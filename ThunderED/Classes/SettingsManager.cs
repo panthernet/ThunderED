@@ -9,7 +9,10 @@ using ThunderED.Helpers;
 
 namespace ThunderED.Classes
 {
-    public static class SettingsManager
+    /// <summary>
+    /// Use partial class to implement additional methods
+    /// </summary>
+    public static partial class SettingsManager
     {
         public static string FileTemplateAuth;
         public static string FileTemplateAuth2;

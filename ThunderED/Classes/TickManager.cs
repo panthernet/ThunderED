@@ -11,7 +11,10 @@ using ThunderED.Modules.Static;
 
 namespace ThunderED.Classes
 {
-    public static class TickManager
+    /// <summary>
+    /// Use partial class to implement additional methods
+    /// </summary>
+    public static partial class TickManager
     {
         private static bool _running;
         private static DateTime _asyncNow = DateTime.Now;

@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace ThunderED.Classes
 {
+    /// <summary>
+    /// Interface for database providers
+    /// </summary>
     public interface IDatabasePovider
     {
         Task<string> SQLiteDataQuery(string table, string field, string whereField, object whereData);

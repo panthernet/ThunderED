@@ -14,7 +14,10 @@ using ThunderED.Json;
 
 namespace ThunderED.API
 {
-    public class ESIAPI: CacheBase
+    /// <summary>
+    /// Use partial class to implement additional methods
+    /// </summary>
+    public partial class ESIAPI: CacheBase
     {
         private readonly string _language;
 
@@ -232,11 +235,18 @@ namespace ThunderED.API
         #endregion
 
         #region Cache
+        /// <summary>
+        /// Purge all outdated cache
+        /// </summary>
         internal override async void PurgeCache()
         {
             await SQLiteHelper.SQLiteDataPurgeCache();
         }
 
+        /// <summary>
+        /// Clear all cache by type. Everything if null.
+        /// </summary>
+        /// <param name="type">Cahce type</param>
         internal override async void ResetCache(string type = null)
         {
             if (string.IsNullOrEmpty(type))

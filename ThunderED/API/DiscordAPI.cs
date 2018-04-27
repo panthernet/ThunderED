@@ -16,7 +16,10 @@ using LogSeverity = ThunderED.Classes.LogSeverity;
 
 namespace ThunderED.API
 {
-    public class DiscordAPI: CacheBase
+    /// <summary>
+    /// Use partial class to implement additional methods
+    /// </summary>
+    public partial class DiscordAPI: CacheBase
     {
         internal DiscordSocketClient Client { get; set; }
         private CommandService Commands { get; }

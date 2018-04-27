@@ -2,10 +2,8 @@
 using System.IO;
 using System.Threading;
 using System.Web;
-using Microsoft.Extensions.Configuration;
 using ThunderED.Classes;
 using ThunderED.Helpers;
-using ThunderED.Providers;
 
 namespace ThunderED
 {

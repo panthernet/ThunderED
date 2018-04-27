@@ -5,12 +5,22 @@ using ThunderED.Helpers;
 
 namespace ThunderED.API
 {
+    /// <summary>
+    /// Base class for API caching
+    /// </summary>
     public abstract class CacheBase
     {
+        /// <summary>
+        /// Purge all outdated cache
+        /// </summary>
         internal virtual void PurgeCache()
         {
         }
 
+        /// <summary>
+        /// Clear all cache by type. Everything if null.
+        /// </summary>
+        /// <param name="type">Cahce type</param>
         internal virtual void ResetCache(string type = null)
         {
         }

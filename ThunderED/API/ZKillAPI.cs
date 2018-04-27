@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json.ZKill;
-using ThunderED.Zkb;
 
 namespace ThunderED.API
 {
-    public class ZKillAPI: CacheBase
+    /// <summary>
+    /// Use partial class to implement additional methods
+    /// </summary>
+    public partial class ZKillAPI: CacheBase
     {
         private readonly HttpClient _zKillhttpClient = new HttpClient();
-        private static IRequestHandler RequestHandler { get; set; }
 
         public ZKillAPI()
         {

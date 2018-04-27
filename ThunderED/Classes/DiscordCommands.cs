@@ -8,6 +8,9 @@ using ThunderED.Modules.Static;
 
 namespace ThunderED.Classes
 {
+    /// <summary>
+    /// Use partial class to implement additional methods
+    /// </summary>
     public partial class DiscordCommands : ModuleBase
     {
         /// <summary>
