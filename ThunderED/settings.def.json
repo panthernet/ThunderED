@@ -1,0 +1,180 @@
+﻿{
+  "config": {
+    "botDiscordToken": "REQUIRED",
+    "botDiscordName": "YourBotName",
+    "botDiscordGame": "DisplayGameInDiscord",
+    "botDiscordCommandPrefix": "!",
+    "discordGuildId": 0,
+    "discordAdminRoles": [ "Admins" ],
+	  "discordGeneralChannel": 0,
+	  "comForbiddenChannels": [],
+	  "language": "en-us",
+	  "useEnglishESIOnly": "true",
+
+    "moduleCharCorp": true,
+    "moduleAuthCheck": false,
+    "moduleAuthWeb": false,
+    "moduleKillFeed": true,
+    "modulePriceCheck": true,
+    "moduleTime": true,
+    "moduleFleetup": false,
+    "moduleJabber": false,
+    "moduleMOTD": false,
+    "moduleNotificationFeed": true,
+
+    "timeFormat": "dd.MM.yyyy HH:mm:ss",
+    "welcomeMessage": true,
+	  "cachePurgeInterval": 30,
+	  "memoryUsageLimitMb": 100,
+    "logSeverity": "Info",	
+	  "logNewNotifications": false,
+    "databaseProvider":  "sqlite" 
+  },
+  "killFeed": {
+    "bigKill": 10000000000,
+	  "//": "Post GLOBAL BIG kills to separate chat channel",
+    "bigKillChannel": 0,
+    "losses": true,
+    "reDisqID": "",
+    "radius": 0,
+    "radiusChannel": 0,
+    "radiusSystem": "",
+    "groupsConfig": {
+      "group1": {
+        "name": "Your corp or alliance",
+		    "//": "Post all group kills to separate chat channel",
+        "discordChannel": 0,
+        "corpID": 0,
+        "allianceID": 0,
+        "minimumValue": 0,
+        "minimumLossValue": 0,
+        "bigKillValue": 300000000,
+		    "//": "Post BIG kills to separate chat channel",
+        "bigKillChannel": 0,		
+		    "bigKillSendToGeneralToo": true
+      }
+    }
+  },
+  "auth": {
+    "authCheckIntervalMinutes": "480",
+    "discordUrl": "https://discord.gg/xxxxxx",
+	  "webAuthListenIP": "YOUR IP",
+    "webAuthListenPort": 0,
+    "authUrl": "http://YourIPandPort",
+    "callbackUrl": "http://YourIPandPort/callback.php",
+    "ccpAppClientId": "REQUIRED",
+    "ccpAppSecret": "REQUIRED",
+    "exemptDiscordRoles": [ "Admins", "Role2" ],
+    "authReportChannel": 0,
+	  "//": "Channels where !auth command is allowed. Empty - everywhere",
+	  "comAuthChannels":  [],
+    "enforceCorpTickers": true,
+    "enforceCharName": true,
+    "authGroups": {
+      "group1": {
+        "corpID": 0,
+        "allianceID": 0,
+        "corpMemberRole": "",
+        "allianceMemberRole": "ExactDiscordRoleName"
+      }
+    }
+  },
+  "resources": {
+	  "imgCitLowPower": "http://www.panthernet.org/evepic/imgCitLowPower.png",
+	  "imgCitUnderAttack": "http://www.panthernet.org/evepic/imgCitUnderAttack.png",
+	  "imgCitAnchoring": "http://www.panthernet.org/evepic/imgCitAnchoring.png",
+	  "imgCitDestroyed": "http://www.panthernet.org/evepic/imgCitDestroyed.png",
+	  "imgCitLostShield": "http://www.panthernet.org/evepic/imgCitLostShield.png",
+	  "imgCitLostArmor": "http://www.panthernet.org/evepic/imgCitLostArmor.png",
+	  "imgCitOnline": "http://www.panthernet.org/evepic/imgCitOnline.png",
+	  "imgCitFuelAlert": "http://www.panthernet.org/evepic/imgCitFuelAlert.png",
+	  "imgCitServicesOffline": "http://www.panthernet.org/evepic/imgCitServicesOffline.png",
+	  "imgLowFWStand": "http://www.panthernet.org/evepic/imgLowFWStand.png",
+	  "imgMoonComplete": "http://www.panthernet.org/evepic/imgMoonComplete.png",
+	  "imgWarAssist": "http://www.panthernet.org/evepic/imgWarAssist.png",
+	  "imgWarDeclared": "http://www.panthernet.org/evepic/imgWarDeclared.png",
+	  "imgWarInvalidate": "http://www.panthernet.org/evepic/imgWarInvalidate.png",
+	  "imgWarSurrender": "http://www.panthernet.org/evepic/imgWarSurrender.png",
+  },
+  "notifications": {
+	  "checkIntervalInMinutes": 2,
+    "keys": {
+      "key1": {
+        "characterID": "REQUIRED",
+		    "overrideChannel": 0,
+      }
+    },
+    "filters": {
+      "StructureUnderAttack": 0,
+      "AllWarDeclaredMsg": 0,
+      "FWAllianceWarningMsg": 0,
+      "StructureWentLowPower": 0,
+      "StructureWentHighPower": 0,
+      "StructureLostArmor": 0,
+      "StructureLostShields": 0,
+      "MoonminingExtractionFinished": 0,
+      "StructureFuelAlert": 0,
+      "MoonminingLaserFired": 0,
+      "AllWarInvalidatedMsg": 0,
+	    "StructureDestroyed": 0,
+	    "StructureOnline": 0,
+	    "CharLeftCorpMsg": 0,
+	    "CharAppAcceptMsg": 0,
+      "SovStructureDestroyed": 0,
+      "SovStationEnteredFreeport": 0,
+      "SovCommandNodeEventStarted": 0,
+      "SovStructureReinforced": 0,
+	    "StationServiceDisabled": 0,
+      "CorpWarDeclaredMsg": 0,
+      "CorpWarInvalidatedMsg": 0,
+      "EntosisCaptureStarted": 0,
+	    "StructureAnchoring": 0,
+	    "AllyJoinedWarAggressorMsg": 0,
+	    "AllyJoinedWarAllyMsg": 0,
+	    "AllyJoinedWarDefenderMsg": 0,
+	  
+      "AcceptedSurrender": 0,
+      "AllAnchoringMsg": 0,
+      "AllWarRetractedMsg": 0,
+      "AllWarSurrenderMsg": 0,
+      "CorpWarRetractedMsg": 0,
+      "SovAllClaimAquiredMsg": 0,
+      "SovAllClaimLostMsg": 0,
+      "SovereigntyIHDamageMsg": 0,
+      "SovereigntySBUDamageMsg": 0,
+      "SovereigntyTCUDamageMsg": 0,
+	    "StationConquerMsg": 0,
+    }
+  },
+  "motd": {
+    "motdkeyID": "",
+    "motdvCode": "",
+    "motdcharid": "",
+    "motdtopicchan": 0,
+    "topicInterval": "30",
+    "MOTDChan": "",
+    "updatetopic": false,
+    "restricted": 0
+  },
+  "fleetup": {
+    "UserId": "",
+    "APICode": "",
+    "GroupID": "",
+    "channel": 0,
+    "announce_post": true,
+    "announce": [ 5, 60 ]
+  },
+  "jabber": {
+    "domain": "example.com",
+    "username": "username",
+    "password": "password",
+    "filter": false,
+    "debug": false,
+    "defchan": "0000000000000",
+    "filters": {
+      "SUPER": "0000000000000",
+      "BLOPS": "0000000000000"
+    },
+    "prepend": "@here"
+  }
+}
