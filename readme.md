@@ -27,4 +27,4 @@
 
 # Build Requirements
 * Visual Studio 2017 Community Edition
-* .NET Core 2.1
+* .NET Core 2.0
