@@ -1,5 +1,7 @@
-﻿# ThunderED - EVE Online Discord Bot
+# ThunderED - EVE Online Discord Bot
 [Reach us on Discord](https://discord.gg/UsnY6UR)
+
+https://ci.appveyor.com/api/projects/status/67i3q6v804sjyse6?svg=true
 
 # Advantages
 * .NET Core powered multi-platform support (Win, Linux, Mac, etc.)
