@@ -19,7 +19,7 @@ build_script:
 after_build:
   # For once the build has completed
 artifacts:
- - path: '\ThunderED\bin\Debug\netcoreapp1.1\publish'
+ - path: '\ThunderED\bin\Debug\netcoreapp2.1\publish'
    name: WebSite
    type: WebDeployPackage
 clone_depth: 1

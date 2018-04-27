@@ -25,6 +25,6 @@
 * (WIP) Timers - built-in web server for important timers and events
 * (WIP) Mail Feeder - feed mail by key phrases from authenticated characters 
 
-# Requirements
+# Build Requirements
 * Visual Studio 2017 Community Edition
-* .NET Core 2.0
+* .NET Core 2.1
