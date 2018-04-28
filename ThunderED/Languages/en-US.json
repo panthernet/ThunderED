@@ -122,4 +122,5 @@
   "authTokenRcv2":  "Now your Discord group will get ingame notifications from {0} character", 
   "killFeedString":  "{0}{1} {2:n0} ISK* - {3}<{4}{5}> in {6}({7}) at {8}", 
   "killFeedBy":  " убит {0}<{1}{2}> ({3})", 
+  "radiusInfoHeader":  "Radius Info", 
 }

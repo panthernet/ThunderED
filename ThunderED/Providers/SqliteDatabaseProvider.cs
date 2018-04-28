@@ -216,7 +216,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("InsertPendingUser", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"RunCommand: {query2}", ex, LogCat.SQLite);
                 }
             }
         }

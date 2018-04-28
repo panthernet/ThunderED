@@ -121,10 +121,15 @@ namespace ThunderED.Classes
         }
 
         [Command("test", RunMode = RunMode.Async), Summary("Test command")]
-        [CheckForRole(Group = "Admins")]
+       // [CheckForRole]
         public async Task Test([Remainder] string x)
         {
-           // await Functions.Test(x);
+            var res = x.Split(' ');
+            if (res[0] == "km")
+            {
+                if(res.Length < 2) return;
+                await TestModule.DebugKillmailMessage(Context, res[1], res.Length > 2 && Convert.ToBoolean(res[2]));
+            }
         }
 
         /// <summary>

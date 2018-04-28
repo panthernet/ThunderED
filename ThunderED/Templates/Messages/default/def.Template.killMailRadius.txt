@@ -1,0 +1,33 @@
+﻿//Available variables
+//{shipID} - destroyed ship type ID
+//{shipType} - destroyed ship type name
+//{iskValue} - km isk value
+//{systemName} - km system name
+//{systemSec} - km system security status
+//{victimName} - victim name
+//{victimCorpName} - victim corp name
+//{victimCorpTicker} - victim corp ticker
+//{victimAllyTicker} - victim ally ticker
+//{isNpcKill} - (BOOL) is this an npc kill
+//{attackerName} - attacker name
+//{attackerAllyName} - attacker ally name
+//{attackerAllyTicker} - attacker ally ticker
+//{attackersCount} - number of attackers in km
+//{kmId} - zkillboard killmail ID
+//{timestamp} - text timestamp
+//{radiusSystem} - radius systen name
+//{radiusJumps} - km system number of jumps from radius system
+
+EmbedBuilder
+.WithColor(0xffff00)
+.WithDescription("[{shipType} | Killmail](https://zkillboard.com/kill/{kmId}/)")
+.WithThumbnailUrl("https://image.eveonline.com/Type/{shipID}_64.png")
+.WithAuthor(
+	.WithName("Kill Reported")
+	.WithUrl("https://zkillboard.com/kill/{kmId}/")
+	.WithIconUrl("https://zkillboard.com/img/wreck.png")
+)
+.AddField(" ", "**{victimName}({victimCorpName}{victimAllyTicker})** lost their **{shipType}** in {systemName}({systemSec}). Final blow by **{attackerName}({attackerCorpName} {attackerAllyTicker})**")
+.AddInlineField("Radius Information", "{radiusJumps} from {radiusSystem}")
+.WithFooter("ISK: {iskValue} * {timestamp}")
+//.WithTimestamp();

@@ -376,7 +376,7 @@ namespace ThunderED.API
                     if (isNpcKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
                 });
             if (!string.IsNullOrEmpty(radiusMessage))
-                builder.AddInlineField("Radius Info", radiusMessage);
+                builder.AddInlineField(LM.Get("radiusInfoHeader"), radiusMessage);
 
             var embed = builder.Build();
             var guildID = SettingsManager.GetULong("config", "discordGuildId");

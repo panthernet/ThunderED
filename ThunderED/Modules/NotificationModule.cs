@@ -608,7 +608,7 @@ namespace ThunderED.Modules
         private async Task SetLastNotificationId(int id, string characterID)
         {
             _lastNotification = id;
-            await SQLiteHelper.RunCommand($"insert into notificationsList (id) values({_lastNotification})");
+            await SQLiteHelper.RunCommand($"insert or replace into notificationsList (id) values({_lastNotification})");
             if(!string.IsNullOrEmpty(characterID))
                 await SQLiteHelper.SQLiteDataInsertOrUpdateLastNotification(characterID, _lastNotification.ToString());
         }

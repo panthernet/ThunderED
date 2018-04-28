@@ -20,6 +20,7 @@
         CorpSearch,
         Jabber,
         Stats,
-        Timers
+        Timers,
+        Templates
     }
 }
