@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -69,15 +70,21 @@ namespace ThunderED.API
             string content = null;
             try
             {
-                var eText = isAlliance ? "allianceID" : "corpID";
-                var responce = await _zKillhttpClient.GetAsync($"https://zkillboard.com/api/{eText}/{id}/no-items/no-attackers/orderDirection/asc/");
-                if (responce.IsSuccessStatusCode)
+                var handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+                using (var httpClient = new HttpClient(handler))
                 {
-                    content = await responce.Content.ReadAsStringAsync();
-                    return JsonConvert.DeserializeObject<List<JsonZKill.LightKill>>(content);
-                }
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+                    httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
+                    var eText = isAlliance ? "allianceID" : "corpID";
+                    var responce = await httpClient.GetAsync($"https://zkillboard.com/api/{eText}/{id}/no-items/no-attackers/orderDirection/asc/pastSeconds/3600/");
+                    if (responce.IsSuccessStatusCode)
+                    {
+                        content = await responce.Content.ReadAsStringAsync();
+                        return JsonConvert.DeserializeObject<List<JsonZKill.LightKill>>(content);
+                    }
 
-                return null;
+                    return null;
+                }
             }
             catch (Exception ex)
             {
@@ -87,20 +94,27 @@ namespace ThunderED.API
             }
         }
 
+
         internal async Task<List<JsonZKill.ZkillOnly>> GetZKillOnlyFeed(bool isAlliance, int id)
         {
             string content = null;
             try
             {
-                var eText = isAlliance ? "allianceID" : "corpID";
-                var responce = await _zKillhttpClient.GetAsync($"https://zkillboard.com/api/{eText}/{id}/zkbOnly/orderDirection/desc/");
-                if (responce.IsSuccessStatusCode)
+                var handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+                using (var httpClient = new HttpClient(handler))
                 {
-                    content = await responce.Content.ReadAsStringAsync();
-                    return JsonConvert.DeserializeObject<List<JsonZKill.ZkillOnly>>(content);
-                }
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+                    httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
+                    var eText = isAlliance ? "allianceID" : "corpID";
+                    var responce = await httpClient.GetAsync($"https://zkillboard.com/api/{eText}/{id}/zkbOnly/orderDirection/desc/pastSeconds/3600/");
+                    if (responce.IsSuccessStatusCode)
+                    {
+                        content = await responce.Content.ReadAsStringAsync();
+                        return JsonConvert.DeserializeObject<List<JsonZKill.ZkillOnly>>(content);
+                    }
 
-                return null;
+                    return null;
+                }
             }
             catch (Exception ex)
             {
@@ -115,14 +129,20 @@ namespace ThunderED.API
             string content = null;
             try
             {
-                var responce = await _zKillhttpClient.GetAsync($"https://zkillboard.com/api/killID/{killmailID}/");
-                if (responce.IsSuccessStatusCode)
+                var handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+                using (var httpClient = new HttpClient(handler))
                 {
-                    content = await responce.Content.ReadAsStringAsync();
-                    return JsonConvert.DeserializeObject<List<JsonZKill.Kill>>(content)?.FirstOrDefault();
-                }
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+                    httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
+                    var responce = await httpClient.GetAsync($"https://zkillboard.com/api/killID/{killmailID}/");
+                    if (responce.IsSuccessStatusCode)
+                    {
+                        content = await responce.Content.ReadAsStringAsync();
+                        return JsonConvert.DeserializeObject<List<JsonZKill.Kill>>(content)?.FirstOrDefault();
+                    }
 
-                return null;
+                    return null;
+                }
             }
             catch (Exception ex)
             {

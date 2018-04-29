@@ -27,6 +27,8 @@ namespace ThunderED.Modules
                 {
                     IsKillfeedRunning = true;
 
+                    var interval = SettingsManager.GetInt("reliableKillFeed", "queryIntervalInSeconds");
+
                     foreach (var i in SettingsManager.GetSubList("reliableKillFeed", "groupsConfig"))
                     {
                         var minimumValue = Convert.ToInt64(i["minimumValue"]);
@@ -190,7 +192,7 @@ namespace ThunderED.Modules
                         }
                     }
 
-                    await Task.Delay(15000);
+                    await Task.Delay(interval * 1000);
                     IsKillfeedRunning = false;
                 }
             }
