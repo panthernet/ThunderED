@@ -167,6 +167,7 @@ namespace ThunderED.API
         private async Task<T> RequestWrapper<T>(string request, string reason, string auth = null)
             where T: class
         {
+            string raw = null;
             try
             {
                 using (var httpClient = new HttpClient())
@@ -177,7 +178,8 @@ namespace ThunderED.API
                         httpClient.DefaultRequestHeaders.Add("Authorization", auth);
                 
                     var responceMessage = await httpClient.GetAsync(request);
-                    var data = JsonConvert.DeserializeObject<T>(await responceMessage.Content.ReadAsStringAsync());
+                    raw = await responceMessage.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<T>(raw);
                     if (!responceMessage.IsSuccessStatusCode || data == null)
                     {
                         if(responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden)
@@ -190,6 +192,7 @@ namespace ThunderED.API
             catch (Exception ex)
             {
                 await LogHelper.LogEx(request, ex, LogCat.ESI);
+                await LogHelper.LogInfo($"REPONCE: {raw}", LogCat.ESI);
                 return null;
             }
         }

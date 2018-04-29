@@ -40,6 +40,9 @@ namespace ThunderED.Classes
             if (SettingsManager.GetBool("config","moduleKillFeed"))
                 Modules.Add(new KillModule());
 
+            if (SettingsManager.GetBool("config","moduleReliableKillFeed"))
+                Modules.Add(new ReliableKillModule());
+
             if (SettingsManager.GetBool("config","moduleNotificationFeed"))
                 Modules.Add(new NotificationModule());
 

@@ -21,5 +21,7 @@ namespace ThunderED.Classes
         Task SQLiteDataUpdateCacheField<T>(string setField, object setData, object whereId);
         Task SQLiteDataUpdateCache<T>(T data, object id, int days = 1);
         Task SQLiteDataPurgeCache();
+        Task<string> SQLiteDataQuery(string table, string field, Dictionary<string, object> where);
+        Task SQLiteDataInsertOrUpdate(string table, Dictionary<string, object> values);
     }
 }

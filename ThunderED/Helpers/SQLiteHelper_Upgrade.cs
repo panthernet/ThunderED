@@ -9,7 +9,7 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0"
+            "1.0.0","1.0.1"
         };
 
         public static async Task<bool> Upgrade()
@@ -28,6 +28,13 @@ namespace ThunderED.Helpers
 
                     switch (update)
                     {
+                        case "1.0.1":
+                            await RunCommand("DELETE FROM cacheData where name='version'");
+                            await RunCommand("CREATE UNIQUE INDEX cacheData_name_uindex ON cacheData (name)");
+                            await RunCommand("CREATE TABLE `killFeedCache` ( `type` text NOT NULL, `id` text NOT NULL, `lastId` TEXT)");
+                            await RunCommand("CREATE UNIQUE INDEX killFeedCache_type_id_uindex ON killFeedCache (type, id)");
+                            await RunCommand("delete from cache");
+                            break;
                         default:
                             continue;
                     }

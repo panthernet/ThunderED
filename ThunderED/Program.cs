@@ -10,7 +10,7 @@ namespace ThunderED
     internal class Program
     {
         private static Timer _timer;
-        public const string VERSION = "1.0.0";
+        public const string VERSION = "1.0.1";
 
         private static void Main(string[] args)
         {
@@ -61,6 +61,10 @@ namespace ThunderED
                     case "flushn":
                         Console.WriteLine("Flushing all notifications DB list");
                         SQLiteHelper.RunCommand("delete from notificationsList").GetAwaiter().GetResult();
+                        break;
+                    case "flushcache":
+                        Console.WriteLine("Flushing all cache from DB");
+                        SQLiteHelper.RunCommand("delete from cache").GetAwaiter().GetResult();
                         break;
                     case "help":
                         Console.WriteLine("List of available commands:");

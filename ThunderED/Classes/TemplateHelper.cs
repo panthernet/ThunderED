@@ -10,6 +10,42 @@ namespace ThunderED.Classes
 {
     public static class TemplateHelper
     {
+        public static async Task<bool> PostTemplatedMessage(MessageTemplateType type, Dictionary<string, string> dic, ulong channelId, string message)
+        {
+            var templateFile = GetTemplate(type);
+            if (string.IsNullOrEmpty(templateFile)) return false;
+            var embed = await CompileTemplate(type, templateFile, dic);
+            if (embed == null) return false;
+            var guildID = SettingsManager.GetULong("config", "discordGuildId");
+            var discordGuild = APIHelper.DiscordAPI.Client.Guilds.FirstOrDefault(x => x.Id == guildID);
+            var channel = discordGuild?.GetTextChannel(channelId);
+            if (channel != null) await channel.SendMessageAsync(message, false, embed).ConfigureAwait(false);
+            return true;
+        }
+
+        public static string GetTemplate(MessageTemplateType type)
+        {
+            string typeFile;
+            switch (type)
+            {
+                case MessageTemplateType.KillMailBig:
+                    typeFile = Path.Combine(SettingsManager.RootDirectory, "Templates/Messages", "Template.killMailBig.txt");
+                    break;
+                case MessageTemplateType.KillMailGeneral:
+                    typeFile = Path.Combine(SettingsManager.RootDirectory, "Templates/Messages", "Template.killMailGeneral.txt");
+                    break;
+                case MessageTemplateType.KillMailRadius:
+                    typeFile = Path.Combine(SettingsManager.RootDirectory, "Templates/Messages", "Template.killMailRadius.txt");
+                    break;
+                default:
+                    return null;
+            }
+
+            if (!string.IsNullOrEmpty(typeFile) && File.Exists(typeFile))
+                return typeFile;
+            return null;
+        }
+
         public static async Task<Embed> CompileTemplate(MessageTemplateType type, string fileName, Dictionary<string, string> dic)
         {
             try

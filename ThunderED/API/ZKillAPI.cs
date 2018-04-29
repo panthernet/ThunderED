@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -61,6 +62,74 @@ namespace ThunderED.API
         {
             var responce = await _zKillhttpClient.GetAsync($"https://zkillboard.com/api/losses/characterID/{characterId}/");
             return responce.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<JsonZKill.Kill>>(await responce.Content.ReadAsStringAsync()) : null;
+        }
+
+        internal async Task<List<JsonZKill.LightKill>> GetLightEntityFeed(bool isAlliance, int id)
+        {
+            string content = null;
+            try
+            {
+                var eText = isAlliance ? "allianceID" : "corpID";
+                var responce = await _zKillhttpClient.GetAsync($"https://zkillboard.com/api/{eText}/{id}/no-items/no-attackers/orderDirection/asc/");
+                if (responce.IsSuccessStatusCode)
+                {
+                    content = await responce.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<List<JsonZKill.LightKill>>(content);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex.Message, ex, LogCat.ZKill);
+                await LogHelper.LogInfo($"GetLightEntityFeed RESPONCE: {content}", LogCat.ZKill);
+                return null;
+            }
+        }
+
+        internal async Task<List<JsonZKill.ZkillOnly>> GetZKillOnlyFeed(bool isAlliance, int id)
+        {
+            string content = null;
+            try
+            {
+                var eText = isAlliance ? "allianceID" : "corpID";
+                var responce = await _zKillhttpClient.GetAsync($"https://zkillboard.com/api/{eText}/{id}/zkbOnly/orderDirection/desc/");
+                if (responce.IsSuccessStatusCode)
+                {
+                    content = await responce.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<List<JsonZKill.ZkillOnly>>(content);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex.Message, ex, LogCat.ZKill);
+                await LogHelper.LogInfo($"GetZKillOnlyFeed RESPONCE: {content}", LogCat.ZKill);
+                return null;
+            }
+        }
+
+        internal async Task<JsonZKill.Kill> GetLightEntityKill(int killmailID)
+        {
+            string content = null;
+            try
+            {
+                var responce = await _zKillhttpClient.GetAsync($"https://zkillboard.com/api/killID/{killmailID}/");
+                if (responce.IsSuccessStatusCode)
+                {
+                    content = await responce.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<List<JsonZKill.Kill>>(content)?.FirstOrDefault();
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex.Message, ex, LogCat.ZKill);
+                await LogHelper.LogInfo($"GetLightEntityKill RESPONCE: {content}", LogCat.ZKill);
+                return null;
+            }
         }
     }
 }

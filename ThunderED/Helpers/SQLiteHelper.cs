@@ -18,6 +18,11 @@ namespace ThunderED.Helpers
             return await Provider?.SQLiteDataQuery(table, field, whereField, whereData);
         }
 
+        internal static async Task<string> SQLiteDataQuery(string table, string field, Dictionary<string, object> where)
+        {
+            return await Provider?.SQLiteDataQuery(table, field, where);
+        }
+
         #endregion
         
         //SQLite Update
@@ -26,6 +31,11 @@ namespace ThunderED.Helpers
         internal static async Task SQLiteDataUpdate(string table, string setField, string setData, string whereField, object whereData)
         {
             await Provider?.SQLiteDataUpdate(table, setField, setData, whereField, whereData);
+        }
+
+        internal static async Task SQLiteDataInsertOrUpdate(string table, Dictionary<string, object> values)
+        {
+            await Provider?.SQLiteDataInsertOrUpdate(table, values);
         }
         #endregion
 

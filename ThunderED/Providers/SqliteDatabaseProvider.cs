@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
@@ -12,6 +13,47 @@ namespace ThunderED.Providers
     {
          //SQLite Query
         #region SQLiteQuery
+
+            
+        public async Task<string> SQLiteDataQuery(string table, string field, Dictionary<string, object> where)
+        {
+            var whereText = string.Empty;
+            int count = 1;
+            var last = where.Keys.Last();
+            foreach (var pair in @where)
+            {
+                whereText += $"{pair.Key}=@var{count++}{(pair.Key == last? null : " and ")}";
+            }
+
+            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+            using (var querySQL = new SqliteCommand($"SELECT {field} FROM {table} WHERE {whereText}", con))
+            {
+                await con.OpenAsync();
+
+                count = 1;
+                foreach (var pair in @where)
+                {
+                    querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
+                }
+                try
+                {
+                    using (var r = await querySQL.ExecuteReaderAsync())
+                    {
+                        if (r.HasRows)
+                        {
+                            await r.ReadAsync();
+                            return r.GetString(0) ?? "";
+                        }
+                        return null;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx("SQLiteDataQuery", ex, LogCat.SQLite);
+                    return null;
+                }
+            }
+        }
 
         public async Task<string> SQLiteDataQuery(string table, string field, string whereField, object whereData)
         {
@@ -44,6 +86,40 @@ namespace ThunderED.Providers
         
         //SQLite Update
         #region SQLiteUpdate
+
+        public async Task SQLiteDataInsertOrUpdate(string table, Dictionary<string, object> values)
+        {
+            var fromText = string.Empty;
+            var valuesText = string.Empty;
+            int count = 1;
+            var last = values.Keys.Last();
+            foreach (var pair in values)
+            {
+                fromText += $"{pair.Key}{(pair.Key == last ? null : ",")}";
+                valuesText += $"@var{count++}{(pair.Key == last ? null : ",")}";
+            }
+
+            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+            using (var querySQL = new SqliteCommand($"insert or replace into {table} ({fromText}) values({valuesText})", con))
+            {
+                await con.OpenAsync();
+
+                count = 1;
+                foreach (var pair in values)
+                {
+                    querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
+                }
+                try
+                {
+                    querySQL.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx("SQLiteDataQuery", ex, LogCat.SQLite);
+                }
+            }
+        }
+
 
         public async Task SQLiteDataUpdate(string table, string setField, string setData, string whereField, object whereData)
         {
@@ -88,6 +164,7 @@ namespace ThunderED.Providers
             }
         }
         #endregion
+
 
         public async Task SQLiteDataInsertOrUpdateTokens(string token, string userId)
         {
@@ -351,5 +428,6 @@ namespace ThunderED.Providers
                 }
             }
         }
+
     }
 }
