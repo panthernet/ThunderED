@@ -200,7 +200,7 @@ namespace ThunderED.Modules
                                                         .WithColor(color)
                                                         .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitLowPower"))
                                                         .WithAuthor(author =>
-                                                            author.WithName(string.Format(LM.Get("NotifyHeader_"),
+                                                            author.WithName(string.Format(LM.Get("NotifyHeader_StructureWentLowPower"),
                                                                 structureType == null ? LM.Get("structure").ToLower() : structureType.name, text)))
                                                         .AddInlineField(LM.Get("System"), system?.name)
                                                         .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))

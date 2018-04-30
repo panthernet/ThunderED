@@ -71,6 +71,7 @@ namespace ThunderED
                         Console.WriteLine(" quit    - quit app");
                         Console.WriteLine(" flushn  - flush all notification IDs from database");
                         Console.WriteLine(" getnurl - display notification auth url");
+                        Console.WriteLine(" flushcache - flush all cache from database");
                         break;
                 }
                 Thread.Sleep(10);
