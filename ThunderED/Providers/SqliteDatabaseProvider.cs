@@ -148,7 +148,7 @@ namespace ThunderED.Providers
         {
             var where = string.IsNullOrEmpty(whereField) || whereValue == null ? null : $" WHERE {whereField} = @name";
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand($"REMOVE FROM {table}{where}", con))
+            using (var insertSQL = new SqliteCommand($"DELETE FROM {table}{where}", con))
             {
                 await con.OpenAsync();
                 insertSQL.Parameters.Add(new SqliteParameter("@name", whereValue));
