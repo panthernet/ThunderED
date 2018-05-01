@@ -335,6 +335,7 @@ namespace ThunderED.Classes
 
             try
             {
+                if(x == "newday") return; //only auto check allowed for this
                 await StatsModule.Stats(Context, x);
             }
             catch (Exception ex)

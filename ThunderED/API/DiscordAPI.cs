@@ -503,5 +503,10 @@ namespace ThunderED.API
         {                                                    
             return Client.GetGuild(guildID).GetTextChannel(noid);
         }
+
+        public IMessageChannel GetChannel(ulong noid)
+        {                                                    
+            return Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId")).GetTextChannel(noid);
+        }
     }
 }
