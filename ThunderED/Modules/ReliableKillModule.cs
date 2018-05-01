@@ -129,14 +129,14 @@ namespace ThunderED.Modules
                                 dic.Add("{isLoss}", isAttack ? "false" : "true");
                                 if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
                                 {
-                                    await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0xD00000), shipID, killmailID, rShipType.name,
+                                    await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, isAttack ? new Color(0x00ff00) : new Color(0xff0000), shipID, killmailID, rShipType.name,
                                         (long) value,
                                         sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
                                         rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
                                         rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null, discordGroupName);
                                     if (sendBigToGeneral && c != bigKillChannel)
                                         if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, c, discordGroupName))
-                                            await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xD00000), shipID, killmailID, rShipType.name, (long) value,
+                                            await APIHelper.DiscordAPI.SendEmbedKillMessage(c, isAttack ? new Color(0x00ff00) : new Color(0xff0000), shipID, killmailID, rShipType.name, (long) value,
                                                 sysName,
                                                 systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
                                                 rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
