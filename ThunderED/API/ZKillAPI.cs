@@ -28,7 +28,7 @@ namespace ThunderED.API
         {
             try
             {
-                var redisqID = SettingsManager.Get("killFeed", "reDisqID");
+                var redisqID = SettingsManager.Get("config", "zkillLiveFeedRedisqID");
                 var resp = await (await _zKillhttpClient.GetAsync(string.IsNullOrEmpty(redisqID)
                     ? "https://redisq.zkillboard.com/listen.php?ttw=1"
                     : $"https://redisq.zkillboard.com/listen.php?ttw=1&queueID={redisqID}")).Content.ReadAsStringAsync();

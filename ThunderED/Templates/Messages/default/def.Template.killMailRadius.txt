@@ -28,6 +28,6 @@ EmbedBuilder
 	.WithIconUrl("https://zkillboard.com/img/wreck.png")
 )
 .AddField(" ", "**{victimName}({victimCorpName}{victimAllyTicker})** lost their **{shipType}** in {systemName}({systemSec}). Final blow by **{attackerName}({attackerCorpName} {attackerAllyTicker})**")
-.AddInlineField("Radius Information", "{radiusJumps} from {radiusSystem}")
+.AddInlineField("Radius Information", "{radiusJumps} jumps from {radiusSystem}")
 .WithFooter("ISK: {iskValue} * {timestamp}")
 //.WithTimestamp();

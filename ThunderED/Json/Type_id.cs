@@ -1,6 +1,6 @@
 ﻿namespace ThunderED.Json
 {
-    internal partial class JsonClasses
+    public partial class JsonClasses
     {
         public class Type_id
         {

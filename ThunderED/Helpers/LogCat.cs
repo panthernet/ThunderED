@@ -21,6 +21,7 @@
         Jabber,
         Stats,
         Timers,
-        Templates
+        Templates,
+        RadiusKill
     }
 }

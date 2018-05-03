@@ -1,2 +1,3 @@
-﻿- timers
+﻿- central auth page for notifications and possible mail feeds auth
+- timers
 - mail feeder

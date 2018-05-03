@@ -16,13 +16,15 @@
 # Supported Modules
 * Web Auth - authenticate EVE characters in Discord using built-in web server
 * Auth Check - check users access rights and strip permissions when char leaves your corp or ally
-* Kill Feed - feed EVE kills in multiple channels with rich filtering capabilities
-* Notifications feed - feed EVE notifications from different characters into multiple channels
+* Live Kill Feed - feed live EVE killmails using ZKill RedisQ into multiple channels 
+* Reliable Kill Feed - feed killmails for selected corps or alliances in a reliable way using ZKill API
+* Radius Kill Feed - feed live killmails in a radius around selected systems into multiple channels
+* Notifications Feed - feed EVE notifications from different characters into multiple channels
 * Jabber Integration - connect with jabbers for cross messaging support
 * Char & corp search - fetch information about characters and corps using special commands
 * EVE Time - get EVE Online time
 * Price Check - check relevant prices on item in all major trade hubs using special commands
-* Ally Stats - get KM stats for your ally or corporation by day or selected month/year
+* Ally & Corp Stats - get KM stats for selected alliances or corporations by day, month or year
 * (WIP) Timers - built-in web server for important timers and events
 * (WIP) Mail Feeder - feed mail by key phrases from authenticated characters 
 

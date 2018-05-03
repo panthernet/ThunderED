@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Async;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,7 +8,9 @@ using ByteSizeLib;
 using Discord.Commands;
 using ThunderED.Helpers;
 using ThunderED.Modules;
+using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Static;
+using ThunderED.Modules.Sub;
 
 namespace ThunderED.Classes
 {
@@ -24,21 +27,22 @@ namespace ThunderED.Classes
         private static DateTime _lastCacheCheckDate = DateTime.Now;
 
         private static readonly List<AppModuleBase> Modules = new List<AppModuleBase>();
+        private static readonly List<AppModuleBase> OnDemandModules = new List<AppModuleBase>();
 
         public static void LoadModules()
         {          
             Modules.Clear();
+            OnDemandModules.Clear();
 
-            //auth module
+            //sub modules - core modules that are called in each tick and can supply other modules with some data
+            Modules.Add(new ZKillLiveFeedModule());
+
+            //dynamic modules - called in each tick
             if (SettingsManager.GetBool("config","moduleAuthWeb"))
                 Modules.Add(new WebAuthModule());
 
-            //auth check
             if (SettingsManager.GetBool("config","moduleAuthCheck"))
                 Modules.Add(new AuthCheckModule());
-
-            if (SettingsManager.GetBool("config","moduleKillFeed"))
-                Modules.Add(new KillModule());
 
             if (SettingsManager.GetBool("config","moduleReliableKillFeed"))
                 Modules.Add(new ReliableKillModule());
@@ -48,6 +52,14 @@ namespace ThunderED.Classes
 
             if (SettingsManager.GetBool("config","moduleJabber"))
                 Modules.Add(new JabberModule());
+
+            //on demand modules - only could be pinged by other modules
+            if (SettingsManager.GetBool("config","moduleLiveKillFeed"))
+                OnDemandModules.Add(new LiveKillFeedModule());
+
+            if (SettingsManager.GetBool("config","moduleRadiusKillFeed"))
+                OnDemandModules.Add(new RadiusKillFeedModule());
+
         }
 
         public static async void Tick(object stateInfo)
@@ -109,8 +121,7 @@ namespace ThunderED.Classes
                     APIHelper.PurgeCache();
                 }
 
-                Modules.ForEach(module => module.Run(null));
-
+                await Modules.ParallelForEachAsync(async module => await module.Run(null));
             }
             catch (Exception ex)
             {

@@ -1,6 +1,6 @@
 ﻿namespace ThunderED.Json
 {
-    internal partial class JsonClasses
+    public partial class JsonClasses
     {
         //ESI Classes
         public class CharacterID

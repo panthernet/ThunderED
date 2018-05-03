@@ -1,6 +1,6 @@
 ﻿namespace ThunderED.Json.ZKill
 {
-    internal partial class JsonZKill
+    public partial class JsonZKill
     {
         public class Package
         {

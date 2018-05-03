@@ -14,15 +14,18 @@
     "moduleCharCorp": true,
     "moduleAuthCheck": false,
     "moduleAuthWeb": false,
-    "moduleKillFeed": true,
+    "moduleLiveKillFeed": false,
+    "moduleRadiusKillFeed": false,
+    "moduleReliableKillFeed": true,
     "modulePriceCheck": true,
     "moduleTime": true,
     "moduleFleetup": false,
     "moduleJabber": false,
     "moduleMOTD": false,
     "moduleNotificationFeed": true,
+    "moduleStats": true,
 
-    "autoDailyStatsChannel": 0,
+    "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "welcomeMessage": true,
 	  "cachePurgeInterval": 30,
@@ -31,6 +34,24 @@
 	  "logNewNotifications": false,
     "databaseProvider":  "sqlite" 
   },
+
+  "radiusKillFeedModule": {
+    "groupsConfig": {
+      "group1": {
+        "radius": 0,
+        "radiusChannel": 0,
+        "radiusSystemId": 0,
+        "minimumValue": 0
+      }
+    }
+  },
+
+  "statsModule": {
+    "autoDailyStatsChannel": 0,
+    "autoDailyStatsDefaultCorp": 0,
+    "autodailyStatsDefaultAlliance": 0
+  },
+  
   "reliableKillFeed": {
     "queryIntervalInSeconds": 30,
     "groupsConfig": {
@@ -50,28 +71,24 @@
       }
     }
   },
-  "killFeed": {
+  "liveKillFeed": {
     "bigKill": 10000000000,
-	  "//": "Post GLOBAL BIG kills to separate chat channel",
+    "//": "Post GLOBAL BIG kills to separate chat channel",
     "bigKillChannel": 0,
     "losses": true,
-    "reDisqID": "",
-    "radius": 0,
-    "radiusChannel": 0,
-    "radiusSystem": "",
     "groupsConfig": {
       "group1": {
-        "name": "Your corp or alliance",
-		    "//": "Post all group kills to separate chat channel",
+        "name": "Your Alliance",
+        "//": "Post all group kills to separate chat channel",
         "discordChannel": 0,
         "corpID": 0,
         "allianceID": 0,
         "minimumValue": 0,
         "minimumLossValue": 0,
         "bigKillValue": 300000000,
-		    "//": "Post BIG kills to separate chat channel",
+        "//": "Post BIG kills to general chat channel",
         "bigKillChannel": 0,		
-		    "bigKillSendToGeneralToo": true
+        "bigKillSendToGeneralToo": true
       }
     }
   },
