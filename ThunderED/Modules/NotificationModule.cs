@@ -480,8 +480,8 @@ namespace ThunderED.Modules
                                                         ? $"{(isAllianceDecl ? LM.Get("Alliance") : LM.Get("Corporation"))} {declName} {LM.Get("declaresWarAgainst")} {declNameAgainst}!"
                                                         : $"{(isAllianceDecl ? LM.Get("Alliance") : LM.Get("Corporation"))} {declName} {LM.Get("invalidatesWarAgainst")} {declNameAgainst}!";
                                                     var template2 = notification.type == "AllWarDeclaredMsg" || notification.type == "CorpWarDeclaredMsg"
-                                                        ? string.Format(LM.Get("fightWillBegin"), GetData("ndelayHours", data))
-                                                        : string.Format(LM.Get("fightWillEnd"),  GetData("ndelayHours", data));
+                                                        ? string.Format(LM.Get("fightWillBegin"), GetData("delayHours", data))
+                                                        : string.Format(LM.Get("fightWillEnd"),  GetData("delayHours", data));
                                                     var color = notification.type == "AllWarDeclaredMsg" || notification.type == "CorpWarDeclaredMsg"
                                                         ? new Color(0xdd5353)
                                                         : new Color(0x00ff00);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -15,20 +16,40 @@ namespace ThunderED.Modules.Static
 
         public static async Task Stats(ICommandContext context, string commandText)
         {
+            if(!SettingsManager.GetBool("config", "moduleStats")) return;
+
             try
             {
                 var now = DateTime.Now;
                 var today = DateTime.Today;
+                var comms = commandText.Split(' ').ToList();
+                var isSingle = comms.Count == 1;
+                var command = string.IsNullOrEmpty(commandText) ? "t" : comms[0].ToLower();
+                string entity = null;
+                if (!isSingle)
+                {
+                    comms.RemoveAt(0);
+                    entity = string.Join(' ', comms);
+                }
 
                 var requestHandler = new ZkbRequestHandler(new JsonSerializer("yyyy-MM-dd HH:mm:ss"));
-                var allyId = SettingsManager.GetSubList("killFeed", "groupsConfig").First()["allianceID"];
-                var corpId = SettingsManager.GetSubList("killFeed", "groupsConfig").First()["corpID"];
-                bool isAlliance = corpId == "0";
-                var id = Convert.ToInt64(allyId == "0" ? corpId : allyId);
+                //TODO introduce own variables and may be even settings section
+                var allyId = SettingsManager.GetLong("statsModule", "autodailyStatsDefaultAlliance");
+                if(!string.IsNullOrEmpty(entity))
+                    allyId = (await APIHelper.ESIAPI.SearchAllianceId("Stats", entity))?.alliance?.FirstOrDefault() ?? 0;
+                var corpId = SettingsManager.GetLong("statsModule", "autoDailyStatsDefaultCorp");
+                if(!string.IsNullOrEmpty(entity) && allyId == 0)
+                    corpId = (await APIHelper.ESIAPI.SearchCorporationId("Stats", entity))?.corporation.FirstOrDefault() ?? 0;
+                if(allyId == 0 && corpId == 0)
+                    return;
 
-                if (commandText.ToLower() == "t" || commandText.ToLower() == "today" || commandText.ToLower() == "newday")
+                bool isAlliance = corpId == 0;
+                var id = isAlliance ? allyId : corpId;
+                entity = string.IsNullOrEmpty(entity) ? (isAlliance ? (await APIHelper.ESIAPI.GetAllianceData("Stats", id))?.name :(await APIHelper.ESIAPI.GetCorporationData("Stats", id))?.name) : entity;
+
+                if (command == "t" || command== "today" || command== "newday")
                 {
-                    var isNewDay = commandText.ToLower() == "newday";
+                    var isNewDay = command == "newday";
                     var channel = SettingsManager.GetULong("config", "autoDailyStatsChannel");
                     if(isNewDay && channel == 0) return;
                     var to = now.Add(TimeSpan.FromHours(1));
@@ -61,13 +82,13 @@ namespace ThunderED.Modules.Static
                     {
                         date = today.Subtract(TimeSpan.FromDays(1));
                         var msg =
-                            $"{LM.Get("dailyStats")} ({date:dd.MM.yyyy}):\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:### ### ### ### ###} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:### ### ### ### ###} ISK)";
+                            $"**{string.Format(LM.Get("dailyStats"), date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
                         await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), msg);
                     }
                     else
                     {
                         var msg =
-                            $"{LM.Get("dailyStats")} ({date:dd.MM.yyyy}):\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:### ### ### ### ###} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:### ### ### ### ###} ISK)";
+                            $"**{string.Format(LM.Get("dailyStats"), date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg, true);
                     }
                 }
@@ -76,27 +97,27 @@ namespace ThunderED.Modules.Static
                     var t = isAlliance ? "allianceID" : "corporationID";
                     var relPath = $"/api/stats/{t}/{id}/";
                     var result = await RequestAsync<ZkbStatResponse>(requestHandler, new Uri(new Uri("https://zkillboard.com"), relPath));
-                    if (commandText.ToLower() == "month" || commandText.ToLower() == "m")
+                    if (command == "month" || command == "m")
                     {
                         var data = result.Months.FirstOrDefault(a => a.Value.Year == now.Year && a.Value.Month == now.Month).Value;
                         if (data == null) return;
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                            $"{string.Format(LM.Get("monthlyStats"), result.Info.Name)}**:\n{LM.Get("Killed")}:        \t**{data.ShipsDestroyed}** ({data.IskDestroyed:### ### ### ### ###} ISK)\n{LM.Get("Lost")}: \t**{data.ShipsLost}** ({data.IskLost:### ### ### ### ###} ISK)");
+                            $"**{string.Format(LM.Get("monthlyStats"), result.Info.Name)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
                     }
-                    else if (commandText.ToLower().All(char.IsDigit))
+                    else if (command.All(char.IsDigit))
                     {
-                        var list = result.Months.Where(a => a.Value.Year.ToString() == commandText).ToList();
+                        var list = result.Months.Where(a => a.Value.Year.ToString() == command).ToList();
                         if (!list.Any()) return;
                         var shipsDestroyed = list.Sum(a => a.Value.ShipsDestroyed);
                         var shipsLost = list.Sum(a => a.Value.ShipsLost);
                         var iskDestroyed = list.Sum(a => a.Value.IskDestroyed);
                         var iskLost = list.Sum(a => a.Value.IskLost);
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                            $"{string.Format(LM.Get("yearlyStats"), result.Info.Name, commandText)}:\n{LM.Get("Killed")}:        \t**{shipsDestroyed}** ({iskDestroyed:### ### ### ### ###} ISK)\n{LM.Get("Lost")}: \t**{shipsLost}** ({iskLost:### ### ### ### ###} ISK)");
+                            $"**{string.Format(LM.Get("yearlyStats"), result.Info.Name, command)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)");
                     }
-                    else if (commandText.ToLower().Contains("/"))
+                    else if (command.Contains("/"))
                     {
-                        var tmp = commandText.Split("/");
+                        var tmp = command.Split("/");
                         if (!tmp[0].All(char.IsDigit) || tmp[0].Length != 4) return;
                         if (!tmp[1].All(char.IsDigit) || tmp[1].Length < 1 || tmp[1].Length > 2) return;
                         var m = int.Parse(tmp[1]);
@@ -107,7 +128,7 @@ namespace ThunderED.Modules.Static
                         var iskDestroyed = list.Sum(a => a.Value.IskDestroyed);
                         var iskLost = list.Sum(a => a.Value.IskLost);
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                            $"{string.Format(LM.Get("monthlyCustomStats"), result.Info.Name, commandText)}:\n{LM.Get("Killed")}:        \t**{shipsDestroyed}** ({iskDestroyed:### ### ### ### ###} ISK)\n{LM.Get("Lost")}: \t**{shipsLost}** ({iskLost:### ### ### ### ###} ISK)");
+                            $"**{string.Format(LM.Get("monthlyCustomStats"), result.Info.Name, command)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)");
                     }
                 }
             }

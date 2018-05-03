@@ -212,6 +212,7 @@ namespace ThunderED.Classes
             try
             {
                 SettingsManager.UpdateSettings();
+                TickManager.LoadModules();
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, "REHASH COMPLETED", true);
             }
             catch (Exception ex)
@@ -344,8 +345,48 @@ namespace ThunderED.Classes
                 await Task.FromException(ex);
             }
         }
+
+        [Command("stats", RunMode = RunMode.Async), Summary("Ally status")]
+        public async Task Stats2([Remainder] string x)
+        {
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
+
+
+            try
+            {
+                if(x == "newday") return; //only auto check allowed for this
+                await StatsModule.Stats(Context, x);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("stat", ex);
+                await Task.FromException(ex);
+            }
+        }
+
         [Command("stat", RunMode = RunMode.Async), Summary("Ally status")]
         public async Task Stats()
+        {
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
+
+
+            try
+            {
+                await StatsModule.Stats(Context, "m");
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("stat", ex);
+                await Task.FromException(ex);
+            }
+        }
+
+        [Command("stats", RunMode = RunMode.Async), Summary("Ally status")]
+        public async Task Stats2()
         {
             var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
             if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
