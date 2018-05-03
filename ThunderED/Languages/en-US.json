@@ -12,7 +12,7 @@
   "helpHelp":  "don't tcp my ip!",
   "helpAuth":  "*auth* command helps to authenticate you by EVE Online character. Send *!auth* command to the bot for additional details.",
   "helpTime":  "*evetime* command displays current EVE Online time",
-  "helpStat":  "*stat* command display alliance stats by time interval\nExamples: !stat m | !stat d | !stat 2018 | !stat 2018/03",
+  "helpStat":  "*stat* or *stats* command display alliance stats by time interval\nExamples: !stat m | !stat d | !stat 2018 | !stat 2018/03\nOr you can specify corp or alliance name. Example: !stats d United Fleet | !stat 2018 Nebula Alba",
   "helpAbout": "*about* command displays information about the bot",
   "helpChar":  "*char* command displays information about in game character by name\nExample: *!char Don Chack*",
   "helpCorp":  "*corp* command displays information about corporation by name\nExample: *!corp Nebula Alba*",

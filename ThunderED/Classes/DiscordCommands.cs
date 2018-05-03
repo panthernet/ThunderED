@@ -41,6 +41,7 @@ namespace ThunderED.Classes
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTime")}", true);
                     break;                        
                 case "stat":
+                case "stats":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpStat")}", true);
                     break;                        
                 case "about":
