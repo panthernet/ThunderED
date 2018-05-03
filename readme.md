@@ -27,6 +27,8 @@
 * Ally & Corp Stats - get KM stats for selected alliances or corporations by day, month or year
 * (WIP) Timers - built-in web server for important timers and events
 * (WIP) Mail Feeder - feed mail by key phrases from authenticated characters 
+* (?) FleetUP integration - could be done by request
+* (?) Channel MOTD integration - could be done by request
 
 # Build Requirements
 * Visual Studio 2017 Community Edition
