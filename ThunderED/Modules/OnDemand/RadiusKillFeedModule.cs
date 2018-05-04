@@ -6,6 +6,7 @@ using Discord;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Json;
 using ThunderED.Json.ZKill;
 using ThunderED.Modules.Sub;
 
@@ -19,6 +20,13 @@ namespace ThunderED.Modules.OnDemand
         public RadiusKillFeedModule()
         {
             ZKillLiveFeedModule.Queryables.Add(ProcessKill);
+        }
+
+        private enum RadiusMode
+        {
+            Range,
+            Constellation,
+            Region
         }
 
         private async Task ProcessKill(JsonZKill.ZKillboard kill)
@@ -37,23 +45,59 @@ namespace ThunderED.Modules.OnDemand
                     var value = kill.package.zkb.totalValue;
                     var systemId = kill.package.killmail.solar_system_id;
                     var radius = Convert.ToInt16(group["radius"]);
-                    var radiusSystemId = Convert.ToUInt64(group["radiusSystemId"]);
+                    var radiusSystemId = Convert.ToInt32(group["radiusSystemId"]);
+                    var radiusConstId = Convert.ToInt32(group["radiusConstellationId"]);
+                    var radiusRegionId = Convert.ToInt32(group["radiusRegionId"]);
                     var radiusChannelId = Convert.ToUInt64(group["radiusChannel"]);
                     int radiusValue = Convert.ToInt32(group["minimumValue"]);
                     var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId);
                     var sysName = rSystem?.name ?? "J";
+                    if (radiusSystemId == 0 && radiusConstId == 0 && radiusRegionId == 0)
+                    {
+                        await LogHelper.LogError("Radius feed must have systemId, constId or regionId defined!", Category);
+                        return;
+                    }
+
+                    var mode = radiusSystemId != 0 ? RadiusMode.Range : (radiusConstId != 0 ? RadiusMode.Constellation : RadiusMode.Region);
 
                     //validity check
-                    if (radiusChannelId <= 0 ||
-                        (sysName[0] == 'J' && int.TryParse(sysName.Substring(1), out int _) && (sysName[0] != 'J' || !int.TryParse(sysName.Substring(1), out _) || radius != 0)) ||
-                        radiusSystemId == 0 || (radiusValue > 0 && value < radiusValue)) continue;
+                    if (radiusChannelId <= 0 || (sysName[0] == 'J' && int.TryParse(sysName.Substring(1), out int _) && radiusSystemId != systemId) || (radiusValue > 0 && value < radiusValue)) continue;
 
-                    var data = JArray.Parse(await APIHelper.ESIAPI.GetRawRoute(Reason, radiusSystemId, systemId));
-                    var routeLength = data.Count - 1;
-                    //not in range
-                    if (routeLength > radius) continue;
+                    var routeLength = 0;
+                    JsonClasses.ConstellationData rConst = null;
+                    JsonClasses.RegionData rRegion= null;
+                    if (radiusSystemId == systemId)
+                    {
+                        //right there
+                        rConst = rSystem.constellation_id == 0 ? null : await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
+                        rRegion =  rConst?.region_id == null ||  rConst.region_id == 0 ? null : await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
+                    }
+                    else
+                    {
+                        switch (mode)
+                        {
+                            case RadiusMode.Range:
+                                var data = JArray.Parse(await APIHelper.ESIAPI.GetRawRoute(Reason, radiusSystemId, systemId));
+                                routeLength = data.Count - 1;
+                                //not in range
+                                if (routeLength > radius) continue;
+                                rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
+                                rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
+                                break;
+                            case RadiusMode.Constellation:
+                                if(rSystem.constellation_id != radiusConstId) return;
+                                rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
+                                rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
+                                break;
+                            case RadiusMode.Region:
+                                rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
+                                if(rConst.region_id != radiusRegionId) return;
+                                rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
+                                break;
+                        }
+                    }
 
-                    var rSystemName = (await APIHelper.ESIAPI.GetSystemData(Reason, radiusSystemId))?.name ?? LM.Get("Unknown");
+                    var rSystemName = rSystem?.name ?? LM.Get("Unknown");
 
                     var victimCharacterID = kill.package.killmail.victim.character_id;
                     var victimCorpID = kill.package.killmail.victim.corporation_id;
@@ -101,12 +145,18 @@ namespace ThunderED.Modules.OnDemand
                         {"{isNpcKill}", isNPCKill.ToString()},
                         {"{timestamp}", killTime},
                         {"{radiusSystem}", rSystemName.ToString()},
-                        {"{radiusJumps}", routeLength.ToString()}
+                        {"{radiusJumps}", routeLength.ToString()},
+                        {"{isRangeMode}", (mode == RadiusMode.Range).ToString()},
+                        {"{isConstMode}", (mode == RadiusMode.Constellation).ToString()},
+                        {"{isRegionMode}", (mode == RadiusMode.Region).ToString()},
+                        {"{constName}", rConst?.name},
+                        {"{regionName}", rRegion?.name},
+
                     };
 
                     if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailRadius, dic, radiusChannelId, group.Key))
                     {
-                        var jumpsText = data.Count > 1 ? $"{routeLength} {LM.Get("From")} {rSystemName}" : $"{LM.Get("InSmall")} {sysName} ({systemSecurityStatus})";
+                        var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {rSystemName}" : $"{LM.Get("InSmall")} {sysName} ({systemSecurityStatus})";
                         await APIHelper.DiscordAPI.SendEmbedKillMessage(radiusChannelId, new Color(0x989898), shipID, killmailID, rShipType.name, (long) value,
                             sysName,
                             systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,

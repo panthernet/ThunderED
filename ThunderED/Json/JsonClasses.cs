@@ -87,9 +87,14 @@
 
         internal class ConstellationData
         {
-            public int onstellation_id;
+            public int constellation_id;
             public string name;
             public int region_id;
+        }
+
+        internal class RegionData
+        {
+            public string name;
         }
     }
 }

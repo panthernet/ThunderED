@@ -50,16 +50,26 @@ namespace ThunderED.Classes
         {
             try
             {
-                var isNpcKill = dic.ContainsKey("isNpcKill") && Convert.ToBoolean(dic["isNpcKill"]);
-                var isLoss = dic.ContainsKey("isLoss") && Convert.ToBoolean(dic["isLoss"]);
-                if (isNpcKill)
-                    dic.Remove("isNpcKill");
-                if (isLoss)
-                    dic.Remove("isLoss");
+                var isNpcKill = dic.ContainsKey("{isNpcKill}") && Convert.ToBoolean(dic["{isNpcKill}"]);
+                var isLoss = dic.ContainsKey("{isLoss}") && Convert.ToBoolean(dic["{isLoss}"]);
+                if (dic.ContainsKey("{isNpcKill}"))
+                    dic.Remove("{isNpcKill}");
+                if (dic.ContainsKey("{isLoss}"))
+                    dic.Remove("{isLoss}");
+                             
+                var isRadiusRange = dic.ContainsKey("{isRangeMode}") && Convert.ToBoolean(dic["{isRangeMode}"]);
+                if (dic.ContainsKey("{isRangeMode}"))
+                    dic.Remove("{isRangeMode}");
+                var isRadiusConst = dic.ContainsKey("{isConstMode}") && Convert.ToBoolean(dic["{isConstMode}"]);
+                if (dic.ContainsKey("{isConstMode}"))
+                    dic.Remove("{isConstMode}");
+                var isRadiusRegion = dic.ContainsKey("{isRegionMode}") && Convert.ToBoolean(dic["{isRegionMode}"]);
+                if (dic.ContainsKey("{isRegionMode}"))
+                    dic.Remove("{isRegionMode}");
 
                 var lines = (await File.ReadAllLinesAsync(fileName))
                     .Where(a => !a.StartsWith("//") && !string.IsNullOrWhiteSpace(a)).ToList();
-               
+
                 foreach (var pair in dic)
                 {
                     for (var i = 0; i < lines.Count; i++)
@@ -67,7 +77,6 @@ namespace ThunderED.Classes
                         lines[i] = lines[i].Replace(pair.Key, pair.Value).Trim().TrimStart('\t');
                     }
                 }
-
                 switch (type)
                 {
                     case MessageTemplateType.KillMailBig:
@@ -83,26 +92,61 @@ namespace ThunderED.Classes
                             var text = line;
                             if (text.StartsWith("EmbedBuilder")) return;
 
+                            if (type == MessageTemplateType.KillMailRadius)
+                            {
+                                if (text.StartsWith("#if {isRangeMode}", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (!isRadiusRange) return;
+                                    text = text.Substring(17, text.Length - 17).Trim();
+                                }
+                                if (text.StartsWith("#if !{isRangeMode}", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (isRadiusRange) return;
+                                    text = text.Substring(18, text.Length - 18).Trim();
+                                }
+                                if (text.StartsWith("#if {isConstMode}", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (!isRadiusConst) return;
+                                    text = text.Substring(17, text.Length - 17).Trim();
+                                }
+                                if (text.StartsWith("#if !{isConstMode}", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (isRadiusConst) return;
+                                    text = text.Substring(18, text.Length - 18).Trim();
+                                }
+
+                                if (text.StartsWith("#if {isRegionMode}", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (!isRadiusRegion) return;
+                                    text = text.Substring(18, text.Length - 18).Trim();
+                                }
+                                if (text.StartsWith("#if !{isRegionMode}", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (isRadiusRegion) return;
+                                    text = text.Substring(19, text.Length - 19).Trim();
+                                }
+                            }
+
                             if (text.StartsWith("#if {isNpcKill}", StringComparison.OrdinalIgnoreCase))
                             {
                                 if (!isNpcKill) return;
-                                text = text.Substring(15, text.Length - 15);
+                                text = text.Substring(15, text.Length - 15).Trim();
                             }
                             if (text.StartsWith("#if !{isNpcKill}", StringComparison.OrdinalIgnoreCase))
                             {
                                 if (isNpcKill) return;
-                                text = text.Substring(16, text.Length - 16);
+                                text = text.Substring(16, text.Length - 16).Trim();
                             }
 
                             if (text.StartsWith("#if {isLoss}", StringComparison.OrdinalIgnoreCase))
                             {
                                 if (!isLoss) return;
-                                text = text.Substring(12, text.Length - 12);
+                                text = text.Substring(12, text.Length - 12).Trim();
                             }
                             if (text.StartsWith("#if !{isLoss}", StringComparison.OrdinalIgnoreCase))
                             {
                                 if (isLoss) return;
-                                text = text.Substring(13, text.Length - 13);
+                                text = text.Substring(13, text.Length - 13).Trim();
                             }
 
                             if (!isAuthor && text.StartsWith(".WithAuthor", StringComparison.OrdinalIgnoreCase))

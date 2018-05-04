@@ -74,10 +74,16 @@ namespace ThunderED.API
             return await RequestWrapper<JsonClasses.StructureData>($"https://esi.tech.ccp.is/latest/universe/structures/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
-        internal async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, string id)
+        internal async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, object id)
         {
             return await RequestWrapper<JsonClasses.ConstellationData>($"https://esi.tech.ccp.is/latest/universe/constellations/{id}/?datasource=tranquility&language={_language}", reason);
         }
+
+        internal async Task<JsonClasses.RegionData> GetRegionData(string reason, object id)
+        {
+            return await RequestWrapper<JsonClasses.RegionData>($"https://esi.tech.ccp.is/latest/universe/regions/{id}/?datasource=tranquility&language={_language}", reason);
+        }
+
 
         internal async Task<JsonClasses.CharacterID> SearchCharacterId(string reason, string name)
         {

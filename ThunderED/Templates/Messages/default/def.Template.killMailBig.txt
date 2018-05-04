@@ -28,7 +28,8 @@ EmbedBuilder
 	.WithUrl("https://zkillboard.com/kill/{kmId}/")
 	.WithIconUrl("https://zkillboard.com/img/wreck.png")
 )
-.AddField(" ", "**{victimName}({victimCorpName}{victimAllyTicker})** lost their **{shipType}** in {systemName}({systemSec}). Final blow by **{attackerName}({attackerCorpName} {attackerAllyTicker})**")
+#if !{isNpcKill} .AddField(" ", "**{victimName}({victimCorpName}{victimAllyTicker})** lost their **{shipType}** in {systemName}({systemSec}). Final blow by **{attackerName}({attackerCorpName} {attackerAllyTicker})**")
+#if {isNpcKill} .AddField(" ", "**{victimName}({victimCorpName}{victimAllyTicker})** lost their **{shipType}** in {systemName}({systemSec})")
 .WithFooter("ISK: {iskValue} * {timestamp}")
 //.AddInlineField({radiusInfoHeader}, radiusMessage)
 //.WithTimestamp();
