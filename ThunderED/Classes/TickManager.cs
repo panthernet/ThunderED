@@ -53,6 +53,9 @@ namespace ThunderED.Classes
             if (SettingsManager.GetBool("config","moduleJabber"))
                 Modules.Add(new JabberModule());
 
+            if (SettingsManager.GetBool("config","moduleFleetup"))
+                Modules.Add(new FleetUpModule());
+
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.GetBool("config","moduleLiveKillFeed"))
                 OnDemandModules.Add(new LiveKillFeedModule());

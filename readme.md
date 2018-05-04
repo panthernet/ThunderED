@@ -25,9 +25,9 @@
 * EVE Time - get EVE Online time
 * Price Check - check relevant prices on item in all major trade hubs using special commands
 * Ally & Corp Stats - get KM stats for selected alliances or corporations by day, month or year
+* (BETA) FleetUP integration - announces and reminders for FleetUp ops
 * (WIP) Timers - built-in web server for important timers and events
 * (WIP) Mail Feeder - feed mail by key phrases from authenticated characters 
-* (?) FleetUP integration - could be done by request
 * (?) Channel MOTD integration - could be done by request
 
 # Build Requirements

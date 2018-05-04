@@ -8,12 +8,14 @@ namespace ThunderED.Helpers
         public static DiscordAPI DiscordAPI { get; private set; }
         public static ESIAPI ESIAPI { get; private set; }
         public static ZKillAPI ZKillAPI { get; private set; }
+        public static FleetUpAPI FleetUpAPI { get; private set; }
 
         public static async Task Prepare()
         {
             DiscordAPI = new DiscordAPI();
             ESIAPI = new ESIAPI();
             ZKillAPI = new ZKillAPI();
+            FleetUpAPI = new FleetUpAPI();
 
             await DiscordAPI.Start();
         }

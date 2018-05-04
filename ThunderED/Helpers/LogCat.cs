@@ -23,6 +23,7 @@
         Timers,
         Templates,
         RadiusKill,
-        Debug
+        Debug,
+        FleetUp
     }
 }

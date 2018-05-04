@@ -2,6 +2,7 @@ v1.0.5 BETA
 + Added !web and !authnotify commands
 + Added main web-server page to display all available activities
 + Added direct system, constellation and region radius KM feeds
++ Added caching option for live feed modules
 + Fixed admin command privilegies
 + Updated test module routine
 + Small fixes to HTML templates

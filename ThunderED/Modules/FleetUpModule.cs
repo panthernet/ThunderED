@@ -1,0 +1,260 @@
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Discord;
+using Discord.Commands;
+using ThunderED.Classes;
+using ThunderED.Helpers;
+
+namespace ThunderED.Modules
+{
+    public class FleetUpModule: AppModuleBase
+    {
+        public override LogCat Category => LogCat.FleetUp;
+
+        private DateTime? _lastChecked;
+
+        public override async Task Run(object prm)
+        {
+            await FleetUp();
+        }
+
+        public async Task FleetUp()
+        {
+            try
+            {
+                //Check Fleetup Operations
+                _lastChecked = _lastChecked ?? DateTime.Parse(await SQLiteHelper.SQLiteDataQuery("cacheData", "data", "name", "fleetUpLastChecked"));
+
+                if (DateTime.Now > _lastChecked)
+                {
+                    var userId = SettingsManager.Get("fleetup", "UserId");
+                    var apiCode = SettingsManager.Get("fleetup", "APICode");
+                    var appKey = SettingsManager.Get("fleetup", "AppKey");
+                    var groupID =SettingsManager.Get("fleetup", "GroupID");
+                    var channelid = SettingsManager.GetULong("fleetup", "channel");
+                    var lastopid = await SQLiteHelper.SQLiteDataQuery("cacheData", "data", "name", "fleetUpLastPostedOperation");
+                    var announcePost = SettingsManager.GetBool("fleetup", "announce_post");
+                    var channel = APIHelper.DiscordAPI.GetChannel(channelid);
+
+                    if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(apiCode) || string.IsNullOrWhiteSpace(groupID))
+                    {
+                        await LogHelper.LogInfo("Setup Incomplete please check the Settings file", Category);
+                        _lastChecked = DateTime.Now;
+                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.ToString(), "name", "fleetUpLastChecked");
+                        return;
+                    }
+
+                    var result = await APIHelper.FleetUpAPI.GetOperations(Reason, userId, apiCode, appKey, groupID);
+                    if (result == null)
+                    {
+                        _lastChecked = DateTime.Now;
+                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.ToString(), "name", "fleetUpLastChecked");
+                        return;
+                    }
+                    foreach (var operation in result.Data)
+                    {
+                        if (operation.OperationId > Convert.ToInt32(lastopid) && announcePost)
+                        {
+                            var name = operation.Subject;
+                            var startTime = operation.Start;
+                            var location = operation.Location;
+                            var details = operation.Details;
+                            var url = $"http://fleet-up.com/Operation#{operation.OperationId}";
+                            var locationText = $"[{ location}](http://evemaps.dotlan.net/system/{location})";
+
+                            var builder = new EmbedBuilder()
+                                .WithUrl(url)
+                                .WithColor(new Color(0x7CB0D0))
+                                .WithTitle($"{name}")
+                                .WithThumbnailUrl("http://fleet-up.com/Content/Images/logo_title.png")
+                                .WithAuthor(author =>
+                                {
+                                    author
+                                        .WithName("FleetUp Notification");
+                                })
+                                .AddInlineField("Form Up Time", startTime.ToString(SettingsManager.Get("config", "timeformat")))
+                                .AddInlineField("Form Up System", string.IsNullOrWhiteSpace(location) ? "None" : locationText)
+                                .AddField("Details", string.IsNullOrWhiteSpace(details) ? "None" : details)
+                                .WithTimestamp(startTime);
+
+                            var embed = builder.Build();
+                            var sendres = await channel.SendMessageAsync($"@everyone FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", false, embed);
+
+                            await LogHelper.LogInfo($"Posting Fleetup OP {name} ({operation.OperationId})", Category);
+
+                            await sendres.AddReactionAsync(new Emoji("✅"));
+                            await sendres.AddReactionAsync(new Emoji("❔"));
+                            await sendres.AddReactionAsync(new Emoji("❌"));
+
+                            await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");
+                        }
+
+                        var timeDiff = TimeSpan.FromTicks(operation.Start.Ticks - DateTime.UtcNow.Ticks);
+                        var array = SettingsManager.GetSubList("fleetup", "announce").Select(x => x.Value).ToArray();
+
+                        foreach (var i in array)
+                        {
+                            var epic1 = TimeSpan.FromMinutes(Convert.ToInt16(i));
+                            var epic2 = TimeSpan.FromMinutes(Convert.ToInt16(i) + 1);
+
+                            if (timeDiff >= epic1 && timeDiff <= epic2)
+                            {
+                                var name = operation.Subject;
+                                var startTime = operation.Start;
+                                var location = operation.Location;
+                                var details = operation.Details;
+                                var url = $"http://fleet-up.com/Operation#{operation.OperationId}";
+                                var locationText = $"[{ location}](http://evemaps.dotlan.net/system/{location})";
+
+                                var builder = new EmbedBuilder()
+                                    .WithUrl(url)
+                                    .WithColor(new Color(0x7CB0D0))
+                                    .WithTitle(name)
+                                    .WithThumbnailUrl("http://fleet-up.com/Content/Images/logo_title.png")
+                                    .WithAuthor(author =>
+                                    {
+                                        author
+                                            .WithName("FleetUp Notification");
+                                    })
+                                    .AddInlineField("Form Up Time", startTime.ToString(SettingsManager.Get("config", "timeformat")))
+                                    .AddInlineField("Form Up System", string.IsNullOrWhiteSpace(location) ? "None" : locationText)
+                                    .AddField("Details", string.IsNullOrWhiteSpace(details) ? "None" : details)
+                                    .WithTimestamp(startTime);
+
+                                var embed = builder.Build();
+                                await channel.SendMessageAsync($"@everyone FORMUP In {i} Minutes for FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", false, embed).ConfigureAwait(false);
+
+                                await LogHelper.LogInfo($"Posting Fleetup Reminder {name} ({operation.OperationId})", Category);
+                            }
+                        }
+
+                        if (timeDiff.TotalMinutes < 1 && timeDiff.TotalMinutes > 0)
+                        {
+                            var name = operation.Subject;
+                            var startTime = operation.Start;
+                            var location = operation.Location;
+                            var details = operation.Details;
+                            var url = $"http://fleet-up.com/Operation#{operation.OperationId}";
+                            var locationText = $"[{ location}](http://evemaps.dotlan.net/system/{location})";
+
+                            var builder = new EmbedBuilder()
+                                .WithUrl(url)
+                                .WithColor(new Color(0x7CB0D0))
+                                .WithTitle($"{name}")
+                                .WithThumbnailUrl("http://fleet-up.com/Content/Images/logo_title.png")
+                                .WithAuthor(author =>
+                                {
+                                    author
+                                        .WithName("FleetUp Notification");
+                                })
+                                .AddInlineField("Form Up Time", startTime.ToString(SettingsManager.Get("config", "timeformat")))
+                                .AddInlineField("Form Up System", string.IsNullOrWhiteSpace(location) ? "None" : locationText)
+                                .AddField("Details", string.IsNullOrWhiteSpace(details) ? "None" : details)
+                                .WithTimestamp(startTime);
+
+                            var embed = builder.Build();
+                            await channel.SendMessageAsync("@everyone FORMUP Now FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", false, embed).ConfigureAwait(false);
+
+                            await LogHelper.LogInfo($"Posting Fleetup FORMUP Now {name} ({operation.OperationId})", Category);
+                        }
+                        _lastChecked = DateTime.Now;
+                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.ToString(), "name", "fleetUpLastChecked");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx($"ERROR {ex.Message}", ex, Category);
+            }
+        }
+
+        public async Task Ops(ICommandContext context, string x)
+        {
+            try
+            {
+                int.TryParse(x, out var amount);
+                var userId = SettingsManager.Get("fleetup", "UserId");
+                var apiCode = SettingsManager.Get("fleetup", "APICode");
+                var groupID = SettingsManager.Get("fleetup", "GroupID");
+                var appKey = SettingsManager.Get("fleetup", "AppKey");
+
+                var result = await APIHelper.FleetUpAPI.GetOperations(Reason, userId, apiCode, appKey, groupID);
+
+                if (!result.Data.Any())
+                {
+                    await context.Message.Channel.SendMessageAsync($"{context.Message.Author.Mention}, No Ops Scheduled");
+                }
+                else if (amount == 0)
+                {
+                    var operation = result.Data[0];
+                    var name = operation.Subject;
+                    var startTime = operation.Start;
+                    var location = operation.Location;
+                    var details = operation.Details;
+                    var url = $"http://fleet-up.com/Operation#{operation.OperationId}";
+                    var locationText = $"[{ location}](http://evemaps.dotlan.net/system/{location})";
+
+                    var builder = new EmbedBuilder()
+                        .WithUrl(url)
+                        .WithColor(new Color(0x7CB0D0))
+                        .WithTitle(name)
+                        .WithThumbnailUrl("http://fleet-up.com/Content/Images/logo_title.png")
+                        .WithAuthor(author =>
+                        {
+                            author
+                                .WithName("FleetUp Notification");
+                        })
+                        .AddInlineField("Form Up Time", startTime.ToString(SettingsManager.Get("config", "timeformat")))
+                        .AddInlineField("Form Up System", string.IsNullOrWhiteSpace(location) ? "None" : locationText)
+                        .AddField("Details", string.IsNullOrWhiteSpace(details) ? "None" : details)
+                        .AddField($"Total OPs {result.Data.Length}", "Use !ops # to list more")
+                        .WithTimestamp(startTime);
+
+                    var embed = builder.Build();
+                    await context.Channel.SendMessageAsync($"FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", false, embed);
+                }
+                else
+                {
+                    var count = 0;
+
+                    foreach (var operation in result.Data)
+                    {
+                        if (count >= amount) continue;
+                        var name = operation.Subject;
+                        var startTime = operation.Start;
+                        var location = operation.Location;
+                        var details = operation.Details;
+                        var url = $"http://fleet-up.com/Operation#{operation.OperationId}";
+                        var locationText = $"[{ location}](http://evemaps.dotlan.net/system/{location})";
+
+                        var builder = new EmbedBuilder()
+                            .WithUrl(url)
+                            .WithColor(new Color(0x7CB0D0))
+                            .WithTitle(name)
+                            .WithThumbnailUrl("http://fleet-up.com/Content/Images/logo_title.png")
+                            .WithAuthor(author =>
+                            {
+                                author
+                                    .WithName("FleetUp Notification");
+                            })
+                            .AddInlineField("Form Up Time", startTime.ToString(SettingsManager.Get("config", "timeformat")))
+                            .AddInlineField("Form Up System", string.IsNullOrWhiteSpace(location) ? "None" : locationText)
+                            .AddField("Details", string.IsNullOrWhiteSpace(details) ? "None" : details)
+                            .WithTimestamp(startTime);
+
+                        var embed = builder.Build();
+                        await context.Channel.SendMessageAsync($"FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>)", false, embed);
+                        count++;
+                    }
+                }
+
+                await LogHelper.LogInfo($"Sending Ops to {context.Message.Channel} for {context.Message.Author}", Category);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx($"ERROR In Fleetup OPS {ex.Message}", ex, Category);
+            }
+        }
+    }
+}
