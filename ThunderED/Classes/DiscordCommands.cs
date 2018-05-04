@@ -509,7 +509,7 @@ namespace ThunderED.Classes
             {
                 try
                 {
-                   // await Functions.Ops(Context, null);
+                    await FleetUpModule.Ops(Context, null);
                 }
                 catch (Exception ex)
                 {
@@ -534,7 +534,7 @@ namespace ThunderED.Classes
             {
                 try
                 {
-                        //await Functions.Ops(Context, x);
+                    await FleetUpModule.Ops(Context, null);
                 }
                 catch (Exception ex)
                 {
