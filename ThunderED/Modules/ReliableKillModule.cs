@@ -39,7 +39,7 @@ namespace ThunderED.Modules
                         var c = Convert.ToUInt64(i["discordChannel"]);
                         var sendBigToGeneral = Convert.ToBoolean(i["bigKillSendToGeneralToo"]);
                         var bigKillChannel = Convert.ToUInt64(i["bigKillChannel"]);
-                        var discordGroupName = i["name"];
+                        var discordGroupName = i.Key;
                         var isAlliance = corpID == 0;
                         var isLossEnabled = Convert.ToBoolean(i["losses"]);
 

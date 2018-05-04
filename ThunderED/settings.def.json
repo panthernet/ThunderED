@@ -55,9 +55,8 @@
   "reliableKillFeed": {
     "queryIntervalInSeconds": 30,
     "groupsConfig": {
-      "group1": {
+      "groupName": {
         "losses": true,
-        "name": "Your corp or alliance",
         "//": "Post all group kills to separate chat channel",
         "discordChannel": 0,
         "corpID": 0,
@@ -77,8 +76,7 @@
     "bigKillChannel": 0,
     "losses": true,
     "groupsConfig": {
-      "group1": {
-        "name": "Your Alliance",
+      "groupName": {
         "//": "Post all group kills to separate chat channel",
         "discordChannel": 0,
         "corpID": 0,
