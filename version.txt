@@ -2,6 +2,10 @@ v1.0.5 BETA
 + Added !web and !authnotify commands
 + Added main web-server page to display all available activities
 + Added direct system, constellation and region radius KM feeds
++ Fixed admin command privilegies
++ Updated test module routine
++ Small fixes to HTML templates
+- Removed name param from feeds. Use group name directly instead.
 
 v1.0.4 BETA
 - Initial public release

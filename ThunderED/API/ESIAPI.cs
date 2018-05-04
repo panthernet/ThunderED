@@ -26,22 +26,22 @@ namespace ThunderED.API
             _language = SettingsManager.GetBool("config", "useEnglishESIOnly") ? "en-us" : (SettingsManager.Get("config", "language")?.ToLower() ?? "en-us");
         }
 
-        internal async Task<JsonClasses.CharacterData> GetCharacterData(string reason, object id, bool forceUpdate = false)
+        internal async Task<JsonClasses.CharacterData> GetCharacterData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
             return await GetEntry<JsonClasses.CharacterData>($"https://esi.tech.ccp.is/latest/characters/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
-                forceUpdate);
+                forceUpdate, noCache);
         }
 
-        internal async Task<JsonClasses.CorporationData> GetCorporationData(string reason, object id, bool forceUpdate = false)
+        internal async Task<JsonClasses.CorporationData> GetCorporationData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
             return await GetEntry<JsonClasses.CorporationData>($"https://esi.tech.ccp.is/latest/corporations/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
-                forceUpdate);
+                forceUpdate, noCache);
         }
 
-        internal async Task<JsonClasses.AllianceData> GetAllianceData(string reason, object id, bool forceUpdate = false)
+        internal async Task<JsonClasses.AllianceData> GetAllianceData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
             return await GetEntry<JsonClasses.AllianceData>($"https://esi.tech.ccp.is/latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
-                forceUpdate);
+                forceUpdate, noCache);
         }
 
         internal async Task<JsonClasses.Type_id> GetTypeId(string reason, object id, bool forceUpdate = false)
@@ -106,10 +106,10 @@ namespace ThunderED.API
                 $"https://esi.tech.ccp.is/latest/search/?categories=alliance&datasource=tranquility&language={_language}&search={name}&strict=true", reason);
         }
 
-        internal async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false)
+        internal async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
             return await GetEntry<JsonClasses.SystemName>($"https://esi.tech.ccp.is/latest/universe/systems/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
-                forceUpdate);
+                forceUpdate, noCache);
         }
 
         public void Auth(string client, string key)
@@ -228,7 +228,7 @@ namespace ThunderED.API
         }
 
         
-        private async Task<T> GetEntry<T>(string url, string reason, object id, int days, bool forceUpdate = false) 
+        private async Task<T> GetEntry<T>(string url, string reason, object id, int days, bool forceUpdate = false, bool noCache = false) 
             where T : class
         {
             if (id == null || id.ToString() == "0") return null;
@@ -236,7 +236,7 @@ namespace ThunderED.API
             if(data == null || forceUpdate)
             {
                 data = await RequestWrapper<T>(url, reason);
-                if(data != null)
+                if(data != null && !noCache)
                     await UpdateDbCache(data, id, days);
             }
             return data;

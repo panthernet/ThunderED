@@ -15,10 +15,12 @@ namespace ThunderED.Modules.OnDemand
         internal volatile bool IsKillfeedRunning;
         private int _lastPosted;
         public override LogCat Category => LogCat.KillFeed;
+        private bool _enableCache;
 
         public LiveKillFeedModule()
         {
             ZKillLiveFeedModule.Queryables.Add(ProcessKill);
+            _enableCache = SettingsManager.GetBool("liveKillFeed", "enableCache");
         }
 
         private async Task ProcessKill(JsonZKill.ZKillboard kill)
@@ -46,27 +48,27 @@ namespace ThunderED.Modules.OnDemand
 
                 var postedGlobalBigKill = false;
 
-                var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId);
+                var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId, false, !_enableCache);
                 if (rSystem == null)
                 {
                     //ESI fail - check back later
                     return;
                 }
 
-                var rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, victimCorpID);
+                var rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, victimCorpID, false, !_enableCache);
                 var rAttackerCorp = finalBlowAttackerCorpId.HasValue && finalBlowAttackerCorpId.Value > 0
-                    ? await APIHelper.ESIAPI.GetCorporationData(Reason, finalBlowAttackerCorpId)
+                    ? await APIHelper.ESIAPI.GetCorporationData(Reason, finalBlowAttackerCorpId, false, !_enableCache)
                     : null;
                 if (rAttackerCorp == null)
                     isNPCKill = true;
-                var rVictimAlliance = victimAllianceID != 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, victimAllianceID) : null;
+                var rVictimAlliance = victimAllianceID != 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, victimAllianceID, false, !_enableCache) : null;
                 var rAttackerAlliance = finalBlowAttackerAllyId.HasValue && finalBlowAttackerAllyId.Value > 0
                     ? await APIHelper.ESIAPI.GetAllianceData(Reason, finalBlowAttackerAllyId)
                     : null;
                 var sysName = rSystem.name;
                 var rShipType = await APIHelper.ESIAPI.GetTypeId(Reason, shipID);
-                var rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, victimCharacterID);
-                var rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, finalBlowAttacker?.character_id);
+                var rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, victimCharacterID, false, !_enableCache);
+                var rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, finalBlowAttacker?.character_id, false, !_enableCache);
                 var systemSecurityStatus = Math.Round(rSystem.security_status, 1).ToString("0.0");
 
                 // ulong lastChannel = 0;

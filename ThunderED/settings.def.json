@@ -36,6 +36,7 @@
   },
 
   "radiusKillFeedModule": {
+    "enableCache": false,
     "groupsConfig": {
       "group1": {
         "radius": 0,
@@ -71,6 +72,7 @@
     }
   },
   "liveKillFeed": {
+    "enableCache": false,
     "bigKill": 10000000000,
     "//": "Post GLOBAL BIG kills to separate chat channel",
     "bigKillChannel": 0,

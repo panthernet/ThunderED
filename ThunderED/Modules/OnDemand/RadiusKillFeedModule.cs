@@ -16,10 +16,12 @@ namespace ThunderED.Modules.OnDemand
     {
         private readonly Dictionary<string, int> _lastPosted = new Dictionary<string, int>();
         public override LogCat Category => LogCat.RadiusKill;
+        private bool _enableCache;
 
         public RadiusKillFeedModule()
         {
             ZKillLiveFeedModule.Queryables.Add(ProcessKill);
+            _enableCache = SettingsManager.GetBool("radiusKillFeedModule", "enableCache");
         }
 
         private enum RadiusMode
@@ -50,7 +52,7 @@ namespace ThunderED.Modules.OnDemand
                     var radiusRegionId = Convert.ToInt32(group["radiusRegionId"]);
                     var radiusChannelId = Convert.ToUInt64(group["radiusChannel"]);
                     int radiusValue = Convert.ToInt32(group["minimumValue"]);
-                    var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId);
+                    var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId, false, !_enableCache);
                     var sysName = rSystem?.name ?? "J";
                     if (radiusSystemId == 0 && radiusConstId == 0 && radiusRegionId == 0)
                     {
@@ -110,17 +112,17 @@ namespace ThunderED.Modules.OnDemand
                     var isNPCKill = kill.package.zkb.npc;
                     var killTime = kill.package.killmail.killmail_time.ToString("dd.MM.yyyy hh:mm");
 
-                    var rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, victimCorpID);
+                    var rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, victimCorpID, false, !_enableCache);
                     var rAttackerCorp = finalBlowAttackerCorpId.HasValue && finalBlowAttackerCorpId.Value > 0
                         ? await APIHelper.ESIAPI.GetCorporationData(Reason, finalBlowAttackerCorpId)
                         : null;
-                    var rVictimAlliance = victimAllianceID != 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, victimAllianceID) : null;
+                    var rVictimAlliance = victimAllianceID != 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, victimAllianceID, false, !_enableCache) : null;
                     var rAttackerAlliance = finalBlowAttackerAllyId.HasValue && finalBlowAttackerAllyId.Value > 0
                         ? await APIHelper.ESIAPI.GetAllianceData(Reason, finalBlowAttackerAllyId)
                         : null;
                     var rShipType = await APIHelper.ESIAPI.GetTypeId(Reason, shipID);
-                    var rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, victimCharacterID);
-                    var rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, finalBlowAttacker?.character_id);
+                    var rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, victimCharacterID, false, !_enableCache);
+                    var rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, finalBlowAttacker?.character_id, false, !_enableCache);
                     var systemSecurityStatus = Math.Round(rSystem.security_status, 1).ToString("0.0");
 
                     var dic = new Dictionary<string, string>
