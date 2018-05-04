@@ -257,7 +257,9 @@ namespace ThunderED.Classes
             {
                 try
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, string.Format(LM.Get("authInvite"), SettingsManager.Get("auth", "authUrl")), true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
+                        string.Format(LM.Get("authInvite"),
+                            $"http://{SettingsManager.Get("auth", "webAuthExternalIP")}:{SettingsManager.Get("auth", "webAuthExternalPort")}/auth.php"), true);
                 }
                 catch (Exception ex)
                 {
@@ -284,9 +286,7 @@ namespace ThunderED.Classes
                 {
                     if (APIHelper.DiscordAPI.IsUserMention(Context))
                     {
-                        var authurl =SettingsManager.Get("auth", "authUrl");
-                        if (!string.IsNullOrWhiteSpace(authurl))
-                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authInvite"), true);
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authInvite"), true);
                     }
                     else
                     {

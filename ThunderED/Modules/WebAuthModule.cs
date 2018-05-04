@@ -22,14 +22,19 @@ namespace ThunderED.Modules
         {
             if (Listener == null || !Listener.IsListening)
             {
-                var callbackurl = SettingsManager.Get("auth", "callbackUrl");
                 var clientID = SettingsManager.Get("auth","ccpAppClientId");
                 var secret = SettingsManager.Get("auth","ccpAppSecret");
                 var url = SettingsManager.Get("auth","discordUrl");
                 var port = SettingsManager.GetInt("auth", "webAuthListenPort");
+                var ip = SettingsManager.Get("auth", "webAuthListenIP");
+                var extIp = SettingsManager.Get("auth", "webAuthExternalIP");
+                var extPort = SettingsManager.Get("auth", "webAuthExternalPort");
+                var authUrl =  $"http://{extIp}:{extPort}/auth.php";
+                var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+                var authNurl = $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-characters.read_notifications.v1&state=9";
 
                 await LogHelper.LogInfo("Starting AuthWeb Server", Category);
-                Listener = new System.Net.Http.HttpListener(IPAddress.Parse(SettingsManager.Get("auth", "webAuthListenIP")), port);
+                Listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), port);
                 Listener.Request += async (sender, context) =>
                 {
                     var esiFailure = false;
@@ -41,7 +46,16 @@ namespace ThunderED.Modules
                         {
                             if (request.Url.LocalPath == "/" || request.Url.LocalPath == $"{port}/")
                             {
-                                //response.Headers.Add("Content-Type", "text/html;charset=windows-1252");
+                                response.Headers.ContentEncoding.Add("utf-8");
+                                response.Headers.ContentType.Add("text/html;charset=utf-8");
+                                var text = File.ReadAllText(SettingsManager.FileTemplateMain).Replace("{authUrl}", authUrl)
+                                    .Replace("{authNotifyUrl}", authNurl).Replace("{header}", LM.Get("authTemplateHeader"))
+                                    .Replace("{authButtonDiscordText}", LM.Get("authButtonDiscordText")).Replace("{authButtonNotifyText}", LM.Get("authButtonNotifyText"))
+                                    .Replace("{authButtonTimersText}", LM.Get("authButtonTimersText"));
+                                await response.WriteContentAsync(text);
+                            }
+                            else if (request.Url.LocalPath == "/auth.php" || request.Url.LocalPath == $"{port}/auth.php")
+                            {
                                 response.Headers.ContentEncoding.Add("utf-8");
                                 response.Headers.ContentType.Add("text/html;charset=utf-8");
                                 var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{callbackurl}", callbackurl).Replace("{client_id}", clientID)
@@ -85,6 +99,8 @@ namespace ThunderED.Modules
 
                                         if (state == "9") //refresh token fetch ops
                                         {
+                                            response.Headers.ContentEncoding.Add("utf-8");
+                                            response.Headers.ContentType.Add("text/html;charset=utf-8");
                                             if (string.IsNullOrEmpty(characterID))
                                             {
                                                 await LogHelper.LogWarning("Bad or outdated notify feed request!");
@@ -102,8 +118,6 @@ namespace ThunderED.Modules
                                             }
 
                                             await SQLiteHelper.SQLiteDataInsertOrUpdateTokens(result[1], characterID?.ToString());
-                                            response.Headers.ContentEncoding.Add("utf-8");
-                                            response.Headers.ContentType.Add("text/html;charset=utf-8");
                                             await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess).Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
                                                 .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")));

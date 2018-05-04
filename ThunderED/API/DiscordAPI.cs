@@ -154,7 +154,7 @@ namespace ThunderED.API
             if (SettingsManager.GetBool("config", "welcomeMessage"))
             {
                 var channel = arg.Guild.DefaultChannel;
-                var authurl = SettingsManager.Get("auth", "authUrl");
+                var authurl = $"http://{SettingsManager.Get("auth", "webAuthExternalIP")}:{SettingsManager.Get("auth", "webAuthExternalPort")}/auth.php";
                 if (!string.IsNullOrWhiteSpace(authurl))
                     await channel.SendMessageAsync(string.Format(LM.Get("welcomeMessage"),arg.Mention,authurl));
                 else

@@ -48,7 +48,7 @@ namespace ThunderED
                         _timer.Dispose();
                         APIHelper.DiscordAPI.Stop();
                         return;
-                    case "getnurl":
+                   /* case "getnurl":
                         var cb = HttpUtility.UrlEncode(SettingsManager.Get("auth", "callbackUrl"));
                         var client_id = SettingsManager.Get("auth", "ccpAppClientId");
                         var url =
@@ -57,7 +57,7 @@ namespace ThunderED
                         var text =
                             $"Notification feeder URL:{Environment.NewLine}{url} {Environment.NewLine}Get this url from 'logs/getnurl.txt' file!";
                         Console.WriteLine(text);
-                        break;
+                        break;*/
                     case "flushn":
                         Console.WriteLine("Flushing all notifications DB list");
                         SQLiteHelper.RunCommand("delete from notificationsList").GetAwaiter().GetResult();

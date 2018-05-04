@@ -14,6 +14,7 @@ namespace ThunderED.Classes
     /// </summary>
     public static partial class SettingsManager
     {
+        public static string FileTemplateMain;
         public static string FileTemplateAuth;
         public static string FileTemplateAuth2;
         public static string FileTemplateAuth3;
@@ -30,6 +31,7 @@ namespace ThunderED.Classes
         {
             UpdateSettings();
 
+            FileTemplateMain = Path.Combine(RootDirectory, "Templates", "main.html");
             FileTemplateAuth = Path.Combine(RootDirectory, "Templates", "auth.html");
             FileTemplateAuth2 = Path.Combine(RootDirectory, "Templates", "auth2.html");
             FileTemplateAuth3 = Path.Combine(RootDirectory, "Templates", "auth3.html");
