@@ -18,6 +18,13 @@ namespace ThunderED.Modules
         internal static System.Net.Http.HttpListener Listener;
         public override LogCat Category => LogCat.AuthWeb;
 
+        public static string GetWebSiteUrl()
+        {
+            var extIp = SettingsManager.Get("auth", "webAuthExternalIP");
+            var extPort = SettingsManager.Get("auth", "webAuthExternalPort");
+            return  $"http://{extIp}:{extPort}";
+        }
+
         public static string GetAuthNotifyURL()
         {
             var clientID = SettingsManager.Get("auth","ccpAppClientId");

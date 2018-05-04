@@ -23,6 +23,12 @@ namespace ThunderED.Classes
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpText")}");
         }
 
+        [Command("web", RunMode = RunMode.Async), Summary("Displays web site address")]
+        public async Task Web()
+        {
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebAuthModule.GetWebSiteUrl());
+        }
+
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
         public async Task Help([Remainder] string x)
         {
@@ -33,6 +39,9 @@ namespace ThunderED.Classes
             {
                 case "help":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpHelp")}", true);
+                    break;   
+                case "web":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpWeb")}", true);
                     break;   
                 case "auth":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAuth")}", true);
