@@ -18,6 +18,15 @@ namespace ThunderED.Modules
         internal static System.Net.Http.HttpListener Listener;
         public override LogCat Category => LogCat.AuthWeb;
 
+        public static string GetAuthNotifyURL()
+        {
+            var clientID = SettingsManager.Get("auth","ccpAppClientId");
+            var extIp = SettingsManager.Get("auth", "webAuthExternalIP");
+            var extPort = SettingsManager.Get("auth", "webAuthExternalPort");
+            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-characters.read_notifications.v1&state=9";
+        }
+
         public async Task Auth()
         {
             if (Listener == null || !Listener.IsListening)
@@ -31,7 +40,7 @@ namespace ThunderED.Modules
                 var extPort = SettingsManager.Get("auth", "webAuthExternalPort");
                 var authUrl =  $"http://{extIp}:{extPort}/auth.php";
                 var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
-                var authNurl = $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-characters.read_notifications.v1&state=9";
+                var authNurl = GetAuthNotifyURL();
 
                 await LogHelper.LogInfo("Starting AuthWeb Server", Category);
                 Listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), port);

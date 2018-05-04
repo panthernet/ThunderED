@@ -37,6 +37,9 @@ namespace ThunderED.Classes
                 case "auth":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAuth")}", true);
                     break;                        
+                case "authnotify":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAuthNotify")}", true);
+                    break;                        
                 case "evetime":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTime")}", true);
                     break;                        
@@ -272,6 +275,37 @@ namespace ThunderED.Classes
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDisabled"), true);
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [Command("authnotify", RunMode = RunMode.Async), Summary("Auth User")]
+        public async Task AuthNotify()
+        {
+            var channels = APIHelper.DiscordAPI.GetAuthAllowedChannels();
+            if(channels.Length != 0 && !channels.Contains(Context.Channel.Id)) return;
+
+            if (SettingsManager.GetBool("config", "moduleAuthWeb"))
+            {
+                try
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
+                        string.Format(LM.Get("authNotifyInvite"), WebAuthModule.GetAuthNotifyURL()), true);
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx("authnotify", ex);
+                    await Task.FromException(ex);
+                }
+            }
+            else
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDisabled"), true);
+            }
+        }
+
+
 
         /// <summary>
         /// 
