@@ -162,6 +162,31 @@ namespace ThunderED.API
             }
         }
 
+        public async Task<string> IsAdminAccess(ICommandContext context)
+        {
+            if (context.Guild != null)
+            {
+                var roles = new List<IRole>(context.Guild.Roles);
+                var userRoleIDs = (await context.Guild.GetUserAsync(context.User.Id)).RoleIds;
+                var roleMatch = SettingsManager.GetSubList("config", "discordAdminRoles");
+                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name == role.Value) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
+                    .All(check => check == 0)) return LM.Get("comRequirePriv");
+            }
+            else
+            {
+                var guild = (await context.Client.GetGuildsAsync()).FirstOrDefault();
+                if (guild == null) return "Error getting guild!";
+                var roles = new List<IRole>(guild.Roles);
+                var userRoleIDs = (await guild.GetUserAsync(context.User.Id)).RoleIds;
+                var roleMatch = SettingsManager.GetSubList("config", "discordAdminRoles");
+                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name == role.Value) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
+                    .All(check => check == 0)) return LM.Get("comRequirePriv");
+            }
+
+            await Task.CompletedTask;
+            return null;
+        }
+
         #region Cached queries
 
         private ulong[] _forbiddenPublicChannels;

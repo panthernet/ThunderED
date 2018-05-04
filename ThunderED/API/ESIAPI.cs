@@ -198,7 +198,7 @@ namespace ThunderED.API
             catch (Exception ex)
             {
                 await LogHelper.LogEx(request, ex, LogCat.ESI);
-                await LogHelper.LogInfo($"REPONCE: {raw}", LogCat.ESI);
+                await LogHelper.LogInfo($"RESPONCE: {raw}", LogCat.ESI);
                 return null;
             }
         }

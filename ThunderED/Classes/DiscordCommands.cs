@@ -137,6 +137,13 @@ namespace ThunderED.Classes
        // [CheckForRole]
         public async Task Test([Remainder] string x)
         {
+            var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
+            if (!string.IsNullOrEmpty(result))
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
+                return;
+            }
+
             var res = x.Split(' ');
             if (res[0] == "km")
             {
@@ -219,11 +226,18 @@ namespace ThunderED.Classes
         /// </summary>
         /// <returns></returns>
         [Command("rehash", RunMode = RunMode.Async), Summary("Rehash settings file")]
-        [CheckForRole]
+       // [CheckForRole]
         public async Task Reshash()
         {
             try
             {
+                var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
+                    return;
+                }
+
                 SettingsManager.UpdateSettings();
                 TickManager.LoadModules();
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, "REHASH COMPLETED", true);
@@ -240,11 +254,17 @@ namespace ThunderED.Classes
         /// </summary>
         /// <returns></returns>
         [Command("reauth", RunMode = RunMode.Async), Summary("Reauth all users")]
-        [CheckForRole]
+        //[CheckForRole]
         public async Task Reauth()
         {
             try
             {
+                var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
+                    return;
+                }
                 await TickManager.RunModule(typeof(AuthCheckModule), Context, true);
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, "Reauth completed!", true);
             }

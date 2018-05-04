@@ -22,6 +22,7 @@
         Stats,
         Timers,
         Templates,
-        RadiusKill
+        RadiusKill,
+        Debug
     }
 }
