@@ -31,7 +31,7 @@
 	  "cachePurgeInterval": 30,
 	  "memoryUsageLimitMb": 100,
     "logSeverity": "Info",	
-	  "logNewNotifications": false,
+	  "logNewNotifications": true,
     "databaseProvider":  "sqlite" 
   },
 
