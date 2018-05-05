@@ -1,3 +1,6 @@
+v1.0.6 BETA
++ Fixed logging files for FleetUp
+
 v1.0.5 BETA
 + Added !web and !authnotify commands
 + Added main web-server page to display all available activities

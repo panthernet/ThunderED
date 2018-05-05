@@ -10,7 +10,7 @@
 * Multiple language support
 * Web templates and rich settings
 * Effective caching logic for less network and memory load
-* Message templates for customization by template files without any source-code modifications
+* Highly customizable Message templates for killmails without any source-code modifications
 * Modular design for new extensions such as templates, modules and DB support
 
 # Supported Modules

@@ -35,7 +35,7 @@ namespace ThunderED.API
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx(request, ex, LogCat.ESI);
+                await LogHelper.LogEx(request, ex, LogCat.FleetUp);
                 return null;
             }
         }
@@ -59,7 +59,7 @@ namespace ThunderED.API
                     if (!responceMessage.IsSuccessStatusCode || data == null)
                     {
                         if(responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden)
-                            await LogHelper.LogError($"[{reason}] Potential {responceMessage.StatusCode} ESI Failure: {request}", LogCat.ESI, false);
+                            await LogHelper.LogError($"[{reason}] Potential {responceMessage.StatusCode} ESI Failure: {request}", LogCat.FleetUp, false);
                         return null;
                     }
                     return data;                
@@ -68,7 +68,7 @@ namespace ThunderED.API
             catch (Exception ex)
             {
                 await LogHelper.LogEx(request, ex, LogCat.ESI);
-                await LogHelper.LogInfo($"RESPONCE: {raw}", LogCat.ESI);
+                await LogHelper.LogInfo($"RESPONCE: {raw}", LogCat.FleetUp);
                 return null;
             }
         }
