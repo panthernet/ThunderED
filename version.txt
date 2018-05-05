@@ -2,6 +2,7 @@ v1.0.7 BETA
 + Moved web-server to the core modules, all others can use it on demand
 + Moved IP address and port settings to webServerModule section
 + Fixed aggressor query in wardec notifications due to weird Core bug
++ Updated notification feed acess rights to include citadels info and chat chanels
 
 v1.0.6 BETA
 + Added ability to run free-for-all auth server with no corp or alliance restrictions

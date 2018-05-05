@@ -89,7 +89,7 @@ namespace ThunderED.Modules.Sub
             var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
             var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
-            return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-characters.read_notifications.v1&state=9";
+            return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-characters.read_notifications.v1+esi-universe.read_structures.v1+esi-characters.read_chat_channels.v1&state=9";
         }
     }
 }

@@ -48,16 +48,6 @@ namespace ThunderED
                         _timer.Dispose();
                         APIHelper.DiscordAPI.Stop();
                         return;
-                   /* case "getnurl":
-                        var cb = HttpUtility.UrlEncode(SettingsManager.Get("auth", "callbackUrl"));
-                        var client_id = SettingsManager.Get("auth", "ccpAppClientId");
-                        var url =
-                            $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={cb}&client_id={client_id}&scope=esi-characters.read_notifications.v1&state=9";
-                        File.WriteAllText(Path.Combine(SettingsManager.RootDirectory, "logs", "getnurl.txt"), $"{url}{Environment.NewLine}");
-                        var text =
-                            $"Notification feeder URL:{Environment.NewLine}{url} {Environment.NewLine}Get this url from 'logs/getnurl.txt' file!";
-                        Console.WriteLine(text);
-                        break;*/
                     case "flushn":
                         Console.WriteLine("Flushing all notifications DB list");
                         SQLiteHelper.RunCommand("delete from notificationsList").GetAwaiter().GetResult();
