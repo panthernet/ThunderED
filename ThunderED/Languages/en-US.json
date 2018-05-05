@@ -127,7 +127,7 @@
   "authTokenRcv":  "Token received successfully!", 
   "authTokenRcv2":  "Now your Discord group will get ingame notifications from {0} character", 
   "killFeedString":  "{0}{1} {2:n0} ISK* - {3}<{4}{5}> in {6}({7}) at {8}", 
-  "killFeedBy":  " убит {0}<{1}{2}> ({3})", 
+  "killFeedBy":  " killed by {0}<{1}{2}> ({3})", 
   "radiusInfoHeader":  "Radius Info", 
   "fuNeedSetup":  "Setup Incomplete please check the Settings file",
   "fuNotification": "FleetUp Notification", 
@@ -136,4 +136,5 @@
   "Details": "Details", 
   "fuFormIn": "FORMUP In {0} Minutes for FleetUp Op <{1}>", 
   "fuFormNow": "FORMUP Now FleetUp Op <{0}>", 
+  "webServerOffline":  "Web Server is offline!" ,
 }

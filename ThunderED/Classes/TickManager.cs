@@ -36,10 +36,9 @@ namespace ThunderED.Classes
 
             //sub modules - core modules that are called in each tick and can supply other modules with some data
             Modules.Add(new ZKillLiveFeedModule());
+            Modules.Add(new WebServerModule());
 
             //dynamic modules - called in each tick
-            if (SettingsManager.GetBool("config","moduleAuthWeb"))
-                Modules.Add(new WebAuthModule());
 
             if (SettingsManager.GetBool("config","moduleAuthCheck"))
                 Modules.Add(new AuthCheckModule());
@@ -62,6 +61,9 @@ namespace ThunderED.Classes
 
             if (SettingsManager.GetBool("config","moduleRadiusKillFeed"))
                 OnDemandModules.Add(new RadiusKillFeedModule());
+
+            if (SettingsManager.GetBool("config","moduleAuthWeb"))
+                OnDemandModules.Add(new WebAuthModule());
 
         }
 

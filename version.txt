@@ -1,3 +1,8 @@
+v1.0.7 BETA
++ Moved web-server to the core modules, all others can use it on demand
++ Moved IP address and port settings to webServerModule section
++ Fixed aggressor query in wardec notifications due to weird Core bug
+
 v1.0.6 BETA
 + Added ability to run free-for-all auth server with no corp or alliance restrictions
 + Fixed logging files for FleetUp

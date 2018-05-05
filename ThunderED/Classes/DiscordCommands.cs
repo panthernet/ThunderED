@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using ThunderED.Helpers;
 using ThunderED.Modules;
+using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Static;
+using ThunderED.Modules.Sub;
 
 namespace ThunderED.Classes
 {
@@ -26,7 +28,14 @@ namespace ThunderED.Classes
         [Command("web", RunMode = RunMode.Async), Summary("Displays web site address")]
         public async Task Web()
         {
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebAuthModule.GetWebSiteUrl());
+            if (SettingsManager.GetBool("config", "moduleWebServer"))
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
+            }
+            else
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
+            }
         }
 
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
@@ -285,13 +294,13 @@ namespace ThunderED.Classes
             var channels = APIHelper.DiscordAPI.GetAuthAllowedChannels();
             if(channels.Length != 0 && !channels.Contains(Context.Channel.Id)) return;
 
-            if (SettingsManager.GetBool("config", "moduleAuthWeb"))
+            if (SettingsManager.GetBool("config", "moduleWebServer") && SettingsManager.GetBool("config", "moduleAuthWeb"))
             {
                 try
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
                         string.Format(LM.Get("authInvite"),
-                            $"http://{SettingsManager.Get("auth", "webAuthExternalIP")}:{SettingsManager.Get("auth", "webAuthExternalPort")}/auth.php"), true);
+                            $"http://{SettingsManager.Get("webServerModule", "webExternalIP")}:{SettingsManager.Get("webServerModule", "webExternalPort")}/auth.php"), true);
                 }
                 catch (Exception ex)
                 {
@@ -315,12 +324,12 @@ namespace ThunderED.Classes
             var channels = APIHelper.DiscordAPI.GetAuthAllowedChannels();
             if(channels.Length != 0 && !channels.Contains(Context.Channel.Id)) return;
 
-            if (SettingsManager.GetBool("config", "moduleAuthWeb"))
+            if (SettingsManager.GetBool("config", "moduleWebServer") && SettingsManager.GetBool("config", "moduleNotificationFeed"))
             {
                 try
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
-                        string.Format(LM.Get("authNotifyInvite"), WebAuthModule.GetAuthNotifyURL()), true);
+                        string.Format(LM.Get("authNotifyInvite"), WebServerModule.GetAuthNotifyURL()), true);
                 }
                 catch (Exception ex)
                 {
@@ -343,7 +352,7 @@ namespace ThunderED.Classes
         [Command("auth", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task Auth([Remainder] string x)
         {
-            if (SettingsManager.GetBool("config", "moduleAuthWeb"))
+            if (SettingsManager.GetBool("config", "moduleWebServer")  && SettingsManager.GetBool("config", "moduleAuthWeb"))
             {
                 try
                 {

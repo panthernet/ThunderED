@@ -3,11 +3,13 @@ using ThunderED.Helpers;
 
 namespace ThunderED.Modules
 {
-    internal class ModuleTimers: AppModuleBase
+    internal class TimersModule: AppModuleBase
     {
         public override LogCat Category => LogCat.Timers;
 
-        public override async  Task Run(object prm)
+
+
+        public override async Task Run(object prm)
         {
             await ProcessTimers();
         }

@@ -24,6 +24,7 @@
         Templates,
         RadiusKill,
         Debug,
-        FleetUp
+        FleetUp,
+        WebServer
     }
 }

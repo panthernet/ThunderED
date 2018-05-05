@@ -516,16 +516,31 @@ namespace ThunderED.Modules
                                                 case "AllyJoinedWarDefenderMsg":
                                                 {
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
-                                                    var ally = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allyID", data)))?.name ??
-                                                               (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("allyID", data)))?.name;
-                                                    var defender = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("defenderID", data)))?.name ??
-                                                                   (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("defenderID", data)))?.name;
-                                                    var agressor = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("agressorID", data)))?.name ??
-                                                                   (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("agressorID", data)))?.name;
+                                                    string allyStr = null;
+                                                    var allyData = await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allyID", data));
+                                                    if (allyData != null) allyStr = allyData.name;
+                                                    else
+                                                    {
+                                                        var corpData = await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("allyID", data));
+                                                        allyStr = corpData?.name;
+                                                    }
+
+                                                    var defenderStr = string.Empty;
+                                                    allyData = await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("defenderID", data));
+                                                    if (allyData != null) defenderStr = allyData.name;
+                                                    else
+                                                    {
+                                                        var corpData = await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("defenderID", data));
+                                                        defenderStr = corpData?.name;
+                                                    }
+                                                    var agressorStr = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("aggressorID", data)))?.name;
+                                                    if (agressorStr == null)
+                                                        agressorStr = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("aggressorID", data)))?.name;
+
                                                     builder = new EmbedBuilder()
                                                         .WithColor(new Color(0xff0000))
                                                         .WithThumbnailUrl(SettingsManager.Get("resources", "imgWarAssist"))
-                                                        .WithAuthor(author => author.WithName(string.Format(LM.Get("AllyJoinedWarDefenderMsg"), ally, defender, agressor)))
+                                                        .WithAuthor(author => author.WithName(string.Format(LM.Get("AllyJoinedWarDefenderMsg"), allyStr, defenderStr, agressorStr)))
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -535,16 +550,16 @@ namespace ThunderED.Modules
                                                 case "AllyJoinedWarAllyMsg":
                                                 {
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
-                                                    var agressor = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("agressorID", data)))?.name ??
-                                                                   (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("agressorID", data)))?.name;
-                                                    var ally = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allyID", data)))?.name ??
+                                                    var agressorStr2 = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("aggressorID", data)))?.name ??
+                                                                   (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("aggressorID", data)))?.name;
+                                                    var allyStr2 = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allyID", data)))?.name ??
                                                                (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("allyID", data)))?.name;
-                                                    var defender = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("defenderID", data)))?.name ??
+                                                    var defenderStr2 = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("defenderID", data)))?.name ??
                                                                    (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("defenderID", data)))?.name;
                                                     builder = new EmbedBuilder()
                                                         .WithColor(new Color(0x00ff00))
                                                         .WithThumbnailUrl(SettingsManager.Get("resources", "imgWarAssist"))
-                                                        .WithAuthor(author => author.WithName(string.Format(LM.Get("AllyJoinedWarAllyMsg"), ally, defender, agressor)))
+                                                        .WithAuthor(author => author.WithName(string.Format(LM.Get("AllyJoinedWarAllyMsg"), allyStr2, defenderStr2, agressorStr2)))
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -556,10 +571,10 @@ namespace ThunderED.Modules
                                                     //"text": "allianceID: 99005333\ncorpList: <br>Quarian Fleet - standings:-0.0500\nfactionID: 500001\nrequiredStanding: 0.0001\n"
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                     var allianceId = GetData("allianceID", data);
-                                                    var ally = !string.IsNullOrEmpty(allianceId)
+                                                    var allyStr3 = !string.IsNullOrEmpty(allianceId)
                                                         ? (await APIHelper.ESIAPI.GetAllianceData(Reason, allianceId, true))?.name
                                                         : LM.Get("Unknown");
-                                                    var corp = data.ContainsKey("corpList")
+                                                    var corpStr3 = data.ContainsKey("corpList")
                                                         ? data["corpList"].Trim().Replace("<br>", "").Replace(" - standings", "")
                                                         : LM.Get("Unknown");
                                                     var required = GetData("requiredStanding", data);
@@ -567,8 +582,8 @@ namespace ThunderED.Modules
                                                     builder = new EmbedBuilder()
                                                         .WithColor(new Color(0xff0000))
                                                         .WithThumbnailUrl(SettingsManager.Get("resources", "imgLowFWStand"))
-                                                        .WithAuthor(author => author.WithName(string.Format(LM.Get("FWAllianceWarningMsg"), ally)))
-                                                        .AddInlineField(LM.Get("BlameCorp"), string.Format(LM.Get("standMissing"), corp, required))
+                                                        .WithAuthor(author => author.WithName(string.Format(LM.Get("FWAllianceWarningMsg"), allyStr3)))
+                                                        .AddInlineField(LM.Get("BlameCorp"), string.Format(LM.Get("standMissing"), corpStr3, required))
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 

@@ -91,9 +91,9 @@
         </div>
         <div class="jumbotron pagination-centered">
             <h1>Welcome to ThunderED server!</h1>
-            <a href="{authUrl}" class="btn btn-info btn-block" role="button">{authButtonDiscordText}</a>
-            <a href="{authNotifyUrl}" class="btn btn-info btn-block" role="button">{authButtonNotifyText}</a>
-            <a href="{timersUrl}" class="btn btn-info btn-block disabled" role="button">{authButtonTimersText}</a>
+            <a href="{authUrl}" class="btn btn-info btn-block {disableWebAuth}" role="button">{authButtonDiscordText}</a>
+            <a href="{authNotifyUrl}" class="btn btn-info btn-block {disableWebNotify}" role="button">{authButtonNotifyText}</a>
+            <a href="{timersUrl}" class="btn btn-info btn-block {disableWebTimers}" role="button">{authButtonTimersText}</a>
         </div>
     </div>
 </body>

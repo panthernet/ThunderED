@@ -11,9 +11,10 @@
 	  "language": "en-us",
 	  "useEnglishESIOnly": "true",
 
-    "moduleCharCorp": true,
+    "moduleWebServer": false,
     "moduleAuthCheck": false,
     "moduleAuthWeb": false,
+    "moduleCharCorp": true,
     "moduleLiveKillFeed": false,
     "moduleRadiusKillFeed": false,
     "moduleReliableKillFeed": true,
@@ -24,6 +25,7 @@
     "moduleMOTD": false,
     "moduleNotificationFeed": true,
     "moduleStats": true,
+    "moduleTimers": false,
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -34,6 +36,14 @@
 	  "logNewNotifications": true,
     "databaseProvider":  "sqlite" 
   },
+
+  "webServerModule": {
+    "webListenIP": "IP",
+    "webListenPort": 80,
+    "webExternalIP": "IP",
+    "webExternalPort": 80,
+  },
+  
 
   "radiusKillFeedModule": {
     "enableCache": false,
@@ -95,10 +105,6 @@
   "auth": {
     "authCheckIntervalMinutes": "480",
     "discordUrl": "https://discord.gg/xxxxxx",
-	  "webAuthListenIP": "YOUR IP",
-    "webAuthListenPort": 0,
-    "webAuthExternalIP": "YOUR EXTERNAL IP",
-    "webAuthExternalPort": 30001,
     "ccpAppClientId": "REQUIRED",
     "ccpAppSecret": "REQUIRED",
     "exemptDiscordRoles": [ "Admins", "Role2" ],
