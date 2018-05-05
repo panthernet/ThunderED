@@ -39,13 +39,18 @@ namespace ThunderED.Classes
             FileTemplateAuthNotifySuccess = Path.Combine(RootDirectory, "Templates", "authNotifySuccess.html");
         }
 
+        public static bool IsNew { get; set; }
+
         static SettingsManager()
         {
             RootDirectory = Path.GetDirectoryName(new Uri(Assembly.GetEntryAssembly().CodeBase).LocalPath);
             DatabaseFilePath = Path.Combine(RootDirectory, "edb.db");
 
             if (!File.Exists(DatabaseFilePath))
+            {
                 File.Copy(RootDirectory + "/edb.def.db", DatabaseFilePath);
+                IsNew = true;
+            }
         }
 
         public static void UpdateSettings()

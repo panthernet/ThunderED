@@ -16,7 +16,7 @@ namespace ThunderED.Helpers
         {
             var version = await SQLiteDataQuery("cacheData", "data", "name", "version");
             bool fullUpdate = string.IsNullOrEmpty(version);
-            var vDbVersion = fullUpdate ? new Version(1,0,0) : new Version(version);
+            var vDbVersion = fullUpdate ? (SettingsManager.IsNew ? new Version(Program.VERSION) : new Version(1,0,0)) : new Version(version);
           //  var vAppVersion = new Version(Program.VERSION);
 
             try
@@ -63,6 +63,10 @@ namespace ThunderED.Helpers
             {
                 await LogHelper.LogEx("Upgrade", ex, LogCat.SQLite);
                 return false;
+            }
+            finally
+            {
+                SettingsManager.IsNew = false;
             }
         }
     }

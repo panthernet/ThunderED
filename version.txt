@@ -1,5 +1,6 @@
 v1.0.6 BETA
 + Fixed logging files for FleetUp
++ Fixed initial setup SQL upgrade issues
 
 v1.0.5 BETA
 + Added !web and !authnotify commands

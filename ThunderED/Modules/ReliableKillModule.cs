@@ -50,6 +50,7 @@ namespace ThunderED.Modules
                         where.Add("id", isAlliance? allianceID.ToString() : corpID.ToString());
                         var resultQ = await SQLiteHelper.SQLiteDataQuery("killFeedCache", "lastId", where);
                         _lastPosted = string.IsNullOrEmpty(resultQ) ? 0 : Convert.ToInt32(resultQ);
+                        if(kills.Count == 0) continue;
                         kills = _lastPosted == 0 ? kills.TakeLast(5).ToList() : kills.Where(a => a.killmail_id > _lastPosted).ToList();
                         
                         if(kills.Count == 0) continue;
