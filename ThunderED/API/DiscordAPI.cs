@@ -262,6 +262,9 @@ namespace ThunderED.API
                             }
                         }
 
+                        if (corps.Count == 0 && alliance.Count == 0)
+                            isInExempt = true;
+
                         bool isAddedRole = false;
                         //Check for Corp roles
                         if (corps.ContainsKey(characterData.corporation_id.ToString()))

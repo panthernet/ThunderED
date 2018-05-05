@@ -174,6 +174,8 @@ namespace ThunderED.Modules
                                             add = true;
                                         else if (alliance.ContainsKey(allianceID))
                                             add = true;
+                                        else if (corps.Count == 0 && alliance.Count == 0)
+                                            add = true;
 
                                         if (!esiFailure && add && (string) JObject.Parse(verifyString)["error"] != "invalid_token")
                                         {
@@ -289,7 +291,7 @@ namespace ThunderED.Modules
                         var allianceID = characterData.alliance_id.ToString();
                         var corpID = characterData.corporation_id.ToString();
 
-                        bool enable = corps.ContainsKey(corpID) || characterData.alliance_id != null && alliance.ContainsKey(allianceID);
+                        bool enable = corps.ContainsKey(corpID) || characterData.alliance_id != null && alliance.ContainsKey(allianceID) || (corps.Count == 0 && alliance.Count == 0);
 
                         if (enable && !esiFailed)
                         {

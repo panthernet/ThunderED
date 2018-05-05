@@ -1,4 +1,5 @@
 v1.0.6 BETA
++ Added ability to run free-for-all auth server with no corp or alliance restrictions
 + Fixed logging files for FleetUp
 + Fixed initial setup SQL upgrade issues
 
