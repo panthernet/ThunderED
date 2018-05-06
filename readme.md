@@ -26,7 +26,7 @@
 * Price Check - check relevant prices on item in all major trade hubs using special commands
 * Ally & Corp Stats - get KM stats for selected alliances or corporations by day, month or year
 * FleetUP integration - announces and reminders for FleetUp ops
-* (WIP) Timers - built-in web server for important timers and events
+* (BETA) Timers - built-in web server for important timers and events. Auto add timers for reinforced structure events!
 * (WIP) Mail Feeder - feed mail by key phrases from authenticated characters 
 * (?) Channel MOTD integration - could be done by request
 
