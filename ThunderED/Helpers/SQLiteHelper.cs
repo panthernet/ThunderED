@@ -111,7 +111,10 @@ namespace ThunderED.Helpers
                     Provider = new SqliteDatabaseProvider();
                     break;
                 default:
-                    return $"[CRITICAL] Unknown database provider {prov}!";
+                    LogHelper.LogInfo("Using default sqlite provider!").GetAwaiter().GetResult();
+                    Provider = new SqliteDatabaseProvider();
+                    break;
+                //  return $"[CRITICAL] Unknown database provider {prov}!";
 
             }
             //upgrade database
