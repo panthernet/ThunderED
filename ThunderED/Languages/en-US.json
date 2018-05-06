@@ -159,4 +159,6 @@
   "timersAddHeader":  "Add New Timer" ,
   "Add":  "Add",
   "Cancel": "Cancel" ,
+  "invalidInputData":  "Invalid input data!", 
+  "LogOut":  "Log Out", 
 }

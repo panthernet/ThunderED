@@ -191,7 +191,7 @@ namespace ThunderED.Modules
 
                                 if (entry == null)
                                 {
-                                    await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                                    await response.WriteContentAsync(LM.Get("invalidInputData"));
                                     return true;
                                 }
 
@@ -232,6 +232,8 @@ namespace ThunderED.Modules
                             .Replace("{timerArmor}",LM.Get("timerArmor"))
                             .Replace("{timerShield}",LM.Get("timerShield"))
                             .Replace("{timerOther}",LM.Get("timerOther"))
+                            .Replace("{LogOutUrl}",WebServerModule.GetWebSiteUrl())
+                            .Replace("{LogOut}",LM.Get("LogOut"))
                             ;
                         await response.WriteContentAsync(text);
                         return true;
@@ -259,8 +261,8 @@ namespace ThunderED.Modules
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("timersStage")}</th>");
             sb.AppendLine($"<th scope=\"col\">{LM.Get("timersLocation")}</th>");
             sb.AppendLine($"<th scope=\"col\">{LM.Get("timersOwner")}</th>");
-            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("timersET")}</th>");
-            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("timersRemaining")}</th>");
+            sb.AppendLine($"<th scope=\"col\">{LM.Get("timersET")}</th>");
+            sb.AppendLine($"<th scope=\"col\">{LM.Get("timersRemaining")}</th>");
             sb.AppendLine($"<th scope=\"col\">{LM.Get("timersNotes")}</th>");
             sb.AppendLine($"<th scope=\"col\">{LM.Get("timersUser")}</th>");
             sb.AppendLine($"<th scope=\"col-md-auto\" class=\"{(isEditor ? null : "d-none")}\"></th");
@@ -274,12 +276,12 @@ namespace ThunderED.Modules
                 sb.AppendLine($"  <th scope=\"row\">{counter++}</th>");
                 sb.AppendLine($"  <td>{timer.GetModeName()}</td>");
                 sb.AppendLine($"  <td>{timer.GetStageName()}</td>");
-                sb.AppendLine($"  <td>{timer.timerLocation}</td>");
-                sb.AppendLine($"  <td>{timer.timerOwner}</td>");
+                sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerLocation)}</td>");
+                sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerOwner)}</td>");
                 sb.AppendLine($"  <td>{timer.timerET}</td>");
                 sb.AppendLine($"  <td>{timer.GetRemains()}</td>");
-                sb.AppendLine($"  <td>{timer.timerNotes}</td>");
-                sb.AppendLine($"  <td>{timer.timerChar}</td>");
+                sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerNotes)}</td>");
+                sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerChar)}</td>");
                 if(isEditor)
                     sb.AppendLine($"<td><a class=\"btn btn-danger\" href=\"{WebServerModule.GetTimersURL()}?data=delete{timer.id}&id={HttpUtility.UrlEncode(baseCharId)}&state=11\" role=\"button\">X</a></td>");
                 sb.AppendLine("</tr>");
@@ -359,6 +361,12 @@ namespace ThunderED.Modules
                 .AddField(LM.Get("timersNotes"), timer.timerNotes);
 
             await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), "", embed.Build());
+        }
+
+        public static async Task AddTimer(TimerItem entry)
+        {
+            await SQLiteHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
+
         }
     }
 }

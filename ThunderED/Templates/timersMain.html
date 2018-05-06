@@ -38,6 +38,10 @@
                 event.preventDefault();
                 sendThemAll();
             });
+            $('#myModal').on('hidden.bs.modal',
+                function() {
+                    $('#error').addClass("d-none");
+                });
         });
 
         function sendThemAll() {
@@ -82,7 +86,7 @@
     </script>
 </head>
 
-<body background="img/background.jpg">
+<body>
     <div class="container">
         <div class="header text-center">
             <h3>{header}</h3>
@@ -90,7 +94,7 @@
 
         <input type="hidden" id="timerCharId" value="{charId}">
 
-        <ul class="nav nav-pills float-right">{loggedInAs}<a href="#" style="margin-left:10px;">Log Out</a></ul>
+        <ul class="nav nav-pills float-right">{loggedInAs}<a href="{LogOutUrl}" style="margin-left:10px;">{LogOut}</a></ul>
         <a class="btn btn-primary {isEditorElement}" data-toggle="modal" data-target="#myModal" href="#" role="button">{addNewTimerHeader}</a>
 
         <table class="table">
@@ -108,10 +112,10 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
+                    <div>
+                        <button type="button" class="btn btn-danger btn-block d-none" id="error" style="width: 300px"></button>
+                    </div>
                     <div class="modal-body">
-                        <div>
-                            <button type="button" class="btn btn-danger btn-block d-none" id="error"></button>
-                        </div>
                         <form role="form">
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">

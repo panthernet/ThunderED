@@ -45,6 +45,7 @@
   },
   
   "timersModule": {
+    "autoAddTimerForReinforceNotifications": true,
     "authTimeoutInMinutes": 10,
     "announces": [60, 10],
     "announceChannel": 0,

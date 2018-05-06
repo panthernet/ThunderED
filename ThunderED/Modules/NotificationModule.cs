@@ -7,6 +7,7 @@ using Discord;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
+using ThunderED.Json.Internal;
 
 namespace ThunderED.Modules
 {
@@ -228,6 +229,20 @@ namespace ThunderED.Modules
                                                     embed = builder.Build();
 
                                                     await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+
+                                                    if (SettingsManager.GetBool("config", "moduleTimers") &&
+                                                        SettingsManager.GetBool("timersModule", "autoAddTimerForReinforceNotifications"))
+                                                    {
+                                                        await TimersModule.AddTimer(new TimerItem
+                                                        {
+                                                            timerChar = "Auto",
+                                                            timerET = (timestamp + timeleft),
+                                                            timerLocation = $"{system?.name} - {structureType.name} - {structure?.name}",
+                                                            timerStage = notification.type == "StructureLostShields" ? 2 : 1,
+                                                            timerType = 2,
+                                                            timerOwner = "Alliance"
+                                                        });
+                                                    }
                                                     break;
                                                 case "StructureDestroyed":
                                                 case "StructureOnline":

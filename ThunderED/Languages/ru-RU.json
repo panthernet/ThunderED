@@ -159,7 +159,7 @@
   "timersStage": "Этап",
   "timersLocation": "Объект",
   "timersOwner": "Владелец",
-  "timersET": "Время по EVE",
+  "timersET": "Время EVE",
   "timersRemaining": "Осталось",
   "timersNotes": "Заметки",
   "timersUser": "Завел",
@@ -167,4 +167,6 @@
   "timersAddHeader":  "Добавить Таймер" ,
   "Add":  "Добавить",
   "Cancel": "Отмена" ,
+  "invalidInputData":  "Неверные данные!", 
+  "LogOut":  "Выйти", 
 }
