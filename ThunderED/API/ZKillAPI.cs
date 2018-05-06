@@ -75,7 +75,7 @@ namespace ThunderED.API
                 {
                     httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
                     httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
-                    var eText = isAlliance ? "allianceID" : "corpID";
+                    var eText = isAlliance ? "allianceID" : "corporationID";
                     var responce = await httpClient.GetAsync($"https://zkillboard.com/api/{eText}/{id}/no-items/no-attackers/orderDirection/asc/pastSeconds/3600/");
                     if (responce.IsSuccessStatusCode)
                     {
@@ -105,7 +105,7 @@ namespace ThunderED.API
                 {
                     httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
                     httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
-                    var eText = isAlliance ? "allianceID" : "corpID";
+                    var eText = isAlliance ? "allianceID" : "corporationID";
                     var responce = await httpClient.GetAsync($"https://zkillboard.com/api/{eText}/{id}/zkbOnly/orderDirection/desc/pastSeconds/3600/");
                     if (responce.IsSuccessStatusCode)
                     {
