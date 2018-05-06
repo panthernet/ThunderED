@@ -1,0 +1,173 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>{header}</title>
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <style type="text/css">
+        .row {
+            background: #f8f9fa;
+            margin-top: 20px;
+        }
+
+        .col {
+            border: solid 1px #6c757d;
+            padding: 10px;
+        }
+
+        .btn {
+            width: 150px;
+        }
+
+        .btn-danger {
+            width: 30px;
+            height: 30px;
+            padding: 0px;
+        }
+
+        .input-group-text {
+            width: 110px;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function() {
+            $('#acceptButton').on('click', function(event) {
+                event.preventDefault();
+                sendThemAll();
+            });
+        });
+
+        function sendThemAll() {
+            let data = {
+                "timerType": $("#timerType").val(),
+                "timerStage": $("#timerStage").val(),
+                "timerLocation": $("#timerLocation").val(),
+                "timerOwner": $("#timerOwner").val(),
+                "timerET": $("#timerET").val(),
+                "timerNotes": $("#timerNotes").val(),
+                "timerCharId": $("#timerCharId").val()
+            };
+            debugger;
+            var str = encodeURIComponent(btoa(JSON.stringify(data)));
+            console.log(str);
+
+            var idstr = encodeURIComponent($("#timerCharId").val());
+
+            $.ajax({
+                type: "get",
+                url: "/timers.php?data="+str+"&id="+idstr+"&state=11",
+                dataType: "text",
+                success: 
+                    function (result) {
+                        if (result != null && result != "") {
+
+                            $('#error').removeClass("d-none");
+                            $('#error').text(result);
+                            return;
+                        }
+                        location.reload(true);
+                    },
+                error: function (xhr,status,error) {
+                    //error
+                },
+                statusCode: {
+                    404: function() {
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+
+<body background="img/background.jpg">
+    <div class="container">
+        <div class="header text-center">
+            <h3>{header}</h3>
+        </div>
+
+        <input type="hidden" id="timerCharId" value="{charId}">
+
+        <ul class="nav nav-pills float-right">{loggedInAs}<a href="#" style="margin-left:10px;">Log Out</a></ul>
+        <a class="btn btn-primary {isEditorElement}" data-toggle="modal" data-target="#myModal" href="#" role="button">{addNewTimerHeader}</a>
+
+        <table class="table">
+           {body}
+        </table>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{addNewTimerHeader}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <button type="button" class="btn btn-danger btn-block d-none" id="error"></button>
+                        </div>
+                        <form role="form">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersType}</span>
+                                </div>
+                                <select class="custom-select" id="timerType">
+                                    <option selected>Choose...</option>
+                                    <option value="1">{timerOffensive}</option>
+                                    <option value="2">{timerDefensive}</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersStage}</span>
+                                </div>
+                                <select class="custom-select" id="timerStage">
+                                    <option selected>Choose...</option>
+                                    <option value="1">{timerHull}</option>
+                                    <option value="2">{timerArmor}</option>
+                                    <option value="3">{timerShield}</option>
+                                    <option value="4">{timerOther}</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersLocation}</span>
+                                </div>
+                                <input type="text" class="form-control" id="timerLocation">
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersOwner}</span>
+                                </div>
+                                <input type="text" class="form-control" id="timerOwner">
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersET}</span>
+                                </div>
+                                <input type='text' class="form-control" id="timerET"/>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersNotes}</span>
+                                </div>
+                                <input type='text' class="form-control" id="timerNotes"/>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-success btn-block" id="acceptButton">{Add}</button>
+                        <button type="button" class="btn btn-default btn-default" data-dismiss="modal">{Cancel}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

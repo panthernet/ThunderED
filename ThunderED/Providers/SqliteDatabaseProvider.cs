@@ -6,6 +6,7 @@ using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Json.Internal;
 
 namespace ThunderED.Providers
 {
@@ -121,7 +122,7 @@ namespace ThunderED.Providers
         }
 
 
-        public async Task SQLiteDataUpdate(string table, string setField, string setData, string whereField, object whereData)
+        public async Task SQLiteDataUpdate(string table, string setField, object setData, string whereField, object whereData)
         {
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
             using (var insertSQL = new SqliteCommand($"UPDATE {table} SET {setField} = @data WHERE {whereField} = @name", con))
@@ -165,6 +166,44 @@ namespace ThunderED.Providers
         }
         #endregion
 
+
+        public async Task<List<TimerItem>> SQLiteDataSelectTimers()
+        {
+            var list = new List<TimerItem>();
+            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+            using (var querySQL = new SqliteCommand("select * from timers", con))
+            {
+                await con.OpenAsync();
+                try
+                {
+                    using (var r = await querySQL.ExecuteReaderAsync())
+                    {
+                        while (await r.ReadAsync())
+                        {
+                            var record = new TimerItem
+                            {
+                                id = r.GetInt32(0),
+                                timerType = r.GetInt32(1),
+                                timerStage = r.GetInt32(2),
+                                timerLocation = r.GetString(3),
+                                timerOwner = r.GetString(4),
+                                timerET = r.GetString(5),
+                                timerNotes = r.GetString(6),
+                                timerChar = r.GetString(7)
+                            };
+                            list.Add(record);
+                        }
+
+                        return list;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx("SQLiteDataUpdate", ex, LogCat.SQLite);
+                    return new List<TimerItem>();
+                }
+            }
+        }
 
         public async Task SQLiteDataInsertOrUpdateTokens(string token, string userId)
         {
@@ -333,7 +372,7 @@ namespace ThunderED.Providers
 
                         await r.ReadAsync();
                         //check for outdated cache
-                        if ((DateTime.Now - r.GetDateTime(1)).TotalDays >= maxDays)
+                        if ((DateTime.Now - r.GetDateTime(1)).Days >= maxDays)
                             return (T)(object)null;
                         var data = JsonConvert.DeserializeObject<T>(r.GetString(0));
                         return data;

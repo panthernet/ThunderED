@@ -22,6 +22,27 @@ namespace ThunderED.Modules.OnDemand
             WebServerModule.ModuleConnectors.Add(Reason, Auth);
         }
 
+        public static async Task<string[]> GetCHaracterIdFromCode(string code, string clientID, string secret)
+        {
+            var result = await APIHelper.ESIAPI.GetAuthToken(code, clientID, secret);
+            var accessToken = result[0];
+
+            if (accessToken == null) return null;
+
+            using (var authWebHttpClient = new HttpClient())
+            {
+                authWebHttpClient.DefaultRequestHeaders.Clear();
+                authWebHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+                var tokenresponse = await authWebHttpClient.GetAsync("https://login.eveonline.com/oauth/verify");
+                var verifyString = await tokenresponse.Content.ReadAsStringAsync();
+                if(JObject.Parse(verifyString)["error"]?.ToString() == "invalid_token")
+                    return null;
+                authWebHttpClient.DefaultRequestHeaders.Clear();
+                return new[] {(string) JObject.Parse(verifyString)["CharacterID"], result[1]};
+            }
+
+        }
+
         public async Task<bool> Auth(HttpListenerRequestEventArgs context)
         {
             var esiFailure = false;
@@ -33,6 +54,7 @@ namespace ThunderED.Modules.OnDemand
             var url = SettingsManager.Get("auth","discordUrl");
             var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
             var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
+            var port = SettingsManager.Get("webServerModule", "webListenPort");
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
 
 
@@ -40,7 +62,7 @@ namespace ThunderED.Modules.OnDemand
                 return false;
             try
             {
-                if (request.Url.LocalPath == "/auth.php" || request.Url.LocalPath == $"{extPort}/auth.php")
+                if (request.Url.LocalPath == "/auth.php" || request.Url.LocalPath == $"{extPort}/auth.php"|| request.Url.LocalPath == $"{port}/auth.php")
                 {
                     response.Headers.ContentEncoding.Add("utf-8");
                     response.Headers.ContentType.Add("text/html;charset=utf-8");
@@ -50,10 +72,9 @@ namespace ThunderED.Modules.OnDemand
                     return true;
                 }
 
-                if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php")
+                if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php"
+                    && !request.Url.Query.Contains("&state=11"))
                 {
-
-                    var authWebHttpClient = new HttpClient();
                     var assembly = Assembly.GetEntryAssembly();
                     // var temp = assembly.GetManifestResourceNames();
                     var resource = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Discord-01.png");
@@ -69,19 +90,11 @@ namespace ThunderED.Modules.OnDemand
                         var code = prms[0].Split('=')[1];
                         var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
 
-                        var result = await APIHelper.ESIAPI.GetAuthToken(code, clientID, secret);
-                        var accessToken = result[0];
-
-                        if (accessToken == null)
+                        var result = await GetCHaracterIdFromCode(code, clientID, secret);
+                        if (result == null)
                             esiFailure = true;
-                        authWebHttpClient.DefaultRequestHeaders.Clear();
-                        authWebHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-                        var tokenresponse = await authWebHttpClient.GetAsync("https://login.eveonline.com/oauth/verify");
-                        var verifyString = await tokenresponse.Content.ReadAsStringAsync();
-                        authWebHttpClient.DefaultRequestHeaders.Clear();
+                        var characterID = result?[0];
 
-
-                        var characterID = (string) JObject.Parse(verifyString)["CharacterID"];
                         var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
 
                         if (state == "9") //refresh token fetch ops
@@ -151,7 +164,7 @@ namespace ThunderED.Modules.OnDemand
                         else if (corps.Count == 0 && alliance.Count == 0)
                             add = true;
 
-                        if (!esiFailure && add && (string) JObject.Parse(verifyString)["error"] != "invalid_token")
+                        if (!esiFailure && add)
                         {
                             await SQLiteHelper.InsertPendingUser(characterID?.ToString(), corpID?.ToString(), allianceID?.ToString(), uid, "1",
                                 DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));

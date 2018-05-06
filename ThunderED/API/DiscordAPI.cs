@@ -245,6 +245,8 @@ namespace ThunderED.API
                         var characterID = responce.OrderByDescending(x => x["id"]).FirstOrDefault()["characterID"];
 
                         var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
+                        //skip bad requests
+                        if(characterData == null) continue;
                         var corporationData = await APIHelper.ESIAPI.GetCorporationData("authCheck", characterData.corporation_id, true);
 
                         var roles = new List<SocketRole>();

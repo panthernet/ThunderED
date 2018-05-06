@@ -73,7 +73,7 @@ namespace ThunderED.Helpers
         {
             const string separator = ", ";
 
-            if (ts.TotalMilliseconds < 1) { return "No time"; }
+            if (ts.Milliseconds < 1) { return "No time"; }
 
             return string.Join(separator, new string[]
             {

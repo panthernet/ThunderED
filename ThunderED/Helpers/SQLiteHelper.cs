@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ThunderED.Classes;
+using ThunderED.Json;
+using ThunderED.Json.Internal;
 using ThunderED.Providers;
 
 namespace ThunderED.Helpers
@@ -28,7 +30,7 @@ namespace ThunderED.Helpers
         //SQLite Update
         #region SQLiteUpdate
 
-        internal static async Task SQLiteDataUpdate(string table, string setField, string setData, string whereField, object whereData)
+        internal static async Task SQLiteDataUpdate(string table, string setField, object setData, string whereField, object whereData)
         {
             await Provider?.SQLiteDataUpdate(table, setField, setData, whereField, whereData);
         }
@@ -119,6 +121,11 @@ namespace ThunderED.Helpers
             }
 
             return null;
+        }
+
+        public static async Task<List<TimerItem>> SQLiteDataSelectTimers()
+        {
+            return await Provider?.SQLiteDataSelectTimers();
         }
     }
 }

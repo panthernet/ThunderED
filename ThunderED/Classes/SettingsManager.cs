@@ -20,6 +20,7 @@ namespace ThunderED.Classes
         public static string FileTemplateAuth3;
         public static string FileTemplateAuthNotifyFail;
         public static string FileTemplateAuthNotifySuccess;
+        public static string FileTemplateTimersPage;
         public static string RootDirectory { get; }
         public static IConfigurationRoot Root { get; private set; }
         public static string DatabaseFilePath { get; }
@@ -37,6 +38,7 @@ namespace ThunderED.Classes
             FileTemplateAuth3 = Path.Combine(RootDirectory, "Templates", "auth3.html");
             FileTemplateAuthNotifyFail = Path.Combine(RootDirectory, "Templates", "authNotifyFail.html");
             FileTemplateAuthNotifySuccess = Path.Combine(RootDirectory, "Templates", "authNotifySuccess.html");
+            FileTemplateTimersPage = Path.Combine(RootDirectory, "Templates", "timersMain.html");
         }
 
         public static bool IsNew { get; set; }
