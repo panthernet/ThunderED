@@ -33,3 +33,10 @@
 # Build Requirements
 * Visual Studio 2017 Community Edition
 * .NET Core 2.0
+
+# Pics
+![Timers](http://dl3.joxi.net/drive/2018/05/06/0014/0683/967339/39/fcb3e030f2.jpg)
+
+![Sample kill feed](http://dl3.joxi.net/drive/2018/05/04/0014/0683/967339/39/4605864a01.jpg)
+
+![Notifications](http://dl3.joxi.net/drive/2018/05/04/0014/0683/967339/39/39e91a5fde.jpg)
