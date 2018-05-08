@@ -93,7 +93,7 @@ namespace ThunderED.Modules.OnDemand
                                 break;
                             case RadiusMode.Region:
                                 rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
-                                if(rConst.region_id != radiusRegionId) return;
+                                if(rConst == null || rConst.region_id != radiusRegionId) return;
                                 rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
                                 break;
                         }

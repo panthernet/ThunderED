@@ -31,6 +31,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Content\scripts\bootstrap-datetimepicker.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\scripts\confirmation.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\scripts\dt.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\scripts\moments\en.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\scripts\moments\ru.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="edb.def.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

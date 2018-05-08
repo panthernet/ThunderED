@@ -41,6 +41,26 @@ namespace ThunderED.Modules.Sub
                         var request = context.Request;
                         var response = context.Response;
 
+                        if (request.Url.LocalPath.EndsWith(".js") || request.Url.LocalPath.EndsWith(".less") || request.Url.LocalPath.EndsWith(".css"))
+                        {
+                            var path = Path.Combine(SettingsManager.RootDirectory, "Content", "scripts", Path.GetFileName(request.Url.LocalPath));
+                            if (request.Url.LocalPath.Contains("moments"))
+                            {
+                                path = Path.Combine(SettingsManager.RootDirectory, "Content", "scripts", "moments", Path.GetFileName(request.Url.LocalPath));
+                            }
+
+                            if(!File.Exists(path))
+                                return;
+                            if(request.Url.LocalPath.EndsWith(".less") || request.Url.LocalPath.EndsWith(".css"))
+                                response.Headers.ContentType.Add("text/css");
+                            if(request.Url.LocalPath.EndsWith(".js"))
+                                response.Headers.ContentType.Add("text/javascript");
+
+                            await response.WriteContentAsync(File.ReadAllText(path));
+                            
+                            return;
+                        }
+
                         if (request.Url.LocalPath == "/" || request.Url.LocalPath == $"{port}/" || request.Url.LocalPath == $"{extPort}/")
                         {
                             var extIp = SettingsManager.Get("webServerModule", "webExternalIP");

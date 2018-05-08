@@ -1,5 +1,6 @@
 v1.0.7 BETA
 + Added TimersModule
++ Improved web queries reliability and performance. Added retries and gzip support.
 + Moved web-server to the core modules, all others can use it on demand
 + Moved IP address and port settings to webServerModule section
 + Fixed aggressor query in wardec notifications due to weird Core bug

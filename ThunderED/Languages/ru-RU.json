@@ -169,4 +169,8 @@
   "Cancel": "Отмена" ,
   "invalidInputData":  "Неверные данные!", 
   "LogOut":  "Выйти", 
+  "timerTooltipLocation":  "Введите имя системы и структуры...",
+  "timerTooltipOwner":  "Введите владельца или тикер...",
+  "timerTooltipET":  "Введите время в UTC формате...",
+  "ConfirmDelete":  "Удалить",
 }

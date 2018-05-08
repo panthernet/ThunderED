@@ -161,4 +161,8 @@
   "Cancel": "Cancel" ,
   "invalidInputData":  "Invalid input data!", 
   "LogOut":  "Log Out", 
+  "timerTooltipLocation":  "Enter system and structure name...",
+  "timerTooltipOwner":  "Enter owner name or its ticker...",
+  "timerTooltipET":  "Select UTC time...",
+  "ConfirmDelete":  "Confirm Delete",
 }

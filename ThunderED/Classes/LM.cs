@@ -12,11 +12,15 @@ namespace ThunderED
     {
         private static readonly Dictionary<string, string> Translations = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
+        public static string Locale { get; private set; }
+
         public static async Task Load()
         {
             try
             {
                 var tr = SettingsManager.Get("config", "language") ?? "en-US";
+                Locale = tr.Split('-')[0].ToLower();
+
                 var folder = Path.Combine(SettingsManager.RootDirectory, "Languages");
                 if (!Directory.Exists(folder))
                 {

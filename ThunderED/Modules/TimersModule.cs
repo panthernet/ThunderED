@@ -233,7 +233,11 @@ namespace ThunderED.Modules
                             .Replace("{timerShield}",LM.Get("timerShield"))
                             .Replace("{timerOther}",LM.Get("timerOther"))
                             .Replace("{LogOutUrl}",WebServerModule.GetWebSiteUrl())
-                            .Replace("{LogOut}",LM.Get("LogOut"))
+                                .Replace("{LogOut}",LM.Get("LogOut"))
+                                .Replace("{timerTooltipLocation}",LM.Get("timerTooltipLocation"))
+                                .Replace("{timerTooltipOwner}",LM.Get("timerTooltipOwner"))
+                                .Replace("{timerTooltipET}",LM.Get("timerTooltipET"))
+                                .Replace("{locale}",LM.Locale)
                             ;
                         await response.WriteContentAsync(text);
                         return true;
@@ -261,8 +265,8 @@ namespace ThunderED.Modules
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("timersStage")}</th>");
             sb.AppendLine($"<th scope=\"col\">{LM.Get("timersLocation")}</th>");
             sb.AppendLine($"<th scope=\"col\">{LM.Get("timersOwner")}</th>");
-            sb.AppendLine($"<th scope=\"col\">{LM.Get("timersET")}</th>");
-            sb.AppendLine($"<th scope=\"col\">{LM.Get("timersRemaining")}</th>");
+            sb.AppendLine($"<th scope=\"col\" class=\"fixed150\">{LM.Get("timersET")}</th>");
+            sb.AppendLine($"<th scope=\"col\" class=\"fixed150\">{LM.Get("timersRemaining")}</th>");
             sb.AppendLine($"<th scope=\"col\">{LM.Get("timersNotes")}</th>");
             sb.AppendLine($"<th scope=\"col\">{LM.Get("timersUser")}</th>");
             sb.AppendLine($"<th scope=\"col-md-auto\" class=\"{(isEditor ? null : "d-none")}\"></th");
@@ -270,6 +274,7 @@ namespace ThunderED.Modules
             sb.AppendLine("</thead>");
             sb.AppendLine("<tbody>");
 
+            var timeFormat = SettingsManager.Get("config", "shortTimeFormat");
             timers.OrderBy(a=> a.GetDateTime()).ToList().ForEach(timer =>
             {
                 sb.AppendLine("<tr>");
@@ -278,12 +283,12 @@ namespace ThunderED.Modules
                 sb.AppendLine($"  <td>{timer.GetStageName()}</td>");
                 sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerLocation)}</td>");
                 sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerOwner)}</td>");
-                sb.AppendLine($"  <td>{timer.timerET}</td>");
+                sb.AppendLine($"  <td>{timer.GetDateTime()?.ToString(timeFormat)}</td>");
                 sb.AppendLine($"  <td>{timer.GetRemains()}</td>");
                 sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerNotes)}</td>");
                 sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerChar)}</td>");
                 if(isEditor)
-                    sb.AppendLine($"<td><a class=\"btn btn-danger\" href=\"{WebServerModule.GetTimersURL()}?data=delete{timer.id}&id={HttpUtility.UrlEncode(baseCharId)}&state=11\" role=\"button\">X</a></td>");
+                    sb.AppendLine($"<td><a class=\"btn btn-danger\" href=\"{WebServerModule.GetTimersURL()}?data=delete{timer.id}&id={HttpUtility.UrlEncode(baseCharId)}&state=11\" role=\"button\" data-toggle=\"confirmation\" data-title=\"{LM.Get("ConfirmDelete")}?\">X</a></td>");
                 sb.AppendLine("</tr>");
             });
             sb.AppendLine("</tbody>");

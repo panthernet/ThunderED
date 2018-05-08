@@ -6,7 +6,16 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/popper.js@1.14.3/dist/umd/popper.min.js"></script>
     <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
+    <script type="text/javascript" src="/scripts/moments/{locale}.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="=/scripts/dt.css">
+    <script type="text/javascript" src="/scripts/bootstrap-datetimepicker.js"></script>
+    <script type="text/javascript" src="/scripts/confirmation.js"></script>
+
     <style type="text/css">
         .row {
             background: #f8f9fa;
@@ -31,17 +40,30 @@
         .input-group-text {
             width: 110px;
         }
+
+        .fixed150 {
+            width: 150px;
+        }
     </style>
     <script type="text/javascript">
-        $(function() {
-            $('#acceptButton').on('click', function(event) {
+        $(function () {
+            $('#acceptButton').on('click', function (event) {
                 event.preventDefault();
                 sendThemAll();
             });
             $('#myModal').on('hidden.bs.modal',
-                function() {
+                function () {
                     $('#error').addClass("d-none");
                 });
+            $(function () {
+                $('#datetimepicker1').datetimepicker({
+                    locale: '{locale}'
+                });
+            });
+            $('[data-toggle=confirmation]').confirmation({
+                rootSelector: '[data-toggle=confirmation]',
+                // other options
+            });
         });
 
         function sendThemAll() {
@@ -62,9 +84,9 @@
 
             $.ajax({
                 type: "get",
-                url: "/timers.php?data="+str+"&id="+idstr+"&state=11",
+                url: "/timers.php?data=" + str + "&id=" + idstr + "&state=11",
                 dataType: "text",
-                success: 
+                success:
                     function (result) {
                         if (result != null && result != "") {
 
@@ -74,11 +96,11 @@
                         }
                         location.reload(true);
                     },
-                error: function (xhr,status,error) {
+                error: function (xhr, status, error) {
                     //error
                 },
                 statusCode: {
-                    404: function() {
+                    404: function () {
                     }
                 }
             });
@@ -122,7 +144,7 @@
                                     <span class="input-group-text">{timersType}</span>
                                 </div>
                                 <select class="custom-select" id="timerType">
-                                    <option selected>Choose...</option>
+                                    <option selected>...</option>
                                     <option value="1">{timerOffensive}</option>
                                     <option value="2">{timerDefensive}</option>
                                 </select>
@@ -132,7 +154,7 @@
                                     <span class="input-group-text">{timersStage}</span>
                                 </div>
                                 <select class="custom-select" id="timerStage">
-                                    <option selected>Choose...</option>
+                                    <option selected>...</option>
                                     <option value="1">{timerHull}</option>
                                     <option value="2">{timerArmor}</option>
                                     <option value="3">{timerShield}</option>
@@ -143,19 +165,24 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">{timersLocation}</span>
                                 </div>
-                                <input type="text" class="form-control" id="timerLocation">
+                                <input type="text" class="form-control" id="timerLocation" placeholder="{timerTooltipLocation}">
                             </div>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">{timersOwner}</span>
                                 </div>
-                                <input type="text" class="form-control" id="timerOwner">
+                                <input type="text" class="form-control" id="timerOwner" placeholder="{timerTooltipOwner}">
                             </div>
                             <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">{timersET}</span>
+                                <div class='input-group date' id='datetimepicker1'>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">{timersET}</span>
+                                    </div>
+                                    <input type='text' class="form-control" id="timerET" placeholder="{timerTooltipET}"/>
+                                    <div class="input-group-addon">
+                                        <span class="input-group-text" style="width: 50px"><i class="fa fa-calendar"></i></span>
+                                    </div>
                                 </div>
-                                <input type='text' class="form-control" id="timerET"/>
                             </div>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">

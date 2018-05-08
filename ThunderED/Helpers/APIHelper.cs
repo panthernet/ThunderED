@@ -1,5 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using ThunderED.API;
+using ThunderED.Classes;
 
 namespace ThunderED.Helpers
 {
@@ -32,6 +37,62 @@ namespace ThunderED.Helpers
             ESIAPI.ResetCache();
             DiscordAPI.ResetCache();
             ZKillAPI.ResetCache();
+        }
+
+
+        public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null)
+            where T : class
+        {
+            string raw = null;
+            var retCount = SettingsManager.GetInt("config", "requestRetries");
+            retCount = retCount == 0 ? 1 : retCount;
+            for (int i = 0; i < retCount; i++)
+            {
+                try
+                {
+                    var handler = new HttpClientHandler {AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate};
+                    using (var httpClient = new HttpClient(handler))
+                    {
+                        httpClient.DefaultRequestHeaders.Clear();
+                        httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
+                        if (!string.IsNullOrEmpty(auth))
+                            httpClient.DefaultRequestHeaders.Add("Authorization", auth);
+
+                        var responceMessage = await httpClient.GetAsync(request);
+                        raw = await responceMessage.Content.ReadAsStringAsync();
+                        if (!responceMessage.IsSuccessStatusCode)
+                        {
+                            if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                (responceMessage.StatusCode == HttpStatusCode.BadGateway || responceMessage.StatusCode  == HttpStatusCode.GatewayTimeout))
+                                await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
+                            continue;
+                        }
+
+                        if (typeof(T) == typeof(string))
+                            return (T)(object)raw;
+
+                        if (!typeof(T).IsClass)
+                            return null;
+
+                        var data = JsonConvert.DeserializeObject<T>(raw);
+                        if (data == null)
+                            await LogHelper.LogError($"[try: {i}][{reason}] Deserialized to null!\r\nRequest: {request}", LogCat.ESI, false);
+                        else return data;
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    //skip, probably due to timeout
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx(request, ex, LogCat.ESI);
+                    await LogHelper.LogInfo($"[try: {i}][{reason}]\r\nREQUEST: {request}\r\nRESPONCE: {raw}", LogCat.ESI);
+                }
+            }
+
+            return null;
         }
     }
 }
