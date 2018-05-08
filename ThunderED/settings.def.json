@@ -47,8 +47,9 @@
   },
   
   "timersModule": {
-    "autoAddTimerForReinforceNotifications": true,
     "authTimeoutInMinutes": 10,
+    "autoAddTimerForReinforceNotifications": true,
+    "grantEditRolesToDiscordAdmins": true,
     "announces": [60, 10],
     "announceChannel": 0,
     "accessList": {

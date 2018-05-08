@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -455,6 +456,17 @@ namespace ThunderED.API
                         //await discordUser.AddRolesAsync(rolesToAdd);
                     }
                 }
+
+                var rolesString = new StringBuilder();
+                foreach (var role in discordUser.Roles)
+                {
+                    if(role.Name.StartsWith("@everyone")) continue;
+                    rolesString.Append(role.Name.Replace("\"", "&br;"));
+                    rolesString.Append(",");
+                }
+                if(rolesString.Length > 0)
+                    rolesString.Remove(rolesString.Length-1, 1);
+
                 await SQLiteHelper.SQLiteDataUpdate("pendingUsers", "active", "0", "authString", remainder);
 
                 await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, string.Format(LM.Get("msgAuthSuccess"), context.Message.Author.Mention, characterData.name));
@@ -464,7 +476,7 @@ namespace ThunderED.API
                 var addedOn = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
                 var query2 =
-                    $"INSERT OR REPLACE INTO authUsers(eveName, characterID, discordID, role, active, addedOn) VALUES (\"{eveName}\", \"{characterID}\", \"{discordID}\", \"[]\", \"{active}\", \"{addedOn}\")";
+                    $"INSERT OR REPLACE INTO authUsers(eveName, characterID, discordID, role, active, addedOn) VALUES (\"{eveName}\", \"{characterID}\", \"{discordID}\", \"{rolesString}\", \"{active}\", \"{addedOn}\")";
                 await SQLiteHelper.RunCommand(query2);
 
                 var corpTickers = SettingsManager.GetBool("auth", "enforceCorpTickers");
@@ -485,7 +497,16 @@ namespace ThunderED.API
                     {
                         nickname += $"{discordUser.Username}";
                     }
-                    await discordUser.ModifyAsync(x => x.Nickname = nickname);
+
+                    try
+                    {
+                        //will throw ex on admins
+                        await discordUser.ModifyAsync(x => x.Nickname = nickname);
+                    }
+                    catch
+                    {
+                        //ignore
+                    }
 
                     await Dupes(discordUser);
                 }

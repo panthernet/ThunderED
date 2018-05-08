@@ -248,13 +248,13 @@ namespace ThunderED.Modules
             var accessChars = new List<int>();
             isEditor = false;
             bool skip = false;
+
             if (authgroups.Count == 0 || authgroups.All(a => (a.GetChildren().ToList().FirstOrDefault(x => x.Key == "id")?.Value ?? "") == "0"))
             {
                 skip = true;
             }
             else
             {
-
                 foreach (var config in authgroups)
                 {
                     var configChildren = config.GetChildren().ToList();
@@ -277,6 +277,18 @@ namespace ThunderED.Modules
             var editAlliance = new List<int>();
             var editChars = new List<int>();
             bool skip2 = false;
+
+            //check for Discord admins
+            if (SettingsManager.GetBool("timersModule", "grantEditRolesToDiscordAdmins"))
+            {
+                var roles = SQLiteHelper.SQLiteDataQuery("authUsers", "role", "characterID", characterId.ToString()).GetAwaiter().GetResult();
+                if (!string.IsNullOrEmpty(roles))
+                {
+                    var exemptRoles = SettingsManager.GetSubList("config", "discordAdminRoles").Select(a => a.Value);
+                    skip2 = roles.Replace("&br;", "\"").Split(',').Any(role => exemptRoles.Contains(role));
+                }
+            }
+
             if (authgroups.Count == 0 || authgroups.All(a => (a.GetChildren().ToList().FirstOrDefault(x => x.Key == "id")?.Value ?? "") == "0"))
             {
                 skip2 = true;
@@ -300,7 +312,9 @@ namespace ThunderED.Modules
                 }
             }
 
-            if (!skip && !accessCorps.Contains(rChar.corporation_id) && !editCorps.Contains(rChar.corporation_id) &&
+
+
+            if (!skip && !skip2 && !accessCorps.Contains(rChar.corporation_id) && !editCorps.Contains(rChar.corporation_id) &&
                 (!rChar.alliance_id.HasValue || !(rChar.alliance_id > 0) || (!accessAlliance.Contains(
                                                                                     rChar.alliance_id
                                                                                         .Value) && !editAlliance.Contains(
