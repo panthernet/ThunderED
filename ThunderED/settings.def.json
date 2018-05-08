@@ -35,7 +35,8 @@
 	  "memoryUsageLimitMb": 100,
     "logSeverity": "Info",	
 	  "logNewNotifications": true,
-    "databaseProvider":  "sqlite" 
+    "databaseProvider":  "sqlite",
+    "requestRetries": 3
   },
 
   "webServerModule": {
