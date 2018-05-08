@@ -3,7 +3,6 @@
 <head>
     <title>{header}</title>
     <meta name="viewport" content="width=device-width">
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <link rel="stylesheet" href="https://djyhxgczejc94.cloudfront.net/frameworks/bootstrap/3.0.0/themes/cirrus/bootstrap.min.css">
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
@@ -24,9 +23,9 @@
             border-bottom: 1px solid #e5e5e5;
         }
             /* Make the masthead heading the same height as the navigation */
-            .header h4 {
+            .header h3 {
                 margin-top: 0;
-                margin-bottom: 50px;
+                margin-bottom: 0;
                 line-height: 40px;
                 padding-bottom: 19px;
             }
@@ -50,12 +49,12 @@
         .jumbotron {
             text-align: center;
             border-bottom: 1px solid #e5e5e5;
+            color: #0D191D;
         }
 
             .jumbotron .btn {
                 font-size: 21px;
-                padding: 34px 24px;
-                color: #ffffff;
+                padding: 14px 24px;
             }
         /* Supporting marketing content */
         .marketing {
@@ -83,20 +82,20 @@
         }
     </style>
 </head>
-
-<body background="img/background.jpg">
-    <div class="container pagination-centered">
+<body>
+    <div class="container">
         <div class="header">
             <ul class="nav nav-pills pull-right"></ul>
         </div>
-        <div class="jumbotron pagination-centered">
-            <h1>{webWelcomeHeader}</h1>
-            <a href="{timersUrl}" class="btn btn-info btn-block {disableWebTimers}" role="button">{authButtonTimersText}</a>
-            <h4>{webAuthHeader}</h4>
-            <a href="{authUrl}" class="btn btn-info btn-block {disableWebAuth}" role="button">{authButtonDiscordText}</a>
-            <a href="{authNotifyUrl}" class="btn btn-info btn-block {disableWebNotify}" role="button">{authButtonNotifyText}</a>
-            <a href="{authMailUrl}" class="btn btn-info btn-block {disableMailNotify}" role="button">{authButtonMailText}</a>
+        <div class="jumbotron">
+            <h1>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/EVE_online_logo.svg/2000px-EVE_online_logo.svg.png" width="250"/>
+            </h1>
+            <p class="lead">{body}</p>
+            <p> {body2}.</p>
+            <p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Yes_Check_Circle.svg/2000px-Yes_Check_Circle.svg.png" width="150" /></p>
         </div>
     </div>
+    <!-- /container -->
 </body>
-</html>
+</html>"

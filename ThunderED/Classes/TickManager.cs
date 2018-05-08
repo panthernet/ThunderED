@@ -58,6 +58,10 @@ namespace ThunderED.Classes
             if (SettingsManager.GetBool("config","moduleTimers"))
                 Modules.Add(new TimersModule());
 
+            if (SettingsManager.GetBool("config","moduleMail"))
+                Modules.Add(new MailModule());
+
+
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.GetBool("config","moduleLiveKillFeed"))
                 OnDemandModules.Add(new LiveKillFeedModule());

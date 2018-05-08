@@ -20,6 +20,12 @@ namespace ThunderED.Helpers
             return await Provider?.SQLiteDataQuery(table, field, whereField, whereData);
         }
 
+        internal static async Task<T> SQLiteDataQuery<T>(string table, string field, string whereField, object whereData)
+        {
+            return await Provider?.SQLiteDataQuery<T>(table, field, whereField, whereData);
+        }
+
+
         internal static async Task<string> SQLiteDataQuery(string table, string field, Dictionary<string, object> where)
         {
             return await Provider?.SQLiteDataQuery(table, field, where);
@@ -49,10 +55,9 @@ namespace ThunderED.Helpers
         }
         #endregion
 
-        internal static async Task SQLiteDataInsertOrUpdateTokens(string token, string userId)
+        internal static async Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken)
         {
-            if(string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId)) return;
-            await Provider?.SQLiteDataInsertOrUpdateTokens(token, userId);
+            await Provider?.SQLiteDataInsertOrUpdateTokens(notifyToken, userId, mailToken);
         }
 
         internal static async Task InsertPendingUser(string characterID, string corporationid, string allianceid, string authString, string active, string dateCreated)

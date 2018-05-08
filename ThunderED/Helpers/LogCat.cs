@@ -25,6 +25,7 @@
         RadiusKill,
         Debug,
         FleetUp,
-        WebServer
+        WebServer,
+        Mail
     }
 }

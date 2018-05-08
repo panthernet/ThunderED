@@ -10,7 +10,7 @@ using ThunderED.Helpers;
 
 namespace ThunderED.Modules.Sub
 {
-    public class WebServerModule: AppModuleBase
+    public class WebServerModule: AppModuleBase, IDisposable
     {
         private static System.Net.Http.HttpListener _listener;
         public override LogCat Category => LogCat.WebServer;
@@ -72,11 +72,17 @@ namespace ThunderED.Modules.Sub
                             var text = File.ReadAllText(SettingsManager.FileTemplateMain).Replace("{authUrl}", authUrl)
                                 .Replace("{authNotifyUrl}", authNurl).Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{timersUrl}", GetTimersURL())
-                                .Replace("{authButtonDiscordText}", LM.Get("authButtonDiscordText")).Replace("{authButtonNotifyText}", LM.Get("authButtonNotifyText"))
-                                .Replace("{authButtonTimersText}", LM.Get("authButtonTimersText"));
+                                .Replace("{authButtonDiscordText}", LM.Get("authButtonDiscordText"))
+                                .Replace("{authButtonNotifyText}", LM.Get("authButtonNotifyText"))
+                                .Replace("{authButtonTimersText}", LM.Get("authButtonTimersText"))
+                                .Replace("{authMailUrl}", GetMailAuthURL())
+                                .Replace("{authButtonMailText}", LM.Get("authButtonMailText"))
+                                    .Replace("{webAuthHeader}", LM.Get("webAuthHeader"))
+                                ;
                             text = text.Replace("{disableWebAuth}", !SettingsManager.GetBool("config", "moduleAuthWeb") ? "disabled" : "");
                             text = text.Replace("{disableWebNotify}", !SettingsManager.GetBool("config", "moduleNotificationFeed") ? "disabled" : "");
                             text = text.Replace("{disableWebTimers}", !SettingsManager.GetBool("config", "moduleTimers") ? "disabled" : "");
+                            text = text.Replace("{disableMailNotify}", !SettingsManager.GetBool("config", "moduleMail") ? "disabled" : "");
                   
                             await response.WriteContentAsync(text);
                             return;
@@ -96,7 +102,9 @@ namespace ThunderED.Modules.Sub
                             response.Headers.ContentEncoding.Add("utf-8");
                             response.Headers.ContentType.Add("text/html;charset=utf-8");
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", "404 Not Found!")
-                                .Replace("{header}", LM.Get("authTemplateHeader")));
+                                .Replace("{header}", LM.Get("authTemplateHeader"))
+                                .Replace("{body}", LM.Get("WebRequestUnexpected"))
+                            );
                         }
                     }
                     finally
@@ -134,11 +142,26 @@ namespace ThunderED.Modules.Sub
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=11";
         }
 
+        public static string GetMailAuthURL()
+        {
+            var clientID = SettingsManager.Get("auth","ccpAppClientId");
+            var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
+            var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
+            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-mail.read_mail.v1+esi-mail.send_mail.v1&state=12";
+        }
+
+
         public static string GetTimersURL()
         {
             var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
             var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
             return $"http://{extIp}:{extPort}/timers.php";
+        }
+
+        public void Dispose()
+        {
+            ModuleConnectors.Clear();
         }
     }
 }

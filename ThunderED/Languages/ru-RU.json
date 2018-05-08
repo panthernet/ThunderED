@@ -107,8 +107,8 @@
   "authNonAlly": "Вы не входите в наш Альянс и не являетесь плюсом!",
   "authHasInvalidKey": "имеет неверный ключ! Используйте команду *!auth*",
   "authHasInactiveKey": "имеет неактивный ключ, пожалуйста используйте команду *!auth*",
-  "authButtonDiscordText": "Аутентификация Discord",
-  "authButtonNotifyText": "Аутентификация Оповещений",
+  "authButtonDiscordText": "Discord",
+  "authButtonNotifyText": "Оповещения",
   "authButtonTimersText": "Страница Таймеров",
   "dailyStats": "Статы за день {0:dd.MM.yyyy} по {1}",
   "Killed": "Убито",
@@ -173,4 +173,11 @@
   "timerTooltipOwner":  "Введите владельца или тикер...",
   "timerTooltipET":  "Введите время в UTC формате...",
   "ConfirmDelete":  "Удалить",
+  "WebRequestUnexpected":  "Упс! Кажется ошибочка вышла!",
+  "mailAuthSuccessHeader":  "Аутентификация выполнена!",
+  "mailAuthSuccessBody": "Теперь почта вашего персонажа может быть перенаправлена в Discord!", 
+  "authButtonMailText":  "Почта",
+  "webWelcomeHeader":  "Добро пожаловать на сервер ThunderED!",
+  "webAuthHeader":  "Аутентификация", 
+
 }

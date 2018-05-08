@@ -58,6 +58,9 @@
     <None Update="settings.def.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Templates\mailAuthSuccess.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\main.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

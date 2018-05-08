@@ -83,6 +83,37 @@ namespace ThunderED.Providers
             }
         }
 
+        public async Task<T> SQLiteDataQuery<T>(string table, string field, string whereField, object whereData)
+        {
+            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+            using (var querySQL = new SqliteCommand($"SELECT {field} FROM {table} WHERE {whereField} = @name", con))
+            {
+                await con.OpenAsync();
+                querySQL.Parameters.Add(new SqliteParameter("@name", whereData));
+                try
+                {
+                    using (var r = await querySQL.ExecuteReaderAsync())
+                    {
+                        if (r.HasRows)
+                        {
+                            await r.ReadAsync();
+                            var type = typeof(T);
+                            if(type == typeof(string))
+                                return (T)(object)(r.GetString(0) ?? "");
+                            if (type == typeof(int))
+                                return (T) (object) r.GetInt32(0);
+                        }
+                        return default(T);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx("SQLiteDataQuery", ex, LogCat.SQLite);
+                    return default(T);
+                }
+            }
+        }
+
         #endregion
         
         //SQLite Update
@@ -206,15 +237,20 @@ namespace ThunderED.Providers
             }
         }
 
-        public async Task SQLiteDataInsertOrUpdateTokens(string token, string userId)
+        public async Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken)
         {
-            if(string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId)) return;
+            if(string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) || string.IsNullOrEmpty(userId)) return;
+
+            var mail = string.IsNullOrEmpty(mailToken) ? await SQLiteDataQuery("refreshTokens", "mail", "id", userId) : mailToken;
+            var token = string.IsNullOrEmpty(notifyToken) ? await SQLiteDataQuery("refreshTokens", "token", "id", userId) : notifyToken;
+
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand("INSERT OR REPLACE INTO refreshTokens (id, token) VALUES(@id,@token)", con))
+            using (var insertSQL = new SqliteCommand("INSERT OR REPLACE INTO refreshTokens (id, token, mail) VALUES(@id,@token,@mail)", con))
             {
                 await con.OpenAsync();
                 insertSQL.Parameters.Add(new SqliteParameter("@id", userId));
                 insertSQL.Parameters.Add(new SqliteParameter("@token", token));
+                insertSQL.Parameters.Add(new SqliteParameter("@mail", mail));
                 try
                 {
                     insertSQL.ExecuteNonQuery();
@@ -226,6 +262,7 @@ namespace ThunderED.Providers
                 }
             }
         }
+
 
         public async Task InsertPendingUser(string characterID, string corporationid, string allianceid, string authString, string active, string dateCreated)
         {

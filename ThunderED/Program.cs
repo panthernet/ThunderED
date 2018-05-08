@@ -10,7 +10,7 @@ namespace ThunderED
     internal class Program
     {
         private static Timer _timer;
-        public const string VERSION = "1.0.7";
+        public const string VERSION = "1.0.8";
 
         private static void Main(string[] args)
         {

@@ -165,4 +165,10 @@
   "timerTooltipOwner":  "Enter owner name or its ticker...",
   "timerTooltipET":  "Select UTC time...",
   "ConfirmDelete":  "Confirm Delete",
+  "WebRequestUnexpected":  "Ops! We've got unexpected result!",
+  "mailAuthSuccessHeader":  "Authentication complete!",
+  "mailAuthSuccessBody": "Now your characters mail could be red and redirected to Discord!", 
+  "authButtonMailText":  "Mail Auth",
+  "webWelcomeHeader":  "Welcome to ThunderED server!",
+  "webAuthHeader":  "Authentication", 
 }

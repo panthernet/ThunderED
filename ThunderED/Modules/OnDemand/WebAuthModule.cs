@@ -119,7 +119,7 @@ namespace ThunderED.Modules.OnDemand
                                 return true;
                             }
 
-                            await SQLiteHelper.SQLiteDataInsertOrUpdateTokens(result[1], characterID?.ToString());
+                            await SQLiteHelper.SQLiteDataInsertOrUpdateTokens(result[1], characterID?.ToString(), null);
                             await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                                 .Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
@@ -246,13 +246,12 @@ namespace ThunderED.Modules.OnDemand
 
                             var corpID2 = configChildren.FirstOrDefault(x => x.Key == "corpID")?.Value ?? "";
                             var allianceID2 = configChildren.FirstOrDefault(x => x.Key == "allianceID")?.Value ?? "";
-                            var corpMemberRole = configChildren.FirstOrDefault(x => x.Key == "corpMemberRole")?.Value ?? "";
-                            var allianceMemberRole = configChildren.FirstOrDefault(x => x.Key == "allianceMemberRole")?.Value ?? "";
+                            var memberRole = configChildren.FirstOrDefault(x => x.Key == "memberRole")?.Value ?? "";
 
                             if (Convert.ToInt32(corpID2) != 0)
-                                corps.Add(corpID2, corpMemberRole);
+                                corps.Add(corpID2, memberRole);
                             if (Convert.ToInt32(allianceID2) != 0)
-                                alliance.Add(allianceID2, allianceMemberRole);
+                                alliance.Add(allianceID2, memberRole);
                         }
 
                         var characterID = responce[0]["characterID"].ToString();

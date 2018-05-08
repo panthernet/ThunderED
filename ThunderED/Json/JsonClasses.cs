@@ -96,5 +96,46 @@
         {
             public string name;
         }
+
+        public class MailRecipient
+        {
+            public int recipient_id;
+            public string recipient_type;
+        }
+
+        public class MailHeader
+        {
+            public int from;
+            public bool is_read;
+            public int[] labels;
+            public int mail_id;
+            public MailRecipient[] recipients;
+            public string subject;
+            public string timestamp;
+        }
+
+        public class Mail
+        {
+            public string body;
+            public int from;
+            public int[] labels;
+            public bool read;
+            public string subject;
+            public string timestamp;
+        }
+
+        public class MailLabelData
+        {
+            public MailLabel[] labels;
+            public int total_unread_count;
+        }
+
+        public class MailLabel
+        {
+            public string color;
+            public int label_id;
+            public string name;
+            public int unread_count;
+        }
     }
 }

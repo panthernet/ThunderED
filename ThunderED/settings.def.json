@@ -140,8 +140,7 @@
       "group1": {
         "corpID": 0,
         "allianceID": 0,
-        "corpMemberRole": "",
-        "allianceMemberRole": "ExactDiscordRoleName"
+        "memberRole": "ExactDiscordRoleName"
       }
     }
   },

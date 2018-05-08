@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
@@ -208,5 +209,26 @@ namespace ThunderED.API
             SettingsManager.UpdateSettings();
         }
         #endregion
+
+        public async Task<List<JsonClasses.MailHeader>> GetMailHeaders(string reason, string id, string token, int lastMailId, List<int> labels)
+        {
+            var authHeader = $"Bearer {token}";
+            var lastIdText = lastMailId == 0 ? null : $"&last_mail_id={lastMailId}";
+            var mailLabels = string.Join("%2C", labels);
+            
+            return await APIHelper.RequestWrapper<List<JsonClasses.MailHeader>>($"https://esi.tech.ccp.is/latest/characters/{id}/mail/?datasource=tranquility{lastIdText}&labels={mailLabels}&language={_language}", reason, authHeader);
+        }
+
+        public async Task<JsonClasses.Mail> GetMail(string reason, string id, string token, int mailId)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<JsonClasses.Mail>($"https://esi.tech.ccp.is/latest/characters/{id}/mail/{mailId}/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
+        public async Task<JsonClasses.MailLabelData> GetMailLabels(string reason, string id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<JsonClasses.MailLabelData>($"https://esi.tech.ccp.is/latest/characters/{id}/mail/labels/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
     }
 }

@@ -461,7 +461,7 @@ namespace ThunderED.Modules
                 .AddInlineField(LM.Get("timersRemaining"), timer.GetRemains())
                 .AddField(LM.Get("timersNotes"), timer.timerNotes);
 
-            await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), "", embed.Build());
+            await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), "@everyone", embed.Build());
         }
 
         public static async Task AddTimer(TimerItem entry)
