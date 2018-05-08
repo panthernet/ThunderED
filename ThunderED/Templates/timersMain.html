@@ -77,15 +77,16 @@
                 "timerCharId": $("#timerCharId").val()
             };
             debugger;
-            var str = encodeURIComponent(btoa(JSON.stringify(data)));
+            var str = JSON.stringify(data);
             console.log(str);
 
             var idstr = encodeURIComponent($("#timerCharId").val());
 
             $.ajax({
-                type: "get",
-                url: "/timers.php?data=" + str + "&id=" + idstr + "&state=11",
-                dataType: "text",
+                type: "POST",
+                url: "/timers.php?data=111&id=" + idstr + "&state=11",
+                data: str,
+                dataType: "html",
                 success:
                     function (result) {
                         if (result != null && result != "") {

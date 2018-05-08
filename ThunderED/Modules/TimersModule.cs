@@ -10,6 +10,7 @@ using Discord;
 using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Json;
 using ThunderED.Json.Internal;
 using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Sub;
@@ -74,12 +75,14 @@ namespace ThunderED.Modules
                             await response.RedirectAsync(new Uri(WebServerModule.GetTimersAuthURL()));
                             return true;
                         }
+
                         var prms = request.Url.Query.TrimStart('?').Split('&');
                         if (prms.Length != 3)
                         {
                             await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                             return true;
                         }
+
                         var data = prms[0].Split('=')[1];
                         var inputId = prms[1].Split('=')[1];
                         var state = prms[2].Split('=')[1];
@@ -89,6 +92,7 @@ namespace ThunderED.Modules
                             return true;
                         }
                         var characterId = Convert.ToInt32(Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
+
                         var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                         if (rChar == null)
                         {
@@ -110,136 +114,83 @@ namespace ThunderED.Modules
                             }
                         }
 
-                        #region check access
-                        var authgroups = SettingsManager.GetSubList("timersModule","accessList");
-                        var accessCorps = new List<int>();
-                        var accessAlliance = new List<int>();
-                        var accessChars = new List<int>();
-                        foreach (var config in authgroups)
+                        if(!CheckAccess(characterId, rChar, out var isEditor))
+                            return true;
+
+                        if (isEditor && data.StartsWith("delete"))
                         {
-                            var configChildren = config.GetChildren().ToList();
-                            var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
-                            var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
-                            var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
-                            if(isChar)
-                                accessChars.Add(Convert.ToInt32(id));
-                            else
-                            {
-                                if (isAlliance)
-                                    accessAlliance.Add(Convert.ToInt32(id));
-                                else accessCorps.Add(Convert.ToInt32(id));
-                            }
-                        }
-                        authgroups = SettingsManager.GetSubList("timersModule","editList");
-                        var editCorps = new List<int>();
-                        var editAlliance = new List<int>();
-                        var editChars = new List<int>();
-                        foreach (var config in authgroups)
-                        {
-                            var configChildren = config.GetChildren().ToList();
-                            var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
-                            var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
-                            var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
-                            if(isChar)
-                                editChars.Add(Convert.ToInt32(id));
-                            else
-                            {
-                                if (isAlliance)
-                                    editAlliance.Add(Convert.ToInt32(id));
-                                else editCorps.Add(Convert.ToInt32(id));
-                            }
+                            data = data.Substring(6, data.Length - 6);
+                            await SQLiteHelper.SQLiteDataDelete("timers", "id", data);
                         }
 
-                        if (!accessCorps.Contains(rChar.corporation_id) && !editCorps.Contains(rChar.corporation_id) &&
-                            (!rChar.alliance_id.HasValue || !(rChar.alliance_id > 0) || (!accessAlliance.Contains(
-                                                                                             rChar.alliance_id
-                                                                                                 .Value) && !editAlliance.Contains(
-                                                                                             rChar.alliance_id.Value))))
+                        await WriteCorrectResponce(response, isEditor, characterId);
+                        return true;
+                    }
+                }else if (request.HttpMethod == HttpMethod.Post.ToString())
+                {
+                    var prms = request.Url.Query.TrimStart('?').Split('&');
+                    if (prms.Length != 3)
+                    {
+                        await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                        return true;
+                    }
+                    var inputId = prms[1].Split('=')[1];
+                    var state = prms[2].Split('=')[1];
+                    if (state != "11")
+                    {
+                        await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                        return true;
+                    }
+
+                    var characterId = Convert.ToInt32(Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
+
+                    var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
+                    if (rChar == null)
+                    {
+                        await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                        return true;
+                    }
+
+                    if(!CheckAccess(characterId, rChar, out var isEditor))
+                        return true;
+
+                    var data = await request.ReadContentAsStringAsync();
+
+                    if (isEditor && data != null)
+                    {
+                        if (data.StartsWith("delete"))
                         {
-                            if (!editChars.Contains(characterId) && !accessChars.Contains(characterId))
+                            data = data.Substring(6, data.Length - 6);
+                            await SQLiteHelper.SQLiteDataDelete("timers", "id", data);
+                        }
+                        else
+                        {
+                            TimerItem entry = null;
+                            try
                             {
-                                //TODO access denied
+                                entry = JsonConvert.DeserializeObject<TimerItem>(data);
+                            }
+                            catch
+                            {
+                                //ignore
+                            }
+
+                            if (entry == null)
+                            {
+                                await response.WriteContentAsync(LM.Get("invalidInputData"));
                                 return true;
                             }
-                        }
 
-                        var isEditor = editCorps.Contains(rChar.corporation_id) || (rChar.alliance_id.HasValue && rChar.alliance_id.Value > 0 && editAlliance.Contains(rChar.alliance_id.Value))
-                            || editChars.Contains(characterId);
-                        #endregion
-
-                        if (isEditor && data != "0")
-                        {
-
-                            if (data.StartsWith("delete"))
+                            if (entry.GetDateTime() == null)
                             {
-                                data = data.Substring(6, data.Length - 6);
-                                await SQLiteHelper.SQLiteDataDelete("timers", "id", data);
-                            }
-                            else
-                            {
-
-                                var inp = Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(data)));
-                                TimerItem entry = null;
-                                try
-                                {
-                                    entry = JsonConvert.DeserializeObject<TimerItem>(inp);
-                                }
-                                catch
-                                {
-                                    //ignore
-                                }
-
-                                if (entry == null)
-                                {
-                                    await response.WriteContentAsync(LM.Get("invalidInputData"));
-                                    return true;
-                                }
-
-                                if (entry.GetDateTime() == null)
-                                {
-                                    await response.WriteContentAsync(LM.Get("invalidTimeFormat"));
-                                    return true;
-                                }
-
-                                //save
-                                entry.timerChar = rChar.name;
-                                await SQLiteHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
+                                await response.WriteContentAsync(LM.Get("invalidTimeFormat"));
                                 return true;
                             }
+
+                            //save
+                            entry.timerChar = rChar.name;
+                            await SQLiteHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
                         }
-
-                        var baseCharId = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
-
-                        response.Headers.ContentEncoding.Add("utf-8");
-                        response.Headers.ContentType.Add("text/html;charset=utf-8");
-                        var text = File.ReadAllText(SettingsManager.FileTemplateTimersPage).Replace("{header}", LM.Get("timersTemplateHeader"))
-                            .Replace("{loggedInAs}", string.Format(LM.Get("loggedInAs"), rChar.name))
-                            .Replace("{charId}", baseCharId )
-                            .Replace("{body}", await GenerateTimersHtml(isEditor, baseCharId))
-                            .Replace("{isEditorElement}", isEditor ? null : "d-none")
-                            .Replace("{addNewTimerHeader}", LM.Get("timersAddHeader"))
-                            .Replace("{timersType}",LM.Get("timersType"))
-                            .Replace("{timersStage}",LM.Get("timersStage"))
-                            .Replace("{timersLocation}",LM.Get("timersLocation"))
-                            .Replace("{timersOwner}",LM.Get("timersOwner"))
-                            .Replace("{timersET}",LM.Get("timersET"))
-                            .Replace("{timersNotes}",LM.Get("timersNotes"))
-                            .Replace("{Add}",LM.Get("Add"))
-                            .Replace("{Cancel}",LM.Get("Cancel"))
-                            .Replace("{timerOffensive}",LM.Get("timerOffensive"))
-                            .Replace("{timerDefensive}",LM.Get("timerDefensive"))
-                            .Replace("{timerHull}",LM.Get("timerHull"))
-                            .Replace("{timerArmor}",LM.Get("timerArmor"))
-                            .Replace("{timerShield}",LM.Get("timerShield"))
-                            .Replace("{timerOther}",LM.Get("timerOther"))
-                            .Replace("{LogOutUrl}",WebServerModule.GetWebSiteUrl())
-                                .Replace("{LogOut}",LM.Get("LogOut"))
-                                .Replace("{timerTooltipLocation}",LM.Get("timerTooltipLocation"))
-                                .Replace("{timerTooltipOwner}",LM.Get("timerTooltipOwner"))
-                                .Replace("{timerTooltipET}",LM.Get("timerTooltipET"))
-                                .Replace("{locale}",LM.Locale)
-                            ;
-                        await response.WriteContentAsync(text);
                         return true;
                     }
                 }
@@ -250,6 +201,104 @@ namespace ThunderED.Modules
             }
 
             return false;
+        }
+
+        private async Task WriteCorrectResponce(HttpListenerResponse response, bool isEditor, int characterId)
+        {
+            var baseCharId = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
+            var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
+
+            response.Headers.ContentEncoding.Add("utf-8");
+            response.Headers.ContentType.Add("text/html;charset=utf-8");
+            var text = File.ReadAllText(SettingsManager.FileTemplateTimersPage).Replace("{header}", LM.Get("timersTemplateHeader"))
+                .Replace("{loggedInAs}", string.Format(LM.Get("loggedInAs"), rChar.name))
+                .Replace("{charId}", baseCharId )
+                .Replace("{body}", await GenerateTimersHtml(isEditor, baseCharId))
+                .Replace("{isEditorElement}", isEditor ? null : "d-none")
+                .Replace("{addNewTimerHeader}", LM.Get("timersAddHeader"))
+                .Replace("{timersType}",LM.Get("timersType"))
+                .Replace("{timersStage}",LM.Get("timersStage"))
+                .Replace("{timersLocation}",LM.Get("timersLocation"))
+                .Replace("{timersOwner}",LM.Get("timersOwner"))
+                .Replace("{timersET}",LM.Get("timersET"))
+                .Replace("{timersNotes}",LM.Get("timersNotes"))
+                .Replace("{Add}",LM.Get("Add"))
+                .Replace("{Cancel}",LM.Get("Cancel"))
+                .Replace("{timerOffensive}",LM.Get("timerOffensive"))
+                .Replace("{timerDefensive}",LM.Get("timerDefensive"))
+                .Replace("{timerHull}",LM.Get("timerHull"))
+                .Replace("{timerArmor}",LM.Get("timerArmor"))
+                .Replace("{timerShield}",LM.Get("timerShield"))
+                .Replace("{timerOther}",LM.Get("timerOther"))
+                .Replace("{LogOutUrl}",WebServerModule.GetWebSiteUrl())
+                    .Replace("{LogOut}",LM.Get("LogOut"))
+                    .Replace("{timerTooltipLocation}",LM.Get("timerTooltipLocation"))
+                    .Replace("{timerTooltipOwner}",LM.Get("timerTooltipOwner"))
+                    .Replace("{timerTooltipET}",LM.Get("timerTooltipET"))
+                    .Replace("{locale}",LM.Locale)
+                ;
+            await response.WriteContentAsync(text);
+        }
+
+        private bool CheckAccess(int characterId, JsonClasses.CharacterData rChar, out bool isEditor)
+        {
+            var authgroups = SettingsManager.GetSubList("timersModule","accessList");
+            var accessCorps = new List<int>();
+            var accessAlliance = new List<int>();
+            var accessChars = new List<int>();
+            isEditor = false;
+            foreach (var config in authgroups)
+            {
+                var configChildren = config.GetChildren().ToList();
+                var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
+                var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
+                var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
+                if(isChar)
+                    accessChars.Add(Convert.ToInt32(id));
+                else
+                {
+                    if (isAlliance)
+                        accessAlliance.Add(Convert.ToInt32(id));
+                    else accessCorps.Add(Convert.ToInt32(id));
+                }
+            }
+            authgroups = SettingsManager.GetSubList("timersModule","editList");
+            var editCorps = new List<int>();
+            var editAlliance = new List<int>();
+            var editChars = new List<int>();
+            foreach (var config in authgroups)
+            {
+                var configChildren = config.GetChildren().ToList();
+                var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
+                var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
+                var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
+                if(isChar)
+                    editChars.Add(Convert.ToInt32(id));
+                else
+                {
+                    if (isAlliance)
+                        editAlliance.Add(Convert.ToInt32(id));
+                    else editCorps.Add(Convert.ToInt32(id));
+                }
+            }
+
+            if (!accessCorps.Contains(rChar.corporation_id) && !editCorps.Contains(rChar.corporation_id) &&
+                (!rChar.alliance_id.HasValue || !(rChar.alliance_id > 0) || (!accessAlliance.Contains(
+                                                                                    rChar.alliance_id
+                                                                                        .Value) && !editAlliance.Contains(
+                                                                                    rChar.alliance_id.Value))))
+            {
+                if (!editChars.Contains(characterId) && !accessChars.Contains(characterId))
+                {
+                    //TODO access denied
+                    return false;
+                }
+            }
+
+            isEditor = editCorps.Contains(rChar.corporation_id) || (rChar.alliance_id.HasValue && rChar.alliance_id.Value > 0 && editAlliance.Contains(rChar.alliance_id.Value))
+                || editChars.Contains(characterId);
+
+            return true;
         }
 
         public async Task<string> GenerateTimersHtml(bool isEditor, string baseCharId)

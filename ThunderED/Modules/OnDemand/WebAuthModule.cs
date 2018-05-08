@@ -139,13 +139,12 @@ namespace ThunderED.Modules.OnDemand
 
                             corpID = configChildren.FirstOrDefault(x => x.Key == "corpID")?.Value ?? "";
                             allianceID = configChildren.FirstOrDefault(x => x.Key == "allianceID")?.Value ?? "";
-                            var corpMemberRole = configChildren.FirstOrDefault(x => x.Key == "corpMemberRole")?.Value ?? "";
-                            var allianceMemberRole = configChildren.FirstOrDefault(x => x.Key == "allianceMemberRole")?.Value ?? "";
+                            var memberRole = configChildren.FirstOrDefault(x => x.Key == "memberRole")?.Value ?? "";
 
                             if (Convert.ToInt32(corpID) != 0)
-                                corps.Add(corpID, corpMemberRole);
+                                corps.Add(corpID, memberRole);
                             if (Convert.ToInt32(allianceID) != 0)
-                                alliance.Add(allianceID, allianceMemberRole);
+                                alliance.Add(allianceID, memberRole);
                         }
 
                         if (rChar == null)
