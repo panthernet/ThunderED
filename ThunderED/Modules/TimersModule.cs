@@ -247,42 +247,60 @@ namespace ThunderED.Modules
             var accessAlliance = new List<int>();
             var accessChars = new List<int>();
             isEditor = false;
-            foreach (var config in authgroups)
+            bool skip = false;
+            if (authgroups.Count == 0 || authgroups.All(a => (a.GetChildren().ToList().FirstOrDefault(x => x.Key == "id")?.Value ?? "") == "0"))
             {
-                var configChildren = config.GetChildren().ToList();
-                var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
-                var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
-                var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
-                if(isChar)
-                    accessChars.Add(Convert.ToInt32(id));
-                else
+                skip = true;
+            }
+            else
+            {
+
+                foreach (var config in authgroups)
                 {
-                    if (isAlliance)
-                        accessAlliance.Add(Convert.ToInt32(id));
-                    else accessCorps.Add(Convert.ToInt32(id));
+                    var configChildren = config.GetChildren().ToList();
+                    var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
+                    var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
+                    var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
+                    if (isChar)
+                        accessChars.Add(Convert.ToInt32(id));
+                    else
+                    {
+                        if (isAlliance)
+                            accessAlliance.Add(Convert.ToInt32(id));
+                        else accessCorps.Add(Convert.ToInt32(id));
+                    }
                 }
             }
+
             authgroups = SettingsManager.GetSubList("timersModule","editList");
             var editCorps = new List<int>();
             var editAlliance = new List<int>();
             var editChars = new List<int>();
-            foreach (var config in authgroups)
+            bool skip2 = false;
+            if (authgroups.Count == 0 || authgroups.All(a => (a.GetChildren().ToList().FirstOrDefault(x => x.Key == "id")?.Value ?? "") == "0"))
             {
-                var configChildren = config.GetChildren().ToList();
-                var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
-                var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
-                var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
-                if(isChar)
-                    editChars.Add(Convert.ToInt32(id));
-                else
+                skip2 = true;
+            }
+            else
+            {
+                foreach (var config in authgroups)
                 {
-                    if (isAlliance)
-                        editAlliance.Add(Convert.ToInt32(id));
-                    else editCorps.Add(Convert.ToInt32(id));
+                    var configChildren = config.GetChildren().ToList();
+                    var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
+                    var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
+                    var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
+                    if (isChar)
+                        editChars.Add(Convert.ToInt32(id));
+                    else
+                    {
+                        if (isAlliance)
+                            editAlliance.Add(Convert.ToInt32(id));
+                        else editCorps.Add(Convert.ToInt32(id));
+                    }
                 }
             }
 
-            if (!accessCorps.Contains(rChar.corporation_id) && !editCorps.Contains(rChar.corporation_id) &&
+            if (!skip && !accessCorps.Contains(rChar.corporation_id) && !editCorps.Contains(rChar.corporation_id) &&
                 (!rChar.alliance_id.HasValue || !(rChar.alliance_id > 0) || (!accessAlliance.Contains(
                                                                                     rChar.alliance_id
                                                                                         .Value) && !editAlliance.Contains(
@@ -295,7 +313,7 @@ namespace ThunderED.Modules
                 }
             }
 
-            isEditor = editCorps.Contains(rChar.corporation_id) || (rChar.alliance_id.HasValue && rChar.alliance_id.Value > 0 && editAlliance.Contains(rChar.alliance_id.Value))
+            isEditor = skip2 || editCorps.Contains(rChar.corporation_id) || (rChar.alliance_id.HasValue && rChar.alliance_id.Value > 0 && editAlliance.Contains(rChar.alliance_id.Value))
                 || editChars.Contains(characterId);
 
             return true;
