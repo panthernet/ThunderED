@@ -427,7 +427,7 @@ namespace ThunderED.API
             try
             {
                 var guildID = SettingsManager.GetULong("config", "discordGuildId");
-                var alertChannel = SettingsManager.GetULong("auth", "alertChannel");
+                var alertChannel = SettingsManager.GetULong("auth", "authReportChannel");
 
                 var discordGuild = Client.GetGuild(guildID);
                 var discordUser = Client.GetGuild(guildID).GetUser(context.Message.Author.Id);
@@ -448,10 +448,14 @@ namespace ThunderED.API
 
                 foreach (var r in rolesToAdd)
                 {
-                    if (discordUser.Roles.FirstOrDefault(x => x.Id == r.Id) == null)
+                    if (discordUser.Roles?.FirstOrDefault(x => x.Id == r.Id) == null)
                     {
-                        var channel = discordGuild.GetTextChannel(alertChannel);
-                        await channel.SendMessageAsync(string.Format(LM.Get("grantRolesMessage"), characterData.name));
+                        if (alertChannel != 0)
+                        {
+                            var channel = discordGuild.GetTextChannel(alertChannel);
+                            await channel.SendMessageAsync(string.Format(LM.Get("grantRolesMessage"), characterData.name));
+                        }
+
                         await discordUser.AddRoleAsync(rolesToAdd.First());
                         //await discordUser.AddRolesAsync(rolesToAdd);
                     }

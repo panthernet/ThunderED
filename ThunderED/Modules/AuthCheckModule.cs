@@ -29,7 +29,6 @@ namespace ThunderED.Modules
                     var authgroups = SettingsManager.GetSubList("auth", "authgroups");
                     var exemptRoles = SettingsManager.GetSubList("auth", "exemptDiscordRoles").ToArray();
                     var guildID = SettingsManager.GetULong("config", "discordGuildId");
-                    // var logchan = Convert.ToUInt64(Program.Settings.GetSection("auth")["alertChannel"]);
 
                     var corps = new Dictionary<string, string>();
                     var alliance = new Dictionary<string, string>();
