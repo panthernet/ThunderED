@@ -91,7 +91,7 @@ namespace ThunderED.Modules
                     var id = group.GetChildren().FirstOrDefault(a=> a.Value == "id")?.ToString();
                     var terms = group.GetChildren().FirstOrDefault(a=> a.Value == "terms")?.GetChildren().Select(a=> a.Value).ToList();
 
-                    if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(terms)) continue;
+                    if (string.IsNullOrEmpty(id) || terms == null || terms.Count == 0) continue;
 
                     var token = await SQLiteHelper.SQLiteDataQuery("refreshTokens", "mail", "id", id);
                     if (string.IsNullOrEmpty(token))
@@ -114,11 +114,11 @@ namespace ThunderED.Modules
                         var mail = await APIHelper.ESIAPI.GetMail(Reason, id, token, mailHeader.mail_id);
                         lastMailId = mailHeader.mail_id;
 
-                        await SendMailNotification(mail)
+                      //  await SendMailNotification(mail)
 
                     }
-                    await SQLiteHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", id}, {"mailId", lastMailId});
-                });
+                    await SQLiteHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", id}, {"mailId", lastMailId}});
+                }
             }
             catch (Exception ex)
             {
