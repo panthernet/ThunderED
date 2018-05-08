@@ -377,15 +377,16 @@ namespace ThunderED.Modules
             var timers = await SQLiteHelper.SQLiteDataSelectTimers();
             timers?.ForEach(async timer =>
             {
+                var channel = SettingsManager.GetULong("timersModule", "announceChannel");
                 var dt = timer.GetDateTime();
-                if (dt != null && (dt.Value - DateTime.UtcNow).TotalMinutes < 0)
+                if (dt != null && (dt.Value - DateTime.UtcNow).TotalMinutes <= 0)
                 {
+                    if(channel!= 0)
+                        await SendNotification(timer, channel);
                     await SQLiteHelper.SQLiteDataDelete("timers", "id", timer.id);
                     return;
                 }
 
-
-                var channel = SettingsManager.GetULong("timersModule", "announceChannel");
                 if(channel == 0) return;
 
                 var announces = SettingsManager.GetSubList("timersModule", "announces").Select(a => Convert.ToInt32(a.Value)).OrderByDescending(a => a).ToList();
@@ -396,13 +397,14 @@ namespace ThunderED.Modules
 
                 if (timer.announce == 0)
                 {
-
-                    var an = announces.First();
-                    if ((timer.GetDateTime().Value - DateTime.UtcNow).TotalMinutes <= an)
+                    var left = (timer.GetDateTime().Value - DateTime.UtcNow).TotalMinutes;
+                    if (left <= announces.Max())
                     {
+                        var value = announces.Where(a => a < left).OrderByDescending(a => a).FirstOrDefault();
+                        value = value == 0 ? announces.Min() : value;
                         //announce
                         await SendNotification(timer, channel);
-                        await SQLiteHelper.SQLiteDataUpdate("timers", "announce", an, "id", timer.id);
+                        await SQLiteHelper.SQLiteDataUpdate("timers", "announce", value, "id", timer.id);
                     }
                 }
                 else

@@ -189,7 +189,8 @@ namespace ThunderED.Providers
                                 timerOwner = r.GetString(4),
                                 timerET = r.GetString(5),
                                 timerNotes = r.GetString(6),
-                                timerChar = r.GetString(7)
+                                timerChar = r.GetString(7),
+                                announce = r.GetInt32(8)
                             };
                             list.Add(record);
                         }
