@@ -371,56 +371,69 @@ namespace ThunderED.Modules
 
         private async Task ProcessTimers()
         {
-            if(_lastTimersCheck != null && (DateTime.Now - _lastTimersCheck.Value).TotalMinutes <= 1) return;
-            _lastTimersCheck = DateTime.Now;
-            
-            var timers = await SQLiteHelper.SQLiteDataSelectTimers();
-            timers?.ForEach(async timer =>
+            if(IsRunning) return;
+            IsRunning = true;
+            try
             {
-                var channel = SettingsManager.GetULong("timersModule", "announceChannel");
-                var dt = timer.GetDateTime();
-                if (dt != null && (dt.Value - DateTime.UtcNow).TotalMinutes <= 0)
+                if (_lastTimersCheck != null && (DateTime.Now - _lastTimersCheck.Value).TotalMinutes <= 1) return;
+                _lastTimersCheck = DateTime.Now;
+
+                var timers = await SQLiteHelper.SQLiteDataSelectTimers();
+                timers?.ForEach(async timer =>
                 {
-                    if(channel!= 0)
-                        await SendNotification(timer, channel);
-                    await SQLiteHelper.SQLiteDataDelete("timers", "id", timer.id);
-                    return;
-                }
-
-                if(channel == 0) return;
-
-                var announces = SettingsManager.GetSubList("timersModule", "announces").Select(a => Convert.ToInt32(a.Value)).OrderByDescending(a => a).ToList();
-                if(announces.Count == 0) return;
-
-                //if we don;t have any lesser announce times
-                if (timer.announce != 0 && announces.Min() >= timer.announce) return;
-
-                if (timer.announce == 0)
-                {
-                    var left = (timer.GetDateTime().Value - DateTime.UtcNow).TotalMinutes;
-                    if (left <= announces.Max())
+                    var channel = SettingsManager.GetULong("timersModule", "announceChannel");
+                    var dt = timer.GetDateTime();
+                    if (dt != null && (dt.Value - DateTime.UtcNow).TotalMinutes <= 0)
                     {
-                        var value = announces.Where(a => a < left).OrderByDescending(a => a).FirstOrDefault();
-                        value = value == 0 ? announces.Min() : value;
-                        //announce
-                        await SendNotification(timer, channel);
-                        await SQLiteHelper.SQLiteDataUpdate("timers", "announce", value, "id", timer.id);
+                        if (channel != 0)
+                            await SendNotification(timer, channel);
+                        await SQLiteHelper.SQLiteDataDelete("timers", "id", timer.id);
+                        return;
                     }
-                }
-                else
-                {
-                    var aList = announces.Where(a => a < timer.announce).OrderByDescending(a => a).ToList();
-                    if(aList.Count == 0) return;
-                    
-                    var an = aList.First();
-                    if ((timer.GetDateTime().Value - DateTime.UtcNow).TotalMinutes <= an)
+
+                    if (channel == 0) return;
+
+                    var announces = SettingsManager.GetSubList("timersModule", "announces").Select(a => Convert.ToInt32(a.Value)).OrderByDescending(a => a).ToList();
+                    if (announces.Count == 0) return;
+
+                    //if we don;t have any lesser announce times
+                    if (timer.announce != 0 && announces.Min() >= timer.announce) return;
+
+                    if (timer.announce == 0)
                     {
-                        //announce
-                        await SendNotification(timer, channel);
-                        await SQLiteHelper.SQLiteDataUpdate("timers", "announce", an, "id", timer.id);
+                        var left = (timer.GetDateTime().Value - DateTime.UtcNow).TotalMinutes;
+                        if (left <= announces.Max())
+                        {
+                            var value = announces.Where(a => a < left).OrderByDescending(a => a).FirstOrDefault();
+                            value = value == 0 ? announces.Min() : value;
+                            //announce
+                            await SendNotification(timer, channel);
+                            await SQLiteHelper.SQLiteDataUpdate("timers", "announce", value, "id", timer.id);
+                        }
                     }
-                }
-            });
+                    else
+                    {
+                        var aList = announces.Where(a => a < timer.announce).OrderByDescending(a => a).ToList();
+                        if (aList.Count == 0) return;
+
+                        var an = aList.First();
+                        if ((timer.GetDateTime().Value - DateTime.UtcNow).TotalMinutes <= an)
+                        {
+                            //announce
+                            await SendNotification(timer, channel);
+                            await SQLiteHelper.SQLiteDataUpdate("timers", "announce", an, "id", timer.id);
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+            finally
+            {
+                IsRunning = false;
+            }
         }
 
         private async Task SendNotification(TimerItem timer, ulong channel)

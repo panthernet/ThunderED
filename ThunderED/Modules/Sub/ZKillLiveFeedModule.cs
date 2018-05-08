@@ -10,7 +10,6 @@ namespace ThunderED.Modules.Sub
     public class ZKillLiveFeedModule: AppModuleBase, IDisposable
     {
         public override LogCat Category => LogCat.KillFeed;
-        public bool IsRunning { get; set; }
 
         public static List<Func<JsonZKill.ZKillboard, Task>> Queryables = new List<Func<JsonZKill.ZKillboard, Task>>();
 

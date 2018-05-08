@@ -12,7 +12,6 @@ namespace ThunderED.Modules
 {
     internal class JabberModule: AppModuleBase
     {
-        private bool _jabberRunning;
         public override LogCat Category => LogCat.Jabber;
 
         public override async Task Run(object prm)
@@ -21,17 +20,18 @@ namespace ThunderED.Modules
             var password = SettingsManager.Get("jabber", "password");
             var domain = SettingsManager.Get("jabber", "domain");
 
-            if (!_jabberRunning)
+            if (!IsRunning)
             {
                 try
                 {
                     var xmppWrapper = new ReconnectXmppWrapper(domain, username, password);
                     xmppWrapper.Connect(null);
-                    _jabberRunning = true;
+                    IsRunning = true;
                 }
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx(ex.Message, ex, Category);
+                    IsRunning = false;
                 }
             }
 

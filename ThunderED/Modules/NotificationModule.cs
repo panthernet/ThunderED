@@ -15,7 +15,6 @@ namespace ThunderED.Modules
     {
         private DateTime _nextNotificationCheck = DateTime.FromFileTime(0);
         private int _lastNotification;
-        private volatile bool _isRunning;
 
         public override LogCat Category => LogCat.Notification;
         public override async Task Run(object prm)
@@ -42,8 +41,8 @@ namespace ThunderED.Modules
         #region Notifications
         private async Task NotificationFeed()
         {
-            if(_isRunning) return;
-            _isRunning = true;
+            if(IsRunning) return;
+            IsRunning = true;
             try
             {
                 if (DateTime.Now > _nextNotificationCheck)
@@ -631,7 +630,7 @@ namespace ThunderED.Modules
             }
             finally
             {
-                _isRunning = false;
+                IsRunning = false;
             }
         }
 

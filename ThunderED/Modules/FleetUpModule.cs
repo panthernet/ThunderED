@@ -60,6 +60,8 @@ namespace ThunderED.Modules
 
         public async Task FleetUp()
         {
+            if(IsRunning) return;
+            IsRunning = true;
             try
             {
                 //Check Fleetup Operations
@@ -70,7 +72,7 @@ namespace ThunderED.Modules
                     var userId = SettingsManager.Get("fleetup", "UserId");
                     var apiCode = SettingsManager.Get("fleetup", "APICode");
                     var appKey = SettingsManager.Get("fleetup", "AppKey");
-                    var groupID =SettingsManager.Get("fleetup", "GroupID");
+                    var groupID = SettingsManager.Get("fleetup", "GroupID");
                     var channelid = SettingsManager.GetULong("fleetup", "channel");
                     var lastopid = await SQLiteHelper.SQLiteDataQuery("cacheData", "data", "name", "fleetUpLastPostedOperation");
                     var announcePost = SettingsManager.GetBool("fleetup", "announce_post");
@@ -91,11 +93,12 @@ namespace ThunderED.Modules
                         await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.ToString(), "name", "fleetUpLastChecked");
                         return;
                     }
+
                     foreach (var operation in result.Data)
                     {
                         if (operation.OperationId > Convert.ToInt32(lastopid) && announcePost)
                         {
-                            await SendMessage(operation, channel,$"@everyone FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
+                            await SendMessage(operation, channel, $"@everyone FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
                             await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");
                         }
 
@@ -114,7 +117,8 @@ namespace ThunderED.Modules
 
                         //NOW
                         if (timeDiff.TotalMinutes < 1 && timeDiff.TotalMinutes > 0)
-                            await SendMessage(operation, channel, $"@everyone {string.Format(LM.Get("fuFormNow"), $"http://fleet-up.com/Operation#{operation.OperationId}")}", false);
+                            await SendMessage(operation, channel, $"@everyone {string.Format(LM.Get("fuFormNow"), $"http://fleet-up.com/Operation#{operation.OperationId}")}",
+                                false);
 
                         _lastChecked = DateTime.Now;
                         await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.ToString(), "name", "fleetUpLastChecked");
@@ -124,6 +128,10 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx($"ERROR {ex.Message}", ex, Category);
+            }
+            finally
+            {
+                IsRunning = false;
             }
         }
 

@@ -129,7 +129,7 @@ namespace ThunderED.Classes
                     APIHelper.PurgeCache();
                 }
 
-                await Modules.ParallelForEachAsync(async module => await module.Run(null));
+                Parallel.ForEach(Modules, module => module.Run(null));
             }
             catch (Exception ex)
             {
