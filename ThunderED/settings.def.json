@@ -26,6 +26,7 @@
     "moduleNotificationFeed": true,
     "moduleStats": true,
     "moduleTimers": false,
+    "moduleMail": true,
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
