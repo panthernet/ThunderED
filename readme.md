@@ -29,7 +29,7 @@
 * Ally & Corp Stats - get KM stats for selected alliances or corporations by day, month or year
 * FleetUP integration - announces and reminders for FleetUp ops
 * (BETA) Timers - built-in web server for important timers and events. Auto add timers for reinforced structure events!
-* (WIP) Mail Feeder - feed mail by key phrases from authenticated characters 
+* (BETA) Mail Feeder - feed mail by labels from authenticated characters 
 * (?) Channel MOTD integration - could be done by request
 
 # Build Requirements
