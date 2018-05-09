@@ -39,6 +39,17 @@
     "requestRetries": 3
   },
 
+  "mailModule": {
+    "checkIntervalInMinutes": 2,
+    "authGroups":{
+      "group1": {
+        "id": 0,
+        "labels": [ "discord" ],
+        "channel": 0,
+      },
+    }
+  },
+
   "webServerModule": {
     "webListenIP": "IP",
     "webListenPort": 80,
