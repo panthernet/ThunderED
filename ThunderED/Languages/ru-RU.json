@@ -179,5 +179,9 @@
   "authButtonMailText":  "Почта",
   "webWelcomeHeader":  "Добро пожаловать на сервер ThunderED!",
   "webAuthHeader":  "Аутентификация", 
+  "mailSubject":  "Тема:", 
+  "mailLabels":  "Ярлыки:", 
+  "mailDate":  "Дата:", 
+  "mailMsgTitle":  "@everyone Письмо от {0}!", 
 
 }

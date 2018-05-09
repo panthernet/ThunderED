@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using ThunderED.Classes;
@@ -124,7 +123,7 @@ namespace ThunderED.Modules
                         continue;
                     }
                     var labelIds = labelsData.labels.Where(a=> terms.Contains(a.name)).Select(a => a.label_id).ToList();
-                    var mails = await APIHelper.ESIAPI.GetMailHeaders(Reason, id, token, lastMailId, labelIds);
+                    var mails = await APIHelper.ESIAPI.GetMailHeaders(Reason, id, token, 0, labelIds);
 
                     foreach (var mailHeader in mails)
                     {
@@ -155,13 +154,61 @@ namespace ThunderED.Modules
         {
             var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.@from);
 
+            var stamp = DateTime.Parse(mail.timestamp).ToString(SettingsManager.Get("config", "shortTimeFormat"));
             var embed = new EmbedBuilder()
-                .WithDescription($"Labels:  {labelNames}")
                 .WithThumbnailUrl(SettingsManager.Get("resources", "imgMail"))
-                .AddField(mail.subject, mail.body.Replace("<br>", Environment.NewLine))
-                .WithFooter(DateTime.Parse(mail.timestamp).ToString(SettingsManager.Get("config", "timeFormat")));
+                .AddField($"{LM.Get("mailSubject")} {mail.subject}",  await PrepareBodyMessage(mail.body))
+                .WithFooter($"{LM.Get("mailLabels")}  {labelNames} | {LM.Get("mailDate")} {stamp}");
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
-            await APIHelper.DiscordAPI.SendMessageAsync(ch, $"@everyone Mail from {sender?.name}!", embed.Build());
+            await APIHelper.DiscordAPI.SendMessageAsync(ch, string.Format(LM.Get("mailMsgTitle"), sender?.name), embed.Build());
+        }
+
+        private async Task<string> PrepareBodyMessage(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            var body = input.Replace("<br>", Environment.NewLine)
+                .Replace("<b>", "**").Replace("</b>", "**")
+                .Replace("<u>", "__").Replace("</u>", "__")
+                .Replace("</font>", null)
+                .Replace("<loc>", null).Replace("</loc>", null);
+
+            try
+            {
+                while (true)
+                {
+                    var index = body.IndexOf("<font");
+                    if (index == -1) break;
+                    var lst = body.IndexOf('>', index + 1);
+                    if (lst == -1) break;
+                    body = index != 0 ? $"{body.Substring(0, index)}{body.Substring(lst + 1, body.Length - lst - 1)}" : $"{body.Substring(lst + 1, body.Length - lst - 1)}";
+                }
+
+                while (true)
+                {
+                    var index = body.IndexOf("<a");
+                    if (index == -1) break;
+                    var urlStart = body.IndexOf('\"', index) + 1;
+                    var urlEnd = body.IndexOf('\"', urlStart) - 1;
+                    var lst = body.IndexOf('>', index + 1);
+                    var endTagStart = body.IndexOf('<', lst + 1);
+
+                    var url = body.Substring(urlStart, urlEnd - urlStart + 1);
+                    var text = body.Substring(lst + 1, endTagStart - lst - 1);
+
+                    body = index != 0
+                        ? $"{body.Substring(0, index)}{text}({url}){body.Substring(endTagStart, body.Length - endTagStart)}"
+                        : $"{text}({url}){body.Substring(endTagStart, body.Length - endTagStart)}";
+                }
+
+                body = body.Replace("</a>", null);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+
+            return body;
         }
     }
 }

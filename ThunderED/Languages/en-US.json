@@ -171,4 +171,8 @@
   "authButtonMailText":  "Mail Auth",
   "webWelcomeHeader":  "Welcome to ThunderED server!",
   "webAuthHeader":  "Authentication", 
+  "mailSubject":  "Subject:", 
+  "mailLabels":  "Labels:", 
+  "mailDate":  "Date:", 
+  "mailMsgTitle":  "@everyone Mail from {0}!", 
 }
