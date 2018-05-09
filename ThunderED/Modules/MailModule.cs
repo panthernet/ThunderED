@@ -5,8 +5,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Discord;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Json;
 using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Sub;
 
@@ -60,6 +62,8 @@ namespace ThunderED.Modules
                         }
 
                         await SQLiteHelper.SQLiteDataInsertOrUpdateTokens(null, result[0], result[1]);
+                        response.Headers.ContentEncoding.Add("utf-8");
+                        response.Headers.ContentType.Add("text/html;charset=utf-8");
                         await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
                             .Replace("{header}", "authTemplateHeader")
                             .Replace("{body}", LM.Get("mailAuthSuccessHeader"))
@@ -88,17 +92,32 @@ namespace ThunderED.Modules
 
                 foreach(var group in SettingsManager.GetSubList("mailModule", "authGroups"))
                 {
-                    var id = group.GetChildren().FirstOrDefault(a=> a.Value == "id")?.ToString();
-                    var terms = group.GetChildren().FirstOrDefault(a=> a.Value == "terms")?.GetChildren().Select(a=> a.Value).ToList();
+                    var id = group.GetChildren().FirstOrDefault(a=> a.Key == "id")?.Value;
+                    var terms = group.GetChildren().FirstOrDefault(a=> a.Key == "labels")?.GetChildren().Select(a=> a.Value).ToList();
+                    var chString = group.GetChildren().FirstOrDefault(a=> a.Key == "channel")?.Value;
+                    if(string.IsNullOrEmpty(chString))
+                        continue;
+                    var channel = Convert.ToUInt64(chString);
 
                     if (string.IsNullOrEmpty(id) || terms == null || terms.Count == 0) continue;
 
-                    var token = await SQLiteHelper.SQLiteDataQuery("refreshTokens", "mail", "id", id);
-                    if (string.IsNullOrEmpty(token))
+                    var rToken = await SQLiteHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", Convert.ToInt32(id));
+                    if (string.IsNullOrEmpty(rToken))
+                    {
                         continue;
+                    }
+
+                    var token = await APIHelper.ESIAPI.RefreshToken(rToken, SettingsManager.Get("auth", "ccpAppClientId"), SettingsManager.Get("auth", "ccpAppSecret"));
+                    if (string.IsNullOrEmpty(rToken))
+                    {
+                        await LogHelper.LogWarning("Unable to get correct token using refresh token! Refresh token might be expired!", Category);
+                        continue;
+                    }
 
                     var lastMailId = await SQLiteHelper.SQLiteDataQuery<int>("mail", "mailId", "id", id);
+                    var prevMailId = lastMailId;
                     var labelsData= await APIHelper.ESIAPI.GetMailLabels(Reason, id, token);
+                    var searchLabels = labelsData.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received");
                     if (labelsData == null || terms.Count == 0)
                     {
                         await LogHelper.LogWarning($"Mail feed for user {id} has no labels or user has no labels in-game!", Category);
@@ -112,12 +131,14 @@ namespace ThunderED.Modules
                         if(mailHeader.mail_id <= lastMailId) continue;
 
                         var mail = await APIHelper.ESIAPI.GetMail(Reason, id, token, mailHeader.mail_id);
+                        var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
                         lastMailId = mailHeader.mail_id;
 
-                      //  await SendMailNotification(mail)
+                        await SendMailNotification(channel, mail, labelNames);
 
                     }
-                    await SQLiteHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", id}, {"mailId", lastMailId}});
+                    if(prevMailId != lastMailId)
+                        await SQLiteHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", id}, {"mailId", lastMailId}});
                 }
             }
             catch (Exception ex)
@@ -128,6 +149,19 @@ namespace ThunderED.Modules
             {
                 IsRunning = false;
             }
+        }
+
+        private async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string labelNames)
+        {
+            var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.@from);
+
+            var embed = new EmbedBuilder()
+                .WithDescription($"Labels:  {labelNames}")
+                .WithThumbnailUrl(SettingsManager.Get("resources", "imgMail"))
+                .AddField(mail.subject, mail.body.Replace("<br>", Environment.NewLine))
+                .WithFooter(DateTime.Parse(mail.timestamp).ToString(SettingsManager.Get("config", "timeFormat")));
+            var ch = APIHelper.DiscordAPI.GetChannel(channel);
+            await APIHelper.DiscordAPI.SendMessageAsync(ch, $"@everyone Mail from {sender?.name}!", embed.Build());
         }
     }
 }

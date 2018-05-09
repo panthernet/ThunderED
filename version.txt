@@ -1,3 +1,11 @@
+v1.0.9 BETA
++ Added first version of Mail module
++ Fixed missing main web page title translation
+
+v1.0.8 BETA
++ Fixed Discor auth failing in some cases
++ Merged auth section group settings into one - memberRole
+
 v1.0.7 BETA
 + Added TimersModule
 + Improved web queries reliability and performance. Added retries and gzip support.

@@ -43,7 +43,7 @@ namespace ThunderED.Providers
                         if (r.HasRows)
                         {
                             await r.ReadAsync();
-                            return r.GetString(0) ?? "";
+                            return r.IsDBNull(0) ? "" : r.GetString(0) ?? "";
                         }
                         return null;
                     }
@@ -70,7 +70,7 @@ namespace ThunderED.Providers
                         if (r.HasRows)
                         {
                             await r.ReadAsync();
-                            return r.GetString(0) ?? "";
+                            return r.IsDBNull(0) ? "" : r.GetString(0) ?? "";
                         }
                         return null;
                     }
@@ -99,7 +99,7 @@ namespace ThunderED.Providers
                             await r.ReadAsync();
                             var type = typeof(T);
                             if(type == typeof(string))
-                                return (T)(object)(r.GetString(0) ?? "");
+                                return r.IsDBNull(0) ? (T)(object)null : (T)(object)(r.GetString(0) ?? "");
                             if (type == typeof(int))
                                 return (T) (object) r.GetInt32(0);
                         }

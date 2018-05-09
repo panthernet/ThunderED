@@ -78,6 +78,7 @@ namespace ThunderED.Modules.Sub
                                 .Replace("{authMailUrl}", GetMailAuthURL())
                                 .Replace("{authButtonMailText}", LM.Get("authButtonMailText"))
                                     .Replace("{webAuthHeader}", LM.Get("webAuthHeader"))
+                                    .Replace("{webWelcomeHeader}", LM.Get("webWelcomeHeader"))
                                 ;
                             text = text.Replace("{disableWebAuth}", !SettingsManager.GetBool("config", "moduleAuthWeb") ? "disabled" : "");
                             text = text.Replace("{disableWebNotify}", !SettingsManager.GetBool("config", "moduleNotificationFeed") ? "disabled" : "");
@@ -148,7 +149,7 @@ namespace ThunderED.Modules.Sub
             var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
             var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
-            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-mail.read_mail.v1+esi-mail.send_mail.v1&state=12";
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-mail.read_mail.v1+esi-mail.send_mail.v1+esi-mail.organize_mail.v1&state=12";
         }
 
 
