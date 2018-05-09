@@ -43,7 +43,7 @@ namespace ThunderED.Modules
                     {"{isLoss}", "false"},
                 };
 
-                var path = Path.Combine(SettingsManager.RootDirectory, "Templates/Messages", "Template.killMailGeneral.txt");
+                var path = Path.Combine(SettingsManager.RootDirectory, "Templates", "Messages", "Template.killMailGeneral.txt");
                 if(!File.Exists(path))
                     return;
                 var embed = await TemplateHelper.CompileTemplate(MessageTemplateType.KillMailGeneral, path, dic);

@@ -77,7 +77,7 @@ namespace ThunderED.Helpers
 
                         var data = JsonConvert.DeserializeObject<T>(raw);
                         if (data == null)
-                            await LogHelper.LogError($"[try: {i}][{reason}] Deserialized to null!\r\nRequest: {request}", LogCat.ESI, false);
+                            await LogHelper.LogError($"[try: {i}][{reason}] Deserialized to null!{Environment.NewLine}Request: {request}", LogCat.ESI, false);
                         else return data;
                     }
                 }
@@ -88,7 +88,7 @@ namespace ThunderED.Helpers
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx(request, ex, LogCat.ESI);
-                    await LogHelper.LogInfo($"[try: {i}][{reason}]\r\nREQUEST: {request}\r\nRESPONCE: {raw}", LogCat.ESI);
+                    await LogHelper.LogInfo($"[try: {i}][{reason}]{Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONCE: {raw}", LogCat.ESI);
                 }
             }
 

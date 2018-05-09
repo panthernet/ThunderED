@@ -1,6 +1,7 @@
 v1.0.9 BETA
 + Added first version of Mail module
 + Fixed missing main web page title translation
++ Improved crossplatform compatibility
 
 v1.0.8 BETA
 + Fixed Discor auth failing in some cases

@@ -105,7 +105,7 @@ namespace ThunderED.Helpers
             if (!Directory.Exists(_logPath))
                 Directory.CreateDirectory(_logPath);
 
-            await File.AppendAllTextAsync(file, $"{notificationType}\n{notificationText}{Environment.NewLine}{Environment.NewLine}");
+            await File.AppendAllTextAsync(file, $"{notificationType}{Environment.NewLine}{notificationText}{Environment.NewLine}{Environment.NewLine}");
         }
 
         public static async Task LogDebug(string message, LogCat cat, bool logToConsole = false)

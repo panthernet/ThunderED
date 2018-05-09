@@ -52,7 +52,7 @@ namespace ThunderED.Classes
 
             if (!File.Exists(DatabaseFilePath))
             {
-                File.Copy(RootDirectory + "/edb.def.db", DatabaseFilePath);
+                File.Copy(Path.Combine(RootDirectory,"edb.def.db"), DatabaseFilePath);
                 IsNew = true;
             }
         }
