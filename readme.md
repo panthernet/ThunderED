@@ -1,5 +1,6 @@
 # ThunderED - EVE Online Discord Bot
 [Reach us on Discord](https://discord.gg/UsnY6UR)
+
 [Check the FAQ about installation and settings!](https://github.com/panthernet/ThunderED/wiki)
 
 ![](https://ci.appveyor.com/api/projects/status/67i3q6v804sjyse6?svg=true)
