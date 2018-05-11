@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -93,9 +92,16 @@ namespace ThunderED.Modules.Sub
 
                         foreach (var method in ModuleConnectors.Values)
                         {
-                            result = await method(context);
-                            if (result)
-                                break;
+                            try
+                            {
+                                result = await method(context);
+                                if (result)
+                                    break;
+                            }
+                            catch (Exception ex)
+                            {
+                                await LogHelper.LogEx($"Module method {method.Method.Name} throws ex!", ex, Category);
+                            }
                         }
 
                         if (!result)

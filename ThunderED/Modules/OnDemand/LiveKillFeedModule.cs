@@ -12,10 +12,9 @@ namespace ThunderED.Modules.OnDemand
 {
     public class LiveKillFeedModule: AppModuleBase
     {
-        internal volatile bool IsKillfeedRunning;
         private int _lastPosted;
         public override LogCat Category => LogCat.KillFeed;
-        private bool _enableCache;
+        private readonly bool _enableCache;
 
         public LiveKillFeedModule()
         {
@@ -108,6 +107,12 @@ namespace ThunderED.Modules.OnDemand
                     var sendBigToGeneral = Convert.ToBoolean(i["bigKillSendToGeneralToo"]);
                     var bigKillChannel = Convert.ToUInt64(i["bigKillChannel"]);
                     var discordGroupName = i["name"];
+
+                    if (c == 0)
+                    {
+                        await LogHelper.LogWarning($"Group {i.Key} has no 'discordChannel' specified! Kills will be skipped.",Category);
+                        continue;
+                    }
 
                     if (bigKillGlobalChan != 0 && bigKillGlobalValue != 0 && value >= bigKillGlobalValue && !postedGlobalBigKill)
                     {

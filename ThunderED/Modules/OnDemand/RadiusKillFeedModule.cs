@@ -16,7 +16,7 @@ namespace ThunderED.Modules.OnDemand
     {
         private readonly Dictionary<string, int> _lastPosted = new Dictionary<string, int>();
         public override LogCat Category => LogCat.RadiusKill;
-        private bool _enableCache;
+        private readonly bool _enableCache;
 
         public RadiusKillFeedModule()
         {
@@ -58,6 +58,12 @@ namespace ThunderED.Modules.OnDemand
                     {
                         await LogHelper.LogError("Radius feed must have systemId, constId or regionId defined!", Category);
                         return;
+                    }
+
+                    if (radiusChannelId == 0)
+                    {
+                        await LogHelper.LogWarning($"Group {group.Key} has no 'radiusChannel' specified! Kills will be skipped.", Category);
+                        continue;
                     }
 
                     var mode = radiusSystemId != 0 ? RadiusMode.Range : (radiusConstId != 0 ? RadiusMode.Constellation : RadiusMode.Region);
