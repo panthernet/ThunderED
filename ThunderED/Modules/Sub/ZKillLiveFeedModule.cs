@@ -23,7 +23,18 @@ namespace ThunderED.Modules.Sub
             {
                 CurrentEntry = await APIHelper.ZKillAPI.GetRedisqResponce();
                 if(CurrentEntry?.package == null ) return;
-                await Queryables.ParallelForEachAsync(async q => await q(CurrentEntry));
+                await Queryables.ParallelForEachAsync(async q =>
+                {
+                    try
+                    {
+                        await q(CurrentEntry);
+                    }
+                    catch (Exception ex)
+                    {
+                        await LogHelper.LogEx(ex.Message, ex, Category);
+                        await LogHelper.LogWarning($"[ZKillCore] error processing {q.Method.Name}! Msg: {ex.Message}", Category);
+                    }
+                });
             }
             catch (Exception ex)
             {

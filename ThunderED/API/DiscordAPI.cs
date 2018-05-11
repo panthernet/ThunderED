@@ -394,6 +394,7 @@ namespace ThunderED.API
         public async Task SendEmbedKillMessage(ulong channelId, Color color, int shipID, int kmId, string shipName, long value, string sysName, string secstatus, string killTime, string cName, string corpName
             , string aTicker, bool isNpcKill, string atName, string atCorp, string atTicker, int atCount, string radiusMessage, string msg = "")
         {
+            msg = msg ?? "";
             var killString = string.Format(LM.Get("killFeedString"), !string.IsNullOrEmpty(radiusMessage) ? "R " : null, shipName, value, cName,
                 corpName, string.IsNullOrEmpty(aTicker) ? null : aTicker, sysName, secstatus, killTime);
             var killedBy = isNpcKill ? null : string.Format(LM.Get("killFeedBy"), atName, atCorp, string.IsNullOrEmpty(atTicker) ? null : atTicker, atCount);
@@ -413,7 +414,8 @@ namespace ThunderED.API
             var guildID = SettingsManager.GetULong("config", "discordGuildId");
             var discordGuild = Client.Guilds.FirstOrDefault(x => x.Id == guildID);
             var channel = discordGuild?.GetTextChannel(channelId);
-            if (channel != null) await channel.SendMessageAsync(msg, false, embed).ConfigureAwait(false);
+            if (channel != null) 
+                await channel.SendMessageAsync(msg, false, embed).ConfigureAwait(false);
         }
 
         internal async Task AuthGrantRoles(ICommandContext context, string characterID, Dictionary<string, string> corps, Dictionary<string, string> alliance, JsonClasses.CharacterData characterData, JsonClasses.CorporationData corporationData, string remainder)

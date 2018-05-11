@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
-using System.Web;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 
@@ -10,7 +8,7 @@ namespace ThunderED
     internal class Program
     {
         private static Timer _timer;
-        public const string VERSION = "1.0.9";
+        public const string VERSION = "1.1.0";
 
         private static void Main(string[] args)
         {
@@ -28,7 +26,7 @@ namespace ThunderED
             }
             //update config settings
             if (SettingsManager.GetBool("config", "moduleNotificationFeed"))
-                SettingsManager.NextNotificationCheck = DateTime.Parse(SQLiteHelper.SQLiteDataQuery("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult());
+                SettingsManager.NextNotificationCheck = DateTime.Parse(SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult());
             //load language
             LM.Load().GetAwaiter().GetResult();
             //load APIs

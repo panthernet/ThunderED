@@ -165,8 +165,15 @@ namespace ThunderED.Modules.OnDemand
 
                         if (!esiFailure && add)
                         {
-                            await SQLiteHelper.InsertPendingUser(characterID?.ToString(), corpID?.ToString(), allianceID?.ToString(), uid, "1",
-                                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            await SQLiteHelper.SQLiteDataInsertOrUpdate("pendingUsers", new Dictionary<string, object>
+                            {
+                                {"characterID", characterID},
+                                {"corporationID", corpID},
+                                {"allianceID", allianceID},
+                                {"authString", uid},
+                                {"active", "1"},
+                                {"dateCreated", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}
+                            });
 
                             response.Headers.ContentEncoding.Add("utf-8");
                             response.Headers.ContentType.Add("text/html;charset=utf-8");

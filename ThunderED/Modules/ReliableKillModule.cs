@@ -42,10 +42,8 @@ namespace ThunderED.Modules
 
                     var kills = await APIHelper.ZKillAPI.GetZKillOnlyFeed(isAlliance, isAlliance ? allianceID : corpID);
                     kills.Reverse();
-                    var where = new Dictionary<string, object>();
-                    @where.Add("type", isAlliance ? "ally" : "corp");
-                    @where.Add("id", isAlliance ? allianceID.ToString() : corpID.ToString());
-                    var resultQ = await SQLiteHelper.SQLiteDataQuery("killFeedCache", "lastId", @where);
+                    var where = new Dictionary<string, object> {{"type", isAlliance ? "ally" : "corp"}, {"id", isAlliance ? allianceID.ToString() : corpID.ToString()}};
+                    var resultQ = await SQLiteHelper.SQLiteDataQuery<string>("killFeedCache", "lastId", @where);
                     _lastPosted = string.IsNullOrEmpty(resultQ) ? 0 : Convert.ToInt32(resultQ);
                     if (kills.Count == 0) continue;
                     kills = _lastPosted == 0 ? kills.TakeLast(5).ToList() : kills.Where(a => a.killmail_id > _lastPosted).ToList();
@@ -121,7 +119,7 @@ namespace ThunderED.Modules
 
                         var isAttack = attackers.Any(a => a.alliance_id != 0 && a.alliance_id == allianceID || corpID != 0 && a.corporation_id == corpID);
 
-                        if (bigKillValue != 0 && value >= bigKillValue && (victimAllianceID == allianceID || victimCorpID == corpID || isAttack))
+                        if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue && (victimAllianceID == allianceID || victimCorpID == corpID || isAttack))
                         {
                             dic.Add("{isLoss}", isAttack ? "false" : "true");
                             if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))

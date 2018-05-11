@@ -64,7 +64,7 @@ namespace ThunderED.Classes
                 .AddJsonFile("settings.json", optional: true, reloadOnChange: true).Build();
             
             if (GetBool("config", "moduleNotificationFeed") && SQLiteHelper.Provider != null)
-              NextNotificationCheck = DateTime.Parse(SQLiteHelper.SQLiteDataQuery("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult());
+              NextNotificationCheck = DateTime.Parse(SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult());
 
         }
 

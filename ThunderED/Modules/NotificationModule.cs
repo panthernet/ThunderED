@@ -57,10 +57,10 @@ namespace ThunderED.Modules
                         var characterID = key["characterID"];
                         var overrideChannel = Convert.ToUInt64(key["overrideChannel"]);
 
-                        var nData = await SQLiteHelper.SQLiteDataQuery("notifications", "lastNotificationID", "characterID", characterID);
+                        var nData = await SQLiteHelper.SQLiteDataQuery<string>("notifications", "lastNotificationID", "characterID", characterID);
                         _lastNotification = string.IsNullOrEmpty(nData) ? 0 : Convert.ToInt32(nData);
 
-                        var rToken = await SQLiteHelper.SQLiteDataQuery("refreshTokens", "token", "id", Convert.ToInt32(characterID));
+                        var rToken = await SQLiteHelper.SQLiteDataQuery<string>("refreshTokens", "token", "id", Convert.ToInt32(characterID));
                         var token = await APIHelper.ESIAPI.RefreshToken(rToken, SettingsManager.Get("auth", "ccpAppClientId"), SettingsManager.Get("auth", "ccpAppSecret"));
                         if(!string.IsNullOrEmpty(token))
                             await LogHelper.LogInfo($"Checking characterID:{characterID}", Category, LogToConsole, false);
@@ -92,7 +92,7 @@ namespace ThunderED.Modules
                                         if (filters.ContainsKey(notification.type) || filters.ContainsKey("ALL"))
                                         {
                                             //skip remembered notifications
-                                            if (!string.IsNullOrEmpty(await SQLiteHelper.SQLiteDataQuery("notificationsList", "id", "id", notification.notification_id)))
+                                            if (!string.IsNullOrEmpty(await SQLiteHelper.SQLiteDataQuery<string>("notificationsList", "id", "id", notification.notification_id)))
                                             {
                                                 await SetLastNotificationId(notification.notification_id, characterID);
                                                 continue;
@@ -639,7 +639,11 @@ namespace ThunderED.Modules
             _lastNotification = id;
             await SQLiteHelper.RunCommand($"insert or replace into notificationsList (id) values({_lastNotification})");
             if(!string.IsNullOrEmpty(characterID))
-                await SQLiteHelper.SQLiteDataInsertOrUpdateLastNotification(characterID, _lastNotification.ToString());
+                await SQLiteHelper.SQLiteDataInsertOrUpdate("notifications", new Dictionary<string, object>
+                {
+                    {"characterID", characterID},
+                    {"lastNotificationID", _lastNotification.ToString()}
+                });
         }
 
         #endregion

@@ -105,7 +105,7 @@ namespace ThunderED.Modules
                         var timeout = SettingsManager.GetInt("timersModule", "authTimeoutInMinutes");
                         if (timeout != 0)
                         {
-                            var result = await SQLiteHelper.SQLiteDataQuery("timersAuth", "time", "id", characterId.ToString());
+                            var result = await SQLiteHelper.SQLiteDataQuery<string>("timersAuth", "time", "id", characterId.ToString());
                             if (result == null || (DateTime.Now - DateTime.Parse(result)).TotalMinutes > timeout)
                             {
                                 //redirect to auth
@@ -281,7 +281,7 @@ namespace ThunderED.Modules
             //check for Discord admins
             if (SettingsManager.GetBool("timersModule", "grantEditRolesToDiscordAdmins"))
             {
-                var roles = SQLiteHelper.SQLiteDataQuery("authUsers", "role", "characterID", characterId.ToString()).GetAwaiter().GetResult();
+                var roles = SQLiteHelper.SQLiteDataQuery<string>("authUsers", "role", "characterID", characterId.ToString()).GetAwaiter().GetResult();
                 if (!string.IsNullOrEmpty(roles))
                 {
                     var exemptRoles = SettingsManager.GetSubList("config", "discordAdminRoles").Select(a => a.Value);

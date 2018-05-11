@@ -27,7 +27,7 @@ namespace ThunderED.Modules.OnDemand
         {
             if (_lastPosted != kill.package.killID)
             {
-                var bigKillGlobal = SettingsManager.GetLong("liveKillFeed", "bigKill");
+                var bigKillGlobalValue = SettingsManager.GetLong("liveKillFeed", "bigKill");
                 var bigKillGlobalChan = SettingsManager.GetULong("liveKillFeed", "bigKillChannel");
 
                 var killmailID = kill.package.killmail.killmail_id;
@@ -109,7 +109,7 @@ namespace ThunderED.Modules.OnDemand
                     var bigKillChannel = Convert.ToUInt64(i["bigKillChannel"]);
                     var discordGroupName = i["name"];
 
-                    if (bigKillGlobal != 0 && value >= bigKillGlobal && !postedGlobalBigKill)
+                    if (bigKillGlobalChan != 0 && bigKillGlobalValue != 0 && value >= bigKillGlobalValue && !postedGlobalBigKill)
                     {
                         postedGlobalBigKill = true;
 
@@ -146,7 +146,7 @@ namespace ThunderED.Modules.OnDemand
 
                         //Losses
                         //Big
-                        if (bigKillValue != 0 && value >= bigKillValue)
+                        if (bigKillChannel !=0 && bigKillValue != 0 && value >= bigKillValue)
                         {
                             if (victimAllianceID == allianceID || victimCorpID == corpID)
                             {
@@ -194,7 +194,7 @@ namespace ThunderED.Modules.OnDemand
                         //Kills
                         foreach (var attacker in attackers.ToList())
                         {
-                            if (bigKillValue != 0 && value >= bigKillValue && !npckill)
+                            if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue && !npckill)
                             {
                                 if ((attacker.alliance_id != 0 && attacker.alliance_id == allianceID) || (allianceID == 0 && attacker.corporation_id == corpID))
                                 {

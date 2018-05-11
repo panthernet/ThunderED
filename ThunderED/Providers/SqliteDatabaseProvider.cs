@@ -14,25 +14,31 @@ namespace ThunderED.Providers
     {
          //SQLite Query
         #region SQLiteQuery
-
-            
-        public async Task<string> SQLiteDataQuery(string table, string field, Dictionary<string, object> where)
+      
+        public async Task<T> SQLiteDataQuery<T>(string table, string field, Dictionary<string, object> where)
         {
+            if (where == null)
+            {
+                await LogHelper.LogError($"[SQLiteDataQuery]: {table}-{field} query has empty values!");
+                return default;
+            }
+
             var whereText = string.Empty;
             int count = 1;
             var last = where.Keys.Last();
-            foreach (var pair in @where)
+            foreach (var pair in where)
             {
                 whereText += $"{pair.Key}=@var{count++}{(pair.Key == last? null : " and ")}";
             }
 
+            var query = $"SELECT {field} FROM {table} WHERE {whereText}";
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand($"SELECT {field} FROM {table} WHERE {whereText}", con))
+            using (var querySQL = new SqliteCommand(query, con))
             {
                 await con.OpenAsync();
 
                 count = 1;
-                foreach (var pair in @where)
+                foreach (var pair in where)
                 {
                     querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
                 }
@@ -43,75 +49,28 @@ namespace ThunderED.Providers
                         if (r.HasRows)
                         {
                             await r.ReadAsync();
-                            return r.IsDBNull(0) ? "" : r.GetString(0) ?? "";
+                            if (r.IsDBNull(0))
+                                return default;
+                            var type = typeof(T);
+                            if(type == typeof(string))
+                                return (T)(object)(r.GetString(0) ?? "");
+                            if (type == typeof(int))
+                                return (T) (object) r.GetInt32(0);
                         }
-                        return null;
+                        return default;
                     }
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("SQLiteDataQuery", ex, LogCat.SQLite);
-                    return null;
-                }
-            }
-        }
-
-        public async Task<string> SQLiteDataQuery(string table, string field, string whereField, object whereData)
-        {
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand($"SELECT {field} FROM {table} WHERE {whereField} = @name", con))
-            {
-                await con.OpenAsync();
-                querySQL.Parameters.Add(new SqliteParameter("@name", whereData));
-                try
-                {
-                    using (var r = await querySQL.ExecuteReaderAsync())
-                    {
-                        if (r.HasRows)
-                        {
-                            await r.ReadAsync();
-                            return r.IsDBNull(0) ? "" : r.GetString(0) ?? "";
-                        }
-                        return null;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("SQLiteDataQuery", ex, LogCat.SQLite);
-                    return null;
+                    await LogHelper.LogEx($"[SQLiteDataQuery]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    return default;
                 }
             }
         }
 
         public async Task<T> SQLiteDataQuery<T>(string table, string field, string whereField, object whereData)
         {
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand($"SELECT {field} FROM {table} WHERE {whereField} = @name", con))
-            {
-                await con.OpenAsync();
-                querySQL.Parameters.Add(new SqliteParameter("@name", whereData));
-                try
-                {
-                    using (var r = await querySQL.ExecuteReaderAsync())
-                    {
-                        if (r.HasRows)
-                        {
-                            await r.ReadAsync();
-                            var type = typeof(T);
-                            if(type == typeof(string))
-                                return r.IsDBNull(0) ? (T)(object)null : (T)(object)(r.GetString(0) ?? "");
-                            if (type == typeof(int))
-                                return (T) (object) r.GetInt32(0);
-                        }
-                        return default(T);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("SQLiteDataQuery", ex, LogCat.SQLite);
-                    return default(T);
-                }
-            }
+            return await SQLiteDataQuery<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
         }
 
         #endregion
@@ -121,6 +80,11 @@ namespace ThunderED.Providers
 
         public async Task SQLiteDataInsertOrUpdate(string table, Dictionary<string, object> values)
         {
+            if (values == null)
+            {
+                await LogHelper.LogError($"[SQLiteDataInsertOrUpdate]: {table} query has empty values!");
+                return;
+            }
             var fromText = string.Empty;
             var valuesText = string.Empty;
             int count = 1;
@@ -131,8 +95,9 @@ namespace ThunderED.Providers
                 valuesText += $"@var{count++}{(pair.Key == last ? null : ",")}";
             }
 
+            var query = $"insert or replace into {table} ({fromText}) values({valuesText})";
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand($"insert or replace into {table} ({fromText}) values({valuesText})", con))
+            using (var querySQL = new SqliteCommand(query, con))
             {
                 await con.OpenAsync();
 
@@ -147,20 +112,40 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("SQLiteDataQuery", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[SQLiteDataInsertOrUpdate]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                 }
             }
         }
 
-
         public async Task SQLiteDataUpdate(string table, string setField, object setData, string whereField, object whereData)
         {
+            await SQLiteDataUpdate(table, setField, setData, new Dictionary<string, object> {{whereField, whereData}});
+        }
+
+        public async Task SQLiteDataUpdate(string table, string setField, object setData, Dictionary<string, object> where)
+        {
+            if (where == null)
+            {
+                await LogHelper.LogError($"[SQLiteDataUpdate]: {table} query has empty values!");
+                return;
+            }
+            var whereText = string.Empty;
+            int count = 1;
+            var last = where.Keys.Last();
+            foreach (var pair in where)
+            {
+                whereText += $"{pair.Key}=@var{count++}{(pair.Key == last? null : " and ")}";
+            }
+
+            var query = $"UPDATE {table} SET {setField} = @data WHERE {whereText}";
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand($"UPDATE {table} SET {setField} = @data WHERE {whereField} = @name", con))
+            using (var insertSQL = new SqliteCommand(query, con))
             {
                 await con.OpenAsync();
-                insertSQL.Parameters.Add(new SqliteParameter("@name", whereData));
+                count = 1;
                 insertSQL.Parameters.Add(new SqliteParameter("@data", setData));
+                foreach (var pair in where)
+                    insertSQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
                 try
                 {
                     insertSQL.ExecuteNonQuery();
@@ -168,7 +153,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("SQLiteDataUpdate", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[SQLiteDataUpdate]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                 }
             }
         }
@@ -197,7 +182,7 @@ namespace ThunderED.Providers
         }
         #endregion
 
-
+        #region Selection
         public async Task<List<TimerItem>> SQLiteDataSelectTimers()
         {
             var list = new List<TimerItem>();
@@ -237,12 +222,14 @@ namespace ThunderED.Providers
             }
         }
 
+        #endregion
+
         public async Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken)
         {
             if(string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) || string.IsNullOrEmpty(userId)) return;
 
-            var mail = string.IsNullOrEmpty(mailToken) ? await SQLiteDataQuery("refreshTokens", "mail", "id", userId) : mailToken;
-            var token = string.IsNullOrEmpty(notifyToken) ? await SQLiteDataQuery("refreshTokens", "token", "id", userId) : notifyToken;
+            var mail = string.IsNullOrEmpty(mailToken) ? await SQLiteDataQuery<string>("refreshTokens", "mail", "id", userId) : mailToken;
+            var token = string.IsNullOrEmpty(notifyToken) ? await SQLiteDataQuery<string>("refreshTokens", "token", "id", userId) : notifyToken;
 
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
             using (var insertSQL = new SqliteCommand("INSERT OR REPLACE INTO refreshTokens (id, token, mail) VALUES(@id,@token,@mail)", con))
@@ -259,26 +246,6 @@ namespace ThunderED.Providers
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx("SQLiteDataUpdate", ex, LogCat.SQLite);
-                }
-            }
-        }
-
-
-        public async Task InsertPendingUser(string characterID, string corporationid, string allianceid, string authString, string active, string dateCreated)
-        {
-            var query = "INSERT OR REPLACE INTO pendingUsers(characterID, corporationID, allianceID, authString, groups, active, dateCreated) " +
-                        $"VALUES (\"{characterID}\", \"{corporationid}\", \"{allianceid}\", \"{authString}\", \"[]\", \"{active}\", \"{dateCreated}\")";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand(query, con))
-            {
-                await con.OpenAsync();
-                try
-                {
-                    insertSQL.ExecuteNonQuery();
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("InsertPendingUser", ex, LogCat.SQLite);
                 }
             }
         }
@@ -370,26 +337,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"RunCommand: {query2}", ex, LogCat.SQLite);
-                }
-            }
-        }
-
-        public async Task SQLiteDataInsertOrUpdateLastNotification(string characterID, string notifID)
-        {
-            var query = "INSERT OR REPLACE INTO notifications(characterID, lastNotificationID) " +
-                        $"VALUES ('{characterID}', '{notifID}')";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand(query, con))
-            {
-                await con.OpenAsync();
-                try
-                {
-                    insertSQL.ExecuteNonQuery();
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("InsertPendingUser", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[RunCommand]: {query2}", ex, LogCat.SQLite);
                 }
             }
         }
@@ -424,27 +372,6 @@ namespace ThunderED.Providers
             }
         }
 
-        public async Task SQLiteDataUpdateCacheField<T>(string setField, object setData, object whereId)
-        {
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand($"UPDATE cache SET {setField} = @data WHERE id= @id and type=@tt", con))
-            {
-                await con.OpenAsync();
-                insertSQL.Parameters.Add(new SqliteParameter("@data", setData));
-                insertSQL.Parameters.Add(new SqliteParameter("@id", whereId));
-                insertSQL.Parameters.Add(new SqliteParameter("@tt", typeof(T).Name));
-                try
-                {
-                    insertSQL.ExecuteNonQuery();
-
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("SQLiteDataUpdateCache", ex, LogCat.SQLite);
-                }
-            }
-        }
-
         public async Task SQLiteDataUpdateCache<T>(T data, object id, int days = 1)
         {
             var entry = await SQLiteDataSelectCache<T>(id, int.MaxValue);
@@ -470,7 +397,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("SQLiteDataUpdateCache", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[SQLiteDataUpdateCache]: {q}", ex, LogCat.SQLite);
                 }
             }
         }

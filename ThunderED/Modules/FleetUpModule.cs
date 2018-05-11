@@ -65,7 +65,7 @@ namespace ThunderED.Modules
             try
             {
                 //Check Fleetup Operations
-                _lastChecked = _lastChecked ?? DateTime.Parse(await SQLiteHelper.SQLiteDataQuery("cacheData", "data", "name", "fleetUpLastChecked"));
+                _lastChecked = _lastChecked ?? DateTime.Parse(await SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastChecked"));
 
                 if (DateTime.Now > _lastChecked)
                 {
@@ -74,7 +74,7 @@ namespace ThunderED.Modules
                     var appKey = SettingsManager.Get("fleetup", "AppKey");
                     var groupID = SettingsManager.Get("fleetup", "GroupID");
                     var channelid = SettingsManager.GetULong("fleetup", "channel");
-                    var lastopid = await SQLiteHelper.SQLiteDataQuery("cacheData", "data", "name", "fleetUpLastPostedOperation");
+                    var lastopid = await SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastPostedOperation");
                     var announcePost = SettingsManager.GetBool("fleetup", "announce_post");
                     var channel = APIHelper.DiscordAPI.GetChannel(channelid);
 

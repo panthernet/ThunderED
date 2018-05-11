@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ThunderED.Helpers;
 
@@ -79,7 +80,11 @@ namespace ThunderED.API
         {
             var data = await SQLiteHelper.SQLiteDataSelectCache<T>(id, days);
             if (data == null) return null;
-            await SQLiteHelper.SQLiteDataUpdateCacheField<T>("lastAccess", DateTime.Now, id);
+            await SQLiteHelper.SQLiteDataUpdate("cache", "lastAccess", DateTime.Now, new Dictionary<string, object>
+            {
+                {"id", id},
+                {"type", typeof(T).Name}
+            });
             return data;
         }
 

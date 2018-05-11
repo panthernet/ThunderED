@@ -15,20 +15,14 @@ namespace ThunderED.Helpers
         //SQLite Query
         #region SQLiteQuery
 
-        internal static async Task<string> SQLiteDataQuery(string table, string field, string whereField, object whereData)
-        {
-            return await Provider?.SQLiteDataQuery(table, field, whereField, whereData);
-        }
-
         internal static async Task<T> SQLiteDataQuery<T>(string table, string field, string whereField, object whereData)
         {
             return await Provider?.SQLiteDataQuery<T>(table, field, whereField, whereData);
         }
 
-
-        internal static async Task<string> SQLiteDataQuery(string table, string field, Dictionary<string, object> where)
+        internal static async Task<T> SQLiteDataQuery<T>(string table, string field, Dictionary<string, object> where)
         {
-            return await Provider?.SQLiteDataQuery(table, field, where);
+            return await Provider?.SQLiteDataQuery<T>(table, field, where);
         }
 
         #endregion
@@ -39,6 +33,12 @@ namespace ThunderED.Helpers
         internal static async Task SQLiteDataUpdate(string table, string setField, object setData, string whereField, object whereData)
         {
             await Provider?.SQLiteDataUpdate(table, setField, setData, whereField, whereData);
+        }
+
+        internal static async Task SQLiteDataUpdate(string table, string setField, object setData, Dictionary<string, object> where)
+        {
+            await Provider?.SQLiteDataUpdate(table, setField, setData, where);
+
         }
 
         internal static async Task SQLiteDataInsertOrUpdate(string table, Dictionary<string, object> values)
@@ -60,11 +60,6 @@ namespace ThunderED.Helpers
             await Provider?.SQLiteDataInsertOrUpdateTokens(notifyToken, userId, mailToken);
         }
 
-        internal static async Task InsertPendingUser(string characterID, string corporationid, string allianceid, string authString, string active, string dateCreated)
-        {
-            await Provider?.InsertPendingUser(characterID, corporationid, allianceid, authString, active, dateCreated);
-        }
-
         internal static async Task<IList<IDictionary<string, object>>> GetAuthUser(ulong uId, bool order = false)
         {
             return await Provider?.GetAuthUser(uId, order);
@@ -80,20 +75,10 @@ namespace ThunderED.Helpers
             await Provider?.RunCommand(query2);
         }
 
-        internal static async Task SQLiteDataInsertOrUpdateLastNotification(string characterID, string notifID)
-        {
-            await Provider?.SQLiteDataInsertOrUpdateLastNotification(characterID, notifID);
-        }
-
         internal static async Task<T> SQLiteDataSelectCache<T>(object whereValue, int maxDays)
             where T: class
         {
             return await Provider?.SQLiteDataSelectCache<T>(whereValue, maxDays);
-        }
-
-        internal static async Task SQLiteDataUpdateCacheField<T>(string setField, object setData, object whereId)
-        {
-            await Provider?.SQLiteDataUpdateCacheField<T>(setField, setData, whereId);
         }
 
         internal static async Task SQLiteDataUpdateCache<T>(T data, object id, int days = 1) 

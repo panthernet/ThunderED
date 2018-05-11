@@ -14,7 +14,7 @@ namespace ThunderED.Helpers
 
         public static async Task<bool> Upgrade()
         {
-            var version = await SQLiteDataQuery("cacheData", "data", "name", "version");
+            var version = await SQLiteDataQuery<string>("cacheData", "data", "name", "version");
             bool fullUpdate = string.IsNullOrEmpty(version);
             var vDbVersion = fullUpdate ? (SettingsManager.IsNew ? new Version(Program.VERSION) : new Version(1,0,0)) : new Version(version);
           //  var vAppVersion = new Version(Program.VERSION);
