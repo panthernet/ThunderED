@@ -117,13 +117,16 @@ namespace ThunderED.Modules
                     var prevMailId = lastMailId;
                     var labelsData= await APIHelper.ESIAPI.GetMailLabels(Reason, id, token);
                     var searchLabels = labelsData.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received");
-                    if (labelsData == null || terms.Count == 0)
+                    var senders = SettingsManager.GetArray<int>(group, "senders");
+
+                    if (senders.Length == 0 && (searchLabels == null || terms.Count == 0))
                     {
-                        await LogHelper.LogWarning($"Mail feed for user {id} has no labels or user has no labels in-game!", Category);
+                        await LogHelper.LogWarning($"Mail feed for user {id} has no labels and senders configured or user has no required labels in-game!", Category);
                         continue;
                     }
+
                     var labelIds = labelsData.labels.Where(a=> terms.Contains(a.name)).Select(a => a.label_id).ToList();
-                    var mails = await APIHelper.ESIAPI.GetMailHeaders(Reason, id, token, 0, labelIds);
+                    var mails = await APIHelper.ESIAPI.GetMailHeaders(Reason, id, token, 0, labelIds, senders);
 
                     foreach (var mailHeader in mails)
                     {
@@ -152,13 +155,15 @@ namespace ThunderED.Modules
 
         private async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string labelNames)
         {
-            var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.@from);
+            var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.from);
+
+            var labels = string.IsNullOrEmpty(labelNames) ? null : $"{LM.Get("mailLabels")}  {labelNames} | ";
 
             var stamp = DateTime.Parse(mail.timestamp).ToString(SettingsManager.Get("config", "shortTimeFormat"));
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(SettingsManager.Get("resources", "imgMail"))
                 .AddField($"{LM.Get("mailSubject")} {mail.subject}",  await PrepareBodyMessage(mail.body))
-                .WithFooter($"{LM.Get("mailLabels")}  {labelNames} | {LM.Get("mailDate")} {stamp}");
+                .WithFooter($"{labels}{LM.Get("mailDate")} {stamp}");
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
             await APIHelper.DiscordAPI.SendMessageAsync(ch, string.Format(LM.Get("mailMsgTitle"), sender?.name), embed.Build());
         }

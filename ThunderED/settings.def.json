@@ -46,6 +46,7 @@
       "group1": {
         "id": 0,
         "labels": [ "discord" ],
+        "senders": [],
         "channel": 0,
       },
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -210,13 +211,15 @@ namespace ThunderED.API
         }
         #endregion
 
-        public async Task<List<JsonClasses.MailHeader>> GetMailHeaders(string reason, string id, string token, int lastMailId, List<int> labels)
+        public async Task<List<JsonClasses.MailHeader>> GetMailHeaders(string reason, string id, string token, int lastMailId, List<int> labels, int[] senders)
         {
             var authHeader = $"Bearer {token}";
             var lastIdText = lastMailId == 0 ? null : $"&last_mail_id={lastMailId}";
-            var mailLabels = string.Join("%2C", labels);
-            
-            return await APIHelper.RequestWrapper<List<JsonClasses.MailHeader>>($"https://esi.tech.ccp.is/latest/characters/{id}/mail/?datasource=tranquility{lastIdText}&labels={mailLabels}&language={_language}", reason, authHeader);
+            var mailLabels = labels == null || labels.Count == 0 ? null : $"&labels={string.Join("%2C", labels)}";
+
+            var data = await APIHelper.RequestWrapper<List<JsonClasses.MailHeader>>(
+                $"https://esi.tech.ccp.is/latest/characters/{id}/mail/?datasource=tranquility{lastIdText}{mailLabels}&language={_language}", reason, authHeader);
+            return senders == null || senders.Length == 0 || data == null ? data : data.Where(a=> senders.Contains(a.from)).ToList();
         }
 
         public async Task<JsonClasses.Mail> GetMail(string reason, string id, string token, int mailId)

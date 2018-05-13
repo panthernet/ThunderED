@@ -103,6 +103,36 @@ namespace ThunderED.Classes
             return Root.GetSection(section).GetSection(section2).GetChildren().ToList();
         }
 
+        public static T[] GetArray<T>(string section, string field)
+        {
+            var f = Root.GetSection(section)?.GetChildren()?.FirstOrDefault(a => a.Key == field);
+            if(f == null) return new T[0];
+
+            return f.GetChildren()?.Select(a=> {
+                var type = typeof(T);
+                if(type == typeof(string))
+                    return (T)(object)a.Value;
+                if(type == typeof(int))
+                    return (T)(object)Convert.ToInt32(a.Value);
+                throw new Exception("Unknown type!");
+            }).ToArray();
+        }
+
+        public static T[] GetArray<T>(IConfigurationSection group, string field)
+        {
+            var f = group?.GetChildren()?.FirstOrDefault(a => a.Key == field);
+            if(f == null) return new T[0];
+
+            return f.GetChildren()?.Select(a=> {
+                var type = typeof(T);
+                if(type == typeof(string))
+                    return (T)(object)a.Value;
+                if(type == typeof(int))
+                    return (T)(object)Convert.ToInt32(a.Value);
+                throw new Exception("Unknown type!");
+            }).ToArray();
+        }
+
         public static T GetSubValue<T>(string section, string section2)
         {
             return (T)(object)Root.GetSection(section).GetSection(section2).Value;

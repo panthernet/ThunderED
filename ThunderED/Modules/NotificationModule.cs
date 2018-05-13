@@ -235,7 +235,7 @@ namespace ThunderED.Modules
                                                         await TimersModule.AddTimer(new TimerItem
                                                         {
                                                             timerChar = "Auto",
-                                                            timerET = (timestamp + timeleft),
+                                                            timerET = (timestamp + TimeSpan.FromTicks(Convert.ToInt64(strTime))).ToString(),
                                                             timerLocation = $"{system?.name} - {structureType.name} - {structure?.name}",
                                                             timerStage = notification.type == "StructureLostShields" ? 2 : 1,
                                                             timerType = 2,

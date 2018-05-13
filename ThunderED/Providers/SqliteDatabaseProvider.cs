@@ -104,7 +104,7 @@ namespace ThunderED.Providers
                 count = 1;
                 foreach (var pair in values)
                 {
-                    querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
+                    querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value ?? DBNull.Value));
                 }
                 try
                 {
@@ -204,7 +204,7 @@ namespace ThunderED.Providers
                                 timerLocation = r.GetString(3),
                                 timerOwner = r.GetString(4),
                                 timerET = r.GetString(5),
-                                timerNotes = r.GetString(6),
+                                timerNotes = r.IsDBNull(6) ? null : r.GetString(6),
                                 timerChar = r.GetString(7),
                                 announce = r.GetInt32(8)
                             };

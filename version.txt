@@ -1,4 +1,6 @@
 v1.1.0
++ Added sender options to mailModule to filter mail by sender IDs
++ Fixed timers handling
 + Fixed 0 big kill channel errors in feeds
 + Refactored SQL methods
 + Updated logging
