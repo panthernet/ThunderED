@@ -1,3 +1,6 @@
+v1.1.1
++ Added includePrivateMail property to mail groups
+
 v1.1.0
 + Added sender options to mailModule to filter mail by sender IDs
 + Fixed timers handling

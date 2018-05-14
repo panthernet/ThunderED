@@ -99,8 +99,9 @@ namespace ThunderED.Modules
                     var channel = Convert.ToUInt64(chString);
 
                     if (string.IsNullOrEmpty(id) || terms == null || terms.Count == 0) continue;
+                    var charId = Convert.ToInt32(id);
 
-                    var rToken = await SQLiteHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", Convert.ToInt32(id));
+                    var rToken = await SQLiteHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", charId);
                     if (string.IsNullOrEmpty(rToken))
                     {
                         continue;
@@ -118,6 +119,7 @@ namespace ThunderED.Modules
                     var labelsData= await APIHelper.ESIAPI.GetMailLabels(Reason, id, token);
                     var searchLabels = labelsData.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received");
                     var senders = SettingsManager.GetArray<int>(group, "senders");
+                    var includePrivate = Convert.ToBoolean(group.GetChildren().FirstOrDefault(a => a.Key == "includePrivateMail")?.Value ?? "false");
 
                     if (senders.Length == 0 && (searchLabels == null || terms.Count == 0))
                     {
@@ -131,6 +133,7 @@ namespace ThunderED.Modules
                     foreach (var mailHeader in mails)
                     {
                         if(mailHeader.mail_id <= lastMailId) continue;
+                        if(!includePrivate && mailHeader.recipients.Count(a => a.recipient_id == charId) > 0) continue;
 
                         var mail = await APIHelper.ESIAPI.GetMail(Reason, id, token, mailHeader.mail_id);
                         var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
