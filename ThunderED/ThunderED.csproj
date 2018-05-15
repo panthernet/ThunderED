@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-	<RuntimeIdentifiers>win10-x64;centos-x64;debian-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win10-x64;centos-x64;debian-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -58,6 +58,9 @@
     </None>
     <None Update="Languages\en-US.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="settings.def.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
