@@ -1,5 +1,7 @@
 v1.1.1
 + Added includePrivateMail property to mail groups
++ Fixed radius kill handling with 2 or more groups
++ Fixed possible radius processing fail
 
 v1.1.0
 + Added sender options to mailModule to filter mail by sender IDs
