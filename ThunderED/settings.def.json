@@ -8,7 +8,7 @@
     "discordAdminRoles": [ "Admins" ],
 	  "discordGeneralChannel": 0,
 	  "comForbiddenChannels": [],
-	  "language": "en-us",
+	  "language": "en-US",
 	  "useEnglishESIOnly": "true",
 
     "moduleWebServer": false,
