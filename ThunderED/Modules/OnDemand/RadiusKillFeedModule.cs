@@ -40,7 +40,7 @@ namespace ThunderED.Modules.OnDemand
                     if(!_lastPosted.ContainsKey(group.Key))
                         _lastPosted.Add(group.Key, 0);
 
-                    if (_lastPosted[group.Key] == kill.package.killID) return;
+                    if (_lastPosted[group.Key] == kill.package.killID) continue;
                     _lastPosted[group.Key] = kill.package.killID;
 
                     var killmailID = kill.package.killmail.killmail_id;
@@ -57,7 +57,7 @@ namespace ThunderED.Modules.OnDemand
                     if (radiusSystemId == 0 && radiusConstId == 0 && radiusRegionId == 0)
                     {
                         await LogHelper.LogError("Radius feed must have systemId, constId or regionId defined!", Category);
-                        return;
+                        continue;
                     }
 
                     if (radiusChannelId == 0)
@@ -85,7 +85,19 @@ namespace ThunderED.Modules.OnDemand
                         switch (mode)
                         {
                             case RadiusMode.Range:
-                                var data = JArray.Parse(await APIHelper.ESIAPI.GetRawRoute(Reason, radiusSystemId, systemId));
+                                var route = await APIHelper.ESIAPI.GetRawRoute(Reason, radiusSystemId, systemId);
+                                if(string.IsNullOrEmpty(route)) continue;
+                                JArray data;
+                                try
+                                {
+                                    data = JArray.Parse(route);
+                                }
+                                catch (Exception ex)
+                                {
+                                    await LogHelper.LogEx("Route parse: " + ex.Message, ex, Category);
+                                    continue;
+                                }
+
                                 routeLength = data.Count - 1;
                                 //not in range
                                 if (routeLength > radius) continue;
@@ -93,13 +105,13 @@ namespace ThunderED.Modules.OnDemand
                                 rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
                                 break;
                             case RadiusMode.Constellation:
-                                if(rSystem.constellation_id != radiusConstId) return;
+                                if(rSystem.constellation_id != radiusConstId) continue;
                                 rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
                                 rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
                                 break;
                             case RadiusMode.Region:
                                 rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
-                                if(rConst == null || rConst.region_id != radiusRegionId) return;
+                                if(rConst == null || rConst.region_id != radiusRegionId) continue;
                                 rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
                                 break;
                         }
