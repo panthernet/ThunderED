@@ -5,6 +5,8 @@
 
 ![](https://ci.appveyor.com/api/projects/status/67i3q6v804sjyse6?svg=true)
 
+### Support with ISK: send donations to Captain Panther character. Thank you!
+
 # Advantages
 * .NET Core powered multi-platform support (Win, Linux, Mac, etc.)
 * Standalone build with no additional software or framework requirements
