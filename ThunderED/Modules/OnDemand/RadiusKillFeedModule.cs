@@ -177,11 +177,11 @@ namespace ThunderED.Modules.OnDemand
                     if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailRadius, dic, radiusChannelId, group.Key))
                     {
                         var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {rSystemName}" : $"{LM.Get("InSmall")} {sysName} ({systemSecurityStatus})";
-                        await APIHelper.DiscordAPI.SendEmbedKillMessage(radiusChannelId, new Color(0x989898), shipID, killmailID, rShipType.name, (long) value,
+                        await APIHelper.DiscordAPI.SendEmbedKillMessage(radiusChannelId, new Color(0x989898), shipID, killmailID, rShipType?.name, (long) value,
                             sysName,
-                            systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
-                            rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-                            rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, jumpsText);
+                            systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType?.name : rVictimCharacter?.name, rVictimCorp?.name,
+                            rVictimAlliance == null ? "" : $"[{rVictimAlliance?.ticker}]", isNPCKill, rAttackerCharacter?.name, rAttackerCorp?.name,
+                            rAttackerAlliance == null ? null : $"[{rAttackerAlliance?.ticker}]", attackers.Length, jumpsText);
                     }
 
                     await LogHelper.LogInfo($"Posting  Radius Kill: {kill.package.killID}  Value: {value:n0} ISK", Category);
