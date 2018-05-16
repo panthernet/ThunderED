@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
+using ThunderED.Modules;
 using LogSeverity = ThunderED.Classes.LogSeverity;
 
 namespace ThunderED.API
@@ -156,6 +157,9 @@ namespace ThunderED.API
         private async Task HandleCommand(SocketMessage messageParam)
         {
             if (!(messageParam is SocketUserMessage message)) return;
+
+            if (SettingsManager.GetBool("config", "moduleIRC"))
+                TickManager.GetModule<IRCModule>()?.SendMessage(message.Channel.Id, message.Author.Username, message.Content);
 
             int argPos = 0;
 
@@ -590,6 +594,12 @@ namespace ThunderED.API
         public IMessageChannel GetChannel(ulong noid)
         {                                                    
             return Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId")).GetTextChannel(noid);
+        }
+
+        public void SubscribeIrcRelay(IRCModule m)
+        {
+            if(m == null) return;
+            m.RelayMessage += async (message, channel) => { await SendMessageAsync(GetChannel(channel), message); };
         }
     }
 }

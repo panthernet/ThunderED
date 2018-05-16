@@ -26,6 +26,7 @@
         Debug,
         FleetUp,
         WebServer,
-        Mail
+        Mail,
+        IRC
     }
 }

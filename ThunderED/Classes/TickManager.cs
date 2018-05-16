@@ -29,6 +29,11 @@ namespace ThunderED.Classes
         private static readonly List<AppModuleBase> Modules = new List<AppModuleBase>();
         private static readonly List<AppModuleBase> OnDemandModules = new List<AppModuleBase>();
 
+        public static T GetModule<T>()
+        {
+            return (T)(object)Modules.FirstOrDefault(a => a.GetType() == typeof(T));
+        }
+
         public static void LoadModules()
         {          
             Modules.Clear();
@@ -61,6 +66,8 @@ namespace ThunderED.Classes
             if (SettingsManager.GetBool("config","moduleMail"))
                 Modules.Add(new MailModule());
 
+            if(SettingsManager.GetBool("config", "moduleIRC"))
+                Modules.Add(new IRCModule());
 
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.GetBool("config","moduleLiveKillFeed"))
@@ -71,6 +78,9 @@ namespace ThunderED.Classes
 
             if (SettingsManager.GetBool("config","moduleAuthWeb"))
                 OnDemandModules.Add(new WebAuthModule());
+
+            if (SettingsManager.GetBool("config", "moduleIRC"))
+                APIHelper.DiscordAPI.SubscribeIrcRelay(GetModule<IRCModule>());
 
         }
 

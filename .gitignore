@@ -6,3 +6,5 @@
 /ThunderED/bin
 /ThunderED/obj
 *.user
+/Jaex.IRCLib/obj
+/Jaex.IRCLib/bin/Debug/netcoreapp2.0

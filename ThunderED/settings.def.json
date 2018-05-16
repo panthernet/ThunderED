@@ -27,6 +27,7 @@
     "moduleStats": true,
     "moduleTimers": false,
     "moduleMail": true,
+    "moduleIRC": false,
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -227,6 +228,7 @@
 	    "StationConquerMsg": 0,
     }
   },
+
   "motd": {
     "motdkeyID": "",
     "motdvCode": "",
@@ -237,6 +239,7 @@
     "updatetopic": false,
     "restricted": 0
   },
+
   "fleetup": {
     "UserId": "",
     "APICode": "",
@@ -246,6 +249,7 @@
     "announce_post": true,
     "announce": [ 5, 60 ]
   },
+
   "jabber": {
     "domain": "example.com",
     "username": "username",
@@ -258,5 +262,36 @@
       "BLOPS": "0000000000000"
     },
     "prepend": "@here"
-  }
+  },
+
+  "ircModule": {
+    "Server": "chat.freenode.net",
+    "Port": 6667,
+    "UseSSL": false,
+    "Password": null,
+    "Nickname": "DefaultUser-TH",
+    "Nickname2": null,
+    "Username": "DefaultUser-TH",
+    "Realname": "realname",
+    "Invisible": true,
+    "AutoReconnect": true,
+    "AutoReconnectDelay": 5000,
+    "AutoRejoinOnKick": false,
+    "QuitReason": "Leaving",
+    "SuppressMOTD": true,
+    "SuppressPing": false,
+    "ConnectCommands": [],
+    "RelayChannels": [
+      {
+        "irc": "#mychannel",
+        "discord": 0,
+        "discordFilters": [ "!auth", "/join" ],
+        "ircFilters": [],
+      },
+    ],
+    "AutoJoinWaitIdentify": false,
+    "AutoResponse": false,
+    "AutoResponseList": [],
+    "AutoResponseDelay": 10000
+  },
 }
