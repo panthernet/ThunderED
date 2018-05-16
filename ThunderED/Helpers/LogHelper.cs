@@ -12,17 +12,17 @@ namespace ThunderED.Helpers
 
         public static async Task LogWarning(string message, LogCat cat = LogCat.Default, bool logConsole = true)
         {
-            await Log(message, LogSeverity.Warning, cat, logConsole);
+            await Log(message, LogSeverity.Warning, cat, logConsole).ConfigureAwait(false);
         }
 
         public static async Task LogError(string message, LogCat cat = LogCat.Default, bool logConsole = true)
         {
-            await Log(message, LogSeverity.Error, cat, logConsole);
+            await Log(message, LogSeverity.Error, cat, logConsole).ConfigureAwait(false);
         }
 
         public static async Task LogInfo(string message, LogCat cat = LogCat.Default, bool logConsole = true, bool logFile = true)
         {
-            await Log(message, LogSeverity.Info, cat, logConsole, logFile);
+            await Log(message, LogSeverity.Info, cat, logConsole, logFile).ConfigureAwait(false);
         }
 
         public static async Task Log(string message, LogSeverity severity = LogSeverity.Info, LogCat cat = LogCat.Default, bool logConsole = true, bool logFile = true)
@@ -85,7 +85,7 @@ namespace ThunderED.Helpers
                 var cc = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
 
-                await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}");
+                await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}").ConfigureAwait(false);
 
                 Console.WriteLine($"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat}]: {message}");
                 Console.ForegroundColor = cc;
@@ -105,12 +105,12 @@ namespace ThunderED.Helpers
             if (!Directory.Exists(_logPath))
                 Directory.CreateDirectory(_logPath);
 
-            await File.AppendAllTextAsync(file, $"{notificationType}{Environment.NewLine}{notificationText}{Environment.NewLine}{Environment.NewLine}");
+            await File.AppendAllTextAsync(file, $"{notificationType}{Environment.NewLine}{notificationText}{Environment.NewLine}{Environment.NewLine}").ConfigureAwait(false);
         }
 
         public static async Task LogDebug(string message, LogCat cat, bool logToConsole = false)
         {
-            await Log(message, LogSeverity.Debug, cat, logToConsole);
+            await Log(message, LogSeverity.Debug, cat, logToConsole).ConfigureAwait(false);
         }
     }
 }

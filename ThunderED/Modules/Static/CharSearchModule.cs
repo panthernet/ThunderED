@@ -108,8 +108,8 @@ namespace ThunderED.Modules.Static
 
             var embed = builder.Build();
 
-            await channel.SendMessageAsync("", false, embed);
-            await LogHelper.LogInfo($"Sending {context.Message.Author} Character Info Request", LogCat.CharSearch);
+            await APIHelper.DiscordAPI.SendMessageAsync(channel, "", embed).ConfigureAwait(false);
+            await LogHelper.LogInfo($"Sending {context.Message.Author} Character Info Request", LogCat.CharSearch).ConfigureAwait(false);
 
             await Task.CompletedTask;
         }

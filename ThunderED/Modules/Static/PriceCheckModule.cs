@@ -65,7 +65,7 @@ namespace ThunderED.Modules.Static
 
                         if (!itemName.IsSuccessStatusCode)
                         {
-                            await channel.SendMessageAsync($"{context.Message.Author.Mention} {LM.Get("ESIFailure")}");
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(context, channel, LM.Get("ESIFailure")).ConfigureAwait(false);
                             await Task.CompletedTask;
                         }
 
@@ -93,7 +93,7 @@ namespace ThunderED.Modules.Static
                             {
                                 var embed2 = builder.Build();
 
-                                await channel.SendMessageAsync("", false, embed2).ConfigureAwait(false);
+                                await APIHelper.DiscordAPI.SendMessageAsync(channel, "", embed2).ConfigureAwait(false);
 
                                 builder.Fields.Clear();
                                 count = 0;
@@ -103,7 +103,7 @@ namespace ThunderED.Modules.Static
                         }
 
                         var embed = builder.Build();
-                        await channel.SendMessageAsync("", false, embed).ConfigureAwait(false);
+                        await APIHelper.DiscordAPI.SendMessageAsync(channel, "", embed).ConfigureAwait(false);
                     }
                     else
                     {

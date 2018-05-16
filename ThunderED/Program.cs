@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -12,6 +13,9 @@ namespace ThunderED
 
         private static void Main(string[] args)
         {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
             //load settings
             SettingsManager.Prepare();
             LogHelper.LogInfo($"ThunderED v{VERSION} is running!").GetAwaiter().GetResult();
@@ -26,7 +30,12 @@ namespace ThunderED
             }
             //update config settings
             if (SettingsManager.GetBool("config", "moduleNotificationFeed"))
-                SettingsManager.NextNotificationCheck = DateTime.Parse(SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult());
+            {
+                var dateStr = SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult();
+                if(DateTime.TryParseExact(dateStr, new [] {"dd.MM.yyyy HH:mm:ss", $"{CultureInfo.InvariantCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.InvariantCulture.DateTimeFormat.LongTimePattern}"}, CultureInfo.InvariantCulture.DateTimeFormat, DateTimeStyles.None, out var x))
+                    SettingsManager.NextNotificationCheck = x;
+            }
+
             //load language
             LM.Load().GetAwaiter().GetResult();
             //load APIs

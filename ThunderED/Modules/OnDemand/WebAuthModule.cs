@@ -235,12 +235,12 @@ namespace ThunderED.Modules.OnDemand
 
                 if (!responce.Any())
                 {
-                    await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, $"{await APIHelper.DiscordAPI.GetMentionedUserString(context)} {LM.Get("authHasInvalidKey")}");
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel, LM.Get("authHasInvalidKey"), true).ConfigureAwait(false);
                 }
                 else switch (responce[0]["active"].ToString())
                 {
                     case "0":
-                        await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, $"{await APIHelper.DiscordAPI.GetMentionedUserString(context)} {LM.Get("authHasInactiveKey")}");
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey"), true).ConfigureAwait(false);
                         break;
                     case "1":
                         var authgroups = SettingsManager.GetSubList("auth", "authgroups");
@@ -281,8 +281,8 @@ namespace ThunderED.Modules.OnDemand
                         }
                         else
                         {
-                            await context.Channel.SendMessageAsync(LM.Get("ESIFailure"));
-                            await LogHelper.LogError("ESI Failure", LogCat.AuthWeb);
+                            await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, LM.Get("ESIFailure")).ConfigureAwait(false);
+                            await LogHelper.LogError("ESI Failure", LogCat.AuthWeb).ConfigureAwait(false);
                         }
 
                         break;
@@ -290,7 +290,7 @@ namespace ThunderED.Modules.OnDemand
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx($"Error: {ex.Message}", ex, LogCat.AuthWeb);
+                await LogHelper.LogEx($"Error: {ex.Message}", ex, LogCat.AuthWeb).ConfigureAwait(false);
             }
         }
     }

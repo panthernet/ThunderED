@@ -19,7 +19,8 @@ namespace ThunderED.Classes
             var guildID = SettingsManager.GetULong("config", "discordGuildId");
             var discordGuild = APIHelper.DiscordAPI.Client.Guilds.FirstOrDefault(x => x.Id == guildID);
             var channel = discordGuild?.GetTextChannel(channelId);
-            if (channel != null) await channel.SendMessageAsync(message, false, embed).ConfigureAwait(false);
+            if (channel != null)
+                await APIHelper.DiscordAPI.SendMessageAsync(channel, message, embed).ConfigureAwait(false);
             return true;
         }
 

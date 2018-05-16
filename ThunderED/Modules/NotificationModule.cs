@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -187,7 +188,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                     break;
                                                 case "StructureWentLowPower":
                                                 case "StructureWentHighPower":
@@ -207,7 +208,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
                                                 case "StructureLostArmor":
@@ -227,7 +228,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
 
                                                     if (SettingsManager.GetBool("config", "moduleTimers") &&
                                                         SettingsManager.GetBool("timersModule", "autoAddTimerForReinforceNotifications"))
@@ -265,7 +266,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
                                                 case "StructureAnchoring":
@@ -284,7 +285,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
                                                 case "StructureFuelAlert":
@@ -301,7 +302,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                     break;
                                                 case "MoonminingExtractionFinished":
                                                     //"text": "autoTime: 131632776620000000\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 1003894.7944164276\n  46676: 3861704.652392864\n  46681: 1934338.7763798237\n  46687: 5183861.7768108845\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
@@ -327,7 +328,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                     break;
                                                 case "MoonminingLaserFired":
                                                     //"text": "firedBy: 91684736\nfiredByLink: <a href=\"showinfo:1386\/\/91684736\">Mike Myzukov<\/a>\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 241789.6056930224\n  46676: 930097.5066294272\n  46681: 465888.4702051679\n  46687: 1248541.084139049\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
@@ -344,7 +345,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                     break;
                                                 case "CharLeftCorpMsg":
                                                 case "CharAppAcceptMsg":
@@ -362,7 +363,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
 
@@ -375,7 +376,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
 
@@ -391,7 +392,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
                                                 case "StationServiceDisabled":
@@ -404,7 +405,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
 
@@ -423,7 +424,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
 
@@ -441,7 +442,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
 
@@ -454,7 +455,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
 
@@ -507,7 +508,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
                                                 case "AllyJoinedWarAggressorMsg":
@@ -524,7 +525,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
                                                 case "AllyJoinedWarDefenderMsg":
@@ -558,7 +559,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
                                                 case "AllyJoinedWarAllyMsg":
@@ -577,7 +578,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
                                                 case "FWAllianceWarningMsg":
@@ -601,7 +602,7 @@ namespace ThunderED.Modules
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", embed).ConfigureAwait(false);
                                                 }
                                                     break;
                                             }
@@ -619,7 +620,7 @@ namespace ThunderED.Modules
                         }
                     }
                     var interval = SettingsManager.GetShort("notifications", "checkIntervalInMinutes");
-                    await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", DateTime.Now.AddMinutes(interval).ToString(), "name", "nextNotificationCheck");
+                    await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
                     _nextNotificationCheck = DateTime.Now.AddMinutes(interval);
                     await LogHelper.LogInfo("Check complete", Category, LogToConsole, false);
                 }

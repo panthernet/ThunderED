@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -41,20 +42,6 @@ namespace ThunderED.API
 
         }
 
-        public async Task SendMessageAsync(ICommandContext context, string message, Embed embed = null)
-        {
-            var channel = context?.Channel;
-            if (context == null)
-            {
-                var guildID = SettingsManager.GetULong("config", "discordGuildId");
-                var chID = SettingsManager.GetULong("config", "discordGeneralChannel");
-                var discordGuild = Client.GetGuild(guildID);
-                channel = discordGuild.GetTextChannel(chID);
-            }
-
-            await channel.SendMessageAsync(message, false, embed);
-        }
-
         public async Task ReplyMessageAsync(ICommandContext context, string message)
         {
             await ReplyMessageAsync(context, message, false);
@@ -69,18 +56,57 @@ namespace ThunderED.API
                 message = $"{mention}, {message}";
             }
 
-            await context.Message.Channel.SendMessageAsync(message);
+            await ReplyMessageAsync(context, message, null);
+        }
+
+        public async Task ReplyMessageAsync(ICommandContext context, IMessageChannel channel, string message, bool mentionSender = false)
+        {
+            if (context == null || channel == null) return;
+            if (mentionSender)
+            {
+                var mention = await GetMentionedUserString(context);
+                message = $"{mention}, {message}";
+            }
+
+            try
+            {
+                await channel.SendMessageAsync($"{message}");
+            }
+            catch (HttpException ex)
+            {
+                if (ex.DiscordCode == 50013)
+                    await LogHelper.LogError($"The bot don't have rights to send message to {context.Message.Channel.Id} ({context.Message.Channel.Name}) channel!");
+                throw;
+            }
         }
 
         public async Task ReplyMessageAsync(ICommandContext context, string message, Embed embed)
         {
             if (context?.Message == null) return;
-            await context.Message.Channel.SendMessageAsync($"{message}", false, embed);
+            try
+            {
+                await context.Message.Channel.SendMessageAsync($"{message}", false, embed).ConfigureAwait(false);
+            }
+            catch (HttpException ex)
+            {
+                if (ex.DiscordCode == 50013)
+                    await LogHelper.LogError($"The bot don't have rights to send message to {context.Message.Channel.Id} ({context.Message.Channel.Name}) channel!");
+                throw;
+            }
         }
 
-        public async Task SendMessageAsync(IMessageChannel channel, string message, Embed embed = null)
+        public async Task<IUserMessage> SendMessageAsync(IMessageChannel channel, string message, Embed embed = null)
         {
-            await channel.SendMessageAsync(message, false, embed);
+            try
+            {
+                return await channel.SendMessageAsync(message, false, embed);
+            }
+            catch (HttpException ex)
+            {
+                if (ex.DiscordCode == 50013)
+                    await LogHelper.LogError($"The bot don't have rights to send message to {channel.Id} ({channel.Name}) channel!");
+                throw;
+            }
         }
 
         public async Task<string> GetMentionedUserString(ICommandContext context)
@@ -157,9 +183,9 @@ namespace ThunderED.API
                 var channel = arg.Guild.DefaultChannel;
                 var authurl = $"http://{SettingsManager.Get("webServerModule", "webExternalIP")}:{SettingsManager.Get("webServerModule", "webExternalPort")}/auth.php";
                 if (!string.IsNullOrWhiteSpace(authurl))
-                    await channel.SendMessageAsync(string.Format(LM.Get("welcomeMessage"),arg.Mention,authurl));
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, string.Format(LM.Get("welcomeMessage"),arg.Mention,authurl));
                 else
-                    await channel.SendMessageAsync(string.Format(LM.Get("welcomeMessage"), arg.Mention));
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, string.Format(LM.Get("welcomeMessage"), arg.Mention));
             }
         }
 
@@ -316,7 +342,7 @@ namespace ThunderED.API
                             if (logchan != 0)
                             {
                                 var channel = discordGuild.GetTextChannel(logchan);
-                                await channel.SendMessageAsync($"{LM.Get("renewingRoles")} {u.Username}");
+                                await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{LM.Get("renewingRoles")} {u.Username}");
                             }
 
                             await LogHelper.LogInfo($"Adjusting roles for {u.Username}", LogCat.AuthCheck);
@@ -373,7 +399,7 @@ namespace ThunderED.API
                             try
                             {
                                 var channel = discordGuild.GetTextChannel(logchan);
-                                await channel.SendMessageAsync($"{LM.Get("resettingRoles")} {u.Username}");
+                                await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{LM.Get("resettingRoles")} {u.Username}");
                                 await LogHelper.LogInfo($"Resetting roles for {u.Username}", LogCat.AuthCheck);
                                 await u.RemoveRolesAsync(rroles);
                             }
@@ -414,8 +440,8 @@ namespace ThunderED.API
             var guildID = SettingsManager.GetULong("config", "discordGuildId");
             var discordGuild = Client.Guilds.FirstOrDefault(x => x.Id == guildID);
             var channel = discordGuild?.GetTextChannel(channelId);
-            if (channel != null) 
-                await channel.SendMessageAsync(msg, false, embed).ConfigureAwait(false);
+            if (channel != null)
+                await SendMessageAsync(channel, msg, embed).ConfigureAwait(false);
         }
 
         internal async Task AuthGrantRoles(ICommandContext context, string characterID, Dictionary<string, string> corps, Dictionary<string, string> alliance, JsonClasses.CharacterData characterData, JsonClasses.CorporationData corporationData, string remainder)
@@ -455,7 +481,7 @@ namespace ThunderED.API
                         if (alertChannel != 0)
                         {
                             var channel = discordGuild.GetTextChannel(alertChannel);
-                            await channel.SendMessageAsync(string.Format(LM.Get("grantRolesMessage"), characterData.name));
+                            await SendMessageAsync(channel, string.Format(LM.Get("grantRolesMessage"), characterData.name)).ConfigureAwait(false);
                         }
 
                         await discordUser.AddRoleAsync(rolesToAdd.First());

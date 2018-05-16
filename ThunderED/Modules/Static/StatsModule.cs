@@ -83,13 +83,13 @@ namespace ThunderED.Modules.Static
                         date = today.Subtract(TimeSpan.FromDays(1));
                         var msg =
                             $"**{string.Format(LM.Get("dailyStats"), date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
-                        await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), msg);
+                        await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), msg).ConfigureAwait(false);
                     }
                     else
                     {
                         var msg =
                             $"**{string.Format(LM.Get("dailyStats"), date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg, true);
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg, true).ConfigureAwait(false);
                     }
                 }
                 else

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -47,7 +48,7 @@ namespace ThunderED.Modules
 
 
             var embed = builder.Build();
-            var sendres = await channel.SendMessageAsync(message, false, embed);
+            var sendres = await APIHelper.DiscordAPI.SendMessageAsync(channel, message, embed);
             await LogHelper.LogInfo($"Posting Fleetup OP {name} ({operation.OperationId})", LogCat.FleetUp);
             if (addReactions)
             {
@@ -65,7 +66,11 @@ namespace ThunderED.Modules
             try
             {
                 //Check Fleetup Operations
-                _lastChecked = _lastChecked ?? DateTime.Parse(await SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastChecked"));
+                
+                var dateStr = await SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastChecked");
+                if (DateTime.TryParseExact(dateStr, new[] {"dd.MM.yyyy HH:mm:ss", $"{CultureInfo.InvariantCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.InvariantCulture.DateTimeFormat.LongTimePattern}"},
+                    CultureInfo.InvariantCulture.DateTimeFormat, DateTimeStyles.None, out var time))
+                    _lastChecked = _lastChecked ?? time;
 
                 if (DateTime.Now > _lastChecked)
                 {
@@ -82,7 +87,7 @@ namespace ThunderED.Modules
                     {
                         await LogHelper.LogInfo(LM.Get("fuNeedSetup"), Category);
                         _lastChecked = DateTime.Now;
-                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.ToString(), "name", "fleetUpLastChecked");
+                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
                         return;
                     }
 
@@ -90,7 +95,7 @@ namespace ThunderED.Modules
                     if (result == null)
                     {
                         _lastChecked = DateTime.Now;
-                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.ToString(), "name", "fleetUpLastChecked");
+                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
                         return;
                     }
 
@@ -121,7 +126,7 @@ namespace ThunderED.Modules
                                 false);
 
                         _lastChecked = DateTime.Now;
-                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.ToString(), "name", "fleetUpLastChecked");
+                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
                     }
                 }
             }
@@ -150,7 +155,7 @@ namespace ThunderED.Modules
 
                 if (!result.Data.Any())
                 {
-                    await context.Message.Channel.SendMessageAsync($"{context.Message.Author.Mention}, No Ops Scheduled");
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, $"No Ops Scheduled", true);
                 }
                 else if (amount == 0)
                 {

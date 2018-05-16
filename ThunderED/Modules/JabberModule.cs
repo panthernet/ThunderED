@@ -89,7 +89,7 @@ namespace ThunderED.Modules
                             var prepend = SettingsManager.Get("jabber", "prepend");
                             var channel = APIHelper.DiscordAPI.Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId")).GetTextChannel(Convert.ToUInt64(filter.Value));
                             filtered = true;
-                            await channel.SendMessageAsync($"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```");
+                            await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```").ConfigureAwait(false);
                         }
                     }
                 }
@@ -98,7 +98,7 @@ namespace ThunderED.Modules
                 {
                     var prepend = SettingsManager.Get("jabber", "prepend");
                     var channel = APIHelper.DiscordAPI.Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId")).GetTextChannel(SettingsManager.GetULong("jabber", "defchan"));
-                    await channel.SendMessageAsync($"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```");
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```").ConfigureAwait(false);
                 }
             }
         }

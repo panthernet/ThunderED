@@ -23,7 +23,7 @@ namespace ThunderED.Modules.Static
             var guilds = APIHelper.DiscordAPI.Client.Guilds.Count;
             var totalUsers = APIHelper.DiscordAPI.Client.Guilds.Aggregate(0, (current, guild) => current + guild.Users.Count);
 
-            await channel.SendMessageAsync($"{context.User.Mention},{Environment.NewLine}{Environment.NewLine}" +
+            await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{context.User.Mention},{Environment.NewLine}{Environment.NewLine}" +
                                            $"```ThunderED v{Program.VERSION} - Thunder EVE Discord Bot{Environment.NewLine}{Environment.NewLine}" +
                                            $"Developer: panthernet (In-game Name: Captain PantheR){Environment.NewLine}" +
                                            $"Initial code based on OpuxV1 by Jimy06{Environment.NewLine}{Environment.NewLine}" +
@@ -32,7 +32,7 @@ namespace ThunderED.Modules.Static
                                            $"Statistics:{Environment.NewLine}" +
                                            $"Memory Used: {Math.Round(memoryUsed.LargestWholeNumberValue, 2)} {memoryUsed.LargestWholeNumberSymbol}{Environment.NewLine}" +
                                            $"Total Connected Guilds: {guilds}{Environment.NewLine}" +
-                                           $"Total Users Seen: {totalUsers}```");
+                                           $"Total Users Seen: {totalUsers}```").ConfigureAwait(false);
             await Task.CompletedTask;
         }
     }
