@@ -172,6 +172,7 @@ namespace ThunderED.Modules.OnDemand
                                 {"allianceID", allianceID},
                                 {"authString", uid},
                                 {"active", "1"},
+                                {"groups", "[]"},
                                 {"dateCreated", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}
                             });
 

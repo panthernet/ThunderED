@@ -2,10 +2,14 @@ v1.1.1
 + Added includePrivateMail property to mail groups
 + Added Docker support
 + Added additional messages when bot don't have access rights in Discord channel
-+ Improved performance
-+ Unified date format handling
++ Added missing AppKey parameter to fleetup default config
++ Improved overall bot performance
++ Improved fleetUp module error handling
++ Fixed critical error in WebAuth for pending users
 + Fixed radius kill handling with 2 or more groups
 + Fixed possible radius processing fail
++ Some localization fixes
++ Unified date format handling
 
 v1.1.0
 + Added sender options to mailModule to filter mail by sender IDs
