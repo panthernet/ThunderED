@@ -240,6 +240,7 @@
   "fleetup": {
     "UserId": "",
     "APICode": "",
+    "AppKey": "",
     "GroupID": "",
     "channel": 0,
     "announce_post": true,

@@ -137,7 +137,7 @@
   "killFeedString": "{0}{1} {2:n0} ISK* - {3}<{4}{5}> в {6}({7}) вр. {8}",
   "killFeedBy": " убит {0}<{1}{2}> ({3})",
   "radiusInfoHeader": "Радиус",
-  "fuNeedSetup": "Настройка FlettUp не завершена! Проверьте файл настроек, секцию fleetup!",
+  "fuNeedSetup": "Настройка FleetUp не завершена! Проверьте файл настроек settings.json, секцию fleetup!",
   "fuNotification": "Оповещение FleetUp",
   "fuFormUpTime": "Время Сбора",
   "fuFormUpSystem": "Система Сбора",

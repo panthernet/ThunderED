@@ -81,9 +81,10 @@ namespace ThunderED.Modules
                     var channelid = SettingsManager.GetULong("fleetup", "channel");
                     var lastopid = await SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastPostedOperation");
                     var announcePost = SettingsManager.GetBool("fleetup", "announce_post");
-                    var channel = APIHelper.DiscordAPI.GetChannel(channelid);
+                    var channel = channelid == 0 ? null : APIHelper.DiscordAPI.GetChannel(channelid);
 
-                    if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(apiCode) || string.IsNullOrWhiteSpace(groupID))
+                    if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(apiCode) || string.IsNullOrWhiteSpace(groupID) || string.IsNullOrWhiteSpace(appKey)
+                        || channel == null)
                     {
                         await LogHelper.LogInfo(LM.Get("fuNeedSetup"), Category);
                         _lastChecked = DateTime.Now;
