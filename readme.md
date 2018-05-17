@@ -9,7 +9,7 @@
 
 ## Advantages
 * .NET Core powered multi-platform support (Win, Linux, Mac, etc.)
-* Standalone build with no additional software or framework requirements
+* Standalone build with no additional software or framework requirements (Docker compatible)
 * 100% ESI API
 * Multiple language support
 * Web templates and rich settings
