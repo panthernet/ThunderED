@@ -24,7 +24,6 @@
 * Reliable Kill Feed - feed killmails for selected corps or alliances in a reliable way using ZKill API
 * Radius Kill Feed - feed live killmails in a radius around selected systems, constellations and regions into multiple channels
 * Notifications Feed - feed EVE notifications from different characters into multiple channels
-* Jabber Integration - connect with jabbers for cross messaging support
 * Char & corp search - fetch information about characters and corps using special commands
 * EVE Time - get EVE Online time
 * Price Check - check relevant prices on item in all major trade hubs using special commands
@@ -32,6 +31,7 @@
 * FleetUP integration - announces and reminders for FleetUp ops
 * Timers - built-in web server for important timers and events. Auto add timers for reinforced structure events!
 * Mail Feeder - feed mail by labels from authenticated characters 
+* Jabber relay - connect with jabbers for cross messaging support
 * (BETA) IRC relay - exchange messages between IRC & Discord channels
 * (BETA) Telegram relay - exchange messages between Telegram & Discord channels
 * (?) Channel MOTD integration - could be done by request
