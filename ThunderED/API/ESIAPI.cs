@@ -78,12 +78,12 @@ namespace ThunderED.API
 
         internal async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, object id)
         {
-            return await APIHelper.RequestWrapper<JsonClasses.ConstellationData>($"https://esi.tech.ccp.is/latest/universe/constellations/{id}/?datasource=tranquility&language={_language}", reason);
+            return await GetEntry<JsonClasses.ConstellationData>($"https://esi.tech.ccp.is/latest/universe/constellations/{id}/?datasource=tranquility&language={_language}", reason, id, 180);
         }
 
         internal async Task<JsonClasses.RegionData> GetRegionData(string reason, object id)
         {
-            return await APIHelper.RequestWrapper<JsonClasses.RegionData>($"https://esi.tech.ccp.is/latest/universe/regions/{id}/?datasource=tranquility&language={_language}", reason);
+            return await GetEntry<JsonClasses.RegionData>($"https://esi.tech.ccp.is/latest/universe/regions/{id}/?datasource=tranquility&language={_language}", reason, id, 180);
         }
 
 
@@ -110,7 +110,7 @@ namespace ThunderED.API
 
         internal async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
-            return await GetEntry<JsonClasses.SystemName>($"https://esi.tech.ccp.is/latest/universe/systems/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
+            return await GetEntry<JsonClasses.SystemName>($"https://esi.tech.ccp.is/latest/universe/systems/{id}/?datasource=tranquility&language={_language}", reason, id, 180,
                 forceUpdate, noCache);
         }
 

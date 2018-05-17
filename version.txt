@@ -1,6 +1,7 @@
 v1.1.2
 + Added new module for IRC connection. Now you can have two-way Discord message relay with IRC.
 + Added new module for Telegram connection. Now you can have two-way Discord message relay with Telegram.
++ Added regions and constellations cache
 + Fixed welcome message translation
 + Fixed double bigkill messages in reliable kill feed
 
