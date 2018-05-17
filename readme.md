@@ -7,7 +7,7 @@
 
 ### Support with ISK: send donations to Captain Panther character. Thank you!
 
-# Advantages
+## Advantages
 * .NET Core powered multi-platform support (Win, Linux, Mac, etc.)
 * Standalone build with no additional software or framework requirements
 * 100% ESI API
@@ -17,7 +17,22 @@
 * Highly customizable Message templates for killmails without any source-code modifications
 * Modular design for new extensions such as templates, modules and DB support
 
-# Supported Modules
+## Effective Corp and Alliance Management
+With this bot you will have tools to:
+* Allow only authed ingame characters into your Discord group
+* Receive important notifications from many alliances and corporations
+* Know when your citadels are under attack or low on fuel
+* Know when moon extraction is finished or moon chunk has been blown
+* Know when your sov space is in danger or war has been declared
+* Know who joins or leaves corporations in your alliance
+* Synchronize important EVE mails with Discord
+* Synchronize your ops in FleetUp to remind them in Discord
+* Manage important structure or ops timers with in-time reminders
+* Monitor recent killmails in your space
+* Query any char or corp info including the cyno and danger probability
+* Receive pings from external messengers like Jabber, IRC, Telegram
+
+## Supported Modules
 * Web Auth - authenticate EVE characters in Discord using built-in web server
 * Auth Check - check users access rights and strip permissions when char leaves your corp or ally
 * Live Kill Feed - feed live EVE killmails using ZKill RedisQ into multiple channels 
