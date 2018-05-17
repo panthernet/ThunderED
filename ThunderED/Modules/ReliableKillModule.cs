@@ -166,7 +166,7 @@ namespace ThunderED.Modules
 
                             if (isBigKill && channel != c && sendBigToGeneral)
                             {
-                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, channel, discordGroupName))
+                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
                                 {
                                     await APIHelper.DiscordAPI.SendEmbedKillMessage(channel, new Color(0xFF0000), shipID, killmailID, rShipType?.name, (long) value, sysName,
                                         systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType?.name : rVictimCharacter?.name, rVictimCorp?.name,
@@ -194,7 +194,7 @@ namespace ThunderED.Modules
 
                             if (isBigKill && channel != c && sendBigToGeneral)
                             {
-                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, channel, discordGroupName))
+                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
                                 {
                                     await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), shipID, killmailID, rShipType.name, (long) value, sysName,
                                         systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
