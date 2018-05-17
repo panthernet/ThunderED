@@ -33,6 +33,7 @@
 * Timers - built-in web server for important timers and events. Auto add timers for reinforced structure events!
 * Mail Feeder - feed mail by labels from authenticated characters 
 * (BETA) IRC relay - exchange messages between IRC & Discord channels
+* (BETA) Telegram relay - exchange messages between Telegram & Discord channels
 * (?) Channel MOTD integration - could be done by request
 
 # Build Requirements
