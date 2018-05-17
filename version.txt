@@ -1,5 +1,6 @@
 v1.1.2
 + Added new module for IRC connection. Now you can have two-way Discord message relay with IRC.
++ Fixed welcome message translation
 
 v1.1.1
 + Added includePrivateMail property to mail groups

@@ -112,7 +112,7 @@
   "yearlyStats":  "{0} stats for {1}",
   "renewingRoles":  "Renewing roles for",
   "resettingRoles":  "Resetting roles for",
-  "welcomeAuthMessage":  "Welcome {0}, please register here {1} to get access. Send !help for available commands list!",
+  "welcomeMessage":  "Welcome {0}, please register here {1} to get access. Send !help for available commands list!",
   "welcomeAuth":  "Welcome, {0}!", 
   "grantRolesMessage":  "Granting roles for {0}" ,
   "msgAuthSuccess":  "{0},:white_check_mark: **Success**: {1} successfully authenticated.", 

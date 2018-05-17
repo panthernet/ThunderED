@@ -8,3 +8,4 @@
 *.user
 /Jaex.IRCLib/obj
 /Jaex.IRCLib/bin/Debug/netcoreapp2.0
+/Jaex.IRCLib/bin/Release/netcoreapp2.0

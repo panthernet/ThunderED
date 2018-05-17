@@ -189,7 +189,7 @@ namespace ThunderED.API
                 if (!string.IsNullOrWhiteSpace(authurl))
                     await APIHelper.DiscordAPI.SendMessageAsync(channel, string.Format(LM.Get("welcomeMessage"),arg.Mention,authurl));
                 else
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, string.Format(LM.Get("welcomeMessage"), arg.Mention));
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, string.Format(LM.Get("welcomeAuth"), arg.Mention));
             }
         }
 
