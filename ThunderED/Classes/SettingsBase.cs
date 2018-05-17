@@ -22,18 +22,18 @@
 
 #endregion License Information (GPL v3)
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System;
-using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using ThunderED.Classes.IRC.Helpers;
 
-namespace Jaex.IRCLib
+namespace ThunderED.Classes
 {
     public abstract class SettingsBase<T> where T : SettingsBase<T>, new()
     {
-        [Browsable(false), JsonIgnore]
+        [JsonIgnore]
         public string FilePath { get; private set; }
 
         public bool Save(string filePath)
@@ -83,7 +83,7 @@ namespace Jaex.IRCLib
                 {
                     lock (obj)
                     {
-                        Helpers.CreateDirectoryFromFilePath(filePath);
+                        IRC.Helpers.Helpers.CreateDirectoryFromFilePath(filePath);
 
                         string tempFilePath = filePath + ".temp";
 

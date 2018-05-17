@@ -69,6 +69,9 @@ namespace ThunderED.Classes
             if(SettingsManager.GetBool("config", "moduleIRC"))
                 Modules.Add(new IRCModule());
 
+            if(SettingsManager.GetBool("config", "moduleTelegram"))
+                Modules.Add(new TelegramModule());
+
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.GetBool("config","moduleLiveKillFeed"))
                 OnDemandModules.Add(new LiveKillFeedModule());
@@ -79,8 +82,11 @@ namespace ThunderED.Classes
             if (SettingsManager.GetBool("config","moduleAuthWeb"))
                 OnDemandModules.Add(new WebAuthModule());
 
+            //subscriptions
             if (SettingsManager.GetBool("config", "moduleIRC"))
-                APIHelper.DiscordAPI.SubscribeIrcRelay(GetModule<IRCModule>());
+                APIHelper.DiscordAPI.SubscribeRelay(GetModule<IRCModule>());
+            if (SettingsManager.GetBool("config", "moduleTelegram"))
+                APIHelper.DiscordAPI.SubscribeRelay(GetModule<TelegramModule>());
 
         }
 

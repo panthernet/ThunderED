@@ -25,7 +25,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Jaex.IRCLib
+namespace ThunderED.Classes.IRC
 {
     public class UserInfo
     {

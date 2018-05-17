@@ -31,7 +31,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Jaex.IRCLib
+namespace ThunderED.Classes.IRC
 {
     public class IRC : IDisposable
     {
@@ -228,7 +228,7 @@ namespace Jaex.IRCLib
         {
             if (message.StartsWith("msg ", StringComparison.InvariantCultureIgnoreCase))
             {
-                var parameters = Helpers.SplitCommand(message, 3);
+                var parameters = Helpers.Helpers.SplitCommand(message, 3);
 
                 if (parameters != null)
                 {
@@ -608,7 +608,7 @@ namespace Jaex.IRCLib
 
                             if (int.TryParse(messageInfo.Parameters[3], out var signOnTime))
                             {
-                                userInfo.SignOnDate = Helpers.UnixToDateTime(signOnTime).ToLocalTime();
+                                userInfo.SignOnDate = Helpers.Helpers.UnixToDateTime(signOnTime).ToLocalTime();
                             }
                         }
                     }

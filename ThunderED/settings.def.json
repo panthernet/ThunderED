@@ -28,6 +28,7 @@
     "moduleTimers": false,
     "moduleMail": true,
     "moduleIRC": false,
+    "moduleTelegram": false,
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -294,4 +295,16 @@
     "AutoResponseList": [],
     "AutoResponseDelay": 10000
   },
+
+  "telegramModule": {
+    "token": "YOUR TOKEN",
+    "RelayChannels": [
+      {
+        "telegram": 0,
+        "discord": 0,
+        "discordFilters": [ "!auth", "/join" ],
+        "telegramFilters": [],
+      }
+    ],
+  }
 }

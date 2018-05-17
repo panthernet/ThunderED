@@ -22,39 +22,20 @@
 
 #endregion License Information (GPL v3)
 
-namespace Jaex.IRCLib
+namespace ThunderED.Classes.IRC
 {
-    public enum IRCAutoResponseType
+    public static class IRCText
     {
-        Contains,
-        StartsWith,
-        ExactMatch
-    }
+        public const string BOLD = "\x02";
 
-    public enum IRCUserType
-    {
-        Me,
-        User,
-        Server
-    }
+        public const string ITALIC = "\x1D";
 
-    public enum IRCColors
-    {
-        White = 0,
-        Black = 1,
-        Blue = 2,
-        Green = 3,
-        LightRed = 4,
-        Brown = 5,
-        Purple = 6,
-        Orange = 7,
-        Yellow = 8,
-        LightGreen = 9,
-        Cyan = 10,
-        LightCyan = 11,
-        LightBlue = 12,
-        Pink = 13,
-        Grey = 14,
-        LightGrey = 15
+        public const string UNDERLINE = "\x1F";
+
+        public const string RESET = "\x0F";
+
+        public static string Color(IRCColors foregroundColor) => $"\x03{(int)foregroundColor:00}";
+
+        public static string Color(IRCColors foregroundColor, IRCColors backgroundColor) => $"\x03{(int)foregroundColor:00},{(int)backgroundColor:00}";
     }
 }

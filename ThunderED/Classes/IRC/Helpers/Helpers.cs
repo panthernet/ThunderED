@@ -28,7 +28,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Jaex.IRCLib
+namespace ThunderED.Classes.IRC.Helpers
 {
     public static class Helpers
     {

@@ -14,6 +14,9 @@ namespace ThunderED.Classes
     /// </summary>
     public static partial class SettingsManager
     {
+        
+        public static bool IsNew { get; set; }
+        public static string FileSettingsPath;
         public static string FileTemplateMain;
         public static string FileTemplateAuth;
         public static string FileTemplateAuth2;
@@ -33,6 +36,8 @@ namespace ThunderED.Classes
         {
             UpdateSettings();
 
+            FileSettingsPath = Path.Combine(RootDirectory, "settings.json");
+
             FileTemplateMain = Path.Combine(RootDirectory, "Templates", "main.html");
             FileTemplateAuth = Path.Combine(RootDirectory, "Templates", "auth.html");
             FileTemplateAuth2 = Path.Combine(RootDirectory, "Templates", "auth2.html");
@@ -43,7 +48,6 @@ namespace ThunderED.Classes
             FileTemplateMailAuthSuccess = Path.Combine(RootDirectory, "Templates", "mailAuthSuccess.html");
         }
 
-        public static bool IsNew { get; set; }
 
         static SettingsManager()
         {

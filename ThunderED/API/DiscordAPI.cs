@@ -160,6 +160,8 @@ namespace ThunderED.API
 
             if (SettingsManager.GetBool("config", "moduleIRC"))
                 TickManager.GetModule<IRCModule>()?.SendMessage(message.Channel.Id, message.Author.Username, message.Content);
+            if (SettingsManager.GetBool("config", "moduleTelegram"))
+                TickManager.GetModule<TelegramModule>()?.SendMessage(message.Channel.Id, message.Author.Username, message.Content);
 
             int argPos = 0;
 
@@ -596,7 +598,7 @@ namespace ThunderED.API
             return Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId")).GetTextChannel(noid);
         }
 
-        public void SubscribeIrcRelay(IRCModule m)
+        public void SubscribeRelay(IDiscordRelayModule m)
         {
             if(m == null) return;
             m.RelayMessage += async (message, channel) => { await SendMessageAsync(GetChannel(channel), message); };

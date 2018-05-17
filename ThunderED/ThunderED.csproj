@@ -32,10 +32,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.2" />
     <PackageReference Include="NETStandard.HttpListener" Version="1.0.3.5" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Jaex.IRCLib\Jaex.IRCLib.csproj" />
+    <PackageReference Include="Telegram.Bot" Version="14.4.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -27,6 +27,7 @@
         FleetUp,
         WebServer,
         Mail,
-        IRC
+        IRC,
+        Telegram
     }
 }

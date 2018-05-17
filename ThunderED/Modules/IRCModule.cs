@@ -26,19 +26,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Jaex.IRCLib;
+using ThunderED.Classes.IRC;
 using ThunderED.Helpers;
 
 namespace ThunderED.Modules
 {
-    public class IRCModule: AppModuleBase, IDisposable
+    public class IRCModule: AppModuleBase, IDisposable, IDiscordRelayModule
     {
         public IRC IRC { get; private set; }
         public IRCSettings Settings { get; private set; }
 
         public event Action<string, ulong> RelayMessage;
 
-        private List<string> _messagePool = new List<string>();
+        private readonly List<string> _messagePool = new List<string>();
 
         private async Task IRC_ErrorOutput(Exception e)
         {
@@ -100,6 +100,7 @@ namespace ThunderED.Modules
             RelayMessage?.Invoke(msg, relay.Discord);
         }
 
+        #region Pooling
         private void UpdatePool(string message)
         {
             _messagePool.Add(message);
@@ -111,6 +112,7 @@ namespace ThunderED.Modules
         {
             return !string.IsNullOrEmpty(_messagePool.FirstOrDefault(a => a == message));
         }
+        #endregion
 
         public async Task SendMessage(ulong channel, string user, string message)
         {

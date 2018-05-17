@@ -24,30 +24,21 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Jaex.IRCLib
+namespace ThunderED.Classes.IRC
 {
     public class AutoResponseInfo
     {
-        public List<string> Messages { get; set; }
+        public List<string> Messages { get; set; } = new List<string>();
 
-        public List<string> Responses { get; set; }
+        public List<string> Responses { get; set; } = new List<string>();
 
-        [DefaultValue(IRCAutoResponseType.Contains)]
-        public IRCAutoResponseType Type { get; set; }
+        public IRCAutoResponseType Type { get; set; } = IRCAutoResponseType.Contains;
 
-        private Stopwatch lastMatchTimer = new Stopwatch();
-
-        public AutoResponseInfo()
-        {
-            Messages = new List<string>();
-            Responses = new List<string>();
-            Type = IRCAutoResponseType.Contains;
-        }
+        private readonly Stopwatch _lastMatchTimer = new Stopwatch();
 
         public AutoResponseInfo(List<string> message, List<string> response, IRCAutoResponseType type)
         {
@@ -74,7 +65,7 @@ namespace Jaex.IRCLib
 
             if (isMatch)
             {
-                lastMatchTimer.Restart();
+                _lastMatchTimer.Restart();
             }
 
             return isMatch;
@@ -82,12 +73,12 @@ namespace Jaex.IRCLib
 
         public bool CheckLastMatchTimer(int milliseconds)
         {
-            return milliseconds <= 0 || !lastMatchTimer.IsRunning || lastMatchTimer.Elapsed.TotalMilliseconds > milliseconds;
+            return milliseconds <= 0 || !_lastMatchTimer.IsRunning || _lastMatchTimer.Elapsed.TotalMilliseconds > milliseconds;
         }
 
         public string RandomResponse(string nick, string mynick)
         {
-            int index = Helpers.Random(Responses.Count - 1);
+            int index = Helpers.Helpers.Random(Responses.Count - 1);
             return Responses.Select(r => r.Replace("$nick", nick).Replace("$mynick", mynick)).ElementAt(index);
         }
 
