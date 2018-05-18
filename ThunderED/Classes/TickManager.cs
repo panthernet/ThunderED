@@ -82,6 +82,9 @@ namespace ThunderED.Classes
             if (SettingsManager.GetBool("config","moduleAuthWeb"))
                 OnDemandModules.Add(new WebAuthModule());
 
+            if (SettingsManager.GetBool("config","moduleChatRelay"))
+                OnDemandModules.Add(new ChatRelayModule());
+
             //subscriptions
             if (SettingsManager.GetBool("config", "moduleIRC"))
                 APIHelper.DiscordAPI.SubscribeRelay(GetModule<IRCModule>());

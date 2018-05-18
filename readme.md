@@ -49,6 +49,7 @@ With this bot you will have tools to:
 * Jabber relay - connect with jabbers for cross messaging support
 * (BETA) IRC relay - exchange messages between IRC & Discord channels
 * (BETA) Telegram relay - exchange messages between Telegram & Discord channels
+* (BETA) EVE Chat relay - feed EVE ingame chat messages into Discord channel by streaming from user local apps to ThunderED server
 * (?) Channel MOTD integration - could be done by request
 
 # Build Requirements

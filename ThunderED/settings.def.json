@@ -29,6 +29,7 @@
     "moduleMail": true,
     "moduleIRC": false,
     "moduleTelegram": false,
+    "moduleChatRelay": false,
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -314,5 +315,15 @@
         "telegramUsers": [],
       }
     ],
+  },
+
+  "chatRelayModule": {
+    "RelayChannels": [
+      {
+        "eveChannelName": "EVE channel name",
+        "discordChannelId": 0,
+        "code": "thesecretsupercode",
+      }
+    ]
   }
 }

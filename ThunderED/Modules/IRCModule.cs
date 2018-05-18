@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ThunderED.Classes;
 using ThunderED.Classes.IRC;
 using ThunderED.Helpers;
 
@@ -69,7 +70,7 @@ namespace ThunderED.Modules
             if(IRC?.IsWorking ?? false) return;
             try
             {
-                Settings = IRCSettings.Load(AppDomain.CurrentDomain.BaseDirectory + "settings.json");
+                Settings = IRCSettings.Load(SettingsManager.FileSettingsPath);
 
                 IRC = new IRC(Settings);
                 IRC.Message += IRC_Message;

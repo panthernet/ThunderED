@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		version.txt = version.txt
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TED_ChatRelay", "TED_ChatRelay\TED_ChatRelay.csproj", "{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{3F2BC1E5-94A6-4E27-A711-43A8050D18FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F2BC1E5-94A6-4E27-A711-43A8050D18FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F2BC1E5-94A6-4E27-A711-43A8050D18FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

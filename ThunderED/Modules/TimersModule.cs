@@ -131,15 +131,15 @@ namespace ThunderED.Modules
                     var prms = request.Url.Query.TrimStart('?').Split('&');
                     if (prms.Length != 3)
                     {
-                        await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
-                        return true;
+                        //await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                        return false;
                     }
                     var inputId = prms[1].Split('=')[1];
                     var state = prms[2].Split('=')[1];
                     if (state != "11")
                     {
-                        await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
-                        return true;
+                       // await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                        return false;
                     }
 
                     var characterId = Convert.ToInt32(Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));

@@ -96,6 +96,12 @@ namespace ThunderED.API
             }
         }
 
+        public async Task<IUserMessage> SendMessageAsync(ulong channel, string message, Embed embed = null)
+        {
+            return await SendMessageAsync(GetChannel(channel), message, embed);
+        }
+
+
         public async Task<IUserMessage> SendMessageAsync(IMessageChannel channel, string message, Embed embed = null)
         {
             try

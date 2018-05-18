@@ -62,18 +62,24 @@ namespace ThunderED.Classes
 
         public static T Load(string filePath)
         {
-            T setting = LoadInternal(filePath, true);
+            T setting;
 
-            if (setting != null)
-            {
-                setting.FilePath = filePath;
-            }
-
-          /*  if (setting == null)
+            if (!File.Exists(filePath))
             {
                 setting = new T {FilePath = filePath};
                 setting.Save();
-            }*/
+            }
+            else
+            {
+                setting = LoadInternal(filePath, true);
+                if (setting != null)
+                {
+                    setting.FilePath = filePath;
+                }
+
+            }
+
+
 
             return setting;
         }
@@ -171,7 +177,10 @@ namespace ThunderED.Classes
                                     JsonSerializer serializer = new JsonSerializer();
                                     serializer.Converters.Add(new StringEnumConverter());
                                     serializer.ObjectCreationHandling = ObjectCreationHandling.Replace;
-                                    serializer.Error += (sender, e) => e.ErrorContext.Handled = true;
+                                    serializer.Error += (sender, e) =>
+                                    {
+                                        e.ErrorContext.Handled = true;
+                                    };
                                     settings = serializer.Deserialize<T>(jsonReader);
                                 }
 

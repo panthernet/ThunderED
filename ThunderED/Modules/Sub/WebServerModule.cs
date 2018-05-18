@@ -48,34 +48,34 @@ namespace ThunderED.Modules.Sub
                                 path = Path.Combine(SettingsManager.RootDirectory, "Content", "scripts", "moments", Path.GetFileName(request.Url.LocalPath));
                             }
 
-                            if(!File.Exists(path))
+                            if (!File.Exists(path))
                                 return;
-                            if(request.Url.LocalPath.EndsWith(".less") || request.Url.LocalPath.EndsWith(".css"))
+                            if (request.Url.LocalPath.EndsWith(".less") || request.Url.LocalPath.EndsWith(".css"))
                                 response.Headers.ContentType.Add("text/css");
-                            if(request.Url.LocalPath.EndsWith(".js"))
+                            if (request.Url.LocalPath.EndsWith(".js"))
                                 response.Headers.ContentType.Add("text/javascript");
 
                             await response.WriteContentAsync(File.ReadAllText(path));
-                            
+
                             return;
                         }
 
                         if (request.Url.LocalPath == "/" || request.Url.LocalPath == $"{port}/" || request.Url.LocalPath == $"{extPort}/")
                         {
                             var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
-                            var authUrl =  $"http://{extIp}:{extPort}/auth.php";
+                            var authUrl = $"http://{extIp}:{extPort}/auth.php";
                             var authNurl = GetAuthNotifyURL();
 
                             response.Headers.ContentEncoding.Add("utf-8");
                             response.Headers.ContentType.Add("text/html;charset=utf-8");
                             var text = File.ReadAllText(SettingsManager.FileTemplateMain).Replace("{authUrl}", authUrl)
-                                .Replace("{authNotifyUrl}", authNurl).Replace("{header}", LM.Get("authTemplateHeader"))
-                                .Replace("{timersUrl}", GetTimersURL())
-                                .Replace("{authButtonDiscordText}", LM.Get("authButtonDiscordText"))
-                                .Replace("{authButtonNotifyText}", LM.Get("authButtonNotifyText"))
-                                .Replace("{authButtonTimersText}", LM.Get("authButtonTimersText"))
-                                .Replace("{authMailUrl}", GetMailAuthURL())
-                                .Replace("{authButtonMailText}", LM.Get("authButtonMailText"))
+                                    .Replace("{authNotifyUrl}", authNurl).Replace("{header}", LM.Get("authTemplateHeader"))
+                                    .Replace("{timersUrl}", GetTimersURL())
+                                    .Replace("{authButtonDiscordText}", LM.Get("authButtonDiscordText"))
+                                    .Replace("{authButtonNotifyText}", LM.Get("authButtonNotifyText"))
+                                    .Replace("{authButtonTimersText}", LM.Get("authButtonTimersText"))
+                                    .Replace("{authMailUrl}", GetMailAuthURL())
+                                    .Replace("{authButtonMailText}", LM.Get("authButtonMailText"))
                                     .Replace("{webAuthHeader}", LM.Get("webAuthHeader"))
                                     .Replace("{webWelcomeHeader}", LM.Get("webWelcomeHeader"))
                                 ;
@@ -83,7 +83,7 @@ namespace ThunderED.Modules.Sub
                             text = text.Replace("{disableWebNotify}", !SettingsManager.GetBool("config", "moduleNotificationFeed") ? "disabled" : "");
                             text = text.Replace("{disableWebTimers}", !SettingsManager.GetBool("config", "moduleTimers") ? "disabled" : "");
                             text = text.Replace("{disableMailNotify}", !SettingsManager.GetBool("config", "moduleMail") ? "disabled" : "");
-                  
+
                             await response.WriteContentAsync(text);
                             return;
                         }
@@ -114,9 +114,20 @@ namespace ThunderED.Modules.Sub
                             );
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        await LogHelper.LogEx(ex.Message, ex, Category);
+                    }
                     finally
                     {
-                        context.Response.Close();
+                        try
+                        {
+                            context.Response.Close();
+                        }
+                        catch
+                        {
+                            //ignore
+                        }
                     }
                 };
                 _listener.Start();

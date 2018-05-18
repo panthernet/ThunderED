@@ -28,6 +28,7 @@
         WebServer,
         Mail,
         IRC,
-        Telegram
+        Telegram,
+        ChatRelay
     }
 }
