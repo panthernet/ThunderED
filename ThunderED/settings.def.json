@@ -287,7 +287,11 @@
         "irc": "#mychannel",
         "discord": 0,
         "discordFilters": [ "!auth", "/join" ],
+        "discordFiltersStartsWith": [ "!" ],
         "ircFilters": [],
+        "ircFiltersStartsWith": [ "/" ],
+        "relayFromDiscordBotOnly": false,
+        "ircUsers": [],
       },
     ],
     "AutoJoinWaitIdentify": false,
@@ -303,7 +307,11 @@
         "telegram": 0,
         "discord": 0,
         "discordFilters": [ "!auth", "/join" ],
+        "discordFiltersStartsWith": [ "!" ],
         "telegramFilters": [],
+        "telegramFiltersStartsWith": [ "/" ],
+        "relayFromDiscordBotOnly": false,
+        "telegramUsers": [],
       }
     ],
   }
