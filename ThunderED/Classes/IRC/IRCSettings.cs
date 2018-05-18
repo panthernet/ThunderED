@@ -90,7 +90,11 @@ namespace ThunderED.Classes.IRC
         public string IRC { get; set; }
         public ulong Discord { get; set; }
         public List<string> DiscordFilters { get; set; } = new List<string>();
+        public List<string> DiscordFiltersStartsWith { get; set; } = new List<string>();
         public List<string> IRCFilters { get; set; } = new List<string>();
+        public List<string> IRCFiltersStartsWith { get; set; } = new List<string>();
+        public List<string> IRCUsers { get; set; } = new List<string>();
+        public bool RelayFromDiscordBotOnly { get; set; }
     }
 
     public class IRCSettings : SettingsBase<IRCSettings>

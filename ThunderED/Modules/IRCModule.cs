@@ -93,7 +93,8 @@ namespace ThunderED.Modules
         {
             var relay = Settings.ircModule.RelayChannels.FirstOrDefault(a => a.IRC == channel);
             if (relay == null) return;
-            if(relay.Discord == 0 || IsMessagePooled(message) || relay.IRCFilters.Any(message.Contains)) return;
+            if(relay.Discord == 0 || IsMessagePooled(message) || relay.IRCFilters.Any(message.Contains) || relay.IRCFiltersStartsWith.Any(message.StartsWith)) return;
+            if(relay.IRCUsers.Count > 0 && !relay.IRCUsers.Contains(userinfo.Nickname)) return;
 
             var msg = $"[IRC][{userinfo.Nickname}]: {message}";
             UpdatePool(msg);
@@ -114,12 +115,18 @@ namespace ThunderED.Modules
         }
         #endregion
 
-        public async Task SendMessage(ulong channel, string user, string message)
+        public async Task SendMessage(ulong channel, ulong authorId, string user, string message)
         {
             if(IRC == null || !IRC.IsWorking) return;
             var relay = Settings.ircModule.RelayChannels.FirstOrDefault(a => a.Discord == channel);
             if(relay == null) return;
-            if(string.IsNullOrEmpty(relay.IRC) || IsMessagePooled(message) || relay.DiscordFilters.Any(message.Contains)) return;
+            if(string.IsNullOrEmpty(relay.IRC) || IsMessagePooled(message) || relay.DiscordFilters.Any(message.Contains) || relay.DiscordFiltersStartsWith.Any(message.StartsWith)) return;
+            //check if we relay only bot messages
+            if (relay.RelayFromDiscordBotOnly)
+            {
+                var u = APIHelper.DiscordAPI.Client.GetUser(authorId);
+                if(APIHelper.DiscordAPI.Client.CurrentUser.Id != u.Id) return;
+            }
 
             var msg = $"[DISCORD][{user}]: {message}";
             UpdatePool(msg);

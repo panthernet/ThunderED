@@ -19,6 +19,10 @@ namespace ThunderED.Classes.Telegram
         public long Telegram { get; set; }
         public ulong Discord { get; set; }
         public List<string> DiscordFilters { get; set; } = new List<string>();
+        public List<string> DiscordFiltersStartsWith { get; set; } = new List<string>();
         public List<string> TelegramFilters { get; set; } = new List<string>();
+        public List<string> TelegramFiltersStartsWith { get; set; } = new List<string>();
+        public List<string> TelegramUsers { get; set; } = new List<string>();
+        public bool RelayFromDiscordBotOnly { get; set; }
     }
 }

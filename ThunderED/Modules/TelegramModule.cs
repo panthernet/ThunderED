@@ -79,21 +79,28 @@ namespace ThunderED.Modules
 
             var relay = Settings.TelegramModule.RelayChannels.FirstOrDefault(a=> a.Telegram == e.Message.Chat.Id);
             if (relay == null) return;
-            if(relay.Discord == 0 || IsMessagePooled(e.Message.Text) || relay.TelegramFilters.Any(e.Message.Text.Contains)) return;
+            if(relay.Discord == 0 || IsMessagePooled(e.Message.Text) || relay.TelegramFilters.Any(e.Message.Text.Contains) || relay.TelegramFiltersStartsWith.Any(e.Message.Text.StartsWith)) return;
 
             var from = string.IsNullOrEmpty(e.Message.From.Username) ? $"{e.Message.From.FirstName} {e.Message.From.LastName}" : e.Message.From.Username;
+            if(relay.TelegramUsers.Count > 0 && !relay.TelegramUsers.Contains(from)) return;
 
             var msg = $"[TM][{from}]: {e.Message.Text}";
             UpdatePool(msg);
             RelayMessage?.Invoke(msg, relay.Discord);
         }
 
-        public async Task SendMessage(ulong channel, string user, string message)
+        public async Task SendMessage(ulong channel, ulong authorId, string user, string message)
         {
             if(_me == null) return;
             var relay = Settings.TelegramModule.RelayChannels.FirstOrDefault(a => a.Discord == channel);
             if(relay == null) return;
-            if(relay.Telegram == 0 || IsMessagePooled(message) || relay.DiscordFilters.Any(message.Contains)) return;
+            if(relay.Telegram == 0 || IsMessagePooled(message) || relay.DiscordFilters.Any(message.Contains) || relay.DiscordFiltersStartsWith.Any(message.StartsWith)) return;
+            //check if we relay only bot messages
+            if (relay.RelayFromDiscordBotOnly)
+            {
+                var u = APIHelper.DiscordAPI.Client.GetUser(authorId);
+                if(APIHelper.DiscordAPI.Client.CurrentUser.Id != u.Id) return;
+            }
 
             var msg = $"[DISCORD][{user}]: {message}";
             UpdatePool(msg);
