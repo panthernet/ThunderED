@@ -325,20 +325,21 @@ namespace ThunderED.Providers
             
         }
 
-        public async Task RunCommand(string query2)
+        public async Task RunCommand(string query2, bool silent = false)
         {
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand(query2, con))
+            try
             {
-                await con.OpenAsync();
-                try
+                using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+                using (var insertSQL = new SqliteCommand(query2, con))
                 {
+                    await con.OpenAsync();
                     insertSQL.ExecuteNonQuery();
                 }
-                catch (Exception ex)
-                {
+            }
+            catch (Exception ex)
+            {
+                if (!silent)
                     await LogHelper.LogEx($"[RunCommand]: {query2}", ex, LogCat.SQLite);
-                }
             }
         }
 

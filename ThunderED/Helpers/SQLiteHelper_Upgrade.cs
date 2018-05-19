@@ -9,7 +9,7 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "*"
         };
 
         public static async Task<bool> Upgrade()
@@ -23,6 +23,11 @@ namespace ThunderED.Helpers
             {
                 foreach (var update in MajorVersionUpdates)
                 {
+                    if (update == "*")
+                    {
+                        await RunCommand("ALTER TABLE refreshTokens ADD mail TEXT NULL;", true);
+                        continue;
+                    }
                     var v = new Version(update);
                     if (vDbVersion >= v) continue;
 

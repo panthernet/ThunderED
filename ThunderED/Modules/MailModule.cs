@@ -60,7 +60,7 @@ namespace ThunderED.Modules
                             return true;
                         }
 
-                        await SQLiteHelper.SQLiteDataInsertOrUpdateTokens(null, result[0], result[1]);
+                        await SQLiteHelper.SQLiteDataInsertOrUpdateTokens("", result[0], result[1]);
                         response.Headers.ContentEncoding.Add("utf-8");
                         response.Headers.ContentType.Add("text/html;charset=utf-8");
                         await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)

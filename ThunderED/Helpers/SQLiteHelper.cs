@@ -70,9 +70,9 @@ namespace ThunderED.Helpers
             return await Provider?.GetPendingUser(remainder);
         }
 
-        internal static async Task RunCommand(string query2)
+        internal static async Task RunCommand(string query2, bool silent = false)
         {
-            await Provider?.RunCommand(query2);
+            await Provider?.RunCommand(query2, silent);
         }
 
         internal static async Task<T> SQLiteDataSelectCache<T>(object whereValue, int maxDays)

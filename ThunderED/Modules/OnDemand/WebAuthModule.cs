@@ -119,7 +119,7 @@ namespace ThunderED.Modules.OnDemand
                                 return true;
                             }
 
-                            await SQLiteHelper.SQLiteDataInsertOrUpdateTokens(result[1], characterID?.ToString(), null);
+                            await SQLiteHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
                             await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                                 .Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
