@@ -72,7 +72,7 @@ namespace ThunderED.Modules
 
                         if (_lastNotification == 0)
                         {
-                            var now = DateTime.Now;
+                            var now = DateTime.UtcNow;
                             notifications = notifications.Where(a =>
                             {
                                 DateTime.TryParse(a.timestamp, out var timestamp);
@@ -101,6 +101,7 @@ namespace ThunderED.Modules
 
                                             if (SettingsManager.GetBool("config", "logNewNotifications"))
                                                 await LogHelper.LogNotification(notification.type, notification.text);
+
                                             var filterChannelID = Convert.ToUInt64(filters.FirstOrDefault(x => x.Key == notification.type).Value);
                                             var iChannelId = overrideChannel != 0 && filterChannelID != 0 ? overrideChannel : filterChannelID;
                                             if (iChannelId == 0)
@@ -168,7 +169,8 @@ namespace ThunderED.Modules
                                                 ? ((await APIHelper.ESIAPI.GetCharacterData(Reason, data["firedBy"]))?.name ?? LM.Get("Auto"))
                                                 : null;
 
-                                            DateTime.TryParse(notification.timestamp, out var timestamp);
+                                            DateTime.TryParse(notification.timestamp, out var localTimestamp);
+                                            var timestamp = localTimestamp.ToUniversalTime();
                                             Embed embed;
                                             EmbedBuilder builder;
                                             string textAdd;
@@ -185,6 +187,7 @@ namespace ThunderED.Modules
                                                         .AddInlineField(LM.Get("System"), system?.name)
                                                         .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
                                                         .AddInlineField(LM.Get("Corporation"), atCorpName) //.WithUrl($"http://www.zkillboard.com/corporation/{}")
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -205,6 +208,7 @@ namespace ThunderED.Modules
                                                                 structureType == null ? LM.Get("structure").ToLower() : structureType.name, text)))
                                                         .AddInlineField(LM.Get("System"), system?.name)
                                                         .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -225,6 +229,7 @@ namespace ThunderED.Modules
                                                         .AddInlineField(LM.Get("System"), system?.name)
                                                         .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
                                                         .AddInlineField("Time Left", timeleft ?? LM.Get("Unknown"))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -263,6 +268,7 @@ namespace ThunderED.Modules
                                                             author.WithName(text))
                                                         .AddInlineField(LM.Get("System"), system?.name)
                                                         .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -282,6 +288,7 @@ namespace ThunderED.Modules
                                                         .AddInlineField(LM.Get("System"), system?.name)
                                                         .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
                                                         .AddInlineField(LM.Get("TimeLeft"), timeleft ?? LM.Get("Unknown"))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -299,6 +306,7 @@ namespace ThunderED.Modules
                                                         .AddInlineField(LM.Get("System"), system?.name)
                                                         .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
                                                         .AddInlineField(LM.Get("Fuel"), itemQuantity == 0 ? LM.Get("Unknown") : $"{itemQuantity} {itemName}")
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -325,6 +333,7 @@ namespace ThunderED.Modules
                                                                 structureType == null ? LM.Get("Structure") : structureType.name)))
                                                         .AddInlineField(LM.Get("Structure"), structureNameDirect ?? LM.Get("Unknown"))
                                                         .AddInlineField(LM.Get("Composition"), compText.ToString())
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -342,6 +351,7 @@ namespace ThunderED.Modules
                                                                 structureType == null ? LM.Get("Structure") : structureType.name)))
                                                         .AddInlineField(LM.Get("Structure"), structureNameDirect ?? LM.Get("Unknown"))
                                                         .AddInlineField(LM.Get("FiredBy"), moonFiredBy)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -360,6 +370,7 @@ namespace ThunderED.Modules
                                                     builder = new EmbedBuilder()
                                                         .WithColor(color)
                                                         .WithAuthor(author => author.WithName(text).WithUrl($"https://zkillboard.com/character/{GetData("charID", data)}/"))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -373,6 +384,7 @@ namespace ThunderED.Modules
                                                     builder = new EmbedBuilder()
                                                         .WithColor(new Color(0xdd5353))
                                                         .WithAuthor(author => author.WithName(string.Format(LM.Get("SovStructureDestroyed"), structureType?.name, system?.name)))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -389,6 +401,7 @@ namespace ThunderED.Modules
                                                         .WithAuthor(
                                                             author => author.WithName(string.Format(LM.Get("SovStationEnteredFreeport"), structureType?.name, system?.name)))
                                                         .AddInlineField("Exit Time", exittime)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -402,6 +415,7 @@ namespace ThunderED.Modules
                                                         .WithColor(new Color(0xdd5353))
                                                         .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitServicesOffline"))
                                                         .WithAuthor(author => author.WithName(string.Format(LM.Get("StationServiceDisabled"), structureType?.name, system?.name)))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -421,6 +435,7 @@ namespace ThunderED.Modules
                                                         .WithColor(new Color(0xdd5353))
                                                         .WithAuthor(author =>
                                                             author.WithName(string.Format(LM.Get("SovCommandNodeEventStarted"), cmp, system?.name, constellation?.name)))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -439,6 +454,7 @@ namespace ThunderED.Modules
                                                         .WithAuthor(author =>
                                                             author.WithName(string.Format(LM.Get("SovStructureReinforced"), cmp, system?.name)))
                                                         .AddInlineField("Decloak Time", decloakTime.ToString())
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -452,6 +468,7 @@ namespace ThunderED.Modules
                                                     builder = new EmbedBuilder()
                                                         .WithColor(new Color(0xdd5353))
                                                         .WithAuthor(author => author.WithName(string.Format(LM.Get("EntosisCaptureStarted"), structureType?.name, system?.name)))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -505,6 +522,7 @@ namespace ThunderED.Modules
                                                         .WithThumbnailUrl(iUrl)
                                                         .WithAuthor(author => author.WithName(template))
                                                         .AddInlineField(LM.Get("Note"), template2)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -522,6 +540,7 @@ namespace ThunderED.Modules
                                                         .WithColor(new Color(0xff0000))
                                                         .WithThumbnailUrl(SettingsManager.Get("resources", "imgWarAssist"))
                                                         .WithAuthor(author => author.WithName(string.Format(LM.Get("AllyJoinedWarAggressorMsg"), ally, defender)))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -556,6 +575,7 @@ namespace ThunderED.Modules
                                                         .WithColor(new Color(0xff0000))
                                                         .WithThumbnailUrl(SettingsManager.Get("resources", "imgWarAssist"))
                                                         .WithAuthor(author => author.WithName(string.Format(LM.Get("AllyJoinedWarDefenderMsg"), allyStr, defenderStr, agressorStr)))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -575,6 +595,7 @@ namespace ThunderED.Modules
                                                         .WithColor(new Color(0x00ff00))
                                                         .WithThumbnailUrl(SettingsManager.Get("resources", "imgWarAssist"))
                                                         .WithAuthor(author => author.WithName(string.Format(LM.Get("AllyJoinedWarAllyMsg"), allyStr2, defenderStr2, agressorStr2)))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 
@@ -599,6 +620,7 @@ namespace ThunderED.Modules
                                                         .WithThumbnailUrl(SettingsManager.Get("resources", "imgLowFWStand"))
                                                         .WithAuthor(author => author.WithName(string.Format(LM.Get("FWAllianceWarningMsg"), allyStr3)))
                                                         .AddInlineField(LM.Get("BlameCorp"), string.Format(LM.Get("standMissing"), corpStr3, required))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 

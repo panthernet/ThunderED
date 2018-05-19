@@ -29,6 +29,8 @@ namespace ThunderED.Modules
             var location = operation.Location;
             var details = operation.Details;
 
+            var format = SettingsManager.Get("config", "timeformat") ?? "dd.MM.yyyy HH:mm";
+
             var url = $"http://fleet-up.com/Operation#{operation.OperationId}";
             var locationText = $"[{ location}](http://evemaps.dotlan.net/system/{location})";
             var builder = new EmbedBuilder()
@@ -41,10 +43,11 @@ namespace ThunderED.Modules
                     author
                         .WithName(LM.Get("fuNotification"));
                 })
-                .AddInlineField(LM.Get("fuFormUpTime"), startTime.ToString(SettingsManager.Get("config", "timeformat")))
+                .AddInlineField(LM.Get("fuFormUpTime"), startTime.ToString(format))
                 .AddInlineField(LM.Get("fuFormUpSystem"), string.IsNullOrWhiteSpace(location) ? LM.Get("None") : locationText)
                 .AddField(LM.Get("Details"), string.IsNullOrWhiteSpace(details) ? LM.Get("None") : details)
-                .WithTimestamp(startTime);
+                .WithFooter($"EVE Time: {DateTime.UtcNow.ToString(format)}")
+                .WithTimestamp(DateTime.UtcNow);
 
 
 
@@ -67,13 +70,19 @@ namespace ThunderED.Modules
             try
             {
                 //Check Fleetup Operations
-                
-                var dateStr = await SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastChecked");
-                if (DateTime.TryParseExact(dateStr, new[] {"dd.MM.yyyy HH:mm:ss", $"{CultureInfo.InvariantCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.InvariantCulture.DateTimeFormat.LongTimePattern}"},
-                    CultureInfo.InvariantCulture.DateTimeFormat, DateTimeStyles.None, out var time))
-                    _lastChecked = _lastChecked ?? time;
 
-                if (DateTime.Now > _lastChecked)
+                if (_lastChecked == null)
+                {
+                    var dateStr = await SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastChecked");
+                    _lastChecked = DateTime.TryParseExact(dateStr,
+                        new[]
+                        {
+                            "dd.MM.yyyy HH:mm:ss", $"{CultureInfo.InvariantCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.InvariantCulture.DateTimeFormat.LongTimePattern}"
+                        },
+                        CultureInfo.InvariantCulture.DateTimeFormat, DateTimeStyles.None, out var time) ? time : DateTime.MinValue;
+                }
+
+                if (DateTime.Now > _lastChecked.Value.AddMinutes(1))
                 {
                     var userId = SettingsManager.Get("fleetup", "UserId");
                     var apiCode = SettingsManager.Get("fleetup", "APICode");
@@ -84,25 +93,24 @@ namespace ThunderED.Modules
                     var announcePost = SettingsManager.GetBool("fleetup", "announce_post");
                     var channel = channelid == 0 ? null : APIHelper.DiscordAPI.GetChannel(channelid);
 
+                    _lastChecked = DateTime.Now;
+                    await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
+
                     if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(apiCode) || string.IsNullOrWhiteSpace(groupID) || string.IsNullOrWhiteSpace(appKey)
                         || channel == null)
                     {
                         await LogHelper.LogInfo(LM.Get("fuNeedSetup"), Category);
-                        _lastChecked = DateTime.Now;
-                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
                         return;
                     }
 
                     var result = await APIHelper.FleetUpAPI.GetOperations(Reason, userId, apiCode, appKey, groupID);
                     if (result == null)
-                    {
-                        _lastChecked = DateTime.Now;
-                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
                         return;
-                    }
 
                     foreach (var operation in result.Data)
                     {
+                        var lastAnnounce = await SQLiteHelper.SQLiteDataQuery<int>("fleetup", "announce", "id", operation.Id.ToString());
+
                         if (operation.OperationId > Convert.ToInt32(lastopid) && announcePost)
                         {
                             await SendMessage(operation, channel, $"@everyone FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
@@ -110,25 +118,35 @@ namespace ThunderED.Modules
                         }
 
                         var timeDiff = TimeSpan.FromTicks(operation.Start.Ticks - DateTime.UtcNow.Ticks);
-                        var array = SettingsManager.GetSubList("fleetup", "announce").Select(x => x.Value).ToArray();
+                        //no need to notify, it is already started
+                        if (lastAnnounce == 0 && timeDiff.TotalMinutes < 1)
+                            continue;
+                        var array = SettingsManager.GetSubList("fleetup", "announce").Select(x => Convert.ToInt32(x.Value)).Where(a=> a < lastAnnounce || lastAnnounce == 0).ToArray();
 
                         foreach (var i in array)
                         {
-                            var epic1 = TimeSpan.FromMinutes(Convert.ToInt16(i));
-                            var epic2 = TimeSpan.FromMinutes(Convert.ToInt16(i) + 1);
+                            var epic1 = TimeSpan.FromMinutes(i);
+                            var epic2 = TimeSpan.FromMinutes(i + 1);
 
                             if (timeDiff >= epic1 && timeDiff <= epic2)
+                            {
                                 await SendMessage(operation, channel, $"@everyone {string.Format(LM.Get("fuFormIn"), i, $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                     false);
+                                await SQLiteHelper.SQLiteDataInsertOrUpdate("fleetup", new Dictionary<string, object>
+                                {
+                                    { "id", operation.Id.ToString()},
+                                    { "announce", i}
+                                });
+                            }
                         }
 
                         //NOW
-                        if (timeDiff.TotalMinutes < 1 && timeDiff.TotalMinutes > 0)
+                        if (timeDiff.TotalMinutes < 1)
+                        {
                             await SendMessage(operation, channel, $"@everyone {string.Format(LM.Get("fuFormNow"), $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                 false);
-
-                        _lastChecked = DateTime.Now;
-                        await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
+                            await SQLiteHelper.SQLiteDataDelete("fleetup", "id", operation.Id.ToString());
+                        }
                     }
                 }
             }

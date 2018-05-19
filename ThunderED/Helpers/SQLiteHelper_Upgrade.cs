@@ -9,7 +9,7 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "*"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "*"
         };
 
         public static async Task<bool> Upgrade()
@@ -48,6 +48,9 @@ namespace ThunderED.Helpers
                         case "1.0.8":
                             await RunCommand("ALTER TABLE refreshTokens ADD mail TEXT NULL;");
                             await RunCommand("CREATE TABLE `mail` ( `id` text UNIQUE PRIMARY KEY NOT NULL, `mailId` int DEFAULT 0);");
+                            break;
+                        case "1.1.3":
+                            await RunCommand("CREATE TABLE `fleetup` ( `id` text UNIQUE PRIMARY KEY NOT NULL, `announce` int NOT NULL DEFAULT 0);");
                             break;
                         default:
                             continue;
