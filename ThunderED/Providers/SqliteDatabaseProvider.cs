@@ -53,9 +53,9 @@ namespace ThunderED.Providers
                                 return default;
                             var type = typeof(T);
                             if(type == typeof(string))
-                                return (T)(object)(r.GetString(0) ?? "");
+                                return (T)(object)(r.IsDBNull(0) ? "" : r.GetString(0));
                             if (type == typeof(int))
-                                return (T) (object) r.GetInt32(0);
+                                return (T) (object) (r.IsDBNull(0) ? 0 : r.GetInt32(0));
                         }
                         return default;
                     }
@@ -143,9 +143,9 @@ namespace ThunderED.Providers
             {
                 await con.OpenAsync();
                 count = 1;
-                insertSQL.Parameters.Add(new SqliteParameter("@data", setData));
+                insertSQL.Parameters.Add(new SqliteParameter("@data", setData ?? DBNull.Value));
                 foreach (var pair in where)
-                    insertSQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
+                    insertSQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value ?? DBNull.Value));
                 try
                 {
                     insertSQL.ExecuteNonQuery();
@@ -237,7 +237,7 @@ namespace ThunderED.Providers
                 await con.OpenAsync();
                 insertSQL.Parameters.Add(new SqliteParameter("@id", userId));
                 insertSQL.Parameters.Add(new SqliteParameter("@token", token));
-                insertSQL.Parameters.Add(new SqliteParameter("@mail", mail));
+                insertSQL.Parameters.Add(new SqliteParameter("@mail", mail ?? (object)DBNull.Value));
                 try
                 {
                     insertSQL.ExecuteNonQuery();
@@ -268,7 +268,7 @@ namespace ThunderED.Providers
                             for (var i = 0; i < r.FieldCount; i++)
                             {
                                 var key = r.GetName(i);
-                                var value = r[i];
+                                var value = r.IsDBNull(i) ? null : r[i];
                                 record.Add(key, value);
                             }
 
@@ -361,7 +361,7 @@ namespace ThunderED.Providers
                         //check for outdated cache
                         if ((DateTime.Now - r.GetDateTime(1)).Days >= maxDays)
                             return (T)(object)null;
-                        var data = JsonConvert.DeserializeObject<T>(r.GetString(0));
+                        var data = JsonConvert.DeserializeObject<T>(r.IsDBNull(0) ? null : r.GetString(0));
                         return data;
                     }
                 }
@@ -385,7 +385,7 @@ namespace ThunderED.Providers
             {
                 await con.OpenAsync();
                 insertSQL.Parameters.Add(new SqliteParameter("@type", typeof(T).Name));
-                insertSQL.Parameters.Add(new SqliteParameter("@id", id));
+                insertSQL.Parameters.Add(new SqliteParameter("@id", id ?? DBNull.Value));
                 insertSQL.Parameters.Add(new SqliteParameter("@access", DateTime.Now));
                 insertSQL.Parameters.Add(new SqliteParameter("@update", DateTime.Now));
                 insertSQL.Parameters.Add(new SqliteParameter("@days", days));

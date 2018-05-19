@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -141,6 +142,10 @@ namespace ThunderED.Modules
             }
         }
 
+       // private Dictionary<string, List<FleetUpCache> _cache = new Dictionary<string, FleetUpCache>();
+
+
+
         public static async Task Ops(ICommandContext context, string x)
         {
             try
@@ -180,5 +185,10 @@ namespace ThunderED.Modules
                 await LogHelper.LogEx($"ERROR In Fleetup OPS {ex.Message}", ex, LogCat.FleetUp);
             }
         }
+    }
+
+    internal class FleetUpCache
+    {
+        //public List<string>
     }
 }
