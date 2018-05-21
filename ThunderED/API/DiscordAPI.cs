@@ -618,5 +618,12 @@ namespace ThunderED.API
             if(m == null) return;
             m.RelayMessage += async (message, channel) => { await SendMessageAsync(GetChannel(channel), message); };
         }
+
+        public string GetRoleMention(string role)
+        {
+            var r = Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId")).Roles.FirstOrDefault(a => a.Name == role);
+            if(r == null || !r.IsMentionable) return null;
+            return r.Mention;
+        }
     }
 }

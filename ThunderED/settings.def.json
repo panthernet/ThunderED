@@ -230,7 +230,8 @@
               "FWAllianceWarningMsg", 
             ],
             "channelID": 0,
-            "mentions": [],
+            "charMentions": [],
+            "roleMentions": []
           },
         },		
       }

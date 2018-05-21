@@ -25,7 +25,8 @@ namespace ThunderED.Modules.Settings
         {
             public List<string> Notifications = new List<string>();
             public ulong ChannelID;
-            public List<string> Mentions = new List<string>();
+            public List<int> CharMentions = new List<int>();
+            public List<string> RoleMentions = new List<string>();
         }
     }
 }

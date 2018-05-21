@@ -213,9 +213,9 @@ namespace ThunderED.Modules
                                         string textAdd;
 
                                         var mention = "@everyone";
-                                        if (filter.Mentions.Count > 0)
+                                        if (filter.CharMentions.Count > 0)
                                         {
-                                            var list = filter.Mentions.Select(a =>
+                                            var list = filter.CharMentions.Select(a =>
                                                     SQLHelper.SQLiteDataQuery<ulong>("authUsers", "discordID", "characterID", a).GetAwaiter().GetResult()).Where(a=> a != 0)
                                                 .ToList();
                                             if (list.Count > 0)
@@ -233,6 +233,21 @@ namespace ThunderED.Modules
                                                 }).Where(a=> a != null);
                                                 if(mList.Any())
                                                     mention = string.Join(" ", mList);
+                                            }
+                                        }
+
+                                        if (filter.RoleMentions.Count > 0)
+                                        {
+                                            var mentionList = new List<string>();
+                                            foreach (var role in filter.RoleMentions)
+                                            {
+                                                mentionList.Add(APIHelper.DiscordAPI.GetRoleMention(role));
+                                            }
+
+                                            if (mentionList.Count > 0)
+                                            {
+                                                var str = string.Join(' ', mentionList);
+                                                mention = mention == "@everyone" ? str : $"{mention} {str}";
                                             }
                                         }
 
