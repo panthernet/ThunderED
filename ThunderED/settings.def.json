@@ -180,14 +180,63 @@
     "imgTimerAlert": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgTimerAlert.png",
     "imgMail": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgMail.png",
   },
-  "notifications": {
-	  "checkIntervalInMinutes": 2,
-    "keys": {
-      "key1": {
-        "characterID": "REQUIRED",
-		    "overrideChannel": 0,
+
+  "notificationFeedModule": {
+    "checkIntervalInMinutes": 2,
+    "groups": {
+      "groupName1": {
+        "characterID": 0,
+        "defaultDiscordChannelID": 0,
+        "filters": {
+          "filter1": {		  
+            "notifications": [
+              "StructureUnderAttack", 
+              "StructureWentLowPower", 
+              "StructureWentHighPower", 
+              "StructureLostArmor", 
+              "StructureLostShields", 
+              "StructureFuelAlert", 
+              "StructureOnline", 
+              "StructureAnchoring", 
+              "StructureDestroyed",
+              "OrbitalAttacked",
+              "AllAnchoringMsg",
+              "AllWarDeclaredMsg", 
+              "AllWarInvalidatedMsg", 
+              "AllyJoinedWarAggressorMsg", 
+              "AllyJoinedWarAllyMsg", 
+              "AllyJoinedWarDefenderMsg", 
+              "AllWarRetractedMsg", 
+              "AllWarSurrenderMsg", 
+              "CorpWarRetractedMsg", 
+              "CorpWarDeclaredMsg", 
+              "AcceptedSurrender",
+              "CharLeftCorpMsg", 
+              "CharAppAcceptMsg", 
+              "SovAllClaimAquiredMsg",
+              "SovAllClaimLostMsg",
+              "SovereigntyIHDamageMsg",
+              "SovereigntySBUDamageMsg",
+              "SovereigntyTCUDamageMsg",
+              "StationConquerMsg",
+              "SovStructureDestroyed",
+              "SovStationEnteredFreeport",
+              "SovCommandNodeEventStarted",
+              "SovStructureReinforced",
+              "StationServiceDisabled",
+              "EntosisCaptureStarted",
+              "MoonminingExtractionFinished", 
+              "MoonminingLaserFired", 
+              "FWAllianceWarningMsg", 
+            ],
+            "channelID": 0,
+            "mentions": [],
+          },
+        },		
       }
-    },
+    }
+  },
+
     "filters": {
       "StructureUnderAttack": 0,
       "AllWarDeclaredMsg": 0,
