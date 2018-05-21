@@ -9,7 +9,7 @@ namespace ThunderED
     internal class Program
     {
         private static Timer _timer;
-        public const string VERSION = "1.1.3";
+        public const string VERSION = "1.1.4";
 
         private static void Main(string[] args)
         {
@@ -20,7 +20,7 @@ namespace ThunderED
             SettingsManager.Prepare();
             LogHelper.LogInfo($"ThunderED v{VERSION} is running!").GetAwaiter().GetResult();
             //load database provider
-            var result = SQLiteHelper.LoadProvider();
+            var result = SQLHelper.LoadProvider();
             if (!string.IsNullOrEmpty(result))
             {
                 Console.BackgroundColor = ConsoleColor.Red;
@@ -31,7 +31,7 @@ namespace ThunderED
             //update config settings
             if (SettingsManager.GetBool("config", "moduleNotificationFeed"))
             {
-                var dateStr = SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult();
+                var dateStr = SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult();
                 if(DateTime.TryParseExact(dateStr, new [] {"dd.MM.yyyy HH:mm:ss", $"{CultureInfo.InvariantCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.InvariantCulture.DateTimeFormat.LongTimePattern}"}, CultureInfo.InvariantCulture.DateTimeFormat, DateTimeStyles.None, out var x))
                     SettingsManager.NextNotificationCheck = x;
             }
@@ -57,11 +57,11 @@ namespace ThunderED
                         return;
                     case "flushn":
                         Console.WriteLine("Flushing all notifications DB list");
-                        SQLiteHelper.RunCommand("delete from notificationsList").GetAwaiter().GetResult();
+                        SQLHelper.RunCommand("delete from notificationsList").GetAwaiter().GetResult();
                         break;
                     case "flushcache":
                         Console.WriteLine("Flushing all cache from DB");
-                        SQLiteHelper.RunCommand("delete from cache").GetAwaiter().GetResult();
+                        SQLHelper.RunCommand("delete from cache").GetAwaiter().GetResult();
                         break;
                     case "help":
                         Console.WriteLine("List of available commands:");

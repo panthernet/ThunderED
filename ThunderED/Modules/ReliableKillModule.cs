@@ -50,7 +50,7 @@ namespace ThunderED.Modules
                     if(kills == null || kills.Count == 0) continue;
                     kills.Reverse();
                     var where = new Dictionary<string, object> {{"type", isAlliance ? "ally" : "corp"}, {"id", isAlliance ? allianceID.ToString() : corpID.ToString()}};
-                    var resultQ = await SQLiteHelper.SQLiteDataQuery<string>("killFeedCache", "lastId", where);
+                    var resultQ = await SQLHelper.SQLiteDataQuery<string>("killFeedCache", "lastId", where);
                     _lastPosted = string.IsNullOrEmpty(resultQ) ? 0 : Convert.ToInt32(resultQ);
                     kills = _lastPosted == 0 ? kills.TakeLast(kills.Count < 5 ? kills.Count : 5).ToList() : kills.Where(a => a.killmail_id > _lastPosted).ToList();
 
@@ -208,7 +208,7 @@ namespace ThunderED.Modules
 
 
                         _lastPosted = kill.killmail_id;
-                        await SQLiteHelper.SQLiteDataInsertOrUpdate("killFeedCache", new Dictionary<string, object>
+                        await SQLHelper.SQLiteDataInsertOrUpdate("killFeedCache", new Dictionary<string, object>
                         {
                             {"type", isAlliance ? "ally" : "corp"},
                             {"id", isAlliance ? allianceID.ToString() : corpID.ToString()},

@@ -1,3 +1,9 @@
+v1.1.4
++ Added new notifications: StructureDestroyed and OrbitalAttacked
++ Added ZKB links to some of the notification messages
++ Reworked notifications module to allow better control over notification filters
++ Fixed auto-timers notification exception with empty notes
+
 v1.1.3
 + Fixed fleetup notification issues
 + Fixed notifications time issue

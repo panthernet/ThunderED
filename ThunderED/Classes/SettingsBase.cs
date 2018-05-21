@@ -30,6 +30,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using ThunderED.Helpers;
 
 namespace ThunderED.Classes
 {
@@ -165,10 +166,10 @@ namespace ThunderED.Classes
                             {
                                 T settings;
 
-                                using (StreamReader streamReader = new StreamReader(fileStream))
-                                using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
+                                using (var streamReader = new StreamReader(fileStream))
+                                using (var jsonReader = new JsonTextReader(streamReader))
                                 {
-                                    JsonSerializer serializer = new JsonSerializer();
+                                    var serializer = new JsonSerializer();
                                     serializer.Converters.Add(new StringEnumConverter());
                                     serializer.ObjectCreationHandling = ObjectCreationHandling.Replace;
                                     serializer.Error += (sender, e) => e.ErrorContext.Handled = true;
@@ -177,10 +178,9 @@ namespace ThunderED.Classes
 
                                 if (settings == null)
                                 {
-                                    throw new Exception(typeName + " object is null.");
+                                    LogHelper.LogError($"Failed to load configuration for type {typeName} from settings.json due to JSON error in config. Default config loaded.").GetAwaiter().GetResult();
+                                    return new T();
                                 }
-
-                               // Console.WriteLine("{0} load finished: {1}", typeName, filePath);
 
                                 return settings;
                             }
@@ -189,17 +189,10 @@ namespace ThunderED.Classes
                 }
                 catch (Exception e)
                 {
-                    throw;
-                }
-
-                if (checkBackup)
-                {
-                    return LoadInternal(filePath + ".bak", false);
+                    LogHelper.LogEx(e.Message, e).GetAwaiter().GetResult();
                 }
             }
-
-            //Console.WriteLine("{0} not found. Loading new instance.", typeName);
-
+            LogHelper.LogError($"Failed to load configuration for type {typeName} from settings.json (File not found?). Default config loaded.").GetAwaiter().GetResult();
             return new T();
         }
     }

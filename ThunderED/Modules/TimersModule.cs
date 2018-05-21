@@ -58,7 +58,7 @@ namespace ThunderED.Modules
                             return true;
                         }
                         var characterId = Convert.ToInt32(result[0]);
-                        await SQLiteHelper.SQLiteDataInsertOrUpdate("timersAuth", new Dictionary<string, object> {{"id", result[0]}, {"time", DateTime.Now}});
+                        await SQLHelper.SQLiteDataInsertOrUpdate("timersAuth", new Dictionary<string, object> {{"id", result[0]}, {"time", DateTime.Now}});
                         //redirect to timers
                         var iid = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
                         iid = HttpUtility.UrlEncode(iid);
@@ -105,7 +105,7 @@ namespace ThunderED.Modules
                         var timeout = SettingsManager.GetInt("timersModule", "authTimeoutInMinutes");
                         if (timeout != 0)
                         {
-                            var result = await SQLiteHelper.SQLiteDataQuery<string>("timersAuth", "time", "id", characterId.ToString());
+                            var result = await SQLHelper.SQLiteDataQuery<string>("timersAuth", "time", "id", characterId.ToString());
                             if (result == null || (DateTime.Now - DateTime.Parse(result)).TotalMinutes > timeout)
                             {
                                 //redirect to auth
@@ -120,7 +120,7 @@ namespace ThunderED.Modules
                         if (isEditor && data.StartsWith("delete"))
                         {
                             data = data.Substring(6, data.Length - 6);
-                            await SQLiteHelper.SQLiteDataDelete("timers", "id", data);
+                            await SQLHelper.SQLiteDataDelete("timers", "id", data);
                         }
 
                         await WriteCorrectResponce(response, isEditor, characterId);
@@ -161,7 +161,7 @@ namespace ThunderED.Modules
                         if (data.StartsWith("delete"))
                         {
                             data = data.Substring(6, data.Length - 6);
-                            await SQLiteHelper.SQLiteDataDelete("timers", "id", data);
+                            await SQLHelper.SQLiteDataDelete("timers", "id", data);
                         }
                         else
                         {
@@ -189,7 +189,7 @@ namespace ThunderED.Modules
 
                             //save
                             entry.timerChar = rChar.name;
-                            await SQLiteHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
+                            await SQLHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
                         }
                         return true;
                     }
@@ -281,7 +281,7 @@ namespace ThunderED.Modules
             //check for Discord admins
             if (SettingsManager.GetBool("timersModule", "grantEditRolesToDiscordAdmins"))
             {
-                var roles = SQLiteHelper.SQLiteDataQuery<string>("authUsers", "role", "characterID", characterId.ToString()).GetAwaiter().GetResult();
+                var roles = SQLHelper.SQLiteDataQuery<string>("authUsers", "role", "characterID", characterId.ToString()).GetAwaiter().GetResult();
                 if (!string.IsNullOrEmpty(roles))
                 {
                     var exemptRoles = SettingsManager.GetSubList("config", "discordAdminRoles").Select(a => a.Value);
@@ -335,7 +335,7 @@ namespace ThunderED.Modules
 
         public async Task<string> GenerateTimersHtml(bool isEditor, string baseCharId)
         {
-            var timers = await SQLiteHelper.SQLiteDataSelectTimers();
+            var timers = await SQLHelper.SQLiteDataSelectTimers();
             int counter = 1;
             var sb = new StringBuilder();
 
@@ -392,7 +392,7 @@ namespace ThunderED.Modules
                 if (_lastTimersCheck != null && (DateTime.Now - _lastTimersCheck.Value).TotalMinutes <= 1) return;
                 _lastTimersCheck = DateTime.Now;
 
-                var timers = await SQLiteHelper.SQLiteDataSelectTimers();
+                var timers = await SQLHelper.SQLiteDataSelectTimers();
                 timers?.ForEach(async timer =>
                 {
                     var channel = SettingsManager.GetULong("timersModule", "announceChannel");
@@ -401,7 +401,7 @@ namespace ThunderED.Modules
                     {
                         if (channel != 0)
                             await SendNotification(timer, channel);
-                        await SQLiteHelper.SQLiteDataDelete("timers", "id", timer.id);
+                        await SQLHelper.SQLiteDataDelete("timers", "id", timer.id);
                         return;
                     }
 
@@ -422,7 +422,7 @@ namespace ThunderED.Modules
                             value = value == 0 ? announces.Min() : value;
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLiteHelper.SQLiteDataUpdate("timers", "announce", value, "id", timer.id);
+                            await SQLHelper.SQLiteDataUpdate("timers", "announce", value, "id", timer.id);
                         }
                     }
                     else
@@ -435,7 +435,7 @@ namespace ThunderED.Modules
                         {
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLiteHelper.SQLiteDataUpdate("timers", "announce", an, "id", timer.id);
+                            await SQLHelper.SQLiteDataUpdate("timers", "announce", an, "id", timer.id);
                         }
                     }
                 });
@@ -453,20 +453,20 @@ namespace ThunderED.Modules
         private async Task SendNotification(TimerItem timer, ulong channel)
         {
             var embed = new EmbedBuilder()
-                .WithTitle(string.Format(LM.Get("timerNotifyTitle"), timer.timerLocation))
-                .WithThumbnailUrl(SettingsManager.Get("resources", "imgTimerAlert"))
+                .WithTitle(string.Format(LM.Get("timerNotifyTitle"), timer.timerLocation)??"-") 
+                .WithThumbnailUrl(SettingsManager.Get("resources", "imgTimerAlert") ?? "-")
                 .AddInlineField(LM.Get("timersType"), timer.GetModeName())
                 .AddInlineField(LM.Get("timersStage"), timer.GetStageName())
-                .AddInlineField(LM.Get("timersOwner"), timer.timerOwner)
+                .AddInlineField(LM.Get("timersOwner"), timer.timerOwner ?? "-")
                 .AddInlineField(LM.Get("timersRemaining"), timer.GetRemains())
-                .AddField(LM.Get("timersNotes"), timer.timerNotes);
+                .AddField(LM.Get("timersNotes"), timer.timerNotes ?? "-");
 
             await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), "@everyone", embed.Build()).ConfigureAwait(false);
         }
 
         public static async Task AddTimer(TimerItem entry)
         {
-            await SQLiteHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
+            await SQLHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
 
         }
     }

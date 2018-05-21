@@ -94,6 +94,7 @@ namespace ThunderED.Modules.OnDemand
                         if (result == null)
                             esiFailure = true;
                         var characterID = result?[0];
+                        var numericCharId = Convert.ToInt32(characterID);
 
                         var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
 
@@ -110,7 +111,7 @@ namespace ThunderED.Modules.OnDemand
                                 return true;
                             }
 
-                            if (SettingsManager.GetSubList("notifications", "keys").All(key => key["characterID"] != characterID))
+                            if (TickManager.GetModule<NotificationModule>().Settings.Core.Groups.Values.All(g => g.CharacterID != numericCharId))
                             {
                                 await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
                                 await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
@@ -119,7 +120,7 @@ namespace ThunderED.Modules.OnDemand
                                 return true;
                             }
 
-                            await SQLiteHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
+                            await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
                             await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                                 .Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
@@ -165,7 +166,7 @@ namespace ThunderED.Modules.OnDemand
 
                         if (!esiFailure && add)
                         {
-                            await SQLiteHelper.SQLiteDataInsertOrUpdate("pendingUsers", new Dictionary<string, object>
+                            await SQLHelper.SQLiteDataInsertOrUpdate("pendingUsers", new Dictionary<string, object>
                             {
                                 {"characterID", characterID},
                                 {"corporationID", corpID},
@@ -232,7 +233,7 @@ namespace ThunderED.Modules.OnDemand
             try
             {
                 var esiFailed = false;
-                var responce = await SQLiteHelper.GetPendingUser(remainder);
+                var responce = await SQLHelper.GetPendingUser(remainder);
 
                 if (!responce.Any())
                 {

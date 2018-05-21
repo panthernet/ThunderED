@@ -11,6 +11,8 @@ namespace ThunderED.Classes
     {
         Task<T> SQLiteDataQuery<T>(string table, string field, Dictionary<string, object> where);
         Task<T> SQLiteDataQuery<T>(string table, string field, string whereField, object whereData);
+        Task<List<T>> SQLiteDataQueryList<T>(string table, string field, string whereField, object whereData);
+        Task<List<T>> SQLiteDataQueryList<T>(string table, string field, Dictionary<string, object> where);
 
         Task SQLiteDataUpdate(string table, string setField, object setData, string whereField, object whereData);
         Task SQLiteDataUpdate(string table, string setField, object setData, Dictionary<string, object> where);
@@ -25,5 +27,6 @@ namespace ThunderED.Classes
         Task SQLiteDataPurgeCache();
         Task SQLiteDataInsertOrUpdate(string table, Dictionary<string, object> values);
         Task<List<TimerItem>> SQLiteDataSelectTimers();
+        Task CleanupNotificationsList();
     }
 }

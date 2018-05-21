@@ -56,6 +56,10 @@ namespace ThunderED.Providers
                                 return (T)(object)(r.IsDBNull(0) ? "" : r.GetString(0));
                             if (type == typeof(int))
                                 return (T) (object) (r.IsDBNull(0) ? 0 : r.GetInt32(0));
+                            if (type == typeof(ulong))
+                                return (T) (object) (r.IsDBNull(0) ? 0 : (ulong)r.GetInt64(0));
+                            if (type == typeof(long))
+                                return (T) (object) (r.IsDBNull(0) ? 0 : r.GetInt64(0));
                         }
                         return default;
                     }
@@ -68,9 +72,74 @@ namespace ThunderED.Providers
             }
         }
 
+        public async Task<List<T>> SQLiteDataQueryList<T>(string table, string field, Dictionary<string, object> where)
+        {
+            if (where == null)
+            {
+                await LogHelper.LogError($"[SQLiteDataQuery]: {table}-{field} query has empty values!");
+                return default;
+            }
+
+            var whereText = string.Empty;
+            int count = 1;
+            var last = where.Keys.Last();
+            foreach (var pair in where)
+            {
+                whereText += $"{pair.Key}=@var{count++}{(pair.Key == last? null : " and ")}";
+            }
+
+            var query = $"SELECT {field} FROM {table} WHERE {whereText}";
+            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+            using (var querySQL = new SqliteCommand(query, con))
+            {
+                await con.OpenAsync();
+
+                count = 1;
+                foreach (var pair in where)
+                {
+                    querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
+                }
+                var res = new List<T>();
+                try
+                {
+                    using (var r = await querySQL.ExecuteReaderAsync())
+                    {
+                        if (!r.HasRows) return res;
+                        while (await r.ReadAsync())
+                        {
+                            if (r.IsDBNull(0))
+                                continue;
+                            var type = typeof(T);
+                            if (type == typeof(string))
+                                res.Add((T) (object) (r.IsDBNull(0) ? "" : r.GetString(0)));
+                            else if (type == typeof(int))
+                                res.Add((T) (object) (r.IsDBNull(0) ? 0 : r.GetInt32(0)));
+                            else if (type == typeof(ulong))
+                                res.Add((T) (object) (r.IsDBNull(0) ? 0 : (ulong)r.GetInt64(0)));
+                            else if (type == typeof(long))
+                                res.Add((T) (object) (r.IsDBNull(0) ? 0 : r.GetInt64(0)));
+
+                        }
+
+                        return res;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx($"[SQLiteDataQuery]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    return res;
+                }
+            }
+        }
+
         public async Task<T> SQLiteDataQuery<T>(string table, string field, string whereField, object whereData)
         {
             return await SQLiteDataQuery<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
+        }
+
+        public async Task<List<T>> SQLiteDataQueryList<T>(string table, string field, string whereField, object whereData)
+        {
+            return await SQLiteDataQueryList<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
         }
 
         #endregion
@@ -434,5 +503,24 @@ namespace ThunderED.Providers
             }
         }
 
+
+        public async Task CleanupNotificationsList()
+        {
+            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+            {
+                await con.OpenAsync();
+                using (var q = new SqliteCommand("delete from notificationsList where `time` <= date('now','-30 day')", con))
+                {
+                    try
+                    {
+                        q.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        await LogHelper.LogEx("CleanupNotificationsList", ex, LogCat.SQLite);
+                    }
+                }
+            }
+        }
     }
 }

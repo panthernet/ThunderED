@@ -73,7 +73,7 @@ namespace ThunderED.Modules
 
                 if (_lastChecked == null)
                 {
-                    var dateStr = await SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastChecked");
+                    var dateStr = await SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastChecked");
                     _lastChecked = DateTime.TryParseExact(dateStr,
                         new[]
                         {
@@ -89,12 +89,12 @@ namespace ThunderED.Modules
                     var appKey = SettingsManager.Get("fleetup", "AppKey");
                     var groupID = SettingsManager.Get("fleetup", "GroupID");
                     var channelid = SettingsManager.GetULong("fleetup", "channel");
-                    var lastopid = await SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastPostedOperation");
+                    var lastopid = await SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastPostedOperation");
                     var announcePost = SettingsManager.GetBool("fleetup", "announce_post");
                     var channel = channelid == 0 ? null : APIHelper.DiscordAPI.GetChannel(channelid);
 
                     _lastChecked = DateTime.Now;
-                    await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
+                    await SQLHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
 
                     if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(apiCode) || string.IsNullOrWhiteSpace(groupID) || string.IsNullOrWhiteSpace(appKey)
                         || channel == null)
@@ -109,12 +109,12 @@ namespace ThunderED.Modules
 
                     foreach (var operation in result.Data)
                     {
-                        var lastAnnounce = await SQLiteHelper.SQLiteDataQuery<int>("fleetup", "announce", "id", operation.Id.ToString());
+                        var lastAnnounce = await SQLHelper.SQLiteDataQuery<int>("fleetup", "announce", "id", operation.Id.ToString());
 
                         if (operation.OperationId > Convert.ToInt32(lastopid) && announcePost)
                         {
                             await SendMessage(operation, channel, $"@everyone FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
-                            await SQLiteHelper.SQLiteDataUpdate("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");
+                            await SQLHelper.SQLiteDataUpdate("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");
                         }
 
                         var timeDiff = TimeSpan.FromTicks(operation.Start.Ticks - DateTime.UtcNow.Ticks);
@@ -132,7 +132,7 @@ namespace ThunderED.Modules
                             {
                                 await SendMessage(operation, channel, $"@everyone {string.Format(LM.Get("fuFormIn"), i, $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                     false);
-                                await SQLiteHelper.SQLiteDataInsertOrUpdate("fleetup", new Dictionary<string, object>
+                                await SQLHelper.SQLiteDataInsertOrUpdate("fleetup", new Dictionary<string, object>
                                 {
                                     { "id", operation.Id.ToString()},
                                     { "announce", i}
@@ -145,7 +145,7 @@ namespace ThunderED.Modules
                         {
                             await SendMessage(operation, channel, $"@everyone {string.Format(LM.Get("fuFormNow"), $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                 false);
-                            await SQLiteHelper.SQLiteDataDelete("fleetup", "id", operation.Id.ToString());
+                            await SQLHelper.SQLiteDataDelete("fleetup", "id", operation.Id.ToString());
                         }
                     }
                 }

@@ -48,6 +48,11 @@ namespace ThunderED.API
             await ReplyMessageAsync(context, message, false);
         }
 
+        public string GetUserMention(ulong userId)
+        {
+            return Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId"))?.GetUser(userId)?.Mention;
+        }
+
         public async Task ReplyMessageAsync(ICommandContext context, string message, bool mentionSender)
         {
             if (context?.Message == null) return;
@@ -281,7 +286,7 @@ namespace ThunderED.API
 
                     await LogHelper.LogInfo($"Running Auth Check on {u.Username}", LogCat.AuthCheck, false);
 
-                    var responce = await SQLiteHelper.GetAuthUser(u.Id);
+                    var responce = await SQLHelper.GetAuthUser(u.Id);
 
                     if (responce.Count > 0)
                     {
@@ -365,8 +370,8 @@ namespace ThunderED.API
                             await u.AddRolesAsync(roles);
                             await u.RemoveRolesAsync(remroles);
                             //remove notifications token if user has been stripped of roles
-                            if (!isInExempt && !isAddedRole && isRemovedRole)
-                                await SQLiteHelper.SQLiteDataDelete("notifications", "characterID", characterID);
+                           // if (!isInExempt && !isAddedRole && isRemovedRole)
+                            //    await SQLHelper.SQLiteDataDelete("notificationsList", "characterID", characterID);
                         }
 
                         var eveName = characterData.name;
@@ -515,7 +520,7 @@ namespace ThunderED.API
                 if(rolesString.Length > 0)
                     rolesString.Remove(rolesString.Length-1, 1);
 
-                await SQLiteHelper.SQLiteDataUpdate("pendingUsers", "active", "0", "authString", remainder);
+                await SQLHelper.SQLiteDataUpdate("pendingUsers", "active", "0", "authString", remainder);
 
                 await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, string.Format(LM.Get("msgAuthSuccess"), context.Message.Author.Mention, characterData.name));
                 var eveName = characterData.name;
@@ -525,7 +530,7 @@ namespace ThunderED.API
 
                 var query2 =
                     $"INSERT OR REPLACE INTO authUsers(eveName, characterID, discordID, role, active, addedOn) VALUES (\"{eveName}\", \"{characterID}\", \"{discordID}\", \"{rolesString}\", \"{active}\", \"{addedOn}\")";
-                await SQLiteHelper.RunCommand(query2);
+                await SQLHelper.RunCommand(query2);
 
                 var corpTickers = SettingsManager.GetBool("auth", "enforceCorpTickers");
                 var nameEnforce = SettingsManager.GetBool("auth", "enforceCharName");
@@ -576,11 +581,11 @@ namespace ThunderED.API
                 foreach (var u in discordUsers)
                 {
                     int count = 0;
-                    var responce = await SQLiteHelper.GetAuthUser(u.Id, true);
+                    var responce = await SQLHelper.GetAuthUser(u.Id, true);
                     foreach (var r in responce)
                     {
                         if (count != 0)
-                            await SQLiteHelper.RunCommand($"DELETE FROM authUsers WHERE id = {r["id"]}");
+                            await SQLHelper.RunCommand($"DELETE FROM authUsers WHERE id = {r["id"]}");
                         count++;
                     }
                 }
@@ -588,11 +593,11 @@ namespace ThunderED.API
             else
             {
                 int count = 0;
-                var responce = await SQLiteHelper.GetAuthUser(user.Id, true);
+                var responce = await SQLHelper.GetAuthUser(user.Id, true);
                 foreach (var r in responce)
                 {
                     if (count != 0)
-                        await SQLiteHelper.RunCommand($"DELETE FROM authUsers WHERE id = {r["id"]}");
+                        await SQLHelper.RunCommand($"DELETE FROM authUsers WHERE id = {r["id"]}");
                     count++;
                 }
             }

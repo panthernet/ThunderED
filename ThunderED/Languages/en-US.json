@@ -175,4 +175,7 @@
   "mailLabels":  "Labels:", 
   "mailDate":  "Date:", 
   "mailMsgTitle":  "@everyone Mail from {0}!", 
+  "NotifyHeader_OrbitalAttacked":  "{0} belonging to {1} is under attack!", 
+  "Location":  "Location" ,
+  "Aggressor":  "Agressor" ,
 }

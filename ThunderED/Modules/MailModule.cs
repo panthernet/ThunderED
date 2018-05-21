@@ -60,7 +60,7 @@ namespace ThunderED.Modules
                             return true;
                         }
 
-                        await SQLiteHelper.SQLiteDataInsertOrUpdateTokens("", result[0], result[1]);
+                        await SQLHelper.SQLiteDataInsertOrUpdateTokens("", result[0], result[1]);
                         response.Headers.ContentEncoding.Add("utf-8");
                         response.Headers.ContentType.Add("text/html;charset=utf-8");
                         await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
@@ -101,7 +101,7 @@ namespace ThunderED.Modules
                     if (string.IsNullOrEmpty(id) || terms == null || terms.Count == 0) continue;
                     var charId = Convert.ToInt32(id);
 
-                    var rToken = await SQLiteHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", charId);
+                    var rToken = await SQLHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", charId);
                     if (string.IsNullOrEmpty(rToken))
                     {
                         continue;
@@ -114,7 +114,7 @@ namespace ThunderED.Modules
                         continue;
                     }
 
-                    var lastMailId = await SQLiteHelper.SQLiteDataQuery<int>("mail", "mailId", "id", id);
+                    var lastMailId = await SQLHelper.SQLiteDataQuery<int>("mail", "mailId", "id", id);
                     var prevMailId = lastMailId;
                     var labelsData= await APIHelper.ESIAPI.GetMailLabels(Reason, id, token);
                     var searchLabels = labelsData.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received");
@@ -143,7 +143,7 @@ namespace ThunderED.Modules
 
                     }
                     if(prevMailId != lastMailId)
-                        await SQLiteHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", id}, {"mailId", lastMailId}});
+                        await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", id}, {"mailId", lastMailId}});
                 }
             }
             catch (Exception ex)

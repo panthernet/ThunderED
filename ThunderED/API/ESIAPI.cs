@@ -70,6 +70,12 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<List<JsonClasses.Notification>>($"https://esi.tech.ccp.is/latest/characters/{userId}/notifications/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
+        internal async Task<JsonClasses.Planet> GetPlanet(string reason, string planetId)
+        {
+            return await APIHelper.RequestWrapper<JsonClasses.Planet>($"https://esi.tech.ccp.is/latest/universe/planets/{planetId}/?datasource=tranquility&language={_language}", reason);
+        }
+
+
         internal async Task<JsonClasses.StructureData> GetStructureData(string reason, string id, string token)
         {
             var authHeader = $"Bearer {token}";
@@ -195,7 +201,7 @@ namespace ThunderED.API
         /// </summary>
         internal override async void PurgeCache()
         {
-            await SQLiteHelper.SQLiteDataPurgeCache();
+            await SQLHelper.SQLiteDataPurgeCache();
         }
 
         /// <summary>
@@ -205,8 +211,8 @@ namespace ThunderED.API
         internal override async void ResetCache(string type = null)
         {
             if (string.IsNullOrEmpty(type))
-                await SQLiteHelper.SQLiteDataDelete("cache");
-            else await SQLiteHelper.SQLiteDataDelete("cache", "type", type);
+                await SQLHelper.SQLiteDataDelete("cache");
+            else await SQLHelper.SQLiteDataDelete("cache", "type", type);
             SettingsManager.UpdateSettings();
         }
         #endregion

@@ -47,6 +47,7 @@
 
         public class Planet
         {
+            public string name;
             public int planet_id { get; set; }
             public int[] moons { get; set; }
         }

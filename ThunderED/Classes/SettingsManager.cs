@@ -67,8 +67,8 @@ namespace ThunderED.Classes
                 .SetBasePath(RootDirectory)
                 .AddJsonFile("settings.json", optional: true, reloadOnChange: true).Build();
             
-            if (GetBool("config", "moduleNotificationFeed") && SQLiteHelper.Provider != null)
-              NextNotificationCheck = DateTime.Parse(SQLiteHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult());
+            if (GetBool("config", "moduleNotificationFeed") && SQLHelper.Provider != null)
+              NextNotificationCheck = DateTime.Parse(SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult());
 
         }
 
@@ -105,6 +105,11 @@ namespace ThunderED.Classes
         public static List<IConfigurationSection> GetSubList(string section, string section2)
         {
             return Root.GetSection(section).GetSection(section2).GetChildren().ToList();
+        }
+
+        public static List<IConfigurationSection> GetSubList(IConfigurationSection section, string section2)
+        {
+            return section.GetSection(section2).GetChildren().ToList();
         }
 
         public static T[] GetArray<T>(string section, string field)

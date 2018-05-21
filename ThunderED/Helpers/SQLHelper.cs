@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using ThunderED.Classes;
-using ThunderED.Json;
 using ThunderED.Json.Internal;
 using ThunderED.Providers;
 
 namespace ThunderED.Helpers
 {
-    public static partial class SQLiteHelper
+    public static partial class SQLHelper
     {
         public static IDatabasePovider Provider { get; set; }
 
@@ -23,6 +21,16 @@ namespace ThunderED.Helpers
         internal static async Task<T> SQLiteDataQuery<T>(string table, string field, Dictionary<string, object> where)
         {
             return await Provider?.SQLiteDataQuery<T>(table, field, where);
+        }
+
+        internal static async Task<List<T>> SQLiteDataQueryList<T>(string table, string field, string whereField, object whereData)
+        {
+            return await Provider?.SQLiteDataQueryList<T>(table, field, whereField, whereData);
+        }
+
+        internal static async Task<List<T>> SQLiteDataQueryList<T>(string table, string field, Dictionary<string, object> where)
+        {
+            return await Provider?.SQLiteDataQueryList<T>(table, field, where);
         }
 
         #endregion
@@ -108,7 +116,7 @@ namespace ThunderED.Helpers
 
             }
             //upgrade database
-            if (!SQLiteHelper.Upgrade().GetAwaiter().GetResult())
+            if (!SQLHelper.Upgrade().GetAwaiter().GetResult())
             {
                 return "[CRITICAL] Failed to upgrade DB to latest version!";
             }
@@ -119,6 +127,11 @@ namespace ThunderED.Helpers
         public static async Task<List<TimerItem>> SQLiteDataSelectTimers()
         {
             return await Provider?.SQLiteDataSelectTimers();
+        }
+
+        public static async Task CleanupNotificationsList()
+        {
+            await Provider?.CleanupNotificationsList();
         }
     }
 }
