@@ -5,6 +5,7 @@
       "eveChannelName":  "channel name",
       "endpoint":  "http://IP:PORT/chatrelay.php",
       "code":  "thesecretsupercode", 
+      "dateformat":  "HH:mm",
     },
   }
 }

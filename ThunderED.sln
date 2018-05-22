@@ -9,10 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		readme.md = readme.md
+		Version.cs = Version.cs
 		version.txt = version.txt
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TED_ChatRelay", "TED_ChatRelay\TED_ChatRelay.csproj", "{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TED_ChatRelay", "TED_ChatRelay\TED_ChatRelay.csproj", "{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

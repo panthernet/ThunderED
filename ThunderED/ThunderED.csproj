@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Version.cs" Link="Version.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Discord-01.png" />
   </ItemGroup>
 

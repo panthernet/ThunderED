@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using ThunderED.Classes;
 
@@ -18,5 +19,7 @@ namespace TED_ChatRelay.Classes
 
         [JsonIgnore]
         public List<string> Pool { get; set; } = new List<string>();
+
+        public string DateFormat { get; set; }
     }
 }

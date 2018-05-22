@@ -6,10 +6,9 @@ using ThunderED.Helpers;
 
 namespace ThunderED
 {
-    internal class Program
+    internal partial class Program
     {
         private static Timer _timer;
-        public const string VERSION = "1.1.4";
 
         private static void Main(string[] args)
         {

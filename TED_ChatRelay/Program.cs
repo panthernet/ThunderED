@@ -10,20 +10,18 @@ using System.Threading.Tasks;
 using System.Web;
 using TED_ChatRelay.Classes;
 
-namespace TED_ChatRelay
+namespace ThunderED
 {
-    class Program
+    internal partial class Program
     {
         private static RelaySetttings _settings;
         private static Timer _timer;
-
-        public static string Version = "1.0.0";
 
         static void Main(string[] args)
         {
             try
             {
-                Console.WriteLine($"TED Chat Relay v{Version} for EVE Online is starting...");
+                Console.WriteLine($"TED Chat Relay v{VERSION} for EVE Online is starting...");
                 _settings = RelaySetttings.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json"));
 
                 if (!Directory.Exists(_settings.EveLogsFolder))
@@ -88,7 +86,20 @@ namespace TED_ChatRelay
                         {
                             if (!line.StartsWith('[') || relay.Pool.Contains(line)) continue;
 
-                            Console.WriteLine($"SEND->[{relay.EveChannelName}]: {line}");
+                            var newLine = line;
+                            //change time
+                            try
+                            {
+                                var end = line.IndexOf(']', 1);
+                                var dt = DateTime.Parse(line.Substring(1, end - 2).Trim());
+                                newLine = $"[{dt.ToString(relay.DateFormat)}] {line.Substring(end + 1, line.Length - end - 1).Trim()}";
+                            }
+                            catch
+                            {
+                                //ignore
+                            }
+
+                            Console.WriteLine($"SEND->[{relay.EveChannelName}]: {newLine}");
                             lock (Locker)
                             {
                                 relay.Pool.Add(line);
@@ -96,7 +107,7 @@ namespace TED_ChatRelay
                                     relay.Pool.RemoveAt(0);
                             }
 
-                            if (!SendMessage(relay, line).GetAwaiter().GetResult())
+                            if (!SendMessage(relay, newLine).GetAwaiter().GetResult())
                             {
                                 Console.WriteLine("");
                             }
