@@ -178,4 +178,5 @@
   "NotifyHeader_OrbitalAttacked":  "{0} belonging to {1} is under attack!", 
   "Location":  "Location" ,
   "Aggressor":  "Agressor" ,
+  "backText":  "Go Back",
 }

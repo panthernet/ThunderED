@@ -186,5 +186,6 @@
   "NotifyHeader_OrbitalAttacked":  "Объект {0}, принадлежащий {1} атакован!", 
   "Location":  "Локация" ,
   "Aggressor":  "Агрессор" ,
+  "backText":  "Назад",
 
 }

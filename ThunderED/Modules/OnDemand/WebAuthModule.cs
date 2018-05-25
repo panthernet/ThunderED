@@ -72,7 +72,7 @@ namespace ThunderED.Modules.OnDemand
                     response.Headers.ContentEncoding.Add("utf-8");
                     response.Headers.ContentType.Add("text/html;charset=utf-8");
                     var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{callbackurl}", callbackurl).Replace("{client_id}", Settings.Core.CcpAppClientId)
-                        .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{body}", LM.Get("authTemplateInv"));
+                        .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{body}", LM.Get("authTemplateInv")).Replace("{backText}", LM.Get("backText"));
                     await response.WriteContentAsync(text);
                     return true;
                 }
@@ -112,7 +112,7 @@ namespace ThunderED.Modules.OnDemand
                                 await LogHelper.LogWarning("Bad or outdated notify feed request!");
                                 await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
                                     .Replace("{message}", LM.Get("authTokenBadRequest"))
-                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")));
+                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
                                 return true;
                             }
 
@@ -121,7 +121,7 @@ namespace ThunderED.Modules.OnDemand
                                 await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
                                 await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
                                     .Replace("{message}", LM.Get("authTokenInvalid"))
-                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")));
+                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
                                 return true;
                             }
 
@@ -129,7 +129,7 @@ namespace ThunderED.Modules.OnDemand
                             await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                                 .Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
-                                .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")));
+                                .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")));
                             return true;
                         }
 
@@ -173,7 +173,7 @@ namespace ThunderED.Modules.OnDemand
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth2).Replace("{url}", Settings.Core.DiscordUrl).Replace("{image}", image)
                                 .Replace("{uid}", uid).Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{body}", string.Format(LM.Get("authTemplateSucc1"), rChar.name))
-                                .Replace("{body2}", LM.Get("authTemplateSucc2")).Replace("{body3}", LM.Get("authTemplateSucc3")));
+                                .Replace("{body2}", LM.Get("authTemplateSucc2")).Replace("{body3}", LM.Get("authTemplateSucc3")).Replace("{backText}", LM.Get("backText")));
                         }
                         else if (!esiFailure)
                         {
@@ -183,7 +183,7 @@ namespace ThunderED.Modules.OnDemand
                             response.Headers.ContentEncoding.Add("utf-8");
                             response.Headers.ContentType.Add("text/html;charset=utf-8");
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
-                                .Replace("{header}", LM.Get("authTemplateHeader")));
+                                .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")));
                         }
                         else
                         {
@@ -191,7 +191,7 @@ namespace ThunderED.Modules.OnDemand
                             response.Headers.ContentEncoding.Add("utf-8");
                             response.Headers.ContentType.Add("text/html;charset=utf-8");
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
-                                .Replace("{header}", LM.Get("authTemplateHeader")));
+                                .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")));
                         }
 
                         return true;

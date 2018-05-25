@@ -3,6 +3,7 @@ v1.1.4
 + Added ZKB links to some of the notification messages
 + Added timestamp settings for EVE Chat Relay module
 + Added unified version file
++ Added Back buttons to all web pages
 + Reworked authenticationto check for multiple discord roles per group
 + Reworked notifications module to allow better control over notification filters
 + Fixed auto-timers notification exception with empty notes
