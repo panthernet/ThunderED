@@ -31,7 +31,9 @@ namespace ThunderED.Classes
 
         public static T GetModule<T>()
         {
-            return (T)(object)Modules.FirstOrDefault(a => a.GetType() == typeof(T));
+            var type = typeof(T);
+            var o = Modules.FirstOrDefault(a => a.GetType() == type) ?? OnDemandModules.FirstOrDefault(a => a.GetType() == type);
+            return (T)(object)o;
         }
 
         public static void LoadModules()

@@ -4,11 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
+using Discord.WebSocket;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Json;
+using ThunderED.Modules.Settings;
 using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules.OnDemand
@@ -17,9 +22,12 @@ namespace ThunderED.Modules.OnDemand
     {
         public override LogCat Category => LogCat.AuthWeb;
 
+        public AuthSettings Settings { get; }
+
         public WebAuthModule()
         {
             WebServerModule.ModuleConnectors.Add(Reason, Auth);
+            Settings = AuthSettings.Load(SettingsManager.FileSettingsPath);
         }
 
         public static async Task<string[]> GetCHaracterIdFromCode(string code, string clientID, string secret)
@@ -49,9 +57,6 @@ namespace ThunderED.Modules.OnDemand
             var request = context.Request;
             var response = context.Response;
 
-            var clientID = SettingsManager.Get("auth","ccpAppClientId");
-            var secret = SettingsManager.Get("auth","ccpAppSecret");
-            var url = SettingsManager.Get("auth","discordUrl");
             var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
             var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
             var port = SettingsManager.Get("webServerModule", "webListenPort");
@@ -66,7 +71,7 @@ namespace ThunderED.Modules.OnDemand
                 {
                     response.Headers.ContentEncoding.Add("utf-8");
                     response.Headers.ContentType.Add("text/html;charset=utf-8");
-                    var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{callbackurl}", callbackurl).Replace("{client_id}", clientID)
+                    var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{callbackurl}", callbackurl).Replace("{client_id}", Settings.Core.CcpAppClientId)
                         .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{body}", LM.Get("authTemplateInv"));
                     await response.WriteContentAsync(text);
                     return true;
@@ -90,7 +95,7 @@ namespace ThunderED.Modules.OnDemand
                         var code = prms[0].Split('=')[1];
                         var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
 
-                        var result = await GetCHaracterIdFromCode(code, clientID, secret);
+                        var result = await GetCHaracterIdFromCode(code, Settings.Core.CcpAppClientId, Settings.Core.CcpAppSecret);
                         if (result == null)
                             esiFailure = true;
                         var characterID = result?[0];
@@ -128,40 +133,25 @@ namespace ThunderED.Modules.OnDemand
                             return true;
                         }
 
-                        var authgroups = SettingsManager.GetSubList("auth", "authgroups");
-                        var corps = new Dictionary<string, string>();
-                        var alliance = new Dictionary<string, string>();
-
-                        string allianceID;
-                        string corpID;
-                        foreach (var config in authgroups)
+                        var foundList = new List<int>();
+                        foreach (var group in Settings.Core.AuthGroups.Values)
                         {
-                            var configChildren = config.GetChildren().ToList();
-
-                            corpID = configChildren.FirstOrDefault(x => x.Key == "corpID")?.Value ?? "";
-                            allianceID = configChildren.FirstOrDefault(x => x.Key == "allianceID")?.Value ?? "";
-                            var memberRole = configChildren.FirstOrDefault(x => x.Key == "memberRole")?.Value ?? "";
-
-                            if (Convert.ToInt32(corpID) != 0)
-                                corps.Add(corpID, memberRole);
-                            if (Convert.ToInt32(allianceID) != 0)
-                                alliance.Add(allianceID, memberRole);
+                            if (group.CorpID != 0)
+                                foundList.Add(group.CorpID);
+                            if (group.AllianceID != 0)
+                                foundList.Add(group.AllianceID);
                         }
 
                         if (rChar == null)
                             esiFailure = true;
-                        corpID = rChar?.corporation_id.ToString() ?? "0";
+                        var corpID = rChar?.corporation_id ?? 0;
 
                         var rCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar?.corporation_id, true);
                         if (rCorp == null)
                             esiFailure = true;
-                        allianceID = rCorp?.alliance_id.ToString() ?? "0";
+                        var allianceID = rCorp?.alliance_id ?? 0;
 
-                        if (corps.ContainsKey(corpID))
-                            add = true;
-                        else if (alliance.ContainsKey(allianceID))
-                            add = true;
-                        else if (corps.Count == 0 && alliance.Count == 0)
+                        if (corpID != 0 && foundList.Contains(corpID) || allianceID != 0 && foundList.Contains(allianceID) || foundList.Count == 0)
                             add = true;
 
                         if (!esiFailure && add)
@@ -169,8 +159,8 @@ namespace ThunderED.Modules.OnDemand
                             await SQLHelper.SQLiteDataInsertOrUpdate("pendingUsers", new Dictionary<string, object>
                             {
                                 {"characterID", characterID},
-                                {"corporationID", corpID},
-                                {"allianceID", allianceID},
+                                {"corporationID", corpID.ToString()},
+                                {"allianceID", allianceID.ToString()},
                                 {"authString", uid},
                                 {"active", "1"},
                                 {"groups", "[]"},
@@ -180,7 +170,7 @@ namespace ThunderED.Modules.OnDemand
                             response.Headers.ContentEncoding.Add("utf-8");
                             response.Headers.ContentType.Add("text/html;charset=utf-8");
 
-                            await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth2).Replace("{url}", url).Replace("{image}", image)
+                            await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth2).Replace("{url}", Settings.Core.DiscordUrl).Replace("{image}", image)
                                 .Replace("{uid}", uid).Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{body}", string.Format(LM.Get("authTemplateSucc1"), rChar.name))
                                 .Replace("{body2}", LM.Get("authTemplateSucc2")).Replace("{body3}", LM.Get("authTemplateSucc3")));
@@ -245,22 +235,17 @@ namespace ThunderED.Modules.OnDemand
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey"), true).ConfigureAwait(false);
                         break;
                     case "1":
-                        var authgroups = SettingsManager.GetSubList("auth", "authgroups");
-                        var corps = new Dictionary<string, string>();
-                        var alliance = new Dictionary<string, string>();
+                       // var authgroups = SettingsManager.GetSubList("auth", "authgroups");
+                       // var corps = new Dictionary<string, string>();
+                       // var alliance = new Dictionary<string, string>();
 
-                        foreach (var config in authgroups)
+                        var foundList = new Dictionary<int, List<string>>();
+                        foreach (var group in TickManager.GetModule<WebAuthModule>().Settings.Core.AuthGroups.Values)
                         {
-                            var configChildren = config.GetChildren().ToList();
-
-                            var corpID2 = configChildren.FirstOrDefault(x => x.Key == "corpID")?.Value ?? "";
-                            var allianceID2 = configChildren.FirstOrDefault(x => x.Key == "allianceID")?.Value ?? "";
-                            var memberRole = configChildren.FirstOrDefault(x => x.Key == "memberRole")?.Value ?? "";
-
-                            if (Convert.ToInt32(corpID2) != 0)
-                                corps.Add(corpID2, memberRole);
-                            if (Convert.ToInt32(allianceID2) != 0)
-                                alliance.Add(allianceID2, memberRole);
+                            if (group.CorpID != 0)
+                                foundList.Add(group.CorpID, group.MemberRoles);
+                            if (group.AllianceID != 0)
+                                foundList.Add(group.AllianceID, group.MemberRoles);
                         }
 
                         var characterID = responce[0]["characterID"].ToString();
@@ -272,14 +257,14 @@ namespace ThunderED.Modules.OnDemand
                         if (corporationData == null)
                             esiFailed = true;
 
-                        var allianceID = characterData.alliance_id.ToString();
-                        var corpID = characterData.corporation_id.ToString();
+                        var allianceID = characterData.alliance_id ?? 0;
+                        var corpID = characterData.corporation_id;
 
-                        bool enable = corps.ContainsKey(corpID) || characterData.alliance_id != null && alliance.ContainsKey(allianceID) || (corps.Count == 0 && alliance.Count == 0);
+                        bool enable = foundList.ContainsKey(corpID) || characterData.alliance_id != null && foundList.ContainsKey(allianceID) || foundList.Count == 0;
 
                         if (enable && !esiFailed)
                         {
-                            await APIHelper.DiscordAPI.AuthGrantRoles(context, characterID, corps, alliance, characterData, corporationData, remainder);
+                            await AuthGrantRoles(context, characterID, foundList, characterData, corporationData, remainder);
                         }
                         else
                         {
@@ -295,5 +280,105 @@ namespace ThunderED.Modules.OnDemand
                 await LogHelper.LogEx($"Error: {ex.Message}", ex, LogCat.AuthWeb).ConfigureAwait(false);
             }
         }
+
+        private static async Task AuthGrantRoles(ICommandContext context, string characterID, Dictionary<int, List<string>> foundList, JsonClasses.CharacterData characterData, JsonClasses.CorporationData corporationData, string remainder)
+        {
+            var rolesToAdd = new List<SocketRole>();
+
+            var allianceID = characterData.alliance_id ?? 0;
+            var corpID = characterData.corporation_id;
+
+            var authSettings = TickManager.GetModule<WebAuthModule>()?.Settings.Core;
+
+            try
+            {
+                //Check for Corp roles
+                if (foundList.ContainsKey(corpID))
+                {
+                    var cRoles = foundList[corpID];
+                    cRoles.ForEach(a =>
+                    {
+                        var f = APIHelper.DiscordAPI.GetGuildRole(a);
+                        if(f != null && !rolesToAdd.Contains(f))
+                            rolesToAdd.Add(f);
+                    });
+                }
+
+                //Check for Alliance roles
+                if (foundList.ContainsKey(allianceID))
+                {
+                    var cRoles = foundList[allianceID];
+                    cRoles.ForEach(a =>
+                    {
+                        var f = APIHelper.DiscordAPI.GetGuildRole(a);
+                        if(f != null && !rolesToAdd.Contains(f))
+                            rolesToAdd.Add(f);
+                    });
+                }
+
+                var discordUser = APIHelper.DiscordAPI.GetUser(context.Message.Author.Id);
+
+                if (authSettings.AuthReportChannel != 0)
+                    await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, string.Format(LM.Get("grantRolesMessage"), characterData.name))
+                        .ConfigureAwait(false);
+                await APIHelper.DiscordAPI.AssignRolesToUser(discordUser, rolesToAdd);
+
+                var rolesString = new StringBuilder();
+                foreach (var role in discordUser.Roles)
+                {
+                    if(role.Name.StartsWith("@everyone")) continue;
+                    rolesString.Append(role.Name.Replace("\"", "&br;"));
+                    rolesString.Append(",");
+                }
+                if(rolesString.Length > 0)
+                    rolesString.Remove(rolesString.Length-1, 1);
+
+                await SQLHelper.SQLiteDataUpdate("pendingUsers", "active", "0", "authString", remainder);
+
+                await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, string.Format(LM.Get("msgAuthSuccess"), context.Message.Author.Mention, characterData.name));
+                var eveName = characterData.name;
+                var discordID = discordUser.Id;
+                var addedOn = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                await SQLHelper.SQLiteDataInsertOrUpdate("authUsers", new Dictionary<string, object>
+                {
+                    {"eveName", eveName},
+                    {"characterID", characterID},
+                    {"discordID", discordID.ToString()},
+                    {"role", rolesString.ToString()},
+                    {"active", "yes"},
+                    {"addedOn", addedOn}
+                });
+               
+                if (authSettings.EnforceCorpTickers || authSettings.EnforceCharName)
+                {
+                    var nickname = "";
+                    if (authSettings.EnforceCorpTickers)
+                        nickname = $"[{corporationData.ticker}] ";
+                    if (authSettings.EnforceCharName)
+                        nickname += $"{eveName}";
+                    else
+                        nickname += $"{discordUser.Username}";
+
+                    try
+                    {
+                        //will throw ex on admins
+                        await discordUser.ModifyAsync(x => x.Nickname = nickname);
+                    }
+                    catch
+                    {
+                        //ignore
+                    }
+
+                    await APIHelper.DiscordAPI.Dupes(discordUser);
+                }
+            }
+
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx($"Failed adding Roles to User {characterData.name}, Reason: {ex.Message}", ex, LogCat.Discord);
+            }
+        }
+
     }
 }

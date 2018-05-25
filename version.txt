@@ -3,8 +3,12 @@ v1.1.4
 + Added ZKB links to some of the notification messages
 + Added timestamp settings for EVE Chat Relay module
 + Added unified version file
++ Reworked authenticationto check for multiple discord roles per group
 + Reworked notifications module to allow better control over notification filters
 + Fixed auto-timers notification exception with empty notes
+
+Breaking changes
++ Settings auth -> authGroups -> group1 -> memberRole renamed to memberRoles and now is a list of strings
 
 v1.1.3
 + Fixed fleetup notification issues

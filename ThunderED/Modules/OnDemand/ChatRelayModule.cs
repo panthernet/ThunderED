@@ -83,11 +83,12 @@ namespace ThunderED.Modules.OnDemand
                             return true;
                         }
 
+                        await APIHelper.DiscordAPI.SendMessageAsync(relay.DiscordChannelId, message);
+
                         list.Add(message);
                         if (list.Count > 20)
                             list.RemoveAt(0);
 
-                        await APIHelper.DiscordAPI.SendMessageAsync(relay.DiscordChannelId, message);
                         await response.WriteContentAsync("OK");
 
                         return true;
@@ -96,6 +97,7 @@ namespace ThunderED.Modules.OnDemand
             }
             catch (Exception ex)
             {
+                await response.WriteContentAsync("ERROR: Server error");
                 await LogHelper.LogEx(ex.Message, ex, Category);
             }
 
