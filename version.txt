@@ -9,7 +9,8 @@ v1.1.4
 + Fixed auto-timers notification exception with empty notes
 
 Breaking changes
-+ Settings auth -> authGroups -> group1 -> memberRole renamed to memberRoles and now is a list of strings
++ Settings **auth -> authGroups -> group1 -> memberRole** renamed to **memberRoles** and now is a list of strings
++ **notifications** section replaced by **notificationFeedModule** section with updated settings
 
 v1.1.3
 + Fixed fleetup notification issues
