@@ -15,10 +15,14 @@ namespace ThunderED.Classes
     /// </summary>
     public partial class DiscordCommands : ModuleBase
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+
+        [Command("tq", RunMode = RunMode.Async), Summary("Reports TQ status")]
+        public async Task TQStatus()
+        {
+            var tq = await APIHelper.ESIAPI.GetServerStatus("ESIAPI");
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, string.Format(LM.Get("tqStatusText"), tq.players > 20 ? LM.Get("online") : LM.Get("offline"), tq.players), true);
+        }
+
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
         public async Task Help()
         {
@@ -73,6 +77,9 @@ namespace ThunderED.Classes
                     break;                        
                 case "corp":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpCorp")}", true);
+                    break;                        
+                case "tq":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTQ")}", true);
                     break;                        
                 case "jita":
                 case "amarr":

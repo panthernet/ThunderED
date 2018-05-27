@@ -247,7 +247,12 @@ namespace ThunderED.API
 
         public async Task<bool> IsServerOnline(string reason)
         {
-            return ((await APIHelper.RequestWrapper<JsonClasses.ServerStatus>($"https://esi.tech.ccp.is/latest/status/?datasource=tranquility&language={_language}", reason))?.players ?? 0) > 20;
+            return ((await GetServerStatus(reason))?.players ?? 0) > 20;
+        }
+
+        public async Task<JsonClasses.ServerStatus> GetServerStatus(string reason)
+        {
+            return await APIHelper.RequestWrapper<JsonClasses.ServerStatus>($"https://esi.tech.ccp.is/latest/status/?datasource=tranquility&language={_language}", reason);
         }
     }
 }

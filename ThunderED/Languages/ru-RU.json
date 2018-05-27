@@ -9,7 +9,7 @@
   "LowPower": "Низкая Мощность",
   "StructureWentLowPower": "Цитадель {0} в режиме {1}!",
   "helpText":
-    "Приват команды: ** !auth | !authnotify | !web | !evetime | !stat | !about | !char | !corp | !jita | !amarr | !dodixie | !rens | !pc**\nВведите !help ИМЯ КОМАНДЫ боту в приват для подробной информации о команде",
+    "Приват команды: ** !auth | !authnotify | !web | !evetime | !stat | !about | !char | !corp | !jita | !amarr | !dodixie | !rens | !pc | !tq**\nВведите !help ИМЯ КОМАНДЫ боту в приват для подробной информации о команде",
   "helpHelp": "не tcp мое ip!",
   "helpAuth":
     "Команда *auth* регистрирует Вас под персонажем EVE Online, отправьте команду *!auth* сообщением для подробной информации",
@@ -24,6 +24,7 @@
   "helpJita": "Команда отображает информацию о ценах на товар в указанном торговом хабе\nПример: *!jita Robotics*",
   "helpPc": "Команда отображает информацию о глобальных ценах на товар\nПример: *!pc Robotics*",
   "helpWeb": "Отображает адрес основной страницы веб-сайта",
+  "helpTQ": "Отображает статус игрового сервера Tranquility",
   "enterItemName": "введите наименование предмета",
   "commandToPrivate": "Эту команду следует писать боту в приват!",
   "authInvite": "Для регистрации перейдите по ссылке {0} и залогиньтесь своим персонажем",
@@ -187,5 +188,14 @@
   "Location":  "Локация" ,
   "Aggressor":  "Агрессор" ,
   "backText":  "Назад",
-
+  "tqStatusText":  "```\nСтатус TQ: {0}\nИгроков: {1}\n```" ,
+  "Online":  "Работает",
+  "Offline":  "Выключен",
+  "incursionUpdateHeader":  "Статус вторжения в консте {0} региона {1}", 
+  "incursionNewHeader":  "Обнаружено вторжение в консте {0} региона {1}!", 
+  "incursionInfestedSystems":  "Зараженные Системы", 
+  "incursionInfluence":  "Влияние", 
+  "incursionBoss":  "Босс", 
+  "Alive":  "Активен", 
+  "Defeated":  "Повержен", 
 }

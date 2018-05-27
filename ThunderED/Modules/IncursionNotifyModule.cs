@@ -122,12 +122,12 @@ namespace ThunderED.Modules
             }
             sb.Remove(sb.Length - 3, 2);
 
-            var x = new EmbedBuilder().WithTitle(isUpdate ? $"Incursion status update for {c.name} const of {r.name} region" : $"Incursion spotted in {c.name} const of {r.name} region!")                
+            var x = new EmbedBuilder().WithTitle(isUpdate ? string.Format(LM.Get("incursionUpdateHeader"), c.name, r.name) : string.Format(LM.Get("incursionNewHeader"), c.name, r.name))                
                 .WithColor(isUpdate ? new Color(0x000045) : new Color(0xdd5353))
                 .WithThumbnailUrl(SettingsManager.Get("resources", "imgIncursion"))
-                .AddField("Infested Systems", sb.ToString())
-                .AddInlineField("Influence", (incursion.influence).ToString("P"))
-                .AddInlineField("Boss", incursion.has_boss ? "Alive" : "Defeated")
+                .AddField(LM.Get("incursionInfestedSystems"), sb.ToString())
+                .AddInlineField(LM.Get("incursionInfluence"), (incursion.influence).ToString("P"))
+                .AddInlineField(LM.Get("incursionBoss"), incursion.has_boss ? LM.Get("Alive") : LM.Get("Defeated"))
                 .WithCurrentTimestamp()
                 .Build();
             await APIHelper.DiscordAPI.SendMessageAsync(channel, "@everyone", x);

@@ -1,6 +1,6 @@
 v1.1.5
 + Added new incursions notification module
-
++ Added new Discord command !tq
 
 v1.1.4
 + Added new notifications: StructureDestroyed and OrbitalAttacked
