@@ -239,5 +239,15 @@ namespace ThunderED.API
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.MailLabelData>($"https://esi.tech.ccp.is/latest/characters/{id}/mail/labels/?datasource=tranquility&language={_language}", reason, authHeader);
         }
+
+        public async Task<JsonClasses.IncursionData[]> GetIncursions(string reason)
+        {
+            return await APIHelper.RequestWrapper<JsonClasses.IncursionData[]>($"https://esi.tech.ccp.is/latest/incursions/?datasource=tranquility&language={_language}", reason);
+        }
+
+        public async Task<bool> IsServerOnline(string reason)
+        {
+            return ((await APIHelper.RequestWrapper<JsonClasses.ServerStatus>($"https://esi.tech.ccp.is/latest/status/?datasource=tranquility&language={_language}", reason))?.players ?? 0) > 20;
+        }
     }
 }

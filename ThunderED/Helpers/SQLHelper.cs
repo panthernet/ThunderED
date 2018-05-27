@@ -133,5 +133,11 @@ namespace ThunderED.Helpers
         {
             await Provider?.CleanupNotificationsList();
         }
+
+        public static async Task SQLiteDataDeleteWhereIn(string table, string field, List<int> list, bool not)
+        {
+            await Provider?.SQLiteDataDeleteWhereIn(table, field, list, not);
+
+        }
     }
 }

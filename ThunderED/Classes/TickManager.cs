@@ -73,6 +73,10 @@ namespace ThunderED.Classes
 
             if(SettingsManager.GetBool("config", "moduleTelegram"))
                 Modules.Add(new TelegramModule());
+            
+            if(SettingsManager.GetBool("config", "moduleIncursionNotify"))
+                Modules.Add(new IncursionNotifyModule());
+            
 
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.GetBool("config","moduleLiveKillFeed"))

@@ -29,6 +29,7 @@
         Mail,
         IRC,
         Telegram,
-        ChatRelay
+        ChatRelay,
+        Incursions
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace ThunderED.Json
+﻿using System.Collections.Generic;
+
+namespace ThunderED.Json
 {
     public partial class JsonClasses
     {
@@ -137,6 +139,30 @@
             public int label_id;
             public string name;
             public int unread_count;
+        }
+
+        public class IncursionsData
+        {
+            public IncursionData[] list;
+        }
+
+        public class IncursionData
+        {
+            public int constellation_id;
+            public int faction_id;
+            public bool has_boss;
+            public List<int> infested_solar_systems = new List<int>();
+            public float influence;
+            public int staging_solar_system_id;
+            public string state;
+            public string type;
+        }
+
+        public class ServerStatus
+        {
+            public int players;
+            public string server_version;
+            public string start_time;
         }
     }
 }

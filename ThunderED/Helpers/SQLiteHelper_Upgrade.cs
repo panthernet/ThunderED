@@ -9,7 +9,7 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "*"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "*"
         };
 
         public static async Task<bool> Upgrade()
@@ -39,30 +39,33 @@ namespace ThunderED.Helpers
                             await RunCommand("CREATE TABLE `killFeedCache` ( `type` text NOT NULL, `id` text NOT NULL, `lastId` TEXT)");
                             await RunCommand("CREATE UNIQUE INDEX killFeedCache_type_id_uindex ON killFeedCache (type, id)");
                             await RunCommand("delete from cache");
-                            await LogHelper.LogWarning($"Upgrade to DB version {update} complete!");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         case "1.0.7":
                             await RunCommand("CREATE TABLE `timersAuth` ( `id` text UNIQUE PRIMARY KEY NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP);");
                             await RunCommand(
                                 "CREATE TABLE `timers` ( `id` INTEGER PRIMARY KEY NOT NULL, `timerType` int NOT NULL, `timerStage` int NOT NULL,`timerLocation` text NOT NULL, `timerOwner` text NOT NULL, `timerET` timestamp NOT NULL,`timerNotes` text, `timerChar` text NOT NULL, `announce` int NOT NULL DEFAULT 0);");
-                            await LogHelper.LogWarning($"Upgrade to DB version {update} complete!");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         case "1.0.8":
                             await RunCommand("ALTER TABLE refreshTokens ADD mail TEXT NULL;");
                             await RunCommand("CREATE TABLE `mail` ( `id` text UNIQUE PRIMARY KEY NOT NULL, `mailId` int DEFAULT 0);");
-                            await LogHelper.LogWarning($"Upgrade to DB version {update} complete!");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         case "1.1.3":
                             await RunCommand("CREATE TABLE `fleetup` ( `id` text UNIQUE PRIMARY KEY NOT NULL, `announce` int NOT NULL DEFAULT 0);");
-                            await LogHelper.LogWarning($"Upgrade to DB version {update} complete!");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         case "1.1.4":
                             await RunCommand("DROP TABLE notificationsList;");
                             await RunCommand("DROP TABLE notifications;");
                             await RunCommand("CREATE TABLE `notificationsList` ( groupName TEXT NOT NULL, filterName TEXT NOT NULL,`id` int NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP);");                            
-                            await LogHelper.LogWarning($"Upgrade to DB version {update} complete!");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
-
+                        case "1.1.5":
+                            await RunCommand("CREATE TABLE `incursions` ( `constId` int UNIQUE PRIMARY KEY NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP);");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
                         default:
                             continue;
                     }

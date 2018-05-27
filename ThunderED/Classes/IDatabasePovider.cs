@@ -28,5 +28,6 @@ namespace ThunderED.Classes
         Task SQLiteDataInsertOrUpdate(string table, Dictionary<string, object> values);
         Task<List<TimerItem>> SQLiteDataSelectTimers();
         Task CleanupNotificationsList();
+        Task SQLiteDataDeleteWhereIn(string table, string field, List<int> list, bool not);
     }
 }

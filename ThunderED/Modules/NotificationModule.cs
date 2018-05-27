@@ -323,8 +323,8 @@ namespace ThunderED.Modules
                                                     .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitLowPower"))
                                                     .WithAuthor(author =>
                                                         author.WithName(string.Format(LM.Get("StructureWentLowPower"),
-                                                            structureType == null ? LM.Get("structure").ToLower() : structureType.name, text)))
-                                                    .AddInlineField(LM.Get("System"), system?.name)
+                                                            (structureType == null ? LM.Get("structure").ToLower() : structureType.name) ?? LM.Get("Unknown"), text)))
+                                                    .AddInlineField(LM.Get("System"), system?.name ?? LM.Get("Unknown"))
                                                     .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);

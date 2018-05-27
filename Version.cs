@@ -2,6 +2,6 @@
 {
     internal partial class Program
     {
-        public const string VERSION = "1.1.4";
+        public const string VERSION = "1.1.5";
     }
 }
