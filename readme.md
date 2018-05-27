@@ -5,7 +5,7 @@
 
 ![](https://ci.appveyor.com/api/projects/status/67i3q6v804sjyse6?svg=true)
 
-### Support with ISK: send donations to Captain Panther character. Thank you!
+### Support with ISK: send donations to (Duke Veldspar)[https://zkillboard.com/character/96496243/] character. Thank you!
 
 ## Advantages
 * .NET Core powered multi-platform support (Win, Linux, Mac, etc.)
@@ -24,6 +24,7 @@ With this bot you will have tools to:
 * Know when your citadels are under attack or low on fuel
 * Know when moon extraction is finished or moon chunk has been blown
 * Know when your sov space is in danger or war has been declared
+* Know when your region or constellation has Sansha Incursion
 * Know who joins or leaves corporations in your alliance
 * Synchronize important EVE mails with Discord
 * Synchronize your ops in FleetUp to remind them in Discord
@@ -47,16 +48,17 @@ With this bot you will have tools to:
 * Timers - built-in web server for important timers and events. Auto add timers for reinforced structure events!
 * Mail Feeder - feed mail by labels from authenticated characters 
 * Jabber relay - connect with jabbers for cross messaging support
-* (BETA) IRC relay - exchange messages between IRC & Discord channels
-* (BETA) Telegram relay - exchange messages between Telegram & Discord channels
+* IRC relay - exchange messages between IRC & Discord channels
+* Telegram relay - exchange messages between Telegram & Discord channels
 * (BETA) EVE Chat relay - feed EVE ingame chat messages into Discord channel by streaming from user local apps to ThunderED server
+* Incursion notifications - receive notifications when specified regions or constellations has Sansha Incursions
 * (?) Channel MOTD integration - could be done by request
 
-# Build Requirements
+## Build Requirements
 * Visual Studio 2017 Community Edition
 * .NET Core 2.0
 
-# Pics
+## Pics
 ![Timers](http://dl3.joxi.net/drive/2018/05/06/0014/0683/967339/39/fcb3e030f2.jpg)
 
 ![Sample kill feed](http://dl3.joxi.net/drive/2018/05/04/0014/0683/967339/39/4605864a01.jpg)
