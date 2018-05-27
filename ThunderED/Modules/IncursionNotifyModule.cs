@@ -16,7 +16,7 @@ namespace ThunderED.Modules
         public override LogCat Category => LogCat.Incursions;
 
         public IncursionNotifySettings Settings { get; }
-        private DateTime _runAt = DateTime.Today + TimeSpan.FromHours(11);
+        private DateTime _runAt = DateTime.UtcNow.Date + TimeSpan.FromHours(11) + TimeSpan.FromMinutes(5);
         private bool _isChecked;
 
         public IncursionNotifyModule()
@@ -29,7 +29,7 @@ namespace ThunderED.Modules
             if (_runAt.Date != DateTime.UtcNow.Date)
             {
                 _isChecked = false;
-                _runAt = DateTime.Today + TimeSpan.FromHours(11);
+                _runAt = DateTime.UtcNow.Date + TimeSpan.FromHours(11) + TimeSpan.FromMinutes(5);
             }
 
             if(IsRunning) return;
