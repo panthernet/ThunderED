@@ -5,7 +5,7 @@
 
 ![](https://ci.appveyor.com/api/projects/status/67i3q6v804sjyse6?svg=true)
 
-### Support with ISK: send donations to (Duke Veldspar)[https://zkillboard.com/character/96496243/] character. Thank you!
+### Support with ISK: send donations to [Duke Veldspar](https://zkillboard.com/character/96496243/) character. Thank you!
 
 ## Advantages
 * .NET Core powered multi-platform support (Win, Linux, Mac, etc.)
