@@ -67,6 +67,7 @@ namespace ThunderED.Modules
                             .Replace("{header}", "authTemplateHeader")
                             .Replace("{body}", LM.Get("mailAuthSuccessHeader"))
                             .Replace("{body2}", LM.Get("mailAuthSuccessBody"))
+                            .Replace("{backText}", LM.Get("backText"))
                         );
                         return true;
                     }

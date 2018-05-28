@@ -828,7 +828,7 @@ namespace ThunderED.Modules
             {
                 if (request.HttpMethod != HttpMethod.Get.ToString())
                     return false;
-                if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php"
+                if ((request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php")
                     && request.Url.Query.Contains("&state=9"))
                 {
                     var prms = request.Url.Query.TrimStart('?').Split('&');
