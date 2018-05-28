@@ -32,7 +32,7 @@ namespace ThunderED.Classes
         [Command("web", RunMode = RunMode.Async), Summary("Displays web site address")]
         public async Task Web()
         {
-            if (SettingsManager.GetBool("config", "moduleWebServer"))
+            if (SettingsManager.Settings.Config.ModuleWebServer)
             {
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
             }
@@ -106,7 +106,7 @@ namespace ThunderED.Classes
                 return;
 
 
-            if (SettingsManager.GetBool("config", "modulePriceCheck"))
+            if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
                 var forbiddenChannels = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
                 if (x == null)
@@ -136,7 +136,7 @@ namespace ThunderED.Classes
                 return;
 
 
-            if (SettingsManager.GetBool("config", "modulePriceCheck"))
+            if (SettingsManager.Settings.Config.ModulePriceCheck)
             { 
                 if (x == null)
                 {
@@ -180,7 +180,7 @@ namespace ThunderED.Classes
                 return;
 
 
-            if (SettingsManager.GetBool("config", "modulePriceCheck"))
+            if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
                 if (x == null)
                 {
@@ -204,7 +204,7 @@ namespace ThunderED.Classes
                 return;
 
 
-            if (SettingsManager.GetBool("config", "modulePriceCheck"))
+            if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
                 if (x == null)
                 {
@@ -228,7 +228,7 @@ namespace ThunderED.Classes
                 return;
 
 
-            if (SettingsManager.GetBool("config", "modulePriceCheck"))
+            if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
                 if (x == null)
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("enterItemName"), true);
@@ -301,13 +301,13 @@ namespace ThunderED.Classes
             var channels = APIHelper.DiscordAPI.GetAuthAllowedChannels();
             if(channels.Length != 0 && !channels.Contains(Context.Channel.Id)) return;
 
-            if (SettingsManager.GetBool("config", "moduleWebServer") && SettingsManager.GetBool("config", "moduleAuthWeb"))
+            if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
             {
                 try
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
                         string.Format(LM.Get("authInvite"),
-                            $"http://{SettingsManager.Get("webServerModule", "webExternalIP")}:{SettingsManager.Get("webServerModule", "webExternalPort")}/auth.php"), true);
+                            $"http://{SettingsManager.Settings.WebServerModule.WebExternalIP}:{SettingsManager.Settings.WebServerModule.WebExternalPort}/auth.php"), true);
                 }
                 catch (Exception ex)
                 {
@@ -331,7 +331,7 @@ namespace ThunderED.Classes
             var channels = APIHelper.DiscordAPI.GetAuthAllowedChannels();
             if(channels.Length != 0 && !channels.Contains(Context.Channel.Id)) return;
 
-            if (SettingsManager.GetBool("config", "moduleWebServer") && SettingsManager.GetBool("config", "moduleNotificationFeed"))
+            if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleNotificationFeed)
             {
                 try
                 {
@@ -359,7 +359,7 @@ namespace ThunderED.Classes
         [Command("auth", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task Auth([Remainder] string x)
         {
-            if (SettingsManager.GetBool("config", "moduleWebServer")  && SettingsManager.GetBool("config", "moduleAuthWeb"))
+            if (SettingsManager.Settings.Config.ModuleWebServer  && SettingsManager.Settings.Config.ModuleAuthWeb)
             {
                 try
                 {
@@ -392,7 +392,7 @@ namespace ThunderED.Classes
                 return;
 
 
-            if (SettingsManager.GetBool("config", "moduleTime"))
+            if (SettingsManager.Settings.Config.ModuleTime)
             {
                 try
                 {
@@ -496,7 +496,7 @@ namespace ThunderED.Classes
                 return;
 
 
-            if (SettingsManager.GetBool("config", "moduleMOTD"))
+            if (SettingsManager.Settings.Config.ModuleMOTD)
             {
                 try
                 {
@@ -521,7 +521,7 @@ namespace ThunderED.Classes
                 return;
 
 
-            if (SettingsManager.GetBool("config", "moduleFleetup"))
+            if (SettingsManager.Settings.Config.ModuleFleetup)
             {
                 try
                 {
@@ -546,7 +546,7 @@ namespace ThunderED.Classes
                 return;
 
 
-            if (SettingsManager.GetBool("config", "moduleFleetup"))
+            if (SettingsManager.Settings.Config.ModuleFleetup)
             {
                 try
                 {
@@ -599,7 +599,7 @@ namespace ThunderED.Classes
                     return;
 
 
-                if (SettingsManager.GetBool("config", "moduleCharCorp"))
+                if (SettingsManager.Settings.Config.ModuleCharCorp)
                    await CharSearchModule.SearchCharacter(Context, x);
             }
             catch (Exception ex)
@@ -623,7 +623,7 @@ namespace ThunderED.Classes
                     return;
 
 
-                if (SettingsManager.GetBool("config", "moduleCharCorp"))
+                if (SettingsManager.Settings.Config.ModuleCharCorp)
                   await CorpSearchModule.CorpSearch(Context, x);
             }
             catch (Exception ex)

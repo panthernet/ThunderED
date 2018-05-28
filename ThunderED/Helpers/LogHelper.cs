@@ -30,7 +30,7 @@ namespace ThunderED.Helpers
             try
             {
                 _logPath = _logPath ?? Path.Combine(SettingsManager.RootDirectory, "logs");
-                _logSeverity = _logSeverity ?? SettingsManager.Get("config", "logSeverity").ToSeverity();
+                _logSeverity = _logSeverity ?? SettingsManager.Settings.Config.LogSeverity.ToSeverity();
                 if((int)_logSeverity > (int)severity) return;
 
                 var file = Path.Combine(_logPath, $"{cat}.log");

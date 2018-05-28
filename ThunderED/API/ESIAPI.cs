@@ -25,7 +25,7 @@ namespace ThunderED.API
 
         public ESIAPI()
         {
-            _language = SettingsManager.GetBool("config", "useEnglishESIOnly") ? "en-us" : (SettingsManager.Get("config", "language")?.ToLower() ?? "en-us");
+            _language = SettingsManager.Settings.Config.UseEnglishESIOnly ? "en-us" : SettingsManager.Settings.Config.Language?.ToLower() ?? "en-us";
         }
 
         internal async Task<JsonClasses.CharacterData> GetCharacterData(string reason, object id, bool forceUpdate = false, bool noCache = false)

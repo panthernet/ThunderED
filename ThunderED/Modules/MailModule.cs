@@ -22,7 +22,7 @@ namespace ThunderED.Modules
 
         public MailModule()
         {
-            _checkInterval = SettingsManager.GetInt("mailModule", "checkIntervalInMinutes");
+            _checkInterval = Settings.MailModule.CheckIntervalInMinutes;
             if (_checkInterval == 0)
                 _checkInterval = 1;
             WebServerModule.ModuleConnectors.Add(Reason, OnAuthRequest);
@@ -35,15 +35,15 @@ namespace ThunderED.Modules
 
             try
             {
-                var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
-                var port = SettingsManager.Get("webServerModule", "webListenPort");
+                var extPort = Settings.WebServerModule.WebExternalPort;
+                var port = Settings.WebServerModule.WebListenPort;
 
                 if (request.HttpMethod == HttpMethod.Get.ToString())
                 {
                     if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php")
                     {
-                        var clientID = SettingsManager.Get("auth", "ccpAppClientId");
-                        var secret = SettingsManager.Get("auth", "ccpAppSecret");
+                        var clientID = Settings.WebServerModule.CcpAppClientId;
+                        var secret = Settings.WebServerModule.CcpAppSecret;
 
                         var prms = request.Url.Query.TrimStart('?').Split('&');
                         var code = prms[0].Split('=')[1];
@@ -89,17 +89,16 @@ namespace ThunderED.Modules
                 if((DateTime.Now - _lastCheckTime).TotalMinutes < _checkInterval) return;
                 _lastCheckTime = DateTime.Now;
 
-                foreach(var group in SettingsManager.GetSubList("mailModule", "authGroups"))
+                foreach(var groupPair in Settings.MailModule.AuthGroups)
                 {
-                    var id = group.GetChildren().FirstOrDefault(a=> a.Key == "id")?.Value;
-                    var terms = group.GetChildren().FirstOrDefault(a=> a.Key == "labels")?.GetChildren().Select(a=> a.Value).ToList();
-                    var chString = group.GetChildren().FirstOrDefault(a=> a.Key == "channel")?.Value;
-                    if(string.IsNullOrEmpty(chString))
+                    var group = groupPair.Value;
+                    var terms = group.Labels;
+                    if(group.Channel == 0)
                         continue;
-                    var channel = Convert.ToUInt64(chString);
+                    var channel = group.Channel;
 
-                    if (string.IsNullOrEmpty(id) || terms == null || terms.Count == 0) continue;
-                    var charId = Convert.ToInt32(id);
+                    if (group.Id == 0 || terms == null || terms.Count == 0) continue;
+                    var charId = group.Id;
 
                     var rToken = await SQLHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", charId);
                     if (string.IsNullOrEmpty(rToken))
@@ -107,35 +106,35 @@ namespace ThunderED.Modules
                         continue;
                     }
 
-                    var token = await APIHelper.ESIAPI.RefreshToken(rToken, SettingsManager.Get("auth", "ccpAppClientId"), SettingsManager.Get("auth", "ccpAppSecret"));
+                    var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                     if (string.IsNullOrEmpty(rToken))
                     {
                         await LogHelper.LogWarning("Unable to get correct token using refresh token! Refresh token might be expired!", Category);
                         continue;
                     }
 
-                    var lastMailId = await SQLHelper.SQLiteDataQuery<int>("mail", "mailId", "id", id);
+                    var lastMailId = await SQLHelper.SQLiteDataQuery<int>("mail", "mailId", "id", group.Id.ToString());
                     var prevMailId = lastMailId;
-                    var labelsData= await APIHelper.ESIAPI.GetMailLabels(Reason, id, token);
-                    var searchLabels = labelsData.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received");
-                    var senders = SettingsManager.GetArray<int>(group, "senders");
-                    var includePrivate = Convert.ToBoolean(group.GetChildren().FirstOrDefault(a => a.Key == "includePrivateMail")?.Value ?? "false");
+                    var labelsData= await APIHelper.ESIAPI.GetMailLabels(Reason, group.Id.ToString(), token);
+                    var searchLabels = labelsData.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received").ToList();
+                    var senders = group.Senders;
+                    var includePrivate = group.IncludePrivateMail;
 
-                    if (senders.Length == 0 && (searchLabels == null || terms.Count == 0))
+                    if (senders.Count == 0 && (searchLabels.Count == 0 || terms.Count == 0))
                     {
-                        await LogHelper.LogWarning($"Mail feed for user {id} has no labels and senders configured or user has no required labels in-game!", Category);
+                        await LogHelper.LogWarning($"Mail feed for user {group.Id} has no labels and senders configured or user has no required labels in-game!", Category);
                         continue;
                     }
 
                     var labelIds = labelsData.labels.Where(a=> terms.Contains(a.name)).Select(a => a.label_id).ToList();
-                    var mails = await APIHelper.ESIAPI.GetMailHeaders(Reason, id, token, 0, labelIds, senders);
+                    var mails = await APIHelper.ESIAPI.GetMailHeaders(Reason, group.Id.ToString(), token, 0, labelIds, senders.ToArray());
 
                     foreach (var mailHeader in mails)
                     {
                         if(mailHeader.mail_id <= lastMailId) continue;
                         if(!includePrivate && mailHeader.recipients.Count(a => a.recipient_id == charId) > 0) continue;
 
-                        var mail = await APIHelper.ESIAPI.GetMail(Reason, id, token, mailHeader.mail_id);
+                        var mail = await APIHelper.ESIAPI.GetMail(Reason, group.Id.ToString(), token, mailHeader.mail_id);
                         var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
                         lastMailId = mailHeader.mail_id;
 
@@ -143,7 +142,7 @@ namespace ThunderED.Modules
 
                     }
                     if(prevMailId != lastMailId)
-                        await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", id}, {"mailId", lastMailId}});
+                        await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", group.Id.ToString()}, {"mailId", lastMailId}});
                 }
             }
             catch (Exception ex)
@@ -162,9 +161,9 @@ namespace ThunderED.Modules
 
             var labels = string.IsNullOrEmpty(labelNames) ? null : $"{LM.Get("mailLabels")}  {labelNames} | ";
 
-            var stamp = DateTime.Parse(mail.timestamp).ToString(SettingsManager.Get("config", "shortTimeFormat"));
+            var stamp = DateTime.Parse(mail.timestamp).ToString(Settings.Config.ShortTimeFormat);
             var embed = new EmbedBuilder()
-                .WithThumbnailUrl(SettingsManager.Get("resources", "imgMail"))
+                .WithThumbnailUrl(Settings.Resources.ImgMail)
                 .AddField($"{LM.Get("mailSubject")} {mail.subject}",  await PrepareBodyMessage(mail.body))
                 .WithFooter($"{labels}{LM.Get("mailDate")} {stamp}");
             var ch = APIHelper.DiscordAPI.GetChannel(channel);

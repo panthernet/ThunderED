@@ -23,7 +23,7 @@ namespace ThunderED.API
 
         internal async Task<JsonZKill.ZKillboard> GetRedisqResponce()
         {
-            var redisqID = SettingsManager.Get("config", "zkillLiveFeedRedisqID");
+            var redisqID = SettingsManager.Settings.Config.ZkillLiveFeedRedisqID;
 			var request = string.IsNullOrEmpty(redisqID)
                     ? "https://redisq.zkillboard.com/listen.php?ttw=1"
                     : $"https://redisq.zkillboard.com/listen.php?ttw=1&queueID={redisqID}";

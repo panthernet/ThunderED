@@ -52,9 +52,9 @@ namespace ThunderED.Modules.OnDemand
             var request = context.Request;
             var response = context.Response;
 
-            var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
-            var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
-            var port = SettingsManager.Get("webServerModule", "webListenPort");
+            var extIp = Settings.WebServerModule.WebExternalIP;
+            var extPort = Settings.WebServerModule.WebExternalPort;
+            var port = Settings.WebServerModule.WebListenPort;
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
 
 

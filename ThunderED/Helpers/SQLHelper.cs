@@ -102,7 +102,7 @@ namespace ThunderED.Helpers
 
         public static string LoadProvider()
         {
-            var prov = SettingsManager.Get("config", "databaseProvider");
+            var prov = SettingsManager.Settings.Config.DatabaseProvider;
             switch (prov)
             {
                 case "sqlite":

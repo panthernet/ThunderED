@@ -18,7 +18,7 @@ namespace ThunderED
         {
             try
             {
-                var tr = SettingsManager.Get("config", "language") ?? "en-US";
+                var tr = SettingsManager.Settings.Config.Language ?? "en-US";
                 Locale = tr.Split('-')[0].ToLower();
 
                 var folder = Path.Combine(SettingsManager.RootDirectory, "Languages");

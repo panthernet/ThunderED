@@ -74,7 +74,7 @@ namespace ThunderED.Modules
                 if (DateTime.Now > _nextNotificationCheck)
                 {
                     await LogHelper.LogInfo("Running Notification Check", Category, LogToConsole, false);
-                    var guildID = SettingsManager.GetULong("config", "discordGuildId");
+                    var guildID = Settings.Config.DiscordGuildId;
 
                     foreach (var groupPair in Settings.NotificationFeedModule.Groups)
                     {
@@ -95,7 +95,7 @@ namespace ThunderED.Modules
                         if (group.Filters.Values.All(a => a.Notifications.Count == 0)) continue;
 
                         var rToken = await SQLHelper.SQLiteDataQuery<string>("refreshTokens", "token", "id", group.CharacterID);
-                        var token = await APIHelper.ESIAPI.RefreshToken(rToken, SettingsManager.Get("auth", "ccpAppClientId"), SettingsManager.Get("auth", "ccpAppSecret"));
+                        var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                         if (!string.IsNullOrEmpty(token))
                             await LogHelper.LogInfo($"Checking characterID:{group.CharacterID}", Category, LogToConsole, false);
                         else
@@ -142,7 +142,7 @@ namespace ThunderED.Modules
                                     try
                                     {
                                         //log new notifications to get essential data
-                                        if (SettingsManager.GetBool("config", "logNewNotifications"))
+                                        if (Settings.Config.LogNewNotifications)
                                             await LogHelper.LogNotification(notification.type, notification.text);
 
                                         var discordChannel = APIHelper.DiscordAPI.GetChannel(guildID, filter.ChannelID != 0 ? filter.ChannelID : group.DefaultDiscordChannelID);
@@ -268,7 +268,7 @@ namespace ThunderED.Modules
 
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitUnderAttack"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
                                                     .WithAuthor(author => author.WithName(string.Format(LM.Get("NotifyHeader_OrbitalAttacked"),
                                                         struc?.name, feederCorp?.name))
                                                         .WithUrl($"http://www.zkillboard.com/character/{GetData("aggressorID", data)}"))
@@ -297,7 +297,7 @@ namespace ThunderED.Modules
                                                 await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitUnderAttack"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
                                                     .WithAuthor(author => author.WithName(string.Format(LM.Get("NotifyHeader_StructureUnderAttack"),
                                                         structureType == null ? LM.Get("structure").ToLower() : structureType.name))
                                                         .WithUrl($"http://www.zkillboard.com/character/{aggCharId}"))
@@ -320,7 +320,7 @@ namespace ThunderED.Modules
                                                 var text = notification.type == "StructureWentLowPower" ? LM.Get("LowPower") : LM.Get("HighPower");
                                                 builder = new EmbedBuilder()
                                                     .WithColor(color)
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitLowPower"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgCitLowPower)
                                                     .WithAuthor(author =>
                                                         author.WithName(string.Format(LM.Get("StructureWentLowPower"),
                                                             (structureType == null ? LM.Get("structure").ToLower() : structureType.name) ?? LM.Get("Unknown"), text)))
@@ -341,7 +341,7 @@ namespace ThunderED.Modules
                                                 textAdd = notification.type == "StructureLostArmor" ? LM.Get("armorSmall") : LM.Get("shieldSmall");
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitLostShield"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgCitLostShield)
                                                     .WithAuthor(author =>
                                                         author.WithName(string.Format(LM.Get("StructureLostArmor"),
                                                             structureType == null ? LM.Get("Structure") : structureType.name, textAdd)))
@@ -354,8 +354,7 @@ namespace ThunderED.Modules
 
                                                 await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
 
-                                                if (SettingsManager.GetBool("config", "moduleTimers") &&
-                                                    SettingsManager.GetBool("timersModule", "autoAddTimerForReinforceNotifications"))
+                                                if (Settings.Config.ModuleTimers && Settings.TimersModule.AutoAddTimerForReinforceNotifications)
                                                 {
                                                     await TimersModule.AddTimer(new TimerItem
                                                     {
@@ -375,8 +374,8 @@ namespace ThunderED.Modules
                                                 await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                 var owner = GetData("ownerCorpName", data) ?? LM.Get("Unknown");
                                                 var iUrl = notification.type == "StructureDestroyed"
-                                                    ? SettingsManager.Get("resources", "imgCitDestroyed")
-                                                    : SettingsManager.Get("resources", "imgCitOnline");
+                                                    ? Settings.Resources.ImgCitDestroyed
+                                                    : Settings.Resources.ImgCitOnline;
                                                 var text = notification.type == "StructureDestroyed"
                                                     ? string.Format(LM.Get("StructureDestroyed"), owner, structureType == null ? LM.Get("Unknown") : structureType.name)
                                                     : string.Format(LM.Get("StructureOnline"), structureType == null ? LM.Get("Unknown") : structureType.name);
@@ -403,7 +402,7 @@ namespace ThunderED.Modules
                                                     structureType == null ? LM.Get("Structure") : structureType.name);
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xff0000))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitAnchoring"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgCitAnchoring)
                                                     .WithAuthor(author =>
                                                         author.WithName(text))
                                                     .AddInlineField(LM.Get("System"), system?.name)
@@ -421,7 +420,7 @@ namespace ThunderED.Modules
                                                 await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xf2882b))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitFuelAlert"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgCitFuelAlert)
                                                     .WithAuthor(author => author.WithName(string.Format(LM.Get("StructureFuelAlert"),
                                                         structureType == null ? LM.Get("Structure") : structureType.name)))
                                                     .AddInlineField(LM.Get("System"), system?.name)
@@ -448,7 +447,7 @@ namespace ThunderED.Modules
 
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xb386f7))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgMoonComplete"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
                                                     .WithAuthor(author =>
                                                         author.WithName(string.Format(LM.Get("MoonminingExtractionFinished"),
                                                             structureType == null ? LM.Get("Structure") : structureType.name)))
@@ -466,7 +465,7 @@ namespace ThunderED.Modules
 
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xb386f7))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgMoonComplete"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
                                                     .WithAuthor(author =>
                                                         author.WithName(string.Format(LM.Get("MoonminingLaserFired"),
                                                             structureType == null ? LM.Get("Structure") : structureType.name)))
@@ -558,7 +557,7 @@ namespace ThunderED.Modules
                                                 await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgCitServicesOffline"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
                                                     .WithAuthor(author =>
                                                         author.WithName(string.Format(LM.Get("StationServiceDisabled"), structureType?.name, system?.name)))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
@@ -652,8 +651,8 @@ namespace ThunderED.Modules
                                                 // bool isAllianceAgainst = !string.IsNullOrEmpty(declareAgainstAlianceName);
 
                                                 var iUrl = notification.type == "AllWarDeclaredMsg" || notification.type == "CorpWarDeclaredMsg"
-                                                    ? SettingsManager.Get("resources", "imgWarDeclared")
-                                                    : SettingsManager.Get("resources", "imgWarInvalidate");
+                                                    ? Settings.Resources.ImgWarDeclared
+                                                    : Settings.Resources.ImgWarInvalidate;
 
                                                 var template = notification.type == "AllWarDeclaredMsg" || notification.type == "CorpWarDeclaredMsg"
                                                     ? $"{(isAllianceDecl ? LM.Get("Alliance") : LM.Get("Corporation"))} {declName} {LM.Get("declaresWarAgainst")} {declNameAgainst}!"
@@ -691,7 +690,7 @@ namespace ThunderED.Modules
                                                                (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("defenderID", data)))?.name;
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xff0000))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgWarAssist"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgWarAssist)
                                                     .WithAuthor(author => author.WithName(string.Format(LM.Get("AllyJoinedWarAggressorMsg"), ally, defender))
                                                         .WithUrl( $"http://www.zkillboard.com/alliance/{allyID}"))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
@@ -728,7 +727,7 @@ namespace ThunderED.Modules
                                                 var allyID = GetData("allyID", data);
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xff0000))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgWarAssist"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgWarAssist)
                                                     .WithAuthor(author =>
                                                         author.WithName(string.Format(LM.Get("AllyJoinedWarDefenderMsg"), allyStr, defenderStr, agressorStr))
                                                             .WithUrl( $"http://www.zkillboard.com/alliance/{allyID}"))
@@ -751,7 +750,7 @@ namespace ThunderED.Modules
                                                                    (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("defenderID", data)))?.name;
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0x00ff00))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgWarAssist"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgWarAssist)
                                                     .WithAuthor(author =>
                                                         author.WithName(string.Format(LM.Get("AllyJoinedWarAllyMsg"), allyStr2, defenderStr2, agressorStr2))
                                                             .WithUrl( $"http://www.zkillboard.com/alliance/{allyID}"))
@@ -777,7 +776,7 @@ namespace ThunderED.Modules
 
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xff0000))
-                                                    .WithThumbnailUrl(SettingsManager.Get("resources", "imgLowFWStand"))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgLowFWStand)
                                                     .WithAuthor(author => author.WithName(string.Format(LM.Get("FWAllianceWarningMsg"), allyStr3)))
                                                     .AddInlineField(LM.Get("BlameCorp"), string.Format(LM.Get("standMissing"), corpStr3, required))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
@@ -851,33 +850,32 @@ namespace ThunderED.Modules
                     var numericCharId = Convert.ToInt32(characterID);
 
                     response.Headers.ContentEncoding.Add("utf-8");
-                            response.Headers.ContentType.Add("text/html;charset=utf-8");
-                            if (string.IsNullOrEmpty(characterID))
-                            {
-                                await LogHelper.LogWarning("Bad or outdated notify feed request!");
-                                await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                                    .Replace("{message}", LM.Get("authTokenBadRequest"))
-                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
-                                return true;
-                            }
+                    response.Headers.ContentType.Add("text/html;charset=utf-8");
+                    if (string.IsNullOrEmpty(characterID))
+                    {
+                        await LogHelper.LogWarning("Bad or outdated notify feed request!");
+                        await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                            .Replace("{message}", LM.Get("authTokenBadRequest"))
+                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
+                        return true;
+                    }
 
-                            if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.Groups.Values.All(g => g.CharacterID != numericCharId))
-                            {
-                                await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
-                                await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                                    .Replace("{message}", LM.Get("authTokenInvalid"))
-                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
-                                return true;
-                            }
+                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.Groups.Values.All(g => g.CharacterID != numericCharId))
+                    {
+                        await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
+                        await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                            .Replace("{message}", LM.Get("authTokenInvalid"))
+                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
+                        return true;
+                    }
 
-                            var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
+                    var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
 
-                            await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
-                            await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
-                            await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
-                                .Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
-                                .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")));
-                            return true;
+                    await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
+                    await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
+                    await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
+                        .Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
+                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")));
                     return true;
                 }                
             }

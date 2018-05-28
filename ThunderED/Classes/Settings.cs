@@ -81,14 +81,14 @@ namespace ThunderED.Classes
 
     public class KillFeedGroup
     {
-        public ulong discordChannel;
-        public int corpID;
-        public int allianceID;
-        public long minimumValue;
-        public long minimumLossValue;
-        public long bigKillValue;
-        public ulong bigKillChannel;
-        public bool bigKillSendToGeneralToo;
+        public ulong DiscordChannel;
+        public int CorpID;
+        public int AllianceID;
+        public long MinimumValue;
+        public long MinimumLossValue;
+        public long BigKillValue;
+        public ulong BigKillChannel;
+        public bool BigKillSendToGeneralToo;
     }
 
     public class StatsModuleSettings
@@ -265,7 +265,7 @@ namespace ThunderED.Classes
         public ulong DiscordGuildId;
         public List<string> DiscordAdminRoles = new List<string>();
         public ulong DiscordGeneralChannel;
-        public List<int> ComForbiddenChannels = new List<int>();
+        public List<ulong> ComForbiddenChannels = new List<ulong>();
         public bool ComRestrictToValidChannels = true;
         public string Language = "en-US";
         public bool UseEnglishESIOnly = true;
@@ -301,6 +301,7 @@ namespace ThunderED.Classes
         public bool LogNewNotifications = true;
         public string DatabaseProvider = "sqlite";
         public int RequestRetries = 3;
+        public string DatabaseFile = "edb.db";
     }
 
     public class WebServerModuleSettings

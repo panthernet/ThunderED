@@ -1,13 +1,21 @@
 v1.1.5
 + Added new incursions notification module
 + Added new Discord command !tq
++ Added new notifications: CorpAppNewMsg and CharAppWithdrawMsg (thanks to lunedis)
++ Added new config property **databaseFile** to be able to specify database location
++ Updated all settings to use unified names and fetch procedures
 + Removed WebAuthModule dependency from NotificationFeedModule
++ Updated Docker script (thanks to lunedis)
 
 Breaking changes
+- Reliable kill feed module is unavailable at the moment. Disabled due to ZKill API issues. Use liveKillFeedModule.
 - **auth** config section renamed to **WebAuthModule**
 - **WebAuthModule.authCheckIntervalMinutes** is now a numeric value
 - **discordUrl, ccpAppClientId, ccpAppSecret** properties moved from **WebAuthModule** to **webServerModule**
-- **jabber** module **defchan** and filters are now numeric values
+- **jabber** module parameter **defchan** and filters are now numeric values
+- **liveKillFeed** module renamed to **liveKillFeedModule**
+- **fleetup** module renamed to **fleetupModule**
+- **jabber** module renamed to **jabberModule**
 
 v1.1.4
 + Added new notifications: StructureDestroyed and OrbitalAttacked

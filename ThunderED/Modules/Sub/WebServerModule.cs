@@ -23,15 +23,15 @@ namespace ThunderED.Modules.Sub
 
         public override async Task Run(object prm)
         {
-            if(!SettingsManager.GetBool("config", "moduleWebServer")) return;
+            if(!Settings.Config.ModuleWebServer) return;
 
             if (_listener == null || !_listener.IsListening)
             {
                 await LogHelper.LogInfo("Starting Web Server", Category);
                 _listener?.Dispose();
-                var port = SettingsManager.GetInt("webServerModule", "webListenPort");
-                var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
-                var ip = SettingsManager.Get("webServerModule", "webListenIP");
+                var port = Settings.WebServerModule.WebListenPort;
+                var extPort = Settings.WebServerModule.WebExternalPort;
+                var ip = Settings.WebServerModule.WebListenIP;
                 _listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), port);
                 _listener.Request += async (sender, context) =>
                 {
@@ -62,7 +62,7 @@ namespace ThunderED.Modules.Sub
 
                         if (request.Url.LocalPath == "/" || request.Url.LocalPath == $"{port}/" || request.Url.LocalPath == $"{extPort}/")
                         {
-                            var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
+                            var extIp = Settings.WebServerModule.WebExternalIP;
                             var authUrl = $"http://{extIp}:{extPort}/auth.php";
                             var authNurl = GetAuthNotifyURL();
 
@@ -79,10 +79,10 @@ namespace ThunderED.Modules.Sub
                                     .Replace("{webAuthHeader}", LM.Get("webAuthHeader"))
                                     .Replace("{webWelcomeHeader}", LM.Get("webWelcomeHeader"))
                                 ;
-                            text = text.Replace("{disableWebAuth}", !SettingsManager.GetBool("config", "moduleAuthWeb") ? "disabled" : "");
-                            text = text.Replace("{disableWebNotify}", !SettingsManager.GetBool("config", "moduleNotificationFeed") ? "disabled" : "");
-                            text = text.Replace("{disableWebTimers}", !SettingsManager.GetBool("config", "moduleTimers") ? "disabled" : "");
-                            text = text.Replace("{disableMailNotify}", !SettingsManager.GetBool("config", "moduleMail") ? "disabled" : "");
+                            text = text.Replace("{disableWebAuth}", !Settings.Config.ModuleAuthWeb ? "disabled" : "");
+                            text = text.Replace("{disableWebNotify}", !Settings.Config.ModuleNotificationFeed ? "disabled" : "");
+                            text = text.Replace("{disableWebTimers}", !Settings.Config.ModuleTimers ? "disabled" : "");
+                            text = text.Replace("{disableMailNotify}", !Settings.Config.ModuleMail ? "disabled" : "");
 
                             await response.WriteContentAsync(text);
                             return;
@@ -136,35 +136,35 @@ namespace ThunderED.Modules.Sub
 
         public static string GetWebSiteUrl()
         {
-            var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
-            var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             return  $"http://{extIp}:{extPort}";
         }
 
         
         public static string GetAuthNotifyURL()
         {
-            var clientID = SettingsManager.Get("auth","ccpAppClientId");
-            var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
-            var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-characters.read_notifications.v1+esi-universe.read_structures.v1+esi-characters.read_chat_channels.v1&state=9";
         }
 
         public static string GetTimersAuthURL()
         {
-            var clientID = SettingsManager.Get("auth","ccpAppClientId");
-            var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
-            var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=11";
         }
 
         public static string GetMailAuthURL()
         {
-            var clientID = SettingsManager.Get("auth","ccpAppClientId");
-            var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
-            var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-mail.read_mail.v1+esi-mail.send_mail.v1+esi-mail.organize_mail.v1&state=12";
         }
@@ -172,8 +172,8 @@ namespace ThunderED.Modules.Sub
 
         public static string GetTimersURL()
         {
-            var extIp = SettingsManager.Get("webServerModule", "webExternalIP");
-            var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             return $"http://{extIp}:{extPort}/timers.php";
         }
 

@@ -29,8 +29,8 @@ namespace ThunderED.Modules.OnDemand
 
             try
             {
-                var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
-                var port = SettingsManager.Get("webServerModule", "webListenPort");
+                var extPort = Settings.WebServerModule.WebExternalPort;
+                var port = Settings.WebServerModule.WebListenPort;
 
                 if (request.HttpMethod == HttpMethod.Post.ToString())
                 {

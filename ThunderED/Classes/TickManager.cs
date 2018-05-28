@@ -47,54 +47,54 @@ namespace ThunderED.Classes
 
             //dynamic modules - called in each tick
 
-            if (SettingsManager.GetBool("config","moduleAuthCheck"))
+            if (SettingsManager.Settings.Config.ModuleAuthCheck)
                 Modules.Add(new AuthCheckModule());
 
-            if (SettingsManager.GetBool("config","moduleReliableKillFeed"))
+            if (SettingsManager.Settings.Config.ModuleReliableKillFeed)
                 Modules.Add(new ReliableKillModule());
 
-            if (SettingsManager.GetBool("config","moduleNotificationFeed"))
+            if (SettingsManager.Settings.Config.ModuleNotificationFeed)
                 Modules.Add(new NotificationModule());
 
-            if (SettingsManager.GetBool("config","moduleJabber"))
+            if (SettingsManager.Settings.Config.ModuleJabber)
                 Modules.Add(new JabberModule());
 
-            if (SettingsManager.GetBool("config","moduleFleetup"))
+            if (SettingsManager.Settings.Config.ModuleFleetup)
                 Modules.Add(new FleetUpModule());
 
-            if (SettingsManager.GetBool("config","moduleTimers"))
+            if (SettingsManager.Settings.Config.ModuleTimers)
                 Modules.Add(new TimersModule());
 
-            if (SettingsManager.GetBool("config","moduleMail"))
+            if (SettingsManager.Settings.Config.ModuleMail)
                 Modules.Add(new MailModule());
 
-            if(SettingsManager.GetBool("config", "moduleIRC"))
+            if(SettingsManager.Settings.Config.ModuleIRC)
                 Modules.Add(new IRCModule());
 
-            if(SettingsManager.GetBool("config", "moduleTelegram"))
+            if(SettingsManager.Settings.Config.ModuleTelegram)
                 Modules.Add(new TelegramModule());
             
-            if(SettingsManager.GetBool("config", "moduleIncursionNotify"))
+            if(SettingsManager.Settings.Config.ModuleIncursionNotify)
                 Modules.Add(new IncursionNotifyModule());
             
 
             //on demand modules - only could be pinged by other modules
-            if (SettingsManager.GetBool("config","moduleLiveKillFeed"))
+            if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
                 OnDemandModules.Add(new LiveKillFeedModule());
 
-            if (SettingsManager.GetBool("config","moduleRadiusKillFeed"))
+            if (SettingsManager.Settings.Config.ModuleRadiusKillFeed)
                 OnDemandModules.Add(new RadiusKillFeedModule());
 
-            if (SettingsManager.GetBool("config","moduleAuthWeb"))
+            if (SettingsManager.Settings.Config.ModuleAuthWeb)
                 OnDemandModules.Add(new WebAuthModule());
 
-            if (SettingsManager.GetBool("config","moduleChatRelay"))
+            if (SettingsManager.Settings.Config.ModuleChatRelay)
                 OnDemandModules.Add(new ChatRelayModule());
 
             //subscriptions
-            if (SettingsManager.GetBool("config", "moduleIRC"))
+            if (SettingsManager.Settings.Config.ModuleIRC)
                 APIHelper.DiscordAPI.SubscribeRelay(GetModule<IRCModule>());
-            if (SettingsManager.GetBool("config", "moduleTelegram"))
+            if (SettingsManager.Settings.Config.ModuleTelegram)
                 APIHelper.DiscordAPI.SubscribeRelay(GetModule<TelegramModule>());
 
         }
@@ -127,7 +127,7 @@ namespace ThunderED.Classes
                 //cache handling
                 if ((_asyncNow - _memoryCheckTime).TotalMinutes >= 30)
                 {
-                    var mem = SettingsManager.GetInt("config", "memoryUsageLimitMb");
+                    var mem = SettingsManager.Settings.Config.MemoryUsageLimitMb;
                     if (mem > 0)
                     {
                         _memoryCheckTime = _asyncNow;
@@ -149,7 +149,7 @@ namespace ThunderED.Classes
                 }
 
                 //purge unused cache from memory
-                _cacheInterval = _cacheInterval != 0? _cacheInterval : SettingsManager.GetInt("config", "cachePurgeInterval");
+                _cacheInterval = _cacheInterval != 0? _cacheInterval : SettingsManager.Settings.Config.CachePurgeInterval;
                 if ((_asyncNow - _lastCacheCheckDate).TotalMinutes >= _cacheInterval)
                 {
                     await LogHelper.LogInfo("Running cache purge...", LogCat.Tick);

@@ -33,15 +33,15 @@ namespace ThunderED.Modules
 
             try
             {
-                var extPort = SettingsManager.Get("webServerModule", "webExternalPort");
-                var port = SettingsManager.Get("webServerModule", "webListenPort");
+                var extPort = Settings.WebServerModule.WebExternalPort;
+                var port = Settings.WebServerModule.WebListenPort;
 
                 if (request.HttpMethod == HttpMethod.Get.ToString())
                 {
                     if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php")
                     {
-                        var clientID = SettingsManager.Get("auth","ccpAppClientId");
-                        var secret = SettingsManager.Get("auth","ccpAppSecret");
+                        var clientID = Settings.WebServerModule.CcpAppClientId;
+                        var secret = Settings.WebServerModule.CcpAppSecret;
 
                         var prms = request.Url.Query.TrimStart('?').Split('&');
                         var code = prms[0].Split('=')[1];
@@ -102,7 +102,7 @@ namespace ThunderED.Modules
                         
                         //have charId - had to check it
                         //check in db
-                        var timeout = SettingsManager.GetInt("timersModule", "authTimeoutInMinutes");
+                        var timeout = Settings.TimersModule.AuthTimeoutInMinutes;
                         if (timeout != 0)
                         {
                             var result = await SQLHelper.SQLiteDataQuery<string>("timersAuth", "time", "id", characterId.ToString());
@@ -242,14 +242,14 @@ namespace ThunderED.Modules
 
         private bool CheckAccess(int characterId, JsonClasses.CharacterData rChar, out bool isEditor)
         {
-            var authgroups = SettingsManager.GetSubList("timersModule","accessList");
+            var authgroups = Settings.TimersModule.AccessList;
             var accessCorps = new List<int>();
             var accessAlliance = new List<int>();
             var accessChars = new List<int>();
             isEditor = false;
             bool skip = false;
 
-            if (authgroups.Count == 0 || authgroups.All(a => (a.GetChildren().ToList().FirstOrDefault(x => x.Key == "id")?.Value ?? "") == "0"))
+            if (authgroups.Count == 0 || authgroups.All(a => a.Value.Id == 0))
             {
                 skip = true;
             }
@@ -257,39 +257,36 @@ namespace ThunderED.Modules
             {
                 foreach (var config in authgroups)
                 {
-                    var configChildren = config.GetChildren().ToList();
-                    var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
-                    var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
-                    var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
-                    if (isChar)
-                        accessChars.Add(Convert.ToInt32(id));
+                    var id = config.Value.Id;
+                    if (config.Value.IsCharacter)
+                        accessChars.Add(id);
                     else
                     {
-                        if (isAlliance)
-                            accessAlliance.Add(Convert.ToInt32(id));
-                        else accessCorps.Add(Convert.ToInt32(id));
+                        if (config.Value.IsAlliance)
+                            accessAlliance.Add(id);
+                        else accessCorps.Add(id);
                     }
                 }
             }
 
-            authgroups = SettingsManager.GetSubList("timersModule","editList");
+            authgroups = Settings.TimersModule.EditList;
             var editCorps = new List<int>();
             var editAlliance = new List<int>();
             var editChars = new List<int>();
             bool skip2 = false;
 
             //check for Discord admins
-            if (SettingsManager.GetBool("timersModule", "grantEditRolesToDiscordAdmins"))
+            if (Settings.TimersModule.GrantEditRolesToDiscordAdmins)
             {
                 var roles = SQLHelper.SQLiteDataQuery<string>("authUsers", "role", "characterID", characterId.ToString()).GetAwaiter().GetResult();
                 if (!string.IsNullOrEmpty(roles))
                 {
-                    var exemptRoles = SettingsManager.GetSubList("config", "discordAdminRoles").Select(a => a.Value);
+                    var exemptRoles = Settings.Config.DiscordAdminRoles;
                     skip2 = roles.Replace("&br;", "\"").Split(',').Any(role => exemptRoles.Contains(role));
                 }
             }
 
-            if (authgroups.Count == 0 || authgroups.All(a => (a.GetChildren().ToList().FirstOrDefault(x => x.Key == "id")?.Value ?? "") == "0"))
+            if (authgroups.Count == 0 || authgroups.All(a => a.Value.Id == 0))
             {
                 skip2 = true;
             }
@@ -297,17 +294,14 @@ namespace ThunderED.Modules
             {
                 foreach (var config in authgroups)
                 {
-                    var configChildren = config.GetChildren().ToList();
-                    var id = configChildren.FirstOrDefault(x => x.Key == "id")?.Value ?? "";
-                    var isAlliance = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isAlliance")?.Value ?? "false");
-                    var isChar = Convert.ToBoolean(configChildren.FirstOrDefault(x => x.Key == "isCharacter")?.Value ?? "false");
-                    if (isChar)
-                        editChars.Add(Convert.ToInt32(id));
+                    var id = config.Value.Id;
+                    if (config.Value.IsCharacter)
+                        editChars.Add(id);
                     else
                     {
-                        if (isAlliance)
-                            editAlliance.Add(Convert.ToInt32(id));
-                        else editCorps.Add(Convert.ToInt32(id));
+                        if (config.Value.IsAlliance)
+                            editAlliance.Add(id);
+                        else editCorps.Add(id);
                     }
                 }
             }
@@ -355,7 +349,7 @@ namespace ThunderED.Modules
             sb.AppendLine("</thead>");
             sb.AppendLine("<tbody>");
 
-            var timeFormat = SettingsManager.Get("config", "shortTimeFormat");
+            var timeFormat = Settings.Config.ShortTimeFormat;
             timers.OrderBy(a=> a.GetDateTime()).ToList().ForEach(timer =>
             {
                 sb.AppendLine("<tr>");
@@ -395,7 +389,7 @@ namespace ThunderED.Modules
                 var timers = await SQLHelper.SQLiteDataSelectTimers();
                 timers?.ForEach(async timer =>
                 {
-                    var channel = SettingsManager.GetULong("timersModule", "announceChannel");
+                    var channel = Settings.TimersModule.AnnounceChannel;
                     var dt = timer.GetDateTime();
                     if (dt != null && (dt.Value - DateTime.UtcNow).TotalMinutes <= 0)
                     {
@@ -407,7 +401,7 @@ namespace ThunderED.Modules
 
                     if (channel == 0) return;
 
-                    var announces = SettingsManager.GetSubList("timersModule", "announces").Select(a => Convert.ToInt32(a.Value)).OrderByDescending(a => a).ToList();
+                    var announces = Settings.TimersModule.Announces.OrderByDescending(a => a).ToList();
                     if (announces.Count == 0) return;
 
                     //if we don;t have any lesser announce times
@@ -454,7 +448,7 @@ namespace ThunderED.Modules
         {
             var embed = new EmbedBuilder()
                 .WithTitle(string.Format(LM.Get("timerNotifyTitle"), timer.timerLocation)??"-") 
-                .WithThumbnailUrl(SettingsManager.Get("resources", "imgTimerAlert") ?? "-")
+                .WithThumbnailUrl(Settings.Resources.ImgTimerAlert ?? "-")
                 .AddInlineField(LM.Get("timersType"), timer.GetModeName())
                 .AddInlineField(LM.Get("timersStage"), timer.GetStageName())
                 .AddInlineField(LM.Get("timersOwner"), timer.timerOwner ?? "-")

@@ -129,7 +129,7 @@ namespace ThunderED.API
             try
             {
                 await InstallCommands();
-                await Client.LoginAsync(TokenType.Bot, SettingsManager.Root.GetSection("config")["botDiscordToken"]);
+                await Client.LoginAsync(TokenType.Bot, SettingsManager.Settings.Config.BotDiscordToken);
                 await Client.StartAsync();
             }
             catch (HttpRequestException ex)
@@ -165,18 +165,18 @@ namespace ThunderED.API
         {
             if (!(messageParam is SocketUserMessage message)) return;
 
-            if (SettingsManager.GetBool("config", "moduleIRC"))
+            if (SettingsManager.Settings.Config.ModuleIRC)
             {
                 var module = TickManager.GetModule<IRCModule>();
                 module?.SendMessage(message.Channel.Id, message.Author.Id, message.Author.Username, message.Content);
             }
 
-            if (SettingsManager.GetBool("config", "moduleTelegram"))
+            if (SettingsManager.Settings.Config.ModuleTelegram)
                 TickManager.GetModule<TelegramModule>()?.SendMessage(message.Channel.Id, message.Author.Id, message.Author.Username, message.Content);
 
             int argPos = 0;
 
-            if (!(message.HasCharPrefix(SettingsManager.Get("config", "botDiscordCommandPrefix")[0], ref argPos) || message.HasMentionPrefix
+            if (!(message.HasCharPrefix(SettingsManager.Settings.Config.BotDiscordCommandPrefix[0], ref argPos) || message.HasMentionPrefix
                       (Client.CurrentUser, ref argPos))) return;
 
             var context = new CommandContext(Client, message);
@@ -188,16 +188,16 @@ namespace ThunderED.API
         {
             IsAvailable = true;
 
-            await GetGuild().CurrentUser.ModifyAsync(x => x.Nickname = SettingsManager.Get("config", "botDiscordName"));
-            await Client.SetGameAsync(SettingsManager.Get("config", "botDiscordGame"));
+            await GetGuild().CurrentUser.ModifyAsync(x => x.Nickname = SettingsManager.Settings.Config.BotDiscordName);
+            await Client.SetGameAsync(SettingsManager.Settings.Config.BotDiscordGame);
         }
 
         private static async Task Event_UserJoined(SocketGuildUser arg)
         {
-            if (SettingsManager.GetBool("config", "welcomeMessage"))
+            if (SettingsManager.Settings.Config.WelcomeMessage)
             {
                 var channel = arg.Guild.DefaultChannel;
-                var authurl = $"http://{SettingsManager.Get("webServerModule", "webExternalIP")}:{SettingsManager.Get("webServerModule", "webExternalPort")}/auth.php";
+                var authurl = $"http://{SettingsManager.Settings.WebServerModule.WebExternalIP}:{SettingsManager.Settings.WebServerModule.WebExternalPort}/auth.php";
                 if (!string.IsNullOrWhiteSpace(authurl))
                     await APIHelper.DiscordAPI.SendMessageAsync(channel, string.Format(LM.Get("welcomeMessage"),arg.Mention,authurl));
                 else
@@ -211,8 +211,8 @@ namespace ThunderED.API
             {
                 var roles = new List<IRole>(context.Guild.Roles);
                 var userRoleIDs = (await context.Guild.GetUserAsync(context.User.Id)).RoleIds;
-                var roleMatch = SettingsManager.GetSubList("config", "discordAdminRoles");
-                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name == role.Value) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
+                var roleMatch = SettingsManager.Settings.Config.DiscordAdminRoles;
+                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name == role) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
                     .All(check => check == 0)) return LM.Get("comRequirePriv");
             }
             else
@@ -221,8 +221,8 @@ namespace ThunderED.API
                 if (guild == null) return "Error getting guild!";
                 var roles = new List<IRole>(guild.Roles);
                 var userRoleIDs = (await guild.GetUserAsync(context.User.Id)).RoleIds;
-                var roleMatch = SettingsManager.GetSubList("config", "discordAdminRoles");
-                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name == role.Value) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
+                var roleMatch = SettingsManager.Settings.Config.DiscordAdminRoles;
+                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name == role) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
                     .All(check => check == 0)) return LM.Get("comRequirePriv");
             }
 
@@ -238,13 +238,13 @@ namespace ThunderED.API
         internal ulong[] GetConfigForbiddenPublicChannels()
         {
             return _forbiddenPublicChannels ?? (_forbiddenPublicChannels =
-                       SettingsManager.GetSubList("config", "comForbiddenChannels").Select(a => Convert.ToUInt64(a.Value)).ToArray());
+                       SettingsManager.Settings.Config.ComForbiddenChannels.ToArray());
         }
 
         internal ulong[] GetAuthAllowedChannels()
         {
             return _authAllowedChannels ?? (_authAllowedChannels =
-                       SettingsManager.GetSubList("auth", "comAuthChannels").Select(a => Convert.ToUInt64(a.Value)).ToArray());
+                       SettingsManager.Settings.WebAuthModule.ComAuthChannels.ToArray());
         }
 
         internal override void PurgeCache()
@@ -507,7 +507,7 @@ namespace ThunderED.API
 
         public SocketGuild GetGuild()
         {
-            return Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId"));
+            return Client.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
         }
 
         public SocketRole GetGuildRole(string roleName)

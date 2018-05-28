@@ -44,7 +44,7 @@ namespace ThunderED.Helpers
             where T : class
         {
             string raw = null;
-            var retCount = SettingsManager.GetInt("config", "requestRetries");
+            var retCount = SettingsManager.Settings.Config.RequestRetries;
             retCount = retCount == 0 ? 1 : retCount;
             for (int i = 0; i < retCount; i++)
             {

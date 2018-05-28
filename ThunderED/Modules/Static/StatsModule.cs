@@ -16,7 +16,7 @@ namespace ThunderED.Modules.Static
 
         public static async Task Stats(ICommandContext context, string commandText)
         {
-            if(!SettingsManager.GetBool("config", "moduleStats")) return;
+            if(!SettingsManager.Settings.Config.ModuleStats) return;
 
             try
             {
@@ -34,10 +34,10 @@ namespace ThunderED.Modules.Static
 
                 var requestHandler = new ZkbRequestHandler(new JsonSerializer("yyyy-MM-dd HH:mm:ss"));
                 //TODO introduce own variables and may be even settings section
-                var allyId = SettingsManager.GetLong("statsModule", "autodailyStatsDefaultAlliance");
+                var allyId = SettingsManager.Settings.StatsModule.AutodailyStatsDefaultAlliance;
                 if(!string.IsNullOrEmpty(entity))
                     allyId = (await APIHelper.ESIAPI.SearchAllianceId("Stats", entity))?.alliance?.FirstOrDefault() ?? 0;
-                var corpId = SettingsManager.GetLong("statsModule", "autoDailyStatsDefaultCorp");
+                var corpId = SettingsManager.Settings.StatsModule.AutoDailyStatsDefaultCorp;
                 if(!string.IsNullOrEmpty(entity) && allyId == 0)
                     corpId = (await APIHelper.ESIAPI.SearchCorporationId("Stats", entity))?.corporation.FirstOrDefault() ?? 0;
                 if(allyId == 0 && corpId == 0)
@@ -50,7 +50,7 @@ namespace ThunderED.Modules.Static
                 if (command == "t" || command== "today" || command== "newday")
                 {
                     var isNewDay = command == "newday";
-                    var channel = SettingsManager.GetULong("config", "autoDailyStatsChannel");
+                    var channel = SettingsManager.Settings.StatsModule.AutoDailyStatsChannel;
                     if(isNewDay && channel == 0) return;
                     var to = now.Add(TimeSpan.FromHours(1));
                     to = to.Subtract(TimeSpan.FromMinutes(to.Minute));

@@ -28,7 +28,7 @@ namespace ThunderED
                 return;
             }
             //update config settings
-            if (SettingsManager.GetBool("config", "moduleNotificationFeed"))
+            if (SettingsManager.Settings.Config.ModuleNotificationFeed)
             {
                 var dateStr = SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult();
                 if(DateTime.TryParseExact(dateStr, new [] {"dd.MM.yyyy HH:mm:ss", $"{CultureInfo.InvariantCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.InvariantCulture.DateTimeFormat.LongTimePattern}"}, CultureInfo.InvariantCulture.DateTimeFormat, DateTimeStyles.None, out var x))

@@ -13,7 +13,7 @@ namespace ThunderED.Modules
         private int _lastPosted;
         public override LogCat Category => LogCat.KillFeed;
 
-        public override async Task Run(object prm)
+    /*    public override async Task Run(object prm)
         {
             await ReliableKillFeed();
         }
@@ -125,29 +125,6 @@ namespace ThunderED.Modules
 
                         var isAttack = attackers.Any(a => a.alliance_id != 0 && a.alliance_id == allianceID || corpID != 0 && a.corporation_id == corpID);
 
-                       /* if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue && (victimAllianceID == allianceID || victimCorpID == corpID || isAttack))
-                        {
-                            dic.Add("{isLoss}", isAttack ? "false" : "true");
-                            if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
-                            {
-                                await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, isAttack ? new Color(0x00ff00) : new Color(0xff0000), shipID, killmailID,
-                                    rShipType.name,
-                                    (long) value,
-                                    sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
-                                    rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-                                    rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null, discordGroupName);
-                                if (sendBigToGeneral && c != bigKillChannel)
-                                    if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, c, discordGroupName))
-                                        await APIHelper.DiscordAPI.SendEmbedKillMessage(c, isAttack ? new Color(0x00ff00) : new Color(0xff0000), shipID, killmailID,
-                                            rShipType.name, (long) value,
-                                            sysName,
-                                            systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
-                                            rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-                                            rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null, discordGroupName);
-                            }
-
-                            await LogHelper.LogInfo($"Posting     Big {(isAttack ? "Kill" : "Loss")}: {kill.killmail_id}  Value: {value:n0} ISK", Category);
-                        }*/
                         if ((minimumLossValue == 0 || minimumLossValue <= value) &&
                                  ((victimAllianceID != 0 && victimAllianceID == allianceID) || (corpID != 0 && victimCorpID == corpID)) && isLossEnabled)
                         {
@@ -228,6 +205,6 @@ namespace ThunderED.Modules
                 IsRunning = false;
             }
         }
-
+    */
     }
 }

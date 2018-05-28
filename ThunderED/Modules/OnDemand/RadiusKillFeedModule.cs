@@ -21,7 +21,7 @@ namespace ThunderED.Modules.OnDemand
         public RadiusKillFeedModule()
         {
             ZKillLiveFeedModule.Queryables.Add(ProcessKill);
-            _enableCache = SettingsManager.GetBool("radiusKillFeedModule", "enableCache");
+            _enableCache = Settings.RadiusKillFeedModule.EnableCache;
         }
 
         private enum RadiusMode
@@ -35,23 +35,24 @@ namespace ThunderED.Modules.OnDemand
         {
             try
             {
-                foreach (var group in SettingsManager.GetSubList("radiusKillFeedModule", "groupsConfig"))
+                foreach (var groupPair in Settings.RadiusKillFeedModule.GroupsConfig)
                 {
-                    if(!_lastPosted.ContainsKey(group.Key))
-                        _lastPosted.Add(group.Key, 0);
+                    var group = groupPair.Value;
+                    if(!_lastPosted.ContainsKey(groupPair.Key))
+                        _lastPosted.Add(groupPair.Key, 0);
 
-                    if (_lastPosted[group.Key] == kill.package.killID) continue;
-                    _lastPosted[group.Key] = kill.package.killID;
+                    if (_lastPosted[groupPair.Key] == kill.package.killID) continue;
+                    _lastPosted[groupPair.Key] = kill.package.killID;
 
                     var killmailID = kill.package.killmail.killmail_id;
                     var value = kill.package.zkb.totalValue;
                     var systemId = kill.package.killmail.solar_system_id;
-                    var radius = Convert.ToInt16(group["radius"]);
-                    var radiusSystemId = Convert.ToInt32(group["radiusSystemId"]);
-                    var radiusConstId = Convert.ToInt32(group["radiusConstellationId"]);
-                    var radiusRegionId = Convert.ToInt32(group["radiusRegionId"]);
-                    var radiusChannelId = Convert.ToUInt64(group["radiusChannel"]);
-                    int radiusValue = Convert.ToInt32(group["minimumValue"]);
+                    var radius = group.Radius;
+                    var radiusSystemId = group.RadiusSystemId;
+                    var radiusConstId = group.RadiusConstellationId;
+                    var radiusRegionId = group.RadiusRegionId;
+                    var radiusChannelId = group.RadiusChannel;
+                    var radiusValue = group.MinimumValue;
                     var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId, false, !_enableCache);
                     var sysName = rSystem?.name ?? "J";
                     if (radiusSystemId == 0 && radiusConstId == 0 && radiusRegionId == 0)
@@ -62,7 +63,7 @@ namespace ThunderED.Modules.OnDemand
 
                     if (radiusChannelId == 0)
                     {
-                        await LogHelper.LogWarning($"Group {group.Key} has no 'radiusChannel' specified! Kills will be skipped.", Category);
+                        await LogHelper.LogWarning($"Group {groupPair.Key} has no 'radiusChannel' specified! Kills will be skipped.", Category);
                         continue;
                     }
 
@@ -174,7 +175,7 @@ namespace ThunderED.Modules.OnDemand
 
                     };
 
-                    if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailRadius, dic, radiusChannelId, group.Key))
+                    if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailRadius, dic, radiusChannelId, groupPair.Key))
                     {
                         var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {rSystemName}" : $"{LM.Get("InSmall")} {sysName} ({systemSecurityStatus})";
                         await APIHelper.DiscordAPI.SendEmbedKillMessage(radiusChannelId, new Color(0x989898), shipID, killmailID, rShipType?.name, (long) value,

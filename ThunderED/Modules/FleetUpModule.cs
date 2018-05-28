@@ -29,7 +29,7 @@ namespace ThunderED.Modules
             var location = operation.Location;
             var details = operation.Details;
 
-            var format = SettingsManager.Get("config", "timeformat") ?? "dd.MM.yyyy HH:mm";
+            var format = SettingsManager.Settings.Config.TimeFormat ?? "dd.MM.yyyy HH:mm";
 
             var url = $"http://fleet-up.com/Operation#{operation.OperationId}";
             var locationText = $"[{ location}](http://evemaps.dotlan.net/system/{location})";
@@ -84,13 +84,13 @@ namespace ThunderED.Modules
 
                 if (DateTime.Now > _lastChecked.Value.AddMinutes(1))
                 {
-                    var userId = SettingsManager.Get("fleetup", "UserId");
-                    var apiCode = SettingsManager.Get("fleetup", "APICode");
-                    var appKey = SettingsManager.Get("fleetup", "AppKey");
-                    var groupID = SettingsManager.Get("fleetup", "GroupID");
-                    var channelid = SettingsManager.GetULong("fleetup", "channel");
+                    var userId = SettingsManager.Settings.FleetupModule.UserId;
+                    var apiCode = SettingsManager.Settings.FleetupModule.APICode;
+                    var appKey = SettingsManager.Settings.FleetupModule.AppKey;
+                    var groupID = SettingsManager.Settings.FleetupModule.GroupID;
+                    var channelid = SettingsManager.Settings.FleetupModule.Channel;
                     var lastopid = await SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastPostedOperation");
-                    var announcePost = SettingsManager.GetBool("fleetup", "announce_post");
+                    var announcePost = SettingsManager.Settings.FleetupModule.Announce_Post;
                     var channel = channelid == 0 ? null : APIHelper.DiscordAPI.GetChannel(channelid);
 
                     _lastChecked = DateTime.Now;
@@ -121,7 +121,7 @@ namespace ThunderED.Modules
                         //no need to notify, it is already started
                         if (lastAnnounce == 0 && timeDiff.TotalMinutes < 1)
                             continue;
-                        var array = SettingsManager.GetSubList("fleetup", "announce").Select(x => Convert.ToInt32(x.Value)).Where(a=> a < lastAnnounce || lastAnnounce == 0).ToArray();
+                        var array = SettingsManager.Settings.FleetupModule.Announce.Where(a=> a < lastAnnounce || lastAnnounce == 0).ToArray();
 
                         foreach (var i in array)
                         {
@@ -170,10 +170,10 @@ namespace ThunderED.Modules
             {
                 var Reason = LogCat.FleetUp.ToString();
                 int.TryParse(x, out var amount);
-                var userId = SettingsManager.Get("fleetup", "UserId");
-                var apiCode = SettingsManager.Get("fleetup", "APICode");
-                var groupID = SettingsManager.Get("fleetup", "GroupID");
-                var appKey = SettingsManager.Get("fleetup", "AppKey");
+                var userId = SettingsManager.Settings.FleetupModule.UserId;
+                var apiCode = SettingsManager.Settings.FleetupModule.APICode;
+                var groupID = SettingsManager.Settings.FleetupModule.GroupID;
+                var appKey = SettingsManager.Settings.FleetupModule.AppKey;
 
                 var result = await APIHelper.FleetUpAPI.GetOperations(Reason, userId, apiCode, appKey, groupID);
 

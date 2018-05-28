@@ -18,7 +18,7 @@ namespace ThunderED.Modules.Static
         {
             try
             {
-                var utcTime = DateTime.UtcNow.ToString( SettingsManager.Get("config", "timeFormat"));
+                var utcTime = DateTime.UtcNow.ToString( SettingsManager.Settings.Config.TimeFormat);
                 await APIHelper.DiscordAPI.ReplyMessageAsync((ICommandContext) context, $"{LM.Get("evetime")}: {utcTime}");
             }
             catch (Exception ex)

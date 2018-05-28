@@ -19,15 +19,15 @@ namespace ThunderED.Modules.OnDemand
         public LiveKillFeedModule()
         {
             ZKillLiveFeedModule.Queryables.Add(ProcessKill);
-            _enableCache = SettingsManager.GetBool("liveKillFeed", "enableCache");
+            _enableCache = Settings.LiveKillFeedModule.EnableCache;
         }
 
         private async Task ProcessKill(JsonZKill.ZKillboard kill)
         {
             if (_lastPosted != kill.package.killID)
             {
-                var bigKillGlobalValue = SettingsManager.GetLong("liveKillFeed", "bigKill");
-                var bigKillGlobalChan = SettingsManager.GetULong("liveKillFeed", "bigKillChannel");
+                var bigKillGlobalValue = Settings.LiveKillFeedModule.BigKill;
+                var bigKillGlobalChan =Settings.LiveKillFeedModule.BigKillChannel;
 
                 var killmailID = kill.package.killmail.killmail_id;
                 var killTime = kill.package.killmail.killmail_time.ToString("dd.MM.yyyy hh:mm");
@@ -96,21 +96,22 @@ namespace ThunderED.Modules.OnDemand
 
                 };
 
-                foreach (var i in SettingsManager.GetSubList("liveKillFeed", "groupsConfig"))
+                foreach (var groupPair in Settings.LiveKillFeedModule.GroupsConfig)
                 {
-                    var minimumValue = Convert.ToInt64(i["minimumValue"]);
-                    var minimumLossValue = Convert.ToInt64(i["minimumLossValue"]);
-                    var allianceID = Convert.ToInt32(i["allianceID"]);
-                    var corpID = Convert.ToInt32(i["corpID"]);
-                    var bigKillValue = Convert.ToInt64(i["bigKillValue"]);
-                    var c = Convert.ToUInt64(i["discordChannel"]);
-                    var sendBigToGeneral = Convert.ToBoolean(i["bigKillSendToGeneralToo"]);
-                    var bigKillChannel = Convert.ToUInt64(i["bigKillChannel"]);
-                    var discordGroupName = i["name"];
+                    var group = groupPair.Value;
+                    var minimumValue = group.MinimumValue;
+                    var minimumLossValue = group.MinimumLossValue;
+                    var allianceID = group.AllianceID;
+                    var corpID = group.CorpID;
+                    var bigKillValue = group.BigKillValue;
+                    var c = group.DiscordChannel;
+                    var sendBigToGeneral = group.BigKillSendToGeneralToo;
+                    var bigKillChannel = group.BigKillChannel;
+                    var discordGroupName = groupPair.Key;
 
                     if (c == 0)
                     {
-                        await LogHelper.LogWarning($"Group {i.Key} has no 'discordChannel' specified! Kills will be skipped.",Category);
+                        await LogHelper.LogWarning($"Group {groupPair.Key} has no 'discordChannel' specified! Kills will be skipped.",Category);
                         continue;
                     }
 

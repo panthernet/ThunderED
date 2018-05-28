@@ -16,7 +16,7 @@ namespace ThunderED.Classes
             if (string.IsNullOrEmpty(templateFile)) return false;
             var embed = await CompileTemplate(type, templateFile, dic);
             if (embed == null) return false;
-            var guildID = SettingsManager.GetULong("config", "discordGuildId");
+            var guildID = SettingsManager.Settings.Config.DiscordGuildId;
             var discordGuild = APIHelper.DiscordAPI.Client.Guilds.FirstOrDefault(x => x.Id == guildID);
             var channel = discordGuild?.GetTextChannel(channelId);
             if (channel != null)

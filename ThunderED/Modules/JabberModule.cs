@@ -16,9 +16,9 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            var username = SettingsManager.Get("jabber", "username");
-            var password = SettingsManager.Get("jabber", "password");
-            var domain = SettingsManager.Get("jabber", "domain");
+            var username = Settings.JabberModule.Username;
+            var password = Settings.JabberModule.Password;
+            var domain = Settings.JabberModule.Domain;
 
             if (!IsRunning)
             {
@@ -80,14 +80,14 @@ namespace ThunderED.Modules
             var filtered = false;
             if (e.Message.Chatstate != Chatstate.Composing && !string.IsNullOrWhiteSpace(e.Message.Value))
             {
-                if (SettingsManager.GetSubValue<bool>("jabber", "filter"))
+                if (SettingsManager.Settings.JabberModule.Filter)
                 {
-                    foreach (var filter in SettingsManager.GetSubList("jabber","filters"))
+                    foreach (var filter in SettingsManager.Settings.JabberModule.Filters)
                     {
                         if (e.Message.Value.ToLower().Contains(filter.Key.ToLower()))
                         {
-                            var prepend = SettingsManager.Get("jabber", "prepend");
-                            var channel = APIHelper.DiscordAPI.Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId")).GetTextChannel(Convert.ToUInt64(filter.Value));
+                            var prepend = SettingsManager.Settings.JabberModule.Prepend;
+                            var channel = APIHelper.DiscordAPI.Client.GetGuild(SettingsManager.Settings.Config.DiscordGuildId).GetTextChannel(Convert.ToUInt64(filter.Value));
                             filtered = true;
                             await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```").ConfigureAwait(false);
                         }
@@ -96,8 +96,8 @@ namespace ThunderED.Modules
 
                 if (!string.IsNullOrWhiteSpace(e.Message.Value) && !filtered)
                 {
-                    var prepend = SettingsManager.Get("jabber", "prepend");
-                    var channel = APIHelper.DiscordAPI.Client.GetGuild(SettingsManager.GetULong("config", "discordGuildId")).GetTextChannel(SettingsManager.GetULong("jabber", "defchan"));
+                    var prepend = SettingsManager.Settings.JabberModule.Prepend;
+                    var channel = APIHelper.DiscordAPI.Client.GetGuild(SettingsManager.Settings.Config.DiscordGuildId).GetTextChannel(SettingsManager.Settings.JabberModule.DefChan);
                     await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```").ConfigureAwait(false);
                 }
             }
@@ -110,7 +110,7 @@ namespace ThunderED.Modules
 
         private void XmppClient_OnReceiveXml(object sender, Matrix.TextEventArgs e)
         {
-            if (SettingsManager.GetBool("jabber", "debug"))
+            if (SettingsManager.Settings.JabberModule.Debug)
                 LogHelper.LogDebug($"JabberClient Rcv {e.Text}", LogCat.Jabber).GetAwaiter().GetResult();
         }
 
