@@ -341,7 +341,7 @@ namespace ThunderED.Modules
                                                 textAdd = notification.type == "StructureLostArmor" ? LM.Get("armorSmall") : LM.Get("shieldSmall");
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
-                                                    .WithThumbnailUrl(Settings.Resources.ImgCitLostShield)
+                                                    .WithThumbnailUrl(notification.type == "StructureLostShields" ? Settings.Resources.ImgCitLostShield : Settings.Resources.ImgCitLostArmor)
                                                     .WithAuthor(author =>
                                                         author.WithName(string.Format(LM.Get("StructureLostArmor"),
                                                             structureType == null ? LM.Get("Structure") : structureType.name, textAdd)))
