@@ -480,16 +480,39 @@ namespace ThunderED.Modules
                                                 break;
                                             case "CharLeftCorpMsg":
                                             case "CharAppAcceptMsg":
+					    case "CorpAppNewMsg":
+					    case "CharAppWithdrawMsg":
                                             {
                                                 await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                 var character = await APIHelper.ESIAPI.GetCharacterData(Reason, GetData("charID", data), true);
                                                 var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data), true);
-                                                var text = notification.type == "CharLeftCorpMsg"
-                                                    ? string.Format(LM.Get("CharLeftCorpMsg"), character?.name, corp?.name)
-                                                    : string.Format(LM.Get("CharAppAcceptMsg"), character?.name, corp?.name);
-                                                var color = notification.type == "" ? new Color(0xdd5353) : new Color(0x00ff00);
+						var text = "";
+						switch(notification.type) {
+							case "CharLeftCorpMsg":
+								text = string.Format(LM.Get("CharLeftCorpMsg"), character?.name, corp?.name);
+								break;
+							case "CharAppAcceptMsg":
+								text = string.Format(LM.Get("CharAppAcceptMsg"), character?.name, corp?.name);
+								break;
+							case "CorpAppNewMsg":
+								text = string.Format(LM.Get("CorpAppNewMsg"), character?.name, corp?.name);
+								break;
+							case "CharAppWithdrawMsg":
+								text = string.Format(LM.Get("CharAppWithdrawMsg"), character?.name, corp?.name);
+								break;
+						}
+						var applicationText = notification.type == "CharLeftCorpMsg" ? "" : GetData("applicationText", data);
+						Color color;
+						if(notification.type == "CharLeftCorpMsg" || notification.type == "CharAppWithdrawMsg") {
+							color = new Color(0xdd5353);
+						} else if(notification.type == "CharAppAcceptMsg") {
+							color = new Color(0x00ff00);
+						} else {
+							color = new Color(0x555555);
+						}
                                                 builder = new EmbedBuilder()
                                                     .WithColor(color)
+						    .WithDescription(applicationText)
                                                     .WithAuthor(author => author.WithName(text).WithUrl($"https://zkillboard.com/character/{GetData("charID", data)}/"))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
