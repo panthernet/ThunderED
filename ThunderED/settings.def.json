@@ -6,7 +6,6 @@
     "botDiscordCommandPrefix": "!",
     "discordGuildId": 0,
     "discordAdminRoles": [ "Admins" ],
-    "discordGeneralChannel": 0,
     "comForbiddenChannels": [],
     "language": "en-US",
     "useEnglishESIOnly": "true",
@@ -131,7 +130,6 @@
     "bigKill": 10000000000,
     "//": "Post GLOBAL BIG kills to separate chat channel",
     "bigKillChannel": 0,
-    "losses": true,
     "groupsConfig": {
       "groupName": {
         "//": "Post all group kills to separate chat channel",

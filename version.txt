@@ -16,6 +16,9 @@ Breaking changes
 - **liveKillFeed** module renamed to **liveKillFeedModule**
 - **fleetup** module renamed to **fleetupModule**
 - **jabber** module renamed to **jabberModule**
+- Removed global **losses** param from **liveKillFeedModule**. Set high **minimumLossValue** value for the same effect.
+- Removed not used **config.DiscordGeneralChannel** param
+- Removed not used **config.comRestrictToValidChannels** param
 
 v1.1.4
 + Added new notifications: StructureDestroyed and OrbitalAttacked

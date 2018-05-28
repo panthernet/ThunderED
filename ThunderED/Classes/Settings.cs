@@ -75,7 +75,6 @@ namespace ThunderED.Classes
         public bool EnableCache;
         public long BigKill;
         public ulong BigKillChannel;
-        public bool Losses;
         public Dictionary<string, KillFeedGroup> GroupsConfig = new Dictionary<string, KillFeedGroup>();
     }
 
@@ -264,9 +263,7 @@ namespace ThunderED.Classes
         public string BotDiscordCommandPrefix = "!";
         public ulong DiscordGuildId;
         public List<string> DiscordAdminRoles = new List<string>();
-        public ulong DiscordGeneralChannel;
         public List<ulong> ComForbiddenChannels = new List<ulong>();
-        public bool ComRestrictToValidChannels = true;
         public string Language = "en-US";
         public bool UseEnglishESIOnly = true;
 
