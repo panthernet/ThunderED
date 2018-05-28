@@ -7,7 +7,6 @@ using Discord;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Modules.Settings;
 
 namespace ThunderED.Modules
 {
@@ -15,14 +14,8 @@ namespace ThunderED.Modules
     {
         public override LogCat Category => LogCat.Incursions;
 
-        public IncursionNotifySettings Settings { get; }
         private DateTime _runAt = DateTime.UtcNow.Date + TimeSpan.FromHours(11) + TimeSpan.FromMinutes(5);
         private bool _isChecked;
-
-        public IncursionNotifyModule()
-        {
-            Settings = IncursionNotifySettings.Load(SettingsManager.FileSettingsPath);
-        }
 
         public override async Task Run(object prm)
         {
@@ -44,7 +37,7 @@ namespace ThunderED.Modules
                         return;
                     }
 
-                    var channel = APIHelper.DiscordAPI.GetChannel(Settings.Core.DiscordChannelId);
+                    var channel = APIHelper.DiscordAPI.GetChannel(Settings.IncursionNotificationModule.DiscordChannelId);
                     if (channel == null)
                     {
                         await LogHelper.LogError(
@@ -58,7 +51,7 @@ namespace ThunderED.Modules
 
                     foreach (var incursion in incursions)
                     {
-                        if (Settings.Core.Constellations.Count == 0 && Settings.Core.Regions.Count == 0)
+                        if (Settings.IncursionNotificationModule.Constellations.Count == 0 && Settings.IncursionNotificationModule.Regions.Count == 0)
                         {
                             await ReportIncursion(incursion, null, channel);
                             continue;
@@ -66,15 +59,15 @@ namespace ThunderED.Modules
 
                         var result = false;
                         JsonClasses.ConstellationData c = null;
-                        if (Settings.Core.Constellations.Count > 0)
-                            result = Settings.Core.Constellations.Contains(incursion.constellation_id);
+                        if (Settings.IncursionNotificationModule.Constellations.Count > 0)
+                            result = Settings.IncursionNotificationModule.Constellations.Contains(incursion.constellation_id);
 
                         if (!result)
                         {
-                            if (Settings.Core.Regions.Count > 0)
+                            if (Settings.IncursionNotificationModule.Regions.Count > 0)
                             {
                                 c = await APIHelper.ESIAPI.GetConstellationData(Reason, incursion.constellation_id);
-                                if (Settings.Core.Regions.Contains(c.region_id))
+                                if (Settings.IncursionNotificationModule.Regions.Contains(c.region_id))
                                     result = true;
                             }
                         }
@@ -101,7 +94,7 @@ namespace ThunderED.Modules
         {
             var result = await SQLHelper.SQLiteDataQuery<int>("incursions", "constId", "constId", incursion.constellation_id);
             //skip existing incursion report
-            var isUpdate = result > 0 && Settings.Core.ReportIncursionStatusAfterDT;
+            var isUpdate = result > 0 && Settings.IncursionNotificationModule.ReportIncursionStatusAfterDT;
             if(!isUpdate && result > 0)
                 return;
 

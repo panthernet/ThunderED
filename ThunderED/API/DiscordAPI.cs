@@ -266,7 +266,6 @@ namespace ThunderED.API
 
         public async Task UpdateAllUserRoles(Dictionary<int, List<string>> foundList, List<string> exemptRoles)
         {
-            var authSettings = TickManager.GetModule<AuthCheckModule>().Settings;
             var discordGuild = GetGuild();
             var discordUsers = discordGuild.Users;
 
@@ -349,9 +348,9 @@ namespace ThunderED.API
                         if (changed)
                         {
                             roles.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
-                            if (authSettings.Auth.AuthReportChannel != 0)
+                            if (SettingsManager.Settings.WebAuthModule.AuthReportChannel != 0)
                             {
-                                var channel = discordGuild.GetTextChannel(authSettings.Auth.AuthReportChannel);
+                                var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
                                 await SendMessageAsync(channel, $"{LM.Get("renewingRoles")} {characterData.name} ({u.Username})");
                             }
 
@@ -366,9 +365,9 @@ namespace ThunderED.API
 
                         var eveName = characterData.name;
 
-                        if (authSettings.Auth.EnforceCorpTickers || authSettings.Auth.EnforceCharName)
+                        if (SettingsManager.Settings.WebAuthModule.EnforceCorpTickers || SettingsManager.Settings.WebAuthModule.EnforceCharName)
                         {
-                            var nickname = $"{(authSettings.Auth.EnforceCorpTickers  ? $"[{corporationData.ticker}] " : null)}{(authSettings.Auth.EnforceCharName ? eveName : u.Username)}";
+                            var nickname = $"{(SettingsManager.Settings.WebAuthModule.EnforceCorpTickers  ? $"[{corporationData.ticker}] " : null)}{(SettingsManager.Settings.WebAuthModule.EnforceCharName ? eveName : u.Username)}";
                             if (nickname != u.Nickname && !string.IsNullOrWhiteSpace(u.Nickname) || string.IsNullOrWhiteSpace(u.Nickname) && u.Username != nickname)
                             {
                                 await u.ModifyAsync(x => x.Nickname = nickname);
@@ -407,7 +406,7 @@ namespace ThunderED.API
                         {
                             try
                             {
-                                var channel = discordGuild.GetTextChannel(authSettings.Auth.AuthReportChannel);
+                                var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
                                 await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{LM.Get("resettingRoles")} {u.Username}");
                                 await LogHelper.LogInfo($"Resetting roles for {u.Username}", LogCat.AuthCheck);
                                 await u.RemoveRolesAsync(rroles);
@@ -538,7 +537,7 @@ namespace ThunderED.API
                     }
                     catch (Exception e)
                     {
-                        await LogHelper.LogEx($"Unable to assign role {r?.Name} to {discordUser.Nickname}", e, LogCat.Discord);
+                        await LogHelper.LogEx($"Unable to assign role {r.Name} to {discordUser.Nickname}", e, LogCat.Discord);
                     }
                 }
             }

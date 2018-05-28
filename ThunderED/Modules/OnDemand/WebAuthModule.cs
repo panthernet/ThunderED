@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
@@ -13,7 +12,6 @@ using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Modules.Settings;
 using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules.OnDemand
@@ -22,12 +20,9 @@ namespace ThunderED.Modules.OnDemand
     {
         public override LogCat Category => LogCat.AuthWeb;
 
-        public AuthSettings Settings { get; }
-
         public WebAuthModule()
         {
             WebServerModule.ModuleConnectors.Add(Reason, Auth);
-            Settings = AuthSettings.Load(SettingsManager.FileSettingsPath);
         }
 
         public static async Task<string[]> GetCHaracterIdFromCode(string code, string clientID, string secret)
@@ -71,14 +66,14 @@ namespace ThunderED.Modules.OnDemand
                 {
                     response.Headers.ContentEncoding.Add("utf-8");
                     response.Headers.ContentType.Add("text/html;charset=utf-8");
-                    var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{callbackurl}", callbackurl).Replace("{client_id}", Settings.Core.CcpAppClientId)
+                    var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{callbackurl}", callbackurl).Replace("{client_id}", Settings.WebServerModule.CcpAppClientId)
                         .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{body}", LM.Get("authTemplateInv")).Replace("{backText}", LM.Get("backText"));
                     await response.WriteContentAsync(text);
                     return true;
                 }
 
                 if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php"
-                    && !request.Url.Query.Contains("&state=11"))
+                    && !request.Url.Query.Contains("&state="))
                 {
                     var assembly = Assembly.GetEntryAssembly();
                     // var temp = assembly.GetManifestResourceNames();
@@ -93,48 +88,17 @@ namespace ThunderED.Modules.OnDemand
                     {
                         var prms = request.Url.Query.TrimStart('?').Split('&');
                         var code = prms[0].Split('=')[1];
-                        var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
+                       // var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
 
-                        var result = await GetCHaracterIdFromCode(code, Settings.Core.CcpAppClientId, Settings.Core.CcpAppSecret);
+                        var result = await GetCHaracterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                         if (result == null)
                             esiFailure = true;
                         var characterID = result?[0];
-                        var numericCharId = Convert.ToInt32(characterID);
 
                         var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
 
-                        if (state == "9") //refresh token fetch ops
-                        {
-                            response.Headers.ContentEncoding.Add("utf-8");
-                            response.Headers.ContentType.Add("text/html;charset=utf-8");
-                            if (string.IsNullOrEmpty(characterID))
-                            {
-                                await LogHelper.LogWarning("Bad or outdated notify feed request!");
-                                await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                                    .Replace("{message}", LM.Get("authTokenBadRequest"))
-                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
-                                return true;
-                            }
-
-                            if (TickManager.GetModule<NotificationModule>().Settings.Core.Groups.Values.All(g => g.CharacterID != numericCharId))
-                            {
-                                await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
-                                await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                                    .Replace("{message}", LM.Get("authTokenInvalid"))
-                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
-                                return true;
-                            }
-
-                            await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
-                            await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
-                            await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
-                                .Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
-                                .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")));
-                            return true;
-                        }
-
                         var foundList = new List<int>();
-                        foreach (var group in Settings.Core.AuthGroups.Values)
+                        foreach (var group in Settings.WebAuthModule.AuthGroups.Values)
                         {
                             if (group.CorpID != 0)
                                 foundList.Add(group.CorpID);
@@ -170,7 +134,7 @@ namespace ThunderED.Modules.OnDemand
                             response.Headers.ContentEncoding.Add("utf-8");
                             response.Headers.ContentType.Add("text/html;charset=utf-8");
 
-                            await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth2).Replace("{url}", Settings.Core.DiscordUrl).Replace("{image}", image)
+                            await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth2).Replace("{url}", Settings.WebServerModule.DiscordUrl).Replace("{image}", image)
                                 .Replace("{uid}", uid).Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{body}", string.Format(LM.Get("authTemplateSucc1"), rChar.name))
                                 .Replace("{body2}", LM.Get("authTemplateSucc2")).Replace("{body3}", LM.Get("authTemplateSucc3")).Replace("{backText}", LM.Get("backText")));
@@ -240,7 +204,7 @@ namespace ThunderED.Modules.OnDemand
                        // var alliance = new Dictionary<string, string>();
 
                         var foundList = new Dictionary<int, List<string>>();
-                        foreach (var group in TickManager.GetModule<WebAuthModule>().Settings.Core.AuthGroups.Values)
+                        foreach (var group in TickManager.GetModule<WebAuthModule>().Settings.WebAuthModule.AuthGroups.Values)
                         {
                             if (group.CorpID != 0)
                                 foundList.Add(group.CorpID, group.MemberRoles);
@@ -288,7 +252,7 @@ namespace ThunderED.Modules.OnDemand
             var allianceID = characterData.alliance_id ?? 0;
             var corpID = characterData.corporation_id;
 
-            var authSettings = TickManager.GetModule<WebAuthModule>()?.Settings.Core;
+            var authSettings = TickManager.GetModule<WebAuthModule>()?.Settings.WebAuthModule;
 
             try
             {

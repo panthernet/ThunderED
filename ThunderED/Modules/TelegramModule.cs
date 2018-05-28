@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using ThunderED.Classes;
-using ThunderED.Classes.Telegram;
 using ThunderED.Helpers;
 
 namespace ThunderED.Modules
@@ -16,7 +14,6 @@ namespace ThunderED.Modules
         public override LogCat Category => LogCat.Telegram;
         private User _me;
         private TelegramBotClient _client;
-        private TelegramSettings Settings { get; set; }
         private readonly List<string> _messagePool = new List<string>();
         public event Action<string, ulong> RelayMessage;
 
@@ -26,7 +23,6 @@ namespace ThunderED.Modules
             IsRunning = true;
             try
             {
-                Settings = TelegramSettings.Load(SettingsManager.FileSettingsPath);
                 if (Settings.TelegramModule == null || string.IsNullOrEmpty(Settings.TelegramModule.Token))
                 {
                     await LogHelper.LogError("Token is not set for Telegram module!", Category);

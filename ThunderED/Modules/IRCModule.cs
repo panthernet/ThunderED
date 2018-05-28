@@ -26,7 +26,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ThunderED.Classes;
 using ThunderED.Classes.IRC;
 using ThunderED.Helpers;
 
@@ -35,7 +34,6 @@ namespace ThunderED.Modules
     public class IRCModule: AppModuleBase, IDisposable, IDiscordRelayModule
     {
         public IRC IRC { get; private set; }
-        public IRCSettings Settings { get; private set; }
 
         public event Action<string, ulong> RelayMessage;
 
@@ -70,9 +68,7 @@ namespace ThunderED.Modules
             if(IRC?.IsWorking ?? false) return;
             try
             {
-                Settings = IRCSettings.Load(SettingsManager.FileSettingsPath);
-
-                IRC = new IRC(Settings);
+                IRC = new IRC();
                 IRC.Message += IRC_Message;
                 IRC.ErrorOutput += IRC_ErrorOutput;
                 IRC.UserJoined += IRC_UserJoined;
@@ -92,7 +88,7 @@ namespace ThunderED.Modules
 
         private void IRC_Message(UserInfo userinfo, string channel, string message)
         {
-            var relay = Settings.ircModule.RelayChannels.FirstOrDefault(a => a.IRC == channel);
+            var relay = Settings.IrcModule.RelayChannels.FirstOrDefault(a => a.IRC == channel);
             if (relay == null) return;
             if(relay.Discord == 0 || IsMessagePooled(message) || relay.IRCFilters.Any(message.Contains) || relay.IRCFiltersStartsWith.Any(message.StartsWith)) return;
             if(relay.IRCUsers.Count > 0 && !relay.IRCUsers.Contains(userinfo.Nickname)) return;
@@ -119,7 +115,7 @@ namespace ThunderED.Modules
         public async Task SendMessage(ulong channel, ulong authorId, string user, string message)
         {
             if(IRC == null || !IRC.IsWorking) return;
-            var relay = Settings.ircModule.RelayChannels.FirstOrDefault(a => a.Discord == channel);
+            var relay = Settings.IrcModule.RelayChannels.FirstOrDefault(a => a.Discord == channel);
             if(relay == null) return;
             if(string.IsNullOrEmpty(relay.IRC) || IsMessagePooled(message) || relay.DiscordFilters.Any(message.Contains) || relay.DiscordFiltersStartsWith.Any(message.StartsWith)) return;
             //check if we relay only bot messages

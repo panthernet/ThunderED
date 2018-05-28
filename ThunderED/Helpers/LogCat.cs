@@ -30,6 +30,7 @@
         IRC,
         Telegram,
         ChatRelay,
-        Incursions
+        Incursions,
+        NullCampaign
     }
 }

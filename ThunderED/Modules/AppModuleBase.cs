@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using ThunderED.Classes;
 using ThunderED.Helpers;
 
 namespace ThunderED.Modules
@@ -15,5 +16,7 @@ namespace ThunderED.Modules
         {
             return Task.CompletedTask;
         }
+
+        public ThunderSettings Settings => SettingsManager.Settings;
     }
 }

@@ -1,6 +1,13 @@
 v1.1.5
 + Added new incursions notification module
 + Added new Discord command !tq
++ Removed WebAuthModule dependency from NotificationFeedModule
+
+Breaking changes
+- **auth** config section renamed to **WebAuthModule**
+- **WebAuthModule.authCheckIntervalMinutes** is now a numeric value
+- **discordUrl, ccpAppClientId, ccpAppSecret** properties moved from **WebAuthModule** to **webServerModule**
+- **jabber** module **defchan** and filters are now numeric values
 
 v1.1.4
 + Added new notifications: StructureDestroyed and OrbitalAttacked

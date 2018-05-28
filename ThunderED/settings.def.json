@@ -143,8 +143,8 @@
       }
     }
   },
-  "auth": {
-    "authCheckIntervalMinutes": "480",
+  "WebAuthModule": {
+    "authCheckIntervalMinutes": 480,
     "discordUrl": "https://discord.gg/xxxxxx",
     "ccpAppClientId": "REQUIRED",
     "ccpAppSecret": "REQUIRED",
@@ -309,10 +309,10 @@
     "password": "password",
     "filter": false,
     "debug": false,
-    "defchan": "0000000000000",
+    "defchan": 0,
     "filters": {
-      "SUPER": "0000000000000",
-      "BLOPS": "0000000000000"
+      "SUPER": 0,
+      "BLOPS": 0
     },
     "prepend": "@here"
   },

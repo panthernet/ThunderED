@@ -62,10 +62,11 @@ namespace ThunderED.Classes.IRC
         public delegate void IRCUserKickedEventHandler(UserInfo userInfo, string channel, string kickedNick);
         public event IRCUserKickedEventHandler UserKicked;
 
-        public IRCSettings Settings { get; }
         public bool IsWorking { get; private set; }
         public bool IsConnected { get; private set; }
         public string CurrentNickname { get; private set; }
+
+        private ThunderSettings Settings => SettingsManager.Settings;
 
         private TcpClient _tcp;
         private StreamReader _streamReader;
@@ -74,12 +75,6 @@ namespace ThunderED.Classes.IRC
         private Timer _pingTimer;
         private string _lastPingServer;
         private readonly List<UserInfo> _userList = new List<UserInfo>();
-
-
-        public IRC(IRCSettings settings)
-        {
-            Settings = settings;
-        }
 
         public async void Dispose()
         {
@@ -97,24 +92,24 @@ namespace ThunderED.Classes.IRC
                 IsConnected = false;
                 _disconnecting = false;
 
-                var port = Settings.ircModule.Port;
+                var port = Settings.IrcModule.Port;
 
                 if (port <= 0)
-                    port = Settings.ircModule.UseSSL ? DEFAULT_PORT_SSL : DEFAULT_PORT;
+                    port = Settings.IrcModule.UseSSL ? DEFAULT_PORT_SSL : DEFAULT_PORT;
 
                 _tcp = new TcpClient()
                 {
                     NoDelay = true
                 };
 
-                await _tcp.ConnectAsync(Settings.ircModule.Server, port);
+                await _tcp.ConnectAsync(Settings.IrcModule.Server, port);
 
                 Stream networkStream = _tcp.GetStream();
 
-                if (Settings.ircModule.UseSSL)
+                if (Settings.IrcModule.UseSSL)
                 {
                     var sslStream = new SslStream(networkStream, false, (sender, certificate, chain, sslPolicyErrors) => true);
-                    await sslStream.AuthenticateAsClientAsync(Settings.ircModule.Server);
+                    await sslStream.AuthenticateAsClientAsync(Settings.IrcModule.Server);
                     networkStream = sslStream;
                 }
 
@@ -123,14 +118,14 @@ namespace ThunderED.Classes.IRC
 
                 await Task.Run(() => StartReadThread());
 
-                if (!string.IsNullOrEmpty(Settings.ircModule.Password))
-                    await SetPassword(Settings.ircModule.Password);
+                if (!string.IsNullOrEmpty(Settings.IrcModule.Password))
+                    await SetPassword(Settings.IrcModule.Password);
 
-                await SetUser(Settings.ircModule.Username, Settings.ircModule.Realname, Settings.ircModule.Invisible);
-                await ChangeNickname(Settings.ircModule.Nickname);
+                await SetUser(Settings.IrcModule.Username, Settings.IrcModule.Realname, Settings.IrcModule.Invisible);
+                await ChangeNickname(Settings.IrcModule.Nickname);
 
                 _pingTimer = new Timer(PingTimerCallback, null, 30000, 30000);
-                OnOutput(new MessageInfo($"Connected to IRC server {Settings.ircModule.Server}:{Settings.ircModule.Port}"));
+                OnOutput(new MessageInfo($"Connected to IRC server {Settings.IrcModule.Server}:{Settings.IrcModule.Port}"));
             }
             catch (Exception e)
             {
@@ -145,7 +140,7 @@ namespace ThunderED.Classes.IRC
             {
                 _disconnecting = true;
                 if (IsWorking)
-                    await Quit(Settings.ircModule.QuitReason);
+                    await Quit(Settings.IrcModule.QuitReason);
                 _streamReader?.Dispose();
                 _streamWriter?.Dispose();
                 _tcp?.Dispose();
@@ -207,9 +202,9 @@ namespace ThunderED.Classes.IRC
 
             OnDisconnected();
 
-            if (!_disconnecting && Settings.ircModule.AutoReconnect)
+            if (!_disconnecting && Settings.IrcModule.AutoReconnect)
             {
-                await Task.Delay(Settings.ircModule.AutoReconnectDelay);
+                await Task.Delay(Settings.IrcModule.AutoReconnectDelay);
 
                 await Reconnect();
             }
@@ -248,10 +243,10 @@ namespace ThunderED.Classes.IRC
                 messageInfo.User.Nickname = CurrentNickname;
             }
 
-            var suppressOutput = (Settings.ircModule.SuppressMOTD && messageInfo.CheckCommand("375", //:sendak.freenode.net 375 Jaex :- sendak.freenode.net Message of the Day -
+            var suppressOutput = (Settings.IrcModule.SuppressMOTD && messageInfo.CheckCommand("375", //:sendak.freenode.net 375 Jaex :- sendak.freenode.net Message of the Day -
                 "372", //:sendak.freenode.net 372 Jaex :- Welcome to sendak.freenode.net in Vilnius, Lithuania, EU.
                 "376")) //:sendak.freenode.net 376 Jaex :End of /MOTD command.
-                || (Settings.ircModule.SuppressPing && messageInfo.CheckCommand("PING", //PING :sendak.freenode.net
+                || (Settings.IrcModule.SuppressPing && messageInfo.CheckCommand("PING", //PING :sendak.freenode.net
                 "PONG")); //PONG :sendak.freenode.net
 
             if (!suppressOutput)
@@ -270,12 +265,12 @@ namespace ThunderED.Classes.IRC
 
                 OnConnected();
 
-                foreach (var command in Settings.ircModule.ConnectCommands)
+                foreach (var command in Settings.IrcModule.ConnectCommands)
                 {
                     await SendRawMessage(command);
                 }
 
-                if (!Settings.ircModule.AutoJoinWaitIdentify)
+                if (!Settings.IrcModule.AutoJoinWaitIdentify)
                 {
                     await AutoJoinChannels();
                 }
@@ -284,7 +279,7 @@ namespace ThunderED.Classes.IRC
             {
                 if (!IsConnected && messageInfo.Parameters.Count >= 2)
                 {
-                    var nickname = !string.IsNullOrEmpty(Settings.ircModule.Nickname2) ? Settings.ircModule.Nickname2 : Settings.ircModule.Nickname + "_";
+                    var nickname = !string.IsNullOrEmpty(Settings.IrcModule.Nickname2) ? Settings.IrcModule.Nickname2 : Settings.IrcModule.Nickname + "_";
 
                     if (!messageInfo.Parameters[1].Equals(nickname, StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -316,7 +311,7 @@ namespace ThunderED.Classes.IRC
             {
                 OnUserKicked(messageInfo.User, messageInfo.Parameters[0], messageInfo.Parameters[1]);
 
-                if (Settings.ircModule.AutoRejoinOnKick && messageInfo.Parameters[1].Equals(CurrentNickname, StringComparison.InvariantCultureIgnoreCase))
+                if (Settings.IrcModule.AutoRejoinOnKick && messageInfo.Parameters[1].Equals(CurrentNickname, StringComparison.InvariantCultureIgnoreCase))
                 {
                     await JoinChannel(messageInfo.Parameters[0]);
                 }
@@ -333,7 +328,7 @@ namespace ThunderED.Classes.IRC
             }
             else if (messageInfo.CheckCommand("396")) //:sendak.freenode.net 396 Jaex unaffiliated/jaex :is now your hidden host (set by services.)
             {
-                if (Settings.ircModule.AutoJoinWaitIdentify)
+                if (Settings.IrcModule.AutoJoinWaitIdentify)
                 {
                     await AutoJoinChannels();
                 }
@@ -360,7 +355,7 @@ namespace ThunderED.Classes.IRC
 
         private async Task AutoJoinChannels()
         {
-            foreach (string channel in Settings.ircModule.RelayChannels.Select(a=> a.IRC))
+            foreach (string channel in Settings.IrcModule.RelayChannels.Select(a=> a.IRC))
             {
                 await JoinChannel(channel);
             }
@@ -518,11 +513,11 @@ namespace ThunderED.Classes.IRC
 
         private async Task<bool> HandleAutoResponse(string channel, string nick, string message)
         {
-            if (Settings.ircModule.AutoResponse && nick != CurrentNickname)
+            if (Settings.IrcModule.AutoResponse && nick != CurrentNickname)
             {
-                foreach (var autoResponseInfo in Settings.ircModule.AutoResponseList)
+                foreach (var autoResponseInfo in Settings.IrcModule.AutoResponseList)
                 {
-                    if (autoResponseInfo.CheckLastMatchTimer(Settings.ircModule.AutoResponseDelay) && autoResponseInfo.IsMatch(message, nick, CurrentNickname))
+                    if (autoResponseInfo.CheckLastMatchTimer(Settings.IrcModule.AutoResponseDelay) && autoResponseInfo.IsMatch(message, nick, CurrentNickname))
                     {
                         // Is it whisper?
                         if (!channel.StartsWith("#"))

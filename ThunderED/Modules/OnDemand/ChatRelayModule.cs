@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using ThunderED.Classes;
-using ThunderED.Classes.ChatRelay;
 using ThunderED.Helpers;
 using ThunderED.Modules.Sub;
 
@@ -16,13 +15,10 @@ namespace ThunderED.Modules.OnDemand
     {
         public override LogCat Category => LogCat.ChatRelay;
 
-        public ChatRelaySettings Settings { get; private set; }
-
         private readonly Dictionary<string, List<string>> _pool = new Dictionary<string, List<string>>();
 
         public ChatRelayModule()
         {
-            Settings = ChatRelaySettings.Load(SettingsManager.FileSettingsPath);
             WebServerModule.ModuleConnectors.Add(Reason, OnRequestReceived);
         }
 
@@ -48,7 +44,7 @@ namespace ThunderED.Modules.OnDemand
                         }
 
                         var message = HttpUtility.UrlDecode(prms[0].Split('=')[1]);
-                        var code = Encoding.UTF8.GetString(Convert.FromBase64String($"{HttpUtility.UrlDecode(prms[1].Split('=')[1]).Replace("-", "+").Replace("_", "/")}"));
+                        var code = Encoding.UTF8.GetString(Convert.FromBase64String($"{HttpUtility.UrlDecode(prms[1].Split('=')[1])?.Replace("-", "+").Replace("_", "/")}"));
                         var relay = Settings.ChatRelayModule.RelayChannels.FirstOrDefault(a => a.Code == code);
                         var iChannel = HttpUtility.UrlDecode(prms[2].Split('=')[1]);
                         //check relay code

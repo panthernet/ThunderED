@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -9,7 +11,8 @@ using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
-using ThunderED.Modules.Settings;
+using ThunderED.Modules.OnDemand;
+using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
@@ -18,21 +21,18 @@ namespace ThunderED.Modules
         private DateTime _nextNotificationCheck = DateTime.FromFileTime(0);
         private int _lastNotification;
 
-        public NotificationSettings Settings { get; }
-
         public override LogCat Category => LogCat.Notification;
-
-
-        public NotificationModule()
-        {
-            Settings = NotificationSettings.Load(SettingsManager.FileSettingsPath);
-        }
 
         public override async Task Run(object prm)
         {
             await NotificationFeed();
 
             await CleanupNotifyList();
+        }
+
+        public NotificationModule()
+        {
+            WebServerModule.ModuleConnectors.Add(Reason, Auth);
         }
 
         private DateTime _lastCleanupCheck = DateTime.FromFileTime(0);
@@ -76,7 +76,7 @@ namespace ThunderED.Modules
                     await LogHelper.LogInfo("Running Notification Check", Category, LogToConsole, false);
                     var guildID = SettingsManager.GetULong("config", "discordGuildId");
 
-                    foreach (var groupPair in Settings.Core.Groups)
+                    foreach (var groupPair in Settings.NotificationFeedModule.Groups)
                     {
                         var group = groupPair.Value;
                         if (group.CharacterID == 0)
@@ -780,7 +780,7 @@ namespace ThunderED.Modules
                         }
                     }
 
-                    var interval = Settings.Core.CheckIntervalInMinutes;
+                    var interval = Settings.NotificationFeedModule.CheckIntervalInMinutes;
                     await SQLHelper.SQLiteDataUpdate("cacheData", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
                     _nextNotificationCheck = DateTime.Now.AddMinutes(interval);
                     await LogHelper.LogInfo("Check complete", Category, LogToConsole, false);
@@ -795,6 +795,77 @@ namespace ThunderED.Modules
                 IsRunning = false;
             }
         }
+
+        public async Task<bool> Auth(HttpListenerRequestEventArgs context)
+        {
+            var request = context.Request;
+            var response = context.Response;
+            var extPort = Settings.WebServerModule.WebExternalPort;
+            var port = Settings.WebServerModule.WebListenPort;
+            try
+            {
+                if (request.HttpMethod != HttpMethod.Get.ToString())
+                    return false;
+                if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php"
+                    && request.Url.Query.Contains("&state=9"))
+                {
+                    var prms = request.Url.Query.TrimStart('?').Split('&');
+                    var code = prms[0].Split('=')[1];
+                    // var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
+
+                    var result = await WebAuthModule.GetCHaracterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    if (result == null)
+                    {
+                        var message = LM.Get("ESIFailure");
+                        response.Headers.ContentEncoding.Add("utf-8");
+                        response.Headers.ContentType.Add("text/html;charset=utf-8");
+                        await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
+                            .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")));
+                        return true;
+                    }
+
+                    var characterID = result[0];
+                    var numericCharId = Convert.ToInt32(characterID);
+
+                    response.Headers.ContentEncoding.Add("utf-8");
+                            response.Headers.ContentType.Add("text/html;charset=utf-8");
+                            if (string.IsNullOrEmpty(characterID))
+                            {
+                                await LogHelper.LogWarning("Bad or outdated notify feed request!");
+                                await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                                    .Replace("{message}", LM.Get("authTokenBadRequest"))
+                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
+                                return true;
+                            }
+
+                            if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.Groups.Values.All(g => g.CharacterID != numericCharId))
+                            {
+                                await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
+                                await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                                    .Replace("{message}", LM.Get("authTokenInvalid"))
+                                    .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
+                                return true;
+                            }
+
+                            var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
+
+                            await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
+                            await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
+                            await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
+                                .Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
+                                .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")));
+                            return true;
+                    return true;
+                }                
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+
+            return false;
+        }
+
 
         private async Task UpdateNotificationList(string groupName, string filterName, bool isNew)
         {

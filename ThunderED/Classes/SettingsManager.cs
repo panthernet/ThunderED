@@ -32,6 +32,8 @@ namespace ThunderED.Classes
         public static DateTime NextNotificationCheck { get; set; }
         public static string DefaultUserAgent = "ThunderED";
 
+        public static ThunderSettings Settings { get; private set; }
+
         public static void Prepare()
         {
             UpdateSettings();
@@ -70,6 +72,8 @@ namespace ThunderED.Classes
             if (GetBool("config", "moduleNotificationFeed") && SQLHelper.Provider != null)
               NextNotificationCheck = DateTime.Parse(SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult());
 
+            //new 
+            Settings = ThunderSettings.Load(FileSettingsPath);
         }
 
         public static bool GetBool(string section, string field)
@@ -154,4 +158,6 @@ namespace ThunderED.Classes
 
 
     }
+
+   
 }

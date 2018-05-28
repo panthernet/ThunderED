@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using ThunderED.Classes;
 using ThunderED.Helpers;
-using ThunderED.Modules.Settings;
 
 namespace ThunderED.Modules
 {
@@ -13,13 +10,6 @@ namespace ThunderED.Modules
         private DateTime _lastAuthCheck = DateTime.MinValue;
         public override LogCat Category => LogCat.AuthCheck;
 
-        public AuthSettings Settings { get; }
-
-        public AuthCheckModule()
-        {
-            Settings = AuthSettings.Load(SettingsManager.FileSettingsPath);
-        }
-   
         public async Task AuthCheck(bool? manual = false)
         {
             if(IsRunning) return;
@@ -28,14 +18,14 @@ namespace ThunderED.Modules
             {
                 manual = manual ?? false;
                 //Check inactive users are correct
-                if (DateTime.Now > _lastAuthCheck.AddMinutes(Settings.Core.AuthCheckIntervalMinutes) || manual.Value)
+                if (DateTime.Now > _lastAuthCheck.AddMinutes(Settings.WebAuthModule.AuthCheckIntervalMinutes) || manual.Value)
                 {
                     _lastAuthCheck = DateTime.Now;
 
                     await LogHelper.LogInfo("Running Auth Check", Category);
 
                     var foundList = new Dictionary<int, List<string>>();
-                    foreach (var group in Settings.Core.AuthGroups.Values)
+                    foreach (var group in Settings.WebAuthModule.AuthGroups.Values)
                     {
                         if (group.CorpID != 0)
                             foundList.Add(group.CorpID, group.MemberRoles);
@@ -43,7 +33,7 @@ namespace ThunderED.Modules
                             foundList.Add(group.AllianceID, group.MemberRoles);
                     }
 
-                    await APIHelper.DiscordAPI.UpdateAllUserRoles(foundList, Settings.Core.ExemptDiscordRoles);
+                    await APIHelper.DiscordAPI.UpdateAllUserRoles(foundList, Settings.WebAuthModule.ExemptDiscordRoles);
                     await LogHelper.LogInfo("Auth check complete!", Category);
                 }
             }
