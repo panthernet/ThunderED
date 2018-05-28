@@ -16,7 +16,6 @@
     "moduleCharCorp": true,
     "moduleLiveKillFeed": false,
     "moduleRadiusKillFeed": false,
-    "moduleReliableKillFeed": true,
     "modulePriceCheck": true,
     "moduleTime": true,
     "moduleFleetup": false,
@@ -107,24 +106,6 @@
     "autodailyStatsDefaultAlliance": 0
   },
   
-  "reliableKillFeed": {
-    "queryIntervalInSeconds": 30,
-    "groupsConfig": {
-      "groupName": {
-        "losses": true,
-        "//": "Post all group kills to separate chat channel",
-        "discordChannel": 0,
-        "corpID": 0,
-        "allianceID": 0,
-        "minimumValue": 0,
-        "minimumLossValue": 0,
-        "bigKillValue": 300000000,
-        "//": "Post BIG kills to separate chat channel",
-        "bigKillChannel": 0,		
-        "bigKillSendToGeneralToo": true
-      }
-    }
-  },
   "liveKillFeedModule": {
     "enableCache": false,
     "bigKill": 10000000000,
