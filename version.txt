@@ -20,6 +20,7 @@ Breaking changes
 - Removed global **losses** param from **liveKillFeedModule**. Set high **minimumLossValue** value for the same effect.
 - Removed not used **config.DiscordGeneralChannel** param
 - Removed not used **config.comRestrictToValidChannels** param
+- Added new resource param **imgIncursion**
 
 v1.1.4
 + Added new notifications: StructureDestroyed and OrbitalAttacked
