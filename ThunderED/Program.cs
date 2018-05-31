@@ -69,6 +69,11 @@ namespace ThunderED
                         Console.WriteLine(" getnurl - display notification auth url");
                         Console.WriteLine(" flushcache - flush all cache from database");
                         break;
+                    case "token":
+                        var id = 96496243;
+                        var rToken = SQLHelper.SQLiteDataQuery<string>("refreshTokens", "token", "id", id).GetAwaiter().GetResult();
+                        Console.WriteLine(APIHelper.ESIAPI.RefreshToken(rToken, SettingsManager.Settings.WebServerModule.CcpAppClientId, SettingsManager.Settings.WebServerModule.CcpAppSecret).GetAwaiter().GetResult());
+                        break;
                 }
                 Thread.Sleep(10);
             }

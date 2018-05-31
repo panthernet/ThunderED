@@ -116,7 +116,7 @@ namespace ThunderED.API
 
         internal async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
-            return await GetEntry<JsonClasses.SystemName>($"https://esi.tech.ccp.is/latest/universe/systems/{id}/?datasource=tranquility&language={_language}", reason, id, 180,
+            return await GetEntry<JsonClasses.SystemName>($"https://esi.tech.ccp.is/dev/universe/systems/{id}/?datasource=tranquility&language={_language}", reason, id, 180,
                 forceUpdate, noCache);
         }
 

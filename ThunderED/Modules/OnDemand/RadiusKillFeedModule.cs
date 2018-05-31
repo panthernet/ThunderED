@@ -54,7 +54,14 @@ namespace ThunderED.Modules.OnDemand
                     var radiusChannelId = group.RadiusChannel;
                     var radiusValue = group.MinimumValue;
                     var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId, false, !_enableCache);
-                    var sysName = rSystem?.name ?? "J";
+                    string sysName;
+                    bool isUnreachableSystem = systemId == 31000005;
+                    if (rSystem != null)
+                    {
+                        sysName = rSystem.name == rSystem.system_id.ToString() ? "Abyss" : (rSystem.name ?? "J");               
+                        isUnreachableSystem = isUnreachableSystem || systemId.ToString() == rSystem.name || sysName[0] == 'J';
+                    }
+                    else sysName = "?";
                     if (radiusSystemId == 0 && radiusConstId == 0 && radiusRegionId == 0)
                     {
                         await LogHelper.LogError("Radius feed must have systemId, constId or regionId defined!", Category);
@@ -83,6 +90,9 @@ namespace ThunderED.Modules.OnDemand
                     }
                     else
                     {
+                        if (isUnreachableSystem) //Thera WH Abyss
+                            continue;
+
                         switch (mode)
                         {
                             case RadiusMode.Range:

@@ -64,7 +64,7 @@ namespace ThunderED.Modules.OnDemand
                 var rAttackerAlliance = finalBlowAttackerAllyId.HasValue && finalBlowAttackerAllyId.Value > 0
                     ? await APIHelper.ESIAPI.GetAllianceData(Reason, finalBlowAttackerAllyId)
                     : null;
-                var sysName = rSystem.name;
+                var sysName = rSystem.name == rSystem.system_id.ToString() ? "Abyss" : rSystem.name;
                 var rShipType = await APIHelper.ESIAPI.GetTypeId(Reason, shipID);
                 var rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, victimCharacterID, false, !_enableCache);
                 var rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, finalBlowAttacker?.character_id, false, !_enableCache);
