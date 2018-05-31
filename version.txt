@@ -6,6 +6,7 @@ v1.1.5
 + Updated all settings to use unified names and fetch procedures
 + Removed WebAuthModule dependency from NotificationFeedModule
 + Updated Docker script (thanks to lunedis)
++ Updated code to work with Abyss innovations
 
 Breaking changes
 - Reliable kill feed module is unavailable at the moment. Disabled due to ZKill API issues. Use liveKillFeedModule.
