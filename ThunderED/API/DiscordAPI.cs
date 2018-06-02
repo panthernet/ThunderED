@@ -33,9 +33,12 @@ namespace ThunderED.API
             Client.Log += async message =>
             {
                 await LogHelper.Log(message.Message, message.Severity.ToSeverity(), LogCat.Discord);
+                if (message.Exception != null)
+                    await LogHelper.LogEx("Discord Internal Exception", message.Exception);
             };
             Client.UserJoined += Event_UserJoined;
             Client.Ready += Event_Ready;
+
 
         }
 
