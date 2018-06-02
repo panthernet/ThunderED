@@ -160,6 +160,7 @@
     "imgWarSurrender": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgWarSurrender.png",
     "imgTimerAlert": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgTimerAlert.png",
     "imgMail": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgMail.png",
+    "imgIncursion": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgIncursion.png",
   },
 
   "notificationFeedModule": {
@@ -218,50 +219,6 @@
       }
     }
   },
-
-  "filters": {
-    "StructureUnderAttack": 0,
-    "AllWarDeclaredMsg": 0,
-    "FWAllianceWarningMsg": 0,
-    "StructureWentLowPower": 0,
-    "StructureWentHighPower": 0,
-    "StructureLostArmor": 0,
-    "StructureLostShields": 0,
-    "MoonminingExtractionFinished": 0,
-    "StructureFuelAlert": 0,
-    "MoonminingLaserFired": 0,
-    "AllWarInvalidatedMsg": 0,
-    "StructureDestroyed": 0,
-    "StructureOnline": 0,
-    "CharLeftCorpMsg": 0,
-    "CharAppAcceptMsg": 0,
-    "SovStructureDestroyed": 0,
-    "SovStationEnteredFreeport": 0,
-    "SovCommandNodeEventStarted": 0,
-    "SovStructureReinforced": 0,
-    "StationServiceDisabled": 0,
-    "CorpWarDeclaredMsg": 0,
-    "CorpWarInvalidatedMsg": 0,
-    "EntosisCaptureStarted": 0,
-    "StructureAnchoring": 0,
-    "AllyJoinedWarAggressorMsg": 0,
-    "AllyJoinedWarAllyMsg": 0,
-    "AllyJoinedWarDefenderMsg": 0,
-	  
-    "AcceptedSurrender": 0,
-    "AllAnchoringMsg": 0,
-    "AllWarRetractedMsg": 0,
-    "AllWarSurrenderMsg": 0,
-    "CorpWarRetractedMsg": 0,
-    "SovAllClaimAquiredMsg": 0,
-    "SovAllClaimLostMsg": 0,
-    "SovereigntyIHDamageMsg": 0,
-    "SovereigntySBUDamageMsg": 0,
-    "SovereigntyTCUDamageMsg": 0,
-    "StationConquerMsg": 0,
-  }
-},
-
   "motd": {
     "motdkeyID": "",
     "motdvCode": "",
