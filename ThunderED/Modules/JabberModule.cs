@@ -135,9 +135,10 @@ namespace ThunderED.Modules
             Console.WriteLine(e.Exception.StackTrace);
         }
 
-        private static void OnAuthError(object sender, Matrix.Xmpp.Sasl.SaslEventArgs e)
+        private static async void OnAuthError(object sender, Matrix.Xmpp.Sasl.SaslEventArgs e)
         {
-            Console.WriteLine("OnAuthError");
+            await LogHelper.LogError("Jabber authentication error. See Jabber.txt log for details.", LogCat.Jabber);
+            await LogHelper.LogError(e.Failure.ToString(), LogCat.Jabber, false);
         }
 
         private void OnError(object sender, Matrix.ExceptionEventArgs e)
