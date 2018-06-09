@@ -137,7 +137,7 @@ namespace ThunderED.Modules
 
         private static async void OnAuthError(object sender, Matrix.Xmpp.Sasl.SaslEventArgs e)
         {
-            await LogHelper.LogError("Jabber authentication error. See Jabber.txt log for details.", LogCat.Jabber);
+            await LogHelper.LogError("Jabber authentication error. See Jabber.log file for details.", LogCat.Jabber);
             await LogHelper.LogError(e.Failure.ToString(), LogCat.Jabber, false);
         }
 

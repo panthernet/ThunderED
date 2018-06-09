@@ -346,11 +346,6 @@ namespace ThunderED.Classes.IRC
             var channel = messageInfo.Parameters[0];
 
             OnMessage(messageInfo.User, channel, messageInfo.Message);
-
-            if (messageInfo.User.UserType == IRCUserType.User)
-            {
-                await HandleAutoResponse(channel, messageInfo.User.Nickname, messageInfo.Message.ToLowerInvariant());
-            }
         }
 
         private async Task AutoJoinChannels()
@@ -509,31 +504,6 @@ namespace ThunderED.Classes.IRC
         {
             if (!string.IsNullOrEmpty(reason)) command += " :" + reason;
             return command;
-        }
-
-        private async Task<bool> HandleAutoResponse(string channel, string nick, string message)
-        {
-            if (Settings.IrcModule.AutoResponse && nick != CurrentNickname)
-            {
-                foreach (var autoResponseInfo in Settings.IrcModule.AutoResponseList)
-                {
-                    if (autoResponseInfo.CheckLastMatchTimer(Settings.IrcModule.AutoResponseDelay) && autoResponseInfo.IsMatch(message, nick, CurrentNickname))
-                    {
-                        // Is it whisper?
-                        if (!channel.StartsWith("#"))
-                        {
-                            channel = nick;
-                        }
-
-                        var response = autoResponseInfo.RandomResponse(nick, CurrentNickname);
-                        await SendMessage(response, channel);
-
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
         private void ParseWHOIS(MessageInfo messageInfo)
