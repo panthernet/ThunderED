@@ -1,7 +1,4 @@
 ﻿using System.Collections.Generic;
-#if !THUNDER
-using TED_ConfigEditor.Classes;
-#endif
 
 namespace ThunderED.Classes
 {
