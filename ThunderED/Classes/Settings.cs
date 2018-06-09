@@ -1,207 +1,210 @@
 ﻿using System.Collections.Generic;
-using ThunderED.Classes.IRC;
+#if !THUNDER
+using TED_ConfigEditor.Classes;
+#endif
 
 namespace ThunderED.Classes
 {
     public class ThunderSettings: SettingsBase<ThunderSettings>
     {
-        public ConfigSettings Config;
-        public WebServerModuleSettings WebServerModule;
-        public WebAuthModuleSettings WebAuthModule;
-        public ChatRelayModuleSettings ChatRelayModule;
-        public IncursionNotificationModuleSettings IncursionNotificationModule;
-        public IRCModuleSettings IrcModule;
-        public NotificationFeedSettings NotificationFeedModule;
-        public NullCampaignModuleSettings NullCampaignModule;
-        public TelegramModuleSettings TelegramModule;
-        public MailModuleSettings MailModule;
-        public TimersModuleSettings TimersModule;
-        public RadiusKillFeedModuleSettings RadiusKillFeedModule;
-        public StatsModuleSettings StatsModule;
-        public LiveKillFeedModuleSettings LiveKillFeedModule;
-        public ResourcesSettings Resources;
-        public FleetupModuleSettings FleetupModule;
-        public JabberModuleSettings JabberModule;
+        public ConfigSettings Config { get; set; } = new ConfigSettings();
+        public WebServerModuleSettings WebServerModule { get; set; }
+        public WebAuthModuleSettings WebAuthModule { get; set; }
+        public ChatRelayModuleSettings ChatRelayModule { get; set; }
+        public IncursionNotificationModuleSettings IncursionNotificationModule { get; set; }
+        public IRCModuleSettings IrcModule { get; set; }
+        public NotificationFeedSettings NotificationFeedModule { get; set; }
+        public NullCampaignModuleSettings NullCampaignModule { get; set; }
+        public TelegramModuleSettings TelegramModule { get; set; }
+        public MailModuleSettings MailModule { get; set; }
+        public TimersModuleSettings TimersModule { get; set; }
+        public RadiusKillFeedModuleSettings RadiusKillFeedModule { get; set; }
+        public StatsModuleSettings StatsModule { get; set; }
+        public LiveKillFeedModuleSettings LiveKillFeedModule { get; set; }
+        public ResourcesSettings Resources { get; set; }
+        public FleetupModuleSettings FleetupModule { get; set; }
+        public JabberModuleSettings JabberModule { get; set; }
     }
 
     public class JabberModuleSettings
     {
-        public string Domain;
-        public string Username;
-        public string Password;
-        public bool Filter;
-        public bool Debug;
-        public ulong DefChan;
-        public Dictionary<string, ulong> Filters = new Dictionary<string, ulong>();
-        public string Prepend = "@here";
+        public string Domain { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public bool Filter { get; set; }
+        public bool Debug { get; set; }
+        public ulong DefChan { get; set; }
+        public Dictionary<string, ulong> Filters { get; set; } = new Dictionary<string, ulong>();
+        public string Prepend { get; set; } = "@here";
     }
 
 
     public class FleetupModuleSettings
     {
-        public string UserId;
-        public string APICode;
-        public string AppKey;
-        public string GroupID;
-        public ulong Channel;
-        public bool Announce_Post;
-        public List<int> Announce = new List<int>();
+        public string UserId { get; set; }
+        public string APICode { get; set; }
+        public string AppKey { get; set; }
+        public string GroupID { get; set; }
+        public ulong Channel { get; set; }
+        public bool Announce_Post { get; set; }
+        public List<int> Announce { get; set; } = new List<int>();
     }
 
     public class ResourcesSettings
     {
-        public string ImgCitLowPower;
-        public string ImgCitUnderAttack;
-        public string ImgCitAnchoring;
-        public string ImgCitDestroyed;
-        public string ImgCitLostShield;
-        public string ImgCitLostArmor;
-        public string ImgCitOnline;
-        public string ImgCitFuelAlert;
-        public string ImgCitServicesOffline;
-        public string ImgLowFWStand;
-        public string ImgMoonComplete;
-        public string ImgWarAssist;
-        public string ImgWarDeclared;
-        public string ImgWarInvalidate;
-        public string ImgWarSurrender;
-        public string ImgTimerAlert;
-        public string ImgMail;
-        public string ImgIncursion;
+        public string ImgCitLowPower { get; set; }
+        public string ImgCitUnderAttack { get; set; }
+        public string ImgCitAnchoring { get; set; }
+        public string ImgCitDestroyed { get; set; }
+        public string ImgCitLostShield { get; set; }
+        public string ImgCitLostArmor { get; set; }
+        public string ImgCitOnline { get; set; }
+        public string ImgCitFuelAlert { get; set; }
+        public string ImgCitServicesOffline { get; set; }
+        public string ImgLowFWStand { get; set; }
+        public string ImgMoonComplete { get; set; }
+        public string ImgWarAssist { get; set; }
+        public string ImgWarDeclared { get; set; }
+        public string ImgWarInvalidate { get; set; }
+        public string ImgWarSurrender { get; set; }
+        public string ImgTimerAlert { get; set; }
+        public string ImgMail { get; set; }
+        public string ImgIncursion { get; set; }
     }
 
     public class LiveKillFeedModuleSettings
     {
-        public bool EnableCache;
-        public long BigKill;
-        public ulong BigKillChannel;
-        public Dictionary<string, KillFeedGroup> GroupsConfig = new Dictionary<string, KillFeedGroup>();
+        public bool EnableCache { get; set; }
+        public long BigKill { get; set; }
+        public ulong BigKillChannel { get; set; }
+        public Dictionary<string, KillFeedGroup> GroupsConfig { get; set; } = new Dictionary<string, KillFeedGroup>();
     }
 
     public class KillFeedGroup
     {
-        public ulong DiscordChannel;
-        public int CorpID;
-        public int AllianceID;
-        public long MinimumValue;
-        public long MinimumLossValue;
-        public long BigKillValue;
-        public ulong BigKillChannel;
-        public bool BigKillSendToGeneralToo;
+        public ulong DiscordChannel { get; set; }
+        public int CorpID { get; set; }
+        public int AllianceID { get; set; }
+        public long MinimumValue { get; set; }
+        public long MinimumLossValue { get; set; }
+        public long BigKillValue { get; set; }
+        public ulong BigKillChannel { get; set; }
+        public bool BigKillSendToGeneralToo { get; set; }
     }
 
     public class StatsModuleSettings
     {
-        public ulong AutoDailyStatsChannel;
-        public int AutoDailyStatsDefaultCorp;
-        public int AutodailyStatsDefaultAlliance;
+        public ulong AutoDailyStatsChannel { get; set; }
+        public int AutoDailyStatsDefaultCorp { get; set; }
+        public int AutodailyStatsDefaultAlliance { get; set; }
     }
 
     public class RadiusKillFeedModuleSettings
     {
-        public bool EnableCache;
-        public Dictionary<string, RadiusGroup> GroupsConfig = new Dictionary<string, RadiusGroup>();
+        public bool EnableCache { get; set; }
+        public Dictionary<string, RadiusGroup> GroupsConfig { get; set; } = new Dictionary<string, RadiusGroup>();
     }
 
     public class RadiusGroup
     {
-        public int Radius;
-        public ulong RadiusChannel;
-        public int RadiusSystemId;
-        public int RadiusConstellationId;
-        public int RadiusRegionId;
-        public long MinimumValue;
+        public int Radius { get; set; }
+        public ulong RadiusChannel { get; set; }
+        public int RadiusSystemId { get; set; }
+        public int RadiusConstellationId { get; set; }
+        public int RadiusRegionId { get; set; }
+        public long MinimumValue { get; set; }
     }
 
     public class TimersModuleSettings
     {
-        public bool AutoAddTimerForReinforceNotifications = true;
-        public int AuthTimeoutInMinutes = 10;
-        public List<int> Announces = new List<int>();
-        public ulong AnnounceChannel;
-        public bool GrantEditRolesToDiscordAdmins = true;
-        public Dictionary<string, TimersAccessGroup> AccessList = new Dictionary<string, TimersAccessGroup>();
-        public Dictionary<string, TimersAccessGroup> EditList = new Dictionary<string, TimersAccessGroup>();
+        public bool AutoAddTimerForReinforceNotifications { get; set; } = true;
+        public int AuthTimeoutInMinutes { get; set; } = 10;
+        public List<int> Announces { get; set; } = new List<int>();
+        public ulong AnnounceChannel { get; set; }
+        public bool GrantEditRolesToDiscordAdmins { get; set; } = true;
+        public Dictionary<string, TimersAccessGroup> AccessList { get; set; } = new Dictionary<string, TimersAccessGroup>();
+        public Dictionary<string, TimersAccessGroup> EditList { get; set; } = new Dictionary<string, TimersAccessGroup>();
     }
 
     public class TimersAccessGroup
     {
-        public bool IsAlliance;
-        public bool IsCharacter;
-        public int Id;
+        public bool IsAlliance { get; set; }
+        public bool IsCharacter { get; set; }
+        public int Id { get; set; }
     }
 
     public class MailModuleSettings
     {
-        public int CheckIntervalInMinutes = 2;
-        public Dictionary<string, MailAuthGroup> AuthGroups = new Dictionary<string, MailAuthGroup>();
+        public int CheckIntervalInMinutes { get; set; } = 2;
+        public Dictionary<string, MailAuthGroup> AuthGroups { get; set; } = new Dictionary<string, MailAuthGroup>();
     }
 
     public class MailAuthGroup
     {
-        public int Id;
-        public List<string> Labels = new List<string>();
-        public bool IncludePrivateMail;
-        public List<int> Senders = new List<int>();
-        public ulong Channel;
+        public int Id { get; set; }
+        public List<string> Labels { get; set; } = new List<string>();
+        public bool IncludePrivateMail { get; set; }
+        public List<int> Senders { get; set; } = new List<int>();
+        public ulong Channel { get; set; }
     }
 
     public class TelegramModuleSettings
     {
-        public string Token;
-        public List<TelegramRelay> RelayChannels = new List<TelegramRelay>();
+        public string Token { get; set; }
+        public List<TelegramRelay> RelayChannels { get; set; } = new List<TelegramRelay>();
     }
 
     public class TelegramRelay
     {
-        public long Telegram;
-        public ulong Discord;
-        public List<string> DiscordFilters = new List<string>();
-        public List<string> DiscordFiltersStartsWith = new List<string>();
-        public List<string> TelegramFilters = new List<string>();
-        public List<string> TelegramFiltersStartsWith = new List<string>();
-        public List<string> TelegramUsers = new List<string>();
-        public bool RelayFromDiscordBotOnly;
+        public long Telegram { get; set; }
+        public ulong Discord { get; set; }
+        public List<string> DiscordFilters { get; set; } = new List<string>();
+        public List<string> DiscordFiltersStartsWith { get; set; } = new List<string>();
+        public List<string> TelegramFilters { get; set; } = new List<string>();
+        public List<string> TelegramFiltersStartsWith { get; set; } = new List<string>();
+        public List<string> TelegramUsers { get; set; } = new List<string>();
+        public bool RelayFromDiscordBotOnly { get; set; }
     }
 
     public class NullCampaignModuleSettings
     {
-        public int CheckIntervalInMinutes = 1;
-        public Dictionary<string, NullCampaignGroup> Groups = new Dictionary<string, NullCampaignGroup>(); 
+        public int CheckIntervalInMinutes { get; set; } = 1;
+        public Dictionary<string, NullCampaignGroup> Groups { get; set; } = new Dictionary<string, NullCampaignGroup>(); 
     }
 
     public class NullCampaignGroup
     {
-        public List<int> Regions = new List<int>();
-        public List<int> Constellations = new List<int>();
-        public ulong DiscordChannelId;
+        public List<int> Regions { get; set; } = new List<int>();
+        public List<int> Constellations { get; set; } = new List<int>();
+        public ulong DiscordChannelId { get; set; }
     }
 
     public class NotificationFeedSettings
     {
-        public int CheckIntervalInMinutes = 2;
-        public Dictionary<string, NotificationSettingsGroup> Groups = new Dictionary<string, NotificationSettingsGroup>();
+        public int CheckIntervalInMinutes { get; set; } = 2;
+        public Dictionary<string, NotificationSettingsGroup> Groups { get; set; } = new Dictionary<string, NotificationSettingsGroup>();
     }
 
     public class NotificationSettingsGroup
     {
-        public int CharacterID;
-        public ulong DefaultDiscordChannelID;
-        public Dictionary<string, NotificationSettingsFilter> Filters = new Dictionary<string, NotificationSettingsFilter>();
+        public int CharacterID { get; set; }
+        public ulong DefaultDiscordChannelID { get; set; }
+        public Dictionary<string, NotificationSettingsFilter> Filters { get; set; } = new Dictionary<string, NotificationSettingsFilter>();
     }
 
     public class NotificationSettingsFilter
     {
-        public List<string> Notifications = new List<string>();
-        public ulong ChannelID;
-        public List<int> CharMentions = new List<int>();
-        public List<string> RoleMentions = new List<string>();
+        public List<string> Notifications { get; set; } = new List<string>();
+        public ulong ChannelID { get; set; }
+        public string DefaultMention { get; set; } = "@everyone";
+        public List<int> CharMentions { get; set; } = new List<int>();
+        public List<string> RoleMentions { get; set; } = new List<string>();
     }
 
     public class IRCModuleSettings
     {
         public string Server { get; set; } = "chat.freenode.net";
-        public int Port { get; set; } = IRC.IRC.DEFAULT_PORT;
+        public int Port { get; set; } = 6667;
         public bool UseSSL { get; set; } = false;
         public string Password { get; set; }
         public string Nickname { get; set; } = "DefaultUser-TH";
@@ -218,9 +221,6 @@ namespace ThunderED.Classes
         public List<string> ConnectCommands { get; set; } = new List<string>();
         public List<IRCRelayItem> RelayChannels { get; set; } = new List<IRCRelayItem>();
         public bool AutoJoinWaitIdentify { get; set; }   
-        public bool AutoResponse { get; set; }
-        public List<AutoResponseInfo> AutoResponseList { get; set; } = new List<AutoResponseInfo>();
-        public int AutoResponseDelay { get; set; } = 10000;
     }
 
     public class IRCRelayItem
@@ -237,10 +237,10 @@ namespace ThunderED.Classes
 
     public class IncursionNotificationModuleSettings
     {
-        public ulong DiscordChannelId;
-        public List<int> Regions = new List<int>();
-        public List<int> Constellations = new List<int>();
-        public bool ReportIncursionStatusAfterDT;
+        public ulong DiscordChannelId { get; set; }
+        public List<int> Regions { get; set; } = new List<int>();
+        public List<int> Constellations { get; set; } = new List<int>();
+        public bool ReportIncursionStatusAfterDT { get; set; }
     }
 
     public class ChatRelayChannel
@@ -257,76 +257,76 @@ namespace ThunderED.Classes
 
     public class ConfigSettings
     {
-        public string BotDiscordToken;
-        public string BotDiscordName;
-        public string BotDiscordGame;
-        public string BotDiscordCommandPrefix = "!";
-        public ulong DiscordGuildId;
-        public List<string> DiscordAdminRoles = new List<string>();
-        public List<ulong> ComForbiddenChannels = new List<ulong>();
-        public string Language = "en-US";
-        public bool UseEnglishESIOnly = true;
+        public string BotDiscordToken { get; set; }
+        public string BotDiscordName { get; set; }
+        public string BotDiscordGame { get; set; }
+        public string BotDiscordCommandPrefix { get; set; } = "!";
+        public ulong DiscordGuildId { get; set; }
+        public List<string> DiscordAdminRoles { get; set; } = new List<string>();
+        public List<ulong> ComForbiddenChannels { get; set; } = new List<ulong>();
+        public string Language { get; set; } = "en-US";
+        public bool UseEnglishESIOnly { get; set; } = true;
 
-        public bool ModuleWebServer = false;
-        public bool ModuleAuthCheck = false;
-        public bool ModuleAuthWeb = false;
-        public bool ModuleCharCorp = false;
-        public bool ModuleLiveKillFeed = false;
-        public bool ModuleRadiusKillFeed = false;
-        public bool ModuleReliableKillFeed = false;
-        public bool ModulePriceCheck = false;
-        public bool ModuleTime = false;
-        public bool ModuleFleetup = false;
-        public bool ModuleJabber = false;
-        public bool ModuleMOTD = false;
-        public bool ModuleNotificationFeed = false;
-        public bool ModuleStats = false;
-        public bool ModuleTimers = false;
-        public bool ModuleMail = false;
-        public bool ModuleIRC = false;
-        public bool ModuleTelegram = false;
-        public bool ModuleChatRelay = false;
-        public bool ModuleIncursionNotify = false;
+        public bool ModuleWebServer { get; set; } = false;
+        public bool ModuleAuthCheck { get; set; } = false;
+        public bool ModuleAuthWeb { get; set; } = false;
+        public bool ModuleCharCorp { get; set; } = false;
+        public bool ModuleLiveKillFeed { get; set; } = false;
+        public bool ModuleRadiusKillFeed { get; set; } = false;
+        public bool ModuleReliableKillFeed { get; set; } = false;
+        public bool ModulePriceCheck { get; set; } = false;
+        public bool ModuleTime { get; set; } = false;
+        public bool ModuleFleetup { get; set; } = false;
+        public bool ModuleJabber { get; set; } = false;
+        public bool ModuleMOTD { get; set; } = false;
+        public bool ModuleNotificationFeed { get; set; } = false;
+        public bool ModuleStats { get; set; } = false;
+        public bool ModuleTimers { get; set; } = false;
+        public bool ModuleMail { get; set; } = false;
+        public bool ModuleIRC { get; set; } = false;
+        public bool ModuleTelegram { get; set; } = false;
+        public bool ModuleChatRelay { get; set; } = false;
+        public bool ModuleIncursionNotify { get; set; } = false;
 
-        public string ZkillLiveFeedRedisqID;
-        public string TimeFormat = "dd.MM.yyyy HH:mm:ss";
-        public string ShortTimeFormat = "dd.MM.yyyy HH:mm";
-        public bool WelcomeMessage = true;
-        public int CachePurgeInterval = 30;
-        public int MemoryUsageLimitMb = 100;
-        public string LogSeverity = "Info";
-        public bool LogNewNotifications = true;
-        public string DatabaseProvider = "sqlite";
-        public int RequestRetries = 3;
-        public string DatabaseFile = "edb.db";
+        public string ZkillLiveFeedRedisqID { get; set; }
+        public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
+        public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";
+        public bool WelcomeMessage { get; set; } = true;
+        public int CachePurgeInterval { get; set; } = 30;
+        public int MemoryUsageLimitMb { get; set; } = 100;
+        public string LogSeverity { get; set; } = "Info";
+        public bool LogNewNotifications { get; set; } = true;
+        public string DatabaseProvider { get; set; } = "sqlite";
+        public int RequestRetries { get; set; } = 3;
+        public string DatabaseFile { get; set; } = "edb.db";
     }
 
     public class WebServerModuleSettings
     {
-        public string WebListenIP;
-        public int WebListenPort;
-        public string WebExternalIP;
-        public int WebExternalPort;
-        public string DiscordUrl;
-        public string CcpAppClientId;
-        public string CcpAppSecret;
+        public string WebListenIP { get; set; }
+        public int WebListenPort { get; set; }
+        public string WebExternalIP { get; set; }
+        public int WebExternalPort { get; set; }
+        public string DiscordUrl { get; set; }
+        public string CcpAppClientId { get; set; }
+        public string CcpAppSecret { get; set; }
     }
 
     public class WebAuthModuleSettings
     {
-        public int AuthCheckIntervalMinutes = 30;
-        public List<string> ExemptDiscordRoles = new List<string>();
-        public ulong AuthReportChannel;
-        public List<ulong> ComAuthChannels = new List<ulong>();
-        public bool EnforceCorpTickers;
-        public bool EnforceCharName;
-        public Dictionary<string, WebAuthGroup> AuthGroups = new Dictionary<string, WebAuthGroup>();
+        public int AuthCheckIntervalMinutes { get; set; } = 30;
+        public List<string> ExemptDiscordRoles { get; set; } = new List<string>();
+        public ulong AuthReportChannel { get; set; }
+        public List<ulong> ComAuthChannels { get; set; } = new List<ulong>();
+        public bool EnforceCorpTickers { get; set; }
+        public bool EnforceCharName { get; set; }
+        public Dictionary<string, WebAuthGroup> AuthGroups { get; set; } = new Dictionary<string, WebAuthGroup>();
     }
 
     public class WebAuthGroup
     {
-        public int CorpID;
-        public int AllianceID;
-        public List<string> MemberRoles;
+        public int CorpID { get; set; }
+        public int AllianceID { get; set; }
+        public List<string> MemberRoles { get; set; } = new List<string>();
     }
 }

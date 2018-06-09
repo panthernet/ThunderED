@@ -213,7 +213,7 @@ namespace ThunderED.Modules
                                         EmbedBuilder builder;
                                         string textAdd;
 
-                                        var mention = "@everyone";
+                                        var mention = filter.DefaultMention;
                                         if (filter.CharMentions.Count > 0)
                                         {
                                             var list = filter.CharMentions.Select(a =>
@@ -248,9 +248,11 @@ namespace ThunderED.Modules
                                             if (mentionList.Count > 0)
                                             {
                                                 var str = string.Join(' ', mentionList);
-                                                mention = mention == "@everyone" ? str : $"{mention} {str}";
+                                                mention = mention == filter.DefaultMention ? str : $"{mention} {str}";
                                             }
                                         }
+
+                                        mention = string.IsNullOrEmpty(mention) ? " " : mention;
 
                                         switch (notification.type)
                                         {
