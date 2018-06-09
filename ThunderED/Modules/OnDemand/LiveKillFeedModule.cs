@@ -155,7 +155,7 @@ namespace ThunderED.Modules.OnDemand
                         //Big
                         if (bigKillChannel !=0 && bigKillValue != 0 && value >= bigKillValue)
                         {
-                            if (victimAllianceID == allianceID || victimCorpID == corpID)
+                            if (victimAllianceID != 0 && victimAllianceID == allianceID || victimCorpID == corpID)
                             {
                                 dic["{isLoss}"] = "true";
                                 if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
