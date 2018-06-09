@@ -446,20 +446,27 @@ namespace ThunderED.Modules
 
         private async Task SendNotification(TimerItem timer, ulong channel)
         {
-            var remains = timer.GetRemains();
-            var stage = timer.GetStageName();
-            var mode = timer.GetModeName();
-            var embed = new EmbedBuilder()
-                .WithTitle(string.Format(LM.Get("timerNotifyTitle"), string.IsNullOrEmpty(timer.timerLocation) ? "-" : timer.timerLocation)) 
-                .AddInlineField(LM.Get("timersType"), string.IsNullOrEmpty(mode) ? "-" : mode)
-                .AddInlineField(LM.Get("timersStage"), string.IsNullOrEmpty(stage) ? "-": stage)
-                .AddInlineField(LM.Get("timersOwner"), string.IsNullOrEmpty(timer.timerOwner) ? "-" : timer.timerOwner)
-                .AddInlineField(LM.Get("timersRemaining"), string.IsNullOrEmpty(remains) ? "-" : remains)
-                .AddField(LM.Get("timersNotes"), string.IsNullOrEmpty(timer.timerNotes) ? "-" : timer.timerNotes);
-            if (!string.IsNullOrEmpty(Settings.Resources.ImgTimerAlert))
-                embed.WithThumbnailUrl(Settings.Resources.ImgTimerAlert);
+            try
+            {
+                var remains = timer.GetRemains();
+                var stage = timer.GetStageName();
+                var mode = timer.GetModeName();
+                var embed = new EmbedBuilder()
+                    .WithTitle(string.Format(LM.Get("timerNotifyTitle"), string.IsNullOrEmpty(timer.timerLocation) ? "-" : timer.timerLocation))
+                    .AddInlineField(LM.Get("timersType"), string.IsNullOrEmpty(mode) ? "-" : mode)
+                    .AddInlineField(LM.Get("timersStage"), string.IsNullOrEmpty(stage) ? "-" : stage)
+                    .AddInlineField(LM.Get("timersOwner"), string.IsNullOrEmpty(timer.timerOwner) ? "-" : timer.timerOwner)
+                    .AddInlineField(LM.Get("timersRemaining"), string.IsNullOrEmpty(remains) ? "-" : remains)
+                    .AddField(LM.Get("timersNotes"), string.IsNullOrEmpty(timer.timerNotes) ? "-" : timer.timerNotes);
+                if (!string.IsNullOrEmpty(Settings.Resources.ImgTimerAlert))
+                    embed.WithThumbnailUrl(Settings.Resources.ImgTimerAlert);
 
-            await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), "@everyone", embed.Build()).ConfigureAwait(false);
+                await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), "@everyone", embed.Build()).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex.Message, ex, Category);
+            }
         }
 
         public static async Task AddTimer(TimerItem entry)
