@@ -446,14 +446,18 @@ namespace ThunderED.Modules
 
         private async Task SendNotification(TimerItem timer, ulong channel)
         {
+            var remains = timer.GetRemains();
+            var stage = timer.GetStageName();
+            var mode = timer.GetModeName();
             var embed = new EmbedBuilder()
-                .WithTitle(string.Format(LM.Get("timerNotifyTitle"), timer.timerLocation)??"-") 
-                .WithThumbnailUrl(Settings.Resources.ImgTimerAlert ?? "-")
-                .AddInlineField(LM.Get("timersType"), timer.GetModeName())
-                .AddInlineField(LM.Get("timersStage"), timer.GetStageName())
-                .AddInlineField(LM.Get("timersOwner"), timer.timerOwner ?? "-")
-                .AddInlineField(LM.Get("timersRemaining"), timer.GetRemains())
-                .AddField(LM.Get("timersNotes"), timer.timerNotes ?? "-");
+                .WithTitle(string.Format(LM.Get("timerNotifyTitle"), string.IsNullOrEmpty(timer.timerLocation) ? "-" : timer.timerLocation)) 
+                .AddInlineField(LM.Get("timersType"), string.IsNullOrEmpty(mode) ? "-" : mode)
+                .AddInlineField(LM.Get("timersStage"), string.IsNullOrEmpty(stage) ? "-": stage)
+                .AddInlineField(LM.Get("timersOwner"), string.IsNullOrEmpty(timer.timerOwner) ? "-" : timer.timerOwner)
+                .AddInlineField(LM.Get("timersRemaining"), string.IsNullOrEmpty(remains) ? "-" : remains)
+                .AddField(LM.Get("timersNotes"), string.IsNullOrEmpty(timer.timerNotes) ? "-" : timer.timerNotes);
+            if (!string.IsNullOrEmpty(Settings.Resources.ImgTimerAlert))
+                embed.WithThumbnailUrl(Settings.Resources.ImgTimerAlert);
 
             await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), "@everyone", embed.Build()).ConfigureAwait(false);
         }
