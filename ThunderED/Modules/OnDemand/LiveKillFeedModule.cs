@@ -93,6 +93,7 @@ namespace ThunderED.Modules.OnDemand
                     {"{kmId}", killmailID.ToString()},
                     {"{isNpcKill}", isNPCKill.ToString()},
                     {"{timestamp}", killTime},
+                    {"{isLoss}", "false"}
 
                 };
 
@@ -156,7 +157,7 @@ namespace ThunderED.Modules.OnDemand
                         {
                             if (victimAllianceID == allianceID || victimCorpID == corpID)
                             {
-                                dic.Add("{isLoss}", "true");
+                                dic["{isLoss}"] = "true";
                                 if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
                                 {
                                     await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0xD00000), shipID, killmailID, rShipType.name, (long) value,
@@ -182,7 +183,7 @@ namespace ThunderED.Modules.OnDemand
                         {
                             if (victimAllianceID != 0 && victimAllianceID == allianceID || victimCorpID == corpID)
                             {
-                                dic.Add("{isLoss}", "true");
+                                dic["{isLoss}"] = "true";
                                 if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
                                 {
                                     await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xFF0000), shipID, killmailID, rShipType?.name, (long) value, sysName,
@@ -204,7 +205,7 @@ namespace ThunderED.Modules.OnDemand
                             {
                                 if ((attacker.alliance_id != 0 && attacker.alliance_id == allianceID) || (allianceID == 0 && attacker.corporation_id == corpID))
                                 {
-                                    dic.Add("{isLoss}", "false");
+                                    dic["{isLoss}"] = "false";
                                     if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
                                     {
                                         await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0x00D000), shipID, killmailID, rShipType.name,
@@ -231,7 +232,7 @@ namespace ThunderED.Modules.OnDemand
                             else if (!npckill && attacker.alliance_id != 0 && allianceID != 0 && attacker.alliance_id == allianceID ||
                                      !npckill && allianceID == 0 && attacker.corporation_id == corpID)
                             {
-                                dic.Add("{isLoss}", "false");
+                                dic["{isLoss}"] = "false";
                                 if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
                                 {
                                     await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), shipID, killmailID, rShipType.name, (long) value, sysName,
