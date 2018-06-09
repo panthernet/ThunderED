@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -155,41 +156,36 @@ namespace ThunderED.Classes
             if (!string.IsNullOrEmpty(filePath))
             {
                 //Console.WriteLine("{0} load started: {1}", typeName, filePath);
-
-                try
+                if (File.Exists(filePath))
                 {
-                    if (File.Exists(filePath))
+                    using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
-                        using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        if (fileStream.Length > 0)
                         {
-                            if (fileStream.Length > 0)
+                            T settings;
+
+                            var listErrors = new StringBuilder();
+                            using (var streamReader = new StreamReader(fileStream))
+                            using (var jsonReader = new JsonTextReader(streamReader))
                             {
-                                T settings;
+                                var serializer = new JsonSerializer();
+                                serializer.Converters.Add(new StringEnumConverter());
+                                serializer.ObjectCreationHandling = ObjectCreationHandling.Replace;
+                                serializer.Error += (sender, e) =>
+                                {                                        
+                                    e.ErrorContext.Handled = true;
+                                    listErrors.Append(e.ErrorContext.Error.Message);
+                                    listErrors.Append("\n");
+                                };
+                                settings = serializer.Deserialize<T>(jsonReader);
 
-                                using (var streamReader = new StreamReader(fileStream))
-                                using (var jsonReader = new JsonTextReader(streamReader))
-                                {
-                                    var serializer = new JsonSerializer();
-                                    serializer.Converters.Add(new StringEnumConverter());
-                                    serializer.ObjectCreationHandling = ObjectCreationHandling.Replace;
-                                    serializer.Error += (sender, e) => e.ErrorContext.Handled = true;
-                                    settings = serializer.Deserialize<T>(jsonReader);
-                                }
-
-                                if (settings == null)
-                                {
-                                    LogHelper.LogError($"Failed to load configuration for type {typeName} from settings.json due to JSON error in config. Default config loaded.").GetAwaiter().GetResult();
-                                    return new T();
-                                }
-
-                                return settings;
+                                if(settings == null)
+                                    throw new Exception($"Config file errors: \n{listErrors}");
                             }
+
+                            return settings;
                         }
                     }
-                }
-                catch (Exception e)
-                {
-                    LogHelper.LogEx(e.Message, e).GetAwaiter().GetResult();
                 }
             }
             LogHelper.LogError($"Failed to load configuration for type {typeName} from settings.json (File not found?). Default config loaded.").GetAwaiter().GetResult();

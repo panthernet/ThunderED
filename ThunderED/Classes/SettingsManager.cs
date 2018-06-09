@@ -28,18 +28,26 @@ namespace ThunderED.Classes
 
         public static ThunderSettings Settings { get; private set; }
 
-        public static void Prepare()
+        public static string Prepare()
         {
-            FileSettingsPath = Path.Combine(RootDirectory, "settings.json");
-            UpdateSettings();
-            FileTemplateMain = Path.Combine(RootDirectory, "Templates", "main.html");
-            FileTemplateAuth = Path.Combine(RootDirectory, "Templates", "auth.html");
-            FileTemplateAuth2 = Path.Combine(RootDirectory, "Templates", "auth2.html");
-            FileTemplateAuth3 = Path.Combine(RootDirectory, "Templates", "auth3.html");
-            FileTemplateAuthNotifyFail = Path.Combine(RootDirectory, "Templates", "authNotifyFail.html");
-            FileTemplateAuthNotifySuccess = Path.Combine(RootDirectory, "Templates", "authNotifySuccess.html");
-            FileTemplateTimersPage = Path.Combine(RootDirectory, "Templates", "timersMain.html");
-            FileTemplateMailAuthSuccess = Path.Combine(RootDirectory, "Templates", "mailAuthSuccess.html");
+            try
+            {
+                FileSettingsPath = Path.Combine(RootDirectory, "settings.json");
+                UpdateSettings();
+                FileTemplateMain = Path.Combine(RootDirectory, "Templates", "main.html");
+                FileTemplateAuth = Path.Combine(RootDirectory, "Templates", "auth.html");
+                FileTemplateAuth2 = Path.Combine(RootDirectory, "Templates", "auth2.html");
+                FileTemplateAuth3 = Path.Combine(RootDirectory, "Templates", "auth3.html");
+                FileTemplateAuthNotifyFail = Path.Combine(RootDirectory, "Templates", "authNotifyFail.html");
+                FileTemplateAuthNotifySuccess = Path.Combine(RootDirectory, "Templates", "authNotifySuccess.html");
+                FileTemplateTimersPage = Path.Combine(RootDirectory, "Templates", "timersMain.html");
+                FileTemplateMailAuthSuccess = Path.Combine(RootDirectory, "Templates", "mailAuthSuccess.html");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return $"ERROR -> {ex.Message}";
+            }
         }
 
 

@@ -16,11 +16,18 @@ namespace ThunderED
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             //load settings
-            SettingsManager.Prepare();
+            var result = SettingsManager.Prepare();
+            if (!string.IsNullOrEmpty(result))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result);
+                Console.ReadKey();
+                return;
+            }
             LogHelper.LogInfo($"ThunderED v{VERSION} is running!").GetAwaiter().GetResult();
             //load database provider
-            var result = SQLHelper.LoadProvider();
-            if (!string.IsNullOrEmpty(result))
+            var rs = SQLHelper.LoadProvider();
+            if (!string.IsNullOrEmpty(rs))
             {
                 Console.BackgroundColor = ConsoleColor.Red;
                 Console.WriteLine(result);
