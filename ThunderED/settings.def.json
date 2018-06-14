@@ -76,13 +76,15 @@
       "UnitedFleet":{
         "isAlliance": true,
         "isCharacter": false,
+        "isCorporation": false, 
         "id": 0,
       }
     },
     "editList": {
       "UnitedFleet":{
-        "isAlliance": false,
-        "isCharacter": true,
+        "isAlliance": true,
+        "isCharacter": false,
+        "isCorporation": false, 
         "id": 0,
       }
     }

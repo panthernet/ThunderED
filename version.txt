@@ -1,5 +1,6 @@
 v1.1.6
 + Added new defaultMention parameter for notifications filter
++ Added isCorporation property to timer module filters to make corporation ID input more convinient
 + Improved bad config error messages
 + Fixed live kill feed exception
 + Fixed inability to add new timers after delete operation

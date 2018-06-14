@@ -127,6 +127,7 @@ namespace ThunderED.Classes
     {
         public bool IsAlliance { get; set; }
         public bool IsCharacter { get; set; }
+        public bool IsCorporation { get; set; }
         public int Id { get; set; }
     }
 
