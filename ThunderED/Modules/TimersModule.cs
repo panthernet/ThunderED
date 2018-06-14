@@ -121,6 +121,10 @@ namespace ThunderED.Modules
                         {
                             data = data.Substring(6, data.Length - 6);
                             await SQLHelper.SQLiteDataDelete("timers", "id", data);
+                            var x = HttpUtility.ParseQueryString(request.Url.Query);
+                            x.Set("data", "0");
+                            await response.RedirectAsync(new Uri($"{request.Url.ToString().Split('?')[0]}?{x}"));
+                            return true;
                         }
 
                         await WriteCorrectResponce(response, isEditor, characterId);
@@ -207,6 +211,12 @@ namespace ThunderED.Modules
         {
             var baseCharId = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
             var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
+
+            if (rChar == null)
+            {
+                await response.WriteContentAsync("ERROR: Probably EVE ESI is shut down at the moment. Please try again later.");
+                return;
+            }
 
             response.Headers.ContentEncoding.Add("utf-8");
             response.Headers.ContentType.Add("text/html;charset=utf-8");

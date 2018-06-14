@@ -2,6 +2,7 @@ v1.1.6
 + Added new defaultMention parameter for notifications filter
 + Improved bad config error messages
 + Fixed live kill feed exception
++ Fixed inability to add new timers after delete operation
 
 v1.1.5
 + Added new incursions notification module
