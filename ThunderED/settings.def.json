@@ -51,8 +51,8 @@
         "labels": [ "discord" ],
         "senders": [],
         "includePrivateMail":  false, 
-        "channel": 0,
-      },
+        "channel": 0
+      }
     }
   },
 
@@ -63,7 +63,7 @@
     "webExternalPort": 80,
     "discordUrl": "https://discord.gg/xxxxxx",
     "ccpAppClientId": "REQUIRED",
-    "ccpAppSecret": "REQUIRED",
+    "ccpAppSecret": "REQUIRED"
   },
   
   "timersModule": {
@@ -77,7 +77,7 @@
         "isAlliance": true,
         "isCharacter": false,
         "isCorporation": false, 
-        "id": 0,
+        "id": 0
       }
     },
     "editList": {
@@ -85,7 +85,7 @@
         "isAlliance": true,
         "isCharacter": false,
         "isCorporation": false, 
-        "id": 0,
+        "id": 0
       }
     }
   },
@@ -115,7 +115,6 @@
     "bigKillChannel": 0,
     "groupsConfig": {
       "groupName": {
-        "//": "Post all group kills to separate chat channel",
         "discordChannel": 0,
         "corpID": 0,
         "allianceID": 0,
@@ -162,7 +161,7 @@
     "imgWarSurrender": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgWarSurrender.png",
     "imgTimerAlert": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgTimerAlert.png",
     "imgMail": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgMail.png",
-    "imgIncursion": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgIncursion.png",
+    "imgIncursion": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgIncursion.png"
   },
 
   "notificationFeedModule": {
@@ -211,14 +210,14 @@
               "EntosisCaptureStarted",
               "MoonminingExtractionFinished", 
               "MoonminingLaserFired", 
-              "FWAllianceWarningMsg", 
+              "FWAllianceWarningMsg"
             ],
             "channelID": 0,
             "defaultMention": "@everyone",
             "charMentions": [],
             "roleMentions": []
-          },
-        },		
+          }
+        }	
       }
     }
   },
@@ -283,8 +282,8 @@
         "ircFilters": [],
         "ircFiltersStartsWith": [ "/" ],
         "relayFromDiscordBotOnly": false,
-        "ircUsers": [],
-      },
+        "ircUsers": []
+      }
     ],
     "AutoJoinWaitIdentify": false,
     "AutoResponse": false,
@@ -303,9 +302,9 @@
         "telegramFilters": [],
         "telegramFiltersStartsWith": [ "/" ],
         "relayFromDiscordBotOnly": false,
-        "telegramUsers": [],
+        "telegramUsers": []
       }
-    ],
+    ]
   },
 
   "chatRelayModule": {
@@ -313,7 +312,7 @@
       {
         "eveChannelName": "EVE channel name",
         "discordChannelId": 0,
-        "code": "thesecretsupercode",
+        "code": "thesecretsupercode"
       }
     ]
   },
@@ -322,6 +321,6 @@
 	  "DiscordChannelId": 0,
 	  "Regions": [],
 	  "Constellations": [],
-	  "ReportIncursionStatusAfterDT": true,
+	  "ReportIncursionStatusAfterDT": true
   }
 }
