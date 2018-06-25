@@ -11,3 +11,6 @@
 /Jaex.IRCLib/bin/Release/netcoreapp2.0
 /TED_ChatRelay/bin
 /TED_ChatRelay/obj
+/packages
+/TED_ConfigEditor/bin/Debug
+/TED_ConfigEditor/obj/Debug

@@ -1,11 +1,11 @@
 ﻿{
   "eveLogsFolder":  "C:\\\\Users\\\\XXX\\\\Documents\\\\EVE\\\\logs\\\\Chatlogs", 
-  "RelayChannels": {
+  "RelayChannels": [
     {
-      "eveChannelName":  "channel name",
-      "endpoint":  "http://IP:PORT/chatrelay.php",
-      "code":  "thesecretsupercode", 
-      "dateformat":  "HH:mm",
-    },
-  }
+      "eveChannelName": "channel name",
+      "endpoint": "http://IP:PORT/chatrelay.php",
+      "code": "thesecretsupercode",
+      "dateformat": "HH:mm"
+    }
+  ]
 }
