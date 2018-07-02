@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TED_ChatRelay", "TED_ChatRelay\TED_ChatRelay.csproj", "{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TED_ConfigEditor", "TED_ConfigEditor\TED_ConfigEditor.csproj", "{004EDB05-71E9-4989-B71C-7CB6BABB5203}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DD85C26-2999-4E8D-A6E7-3C6256E2E792}.Release|Any CPU.Build.0 = Release|Any CPU
+		{004EDB05-71E9-4989-B71C-7CB6BABB5203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{004EDB05-71E9-4989-B71C-7CB6BABB5203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{004EDB05-71E9-4989-B71C-7CB6BABB5203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{004EDB05-71E9-4989-B71C-7CB6BABB5203}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

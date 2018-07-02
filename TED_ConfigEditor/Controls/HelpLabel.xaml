@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="TED_ConfigEditor.Controls.HelpLabel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+	<UserControl.Resources>
+		<Style x:Key="HelpSignStyle" TargetType="Path">
+			<Setter Property="Width" Value="16"/>
+			<Setter Property="Height" Value="16"/>
+			<Setter Property="Data" Value="M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,9.88 15.64,10.67 15.07,11.25M13,19H11V17H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z"/>
+			<Setter Property="Fill" Value="{DynamicResource AccentColorBrush}"/>
+			<Setter Property="Margin" Value="3"/>
+			<Setter Property="Stretch" Value="Fill"/>
+			<Setter Property="ToolTipService.InitialShowDelay" Value="0"/>
+		</Style>
+	</UserControl.Resources>
+    <Grid>
+        <Border Background="Transparent">
+            <StackPanel Orientation="Horizontal">
+	            <Path Style="{DynamicResource HelpSignStyle}" ToolTip="{Binding ToolTipText}" Margin="0,0,3,0" 
+	                  Visibility="{Binding HelpVisibility}"/>
+                <Label MinWidth="{Binding LabelMinWidth}" VerticalAlignment="Center" HorizontalAlignment="Left" Content="{Binding LabelText}"
+                       Name="label"/>
+            </StackPanel>
+           <!-- <Border.Triggers>
+                <EventTrigger RoutedEvent="Border.MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard TargetName="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Border}}, Path=Tag}" TargetProperty="Opacity">
+                            <DoubleAnimation To="1"  Duration="0:0:.1"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="Border.MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard TargetName="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Border}}, Path=Tag}" TargetProperty="Opacity">
+                            <DoubleAnimation To="0" Duration="0:0:.1" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+
+            </Border.Triggers>-->
+        </Border>
+    </Grid>
+</UserControl>

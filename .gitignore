@@ -14,3 +14,5 @@
 /packages
 /TED_ConfigEditor/bin/Debug
 /TED_ConfigEditor/obj/Debug
+/TED_ConfigEditor/bin/Release
+/TED_ConfigEditor/obj/Release
