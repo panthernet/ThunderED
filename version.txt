@@ -1,9 +1,12 @@
 v1.1.6
 + Added new defaultMention parameter for notifications filter
++ Added new fetchLastNotifDays parameter for notification group
 + Added isCorporation property to timer module filters to make corporation ID input more convinient
 + Improved bad config error messages
++ Improved TED Chat Relay error report
 + Fixed live kill feed exception
 + Fixed inability to add new timers after delete operation
++ Fixed mail module refresh logic
 
 v1.1.5
 + Added new incursions notification module

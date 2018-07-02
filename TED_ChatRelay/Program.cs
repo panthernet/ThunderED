@@ -22,7 +22,17 @@ namespace ThunderED
             try
             {
                 Console.WriteLine($"TED Chat Relay v{VERSION} for EVE Online is starting...");
-                _settings = RelaySetttings.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json"));
+                try
+                {
+                    _settings = RelaySetttings.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json"));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error loading config file! Make sure it has correct syntax.");
+                    Console.WriteLine(ex.InnerException?.ToString());
+                    Console.ReadKey();
+                    return;
+                }
 
                 if (!Directory.Exists(_settings.EveLogsFolder))
                 {

@@ -129,7 +129,15 @@ namespace ThunderED.Modules
                     }
 
                     var labelIds = labelsData.labels.Where(a=> terms.Contains(a.name)).Select(a => a.label_id).ToList();
-                    var mails = await APIHelper.ESIAPI.GetMailHeaders(Reason, group.Id.ToString(), token, 0, labelIds, senders.ToArray());
+                    var mails = (await APIHelper.ESIAPI.GetMailHeaders(Reason, group.Id.ToString(), token, 0, labelIds, senders.ToArray()));
+
+                    if (lastMailId > 0)
+                        mails = mails.Where(a => a.mail_id > lastMailId).OrderBy(a=> a.mail_id).ToList();
+                    else
+                    {
+                        lastMailId = mails.LastOrDefault()?.mail_id ?? 0;
+                        mails.Clear();
+                    }
 
                     foreach (var mailHeader in mails)
                     {
@@ -143,7 +151,7 @@ namespace ThunderED.Modules
                         await SendMailNotification(channel, mail, labelNames);
 
                     }
-                    if(prevMailId != lastMailId)
+                    if(prevMailId != lastMailId || lastMailId == 0)
                         await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", group.Id.ToString()}, {"mailId", lastMailId}});
                 }
             }
