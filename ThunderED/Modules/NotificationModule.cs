@@ -123,11 +123,21 @@ namespace ThunderED.Modules
                             if (_lastNotification == 0)
                             {
                                 var now = DateTime.UtcNow;
-                                fNotifications = notifications.Where(a =>
+                                if (group.FetchLastNotifDays > 0)
                                 {
-                                    DateTime.TryParse(a.timestamp, out var timestamp);
-                                    return (now - timestamp).Days < 7 && filter.Notifications.Contains(a.type);
-                                }).OrderBy(x => x.notification_id).ToList();
+                                    fNotifications = notifications.Where(a =>
+                                    {
+                                        DateTime.TryParse(a.timestamp, out var timestamp);
+                                        return (now - timestamp).Days < group.FetchLastNotifDays && filter.Notifications.Contains(a.type);
+                                    }).OrderBy(x => x.notification_id).ToList();
+                                }
+                                else
+                                {
+                                    fNotifications = new List<JsonClasses.Notification>();
+                                    _lastNotification = notifications.Max(a => a.notification_id);
+                                    await UpdateNotificationList(groupPair.Key, filterPair.Key, true);
+                                    continue;
+                                }
                             }
                             else
                                 fNotifications = notifications.Where(a => filter.Notifications.Contains(a.type) && a.notification_id > _lastNotification)

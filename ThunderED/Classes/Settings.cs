@@ -287,6 +287,7 @@ namespace ThunderED.Classes
     {
         public int CharacterID { get; set; }
         public ulong DefaultDiscordChannelID { get; set; }
+        public int FetchLastNotifDays { get; set; }
 #if EDITOR
         public ObservableDictionary<string, NotificationSettingsFilter> Filters { get; set; } = new ObservableDictionary<string, NotificationSettingsFilter>();
 #else
