@@ -101,6 +101,12 @@ namespace TED_ConfigEditor.Controls
 
         protected async void AddCommandMethod(object obj)
         {
+            if (IsValidatableCollection)
+            {
+                ((IList) ItemsList).Add(Activator.CreateInstance(ItemType));
+                return;
+            }
+
             var isDoubleEntry = IsDictionary && !ItemType.IsClass;
 
             var res = isDoubleEntry ? await MainWindow.Instance.ShowInputAsync("Enter new key", "Key:") : await MainWindow.Instance.ShowInputAsync("Enter new value", "Value:");
@@ -117,8 +123,7 @@ namespace TED_ConfigEditor.Controls
                         ((IDictionary) ItemsList).Add(res, Convert.ChangeType(res2, ItemType));
                     }
                     else ((IDictionary) ItemsList).Add(res, Activator.CreateInstance(ItemType));
-                }
-                else
+                }else
                     ((IList) ItemsList).Add(Convert.ChangeType(res, ItemType));
             }
             catch
@@ -176,5 +181,6 @@ namespace TED_ConfigEditor.Controls
         }
 
         public bool IsDictionary { get; set; }
+        public bool IsValidatableCollection { get; set; }
     }
 }

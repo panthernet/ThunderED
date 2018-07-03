@@ -10,7 +10,6 @@ namespace TED_ConfigEditor.Controls.Modules
     /// </summary>
     public partial class ModuleControlEx
     {
-        private object _item;
         public IModuleControl Settings { get; set; }
         public string Title { get; set; }
 

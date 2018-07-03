@@ -66,6 +66,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Controls\ErrorsControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\HelpLabel.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -102,12 +106,16 @@
     <Compile Include="Classes\Extensions.cs" />
     <Compile Include="Classes\IValidatable.cs" />
     <Compile Include="Classes\ListboxTemplateSelector.cs" />
-    <Compile Include="Classes\ModulesEnum.cs" />
+    <Compile Include="Classes\Logger.cs" />
     <Compile Include="Classes\ObservableDictionary.cs" />
     <Compile Include="Classes\Options.cs" />
     <Compile Include="Classes\SettingsBase.cs" />
     <Compile Include="Classes\SimpleCommand.cs" />
+    <Compile Include="Classes\ValidatableSettings.cs" />
     <Compile Include="Classes\VisualHelper.cs" />
+    <Compile Include="Controls\ErrorsControl.xaml.cs">
+      <DependentUpon>ErrorsControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\HelpLabel.xaml.cs">
       <DependentUpon>HelpLabel.xaml</DependentUpon>
     </Compile>

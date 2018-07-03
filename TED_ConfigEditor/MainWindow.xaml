@@ -21,14 +21,14 @@
 			</Grid.ColumnDefinitions>
 			
 			<StackPanel Orientation="Horizontal">
-				<Button Width="100" DockPanel.Dock="Right" Padding="0" Margin="3"
+				<Button Width="80" DockPanel.Dock="Right" Padding="0" Margin="3"
 				        Command="{Binding AddFileCommand}">
 					<StackPanel Orientation="Horizontal">
 						<Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,15V12H9V15H6V17H9V20H11V17H14V15H11Z" Stretch="Uniform" Fill="Black" Margin="3"/>
 						<TextBlock Text="New file" VerticalAlignment="Center" Margin="3"/>
 					</StackPanel>
 				</Button>
-				<Button Width="100" DockPanel.Dock="Right" Padding="0" Margin="3"
+				<Button Width="80" DockPanel.Dock="Right" Padding="0" Margin="3"
 				        Command="{Binding OpenFileCommand}">
 					<StackPanel Orientation="Horizontal">
 						<Path Data="M14,2H6C4.89,2 4,2.89 4,4V20C4,21.11 4.89,22 6,22H18C19.11,22 20,21.11 20,20V8L14,2M12,19L8.11,15.11H10.44V12H13.56V15.11H15.89L12,19M13,9V3.5L18.5,9H13Z" Stretch="Uniform" Fill="Black"/>
@@ -36,7 +36,7 @@
 					</StackPanel>
 
 				</Button>
-				<Button Width="100" DockPanel.Dock="Right" Padding="0" Margin="3"
+				<Button Width="80" DockPanel.Dock="Right" Padding="0" Margin="3"
 				        Command="{Binding SaveFileCommand}">
 					<StackPanel Orientation="Horizontal">
 						<Path Data="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" Stretch="Uniform" Fill="Black"/>
@@ -44,10 +44,18 @@
 					</StackPanel>
 
 				</Button>
+				<Button Width="80" DockPanel.Dock="Right" Padding="0" Margin="3"
+				        Command="{Binding ValidateCommand}">
+					<StackPanel Orientation="Horizontal">
+						<Path Data="M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z" Stretch="Uniform" Fill="Black"/>
+						<TextBlock Text="Validation" VerticalAlignment="Center" Margin="3"/>
+					</StackPanel>
+
+				</Button>
 
 			</StackPanel>
 
-			<DockPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2">
+			<DockPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Name="modulesPanel" Margin="0,0,7,0">
 				<TextBlock Text="Select modules to add" Margin="3" DockPanel.Dock="Top"/>
 				<DockPanel>
 					<Button Width="50" DockPanel.Dock="Right" Padding="0" Margin="3"
@@ -59,7 +67,7 @@
 				</DockPanel>
 			</DockPanel>
 			
-			<ListBox Grid.Row="2" Grid.Column="1" Margin="3" ItemsSource="{Binding ModulesList}" SelectedItem="{Binding SelectedModuleToRemove}">
+			<ListBox Grid.Row="2" Grid.Column="1" Margin="3,3,10,10" ItemsSource="{Binding ModulesList}" SelectedItem="{Binding SelectedModuleToRemove}">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<DockPanel>
@@ -79,7 +87,8 @@
 				</ListBox.ItemTemplate>
 			</ListBox>
 
-			<controls:ConfigModuleControl Grid.Row="2" Grid.Column="0" x:Name="configModuleControl"/>
+			<controls:ConfigModuleControl Grid.Row="2" Grid.Column="0" x:Name="configModuleControl"
+			                              Margin="10,3,3,10"/>
 
 	    </Grid>
 		<Grid Name="layerGrid" Visibility="Collapsed">
@@ -92,7 +101,10 @@
 						<RowDefinition Height="Auto"/>
 					</Grid.RowDefinitions>
 					<Border Grid.Row="0"  Name="layerContainer"/>
-					<Button Grid.Row="1" Width="150" Content="Close" Margin="3" HorizontalAlignment="Center" Click="CloseOverlay_OnClick"/>
+					<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+						<Button Width="150" Content="Continue" Margin="3" HorizontalAlignment="Center" Click="ContinueOverlay_OnClick" Visibility="Collapsed" Name="continueButton"/>
+						<Button Width="150" Content="Close" Margin="3" HorizontalAlignment="Center" Click="CloseOverlay_OnClick"/>
+					</StackPanel>
 				</Grid>
 			</Border>
 

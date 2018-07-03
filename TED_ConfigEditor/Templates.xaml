@@ -20,6 +20,15 @@
 			<modules:ModuleControlEx Grid.Row="1" Item="{Binding Value}" HorizontalAlignment="Stretch"/>
 		</Grid>
 	</DataTemplate>
+	
+	<DataTemplate x:Key="CollectionValueTemplate">
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+			<modules:ModuleControlEx Item="{Binding}" HorizontalAlignment="Stretch"/>
+		</Grid>
+	</DataTemplate>
 
 
 	<Style TargetType="ctrl:ListBoxControlBase">

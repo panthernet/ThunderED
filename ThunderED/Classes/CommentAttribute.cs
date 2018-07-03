@@ -19,4 +19,24 @@ namespace ThunderED.Classes
     public class RequiredAttribute: Attribute
     {
     }
+
+    public class PropertyNameAttribute : Attribute
+    {
+        public string Name { get; set; }
+
+        public PropertyNameAttribute(string name)
+        {
+            Name = name;
+        }
+    }
+
+    public class ConfigEntryNameAttribute : Attribute
+    {
+        public string Name { get; set; }
+
+        public ConfigEntryNameAttribute(string name)
+        {
+            Name = name;
+        }
+    }
 }

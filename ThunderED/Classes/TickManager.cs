@@ -50,8 +50,8 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleAuthCheck)
                 Modules.Add(new AuthCheckModule());
 
-            if (SettingsManager.Settings.Config.ModuleReliableKillFeed)
-                Modules.Add(new ReliableKillModule());
+           // if (SettingsManager.Settings.Config.ModuleReliableKillFeed)
+           //     Modules.Add(new ReliableKillModule());
 
             if (SettingsManager.Settings.Config.ModuleNotificationFeed)
                 Modules.Add(new NotificationModule());

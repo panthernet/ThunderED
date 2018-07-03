@@ -5,6 +5,6 @@ namespace TED_ConfigEditor.Classes
 {
     public interface IValidatable: IDataErrorInfo
     {
-       string Validate();
+       string Validate(bool sub = false);
     }
 }

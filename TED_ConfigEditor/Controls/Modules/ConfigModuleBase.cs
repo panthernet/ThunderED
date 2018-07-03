@@ -80,14 +80,12 @@ namespace TED_ConfigEditor.Controls.Modules
             var label = new Label { FontWeight =  FontWeights.Bold};
             var labelMinWidth = props.Max(a => MeasureString(a.Name, label).Width) + 10;
 
+            var configurableModuleNames = MainWindow.Instance.GetAvailableModuleNames().Select(a=> a.ToLower());
+
             foreach (var property in props)
             {
-                if(property.Name.StartsWith("Module"))
-                {
-                    if(Enum.TryParse(property.Name, out ModulesEnum e))
-                        if (!string.IsNullOrEmpty(e.DescriptionAttr()))
-                            continue;
-                }
+                if(property.Name.StartsWith("Module") && configurableModuleNames.Contains(property.Name.ToLower()))
+                        continue;
                 //config specific
                 
                 var d = new DockPanel();
@@ -176,6 +174,7 @@ namespace TED_ConfigEditor.Controls.Modules
                     if (Activator.CreateInstance(typeof(ListBoxControlBase)) is ListBoxControlBase el)
                     {
                         el.IsDictionary = typeof(IDictionary).IsAssignableFrom(property.PropertyType);
+                        el.IsValidatableCollection = typeof(IList).IsAssignableFrom(property.PropertyType) && typeof(IValidatable).IsAssignableFrom(property.PropertyType.GenericTypeArguments.Last());
                         el.ItemType = el.IsDictionary ? property.PropertyType.GenericTypeArguments.LastOrDefault() : property.PropertyType.GenericTypeArguments.FirstOrDefault();
                         var dp = el.GetType()
                             .GetFields(BindingFlags.Static | BindingFlags.Public).FirstOrDefault(p => p.FieldType == typeof(DependencyProperty) && p.Name=="ItemsListProperty");

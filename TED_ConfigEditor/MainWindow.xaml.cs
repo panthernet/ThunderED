@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using MahApps.Metro.Controls.Dialogs;
 using Microsoft.Win32;
 using TED_ConfigEditor.Classes;
+using TED_ConfigEditor.Controls;
 using TED_ConfigEditor.Controls.Modules;
+using ThunderED;
 
 namespace TED_ConfigEditor
 {
@@ -19,11 +23,11 @@ namespace TED_ConfigEditor
     public partial class MainWindow: INotifyPropertyChanged
     {
         private string _fileName;
-        private ModulesEnum? _selectedModuleToAdd;
-        public ObservableCollection<ModulesEnum> AvailableModulesList { get; set; }
-        public ObservableCollection<ModulesEnum> ModulesList { get; set; } = new ObservableCollection<ModulesEnum>();
+        private string _selectedModuleToAdd;
+        public ObservableCollection<string> AvailableModulesList { get; set; }
+        public ObservableCollection<string> ModulesList { get; set; } = new ObservableCollection<string>();
 
-        public ModulesEnum? SelectedModuleToAdd
+        public string SelectedModuleToAdd
         {
             get => _selectedModuleToAdd;
             set { _selectedModuleToAdd = value; OnPropertyChanged();}
@@ -43,6 +47,7 @@ namespace TED_ConfigEditor
         public ICommand EditModuleCommand { get; set; }
         public ICommand DeleteModuleCommand { get; set; }
         public ICommand SaveFileCommand { get; set; }
+        public ICommand ValidateCommand { get; set; }
 
         public static MainWindow Instance { get; private set; }
 
@@ -57,51 +62,89 @@ namespace TED_ConfigEditor
             EditModuleCommand = new SimpleCommand(EditModuleExecuted);
             DeleteModuleCommand = new SimpleCommand(DeleteModuleExecuted);
             SaveFileCommand = new SimpleCommand(o => !string.IsNullOrEmpty(_fileName), OnSaveFileExecuted);
+            ValidateCommand = new SimpleCommand(o=> !string.IsNullOrEmpty(_fileName), async o =>
+            {
+                var text = Settings.Validate(ModulesList.ToList());
+                if (!string.IsNullOrEmpty(text))
+                    EditModuleExecuted(new ErrorsControl(text));
+                else await this.ShowMessageAsync("SUCCESS", "Validation successful!");
+            });
+
+            configModuleControl.Visibility = Visibility.Collapsed;
+            modulesPanel.Visibility = Visibility.Collapsed;
 
             ResetFile();
+            //Title = $"ThunderED Bot Config Tool v{Program.VERSION}";
+            UpdateTitle();
         }
 
-        private void OnSaveFileExecuted(object obj)
+        private async void OnSaveFileExecuted(object obj)
         {
-            var props = typeof(ThunderSettings).GetProperties();
-            var cProps = typeof(ConfigSettings).GetProperties();
-            //null left modules
-            if (App.Options.NullifyDisabledModules)
+            try
             {
-                foreach (var modulesEnum in AvailableModulesList)
+                var props = typeof(ThunderSettings).GetProperties();
+                var cProps = typeof(ConfigSettings).GetProperties();
+                //null left modules
+                if (App.Options.NullifyDisabledModules)
                 {
-                    var moduleName = modulesEnum.DescriptionAttr().ToLower();
-                    var p = props.FirstOrDefault(a => a.Name.ToLower() == moduleName);
-                    if (p == null) continue;
-                    p.SetValue(Settings, null);
+                    foreach (var modulesEnum in AvailableModulesList)
+                    {
+                        var moduleName = modulesEnum.DescriptionAttr().ToLower();
+                        var p = props.FirstOrDefault(a => a.Name.ToLower() == moduleName);
+                        if (p == null) continue;
+                        p.SetValue(Settings, null);
+                    }
                 }
-            }
 
-            //check added modules
-            foreach (var modulesEnum in ModulesList)
+                //check added modules
+                foreach (var modulesEnum in ModulesList)
+                {
+                    var moduleName = modulesEnum.ToString();
+                    var p = cProps.FirstOrDefault(a => a.Name == moduleName);
+                    if (p == null) continue;
+                    p.SetValue(Settings.Config, true);
+                }
+
+                var text = Settings.Validate(ModulesList.ToList());
+                if (!string.IsNullOrEmpty(text))
+                {
+                    continueButton.Visibility = Visibility.Visible;
+                    EditModuleExecuted(new ErrorsControl(text));
+                    return;
+                }
+
+                Settings.Save(FileName);
+            }
+            catch (Exception ex)
             {
-                var moduleName = modulesEnum.ToString();
-                var p = cProps.FirstOrDefault(a => a.Name == moduleName);
-                if(p == null) continue;
-                p.SetValue(Settings.Config, true);
+                await this.ShowMessageAsync("ERROR", "Error saving file! Read logs for details.");
+                App.Logger.Log(ex, nameof(OnSaveFileExecuted));
             }
-
-            Settings.Save(FileName);
         }
 
         private void UpdateTitle(string file = null)
         {
-            Title = $"ThunderED Bot Config Tool {(string.IsNullOrEmpty(file) ? "" : $" - {Path.GetFileNameWithoutExtension(file)}")}";
-
+            Title = $"ThunderED Bot Config Tool v{Program.VERSION} {(string.IsNullOrEmpty(file) ? "" : $" - {Path.GetFileNameWithoutExtension(file)}")}";
         }
 
         private void ResetFile()
         {
             FileName = null;
             UpdateTitle();
-            AvailableModulesList = new ObservableCollection<ModulesEnum>(Enum.GetValues(typeof(ModulesEnum)).Cast<ModulesEnum>().Where(a=> !string.IsNullOrEmpty(a.DescriptionAttr())));
+            AvailableModulesList = new ObservableCollection<string>(GetAvailableModuleNames());
             SelectedModuleToAdd = AvailableModulesList.FirstOrDefault();
             ModulesList.Clear();
+        }
+
+        public List<string> GetAvailableModuleNames()
+        {
+            return Settings.GetType().GetProperties().Where(a => a.Name != "Config").Select(a => (string)a.GetAttributeValue<ConfigEntryNameAttribute>("Name"))
+                .Where(a => !string.IsNullOrEmpty(a)).ToList();
+        }
+
+        public PropertyInfo GetPropertyByEntryName(string name)
+        {
+            return Settings.GetType().GetProperties().FirstOrDefault(a => (string) a.GetAttributeValue<ConfigEntryNameAttribute>("Name") == name);
         }
 
         private async void AddFileExecuted(object obj)
@@ -121,38 +164,53 @@ namespace TED_ConfigEditor
                 return;
             }
 
-            FileName = dlg.FileName;
-            UpdateTitle(FileName);
-            UpdateBindings();
-        }
-
-        private async void OpenFileExecuted(object obj)
-        {
-            if (!string.IsNullOrEmpty(FileName) || ModulesList.Count > 0)
-            {
-                if(await this.ShowMessageAsync("Warning", "Open new settings file? All unsaved changed will be lost.", MessageDialogStyle.AffirmativeAndNegative) == MessageDialogResult.Negative)
-                    return;
-            }
-
-            var dlg = new OpenFileDialog {Filter = "JSON Files (*.json)|*.json", CheckFileExists = true };
-            if(dlg.ShowDialog() != true)
-                return;
-
             ResetFile();
-
-            Settings = ThunderSettings.Load(dlg.FileName);
-            if (Settings == null)
-            {
-                await this.ShowMessageAsync("Error", "Can't load settings file!");
-                ResetFile();
-                return;
-            }
-
-
             FileName = dlg.FileName;
             UpdateTitle(FileName);
             LoadModules();
             UpdateBindings();
+            configModuleControl.Visibility = Visibility.Visible;
+            modulesPanel.Visibility = Visibility.Visible;
+        }
+
+        private async void OpenFileExecuted(object obj)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(FileName) || ModulesList.Count > 0)
+                {
+                    if (await this.ShowMessageAsync("Warning", "Open new settings file? All unsaved changed will be lost.", MessageDialogStyle.AffirmativeAndNegative) ==
+                        MessageDialogResult.Negative)
+                        return;
+                }
+
+                var dlg = new OpenFileDialog {Filter = "JSON Files (*.json)|*.json", CheckFileExists = true};
+                if (dlg.ShowDialog() != true)
+                    return;
+
+                ResetFile();
+
+                Settings = ThunderSettings.Load(dlg.FileName);
+                if (Settings == null)
+                {
+                    await this.ShowMessageAsync("Error", "Can't load settings file!");
+                    ResetFile();
+                    return;
+                }
+
+
+                FileName = dlg.FileName;
+                UpdateTitle(FileName);
+                LoadModules();
+                UpdateBindings();
+                configModuleControl.Visibility = Visibility.Visible;
+                modulesPanel.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                await this.ShowMessageAsync("ERROR", "Error opening file! Read logs for details.");
+                App.Logger.Log(ex, nameof(OpenFileExecuted));
+            }
         }
 
         private void UpdateBindings()
@@ -162,23 +220,30 @@ namespace TED_ConfigEditor
 
         private void LoadModules()
         {
+            ModulesList.Clear();
+            AvailableModulesList.Clear();
+
+            var configurableList = GetAvailableModuleNames();
             foreach (var propertyInfo in Settings.Config.GetType().GetProperties().Where(a=> a.Name.StartsWith("Module")))
             {
+                var entry = configurableList.FirstOrDefault(a => a.Equals(propertyInfo.Name, StringComparison.OrdinalIgnoreCase));
+                //(string)propertyInfo.GetAttributeValue<ConfigEntryNameAttribute>("Name");
+                if(string.IsNullOrEmpty(entry)) continue;
 
-                if(!Enum.TryParse(propertyInfo.Name, true, out ModulesEnum e))
-                    continue;
                 var value = (bool) propertyInfo.GetValue(Settings.Config);
                 if (value)
                 {
-                    ModulesList.Add(e);
-                    AvailableModulesList.Remove(e);
+                    ModulesList.Add(entry);
+                    AvailableModulesList.Remove(entry);
                 }
                 else
                 {
-                    AvailableModulesList.Add(e);
-                    ModulesList.Remove(e);
+                    AvailableModulesList.Add(entry);
+                    ModulesList.Remove(entry);
                 }
             }
+            OnPropertyChanged(nameof(AvailableModulesList));
+            SelectedModuleToAdd = AvailableModulesList.FirstOrDefault();
         }
 
         private void LoadOverlay(UIElement element)
@@ -191,131 +256,49 @@ namespace TED_ConfigEditor
         {
             layerGrid.Visibility = Visibility.Collapsed;
             layerContainer.Child = null;
+            continueButton.Visibility = Visibility.Collapsed;
         }
 
         private void DeleteModuleExecuted(object obj)
         {
-            var m = (ModulesEnum)obj;
-            ModulesList.Remove(m);
-            AvailableModulesList.Add(m);
+            ModulesList.Remove((string)obj);
+            AvailableModulesList.Add((string)obj);
         }
 
-        private void EditModuleExecuted(object obj)
+        private async void EditModuleExecuted(object obj)
         {
-            UIElement element = null;
-
-            switch ((ModulesEnum)obj)
+            if (obj is ErrorsControl control)
             {
-                case ModulesEnum.ModuleWebServer:
-                {
-                    var s = new ConfigModuleBase<WebServerModuleSettings>();
-                    element = new ModuleControl(s, "Web Server Module Settings");
-                    s.Settings = Settings.WebServerModule;
-                }
-                    break;
-                case ModulesEnum.ModuleIRC:
-                {
-                    var s = new ConfigModuleBase<IRCModuleSettings>();
-                    element = new ModuleControl(s, "IRC Module Settings");
-                    s.Settings = Settings.IrcModule;
-                }
-                    break;
-                case ModulesEnum.ModuleAuthWeb:
-                {
-                    var s = new ConfigModuleBase<WebAuthModuleSettings>();
-                    element = new ModuleControl(s, "Web Auth Module Settings");
-                    s.Settings = Settings.WebAuthModule;
-                }
-                    break;
-                case ModulesEnum.ModuleChatRelay:
-                {
-                    var s = new ConfigModuleBase<ChatRelayModuleSettings>();
-                    element = new ModuleControl(s, "Chat Relay Module Settings");
-                    s.Settings = Settings.ChatRelayModule;
-                }
-                    break;
-                case ModulesEnum.ModuleFleetup:
-                {
-                    var s = new ConfigModuleBase<FleetupModuleSettings>();
-                    element = new ModuleControl(s, "Fleetup Module Settings");
-                    s.Settings = Settings.FleetupModule;
-                }
-                    break;
-                case ModulesEnum.ModuleIncursionNotify:
-                {
-                    var s = new ConfigModuleBase<IncursionNotificationModuleSettings>();
-                    element = new ModuleControl(s, "Incursion Module Settings");
-                    s.Settings = Settings.IncursionNotificationModule;
-                }
-                    break;
-                case ModulesEnum.ModuleJabber:
-                {
-                    var s = new ConfigModuleBase<JabberModuleSettings>();
-                    element = new ModuleControl(s, "Jabber Module Settings");
-                    s.Settings = Settings.JabberModule;
-                }
-                    break;
-                case ModulesEnum.ModuleLiveKillFeed:
-                {
-                    var s = new ConfigModuleBase<LiveKillFeedModuleSettings>();
-                    element = new ModuleControl(s, "Live Kill Feed Module Settings");
-                    s.Settings = Settings.LiveKillFeedModule;
-                }
-                    break;
-                case ModulesEnum.ModuleMail:
-                {
-                    var s = new ConfigModuleBase<MailModuleSettings>();
-                    element = new ModuleControl(s, "Mail Module Settings");
-                    s.Settings = Settings.MailModule;
-                }
-                    break;
-                case ModulesEnum.ModuleNotificationFeed:
-                {
-                    var s = new ConfigModuleBase<NotificationFeedSettings>();
-                    element = new ModuleControl(s, "Notification Feed Module Settings");
-                    s.Settings = Settings.NotificationFeedModule;
-                }
-                    break;
-                case ModulesEnum.ModuleRadiusKillFeed:
-                {
-                    var s = new ConfigModuleBase<RadiusKillFeedModuleSettings>();
-                    element = new ModuleControl(s, "Radius Kill Feed Module Settings");
-                    s.Settings = Settings.RadiusKillFeedModule;
-                }
-                    break;
-                case ModulesEnum.ModuleTelegram:
-                {
-                    var s = new ConfigModuleBase<TelegramModuleSettings>();
-                    element = new ModuleControl(s, "Telegram Module Settings");
-                    s.Settings = Settings.TelegramModule;
-                }
-                    break;
-                case ModulesEnum.ModuleStats:
-                {
-                    var s = new ConfigModuleBase<StatsModuleSettings>();
-                    element = new ModuleControl(s, "Stats Module Settings");
-                    s.Settings = Settings.StatsModule;
-                }
-                    break;
-                case ModulesEnum.ModuleTimers:
-                {
-                    var s = new ConfigModuleBase<TimersModuleSettings>();
-                    element = new ModuleControl(s, "Timers Module Settings");
-                    s.Settings = Settings.TimersModule;
-                }
-                    break;
+                LoadOverlay(control);
+                return;
             }
 
-            if(element != null)
-                LoadOverlay(element);
+            try
+            {
+                var moduleEntryName = (string) obj;
+                var prop = GetPropertyByEntryName(moduleEntryName);
+                var makeme = Type.GetType("TED_ConfigEditor.Controls.Modules.ConfigModuleBase`1").MakeGenericType(prop.PropertyType);
+                var s = (IModuleControl) Activator.CreateInstance(makeme);
+                UIElement element = new ModuleControl(s, $"{moduleEntryName} Settings");
+                s.GetType().GetProperty("Settings").SetValue(s, prop.GetValue(Settings));
+
+                if (element != null)
+                    LoadOverlay(element);
+            }
+            catch (Exception ex)
+            {
+                await this.ShowMessageAsync("ERROR", "Error loading settings section! Please contact developer!");
+                App.Logger.Log(ex, nameof(EditModuleExecuted));
+                CloseOverlay_OnClick(null, null);
+            }
         }
 
         private void AddModuleExecuted(object obj)
         {
             if(_selectedModuleToAdd == null) return;
 
-            ModulesList.Add(_selectedModuleToAdd.Value);
-            AvailableModulesList.Remove(_selectedModuleToAdd.Value);
+            ModulesList.Add(_selectedModuleToAdd);
+            AvailableModulesList.Remove(_selectedModuleToAdd);
             SelectedModuleToAdd = AvailableModulesList.FirstOrDefault();
         }
 
@@ -329,6 +312,12 @@ namespace TED_ConfigEditor
         private void CloseOverlay_OnClick(object sender, RoutedEventArgs e)
         {
             UnloadOverlay();
+        }
+
+        private void ContinueOverlay_OnClick(object sender, RoutedEventArgs e)
+        {
+            UnloadOverlay();
+            Settings.Save(FileName);
         }
     }
 }

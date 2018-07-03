@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace TED_ConfigEditor.Classes
 {
     public static class Extensions
     {
-        public const string ERR_MSG_VALUEEMPTY = "Value must not be empty!";
+        public const string ERR_MSG_VALUEEMPTY = "Required value must not be empty!";
 
         private static readonly Regex AllNumsRegex = new Regex("[^0-9.-]+"); //regex that matches disallowed text
         private static readonly Regex NumsRegex = new Regex("[^0-9-]+"); //regex that matches disallowed text
@@ -50,10 +51,32 @@ namespace TED_ConfigEditor.Classes
 
         }
 
+        public static object GetAttributeValue<T>(this object obj, string propertyName)
+        {
+            var attr = obj.GetType().GetCustomAttributes(typeof(T), false).FirstOrDefault();
+            return attr == null ? null : typeof(T).GetProperty(propertyName)?.GetValue(attr);
+
+        }
+
         public static bool HasAttribute<T>(this PropertyInfo obj)
         {
             return obj.GetCustomAttributes(typeof(T), false).FirstOrDefault() != null;
         }
+
+      /*  public static Type GetCollectionItemType(this object value)
+        {
+            return value.GetType().GetGenericTypeDefinition();
+        }
+
+        public static bool IsCollection(this object valueType)
+        {
+            if (valueType != null)
+            {
+                var t = valueType.GetType();
+                return typeof(ICollection).IsAssignableFrom(t);
+            }
+            return false;
+        }*/
 
         public static bool IsKeyValuePair(this Type valueType)
         {
