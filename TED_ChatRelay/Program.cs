@@ -24,7 +24,7 @@ namespace ThunderED
                 Console.WriteLine($"TED Chat Relay v{VERSION} for EVE Online is starting...");
                 try
                 {
-                    _settings = RelaySetttings.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json"));
+                    _settings = RelaySetttings.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "relaysettings.json"));
                 }
                 catch (Exception ex)
                 {

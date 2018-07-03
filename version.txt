@@ -8,6 +8,10 @@ v1.1.6
 + Fixed inability to add new timers after delete operation
 + Fixed mail module refresh logic
 
+Breaking changes
++ TED_ChatRelay app: Renamed settings.json to relaysettings.json
++ TED_ChatRelay and ThunderED will now be supplied within single package as they share 99% of release libraries anyway.
+
 v1.1.5
 + Added new incursions notification module
 + Added new Discord command !tq
