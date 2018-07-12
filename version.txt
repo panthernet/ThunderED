@@ -1,7 +1,10 @@
 v1.1.6
 + Added new defaultMention parameter for notifications filter
 + Added new fetchLastNotifDays parameter for notification group
++ Added new NullsecCampaign module
++ Added bot config tool for Windows
 + Added isCorporation property to timer module filters to make corporation ID input more convinient
++ Added static EVE systems data into the database
 + Improved bad config error messages
 + Improved TED Chat Relay error report
 + Fixed live kill feed exception

@@ -76,7 +76,10 @@ namespace ThunderED.Classes
             
             if(SettingsManager.Settings.Config.ModuleIncursionNotify)
                 Modules.Add(new IncursionNotifyModule());
-            
+
+            if(SettingsManager.Settings.Config.ModuleNullsecCampaign)
+                Modules.Add(new NullCampaignModule());
+
 
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)

@@ -200,4 +200,14 @@
   "incursionBoss":  "Босс", 
   "Alive":  "Активен", 
   "Defeated":  "Повержен", 
+  "NC_LessThanMinsLeft":  "Предупреждение о начале кампании через {0}!",
+  "NC_NewCampaign": "Замечена новая кампания в нулях!",
+  "NC_StartTime": "Начало",
+  "NC_StartTimeText": "{0} (через {1})",
+  "NC_type": "Тип",
+  "NC_Score": "Счет",
+  "NC_ScoreText": "Атакующий {0}\nЗащитник {1}",
+  "NC_Location": "Локация",
+  "NC_LocationText": "{0} / {1}",
+  "NC_Defender": "Защитник"
 }

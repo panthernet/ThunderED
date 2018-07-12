@@ -28,7 +28,7 @@ namespace ThunderED.Classes
         public IRCModuleSettings IrcModule { get; set; } = new IRCModuleSettings();
         [ConfigEntryName("moduleNotificationFeed")]
         public NotificationFeedSettings NotificationFeedModule { get; set; } = new NotificationFeedSettings();
-        [ConfigEntryName("moduleNullCampaign")]
+        [ConfigEntryName("moduleNullsecCampaign")]
         public NullCampaignModuleSettings NullCampaignModule { get; set; } = new NullCampaignModuleSettings();
         [ConfigEntryName("moduleTelegram")]
         public TelegramModuleSettings TelegramModule { get; set; } = new TelegramModuleSettings();
@@ -587,10 +587,16 @@ namespace ThunderED.Classes
 #if EDITOR
         public ObservableCollection<int> Regions { get; set; } = new ObservableCollection<int>();
         public ObservableCollection<int> Constellations { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<int> Announces { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<string> Mentions { get; set; } = new ObservableCollection<string>();
 #else
         public List<int> Regions { get; set; } = new List<int>();
         public List<int> Constellations { get; set; } = new List<int>();
+        public List<int> Announces { get; set; } = new List<int>();
+        public List<string> Mentions { get; set; } = new List<string>();
 #endif
+        public string DefaultMention { get; set; } = "@everyone";
+        public bool ReportNewCampaign { get; set; } = true;
         public ulong DiscordChannelId { get; set; }
     }
 
@@ -951,6 +957,7 @@ namespace ThunderED.Classes
         public bool ModuleTelegram { get; set; } = false;
         public bool ModuleChatRelay { get; set; } = false;
         public bool ModuleIncursionNotify { get; set; } = false;
+        public bool ModuleNullsecCampaign { get; set; } = false;
 
         [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
         public string ZkillLiveFeedRedisqID { get; set; }

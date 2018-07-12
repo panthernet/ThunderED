@@ -90,7 +90,7 @@ namespace TED_ConfigEditor
                     foreach (var modulesEnum in AvailableModulesList)
                     {
                         var moduleName = modulesEnum.DescriptionAttr().ToLower();
-                        var p = props.FirstOrDefault(a => a.Name.ToLower() == moduleName);
+                        var p = props.FirstOrDefault(a => a.Name.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
                         if (p == null) continue;
                         p.SetValue(Settings, null);
                     }
@@ -99,10 +99,16 @@ namespace TED_ConfigEditor
                 //check added modules
                 foreach (var modulesEnum in ModulesList)
                 {
-                    var moduleName = modulesEnum.ToString();
-                    var p = cProps.FirstOrDefault(a => a.Name == moduleName);
+                    var p = cProps.FirstOrDefault(a => a.Name.Equals(modulesEnum, StringComparison.OrdinalIgnoreCase));
                     if (p == null) continue;
                     p.SetValue(Settings.Config, true);
+                }
+                //uncheck skipped modules
+                foreach (var modulesEnum in AvailableModulesList)
+                {
+                    var p = cProps.FirstOrDefault(a => a.Name.Equals(modulesEnum, StringComparison.OrdinalIgnoreCase));
+                    if (p == null) continue;
+                    p.SetValue(Settings.Config, false);
                 }
 
                 var text = Settings.Validate(ModulesList.ToList());

@@ -18,6 +18,7 @@ namespace ThunderED.Classes
         Task SQLiteDataUpdate(string table, string setField, object setData, Dictionary<string, object> where);
 
         Task SQLiteDataDelete(string table, string whereField = null, object whereValue = null);
+        Task SQLiteDataDelete(string table, Dictionary<string, object> where);
         Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken);
         Task<IList<IDictionary<string, object>>> GetAuthUser(ulong uId, bool order = false);
         Task<List<IDictionary<string, object>>> GetPendingUser(string remainder);
@@ -29,5 +30,9 @@ namespace ThunderED.Classes
         Task<List<TimerItem>> SQLiteDataSelectTimers();
         Task CleanupNotificationsList();
         Task SQLiteDataDeleteWhereIn(string table, string field, List<int> list, bool not);
+        Task<bool> RunScript(string file);
+        Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where);
+        Task<bool> IsEntryExists(string table, Dictionary<string, object> where);
+        Task SQLiteDataInsert(string table, Dictionary<string, object> values);
     }
 }

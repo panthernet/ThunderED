@@ -1,4 +1,6 @@
-﻿namespace ThunderED.Json
+﻿using Newtonsoft.Json;
+
+namespace ThunderED.Json
 {
     public partial class JsonClasses
     {
@@ -13,6 +15,9 @@
             public int star_id { get; set; }
             public int[] stargates { get; set; }
             public int system_id { get; set; }
+
+            [JsonIgnore]
+            public int? DB_RegionId;
         }
     }
 }

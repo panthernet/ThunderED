@@ -57,6 +57,9 @@
     <None Update="Content\scripts\moments\ru.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Content\sql\1.1.6.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="edb.def.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

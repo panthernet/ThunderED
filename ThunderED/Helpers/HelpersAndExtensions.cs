@@ -2,12 +2,28 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using ThunderED.Classes;
 
 namespace ThunderED.Helpers
 {
     public static class HelpersAndExtensions
     {
+        public static string ToJson(this object obj)
+        {
+            return JsonConvert.SerializeObject(obj);
+        }
+
+        public static T FromJson<T>(this T obj, string json)
+        {
+            return JsonConvert.DeserializeObject<T>(json);
+        }
+
+        public static string ToPercent(this float value)
+        {
+            return $"{value * 100}%";
+        }
+
         public static void AddOrUpdate<T, T2>(this ConcurrentDictionary<T, T2> dic, T id, T2 data)
         {
             if (dic.ContainsKey(id))

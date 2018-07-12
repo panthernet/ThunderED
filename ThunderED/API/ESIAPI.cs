@@ -254,5 +254,10 @@ namespace ThunderED.API
         {
             return await APIHelper.RequestWrapper<JsonClasses.ServerStatus>($"https://esi.tech.ccp.is/latest/status/?datasource=tranquility&language={_language}", reason);
         }
+
+        public async Task<List<JsonClasses.NullCampaignItem>> GetNullCampaigns(string reason)
+        {
+            return new List<JsonClasses.NullCampaignItem>(await APIHelper.RequestWrapper<JsonClasses.NullCampaignItem[]>($"https://esi.tech.ccp.is/latest/sovereignty/campaigns/?datasource=tranquility&language={_language}", reason));
+        }
     }
 }

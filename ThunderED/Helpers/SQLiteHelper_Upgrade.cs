@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using ThunderED.Classes;
@@ -9,7 +10,7 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "*"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "*", "1.1.6"
         };
 
         public static async Task<bool> Upgrade()
@@ -65,6 +66,16 @@ namespace ThunderED.Helpers
                         case "1.1.5":
                             await RunCommand("CREATE TABLE `incursions` ( `constId` int UNIQUE PRIMARY KEY NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP);");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
+                        case "1.1.6": 
+                            await RunCommand("CREATE TABLE `nullCampaigns` ( `groupKey` text NOT NULL, `campaignId` INTEGER NOT NULL, `time` timestamp NOT NULL, `data` TEXT NOT NULL, `lastAnnounce` INTEGER NOT NULL DEFAULT 0);");
+                            await RunCommand("CREATE INDEX nullCampaigns_groupKey_uindex ON nullCampaigns (groupKey);");
+                            await RunCommand("CREATE UNIQUE INDEX nullCampaigns_groupKey_campaignId_uindex ON nullCampaigns (groupKey, campaignId);");
+
+                            //https://www.fuzzwork.co.uk/dump/latest/
+                            if(await RunScript(Path.Combine(SettingsManager.RootDirectory, "Content", "SQL", "1.1.6.sql")))
+                                await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            else await LogHelper.LogError($"Upgrade to DB version {update} FAILED! Script not found!");
                             break;
                         default:
                             continue;

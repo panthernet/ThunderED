@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace ThunderED.Json
 {
@@ -163,6 +165,25 @@ namespace ThunderED.Json
             public int players;
             public string server_version;
             public string start_time;
+        }
+
+        public class NullCampaignItem
+        {
+            public float attackers_score;
+            public int campaign_id;
+            public int constellation_id;
+            public int defender_id;
+            public float defender_score;
+            public string event_type;
+            public int solar_system_id;
+            public string start_time;
+            public long structure_id;
+
+            [JsonIgnore]
+            public DateTimeOffset Time => DateTimeOffset.Parse(start_time);
+
+            [JsonIgnore] 
+            public int LastAnnounce;
         }
     }
 }

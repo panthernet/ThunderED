@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Classes;
+using ThunderED.Json;
 using ThunderED.Json.Internal;
 using ThunderED.Providers;
 
@@ -53,6 +56,11 @@ namespace ThunderED.Helpers
         {
             await Provider?.SQLiteDataInsertOrUpdate(table, values);
         }
+
+        internal static async Task SQLiteDataInsert(string table, Dictionary<string, object> values)
+        {
+            await Provider?.SQLiteDataInsert(table, values);
+        }
         #endregion
 
         //SQLite Delete
@@ -60,6 +68,11 @@ namespace ThunderED.Helpers
         internal static async Task SQLiteDataDelete(string table, string whereField = null, object whereValue = null)
         {
             await Provider?.SQLiteDataDelete(table, whereField, whereValue);
+        }
+
+        internal static async Task SQLiteDataDelete(string table, Dictionary<string, object> where)
+        {
+            await Provider?.SQLiteDataDelete(table, where);
         }
         #endregion
 
@@ -138,6 +151,62 @@ namespace ThunderED.Helpers
         {
             await Provider?.SQLiteDataDeleteWhereIn(table, field, list, not);
 
+        }
+
+        private static async Task<bool> RunScript(string file)
+        {
+            return await Provider?.RunScript(file);
+        }
+
+        public static async Task<List<JsonClasses.SystemName>> GetSystemsByConstellation(int constellationId)
+        {
+            return (await SelectData("mapSolarSystems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
+            {
+                {"constellationID", constellationId}
+            })).Select(item => new JsonClasses.SystemName
+            {
+                system_id = Convert.ToInt32(item[0]),
+                constellation_id = Convert.ToInt32(item[1]),
+                DB_RegionId = Convert.ToInt32(item[2]),
+                name = Convert.ToString(item[3]),
+                security_status = (float)Convert.ToDouble(item[4]),
+            }).ToList();
+        }
+
+        public static async Task<List<JsonClasses.SystemName>> GetSystemsByRegion(int regionId)
+        {
+            return (await SelectData("mapSolarSystems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
+            {
+                {"regionID", regionId}
+            })).Select(item => new JsonClasses.SystemName
+            {
+                system_id = Convert.ToInt32(item[0]),
+                constellation_id = Convert.ToInt32(item[1]),
+                DB_RegionId = Convert.ToInt32(item[2]),
+                name = Convert.ToString(item[3]),
+                security_status = (float)Convert.ToDouble(item[4]),
+            }).ToList();
+        }
+
+        public static async Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where)
+        {
+            return await Provider?.SelectData(table, fields, where);
+        }
+
+        public static async Task<bool> IsEntryExists(string table, Dictionary<string, object> where)
+        {
+            return await Provider?.IsEntryExists(table, where);
+        }
+
+        public static async Task<List<JsonClasses.NullCampaignItem>> GetNullCampaigns(string group)
+        {
+            return (await SelectData("nullCampaigns", new[] {"data", "lastAnnounce" }, new Dictionary<string, object>{{"groupKey", group}}))
+                .Select(item =>
+                {                    
+                    var i = new JsonClasses.NullCampaignItem().FromJson((string) item[0]);
+                    i.LastAnnounce = Convert.ToInt32(item[1]);
+                    return i;
+                }).ToList();
         }
     }
 }
