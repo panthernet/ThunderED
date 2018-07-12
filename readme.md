@@ -50,8 +50,9 @@ With this bot you will have tools to:
 * Jabber relay - connect with jabbers for cross messaging support
 * IRC relay - exchange messages between IRC & Discord channels
 * Telegram relay - exchange messages between Telegram & Discord channels
-* (BETA) EVE Chat relay - feed EVE ingame chat messages into Discord channel by streaming from user local apps to ThunderED server
+* EVE Chat relay - feed EVE ingame chat messages into Discord channel by streaming from user local apps to ThunderED server
 * Incursion notifications - receive notifications when specified regions or constellations has Sansha Incursions
+* Nullsec campaign  - sovereignty contest campaign notifications
 * (?) Channel MOTD integration - could be done by request
 
 ## Build Requirements
