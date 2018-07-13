@@ -1,4 +1,6 @@
 v1.1.7
++ Added missing discord roles console and file log entry for Auth module
++ Added Discord guild ID validity check
 + Upgraded to .NET Core 2.1 platform
 
 v1.1.6

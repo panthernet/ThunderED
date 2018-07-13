@@ -253,7 +253,7 @@ namespace ThunderED.Modules.OnDemand
             var corpID = characterData.corporation_id;
 
             var authSettings = TickManager.GetModule<WebAuthModule>()?.Settings.WebAuthModule;
-
+            var missedRoles = new List<string>();
             try
             {
                 //Check for Corp roles
@@ -265,6 +265,7 @@ namespace ThunderED.Modules.OnDemand
                         var f = APIHelper.DiscordAPI.GetGuildRole(a);
                         if(f != null && !rolesToAdd.Contains(f))
                             rolesToAdd.Add(f);
+                        else missedRoles.Add(a);
                     });
                 }
 
@@ -277,6 +278,7 @@ namespace ThunderED.Modules.OnDemand
                         var f = APIHelper.DiscordAPI.GetGuildRole(a);
                         if(f != null && !rolesToAdd.Contains(f))
                             rolesToAdd.Add(f);
+                        else missedRoles.Add(a);
                     });
                 }
 
@@ -286,6 +288,9 @@ namespace ThunderED.Modules.OnDemand
                     await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, string.Format(LM.Get("grantRolesMessage"), characterData.name))
                         .ConfigureAwait(false);
                 await APIHelper.DiscordAPI.AssignRolesToUser(discordUser, rolesToAdd);
+
+                if (missedRoles.Any())
+                    await LogHelper.LogWarning($"Missing discord roles: {string.Join(',', missedRoles)}");
 
                 var rolesString = new StringBuilder();
                 foreach (var role in discordUser.Roles)

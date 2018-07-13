@@ -24,6 +24,7 @@ namespace ThunderED
                 Console.ReadKey();
                 return;
             }
+
             LogHelper.LogInfo($"ThunderED v{VERSION} is running!").GetAwaiter().GetResult();
             //load database provider
             var rs = SQLHelper.LoadProvider();
@@ -46,6 +47,14 @@ namespace ThunderED
             LM.Load().GetAwaiter().GetResult();
             //load APIs
             APIHelper.Prepare().GetAwaiter().GetResult();
+           
+            if (APIHelper.DiscordAPI.GetGuild() == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[CRITICAL] DiscordGuildId - Discord guild not found!");
+                Console.ReadKey();
+            }
+
             //Load modules
             TickManager.LoadModules();
             //initiate core timer
