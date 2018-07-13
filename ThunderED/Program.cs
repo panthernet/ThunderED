@@ -53,6 +53,7 @@ namespace ThunderED
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("[CRITICAL] DiscordGuildId - Discord guild not found!");
                 Console.ReadKey();
+                return;
             }
 
             //Load modules
