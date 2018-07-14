@@ -2,6 +2,7 @@
 using System.Collections.Async;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json.ZKill;
 
@@ -21,6 +22,8 @@ namespace ThunderED.Modules.Sub
             IsRunning = true;
             try
             {
+                if(TickManager.IsNoConnection) return;
+
                 CurrentEntry = await APIHelper.ZKillAPI.GetRedisqResponce();
                 if(CurrentEntry?.package == null ) return;
                 await Queryables.ParallelForEachAsync(async q =>

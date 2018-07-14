@@ -10,9 +10,9 @@ namespace ThunderED.Helpers
         private static string _logPath;
         private static LogSeverity? _logSeverity;
 
-        public static async Task LogWarning(string message, LogCat cat = LogCat.Default, bool logConsole = true)
+        public static async Task LogWarning(string message, LogCat cat = LogCat.Default, bool logConsole = true, bool logFile = true)
         {
-            await Log(message, LogSeverity.Warning, cat, logConsole).ConfigureAwait(false);
+            await Log(message, LogSeverity.Warning, cat, logConsole, logFile).ConfigureAwait(false);
         }
 
         public static async Task LogError(string message, LogCat cat = LogCat.Default, bool logConsole = true)
