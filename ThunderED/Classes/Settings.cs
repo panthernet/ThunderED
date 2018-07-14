@@ -184,6 +184,10 @@ namespace ThunderED.Classes
         public string ImgTimerAlert { get; set; }
         public string ImgMail { get; set; }
         public string ImgIncursion { get; set; }
+        public string ImgFactionCaldari { get; set; }
+        public string ImgFactionGallente { get; set; }
+        public string ImgFactionAmarr { get; set; }
+        public string ImgFactionMinmatar { get; set; }
     }
 
     public class LiveKillFeedModuleSettings: ValidatableSettings
@@ -587,7 +591,9 @@ namespace ThunderED.Classes
 #if EDITOR
         public ObservableCollection<int> Regions { get; set; } = new ObservableCollection<int>();
         public ObservableCollection<int> Constellations { get; set; } = new ObservableCollection<int>();
+        [Comment("List of time marks in minutes before the event starts to send notifications. E.g. 15, 30 - will send notifications when 15 and 30 minutes  left for event start.")]
         public ObservableCollection<int> Announces { get; set; } = new ObservableCollection<int>();
+        [Comment("The list of Discord mentions to use for this notifications, default is @everyone")]
         public ObservableCollection<string> Mentions { get; set; } = new ObservableCollection<string>();
 #else
         public List<int> Regions { get; set; } = new List<int>();
@@ -595,8 +601,11 @@ namespace ThunderED.Classes
         public List<int> Announces { get; set; } = new List<int>();
         public List<string> Mentions { get; set; } = new List<string>();
 #endif
+        [Comment("Default mention to use for module notification messages")]
         public string DefaultMention { get; set; } = "@everyone";
+        [Comment("Send notification message when new campaign has been discovered")]
         public bool ReportNewCampaign { get; set; } = true;
+        [Comment("Discord numeric channel ID")]
         public ulong DiscordChannelId { get; set; }
     }
 
@@ -958,6 +967,8 @@ namespace ThunderED.Classes
         public bool ModuleChatRelay { get; set; } = false;
         public bool ModuleIncursionNotify { get; set; } = false;
         public bool ModuleNullsecCampaign { get; set; } = false;
+        public bool ModuleFWStats { get; set; } = true;
+        public bool ModuleLPStock { get; set; } = true;
 
         [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
         public string ZkillLiveFeedRedisqID { get; set; }

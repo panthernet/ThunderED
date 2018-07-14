@@ -23,6 +23,35 @@ namespace ThunderED.Classes
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, string.Format(LM.Get("tqStatusText"), tq.players > 20 ? LM.Get("online") : LM.Get("offline"), tq.players), true);
         }
 
+        [Command("fwstats", RunMode = RunMode.Async), Summary("Reports FW status for a faction")]
+        public async Task FWStats(string faction)
+        {
+            if (!SettingsManager.Settings.Config.ModuleFWStats) return;
+
+            switch (faction.ToLower())
+            {
+                case "caldari":
+                case "c":
+                    await FWStatsModule.PostFWSTats(faction[0], Context.Channel);
+                    break;
+                case "gallente":
+                case "g":
+                    await FWStatsModule.PostFWSTats(faction[0], Context.Channel);
+                    break;
+                case "amarr":
+                case "a":
+                    await FWStatsModule.PostFWSTats(faction[0], Context.Channel);
+                    break;
+                case "minmatar":
+                case "m":
+                    await FWStatsModule.PostFWSTats(faction[0], Context.Channel);
+                    break;
+                default:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("fwstats_error"), true);
+                    break;
+            }
+       }
+
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
         public async Task Help()
         {
@@ -89,7 +118,10 @@ namespace ThunderED.Classes
                     break;                        
                 case "pc":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpPc")}", true);
-                    break;                        
+                    break;            
+                case "fwstats":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpFwstats")}", true);
+                    break;  
 
             }
         }

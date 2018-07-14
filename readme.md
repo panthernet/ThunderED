@@ -52,7 +52,8 @@ With this bot you will have tools to:
 * Telegram relay - exchange messages between Telegram & Discord channels
 * EVE Chat relay - feed EVE ingame chat messages into Discord channel by streaming from user local apps to ThunderED server
 * Incursion notifications - receive notifications when specified regions or constellations has Sansha Incursions
-* Nullsec campaign  - sovereignty contest campaign notifications
+* Nullsec campaign  - sovereignty contest campaign notifications about TCU/IHUB entosis occurs in specified regions or constellations
+* FWStats - access to !fwstats command to display information about the FW faction along with the LP farming tips
 * (?) Channel MOTD integration - could be done by request
 
 ## Build Requirements

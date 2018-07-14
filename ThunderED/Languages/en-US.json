@@ -9,7 +9,7 @@
   "LowPower": "Low Power",
   "StructureWentLowPower": "Allied {0} is on {1}!",
   "helpText":
-    "Private commands: ** !auth | !authnotify | !web | !evetime | !stat | !about | !char | !corp | !jita | !amarr | !dodixie | !rens | !pc | !tq**\nEnter !help COMMAND in the bot private message for additional info",
+    "Private commands: ** !auth | !authnotify | !web | !evetime | !stat | !about | !char | !corp | !jita | !amarr | !dodixie | !rens | !pc | !tq |!fwstats **\nEnter !help COMMAND in the bot private message for additional info",
   "helpHelp": "don't tcp my ip!",
   "helpAuth":
     "*auth* command helps to authenticate you by EVE Online character. Send *!auth* command to the bot for additional details.",
@@ -208,5 +208,18 @@
   "NC_ScoreText": "Attacker {0}\nDefender {1}",
   "NC_Location": "Location",
   "NC_LocationText": "{0} / {1}",
-  "NC_Defender": "Defender"
+  "NC_Defender": "Defender",
+  "fwstats_error":  "Faction is not recognized. Please correct spelling and try again.",
+  "helpFwstats":  "Displays information about FW for specified faction. Examples: !fwstats minmatar | !fwstats m", 
+  "fwstats_title":  "Statistics for {0} faction",
+  "fwstats_systems":  "Controlled Systems",
+  "fwstats_pilots": "Pilots & Kills",
+  "fwstats_pilotsText":  "{0} pilots with {1} recent kills",
+  "fwstats_tier":  "Minimum Tier",
+  "fwstats_tip":  "Tip of the Day", 
+  "fwstats_notip":  "There is no tip available", 
+  "fwstats_gosell":  "Faction owns {0}% of systems, probably it is a good idea to check LP sell value and start withdrawing your actives!", 
+  "fwstats_gofarm":  "Faction owns {0}% of systems, probably it has high Tier worth of LP farm!",
+  "fwstats_goselllp":  "Average LP sell ratio is {0}! Might worth checking LP stock and start selling your LP (http://www.lpstock.ru/corp.php?corpid={1})\nTop Items:\n{2}",
+  "commandInProgress":  "Already processing this command for another request. Please try again later." 
 }

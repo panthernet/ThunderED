@@ -185,5 +185,32 @@ namespace ThunderED.Json
             [JsonIgnore] 
             public int LastAnnounce;
         }
+
+        internal class FWSystemStat
+        {
+            public string contested;
+            public int occupier_faction_id;
+            public int owner_faction_id;
+            public long solar_system_id;
+            public int victory_points;
+            public int victory_points_threshold;
+        }
+
+        public class FWStats
+        {
+            public int faction_id;
+            public FWStatsKills kills;
+            
+            public int pilots;
+            public int systems_controlled;
+        }
+
+        public class FWStatsKills
+        {
+            public int last_week;
+            public int total;
+            public int yesterday;
+        }
+
     }
 }

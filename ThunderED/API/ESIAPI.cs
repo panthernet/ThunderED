@@ -114,6 +114,12 @@ namespace ThunderED.API
                 $"https://esi.tech.ccp.is/latest/search/?categories=alliance&datasource=tranquility&language={_language}&search={name}&strict=true", reason);
         }
 
+        internal async Task<List<JsonClasses.FWSystemStat>> GetFWSystemStats(string reason)
+        {
+            return await APIHelper.RequestWrapper<List<JsonClasses.FWSystemStat>>(
+                $"https://esi.tech.ccp.is/latest/fw/systems/?datasource=tranquility&language={_language}", reason);
+        }
+
         internal async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
             var system = await SQLHelper.GetSystemById(Convert.ToInt32(id));
@@ -263,5 +269,12 @@ namespace ThunderED.API
         {
             return new List<JsonClasses.NullCampaignItem>(await APIHelper.RequestWrapper<JsonClasses.NullCampaignItem[]>($"https://esi.tech.ccp.is/latest/sovereignty/campaigns/?datasource=tranquility&language={_language}", reason));
         }
+
+        public async Task<List<JsonClasses.FWStats>> GetFWStats(string reason)
+        {
+            return await APIHelper.RequestWrapper<List<JsonClasses.FWStats>>($"https://esi.tech.ccp.is/latest/fw/stats/?datasource=tranquility&language={_language}", reason);
+
+        }
+        
     }
 }
