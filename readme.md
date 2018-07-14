@@ -57,7 +57,7 @@ With this bot you will have tools to:
 
 ## Build Requirements
 * Visual Studio 2017 Community Edition
-* .NET Core 2.0
+* .NET Core 2.1
 
 ## Pics
 ![Timers](http://dl3.joxi.net/drive/2018/05/06/0014/0683/967339/39/fcb3e030f2.jpg)

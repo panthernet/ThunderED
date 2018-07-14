@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading;
+using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 
@@ -47,7 +48,12 @@ namespace ThunderED
             LM.Load().GetAwaiter().GetResult();
             //load APIs
             APIHelper.Prepare().GetAwaiter().GetResult();
-           
+
+            while (!APIHelper.DiscordAPI.IsAvailable)
+            {
+                Task.Delay(10).GetAwaiter().GetResult();
+            }
+
             if (APIHelper.DiscordAPI.GetGuild() == null)
             {
                 Console.ForegroundColor = ConsoleColor.Red;

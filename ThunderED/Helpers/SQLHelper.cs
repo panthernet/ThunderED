@@ -208,5 +208,20 @@ namespace ThunderED.Helpers
                     return i;
                 }).ToList();
         }
+
+        public static async Task<JsonClasses.SystemName> GetSystemById(int id)
+        {
+            return (await SelectData("mapSolarSystems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
+            {
+                {"solarSystemID", id}
+            })).Select(item => new JsonClasses.SystemName
+            {
+                system_id = Convert.ToInt32(item[0]),
+                constellation_id = Convert.ToInt32(item[1]),
+                DB_RegionId = Convert.ToInt32(item[2]),
+                name = Convert.ToString(item[3]),
+                security_status = (float)Convert.ToDouble(item[4]),
+            }).FirstOrDefault();
+        }
     }
 }
