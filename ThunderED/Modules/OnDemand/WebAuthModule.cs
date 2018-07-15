@@ -72,7 +72,7 @@ namespace ThunderED.Modules.OnDemand
                     return true;
                 }
 
-                if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php"
+                if ((request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php")
                     && !request.Url.Query.Contains("&state="))
                 {
                     var assembly = Assembly.GetEntryAssembly();
@@ -147,7 +147,7 @@ namespace ThunderED.Modules.OnDemand
                             response.Headers.ContentEncoding.Add("utf-8");
                             response.Headers.ContentType.Add("text/html;charset=utf-8");
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
-                                .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")));
+                                .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")).Replace("{body}", ""));
                         }
                         else
                         {
@@ -162,6 +162,7 @@ namespace ThunderED.Modules.OnDemand
                     }
                 }
             }
+
             catch (Exception ex)
             {
                 await LogHelper.LogEx($"Error: {ex.Message}", ex, Category);

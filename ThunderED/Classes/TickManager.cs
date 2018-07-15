@@ -88,11 +88,13 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleRadiusKillFeed)
                 OnDemandModules.Add(new RadiusKillFeedModule());
 
+            if (SettingsManager.Settings.Config.ModuleChatRelay)
+                OnDemandModules.Add(new ChatRelayModule());
+
+                //IMPORTANT - web auth is the last module - to be the last for 404 handling
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
                 OnDemandModules.Add(new WebAuthModule());
 
-            if (SettingsManager.Settings.Config.ModuleChatRelay)
-                OnDemandModules.Add(new ChatRelayModule());
 
             //subscriptions
             if (SettingsManager.Settings.Config.ModuleIRC)

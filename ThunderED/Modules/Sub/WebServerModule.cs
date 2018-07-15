@@ -111,6 +111,7 @@ namespace ThunderED.Modules.Sub
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", "404 Not Found!")
                                 .Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{body}", LM.Get("WebRequestUnexpected"))
+                                .Replace("{backText}", LM.Get("backText"))
                             );
                         }
                     }

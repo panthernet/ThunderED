@@ -8,8 +8,11 @@ v1.1.7
 + Optimized star system data queries to use static data when possible
 
 ### Notes
-* 4 new settings Resources section entries - ImgFaction
-* New properties in the Config settings section: moduleFWStats, moduleLPStock
+* 4 new Resources section entries in the settings file - ImgFaction
+* New properties in the Config section of the settings file: moduleFWStats, moduleLPStock
+
+### Breaking changes
++ Platform has been updated to .NET Core 2.1 which might require an SDK update on the server
 
 v1.1.6
 + Added new defaultMention parameter for notifications filter

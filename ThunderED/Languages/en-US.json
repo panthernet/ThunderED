@@ -223,5 +223,6 @@
   "fwstats_goselllp":  "Average LP sell ratio is {0}! Might worth checking LP stock and start selling your LP (http://www.lpstock.ru/corp.php?corpid={1})\nTop Items:\n{2}",
   "commandInProgress":  "Already processing this command for another request. Please try again later.",
   "timersUrlText":  "Timers URL: {0}",
-  "helpTurl":  "Display Timers page web URL" 
+  "helpTurl":  "Display Timers page web URL",
+  "timersModuleDisabled":  "Timers module is disabled on this server" 
 }

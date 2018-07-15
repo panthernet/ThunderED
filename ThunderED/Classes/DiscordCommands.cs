@@ -28,7 +28,9 @@ namespace ThunderED.Classes
         [Command(CMD_TURL, RunMode = RunMode.Async), Summary("Display timers url")]
         public async Task TimersUrl()
         {
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersUrlText", WebServerModule.GetTimersAuthURL()), true);
+            if(SettingsManager.Settings.Config.ModuleTimers)
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersUrlText", WebServerModule.GetTimersAuthURL()), true);
+            else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersModuleDisabled"), true);
         }
 
         internal const string CMD_FWSTATS = "fwstats";
