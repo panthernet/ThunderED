@@ -221,7 +221,7 @@ namespace ThunderED.Modules
             response.Headers.ContentEncoding.Add("utf-8");
             response.Headers.ContentType.Add("text/html;charset=utf-8");
             var text = File.ReadAllText(SettingsManager.FileTemplateTimersPage).Replace("{header}", LM.Get("timersTemplateHeader"))
-                .Replace("{loggedInAs}", string.Format(LM.Get("loggedInAs"), rChar.name))
+                .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
                 .Replace("{charId}", baseCharId )
                 .Replace("{body}", await GenerateTimersHtml(isEditor, baseCharId))
                 .Replace("{isEditorElement}", isEditor ? null : "d-none")
@@ -462,7 +462,7 @@ namespace ThunderED.Modules
                 var stage = timer.GetStageName();
                 var mode = timer.GetModeName();
                 var embed = new EmbedBuilder()
-                    .WithTitle(string.Format(LM.Get("timerNotifyTitle"), string.IsNullOrEmpty(timer.timerLocation) ? "-" : timer.timerLocation))
+                    .WithTitle(LM.Get("timerNotifyTitle", string.IsNullOrEmpty(timer.timerLocation) ? "-" : timer.timerLocation))
                     .AddInlineField(LM.Get("timersType"), string.IsNullOrEmpty(mode) ? "-" : mode)
                     .AddInlineField(LM.Get("timersStage"), string.IsNullOrEmpty(stage) ? "-" : stage)
                     .AddInlineField(LM.Get("timersOwner"), string.IsNullOrEmpty(timer.timerOwner) ? "-" : timer.timerOwner)

@@ -16,14 +16,23 @@ namespace ThunderED.Classes
     public partial class DiscordCommands : ModuleBase
     {
 
-        [Command("tq", RunMode = RunMode.Async), Summary("Reports TQ status")]
+        internal const string CMD_TQ= "tq";
+        [Command(CMD_TQ, RunMode = RunMode.Async), Summary("Reports TQ status")]
         public async Task TQStatus()
         {
             var tq = await APIHelper.ESIAPI.GetServerStatus("ESIAPI");
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, string.Format(LM.Get("tqStatusText"), tq.players > 20 ? LM.Get("online") : LM.Get("offline"), tq.players), true);
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("tqStatusText", tq.players > 20 ? LM.Get("online") : LM.Get("offline"), tq.players), true);
         }
 
-        [Command("fwstats", RunMode = RunMode.Async), Summary("Reports FW status for a faction")]
+        internal const string CMD_TURL = "turl";
+        [Command(CMD_TURL, RunMode = RunMode.Async), Summary("Display timers url")]
+        public async Task TimersUrl()
+        {
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersUrlText", WebServerModule.GetTimersAuthURL()), true);
+        }
+
+        internal const string CMD_FWSTATS = "fwstats";
+        [Command(CMD_FWSTATS, RunMode = RunMode.Async), Summary("Reports FW status for a faction")]
         public async Task FWStats(string faction)
         {
             if (!SettingsManager.Settings.Config.ModuleFWStats) return;
@@ -107,7 +116,7 @@ namespace ThunderED.Classes
                 case "corp":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpCorp")}", true);
                     break;                        
-                case "tq":
+                case CMD_TQ:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTQ")}", true);
                     break;                        
                 case "jita":
@@ -119,9 +128,12 @@ namespace ThunderED.Classes
                 case "pc":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpPc")}", true);
                     break;            
-                case "fwstats":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpFwstats")}", true);
+                case CMD_FWSTATS:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpFwstats", CMD_FWSTATS)}", true);
                     break;  
+                case CMD_TURL:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTurl")}", true);
+                    break;
 
             }
         }
@@ -338,7 +350,7 @@ namespace ThunderED.Classes
                 try
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
-                        string.Format(LM.Get("authInvite"),
+                        LM.Get("authInvite",
                             $"http://{SettingsManager.Settings.WebServerModule.WebExternalIP}:{SettingsManager.Settings.WebServerModule.WebExternalPort}/auth.php"), true);
                 }
                 catch (Exception ex)
@@ -368,7 +380,7 @@ namespace ThunderED.Classes
                 try
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
-                        string.Format(LM.Get("authNotifyInvite"), WebServerModule.GetAuthNotifyURL()), true);
+                        LM.Get("authNotifyInvite", WebServerModule.GetAuthNotifyURL()), true);
                 }
                 catch (Exception ex)
                 {

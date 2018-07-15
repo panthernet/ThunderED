@@ -115,7 +115,7 @@ namespace ThunderED.Modules
             }
             sb.Remove(sb.Length - 3, 2);
 
-            var x = new EmbedBuilder().WithTitle(isUpdate ? string.Format(LM.Get("incursionUpdateHeader"), c.name, r.name) : string.Format(LM.Get("incursionNewHeader"), c.name, r.name))                
+            var x = new EmbedBuilder().WithTitle(isUpdate ? LM.Get("incursionUpdateHeader", c.name, r.name) : LM.Get("incursionNewHeader", c.name, r.name))                
                 .WithColor(isUpdate ? new Color(0x000045) : new Color(0xdd5353))
                 .WithThumbnailUrl(Settings.Resources.ImgIncursion)
                 .AddField(LM.Get("incursionInfestedSystems"), sb.ToString())

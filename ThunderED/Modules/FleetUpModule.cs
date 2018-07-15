@@ -130,7 +130,7 @@ namespace ThunderED.Modules
 
                             if (timeDiff >= epic1 && timeDiff <= epic2)
                             {
-                                await SendMessage(operation, channel, $"@everyone {string.Format(LM.Get("fuFormIn"), i, $"http://fleet-up.com/Operation#{operation.OperationId}")}",
+                                await SendMessage(operation, channel, $"@everyone {LM.Get("fuFormIn", i, $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                     false);
                                 await SQLHelper.SQLiteDataInsertOrUpdate("fleetup", new Dictionary<string, object>
                                 {
@@ -143,7 +143,7 @@ namespace ThunderED.Modules
                         //NOW
                         if (timeDiff.TotalMinutes < 1)
                         {
-                            await SendMessage(operation, channel, $"@everyone {string.Format(LM.Get("fuFormNow"), $"http://fleet-up.com/Operation#{operation.OperationId}")}",
+                            await SendMessage(operation, channel, $"@everyone {LM.Get("fuFormNow", $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                 false);
                             await SQLHelper.SQLiteDataDelete("fleetup", "id", operation.Id.ToString());
                         }

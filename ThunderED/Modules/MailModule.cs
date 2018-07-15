@@ -177,7 +177,7 @@ namespace ThunderED.Modules
                 .AddField($"{LM.Get("mailSubject")} {mail.subject}",  await PrepareBodyMessage(mail.body))
                 .WithFooter($"{labels}{LM.Get("mailDate")} {stamp}");
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
-            await APIHelper.DiscordAPI.SendMessageAsync(ch, string.Format(LM.Get("mailMsgTitle"), sender?.name), embed.Build()).ConfigureAwait(false);
+            await APIHelper.DiscordAPI.SendMessageAsync(ch, LM.Get("mailMsgTitle", sender?.name), embed.Build()).ConfigureAwait(false);
         }
 
         private async Task<string> PrepareBodyMessage(string input)

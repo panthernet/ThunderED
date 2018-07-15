@@ -58,7 +58,7 @@ namespace ThunderED.Json.Internal
             var d = GetDateTime();
             if(!d.HasValue) return null;
             var dif = (d.Value - DateTime.UtcNow);
-            return string.Format(LM.Get("timerRemains"), dif.Days, dif.Hours, dif.Minutes);
+            return LM.Get("timerRemains", dif.Days, dif.Hours, dif.Minutes);
 
         }
 

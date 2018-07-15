@@ -282,7 +282,7 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
                                                     .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
-                                                    .WithAuthor(author => author.WithName(string.Format(LM.Get("NotifyHeader_OrbitalAttacked"),
+                                                    .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_OrbitalAttacked",
                                                         struc?.name, feederCorp?.name))
                                                         .WithUrl($"http://www.zkillboard.com/character/{GetData("aggressorID", data)}"))
                                                     .AddInlineField(LM.Get("Location"), $"{systemName} - {planet?.name ?? LM.Get("Unknown")}")
@@ -311,7 +311,7 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
                                                     .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
-                                                    .WithAuthor(author => author.WithName(string.Format(LM.Get("NotifyHeader_StructureUnderAttack"),
+                                                    .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_StructureUnderAttack",
                                                         structureType == null ? LM.Get("structure").ToLower() : structureType.name))
                                                         .WithUrl($"http://www.zkillboard.com/character/{aggCharId}"))
                                                     .AddInlineField(LM.Get("System"), systemName)
@@ -335,7 +335,7 @@ namespace ThunderED.Modules
                                                     .WithColor(color)
                                                     .WithThumbnailUrl(Settings.Resources.ImgCitLowPower)
                                                     .WithAuthor(author =>
-                                                        author.WithName(string.Format(LM.Get("StructureWentLowPower"),
+                                                        author.WithName(LM.Get("StructureWentLowPower",
                                                             (structureType == null ? LM.Get("structure").ToLower() : structureType.name) ?? LM.Get("Unknown"), text)))
                                                     .AddInlineField(LM.Get("System"), systemName)
                                                     .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
@@ -356,7 +356,7 @@ namespace ThunderED.Modules
                                                     .WithColor(new Color(0xdd5353))
                                                     .WithThumbnailUrl(notification.type == "StructureLostShields" ? Settings.Resources.ImgCitLostShield : Settings.Resources.ImgCitLostArmor)
                                                     .WithAuthor(author =>
-                                                        author.WithName(string.Format(LM.Get("StructureLostArmor"),
+                                                        author.WithName(LM.Get("StructureLostArmor",
                                                             structureType == null ? LM.Get("Structure") : structureType.name, textAdd)))
                                                     .AddInlineField(LM.Get("System"), systemName)
                                                     .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
@@ -390,8 +390,8 @@ namespace ThunderED.Modules
                                                     ? Settings.Resources.ImgCitDestroyed
                                                     : Settings.Resources.ImgCitOnline;
                                                 var text = notification.type == "StructureDestroyed"
-                                                    ? string.Format(LM.Get("StructureDestroyed"), owner, structureType == null ? LM.Get("Unknown") : structureType.name)
-                                                    : string.Format(LM.Get("StructureOnline"), structureType == null ? LM.Get("Unknown") : structureType.name);
+                                                    ? LM.Get("StructureDestroyed", owner, structureType == null ? LM.Get("Unknown") : structureType.name)
+                                                    : LM.Get("StructureOnline", structureType == null ? LM.Get("Unknown") : structureType.name);
                                                 var color = notification.type == "StructureDestroyed" ? new Color(0xdd5353) : new Color(0x00ff00);
                                                 builder = new EmbedBuilder()
                                                     .WithColor(color)
@@ -411,7 +411,7 @@ namespace ThunderED.Modules
                                             {
                                                 await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                 var owner = GetData("ownerCorpName", data) ?? LM.Get("Unknown");
-                                                var text = string.Format(LM.Get("StructureAnchoring"), owner,
+                                                var text = LM.Get("StructureAnchoring", owner,
                                                     structureType == null ? LM.Get("Structure") : structureType.name);
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xff0000))
@@ -434,7 +434,7 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xf2882b))
                                                     .WithThumbnailUrl(Settings.Resources.ImgCitFuelAlert)
-                                                    .WithAuthor(author => author.WithName(string.Format(LM.Get("StructureFuelAlert"),
+                                                    .WithAuthor(author => author.WithName(LM.Get("StructureFuelAlert",
                                                         structureType == null ? LM.Get("Structure") : structureType.name)))
                                                     .AddInlineField(LM.Get("System"), systemName)
                                                     .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
@@ -462,7 +462,7 @@ namespace ThunderED.Modules
                                                     .WithColor(new Color(0xb386f7))
                                                     .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
                                                     .WithAuthor(author =>
-                                                        author.WithName(string.Format(LM.Get("MoonminingExtractionFinished"),
+                                                        author.WithName(LM.Get("MoonminingExtractionFinished",
                                                             structureType == null ? LM.Get("Structure") : structureType.name)))
                                                     .AddInlineField(LM.Get("Structure"), structureNameDirect ?? LM.Get("Unknown"))
                                                     .AddInlineField(LM.Get("Composition"), compText.ToString())
@@ -480,7 +480,7 @@ namespace ThunderED.Modules
                                                     .WithColor(new Color(0xb386f7))
                                                     .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
                                                     .WithAuthor(author =>
-                                                        author.WithName(string.Format(LM.Get("MoonminingLaserFired"),
+                                                        author.WithName(LM.Get("MoonminingLaserFired",
                                                             structureType == null ? LM.Get("Structure") : structureType.name)))
                                                     .AddInlineField(LM.Get("Structure"), structureNameDirect ?? LM.Get("Unknown"))
                                                     .AddInlineField(LM.Get("FiredBy"), moonFiredBy)
@@ -501,16 +501,16 @@ namespace ThunderED.Modules
 						var text = "";
 						switch(notification.type) {
 							case "CharLeftCorpMsg":
-								text = string.Format(LM.Get("CharLeftCorpMsg"), character?.name, corp?.name);
+								text = LM.Get("CharLeftCorpMsg", character?.name, corp?.name);
 								break;
 							case "CharAppAcceptMsg":
-								text = string.Format(LM.Get("CharAppAcceptMsg"), character?.name, corp?.name);
+								text = LM.Get("CharAppAcceptMsg", character?.name, corp?.name);
 								break;
 							case "CorpAppNewMsg":
-								text = string.Format(LM.Get("CorpAppNewMsg"), character?.name, corp?.name);
+								text = LM.Get("CorpAppNewMsg", character?.name, corp?.name);
 								break;
 							case "CharAppWithdrawMsg":
-								text = string.Format(LM.Get("CharAppWithdrawMsg"), character?.name, corp?.name);
+								text = LM.Get("CharAppWithdrawMsg", character?.name, corp?.name);
 								break;
 						}
 						var applicationText = notification.type == "CharLeftCorpMsg" ? "" : GetData("applicationText", data);
@@ -540,7 +540,7 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
                                                     .WithAuthor(
-                                                        author => author.WithName(string.Format(LM.Get("SovStructureDestroyed"), structureType?.name, systemName)))
+                                                        author => author.WithName(LM.Get("SovStructureDestroyed", structureType?.name, systemName)))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
                                                 embed = builder.Build();
@@ -556,7 +556,7 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
                                                     .WithAuthor(
-                                                        author => author.WithName(string.Format(LM.Get("SovStationEnteredFreeport"), structureType?.name, systemName)))
+                                                        author => author.WithName(LM.Get("SovStationEnteredFreeport", structureType?.name, systemName)))
                                                     .AddInlineField("Exit Time", exittime)
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
@@ -572,7 +572,7 @@ namespace ThunderED.Modules
                                                     .WithColor(new Color(0xdd5353))
                                                     .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
                                                     .WithAuthor(author =>
-                                                        author.WithName(string.Format(LM.Get("StationServiceDisabled"), structureType?.name, systemName)))
+                                                        author.WithName(LM.Get("StationServiceDisabled", structureType?.name, systemName)))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
                                                 embed = builder.Build();
@@ -592,7 +592,7 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
                                                     .WithAuthor(author =>
-                                                        author.WithName(string.Format(LM.Get("SovCommandNodeEventStarted"), cmp, systemName, constellation?.name)))
+                                                        author.WithName(LM.Get("SovCommandNodeEventStarted", cmp, systemName, constellation?.name)))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
                                                 embed = builder.Build();
@@ -610,7 +610,7 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
                                                     .WithAuthor(author =>
-                                                        author.WithName(string.Format(LM.Get("SovStructureReinforced"), cmp, systemName)))
+                                                        author.WithName(LM.Get("SovStructureReinforced", cmp, systemName)))
                                                     .AddInlineField("Decloak Time", decloakTime.ToString())
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
@@ -626,7 +626,7 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xdd5353))
                                                     .WithAuthor(
-                                                        author => author.WithName(string.Format(LM.Get("EntosisCaptureStarted"), structureType?.name, systemName)))
+                                                        author => author.WithName(LM.Get("EntosisCaptureStarted", structureType?.name, systemName)))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
                                                 embed = builder.Build();
@@ -671,8 +671,8 @@ namespace ThunderED.Modules
                                                     ? $"{(isAllianceDecl ? LM.Get("Alliance") : LM.Get("Corporation"))} {declName} {LM.Get("declaresWarAgainst")} {declNameAgainst}!"
                                                     : $"{(isAllianceDecl ? LM.Get("Alliance") : LM.Get("Corporation"))} {declName} {LM.Get("invalidatesWarAgainst")} {declNameAgainst}!";
                                                 var template2 = notification.type == "AllWarDeclaredMsg" || notification.type == "CorpWarDeclaredMsg"
-                                                    ? string.Format(LM.Get("fightWillBegin"), GetData("delayHours", data))
-                                                    : string.Format(LM.Get("fightWillEnd"), GetData("delayHours", data));
+                                                    ? LM.Get("fightWillBegin", GetData("delayHours", data))
+                                                    : LM.Get("fightWillEnd", GetData("delayHours", data));
                                                 var color = notification.type == "AllWarDeclaredMsg" || notification.type == "CorpWarDeclaredMsg"
                                                     ? new Color(0xdd5353)
                                                     : new Color(0x00ff00);
@@ -704,7 +704,7 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xff0000))
                                                     .WithThumbnailUrl(Settings.Resources.ImgWarAssist)
-                                                    .WithAuthor(author => author.WithName(string.Format(LM.Get("AllyJoinedWarAggressorMsg"), ally, defender))
+                                                    .WithAuthor(author => author.WithName(LM.Get("AllyJoinedWarAggressorMsg", ally, defender))
                                                         .WithUrl( $"http://www.zkillboard.com/alliance/{allyID}"))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
@@ -742,7 +742,7 @@ namespace ThunderED.Modules
                                                     .WithColor(new Color(0xff0000))
                                                     .WithThumbnailUrl(Settings.Resources.ImgWarAssist)
                                                     .WithAuthor(author =>
-                                                        author.WithName(string.Format(LM.Get("AllyJoinedWarDefenderMsg"), allyStr, defenderStr, agressorStr))
+                                                        author.WithName(LM.Get("AllyJoinedWarDefenderMsg", allyStr, defenderStr, agressorStr))
                                                             .WithUrl( $"http://www.zkillboard.com/alliance/{allyID}"))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
@@ -765,7 +765,7 @@ namespace ThunderED.Modules
                                                     .WithColor(new Color(0x00ff00))
                                                     .WithThumbnailUrl(Settings.Resources.ImgWarAssist)
                                                     .WithAuthor(author =>
-                                                        author.WithName(string.Format(LM.Get("AllyJoinedWarAllyMsg"), allyStr2, defenderStr2, agressorStr2))
+                                                        author.WithName(LM.Get("AllyJoinedWarAllyMsg", allyStr2, defenderStr2, agressorStr2))
                                                             .WithUrl( $"http://www.zkillboard.com/alliance/{allyID}"))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
@@ -790,8 +790,8 @@ namespace ThunderED.Modules
                                                 builder = new EmbedBuilder()
                                                     .WithColor(new Color(0xff0000))
                                                     .WithThumbnailUrl(Settings.Resources.ImgLowFWStand)
-                                                    .WithAuthor(author => author.WithName(string.Format(LM.Get("FWAllianceWarningMsg"), allyStr3)))
-                                                    .AddInlineField(LM.Get("BlameCorp"), string.Format(LM.Get("standMissing"), corpStr3, required))
+                                                    .WithAuthor(author => author.WithName(LM.Get("FWAllianceWarningMsg", allyStr3)))
+                                                    .AddInlineField(LM.Get("BlameCorp"), LM.Get("standMissing", corpStr3, required))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
                                                 embed = builder.Build();
@@ -887,7 +887,7 @@ namespace ThunderED.Modules
                     await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
                     await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                     await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
-                        .Replace("{body2}", string.Format(LM.Get("authTokenRcv2"), rChar.name))
+                        .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
                         .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")));
                     return true;
                 }                

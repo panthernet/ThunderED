@@ -51,7 +51,7 @@ namespace ThunderED.Modules.Static
                     var itemIDResults = JsonConvert.DeserializeObject<JsonClasses.SearchInventoryType>(itemIDResult);
 
                     if (string.IsNullOrWhiteSpace(itemIDResults.inventory_type?.ToString()))
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, string.Format(LM.Get("itemNotExist"),command));
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("itemNotExist",command));
                     else if (itemIDResults.inventory_type.Count() > 1)
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("seeDM"));

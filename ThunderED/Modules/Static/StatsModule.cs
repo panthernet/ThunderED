@@ -82,13 +82,13 @@ namespace ThunderED.Modules.Static
                     {
                         date = today.Subtract(TimeSpan.FromDays(1));
                         var msg =
-                            $"**{string.Format(LM.Get("dailyStats"), date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
+                            $"**{LM.Get("dailyStats", date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
                         await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), msg).ConfigureAwait(false);
                     }
                     else
                     {
                         var msg =
-                            $"**{string.Format(LM.Get("dailyStats"), date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
+                            $"**{LM.Get("dailyStats", date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg, true).ConfigureAwait(false);
                     }
                 }
@@ -102,7 +102,7 @@ namespace ThunderED.Modules.Static
                         var data = result.Months.FirstOrDefault(a => a.Value.Year == now.Year && a.Value.Month == now.Month).Value;
                         if (data == null) return;
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                            $"**{string.Format(LM.Get("monthlyStats"), result.Info.Name)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                            $"**{LM.Get("monthlyStats", result.Info.Name)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
                     }
                     else if (command.All(char.IsDigit))
                     {
@@ -113,7 +113,7 @@ namespace ThunderED.Modules.Static
                         var iskDestroyed = list.Sum(a => a.Value.IskDestroyed);
                         var iskLost = list.Sum(a => a.Value.IskLost);
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                            $"**{string.Format(LM.Get("yearlyStats"), result.Info.Name, command)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)");
+                            $"**{LM.Get("yearlyStats", result.Info.Name, command)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)");
                     }
                     else if (command.Contains("/"))
                     {
@@ -128,7 +128,7 @@ namespace ThunderED.Modules.Static
                         var iskDestroyed = list.Sum(a => a.Value.IskDestroyed);
                         var iskLost = list.Sum(a => a.Value.IskLost);
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                            $"**{string.Format(LM.Get("monthlyCustomStats"), result.Info.Name, command)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)");
+                            $"**{LM.Get("monthlyCustomStats", result.Info.Name, command)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)");
                     }
                 }
             }

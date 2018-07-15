@@ -202,9 +202,9 @@ namespace ThunderED.API
                 var channel = arg.Guild.DefaultChannel;
                 var authurl = $"http://{SettingsManager.Settings.WebServerModule.WebExternalIP}:{SettingsManager.Settings.WebServerModule.WebExternalPort}/auth.php";
                 if (!string.IsNullOrWhiteSpace(authurl))
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, string.Format(LM.Get("welcomeMessage"),arg.Mention,authurl));
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeMessage",arg.Mention,authurl));
                 else
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, string.Format(LM.Get("welcomeAuth"), arg.Mention));
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention));
             }
         }
 
@@ -432,9 +432,9 @@ namespace ThunderED.API
             , string aTicker, bool isNpcKill, string atName, string atCorp, string atTicker, int atCount, string radiusMessage, string msg = "")
         {
             msg = msg ?? "";
-            var killString = string.Format(LM.Get("killFeedString"), !string.IsNullOrEmpty(radiusMessage) ? "R " : null, shipName, value, cName,
+            var killString = LM.Get("killFeedString", !string.IsNullOrEmpty(radiusMessage) ? "R " : null, shipName, value, cName,
                 corpName, string.IsNullOrEmpty(aTicker) ? null : aTicker, sysName, secstatus, killTime);
-            var killedBy = isNpcKill ? null : string.Format(LM.Get("killFeedBy"), atName, atCorp, string.IsNullOrEmpty(atTicker) ? null : atTicker, atCount);
+            var killedBy = isNpcKill ? null : LM.Get("killFeedBy", atName, atCorp, string.IsNullOrEmpty(atTicker) ? null : atTicker, atCount);
             var builder = new EmbedBuilder()
                 .WithColor(color)
                 .WithThumbnailUrl($"https://image.eveonline.com/Type/{shipID}_32.png")

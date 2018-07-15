@@ -136,7 +136,7 @@ namespace ThunderED.Modules.OnDemand
 
                             await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth2).Replace("{url}", Settings.WebServerModule.DiscordUrl).Replace("{image}", image)
                                 .Replace("{uid}", uid).Replace("{header}", LM.Get("authTemplateHeader"))
-                                .Replace("{body}", string.Format(LM.Get("authTemplateSucc1"), rChar.name))
+                                .Replace("{body}", LM.Get("authTemplateSucc1", rChar.name))
                                 .Replace("{body2}", LM.Get("authTemplateSucc2")).Replace("{body3}", LM.Get("authTemplateSucc3")).Replace("{backText}", LM.Get("backText")));
                         }
                         else if (!esiFailure)
@@ -285,7 +285,7 @@ namespace ThunderED.Modules.OnDemand
                 var discordUser = APIHelper.DiscordAPI.GetUser(context.Message.Author.Id);
 
                 if (authSettings.AuthReportChannel != 0)
-                    await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, string.Format(LM.Get("grantRolesMessage"), characterData.name))
+                    await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, LM.Get("grantRolesMessage", characterData.name))
                         .ConfigureAwait(false);
                 await APIHelper.DiscordAPI.AssignRolesToUser(discordUser, rolesToAdd);
 
@@ -304,7 +304,7 @@ namespace ThunderED.Modules.OnDemand
 
                 await SQLHelper.SQLiteDataUpdate("pendingUsers", "active", "0", "authString", remainder);
 
-                await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, string.Format(LM.Get("msgAuthSuccess"), context.Message.Author.Mention, characterData.name));
+                await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, LM.Get("msgAuthSuccess", context.Message.Author.Mention, characterData.name));
                 var eveName = characterData.name;
                 var discordID = discordUser.Id;
                 var addedOn = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");

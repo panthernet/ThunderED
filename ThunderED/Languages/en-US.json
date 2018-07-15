@@ -210,7 +210,7 @@
   "NC_LocationText": "{0} / {1}",
   "NC_Defender": "Defender",
   "fwstats_error":  "Faction is not recognized. Please correct spelling and try again.",
-  "helpFwstats":  "Displays information about FW for specified faction. Examples: !fwstats minmatar | !fwstats m", 
+  "helpFwstats":  "Displays information about FW for specified faction. Examples: !{0} minmatar | !{0} m", 
   "fwstats_title":  "Statistics for {0} faction",
   "fwstats_systems":  "Controlled Systems",
   "fwstats_pilots": "Pilots & Kills",
@@ -221,5 +221,7 @@
   "fwstats_gosell":  "Faction owns {0}% of systems, probably it is a good idea to check LP sell value and start withdrawing your actives!", 
   "fwstats_gofarm":  "Faction owns {0}% of systems, probably it has high Tier worth of LP farm!",
   "fwstats_goselllp":  "Average LP sell ratio is {0}! Might worth checking LP stock and start selling your LP (http://www.lpstock.ru/corp.php?corpid={1})\nTop Items:\n{2}",
-  "commandInProgress":  "Already processing this command for another request. Please try again later." 
+  "commandInProgress":  "Already processing this command for another request. Please try again later.",
+  "timersUrlText":  "Timers URL: {0}",
+  "helpTurl":  "Display Timers page web URL" 
 }
