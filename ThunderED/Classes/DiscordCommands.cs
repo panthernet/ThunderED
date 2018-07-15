@@ -24,6 +24,47 @@ namespace ThunderED.Classes
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("tqStatusText", tq.players > 20 ? LM.Get("online") : LM.Get("offline"), tq.players), true);
         }
 
+        internal const string CMD_TIMERS= "timers";
+
+        [Command(CMD_TIMERS, RunMode = RunMode.Async), Summary("Report timers to bot private")]
+        public async Task TimersCommand()
+        {
+            if (!SettingsManager.Settings.Config.ModuleTimers)
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersModuleDisabled"), true);
+                return;
+            }
+
+            
+            if (!await APIHelper.DiscordAPI.IsBotPrivateChannel(Context.Channel))
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("onyBotPrivateCommand"), true);
+                return;
+            }
+
+            var timers = await TimersModule.GetUpcomingTimersString();
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"```\n{timers}\n```", true);
+        }
+
+        [Command(CMD_TIMERS, RunMode = RunMode.Async), Summary("Report timers to bot private")]
+        public async Task TimersCommand2(int value)
+        {
+            if (!SettingsManager.Settings.Config.ModuleTimers)
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersModuleDisabled"), true);
+                return;
+            }
+
+            if (!await APIHelper.DiscordAPI.IsBotPrivateChannel(Context.Channel))
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("onyBotPrivateCommand"), true);
+                return;
+            }
+
+            var timers = TimersModule.GetUpcomingTimersString(value);
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"```\n{timers}\n```", true);
+        }
+
         internal const string CMD_TURL = "turl";
         [Command(CMD_TURL, RunMode = RunMode.Async), Summary("Display timers url")]
         public async Task TimersUrl()
@@ -135,6 +176,9 @@ namespace ThunderED.Classes
                     break;  
                 case CMD_TURL:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTurl")}", true);
+                    break;
+                case CMD_TIMERS:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTimers")}", true);
                     break;
 
             }

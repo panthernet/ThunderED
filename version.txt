@@ -3,6 +3,7 @@ v1.1.7
 + Added Discord guild ID validity check
 + Added new module: moduleFWStats - access to !fwstats command
 + Added new command *!turl* - displays timers auth page url
++ Added new command *!timers* - displays upcoming timers list
 + Added connection status check to avoid excessive requests and logging while EVE is offline or network connection is not available
 + Upgraded to .NET Core 2.1 platform
 + Optimized star system data queries to use static data when possible

@@ -53,12 +53,12 @@ namespace ThunderED.Json.Internal
             }
         }
 
-        public string GetRemains()
+        public string GetRemains(bool addWord = false)
         {
             var d = GetDateTime();
             if(!d.HasValue) return null;
             var dif = (d.Value - DateTime.UtcNow);
-            return LM.Get("timerRemains", dif.Days, dif.Hours, dif.Minutes);
+            return $"{(addWord ? $"{LM.Get("Remains")} " : null)}{LM.Get("timerRemains", dif.Days, dif.Hours, dif.Minutes)}";
 
         }
 

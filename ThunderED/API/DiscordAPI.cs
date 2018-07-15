@@ -547,5 +547,10 @@ namespace ThunderED.API
         }
 
 
+        public async Task<bool> IsBotPrivateChannel(IMessageChannel contextChannel)
+        {
+            return contextChannel.GetType() == typeof(SocketDMChannel) && await contextChannel.GetUserAsync(Client.CurrentUser.Id) != null;
+
+        }
     }
 }

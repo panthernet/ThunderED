@@ -484,5 +484,26 @@ namespace ThunderED.Modules
             await SQLHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
 
         }
+
+        public static async Task<string> GetUpcomingTimersString(int count = 5)
+        {
+            var timers = await SQLHelper.SQLiteDataSelectTimers();
+            var sb = new StringBuilder();
+            if (timers.Count > 0)
+            {
+                for (int i = 0; i < timers.Count && i < count; i++)
+                {
+                    var timer = timers[i];
+                    sb.Append(
+                        $"[{timer.GetModeName()}][{timer.GetStageName()}] {timer.timerLocation} - {timer.GetRemains(true)} ({timer.GetDateTime().Value.ToString(SettingsManager.Settings.Config.ShortTimeFormat)} ET)\n");
+                }
+            }
+            else
+            {
+                sb.Append(LM.Get("timers_none"));
+            }
+
+            return sb.ToString();
+        }
     }
 }

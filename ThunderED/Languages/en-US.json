@@ -9,7 +9,7 @@
   "LowPower": "Low Power",
   "StructureWentLowPower": "Allied {0} is on {1}!",
   "helpText":
-    "Private commands: ** !auth | !authnotify | !web | !evetime | !stat | !about | !char | !corp | !jita | !amarr | !dodixie | !rens | !pc | !tq |!fwstats **\nEnter !help COMMAND in the bot private message for additional info",
+    "Private commands: ** !auth | !authnotify | !web | !evetime | !stat | !about | !char | !corp | !jita | !amarr | !dodixie | !rens | !pc | !tq | !fwstats | !turl | !timers **\nEnter !help COMMAND in the bot private message for additional info",
   "helpHelp": "don't tcp my ip!",
   "helpAuth":
     "*auth* command helps to authenticate you by EVE Online character. Send *!auth* command to the bot for additional details.",
@@ -224,5 +224,9 @@
   "commandInProgress":  "Already processing this command for another request. Please try again later.",
   "timersUrlText":  "Timers URL: {0}",
   "helpTurl":  "Display Timers page web URL",
-  "timersModuleDisabled":  "Timers module is disabled on this server" 
+  "timersModuleDisabled":  "Timers module is disabled on this server",
+  "onyBotPrivateCommand": "This command can only be sent to the bot in private!",
+  "helpTimers":  "Display list of upcoming timers. Can only be sent to bot in private. Example: !{0} | !{0} 3",
+  "Remains":  "Remains",
+  "timers_none":  "Not timers found!" 
 }

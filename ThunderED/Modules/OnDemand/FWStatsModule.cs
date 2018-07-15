@@ -102,7 +102,7 @@ namespace ThunderED.Modules.OnDemand
                         {
                             avgRatio = Math.Round(lpstockList.Average(a => a.Ratio), 1);
                             var sb = new StringBuilder();
-                            for (var i = 0; i < lpstockList.Count || i < 3; i++)
+                            for (var i = 0; i < lpstockList.Count && i < 3; i++)
                             {
                                 sb.Append((i + 1).ToString());
                                 sb.Append(". ");
