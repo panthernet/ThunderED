@@ -42,8 +42,29 @@ namespace ThunderED.Classes
                 return;
             }
 
-            var timers = await TimersModule.GetUpcomingTimersString();
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"```\n{timers}\n```", true);
+            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsAlliance).Select(a => a.Id);
+            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCorporation).Select(a => a.Id);
+            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCharacter).Select(a => a.Id);
+
+            var dataList = (await SQLHelper.GetAuthUser(Context.User.Id))?.FirstOrDefault();
+            if (dataList != null && dataList.Count > 0 && dataList.ContainsKey("characterID"))
+            {
+                var chId = Convert.ToInt64(dataList["characterID"]);
+                var ch = await APIHelper.ESIAPI.GetCharacterData("Discord", chId, true);
+                if (ch != null)
+                {
+                    if (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains((int)chId))
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("accessDenied"), true);
+                        return;
+                    }
+                    var timers = await TimersModule.GetUpcomingTimersString();
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"```\n{timers}\n```", true);
+                    return;
+                }
+            }
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("accessDenied"), true);
+
         }
 
         [Command(CMD_TIMERS, RunMode = RunMode.Async), Summary("Report timers to bot private")]
@@ -61,8 +82,28 @@ namespace ThunderED.Classes
                 return;
             }
 
-            var timers = TimersModule.GetUpcomingTimersString(value);
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"```\n{timers}\n```", true);
+            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsAlliance).Select(a => a.Id);
+            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCorporation).Select(a => a.Id);
+            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCharacter).Select(a => a.Id);
+
+            var dataList = (await SQLHelper.GetAuthUser(Context.User.Id))?.FirstOrDefault();
+            if (dataList != null && dataList.Count > 0 && dataList.ContainsKey("characterId"))
+            {
+                var chId = Convert.ToInt64(dataList["characterId"]);
+                var ch = await APIHelper.ESIAPI.GetCharacterData("Discord", chId, true);
+                if (ch != null)
+                {
+                    if (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains((int)chId))
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("accessDenied"), true);
+                        return;
+                    }
+                    var timers = await TimersModule.GetUpcomingTimersString(value);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"```\n{timers}\n```", true);
+                    return;
+                }
+            }
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("accessDenied"), true);
         }
 
         internal const string CMD_TURL = "turl";

@@ -228,5 +228,6 @@
   "onyBotPrivateCommand": "This command can only be sent to the bot in private!",
   "helpTimers":  "Display list of upcoming timers. Can only be sent to bot in private. Example: !{0} | !{0} 3",
   "Remains":  "Remains",
-  "timers_none":  "Not timers found!" 
+  "timers_none":  "Not timers found!",
+  "accessDenied":  "Access Denied" 
 }
