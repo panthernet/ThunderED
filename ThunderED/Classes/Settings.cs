@@ -576,7 +576,7 @@ namespace ThunderED.Classes
 #endif
     }
 
-    public class NullCampaignModuleSettings
+    public class NullCampaignModuleSettings: ValidatableSettings
     {
         public int CheckIntervalInMinutes { get; set; } = 1;
 #if EDITOR
@@ -584,14 +584,31 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, NullCampaignGroup> Groups { get; set; } = new Dictionary<string, NullCampaignGroup>(); 
 #endif
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(CheckIntervalInMinutes):
+                        return CheckIntervalInMinutes < 1 ? Compose(nameof(CheckIntervalInMinutes), "Value must be greater than 0 or the bot will blow up!") : null;
+                    case nameof(Groups):
+                        return Groups.Count == 0 ? Compose(nameof(Groups), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                }
+
+                return null;
+            }
+        }
+#endif
     }
 
-    public class NullCampaignGroup
+    public class NullCampaignGroup: ValidatableSettings
     {
 #if EDITOR
         public ObservableCollection<int> Regions { get; set; } = new ObservableCollection<int>();
         public ObservableCollection<int> Constellations { get; set; } = new ObservableCollection<int>();
-        [Comment("List of time marks in minutes before the event starts to send notifications. E.g. 15, 30 - will send notifications when 15 and 30 minutes  left for event start.")]
+        [Comment("List of time marks in minutes before the event starts to send notifications. E.g. 15, 30 - will send notifications when 15 and 30 minutes left for event start.")]
         public ObservableCollection<int> Announces { get; set; } = new ObservableCollection<int>();
         [Comment("The list of Discord mentions to use for this notifications, default is @everyone")]
         public ObservableCollection<string> Mentions { get; set; } = new ObservableCollection<string>();
@@ -607,6 +624,24 @@ namespace ThunderED.Classes
         public bool ReportNewCampaign { get; set; } = true;
         [Comment("Discord numeric channel ID")]
         public ulong DiscordChannelId { get; set; }
+
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(DiscordChannelId):
+                        return DiscordChannelId == 0 ? Compose(nameof(DiscordChannelId), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(Regions):
+                        return Regions.Count == 0 && Constellations.Count == 0? Compose(nameof(Regions), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                }
+
+                return null;
+            }
+        }
+#endif
     }
 
     public class NotificationFeedSettings: ValidatableSettings

@@ -104,7 +104,7 @@
   "marketLow": "Low",
   "marketMid": "Mid",
   "marketHigh": "High",
-  "authTokenInvalid": "Refresh token request is invalid or outdated. Please try again.",
+  "authTokenInvalid": "Refresh token request is invalid or outdated. Character not found.\nPlease try again.",
   "authTokenBadRequest": "Character you'd selected is not authorized for notifications! Please contact your bot admin.",
   "authNonAlly": "You're not in our alliance and not blue to us!",
   "authHasInvalidKey": "has invalid key! Use *!auth* command",
