@@ -122,9 +122,8 @@ namespace ThunderED.Classes
 
         private static int _cacheInterval;
         private static DateTime _lastOnlineCheck;
-        private static bool _wereOffline;
 
-        public static bool IsNoConnection => _wereOffline;
+        public static bool IsNoConnection { get; private set; }
 
         private static async Task Async_Tick(object stateInfo)
         {
@@ -138,20 +137,25 @@ namespace ThunderED.Classes
                     _lastOnlineCheck = _asyncNow;
                     if (!await APIHelper.ESIAPI.IsServerOnline("General"))
                     {
-                        if(!_wereOffline)
-                            await LogHelper.LogWarning("EVE server is offline or there is a connection problem!", LogCat.ESI, true, false);
-                        _wereOffline = true;
+                        if (!IsNoConnection)
+                        {
+                            await LogHelper.LogWarning("EVE server is offline or there is a connection problem!", LogCat.ESI);
+                            await LogHelper.LogWarning("Waiting for connection....", LogCat.ESI);
+                        }
+                        IsNoConnection = true;
                         return;
                     }
                     else
                     {
-                        if (_wereOffline)
+                        if (IsNoConnection)
                         {
-                            _wereOffline = false;
+                            IsNoConnection = false;
                             await LogHelper.LogWarning("EVE server is ONLINE or connection has been restored!", LogCat.ESI, true, false);
                         }
                     }
                 }
+
+                if(IsNoConnection) return;
 
                 //cache handling
                 if ((_asyncNow - _memoryCheckTime).TotalMinutes >= 30)
