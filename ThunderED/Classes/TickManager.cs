@@ -44,6 +44,7 @@ namespace ThunderED.Classes
             //sub modules - core modules that are called in each tick and can supply other modules with some data
             Modules.Add(new ZKillLiveFeedModule());
             Modules.Add(new WebServerModule());
+            Modules.Add(new ContinousCheckModule());
 
             //dynamic modules - called in each tick
 
@@ -79,7 +80,6 @@ namespace ThunderED.Classes
 
             if(SettingsManager.Settings.Config.ModuleNullsecCampaign)
                 Modules.Add(new NullCampaignModule());
-
 
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)

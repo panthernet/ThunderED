@@ -49,6 +49,9 @@ namespace ThunderED.Classes
         [ConfigEntryName("moduleJabber")]
         public JabberModuleSettings JabberModule { get; set; } = new JabberModuleSettings();
 
+        [ConfigEntryName("")]
+        public ContinousCheckModuleSettings ContinousCheckModule { get; set; } = new ContinousCheckModuleSettings();
+
 #if EDITOR
         public string Validate(List<string> usedModules)
         {
@@ -75,6 +78,34 @@ namespace ThunderED.Classes
             }
 
             return sb.ToString();
+        }
+#endif
+    }
+
+    public class ContinousCheckModuleSettings: ValidatableSettings
+    {
+        [Comment("Enable posting about TQ status into specified channels")]
+        public bool EnableTQStatusPost { get; set; }
+
+        [Comment("Discord mention string to use for message")]
+        public string TQStatusPostMention { get; set; } = "@everyone";
+#if EDITOR
+        public ObservableCollection<ulong> TQStatusPostChannels { get; set; } = new ObservableCollection<ulong>();
+#else
+        public List<ulong> TQStatusPostChannels { get; set; } = new List<ulong>();
+#endif
+
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                }
+
+                return null;
+            }
         }
 #endif
     }
@@ -1028,7 +1059,7 @@ namespace ThunderED.Classes
         public string DatabaseFile { get; set; } = "edb.db";
 
 #if EDITOR
-        public override string this[string columnName]
+   bool public override string this[string columnName]
         {
             get
             {

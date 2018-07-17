@@ -31,6 +31,7 @@
         Telegram,
         ChatRelay,
         Incursions,
-        NullCampaign
+        NullCampaign,
+        AutoPost
     }
 }
