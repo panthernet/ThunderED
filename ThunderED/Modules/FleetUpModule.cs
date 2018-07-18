@@ -29,7 +29,7 @@ namespace ThunderED.Modules
             var location = operation.Location;
             var details = operation.Details;
 
-            var format = SettingsManager.Settings.Config.TimeFormat ?? "dd.MM.yyyy HH:mm";
+            var format = SettingsManager.Settings.Config.ShortTimeFormat ?? "dd.MM.yyyy HH:mm";
 
             var url = $"http://fleet-up.com/Operation#{operation.OperationId}";
             var locationText = $"[{ location}](http://evemaps.dotlan.net/system/{location})";

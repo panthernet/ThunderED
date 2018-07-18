@@ -20,6 +20,11 @@ namespace ThunderED.Classes
     {
     }
 
+    public class StaticConfigEntryAttribute : Attribute
+    {
+
+    }
+
     public class PropertyNameAttribute : Attribute
     {
         public string Name { get; set; }

@@ -72,6 +72,7 @@ namespace TED_ConfigEditor
 
             configModuleControl.Visibility = Visibility.Collapsed;
             modulesPanel.Visibility = Visibility.Collapsed;
+            listBox.Visibility = Visibility.Collapsed;
 
             ResetFile();
             //Title = $"ThunderED Bot Config Tool v{Program.VERSION}";
@@ -140,6 +141,15 @@ namespace TED_ConfigEditor
             AvailableModulesList = new ObservableCollection<string>(GetAvailableModuleNames());
             SelectedModuleToAdd = AvailableModulesList.FirstOrDefault();
             ModulesList.Clear();
+            GetStaticModulesList().ForEach(ModulesList.Add);
+
+
+        }
+
+        public List<string> GetStaticModulesList()
+        {
+            return Settings.GetType().GetProperties().Where(a => a.Name != "Config" && a.HasAttribute<StaticConfigEntryAttribute>()).Select(a => a.Name)
+                .Where(a => !string.IsNullOrEmpty(a)).ToList();
         }
 
         public List<string> GetAvailableModuleNames()
@@ -153,9 +163,14 @@ namespace TED_ConfigEditor
             return Settings.GetType().GetProperties().FirstOrDefault(a => (string) a.GetAttributeValue<ConfigEntryNameAttribute>("Name") == name);
         }
 
+        public PropertyInfo GetPropertyByName(string name)
+        {
+            return Settings.GetType().GetProperties().FirstOrDefault(a => a.Name == name);
+        }
+
         private async void AddFileExecuted(object obj)
         {
-            if (!string.IsNullOrEmpty(FileName) || ModulesList.Count > 0)
+            if (!string.IsNullOrEmpty(FileName) || (ModulesList.Count > 0 && ModulesList.Count != GetStaticModulesList().Count))
             {
                 if(await this.ShowMessageAsync("Warning", "Create new settings file? All unsaved changed will be lost.", MessageDialogStyle.AffirmativeAndNegative) == MessageDialogResult.Negative)
                     return;
@@ -177,6 +192,7 @@ namespace TED_ConfigEditor
             UpdateBindings();
             configModuleControl.Visibility = Visibility.Visible;
             modulesPanel.Visibility = Visibility.Visible;
+            listBox.Visibility = Visibility.Visible;
         }
 
         private async void OpenFileExecuted(object obj)
@@ -211,6 +227,7 @@ namespace TED_ConfigEditor
                 UpdateBindings();
                 configModuleControl.Visibility = Visibility.Visible;
                 modulesPanel.Visibility = Visibility.Visible;
+                listBox.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
@@ -227,6 +244,7 @@ namespace TED_ConfigEditor
         private void LoadModules()
         {
             ModulesList.Clear();
+            GetStaticModulesList().ForEach(ModulesList.Add);
             AvailableModulesList.Clear();
 
             var configurableList = GetAvailableModuleNames();
@@ -267,6 +285,8 @@ namespace TED_ConfigEditor
 
         private void DeleteModuleExecuted(object obj)
         {
+            if(GetStaticModulesList().Contains((string)obj))
+                return;
             ModulesList.Remove((string)obj);
             AvailableModulesList.Add((string)obj);
         }
@@ -282,7 +302,10 @@ namespace TED_ConfigEditor
             try
             {
                 var moduleEntryName = (string) obj;
-                var prop = GetPropertyByEntryName(moduleEntryName);
+                PropertyInfo prop = null;
+                if (GetStaticModulesList().Contains(moduleEntryName))
+                    prop = GetPropertyByName(moduleEntryName);
+                else prop = GetPropertyByEntryName(moduleEntryName);
                 var makeme = Type.GetType("TED_ConfigEditor.Controls.Modules.ConfigModuleBase`1").MakeGenericType(prop.PropertyType);
                 var s = (IModuleControl) Activator.CreateInstance(makeme);
                 UIElement element = new ModuleControl(s, $"{moduleEntryName} Settings");

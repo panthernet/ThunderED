@@ -43,6 +43,7 @@ namespace ThunderED.Classes
         [ConfigEntryName("moduleLiveKillFeed")]
         public LiveKillFeedModuleSettings LiveKillFeedModule { get; set; } = new LiveKillFeedModuleSettings();
         [ConfigEntryName("")]
+        [StaticConfigEntry]
         public ResourcesSettings Resources { get; set; } = new ResourcesSettings();
         [ConfigEntryName("moduleFleetup")]
         public FleetupModuleSettings FleetupModule { get; set; } = new FleetupModuleSettings();
@@ -50,6 +51,7 @@ namespace ThunderED.Classes
         public JabberModuleSettings JabberModule { get; set; } = new JabberModuleSettings();
 
         [ConfigEntryName("")]
+        [StaticConfigEntry]
         public ContinousCheckModuleSettings ContinousCheckModule { get; set; } = new ContinousCheckModuleSettings();
 
 #if EDITOR
@@ -1060,7 +1062,7 @@ namespace ThunderED.Classes
         public string DatabaseFile { get; set; } = "edb.db";
 
 #if EDITOR
-   bool public override string this[string columnName]
+        public override string this[string columnName]
         {
             get
             {

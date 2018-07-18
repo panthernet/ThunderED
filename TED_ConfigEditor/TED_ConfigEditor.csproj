@@ -107,6 +107,7 @@
     <Compile Include="Classes\IValidatable.cs" />
     <Compile Include="Classes\ListboxTemplateSelector.cs" />
     <Compile Include="Classes\Logger.cs" />
+    <Compile Include="Classes\ModuleNameToVisibilityConverter.cs" />
     <Compile Include="Classes\ObservableDictionary.cs" />
     <Compile Include="Classes\Options.cs" />
     <Compile Include="Classes\SettingsBase.cs" />
