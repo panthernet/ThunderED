@@ -12,6 +12,7 @@ v1.1.7
 ### Notes
 * 4 new Resources section entries in the settings file - ImgFaction
 * New properties in the Config section of the settings file: moduleFWStats, moduleLPStock
+* New config file section - *ContinousCheckModule*
 
 ### Breaking changes
 + Platform has been updated to .NET Core 2.1 which might require an SDK update on the server

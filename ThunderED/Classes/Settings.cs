@@ -219,6 +219,7 @@ namespace ThunderED.Classes
         public string ImgFactionGallente { get; set; }
         public string ImgFactionAmarr { get; set; }
         public string ImgFactionMinmatar { get; set; }
+        public string ImgEntosisAlert { get; set; }
     }
 
     public class LiveKillFeedModuleSettings: ValidatableSettings

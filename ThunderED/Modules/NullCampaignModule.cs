@@ -175,8 +175,8 @@ namespace ThunderED.Modules
                     .WithTimestamp(campaign.Time)
                     .WithColor(color);
                     
-                if (!string.IsNullOrEmpty(Settings.Resources.ImgIncursion))
-                    embed.WithThumbnailUrl(Settings.Resources.ImgIncursion);
+                if (!string.IsNullOrEmpty(Settings.Resources.ImgEntosisAlert))
+                    embed.WithThumbnailUrl(Settings.Resources.ImgEntosisAlert);
 
                 var mention = group.Mentions.Any() ? string.Join(", ", group.Mentions) : group.DefaultMention;
 

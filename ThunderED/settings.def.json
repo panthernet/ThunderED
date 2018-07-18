@@ -173,8 +173,9 @@
     "imgIncursion": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgIncursion.png",
     "ImgFactionCaldari":  "https://wiki.eveuniversity.org/images/e/e3/Logo_faction_caldari_state.png", 
     "ImgFactionGallente":  "https://wiki.eveuniversity.org/images/b/b9/Logo_faction_gallente_federation.png", 
-    "ImgFactionAmarr":  "https://wiki.eveuniversity.org/images/a/a0/Logo_faction_amarr_empire.png", 
-    "ImgFactionMinmatar":  "https://wiki.eveuniversity.org/images/1/1f/Logo_faction_minmatar_republic.png" 
+    "ImgFactionAmarr":  "https://wiki.eveuniversity.org/images/a/a0/Logo_faction_amarr_empire.png",
+    "ImgFactionMinmatar":  "https://wiki.eveuniversity.org/images/1/1f/Logo_faction_minmatar_republic.png",
+    "imgEntosisAlert":  "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgEntosisAlert.png" 
   },
 
   "notificationFeedModule": {
