@@ -34,7 +34,6 @@ namespace ThunderED.Classes
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersModuleDisabled"), true);
                 return;
             }
-
             
             if (!await APIHelper.DiscordAPI.IsBotPrivateChannel(Context.Channel))
             {
@@ -42,18 +41,20 @@ namespace ThunderED.Classes
                 return;
             }
 
-            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsAlliance).Select(a => a.Id);
-            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCorporation).Select(a => a.Id);
-            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCharacter).Select(a => a.Id);
+            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsAlliance && a.Id > 0).Select(a => a.Id);
+            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCorporation && a.Id > 0).Select(a => a.Id);
+            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCharacter && a.Id > 0).Select(a => a.Id);
+
+            var skip = !allys.Any() && !corps.Any() && !chars.Any();
 
             var dataList = (await SQLHelper.GetAuthUser(Context.User.Id))?.FirstOrDefault();
-            if (dataList != null && dataList.Count > 0 && dataList.ContainsKey("characterID"))
+            if (skip || (dataList != null && dataList.Count > 0 && dataList.ContainsKey("characterID")))
             {
                 var chId = Convert.ToInt64(dataList["characterID"]);
                 var ch = await APIHelper.ESIAPI.GetCharacterData("Discord", chId, true);
-                if (ch != null)
+                if (skip || ch != null)
                 {
-                    if (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains((int)chId))
+                    if (!skip && (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains((int)chId)))
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("accessDenied"), true);
                         return;

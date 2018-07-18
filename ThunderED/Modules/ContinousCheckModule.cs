@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using ThunderED.Classes;
@@ -27,7 +28,8 @@ namespace ThunderED.Modules.OnDemand
                 {
                     _checkOneSec = now;
                     //onesec ops
-                    if (Settings.ContinousCheckModule.EnableTQStatusPost && _IsTQOnline != !TickManager.IsNoConnection && !_isTQOnlineRunning)
+                    //TQ status post
+                    if (Settings.ContinousCheckModule.EnableTQStatusPost && Settings.ContinousCheckModule.TQStatusPostChannels.Any() && _IsTQOnline != !TickManager.IsNoConnection && !_isTQOnlineRunning)
                     {
                         try
                         {

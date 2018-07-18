@@ -46,6 +46,12 @@
     "requestRetries": 3
   },
 
+  "ContinousCheckModule": {
+    "EnableTQStatusPost": true,
+    "TQStatusPostMention": "@here",
+    "TQStatusPostChannels": []
+  },
+
   "mailModule": {
     "checkIntervalInMinutes": 2,
     "authGroups":{
