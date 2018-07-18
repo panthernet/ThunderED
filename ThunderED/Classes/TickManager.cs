@@ -22,9 +22,7 @@ namespace ThunderED.Classes
         private static bool _running;
         private static DateTime _asyncNow = DateTime.Now;
         private static DateTime _asyncToday = DateTime.Today;
-        private static DateTime _memoryCheckTime = DateTime.Now;
         private static DateTime _lastTickDate = DateTime.Now;
-        private static DateTime _lastCacheCheckDate = DateTime.Now;
 
         private static readonly List<AppModuleBase> Modules = new List<AppModuleBase>();
         private static readonly List<AppModuleBase> OnDemandModules = new List<AppModuleBase>();
@@ -120,7 +118,6 @@ namespace ThunderED.Classes
             }
         }
 
-        private static int _cacheInterval;
         private static DateTime _lastOnlineCheck;
 
         public static bool IsNoConnection { get; private set; }
@@ -156,40 +153,6 @@ namespace ThunderED.Classes
                 }
 
                 if(IsNoConnection) return;
-
-                //cache handling
-                if ((_asyncNow - _memoryCheckTime).TotalMinutes >= 30)
-                {
-                    var mem = SettingsManager.Settings.Config.MemoryUsageLimitMb;
-                    if (mem > 0)
-                    {
-                        _memoryCheckTime = _asyncNow;
-                        var size = ByteSize.FromBytes(Process.GetCurrentProcess().WorkingSet64);
-                        if (size.MegaBytes > mem)
-                        {
-                           // APIHelper.ResetCache();
-                            GC.Collect();
-                        }
-                    }
-                }
-
-                //display day stats on day change
-                if (_lastTickDate.Date != _asyncToday.Date)
-                {
-                    _lastTickDate = _asyncToday;
-                    await LogHelper.LogInfo("Running auto day stats post...", LogCat.Tick);
-                    await StatsModule.Stats(null, "newday");
-                }
-
-                //purge unused cache from memory
-                _cacheInterval = _cacheInterval != 0? _cacheInterval : SettingsManager.Settings.Config.CachePurgeInterval;
-                if ((_asyncNow - _lastCacheCheckDate).TotalMinutes >= _cacheInterval)
-                {
-                    await LogHelper.LogInfo("Running cache purge...", LogCat.Tick);
-
-                    _lastCacheCheckDate = _asyncNow;
-                    APIHelper.PurgeCache();
-                }
 
                 Parallel.ForEach(Modules, module => module.Run(null));
             }

@@ -549,7 +549,7 @@ namespace ThunderED.Classes
             try
             {
                 if(x == "newday") return; //only auto check allowed for this
-                await StatsModule.Stats(Context, x);
+                await ContinousCheckModule.Stats(Context, x);
             }
             catch (Exception ex)
             {
@@ -569,7 +569,7 @@ namespace ThunderED.Classes
             try
             {
                 if(x == "newday") return; //only auto check allowed for this
-                await StatsModule.Stats(Context, x);
+                await ContinousCheckModule.Stats(Context, x);
             }
             catch (Exception ex)
             {
@@ -588,7 +588,7 @@ namespace ThunderED.Classes
 
             try
             {
-                await StatsModule.Stats(Context, "m");
+                await ContinousCheckModule.Stats(Context, "m");
             }
             catch (Exception ex)
             {
@@ -607,7 +607,7 @@ namespace ThunderED.Classes
 
             try
             {
-                await StatsModule.Stats(Context, "m");
+                await ContinousCheckModule.Stats(Context, "m");
             }
             catch (Exception ex)
             {

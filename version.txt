@@ -7,6 +7,7 @@ v1.1.7
 + Added connection status check to avoid excessive requests and logging while EVE is offline or network connection is not available
 + Added core ContinousCheckModule for misc reporting and processing logic. Now featuring auto-post when TQ goes Online / Offline into selected channels.
 + Upgraded to .NET Core 2.1 platform
++ Updated config editor to support static modules like Resources and ContinousCheckModule
 + Optimized star system data queries to use static data when possible
 
 ### Notes
@@ -16,6 +17,7 @@ v1.1.7
 
 ### Breaking changes
 + Platform has been updated to .NET Core 2.1 which might require an SDK update on the server
++ StatsModule config setion has been merged into new ContinousCheckModule section with the new property names
 
 v1.1.6
 + Added new defaultMention parameter for notifications filter

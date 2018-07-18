@@ -38,8 +38,6 @@ namespace ThunderED.Classes
         public TimersModuleSettings TimersModule { get; set; } = new TimersModuleSettings();
         [ConfigEntryName("moduleRadiusKillFeed")]
         public RadiusKillFeedModuleSettings RadiusKillFeedModule { get; set; } = new RadiusKillFeedModuleSettings();
-        [ConfigEntryName("moduleStats")]
-        public StatsModuleSettings StatsModule { get; set; } = new StatsModuleSettings();
         [ConfigEntryName("moduleLiveKillFeed")]
         public LiveKillFeedModuleSettings LiveKillFeedModule { get; set; } = new LiveKillFeedModuleSettings();
         [ConfigEntryName("")]
@@ -87,15 +85,24 @@ namespace ThunderED.Classes
     public class ContinousCheckModuleSettings: ValidatableSettings
     {
         [Comment("Enable posting about TQ status into specified channels")]
-        public bool EnableTQStatusPost { get; set; }
+        public bool EnableTQStatusPost { get; set; } = true;
 
         [Comment("Discord mention string to use for message")]
-        public string TQStatusPostMention { get; set; } = "@everyone";
+        public string TQStatusPostMention { get; set; } = "@here";
 #if EDITOR
         public ObservableCollection<ulong> TQStatusPostChannels { get; set; } = new ObservableCollection<ulong>();
 #else
         public List<ulong> TQStatusPostChannels { get; set; } = new List<ulong>();
 #endif
+        [Comment("Enable posting daily stats about corp or alliance into a Discord channel")]
+        public bool EnableDalyStatsPost { get; set; }
+
+        [Comment("Numeric discord channel ID for auto posting daily stats upon new day. Leave 0 to disable")]
+        public ulong DailyStatsChannel { get; set; }
+        [Comment("Default numeric corporation ID to display stats for. Mutually exclusive with AutodailyStatsDefaultAlliance")]
+        public int DailyStatsDefaultCorp { get; set; }
+        [Comment("Default numeric alliance ID to display stats for. Mutually exclusive with AutoDailyStatsDefaultCorp")]
+        public int DailyStatsDefaultAlliance { get; set; }
 
 #if EDITOR
         public override string this[string columnName]
@@ -104,6 +111,9 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
+                    case nameof(DailyStatsDefaultCorp):
+                        return EnableDalyStatsPost && DailyStatsDefaultCorp == 0 && DailyStatsDefaultAlliance == 0? Compose(nameof(DailyStatsDefaultCorp), "Either DailyStatsDefaultCorp or DailyStatsDefaultAlliance must be specified!") : null;
+
                 }
 
                 return null;
@@ -149,7 +159,6 @@ namespace ThunderED.Classes
         }
 #endif
     }
-
 
     public class FleetupModuleSettings: ValidatableSettings
     {
@@ -297,11 +306,8 @@ namespace ThunderED.Classes
 
     public class StatsModuleSettings: ValidatableSettings
     {
-        [Comment("Numeric discord channel ID for auto posting daily stats upon new day. Leave 0 to disable")]
         public ulong AutoDailyStatsChannel { get; set; }
-        [Comment("Default numeric corporation ID to display stats for. Mutually exclusive with AutodailyStatsDefaultAlliance")]
         public int AutoDailyStatsDefaultCorp { get; set; }
-        [Comment("Default numeric alliance ID to display stats for. Mutually exclusive with AutoDailyStatsDefaultCorp")]
         public int AutodailyStatsDefaultAlliance { get; set; }
 
 #if EDITOR

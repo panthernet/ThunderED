@@ -22,7 +22,6 @@
     "moduleJabber": false,
     "moduleMOTD": false,
     "moduleNotificationFeed": false,
-    "moduleStats": false,
     "moduleTimers": false,
     "moduleMail": false,
     "moduleIRC": false,
@@ -49,7 +48,12 @@
   "ContinousCheckModule": {
     "EnableTQStatusPost": true,
     "TQStatusPostMention": "@here",
-    "TQStatusPostChannels": []
+    "TQStatusPostChannels": [],
+
+    "EnableDalyStatsPost":  false, 
+    "DailyStatsChannel": 0,
+    "DailyStatsDefaultCorp": 0,
+    "DailyStatsDefaultAlliance": 0
   },
 
   "mailModule": {
@@ -109,12 +113,6 @@
         "minimumValue": 0
       }
     }
-  },
-
-  "statsModule": {
-    "autoDailyStatsChannel": 0,
-    "autoDailyStatsDefaultCorp": 0,
-    "autodailyStatsDefaultAlliance": 0
   },
   
   "liveKillFeedModule": {
