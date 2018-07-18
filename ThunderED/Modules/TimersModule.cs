@@ -114,8 +114,14 @@ namespace ThunderED.Modules
                             }
                         }
 
-                        if(!CheckAccess(characterId, rChar, out var isEditor))
+                        if (!CheckAccess(characterId, rChar, out var isEditor))
+                        {
+                            response.Headers.ContentEncoding.Add("utf-8");
+                            response.Headers.ContentType.Add("text/html;charset=utf-8");
+                            await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", null).Replace("{body}", $"Timers: {LM.Get("AccessDenied")}")
+                                .Replace("{header}", LM.Get("timersTemplateHeader")).Replace("{backText}", LM.Get("backText")));
                             return true;
+                        }
 
                         if (isEditor && data.StartsWith("delete"))
                         {

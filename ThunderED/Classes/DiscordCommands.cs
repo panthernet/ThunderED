@@ -112,7 +112,7 @@ namespace ThunderED.Classes
         public async Task TimersUrl()
         {
             if(SettingsManager.Settings.Config.ModuleTimers)
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersUrlText", WebServerModule.GetTimersAuthURL()), true);
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersUrlText", string.IsNullOrEmpty(SettingsManager.Settings.TimersModule.TinyUrl) ? WebServerModule.GetTimersAuthURL() : SettingsManager.Settings.TimersModule.TinyUrl), true);
             else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersModuleDisabled"), true);
         }
 

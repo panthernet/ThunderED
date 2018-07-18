@@ -394,6 +394,8 @@ namespace ThunderED.Classes
         public bool AutoAddTimerForReinforceNotifications { get; set; } = true;
         [Comment("Web session timeout in minutes")]
         public int AuthTimeoutInMinutes { get; set; } = 10;
+        [Comment("Link to a tiny url representation which is created manually and overrides standard URL for !turl command")]
+        public string TinyUrl { get; set; }
 #if EDITOR
         [Comment("List of numeric values representing the time in minutes to send timer reminder message to discord when specified amount of minutes is left before the timer ends")]
         public ObservableCollection<int> Announces { get; set; } = new ObservableCollection<int>();

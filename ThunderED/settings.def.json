@@ -82,6 +82,7 @@
   "timersModule": {
     "authTimeoutInMinutes": 10,
     "autoAddTimerForReinforceNotifications": true,
+    "TinyUrl": "",
     "grantEditRolesToDiscordAdmins": true,
     "announces": [60, 10],
     "announceChannel": 0,
