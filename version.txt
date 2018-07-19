@@ -1,5 +1,5 @@
 v1.1.7
-+ Added missing discord roles console and file log entry for Auth module
++ Added missing discord roles notification for console and file logs in Auth module
 + Added Discord guild ID validity check
 + Added new module: moduleFWStats - access to !fwstats command
 + Added new command *!turl* - displays timers auth page url
@@ -20,7 +20,7 @@ v1.1.7
 
 ### Breaking changes
 + Platform has been updated to .NET Core 2.1 which might require an SDK update on the server
-+ StatsModule config setion has been merged into new ContinousCheckModule section with the new property names
++ StatsModule config section has been merged into new ContinousCheckModule section with the new property names
 
 v1.1.6
 + Added new defaultMention parameter for notifications filter

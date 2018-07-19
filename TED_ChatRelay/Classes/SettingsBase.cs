@@ -97,9 +97,10 @@ namespace ThunderED.Classes
                 {
                     lock (obj)
                     {
-                        if (!string.IsNullOrEmpty(filePath) && !Directory.Exists(filePath))
+                        var dir = Path.GetDirectoryName(filePath);
+                        if (!Directory.Exists(dir))
                         {
-                            Directory.CreateDirectory(filePath);
+                            Directory.CreateDirectory(dir);
                         }
 
                         var tempFilePath = filePath + ".temp";
