@@ -32,6 +32,7 @@
         ChatRelay,
         Incursions,
         NullCampaign,
-        AutoPost
+        AutoPost,
+        Continuous
     }
 }

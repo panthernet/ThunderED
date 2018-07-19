@@ -12,11 +12,12 @@ using ThunderED.Zkb;
 
 namespace ThunderED.Modules
 {
-    public class ContinousCheckModule: AppModuleBase
+    public class ContinuousCheckModule: AppModuleBase
     {
-        public override LogCat Category => LogCat.AutoPost;
+        public override LogCat Category => LogCat.Continuous;
 
         private DateTime _checkOneSec = DateTime.Now;
+        private DateTime _checkDailyPost = DateTime.Now;
         private static DateTime _30minTime = DateTime.Now;
         private static DateTime _lastCacheCheckDate = DateTime.Now;
         private static int _cacheInterval;
@@ -30,85 +31,128 @@ namespace ThunderED.Modules
             {
                 var now = DateTime.Now;
                 if (!_IsTQOnline.HasValue)
-                    _IsTQOnline = !TickManager.IsNoConnection;
+                    _IsTQOnline = TickManager.IsConnected;
                 
                 //onesec ops
-                if ((now - _checkOneSec).TotalSeconds >= 1)
-                {
-                    
-                    //display day stats on day change
-                    if (_checkOneSec.Date != now.Date)
-                    {
-                        await LogHelper.LogInfo("Running auto day stats post...", LogCat.Tick);
-                        await ContinousCheckModule.Stats(null, "newday");
-                    }
+                await OneSecOps(now);
 
-                    //TQ status post
-                    if (Settings.ContinousCheckModule.EnableTQStatusPost && Settings.ContinousCheckModule.TQStatusPostChannels.Any() && _IsTQOnline != !TickManager.IsNoConnection && !_isTQOnlineRunning)
-                    {
-                        try
-                        {
-                            _isTQOnlineRunning = true;
-                            if (APIHelper.DiscordAPI.IsAvailable)
-                            {
-                                var msg = _IsTQOnline.Value ? $"{LM.Get("autopost_tq")} {LM.Get("Offline")}" : $"{LM.Get("autopost_tq")} {LM.Get("Online")}";
-                                var color = _IsTQOnline.Value ? new Discord.Color(0xFF0000) : new Discord.Color(0x00FF00);
-                                foreach (var channelId in Settings.ContinousCheckModule.TQStatusPostChannels)
-                                {
-                                    try
-                                    {
-                                        var embed = new EmbedBuilder().WithTitle(msg).WithColor(color);
-                                        await APIHelper.DiscordAPI.SendMessageAsync(channelId, Settings.ContinousCheckModule.TQStatusPostMention, embed.Build());
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        await LogHelper.LogEx("Autopost - TQStatus", ex, Category);
-                                    }
-                                }
-
-                                _IsTQOnline = !TickManager.IsNoConnection;
-                            }
-                        }
-                        finally
-                        {
-                            _isTQOnlineRunning = false;
-                        }
-                    }
-
-                    _checkOneSec = now;
-                }
                 //30 min
-                if ((now - _30minTime).TotalMinutes >= 30)
-                {
-                    //cache handling
-                    var mem = SettingsManager.Settings.Config.MemoryUsageLimitMb;
-                    if (mem > 0)
-                    {
-                        var size = ByteSize.FromBytes(Process.GetCurrentProcess().WorkingSet64);
-                        if (size.MegaBytes > mem)
-                        {
-                            // APIHelper.ResetCache();
-                            GC.Collect();
-                        }
-                    }
-
-                    _30minTime = now;
-                }
+                await ThirtyMinOps(now);
 
                 //custom
                 //purge unused cache from memory
-                _cacheInterval = _cacheInterval != 0? _cacheInterval : SettingsManager.Settings.Config.CachePurgeInterval;
-                if ((now - _lastCacheCheckDate).TotalMinutes >= _cacheInterval)
-                {
-                    await LogHelper.LogInfo("Running cache purge...", LogCat.Tick);
-
-                    _lastCacheCheckDate = now;
-                    APIHelper.PurgeCache();
-                }
+                await Custom_CacheCheck(now).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx("Continous", ex, Category);
+            }
+        }
+
+        private async Task Custom_CacheCheck(DateTime now)
+        {
+            _cacheInterval = _cacheInterval != 0? _cacheInterval : SettingsManager.Settings.Config.CachePurgeInterval;
+            if ((now - _lastCacheCheckDate).TotalMinutes >= _cacheInterval)
+            {
+                _lastCacheCheckDate = now;
+                await LogHelper.LogInfo("Running cache purge...", LogCat.Tick);
+                APIHelper.PurgeCache();
+            }
+        }
+
+        private async Task ThirtyMinOps(DateTime now)
+        {
+            //skip wait for ALL inside
+            if ((now - _30minTime).TotalMinutes >= 30)
+            {
+                //cache handling
+                await ThirtyMin_MemoryCheck(now).ConfigureAwait(false);
+
+                _30minTime = now;
+            }
+        }
+
+        private async Task ThirtyMin_MemoryCheck(DateTime now)
+        {
+            try
+            {
+                var mem = SettingsManager.Settings.Config.MemoryUsageLimitMb;
+                if (mem > 0)
+                {
+                    var size = ByteSize.FromBytes(Process.GetCurrentProcess().WorkingSet64);
+                    if (size.MegaBytes > mem)
+                    {
+                        // APIHelper.ResetCache();
+                        GC.Collect();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("Cache handling", ex, Category);
+            }
+        }
+
+        private async Task OneSecOps(DateTime now)
+        {
+            //skip wait for ALL inside
+            if ((now - _checkOneSec).TotalSeconds >= 1)
+            {      
+                //display day stats on day change
+                await OneSec_ReportDailyStatus(now).ConfigureAwait(false);
+
+                //TQ status post
+                await OneSec_TQStatusPost(now).ConfigureAwait(false);
+                
+                _checkOneSec = now;
+            }
+        }
+
+        private async Task OneSec_TQStatusPost(DateTime now)
+        {
+            if (!_isTQOnlineRunning && Settings.ContinousCheckModule.EnableTQStatusPost && Settings.ContinousCheckModule.TQStatusPostChannels.Any() && _IsTQOnline != TickManager.IsConnected)
+            {
+                try
+                {
+                    _isTQOnlineRunning = true;
+                    if (APIHelper.DiscordAPI.IsAvailable)
+                    {
+                        var msg = _IsTQOnline.Value ? $"{LM.Get("autopost_tq")} {LM.Get("Offline")}" : $"{LM.Get("autopost_tq")} {LM.Get("Online")}";
+                        var color = _IsTQOnline.Value ? new Discord.Color(0xFF0000) : new Discord.Color(0x00FF00);
+                        foreach (var channelId in Settings.ContinousCheckModule.TQStatusPostChannels)
+                        {
+                            try
+                            {
+                                var embed = new EmbedBuilder().WithTitle(msg).WithColor(color);
+                                await APIHelper.DiscordAPI.SendMessageAsync(channelId, Settings.ContinousCheckModule.TQStatusPostMention, embed.Build()).ConfigureAwait(false);
+                            }
+                            catch (Exception ex)
+                            {
+                                await LogHelper.LogEx("Autopost - TQStatus", ex, Category);
+                            }
+                        }
+
+                        _IsTQOnline = !TickManager.IsNoConnection;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx("OneSec_TQStatusPost", ex, Category);
+                }
+                finally
+                {
+                    _isTQOnlineRunning = false;
+                }
+            }
+        }
+
+        private async Task OneSec_ReportDailyStatus(DateTime now)
+        {
+            if (_checkDailyPost.Date != now.Date)
+            {
+                await LogHelper.LogInfo("Running auto day stats post...", LogCat.Tick);
+                await Stats(null, "newday").ConfigureAwait(false);
+                _checkDailyPost = now;
             }
         }
 

@@ -6,14 +6,17 @@ v1.1.7
 + Added new command *!timers* - displays upcoming timers list
 + Added connection status check to avoid excessive requests and logging while EVE is offline or network connection is not available
 + Added core ContinousCheckModule for misc reporting and processing logic. Now featuring auto-post when TQ goes Online / Offline into selected channels.
++ Improved checks performance
 + Upgraded to .NET Core 2.1 platform
 + Updated config editor to support static modules like Resources and ContinousCheckModule
 + Optimized star system data queries to use static data when possible
++ Fixed nullsec campaign excessive spam
 
 ### Notes
 * 4 new Resources section entries in the settings file - ImgFaction
 * New properties in the Config section of the settings file: moduleFWStats, moduleLPStock
 * New config file section - *ContinousCheckModule*
+* New *TinyUrl* param in Timers section - manually generated tinu url to display for !turl command
 
 ### Breaking changes
 + Platform has been updated to .NET Core 2.1 which might require an SDK update on the server

@@ -42,7 +42,7 @@ namespace ThunderED.Classes
             //sub modules - core modules that are called in each tick and can supply other modules with some data
             Modules.Add(new ZKillLiveFeedModule());
             Modules.Add(new WebServerModule());
-            Modules.Add(new ContinousCheckModule());
+            Modules.Add(new ContinuousCheckModule());
 
             //dynamic modules - called in each tick
 
@@ -121,6 +121,7 @@ namespace ThunderED.Classes
         private static DateTime _lastOnlineCheck;
 
         public static bool IsNoConnection { get; private set; }
+        public static bool IsConnected => !IsNoConnection;
 
         private static async Task Async_Tick(object stateInfo)
         {
