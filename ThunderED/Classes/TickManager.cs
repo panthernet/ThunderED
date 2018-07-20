@@ -135,13 +135,12 @@ namespace ThunderED.Classes
                     _lastOnlineCheck = _asyncNow;
                     if (!await APIHelper.ESIAPI.IsServerOnline("General"))
                     {
-                        if (!IsNoConnection)
+                        if (IsConnected)
                         {
                             await LogHelper.LogWarning("EVE server is offline or there is a connection problem!", LogCat.ESI);
                             await LogHelper.LogWarning("Waiting for connection....", LogCat.ESI);
                         }
                         IsNoConnection = true;
-                        return;
                     }
                     else
                     {
@@ -152,6 +151,8 @@ namespace ThunderED.Classes
                         }
                     }
                 }
+
+                await ContinuousCheckModule.OneSec_TQStatusPost(_asyncNow);
 
                 if(IsNoConnection) return;
 

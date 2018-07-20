@@ -22,16 +22,14 @@ namespace ThunderED.Modules
         private static DateTime _lastCacheCheckDate = DateTime.Now;
         private static int _cacheInterval;
 
-        private bool? _IsTQOnline;
-        private bool _isTQOnlineRunning;
+        private static bool? _IsTQOnline;
+        private static bool _isTQOnlineRunning;
 
         public override async Task Run(object prm)
         {
             try
             {
                 var now = DateTime.Now;
-                if (!_IsTQOnline.HasValue)
-                    _IsTQOnline = TickManager.IsConnected;
                 
                 //onesec ops
                 await OneSecOps(now);
@@ -102,15 +100,18 @@ namespace ThunderED.Modules
                 await OneSec_ReportDailyStatus(now).ConfigureAwait(false);
 
                 //TQ status post
-                await OneSec_TQStatusPost(now).ConfigureAwait(false);
+               // await OneSec_TQStatusPost(now).ConfigureAwait(false);
                 
                 _checkOneSec = now;
             }
         }
 
-        private async Task OneSec_TQStatusPost(DateTime now)
+        public static async Task OneSec_TQStatusPost(DateTime now)
         {
-            if (!_isTQOnlineRunning && Settings.ContinousCheckModule.EnableTQStatusPost && Settings.ContinousCheckModule.TQStatusPostChannels.Any() && _IsTQOnline != TickManager.IsConnected)
+            if (!_IsTQOnline.HasValue)
+                _IsTQOnline = TickManager.IsConnected;
+
+            if (!_isTQOnlineRunning && SettingsManager.Settings.ContinousCheckModule.EnableTQStatusPost && SettingsManager.Settings.ContinousCheckModule.TQStatusPostChannels.Any() && _IsTQOnline != TickManager.IsConnected)
             {
                 try
                 {
@@ -119,25 +120,25 @@ namespace ThunderED.Modules
                     {
                         var msg = _IsTQOnline.Value ? $"{LM.Get("autopost_tq")} {LM.Get("Offline")}" : $"{LM.Get("autopost_tq")} {LM.Get("Online")}";
                         var color = _IsTQOnline.Value ? new Discord.Color(0xFF0000) : new Discord.Color(0x00FF00);
-                        foreach (var channelId in Settings.ContinousCheckModule.TQStatusPostChannels)
+                        foreach (var channelId in SettingsManager.Settings.ContinousCheckModule.TQStatusPostChannels)
                         {
                             try
                             {
                                 var embed = new EmbedBuilder().WithTitle(msg).WithColor(color);
-                                await APIHelper.DiscordAPI.SendMessageAsync(channelId, Settings.ContinousCheckModule.TQStatusPostMention, embed.Build()).ConfigureAwait(false);
+                                await APIHelper.DiscordAPI.SendMessageAsync(channelId, SettingsManager.Settings.ContinousCheckModule.TQStatusPostMention, embed.Build()).ConfigureAwait(false);
                             }
                             catch (Exception ex)
                             {
-                                await LogHelper.LogEx("Autopost - TQStatus", ex, Category);
+                                await LogHelper.LogEx("Autopost - TQStatus", ex, LogCat.Continuous);
                             }
                         }
 
-                        _IsTQOnline = !TickManager.IsNoConnection;
+                        _IsTQOnline = TickManager.IsConnected;
                     }
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("OneSec_TQStatusPost", ex, Category);
+                    await LogHelper.LogEx("OneSec_TQStatusPost", ex, LogCat.Continuous);
                 }
                 finally
                 {
