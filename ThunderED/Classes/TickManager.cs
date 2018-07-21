@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Async;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using ByteSizeLib;
 using Discord.Commands;
 using ThunderED.Helpers;
 using ThunderED.Modules;
 using ThunderED.Modules.OnDemand;
-using ThunderED.Modules.Static;
 using ThunderED.Modules.Sub;
 
 namespace ThunderED.Classes
@@ -21,8 +17,8 @@ namespace ThunderED.Classes
     {
         private static bool _running;
         private static DateTime _asyncNow = DateTime.Now;
-        private static DateTime _asyncToday = DateTime.Today;
-        private static DateTime _lastTickDate = DateTime.Now;
+       // private static DateTime _asyncToday = DateTime.Today;
+       // private static DateTime _lastTickDate = DateTime.Now;
 
         private static readonly List<AppModuleBase> Modules = new List<AppModuleBase>();
         private static readonly List<AppModuleBase> OnDemandModules = new List<AppModuleBase>();
@@ -126,7 +122,7 @@ namespace ThunderED.Classes
         private static async Task Async_Tick(object stateInfo)
         {
             _asyncNow = DateTime.Now;
-            _asyncToday = DateTime.Today;
+          //  _asyncToday = DateTime.Today;
 
             try
             {

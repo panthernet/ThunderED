@@ -144,7 +144,7 @@ namespace ThunderED.API
             {
                 if (ex.Reason.Contains("401"))
                 {
-                    await LogHelper.LogError($"Check your Token: {ex.Reason}", LogCat.Discord);
+                    await LogHelper.LogError($"Check your Discord bot Token and make sure it is NOT a Client ID: {ex.Reason}", LogCat.Discord);
                 }
             }
             catch (Exception ex)

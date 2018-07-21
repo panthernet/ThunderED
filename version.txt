@@ -1,3 +1,6 @@
+V1.1.8
++ Added startup check if settings.json file is present
+
 v1.1.7
 + Added missing discord roles notification for console and file logs in Auth module
 + Added Discord guild ID validity check

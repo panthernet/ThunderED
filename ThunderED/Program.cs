@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -19,6 +20,15 @@ namespace ThunderED
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+
+            if (!File.Exists(SettingsManager.FileSettingsPath))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
+                Console.ReadKey();
+                return;
+            }
 
             //load settings
             var result = SettingsManager.Prepare();

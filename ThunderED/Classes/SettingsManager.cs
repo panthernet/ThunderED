@@ -32,7 +32,6 @@ namespace ThunderED.Classes
         {
             try
             {
-                FileSettingsPath = Path.Combine(RootDirectory, "settings.json");
                 UpdateSettings();
                 FileTemplateMain = Path.Combine(RootDirectory, "Templates", "main.html");
                 FileTemplateAuth = Path.Combine(RootDirectory, "Templates", "auth.html");
@@ -54,6 +53,7 @@ namespace ThunderED.Classes
         static SettingsManager()
         {
             RootDirectory = Path.GetDirectoryName(new Uri(Assembly.GetEntryAssembly().CodeBase).LocalPath);
+            FileSettingsPath = Path.Combine(RootDirectory, "settings.json");
         }
 
         public static void UpdateSettings()
