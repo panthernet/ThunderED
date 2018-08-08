@@ -1,7 +1,49 @@
-V1.1.8
+### V1.1.8
++ Improved web auth module to process authentication for groups with special ESI permission list 
++ Added new HRM module - human resource management with JackKnife feats, able to display complete data for members authed with special permissions
 + Added startup check if settings.json file is present
++ Do not generate buttons on the main web page if corresponding module is disabled
++ Added optional params to webAuthModule settings group: UseCustomAuthRoles and ESICustomAuthRoles
++ Added optional DefaultAuthGroup param to webAuthModule
++ Added optional ShowGroupName param to liveKillFeedModule and radiusKillFeedModule
++ Added new !authurl command which will return default web auth url based on DefaultAuthGroup param or first auth group found. *!authurl groupName* will return auth url for specified group name (by default known to admin only).
++ Improved denied access handling for web modules
++ Improved ZKill feeder to don't feed kills if none of the other modules demands them
++ Improved logging
 
-v1.1.7
+### Highlights - Advanced Web Auth
+Improved web authentication module now supports 3 different modes:
+1. General auth with no special permissions (as before)
+2. General auth with special ESI permissions requested from group applicant. Creates separate auth button on web server.
+3. Preliminary auth with special ESI permissions requested from group applicant. Creates separate auth button on web server.
+
+Renewed auth logic now allows you to control which permissions to request from which auth groups, i.e. which data EVE Online characters will share with you upon authentication.
+By default this feature is disabled and new users will only pass basic auth as before. But if you fill *ESICustomAuthRoles* param (mode 2) then bot will get a refresh token from character during auth process.
+This refresh token will be stored in a database and will be used to fetch all required data about registered characters. You can also set *PreliminaryAuthMode* (mode 3) to force applicants to wait for an approval 
+making it possible to inspect them using "JackKnife" utility named **HRM** before they're allowed into your corporation or alliance.
+
+NOTE: Refresh token can be invalidated by user at any time in their EVE Online account settings
+NOTE: You have to add all required ESI permissions to your CCP app before you can use them in auth process
+
+Considering the above you can build your own "JackKnife" recruitment process for selected group as following:
+1. Create auth group with *PreliminaryAuthMode* set to true. This will force group to accept all auth requests and enable refresh token extraction. All appllicants will be put on hold for consequent actions.
+2. An applicant should confirm his registration in Discord using *!auth confirm CODE* command displayed during their auth process. This is needed to bind their registration to Discord account.
+3. Now the data from the applicants will be available for review in the HRM Module web page.
+4. Decision:
+  - If you decide to accept member then just invite him to your corporation and the bot will automatically auth applicant in Discord based on *CorpIDList* and *AllianceIDList* params. Make sure to set correct *MemberRoles* param to apply Discord roles upon successful registration.
+  - If you decide to decline application you can set *AppInvalidationInHours* param which will delete applications when specified amount of hours has passed, decline them manually in HRM module or by using *!auth decline CODE/ID* command.
+
+### Breaking changes
++ Templates/main.html template file changed
++ Templates/auth2.html template file changed
++ Templates/accessDenied.html template file added
++ Auth group CorpID property renamed to CorpIDList and is now an array of integer values
++ Auth group AllianceID property renamed to AllianceIDList and is now an array of integer values
+
+### Notes
++ Web templates for HRM are not optimal yet. They use Bootstrap4 + JQuery so any help tuning them to look nice will be highly appreciated.
+
+### v1.1.7
 + Added missing discord roles notification for console and file logs in Auth module
 + Added Discord guild ID validity check
 + Added new module: moduleFWStats - access to !fwstats command

@@ -91,11 +91,9 @@
         </div>
         <div class="jumbotron pagination-centered">
             <h2>{webWelcomeHeader}</h2>
-            <a href="{timersUrl}" class="btn btn-info btn-block {disableWebTimers}" role="button">{authButtonTimersText}</a>
+            {manageControls}
             <h4>{webAuthHeader}</h4>
-            <a href="{authUrl}" class="btn btn-info btn-block {disableWebAuth}" role="button">{authButtonDiscordText}</a>
-            <a href="{authNotifyUrl}" class="btn btn-info btn-block {disableWebNotify}" role="button">{authButtonNotifyText}</a>
-            <a href="{authMailUrl}" class="btn btn-info btn-block {disableMailNotify}" role="button">{authButtonMailText}</a>
+            {authControls}
         </div>
     </div>
 </body>

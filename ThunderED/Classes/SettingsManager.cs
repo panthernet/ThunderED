@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -20,11 +21,16 @@ namespace ThunderED.Classes
         public static string FileTemplateAuthNotifySuccess;
         public static string FileTemplateTimersPage;
         public static string FileTemplateMailAuthSuccess;
+        public static string FileTemplateAccessDenied;
         public static string RootDirectory { get; }
         public static string DatabaseFilePath { get; private set; }
 
         public static DateTime NextNotificationCheck { get; set; }
         public static string DefaultUserAgent = "ThunderED";
+        public static string FileTemplateHRM_Main;
+        public static string FileTemplateHRM_Inspect;
+        public static string FileTemplateHRM_MailBody;
+        public static string FileTemplateHRM_Table;
 
         public static ThunderSettings Settings { get; private set; }
 
@@ -41,6 +47,11 @@ namespace ThunderED.Classes
                 FileTemplateAuthNotifySuccess = Path.Combine(RootDirectory, "Templates", "authNotifySuccess.html");
                 FileTemplateTimersPage = Path.Combine(RootDirectory, "Templates", "timersMain.html");
                 FileTemplateMailAuthSuccess = Path.Combine(RootDirectory, "Templates", "mailAuthSuccess.html");
+                FileTemplateAccessDenied = Path.Combine(RootDirectory, "Templates", "accessDenied.html");
+                FileTemplateHRM_Main = Path.Combine(RootDirectory, "Templates", "hrm_main.html");
+                FileTemplateHRM_Inspect = Path.Combine(RootDirectory, "Templates", "hrm_inspect.html");
+                FileTemplateHRM_MailBody = Path.Combine(RootDirectory, "Templates", "hrm_inspect_mail.html");
+                FileTemplateHRM_Table = Path.Combine(RootDirectory, "Templates", "hrm_inspect_table.html");
                 return null;
             }
             catch (Exception ex)
@@ -49,7 +60,7 @@ namespace ThunderED.Classes
             }
         }
 
-
+       
         static SettingsManager()
         {
             RootDirectory = Path.GetDirectoryName(new Uri(Assembly.GetEntryAssembly().CodeBase).LocalPath);

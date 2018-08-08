@@ -14,6 +14,11 @@ namespace ThunderED.Modules
     {
         public override LogCat Category => LogCat.Jabber;
 
+        public JabberModule()
+        {
+            LogHelper.LogModule("Inititalizing Jabber module...", Category).GetAwaiter().GetResult();
+        }
+
         public override async Task Run(object prm)
         {
             var username = Settings.JabberModule.Username;

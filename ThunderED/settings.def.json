@@ -31,6 +31,7 @@
     "moduleNullsecCampaign": false,
     "moduleFWStats": false,
     "ModuleLPStock": false, 
+    "moduleHRM":  false, 
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -50,10 +51,19 @@
     "TQStatusPostMention": "@here",
     "TQStatusPostChannels": [],
 
-    "EnableDalyStatsPost":  false, 
+    "EnableDalyStatsPost":  false,
     "DailyStatsChannel": 0,
     "DailyStatsDefaultCorp": 0,
     "DailyStatsDefaultAlliance": 0
+  },
+
+  "HRMModule": {
+    "UsersAccessList": [],
+    "RolesAccessList": [],
+    "AuthTimeoutInMinutes":  10,
+    "TableEntriesPerPage":  10,
+    "ExcludeNotificationTypes": [ "NPCStandingsLost", "KillReportFinalBlow", "BountyClaimMsg", "SeasonalChallengeCompleted", "StoryLineMissionAvailableMsg", "KillReportVictim", "InsuranceIssuedMsg", "InsuranceFirstShipMsg" ]
+
   },
 
   "mailModule": {
@@ -111,6 +121,7 @@
         "radius": 0,
         "radiusChannel": 0,
         "radiusSystemId": 0,
+        "showGroupName":  false, 
         "minimumValue": 0
       }
     }
@@ -126,6 +137,7 @@
         "discordChannel": 0,
         "corpID": 0,
         "allianceID": 0,
+        "showGroupName":  false, 
         "minimumValue": 0,
         "minimumLossValue": 0,
         "bigKillValue": 300000000,
@@ -141,14 +153,56 @@
     "authReportChannel": 0,
     "//": "Channels where !auth command is allowed. Empty - everywhere",
     "comAuthChannels":  [],
+    "DefaultAuthGroup": "group1",
     "enforceCorpTickers": true,
     "enforceCharName": true,
     "authGroups": {
       "group1": {
-        "corpID": 0,
-        "allianceID": 0,
-        "memberRoles": ["ExactDiscordRoleName"]
+        "CorpIDList": [],
+        "AllianceIDList": [],
+        "memberRoles": ["ExactDiscordRoleName"],
+        "authRoles": [],
+        "PreliminaryAuthMode": false,
+        "AppInvalidationInHours": 0,
+        "ESICustomAuthRoles": [],
+        "CustomButtonText": null 
+      },
+      "group2": {
+        "CorpIDList": [],
+        "AllianceIDList": [],
+        "memberRoles": ["ExactDiscordRoleName"],
+        "authRoles": ["AuthorizedDiscordRoleName"],
+        "PreliminaryAuthMode": true,
+        "AppInvalidationInHours": 48,
+        "CustomButtonText":  "Custom Discord Auth", 
+        "ESICustomAuthRoles": [
+          "esi-assets.read_assets.v1",
+          "esi-characters.read_blueprints.v1",
+          "esi-characters.read_contacts.v1",
+          "esi-characters.read_corporation_roles.v1",
+          "esi-characters.read_fw_stats.v1",
+          "esi-characters.read_loyalty.v1",
+          "esi-characters.read_notifications.v1",
+          "esi-characters.read_standings.v1",
+          "esi-characters.read_titles.v1",
+          "esi-characterstats.read.v1",
+          "esi-clones.read_clones.v1",
+          "esi-clones.read_implants.v1",
+          "esi-contracts.read_character_contracts.v1",
+          "esi-industry.read_character_jobs.v1",
+          "esi-industry.read_character_mining.v1",
+          "esi-killmails.read_killmails.v1",
+          "esi-location.read_location.v1",
+          "esi-location.read_online.v1",
+          "esi-location.read_ship_type.v1",
+          "esi-mail.read_mail.v1",
+          "esi-markets.read_character_orders.v1",
+          "esi-skills.read_skillqueue.v1",
+          "esi-skills.read_skills.v1",
+          "esi-wallet.read_character_wallet.v1"
+        ]
       }
+
     }
   },
   "resources": {
@@ -183,7 +237,7 @@
       "groupName1": {
         "characterID": 0,
         "defaultDiscordChannelID": 0,
-        "fetchLastNotifDays":  0, 
+        "fetchLastNotifDays":  0,
         "filters": {
           "filter1": {		  
             "notifications": [

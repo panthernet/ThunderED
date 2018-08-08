@@ -85,9 +85,14 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleChatRelay)
                 OnDemandModules.Add(new ChatRelayModule());
 
-                //IMPORTANT - web auth is the last module - to be the last for 404 handling
+            if (SettingsManager.Settings.Config.ModuleHRM)
+                OnDemandModules.Add(new HRMModule());
+
+            
+            
+            //IMPORTANT - web auth is the last module - to be the last for 404 handling
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
-                OnDemandModules.Add(new WebAuthModule());
+                Modules.Add(new WebAuthModule());
 
 
             //subscriptions
@@ -105,7 +110,14 @@ namespace ThunderED.Classes
                 if (!_running && APIHelper.DiscordAPI.IsAvailable)
                 {
                     _running = true;
-                    await Async_Tick(stateInfo);
+                    try
+                    {
+                        await Async_Tick(stateInfo);
+                    }
+                    finally
+                    {
+                        _running = false;
+                    }
                 }
             }
             catch (Exception ex)

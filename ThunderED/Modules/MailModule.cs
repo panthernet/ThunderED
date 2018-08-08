@@ -30,6 +30,8 @@ namespace ThunderED.Modules
 
         private async Task<bool> OnAuthRequest(HttpListenerRequestEventArgs context)
         {
+            if (!Settings.Config.ModuleMail) return false;
+
             var request = context.Request;
             var response = context.Response;
 
@@ -52,22 +54,19 @@ namespace ThunderED.Modules
                         if (state != "12") return false;
 
                         //state = 12 && have code
-                        var result = await WebAuthModule.GetCHaracterIdFromCode(code, clientID, secret);
+                        var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
                         if (result == null)
                         {
-                            //TODO invalid auth
-                            await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Mail Module", LM.Get("accessDenied")), response);
                             return true;
                         }
 
                         await SQLHelper.SQLiteDataInsertOrUpdateTokens("", result[0], result[1]);
-                        response.Headers.ContentEncoding.Add("utf-8");
-                        response.Headers.ContentType.Add("text/html;charset=utf-8");
-                        await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
+                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
                             .Replace("{header}", "authTemplateHeader")
                             .Replace("{body}", LM.Get("mailAuthSuccessHeader"))
                             .Replace("{body2}", LM.Get("mailAuthSuccessBody"))
-                            .Replace("{backText}", LM.Get("backText"))
+                            .Replace("{backText}", LM.Get("backText")), response
                         );
                         return true;
                     }
@@ -89,6 +88,7 @@ namespace ThunderED.Modules
             {
                 if((DateTime.Now - _lastCheckTime).TotalMinutes < _checkInterval) return;
                 _lastCheckTime = DateTime.Now;
+                await LogHelper.LogModule("Running Mail module check...", Category);
 
                 foreach(var groupPair in Settings.MailModule.AuthGroups)
                 {
@@ -180,7 +180,7 @@ namespace ThunderED.Modules
             await APIHelper.DiscordAPI.SendMessageAsync(ch, LM.Get("mailMsgTitle", sender?.name), embed.Build()).ConfigureAwait(false);
         }
 
-        private async Task<string> PrepareBodyMessage(string input)
+        public static async Task<string> PrepareBodyMessage(string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
@@ -222,7 +222,7 @@ namespace ThunderED.Modules
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx(ex.Message, ex, Category);
+                await LogHelper.LogEx(ex.Message, ex, LogCat.Mail);
             }
 
             return body;

@@ -25,20 +25,28 @@ namespace ThunderED.Helpers
             await Log(message, LogSeverity.Info, cat, logConsole, logFile).ConfigureAwait(false);
         }
 
+        public static async Task LogModule(string message, LogCat cat = LogCat.Default, bool logConsole = true, bool logFile = false)
+        {
+            await Log(message, LogSeverity.Module, cat, logConsole, logFile).ConfigureAwait(false);
+        }
+
         public static async Task Log(string message, LogSeverity severity = LogSeverity.Info, LogCat cat = LogCat.Default, bool logConsole = true, bool logFile = true)
         {
             try
             {
                 _logPath = _logPath ?? Path.Combine(SettingsManager.RootDirectory, "logs");
                 _logSeverity = _logSeverity ?? SettingsManager.Settings.Config.LogSeverity.ToSeverity();
-                if((int)_logSeverity > (int)severity) return;
+                if ((int) _logSeverity > (int) severity) return;
 
                 var file = Path.Combine(_logPath, $"{cat}.log");
 
                 if (!Directory.Exists(_logPath))
                     Directory.CreateDirectory(_logPath);
 
-                var cc = Console.ForegroundColor;
+                // var cc = Console.ForegroundColor;
+
+                if (logFile)
+                    await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{severity,8}]: {message}{Environment.NewLine}");
 
                 switch (severity)
                 {
@@ -57,14 +65,13 @@ namespace ThunderED.Helpers
                     case LogSeverity.Debug:
                         Console.ForegroundColor = ConsoleColor.DarkGray;
                         break;
+                    case LogSeverity.Module:
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        break;
                 }
 
-                if(logFile)
-                    await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{severity,8}]: {message}{Environment.NewLine}");
-
-                if(logConsole)
+                if (logConsole)
                     Console.WriteLine($"{DateTime.Now,-19} [{severity,8}] [{cat}]: {message}");
-                Console.ForegroundColor = cc;
             }
             catch
             {
@@ -82,13 +89,11 @@ namespace ThunderED.Helpers
                 if (!Directory.Exists(_logPath))
                     Directory.CreateDirectory(_logPath);
 
-                var cc = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-
                 await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}").ConfigureAwait(false);
 
+                
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat}]: {message}");
-                Console.ForegroundColor = cc;
             }
             catch
             {

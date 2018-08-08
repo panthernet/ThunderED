@@ -33,6 +33,7 @@
         Incursions,
         NullCampaign,
         AutoPost,
-        Continuous
+        Continuous,
+        HRM
     }
 }

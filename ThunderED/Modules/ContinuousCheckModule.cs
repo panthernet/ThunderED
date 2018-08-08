@@ -24,6 +24,7 @@ namespace ThunderED.Modules
 
         private static bool? _IsTQOnline;
         private static bool _isTQOnlineRunning;
+        private static bool _isPostingDailyStats;
 
         public override async Task Run(object prm)
         {
@@ -149,11 +150,20 @@ namespace ThunderED.Modules
 
         private async Task OneSec_ReportDailyStatus(DateTime now)
         {
-            if (_checkDailyPost.Date != now.Date)
+            var d = now.Date;
+            if (!_isPostingDailyStats && _checkDailyPost.Date != d)
             {
-                await LogHelper.LogInfo("Running auto day stats post...", LogCat.Tick);
-                await Stats(null, "newday").ConfigureAwait(false);
-                _checkDailyPost = now;
+                _isPostingDailyStats = true;
+                try
+                {
+                    await LogHelper.LogInfo("Running auto day stats post...", LogCat.Tick);
+                    await Stats(null, "newday").ConfigureAwait(false);
+                    _checkDailyPost = now;
+                }
+                finally
+                {
+                    _isPostingDailyStats = false;
+                }
             }
         }
 

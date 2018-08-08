@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Modules.Sub;
 
@@ -19,11 +18,14 @@ namespace ThunderED.Modules.OnDemand
 
         public ChatRelayModule()
         {
+            LogHelper.LogModule("Inititalizing ChatRelay module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, OnRequestReceived);
         }
 
         private async Task<bool> OnRequestReceived(HttpListenerRequestEventArgs context)
         {
+            if (!Settings.Config.ModuleChatRelay) return false;
+
             var request = context.Request;
             var response = context.Response;
 

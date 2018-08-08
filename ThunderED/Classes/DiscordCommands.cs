@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
@@ -163,6 +164,162 @@ namespace ThunderED.Classes
             {
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
             }
+        }
+
+        [Command("authurl", RunMode = RunMode.Async), Summary("Displays web auth URL address")]
+        public async Task AuthUrl()
+        {
+            if (SettingsManager.Settings.Config.ModuleAuthWeb)
+            {
+                if(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Any(a=> a.PreliminaryAuthMode == false))
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
+                else
+                {
+                    var grp = !string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) ? SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a=> a.Key == SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) : SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault();
+                    if (grp.Value != null)
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl(grp.Value.ESICustomAuthRoles, grp.Key)}");
+                    }
+                }
+            }
+            else
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
+            }
+        }
+
+        [Command("authurl", RunMode = RunMode.Async), Summary("Displays web auth URL address")]
+        public async Task AuthUrl2(string group)
+        {
+            if (SettingsManager.Settings.Config.ModuleAuthWeb)
+            {
+                var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a=> a.Key == group);
+                if (grp.Value != null)
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl(grp.Value.ESICustomAuthRoles, grp.Key)}");
+                }
+            }
+            else
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
+            }
+        }
+
+        [Command("auth", RunMode = RunMode.Async), Summary("Displays web auth URL address")]
+        public async Task Auth3(string command, string data)
+        {
+            if (SettingsManager.Settings.Config.ModuleAuthWeb)
+            {
+                try
+                {
+                    string code;
+                    int characterId;
+                    if (!data.All(char.IsDigit))
+                    {
+                        code = data;
+                        characterId = 0;
+                    }
+                    else
+                    {
+                        code = null;
+                        characterId = Convert.ToInt32(data);
+                    }
+                    code = code ?? await SQLHelper.PendingUsersGetCode(characterId);
+
+                    //check if entry exists
+                    if (await SQLHelper.UserTokensExists(code) == false)
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
+                        return;
+                    }
+
+                    var name = await SQLHelper.UserTokensGetName(code);
+                    switch (command)
+                    {
+                        case "accept":
+                        {
+                            //check if pending users have valid entry
+                            if (await SQLHelper.PendingUsersIsEntryActive(code) == false)
+                            {
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
+                                return;
+                            }
+                            //check if user confirmed application
+                            if (await SQLHelper.UserTokensIsConfirmed(code) == false)
+                            {
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authUserNotConfirmed", name));
+                                return;
+                            }
+
+                            var userGroupName = await SQLHelper.UserTokensGetGroupName(code);
+                            var groupRoles = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == userGroupName).Value?.AuthRoles;
+                            //check if group exists
+                            if (string.IsNullOrEmpty(userGroupName) || groupRoles == null)
+                            {
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authGroupNameNotFound", userGroupName));
+                                return;
+                            }
+
+                            //check auth rights
+                            if (!APIHelper.DiscordAPI.GetUserRoleNames(Context.Message.Author.Id).Any(a => groupRoles.Contains(a)))
+                            {
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authNoAccessRights"));
+                                return;
+                            }
+
+                            //authed for action!
+                           // code = code ?? await SQLHelper.PendingUsersGetCode(characterId);
+                            var discordUserId = await SQLHelper.PendingUsersGetDiscordId(code);
+
+                            await WebAuthModule.AuthUser(Context, code, discordUserId);
+                            await SQLHelper.UserTokensSetAuthState(code, 2);
+                            return;
+                        }
+                        case "decline":
+                        {
+                            //check if pending users have valid entry
+                            if (await SQLHelper.PendingUsersIsEntryActive(code) == false)
+                            {
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
+                                return;
+                            }
+
+                            characterId = characterId == 0 ? await SQLHelper.PendingUsersGetCharacterId(code) : characterId;
+
+                            await SQLHelper.SQLiteDataDelete("pendingUsers", "characterID", characterId.ToString());
+                            await SQLHelper.SQLiteDataDelete("userTokens", "characterID", characterId.ToString());
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserDeclined", name));
+
+                            return;
+                        }
+                        case "confirm":
+                            code = code ?? data;
+
+                            if (await SQLHelper.UserTokensExists(code) == false || await SQLHelper.PendingUsersIsEntryActive(code) == false || await SQLHelper.UserTokensHasDiscordId(code))
+                            {
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
+                                return;
+                            }
+
+                            await SQLHelper.UserTokensSetDiscordId(code, Context.Message.Author.Id);
+                            await SQLHelper.PendingUsersSetCode(code, Context.Message.Author.Id);
+                            await SQLHelper.UserTokensSetAuthState(code, 1);
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserConfirmed", name));
+
+                            return;
+                        default:
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("invalidCommandSyntax"));
+                            return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx($"!auth {command} {data}", ex, LogCat.AuthWeb);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("WebRequestUnexpected"));
+                }
+            }
+
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
         }
 
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
@@ -501,7 +658,7 @@ namespace ThunderED.Classes
                     }
                     else
                     {
-                        await WebAuthModule.AuthUser(Context, x);
+                        await WebAuthModule.AuthUser(Context, x, 0);
                     }
                 }
                 catch (Exception ex)

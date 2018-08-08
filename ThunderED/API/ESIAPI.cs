@@ -46,6 +46,17 @@ namespace ThunderED.API
                 forceUpdate, noCache);
         }
 
+        internal async Task<JsonClasses.FactionData> GetFactionData(string reason, long id)
+        {
+            var factions = await APIHelper.RequestWrapper<List<JsonClasses.FactionData>>($"https://esi.tech.ccp.is/latest/universe/factions/?datasource=tranquility&language={_language}", reason);
+            return factions?.FirstOrDefault(a => a.faction_id == id);
+        }
+
+        internal async Task<List<JsonClasses.CorporationHistoryEntry>> GetCharCorpHistory(string reason, int charId)
+        {
+            return await APIHelper.RequestWrapper<List<JsonClasses.CorporationHistoryEntry>>($"https://esi.tech.ccp.is/latest/characters/{charId}/corporationhistory/?datasource=tranquility&language={_language}", reason);
+        }
+
         internal async Task<JsonClasses.Type_id> GetTypeId(string reason, object id, bool forceUpdate = false)
         {
             return await GetEntry<JsonClasses.Type_id>($"https://esi.tech.ccp.is/latest/universe/types/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
@@ -238,7 +249,45 @@ namespace ThunderED.API
             return senders == null || senders.Length == 0 || data == null ? data : data.Where(a=> senders.Contains(a.from)).ToList();
         }
 
-        public async Task<JsonClasses.Mail> GetMail(string reason, string id, string token, int mailId)
+        public async Task<double> GetCharacterWalletBalance(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            var result = await APIHelper.RequestWrapper<string>(
+                $"https://esi.tech.ccp.is/latest/characters/{id}/wallet/?datasource=tranquility", reason, authHeader);
+            return string.IsNullOrEmpty(result) ? 0 : Convert.ToDouble(result);
+        }
+
+        public async Task<List<JsonClasses.WalletJournalEntry>> GetCharacterWalletJournal(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.WalletJournalEntry>>(
+                $"https://esi.tech.ccp.is/latest/characters/{id}/wallet/journal/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
+        
+        public async Task<List<JsonClasses.WalletTransactionEntry>> GetCharacterWalletTransactions(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.WalletTransactionEntry>>(
+                $"https://esi.tech.ccp.is/latest/characters/{id}/wallet/transactions/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
+        public async Task<List<JsonClasses.WalletJournalEntry>> GetCharacterJournalTransactions(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.WalletJournalEntry>>(
+                $"https://esi.tech.ccp.is/latest/characters/{id}/wallet/journal/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
+        public async Task<List<JsonClasses.CharYearlyStatsEntry>> GetCharYearlyStats(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.CharYearlyStatsEntry>>(
+                $"https://esi.tech.ccp.is/latest/characters/{id}/stats/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+        
+
+        public async Task<JsonClasses.Mail> GetMail(string reason, object id, string token, int mailId)
         {
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.Mail>($"https://esi.tech.ccp.is/latest/characters/{id}/mail/{mailId}/?datasource=tranquility&language={_language}", reason, authHeader);
@@ -275,6 +324,23 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<List<JsonClasses.FWStats>>($"https://esi.tech.ccp.is/latest/fw/stats/?datasource=tranquility&language={_language}", reason);
 
         }
-        
+
+        public async Task<List<JsonClasses.Contract>> GetCharacterContracts(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.Contract>>($"https://esi.tech.ccp.is/latest/characters/{id}/contracts/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
+        public async Task<List<JsonClasses.Contact>> GetCharacterContacts(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.Contact>>($"https://esi.tech.ccp.is/latest/characters/{id}/contacts/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
+        public async Task<JsonClasses.SkillsData> GetCharSkills(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<JsonClasses.SkillsData>($"https://esi.tech.ccp.is/latest/characters/{id}/skills/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
     }
 }

@@ -20,6 +20,7 @@ namespace ThunderED.Modules.OnDemand
 
         public RadiusKillFeedModule()
         {
+            LogHelper.LogModule("Inititalizing RadiusKillFeed module...", Category).GetAwaiter().GetResult();
             ZKillLiveFeedModule.Queryables.Add(ProcessKill);
             _enableCache = Settings.RadiusKillFeedModule.EnableCache;
         }
@@ -192,7 +193,7 @@ namespace ThunderED.Modules.OnDemand
                             sysName,
                             systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType?.name : rVictimCharacter?.name, rVictimCorp?.name,
                             rVictimAlliance == null ? "" : $"[{rVictimAlliance?.ticker}]", isNPCKill, rAttackerCharacter?.name, rAttackerCorp?.name,
-                            rAttackerAlliance == null ? null : $"[{rAttackerAlliance?.ticker}]", attackers.Length, jumpsText);
+                            rAttackerAlliance == null ? null : $"[{rAttackerAlliance?.ticker}]", attackers.Length, jumpsText,  groupPair.Value.ShowGroupName ? groupPair.Key : " ");
                     }
 
                     await LogHelper.LogInfo($"Posting  Radius Kill: {kill.package.killID}  Value: {value:n0} ISK", Category);

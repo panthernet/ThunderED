@@ -117,6 +117,9 @@ namespace ThunderED.Json
             public MailRecipient[] recipients;
             public string subject;
             public string timestamp;
+
+            [JsonIgnore]
+            public DateTime Date => DateTime.Parse(timestamp);
         }
 
         public class Mail
@@ -182,8 +185,7 @@ namespace ThunderED.Json
             [JsonIgnore]
             public DateTimeOffset Time => DateTimeOffset.Parse(start_time);
 
-            [JsonIgnore] 
-            public int LastAnnounce;
+            [JsonIgnore] public int LastAnnounce;
         }
 
         internal class FWSystemStat
@@ -200,7 +202,7 @@ namespace ThunderED.Json
         {
             public int faction_id;
             public FWStatsKills kills;
-            
+
             public int pilots;
             public int systems_controlled;
         }
@@ -212,5 +214,242 @@ namespace ThunderED.Json
             public int yesterday;
         }
 
+        public class CorporationHistoryEntry
+        {
+            public int corporation_id;
+            public int record_id;
+            public string start_date;
+            public bool is_deleted;
+
+            [JsonIgnore] public int Days;
+
+            [JsonIgnore] public bool IsNpcCorp;
+
+            [JsonIgnore] public string CorpName;
+
+            [JsonIgnore]
+            public DateTime Date => DateTime.Parse(start_date);
+
+            [JsonIgnore] public string CorpTicker;
+        }
+
+        public class WalletJournalEntry
+        {
+            public double amount;
+            public double balance;
+            public long context_id;
+            public string context_id_type;
+            public string date;
+            public string description;
+            public long first_party_id;
+            public long id;
+            public string ref_type;
+            public long second_party_id;
+
+            [JsonIgnore]
+            public DateTime DateEntry => DateTime.Parse(date);
+        }
+
+        public class WalletTransactionEntry
+        {
+            public long client_id;
+            public string date;
+            public bool is_buy;
+            public bool is_personal;
+            public long journal_ref_id;
+            public long location_id;
+            public long quantity;
+            public long transaction_id;
+            public long type_id;
+            public double unit_price;
+
+            [JsonIgnore]
+            public DateTime DateEntry => DateTime.Parse(date);
+        }
+
+        public class CharYearlyStatsEntry
+        {
+            public CharYearlyStatsCharacterEntry character;
+            public CharYearlyStatsCombatEntry combat;
+            public CharYearlyStatsInvEntry inventory;
+            public CharYearlyStatsIskEntry isk;
+            public CharYearlyStatsMarketEntry market;
+            public CharYearlyStatsModuleEntry module;
+            public CharYearlyStatsPveEntry pve;
+            public CharYearlyStatsSocialEntry social;
+            public CharYearlyStatsTravelEntry travel;
+
+            public int year;
+        }
+
+        public class Contract
+        {
+            public long acceptor_id;
+            public long assignee_id;
+            public string availability;//"public", "personal"
+            public double collateral;
+            public long contract_id;
+            public string date_accepted;
+            public string date_completed;
+            public string date_expired;
+            public string date_issued;
+            public int days_to_complete;
+            public long end_location_id;
+            public bool for_corporation;
+            public long issuer_corporation_id;
+            public long issuer_id;
+            public double price;
+            public double reward;
+            public long start_location_id;
+            public string status;//"outstanding","finished"
+            public string title;//desc
+            public string type;// "item_exchange",courier
+            public double volume;
+
+            [JsonIgnore]
+            public DateTime? DateExpired => string.IsNullOrEmpty(date_expired) ? null : (DateTime?)DateTime.Parse(date_expired);
+            [JsonIgnore]
+            public DateTime? DateIssued => string.IsNullOrEmpty(date_issued) ? null : (DateTime?)DateTime.Parse(date_issued);
+            [JsonIgnore]
+            public DateTime? DateCompleted => string.IsNullOrEmpty(date_completed) ? null : (DateTime?)DateTime.Parse(date_completed);
+            [JsonIgnore]
+            public DateTime? DateAccepted => string.IsNullOrEmpty(date_accepted) ? null : (DateTime?)DateTime.Parse(date_accepted);
+        }
+
+        public class Contact
+        {
+            public long contact_id;
+            public string contact_type;// "character",
+            public bool is_blocked;
+            public bool is_watched;
+            public double standing;
+        }
+
+
+        public class CharYearlyStatsTravelEntry
+        {
+            public int acceleration_gate_activations;
+            public int align_to;
+            public long distance_warped_high_sec;
+            public long distance_warped_low_sec;
+            public long distance_warped_null_sec;
+            public long distance_warped_wormhole;
+            public int docks_high_sec;
+            public int docks_low_sec;
+            public int docks_null_sec;
+            public int jumps_stargate_high_sec;
+            public int jumps_stargate_low_sec;
+            public int jumps_stargate_null_sec;
+            public int jumps_wormhole;
+            public int warps_high_sec;
+            public int warps_low_sec;
+            public int warps_null_sec;
+            public int warps_to_bookmark;
+            public int warps_to_celestial;
+            public int warps_to_fleet_member;
+            public int warps_to_scan_result;
+            public int warps_wormhole;
+        }
+
+        public class CharYearlyStatsSocialEntry
+        {
+            public int add_contact_bad;
+            public int add_contact_good;
+            public int add_contact_high;
+            public int add_note;
+            public int added_as_contact_bad;
+            public int added_as_contact_good;
+            public int added_as_contact_high;
+            public int added_as_contact_neutral;
+            public int added_as_contact_horrible;
+            public int chat_messages_alliance;
+            public int chat_messages_corporation;
+            public int chat_messages_fleet;
+            public int chat_messages_solarsystem;
+            public int chat_messages_warfaction;
+            public ulong chat_total_message_length;
+            public int direct_trades;
+            public int fleet_broadcasts;
+            public int fleet_joins;
+        }
+
+        public class CharYearlyStatsPveEntry
+        {
+            public int dungeons_completed_agent;
+            public int dungeons_completed_distribution;
+            public int missions_succeeded;
+        }
+
+        public class CharYearlyStatsModuleEntry
+        {
+            public int activations_hybrid_weapon;
+            public int activations_interdiction_sphere_launcher;
+            public int activations_missile_launcher;
+            public int activations_probe_launcher;
+            public int activations_projectile_weapon;
+            public int link_weapons;
+            public int overload;
+            public int repairs;
+        }
+
+        public class CharYearlyStatsMarketEntry
+        {
+            public int accept_contracts_item_exchange;
+            public int buy_orders_placed;
+            public int cancel_market_order;
+            public int create_contracts_courier;
+            public int create_contracts_item_exchange;
+            public long isk_gained;
+            public long isk_spent;
+            public int search_contracts;
+            public int modify_market_order;
+            public int sell_orders_placed;
+        }
+
+        public class CharYearlyStatsIskEntry
+        {
+            public long @in;
+            public long @out;
+        }
+
+        public class CharYearlyStatsInvEntry
+        {
+            public int trash_item_quantity;
+        }
+
+        public class CharYearlyStatsCombatEntry
+        {
+            public int criminal_flag_set;
+            public int deaths_high_sec;
+            public int deaths_low_sec;
+            public int duel_requested;
+            public int pvp_flag_set;
+            public int kills_assists;
+            public int kills_high_sec;
+            public int kills_low_sec;
+            public int kills_null_sec;
+            public int probe_scans;
+        }
+
+        public class CharYearlyStatsCharacterEntry
+        {
+            public int days_of_activity;
+            public long minutes;
+            public int sessions_started;
+        }
+
+        public class SkillsData
+        {
+            public List<SkillEntry> skills;
+            public int total_sp;
+        }
+
+        public class SkillEntry
+        {
+            public int active_skill_level;
+            public long skill_id;
+            public long skillpoints_in_skill;
+            public int trained_skill_level;
+        }
     }
 }

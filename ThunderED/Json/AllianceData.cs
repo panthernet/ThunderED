@@ -19,5 +19,18 @@ namespace ThunderED.Json
         {
             public int[] alliance;
         }
+
+        internal class FactionData
+        {
+            public long corporation_id;
+            public string description;
+            public long faction_id;
+            public bool is_unique;
+            public string name;
+            public double size_factor;
+            public long solar_system_id;
+            public int station_count;
+            public int station_system_count;
+        }
     }
 }

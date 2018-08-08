@@ -90,6 +90,7 @@ namespace ThunderED.Modules
                 if (DateTime.Now <= _nextNotificationCheck2) return;
                 _nextNotificationCheck2 = DateTime.Now.AddMinutes(1);
 
+                await LogHelper.LogModule("Running NullCampaign module check...", Category);
                 foreach (var pair in Settings.NullCampaignModule.Groups)
                 {
                     foreach (var campaign in await SQLHelper.GetNullCampaigns(pair.Key))

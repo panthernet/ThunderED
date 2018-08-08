@@ -31,7 +31,7 @@ namespace ThunderED.Classes
         Task CleanupNotificationsList();
         Task SQLiteDataDeleteWhereIn(string table, string field, List<int> list, bool not);
         Task<bool> RunScript(string file);
-        Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where);
+        Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where = null);
         Task<bool> IsEntryExists(string table, Dictionary<string, object> where);
         Task SQLiteDataInsert(string table, Dictionary<string, object> values);
     }

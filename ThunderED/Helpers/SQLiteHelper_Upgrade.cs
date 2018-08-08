@@ -10,7 +10,7 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "*", "1.1.6"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8"
         };
 
         public static async Task<bool> Upgrade()
@@ -24,11 +24,6 @@ namespace ThunderED.Helpers
             {
                 foreach (var update in MajorVersionUpdates)
                 {
-                    if (update == "*")
-                    {
-                        await RunCommand("ALTER TABLE refreshTokens ADD mail TEXT NULL;", true);
-                        continue;
-                    }
                     var v = new Version(update);
                     if (vDbVersion >= v) continue;
 
@@ -76,6 +71,19 @@ namespace ThunderED.Helpers
                             if(await RunScript(Path.Combine(SettingsManager.RootDirectory, "Content", "SQL", "1.1.6.sql")))
                                 await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             else await LogHelper.LogError($"Upgrade to DB version {update} FAILED! Script not found!");
+                            break;
+                        case "1.1.8":
+                            await RunCommand(
+                                "CREATE TABLE `userTokens` ( `characterID` INT UNIQUE NOT NULL, `characterName` TEXT NOT NULL, `discordUserId` INT NOT NULL DEFAULT 0, `refreshToken` TEXT NOT NULL, `groupName` TEXT NOT NULL DEFAULT 'DEFAULT', `permissions` TEXT NOT NULL, `authState` INT NOT NULL DEFAULT 0);");
+                            await LogHelper.LogWarning("Step 1 finished...");
+                            await RunCommand("DELETE FROM `pendingUsers`;");
+                            await RunCommand("CREATE UNIQUE INDEX ux_pendingUsers_characterID ON `pendingUsers`(`characterID`);;");
+                            await LogHelper.LogWarning("Step 2 finished...");
+                            await RunCommand("ALTER TABLE `pendingUsers` ADD COLUMN `discordID` INT NOT NULL DEFAULT 0;");
+                            await LogHelper.LogWarning("Step 3 finished...");
+                            await RunCommand("CREATE TABLE `hrmAuth` ( `id` text UNIQUE PRIMARY KEY NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `code` TEXT NOT NULL);");
+                            await LogHelper.LogWarning("Step 4 finished...");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:
                             continue;

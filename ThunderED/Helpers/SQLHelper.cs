@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Classes;
+using ThunderED.Classes.Entities;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
 using ThunderED.Providers;
@@ -188,7 +189,7 @@ namespace ThunderED.Helpers
             }).ToList();
         }
 
-        public static async Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where)
+        public static async Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where = null)
         {
             return await Provider?.SelectData(table, fields, where);
         }
@@ -222,6 +223,163 @@ namespace ThunderED.Helpers
                 name = Convert.ToString(item[3]),
                 security_status = (float)Convert.ToDouble(item[4]),
             }).FirstOrDefault();
+        }
+
+        #region pendingUsers table
+        public static async Task<bool> PendingUsersIsEntryActive(int characterId)
+        {
+            return !string.IsNullOrEmpty(await SQLiteDataQuery<string>("pendingUsers", "characterID", "characterID", characterId.ToString()));
+        }
+
+        public static async Task<bool> PendingUsersIsEntryActive(string code)
+        {
+            return !string.IsNullOrEmpty(await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code)) && 
+                 await SQLiteDataQuery<string>("pendingUsers", "active", "authString", code) == "1";
+        }
+
+        public static async Task<string> PendingUsersGetCode(int characterId)
+        {
+            return await SQLiteDataQuery<string>("pendingUsers", "authString", "characterID", characterId.ToString());
+        }
+
+        public static async Task PendingUsersSetCode(string code, ulong discordId)
+        {
+            await SQLiteDataUpdate("pendingUsers", "discordID", discordId, "authString", code);
+        }
+
+        public static async Task<ulong> PendingUsersGetDiscordId(string code)
+        {
+            return await SQLiteDataQuery<ulong>("pendingUsers", "discordID", "authString", code);
+        }
+
+        
+        public static async Task<int> PendingUsersGetCharacterId(string code)
+        {
+            return await SQLiteDataQuery<int>("pendingUsers", "characterID", "authString", code);
+
+        }
+        
+        #endregion
+
+        #region userTokens table
+
+        public static async Task<string> UserTokensGetGroupName(int characterId)
+        {
+            return await SQLiteDataQuery<string>("userTokens", "groupName", "characterID", characterId);
+        }
+        public static async Task<string> UserTokensGetGroupName(string code)
+        {
+            var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
+            return await UserTokensGetGroupName(Convert.ToInt32(characterId));
+        }
+
+        public static async Task<string> UserTokensGetName(int characterId)
+        {
+            return await SQLiteDataQuery<string>("userTokens", "characterName", "characterID", characterId);
+        }
+
+        public static async Task<string> UserTokensGetName(string code)
+        {
+            var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
+            return await UserTokensGetName(Convert.ToInt32(characterId));
+        }
+
+        public static async Task<bool> UserTokensIsAuthed(int characterId)
+        {
+            return await SQLiteDataQuery<int>("userTokens", "authState", "characterID", characterId) == 2;
+        }
+
+        public static async Task<bool> UserTokensIsConfirmed(int characterId)
+        {
+            return await SQLiteDataQuery<int>("userTokens", "authState", "characterID", characterId) == 1;
+        }
+
+        public static async Task<bool> UserTokensIsConfirmed(string code)
+        {
+            var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
+            return await UserTokensIsConfirmed(Convert.ToInt32(characterId));
+        }
+
+        public static async Task<bool> UserTokensIsPending(int characterId)
+        {
+            return await SQLiteDataQuery<int>("userTokens", "authState", "characterID", characterId) == 0;
+        }
+
+        public static async Task<bool> UserTokensIsPending(string code )
+        {
+            var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
+            return await UserTokensIsPending(Convert.ToInt32(characterId));
+        }
+
+        public static async Task<bool> UserTokensExists(int characterId)
+        {
+            return await SQLiteDataQuery<int>("userTokens", "characterID", "characterID", characterId) != 0;
+        }
+
+
+        public static async Task<bool> UserTokensExists(string code)
+        {
+            var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
+            return await UserTokensExists(Convert.ToInt32(characterId));
+
+        }
+
+        public static async Task UserTokensSetDiscordId(string code, ulong authorId)
+        {
+            var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
+
+            await SQLiteDataUpdate("userTokens", "discordUserId", authorId, "characterID", Convert.ToInt32(characterId));
+        }
+
+        public static async Task<List<object[]>> UserTokensGetConfirmedDataList()
+        {
+            return await SelectData("userTokens", new[] {"characterID", "characterName", "discordUserId", "groupName"}, new Dictionary<string, object>
+            {
+                {"authState", 1}
+            });
+        }
+
+        public static async Task UserTokensSetAuthState(int characterId, int value)
+        {
+            await SQLiteDataUpdate("userTokens", "authState", value, "characterID", characterId);
+        }
+
+        public static async Task UserTokensSetAuthState(string code, int value)
+        {
+            var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
+            await SQLiteDataUpdate("userTokens", "authState", value, "characterID", Convert.ToInt32(characterId));
+        }
+        
+        public static async Task<bool> UserTokensHasDiscordId(string code)
+        {
+            var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
+            return await SQLiteDataQuery<ulong>("userTokens", "discordUserId", "characterID", characterId) != 0;
+        }
+
+        public static async Task<List<UserTokenEntity>> UserTokensGetAllEntries(Dictionary<string, object> where = null)
+        {
+            var data = await SelectData("userTokens", new[] {"characterID", "characterName", "discordUserId", "refreshToken", "groupName", "permissions", "authState"}, where);
+            var list = new List<UserTokenEntity>();
+            data.ForEach(d =>
+            {
+                list.Add(new UserTokenEntity
+                {
+                    CharacterId = Convert.ToInt32(d[0]),
+                    CharacterName = d[1].ToString(),
+                    DiscordUserId = Convert.ToUInt64(d[2]),
+                    RefreshToken = d[3].ToString(),
+                    GroupName = d[4].ToString(),
+                    Permissions = d[5].ToString(),
+                    AuthState = Convert.ToInt32(d[6]),
+                });
+            });
+            return list;
+        }
+        #endregion
+
+        public static async Task<UserTokenEntity> UserTokensGetEntry(int inspectCharId)
+        {
+            return (await UserTokensGetAllEntries(new Dictionary<string, object> {{"characterID", inspectCharId}})).FirstOrDefault();
         }
     }
 }

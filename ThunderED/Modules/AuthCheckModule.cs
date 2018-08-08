@@ -22,15 +22,15 @@ namespace ThunderED.Modules
                 {
                     _lastAuthCheck = DateTime.Now;
 
-                    await LogHelper.LogInfo("Running Auth Check", Category);
+                    await LogHelper.LogModule("Running AuthCheck module...", Category);
 
                     var foundList = new Dictionary<int, List<string>>();
                     foreach (var group in Settings.WebAuthModule.AuthGroups.Values)
                     {
-                        if (group.CorpID != 0)
-                            foundList.Add(group.CorpID, group.MemberRoles);
-                        if (group.AllianceID != 0)
-                            foundList.Add(group.AllianceID, group.MemberRoles);
+                        if (group.CorpIDList.Count > 0)
+                            group.CorpIDList.ForEach(c => foundList.Add(c, group.MemberRoles));
+                        if (group.AllianceIDList.Count > 0)
+                            group.AllianceIDList.ForEach(a => foundList.Add(a, group.MemberRoles));
                     }
 
                     await APIHelper.DiscordAPI.UpdateAllUserRoles(foundList, Settings.WebAuthModule.ExemptDiscordRoles);

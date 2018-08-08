@@ -1,3 +1,13 @@
-﻿- central auth page for notifications and possible mail feeds auth
-- timers
-- mail feeder
+﻿- Services offline page when TQ is offline for webserver
+- move SQL queries to SQLDatahelper
+??? allow ESI custom roles in ordinary auth and grab token
+- loading screen for ajax queries
+
+HRM
+- interesting skills
+- notifications
+- clones
+- assets
+- Location: where, last login, ship
+- LP list
+- evewho links

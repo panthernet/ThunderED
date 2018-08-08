@@ -84,6 +84,8 @@ namespace ThunderED.Modules
 
                 if (DateTime.Now > _lastChecked.Value.AddMinutes(1))
                 {
+                    await LogHelper.LogModule("Running FleetUp module check...", Category);
+
                     var userId = SettingsManager.Settings.FleetupModule.UserId;
                     var apiCode = SettingsManager.Settings.FleetupModule.APICode;
                     var appKey = SettingsManager.Settings.FleetupModule.AppKey;

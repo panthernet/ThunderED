@@ -44,6 +44,7 @@ namespace ThunderED.Modules
                             "IncursionNotificationModule is not configured properly! Make sure you have correct channel specified and bot have correct access rights!");
                         return;
                     }
+                    await LogHelper.LogModule("Running Incursions module check...", Category);
 
                     var incursions = await APIHelper.ESIAPI.GetIncursions(Reason);
                     if (incursions == null) return;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Async;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -22,7 +23,7 @@ namespace ThunderED.Modules.Sub
             IsRunning = true;
             try
             {
-                if(TickManager.IsNoConnection) return;
+                if(TickManager.IsNoConnection || !Queryables.Any()) return;
 
                 CurrentEntry = await APIHelper.ZKillAPI.GetRedisqResponce();
                 if(CurrentEntry?.package == null ) return;

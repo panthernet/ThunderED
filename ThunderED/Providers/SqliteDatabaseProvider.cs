@@ -60,7 +60,7 @@ namespace ThunderED.Providers
             }
         }
 
-        public async Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where)
+        public async Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where = null)
         {
             var whereText = string.Empty;
             int count = 1;

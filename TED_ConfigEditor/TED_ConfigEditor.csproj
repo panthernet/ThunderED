@@ -111,6 +111,9 @@
     <Compile Include="..\ThunderED\Classes\Settings.cs">
       <Link>Classes\Settings.cs</Link>
     </Compile>
+    <Compile Include="..\ThunderED\Classes\SettingsManager_Scopes.cs">
+      <Link>Classes\SettingsManager_Scopes.cs</Link>
+    </Compile>
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>

@@ -23,11 +23,14 @@ namespace ThunderED.Modules
 
         public TimersModule()
         {
+            LogHelper.LogModule("Initializing Timers module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, OnDisplayTimers);
         }
 
         private async Task<bool> OnDisplayTimers(HttpListenerRequestEventArgs context)
         {
+            if (!Settings.Config.ModuleTimers) return false;
+
             var request = context.Request;
             var response = context.Response;
 
@@ -50,7 +53,7 @@ namespace ThunderED.Modules
                         if (state != "11") return false;
 
                         //state = 11 && have code
-                        var result = await WebAuthModule.GetCHaracterIdFromCode(code, clientID, secret);
+                        var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
                         if (result == null)
                         {
                             //TODO invalid auth
@@ -116,10 +119,7 @@ namespace ThunderED.Modules
 
                         if (!CheckAccess(characterId, rChar, out var isEditor))
                         {
-                            response.Headers.ContentEncoding.Add("utf-8");
-                            response.Headers.ContentType.Add("text/html;charset=utf-8");
-                            await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", null).Replace("{body}", $"Timers: {LM.Get("AccessDenied")}")
-                                .Replace("{header}", LM.Get("timersTemplateHeader")).Replace("{backText}", LM.Get("backText")));
+                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Timers Module", LM.Get("accessDenied")), response);
                             return true;
                         }
 
@@ -224,8 +224,6 @@ namespace ThunderED.Modules
                 return;
             }
 
-            response.Headers.ContentEncoding.Add("utf-8");
-            response.Headers.ContentType.Add("text/html;charset=utf-8");
             var text = File.ReadAllText(SettingsManager.FileTemplateTimersPage).Replace("{header}", LM.Get("timersTemplateHeader"))
                 .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
                 .Replace("{charId}", baseCharId )
@@ -253,7 +251,7 @@ namespace ThunderED.Modules
                     .Replace("{timerTooltipET}",LM.Get("timerTooltipET"))
                     .Replace("{locale}",LM.Locale)
                 ;
-            await response.WriteContentAsync(text);
+            await WebServerModule.WriteResponce(text, response);
         }
 
         private bool CheckAccess(int characterId, JsonClasses.CharacterData rChar, out bool isEditor)
@@ -332,7 +330,6 @@ namespace ThunderED.Modules
             {
                 if (!editChars.Contains(characterId) && !accessChars.Contains(characterId))
                 {
-                    //TODO access denied
                     return false;
                 }
             }
@@ -402,6 +399,7 @@ namespace ThunderED.Modules
                 if (_lastTimersCheck != null && (DateTime.Now - _lastTimersCheck.Value).TotalMinutes <= 1) return;
                 _lastTimersCheck = DateTime.Now;
 
+                await LogHelper.LogModule("Running timers check...", Category);
                 var timers = await SQLHelper.SQLiteDataSelectTimers();
                 timers?.ForEach(async timer =>
                 {

@@ -23,6 +23,7 @@ namespace ThunderED.Modules
             IsRunning = true;
             try
             {
+                await LogHelper.LogModule("Initializing Telegram module...", Category);
                 if (Settings.TelegramModule == null || string.IsNullOrEmpty(Settings.TelegramModule.Token))
                 {
                     await LogHelper.LogError("Token is not set for Telegram module!", Category);

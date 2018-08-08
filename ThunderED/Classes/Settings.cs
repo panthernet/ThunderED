@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using ThunderED.Classes;
 
 namespace TED_ConfigEditor.Classes
 #else
@@ -47,6 +48,8 @@ namespace ThunderED.Classes
         public FleetupModuleSettings FleetupModule { get; set; } = new FleetupModuleSettings();
         [ConfigEntryName("moduleJabber")]
         public JabberModuleSettings JabberModule { get; set; } = new JabberModuleSettings();
+        [ConfigEntryName("moduleHRM")]
+        public HRMModuleSettings HRMModule { get; set; } = new HRMModuleSettings();
 
         [ConfigEntryName("")]
         [StaticConfigEntry]
@@ -78,6 +81,40 @@ namespace ThunderED.Classes
             }
 
             return sb.ToString();
+        }
+#endif
+    }
+
+    public class HRMModuleSettings: ValidatableSettings
+    {
+#if EDITOR
+        public ObservableCollection<int> UsersAccessList { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<string> RolesAccessList { get; set; } = new ObservableCollection<string>();
+#else
+        public List<int> UsersAccessList { get; set; } = new List<int>();
+        public List<string> RolesAccessList { get; set; } = new List<string>();
+#endif
+        [Comment("Authentication timeout in minutes")]
+        public int AuthTimeoutInMinutes { get; set; } = 10;
+        [Comment("Number of entries to display in tables")]
+        public int TableEntriesPerPage { get; set; } = 10;
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(UsersAccessList):
+                        return UsersAccessList.Count == 0 && RolesAccessList.Count == 0? Compose(nameof(UsersAccessList), "Either UsersAccessList or RolesAccessList must be specified to protect sensitive data!") : null;
+                    case nameof(AuthTimeoutInMinutes):
+                        return AuthTimeoutInMinutes <= 0 ? Compose(nameof(AuthTimeoutInMinutes), "It is security unwise to set unlimited HR session") : null;
+                    case nameof(TableEntriesPerPage):
+                        return TableEntriesPerPage <= 0 ? Compose(nameof(TableEntriesPerPage), "Number of entries in a table must be greater than 0") : null;
+                }
+
+                return null;
+            }
         }
 #endif
     }
@@ -284,6 +321,8 @@ namespace ThunderED.Classes
         public ulong BigKillChannel { get; set; }
         [Comment("Also post big kills to the channel specified in discordChannel setting")]
         public bool BigKillSendToGeneralToo { get; set; }
+        [Comment("Post group name into notification message")]
+        public bool ShowGroupName { get; set; }
 
 #if EDITOR
         public override string this[string columnName]
@@ -366,6 +405,8 @@ namespace ThunderED.Classes
         public int RadiusRegionId { get; set; }
         [Comment("Minimum ISK value to filter killmails")]
         public long MinimumValue { get; set; }
+        [Comment("Post group name into notification message")]
+        public bool ShowGroupName { get; set; }
 
 #if EDITOR
         public override string this[string columnName]
@@ -726,6 +767,7 @@ namespace ThunderED.Classes
         public ulong DefaultDiscordChannelID { get; set; }
         [Comment("Numeric number of days to fetch old notifications for newly registered feeder. \n0 by default meaning no old notifications will be feeded")]
         public int FetchLastNotifDays { get; set; }
+
 #if EDITOR
         [Comment("The list of filters to sort incoming notifications")]
         [Required]
@@ -1046,6 +1088,7 @@ namespace ThunderED.Classes
         public bool ModuleNullsecCampaign { get; set; } = false;
         public bool ModuleFWStats { get; set; } = true;
         public bool ModuleLPStock { get; set; } = true;
+        public bool ModuleHRM { get; set; } = false;
 
         [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
         public string ZkillLiveFeedRedisqID { get; set; }
@@ -1159,6 +1202,9 @@ namespace ThunderED.Classes
         public bool EnforceCorpTickers { get; set; }
         [Comment("Automatically assign character names to users (setup Discord group to disallow name change also)")]
         public bool EnforceCharName { get; set; }
+        [Comment("Default group to use for auth url display")]
+        public string DefaultAuthGroup { get; set; }
+
 #if EDITOR
         [Comment("The list of Discord role names which will not be checked for authentication (admins etc.)")]
         public ObservableCollection<string> ExemptDiscordRoles { get; set; } = new ObservableCollection<string>();
@@ -1186,6 +1232,8 @@ namespace ThunderED.Classes
                         return ComAuthChannels.Count == 0 ? Compose(nameof(ComAuthChannels), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(AuthGroups):
                         return AuthGroups.Count == 0 ? Compose(nameof(AuthGroups), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(DefaultAuthGroup):
+                        return !string.IsNullOrEmpty(DefaultAuthGroup) && AuthGroups.All(a => a.Key != DefaultAuthGroup) ? Compose(nameof(DefaultAuthGroup), "DefaultAuthGroup do not equal to any of the AuthGroups names!") : null;
                 }
 
                 return null;
@@ -1196,18 +1244,38 @@ namespace ThunderED.Classes
 
     public class WebAuthGroup: ValidatableSettings
     {
-        [Comment("Numeric corporation ID. You can leave it 0 if you want to filter by entire alliance.")]
-        [Required]
-        public int CorpID { get; set; }
-        [Comment("Numeric alliance ID. Checked ADDITIVELY after the corpID")]
-        [Required]
-        public int AllianceID { get; set; }
 #if EDITOR
         [Comment("The list of exact Discord role names to assign")]
         [Required]
         public ObservableCollection<string> MemberRoles { get; set; } = new ObservableCollection<string>();
+        [Comment("The list of exact Discord role names authorized to manually approve applicants")]
+        public ObservableCollection<string> AuthRoles { get; set; } = new ObservableCollection<string>();
+        [Comment("Numeric alliance ID list. Checked ADDITIVELY after the corpIDList")]
+        [Required]
+        public ObservableCollection<int> AllianceIDList { get; set; } = new ObservableCollection<int>();
+        [Comment("Numeric corporation ID list. You can leave it empty if you want to filter by entire alliance.")]
+        [Required]
+        public ObservableCollection<int> CorpIDList { get; set; } = new ObservableCollection<int>();
 #else
         public List<string> MemberRoles { get; set; } = new List<string>();
+        public List<string> AuthRoles { get; set; } = new List<string>();
+        public List<int> CorpIDList { get; set; } = new List<int>();
+        public List<int> AllianceIDList { get; set; } = new List<int>();
+#endif
+        [Comment("Enable auth to require manual acceptance from authorized members")]
+        public bool PreliminaryAuthMode { get; set; }
+
+        [Comment("Enable automatic applications invalidation and cleanup in specified amount of hours")]
+        public int AppInvalidationInHours { get; set; } = 48;
+
+        [Comment("Optional text to display in a web-server group auth button if separate button is generated for this group")]
+        public string CustomButtonText { get; set; }
+        
+#if EDITOR
+        [Comment("The list of ESI access role names to check on auth")]
+        public ObservableCollection<string> ESICustomAuthRoles { get; set; } = new ObservableCollection<string>();
+#else
+        public List<string> ESICustomAuthRoles { get; set; } = new List<string>();
 #endif
 #if EDITOR
         public override string this[string columnName]
@@ -1216,10 +1284,15 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    case nameof(CorpID):
-                        return CorpID == 0 && AllianceID == 0 ? Compose(nameof(CorpID), "Either CorpID or AllianceID must be specified!") : null;
+                    //case nameof(CorpIDList):
+                        //return CorpIDList.Count == 0 && AllianceIDList.Count == 0 ? Compose(nameof(CorpIDList), "Either CorpID or AllianceID must be specified!") : null;
                     case nameof(MemberRoles):
                         return MemberRoles.Count == 0 ? Compose(nameof(MemberRoles), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(PreliminaryAuthMode):
+                        return ESICustomAuthRoles.Count == 0 ? Compose(nameof(ESICustomAuthRoles), "ESICustomAuthRoles must contain at least one value when PreliminaryAuthMode is true!") : null;
+                    case nameof(ESICustomAuthRoles):
+                        var wrong = ESICustomAuthRoles.Where(a => !SettingsManager.ESIScopes.Contains(a)).ToList();
+                        return wrong.Count > 0 ? Compose(nameof(ESICustomAuthRoles), $"ESICustomAuthRoles contains unidentified ESI scopes: {string.Join(", ", wrong)}") : null;
                 }
 
                 return null;

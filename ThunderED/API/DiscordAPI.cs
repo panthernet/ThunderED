@@ -552,5 +552,10 @@ namespace ThunderED.API
             return contextChannel.GetType() == typeof(SocketDMChannel) && await contextChannel.GetUserAsync(Client.CurrentUser.Id) != null;
 
         }
+
+        public List<string> GetUserRoleNames(ulong id)
+        {
+            return GetUser(id).Roles.Select(a => a.Name).ToList();
+        }
     }
 }

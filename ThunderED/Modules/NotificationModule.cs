@@ -32,6 +32,7 @@ namespace ThunderED.Modules
 
         public NotificationModule()
         {
+            LogHelper.LogModule("Inititalizing Notifications module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, Auth);
         }
 
@@ -44,7 +45,7 @@ namespace ThunderED.Modules
             {
                 _lastCleanupCheck = DateTime.Now;
                 await SQLHelper.CleanupNotificationsList();
-                await LogHelper.LogInfo("Notitfications cleanup complete", Category, LogToConsole, false);
+                await LogHelper.LogInfo("Notifications cleanup complete", Category, LogToConsole, false);
             }
         }
 
@@ -73,7 +74,7 @@ namespace ThunderED.Modules
             {
                 if (DateTime.Now > _nextNotificationCheck)
                 {
-                    await LogHelper.LogInfo("Running Notification Check", Category, LogToConsole, false);
+                    await LogHelper.LogModule("Running Notifications module check...", Category);
                     var guildID = Settings.Config.DiscordGuildId;
 
                     foreach (var groupPair in Settings.NotificationFeedModule.Groups)
@@ -833,6 +834,8 @@ namespace ThunderED.Modules
 
         public async Task<bool> Auth(HttpListenerRequestEventArgs context)
         {
+            if (!Settings.Config.ModuleNotificationFeed) return false;
+
             var request = context.Request;
             var response = context.Response;
             var extPort = Settings.WebServerModule.WebExternalPort;
@@ -848,37 +851,33 @@ namespace ThunderED.Modules
                     var code = prms[0].Split('=')[1];
                     // var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
 
-                    var result = await WebAuthModule.GetCHaracterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    var result = await WebAuthModule.GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                     if (result == null)
                     {
                         var message = LM.Get("ESIFailure");
-                        response.Headers.ContentEncoding.Add("utf-8");
-                        response.Headers.ContentType.Add("text/html;charset=utf-8");
-                        await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
-                            .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")));
+                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
+                            .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
                         return true;
                     }
 
                     var characterID = result[0];
                     var numericCharId = Convert.ToInt32(characterID);
 
-                    response.Headers.ContentEncoding.Add("utf-8");
-                    response.Headers.ContentType.Add("text/html;charset=utf-8");
                     if (string.IsNullOrEmpty(characterID))
                     {
                         await LogHelper.LogWarning("Bad or outdated notify feed request!");
-                        await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
                             .Replace("{message}", LM.Get("authTokenBadRequest"))
-                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
+                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
                         return true;
                     }
 
                     if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.Groups.Values.All(g => g.CharacterID != numericCharId))
                     {
                         await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
-                        await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
                             .Replace("{message}", LM.Get("authTokenInvalid"))
-                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")));
+                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
                         return true;
                     }
 
@@ -886,9 +885,9 @@ namespace ThunderED.Modules
 
                     await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
                     await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
-                    await response.WriteContentAsync(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
+                    await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                         .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
-                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")));
+                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")), response);
                     return true;
                 }                
             }
