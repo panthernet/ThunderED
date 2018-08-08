@@ -12,6 +12,7 @@
 * Standalone build with no additional software or framework requirements (Docker compatible)
 * 100% ESI API
 * Multiple language support
+* The very own JackKnife inspection utility!
 * Web templates and rich settings
 * Effective caching logic for less network and memory load
 * Highly customizable Message templates for killmails without any source-code modifications
