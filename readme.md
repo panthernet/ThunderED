@@ -20,6 +20,7 @@
 ## Effective Corp and Alliance Management
 With this bot you will have tools to:
 * Allow only authed ingame characters into your Discord group
+* Use preliminary auth and inspect characters using JackKnife utility
 * Receive important notifications from many alliances and corporations
 * Know when your citadels are under attack or low on fuel
 * Know when moon extraction is finished or moon chunk has been blown
@@ -34,7 +35,7 @@ With this bot you will have tools to:
 * Receive pings from external messengers like Jabber, IRC, Telegram
 
 ## Supported Modules
-* Web Auth - authenticate EVE characters in Discord using built-in web server
+* Web Auth - authenticate EVE characters in Discord using built-in web server, use JackKnife utility to inspect them before you accept them into your community
 * Auth Check - check users access rights and strip permissions when char leaves your corp or ally
 * Live Kill Feed - feed live EVE killmails using ZKill RedisQ into multiple channels 
 * Reliable Kill Feed - feed killmails for selected corps or alliances in a reliable way using ZKill API
@@ -66,3 +67,5 @@ With this bot you will have tools to:
 ![Sample kill feed](http://dl3.joxi.net/drive/2018/05/04/0014/0683/967339/39/4605864a01.jpg)
 
 ![Notifications](http://dl3.joxi.net/drive/2018/05/04/0014/0683/967339/39/39e91a5fde.jpg)
+
+![JackKnife - HRM](http://joxi.ru/gmv89dJsL6wnnA.jpg)
