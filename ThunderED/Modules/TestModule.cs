@@ -52,6 +52,7 @@ namespace ThunderED.Modules
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, "Test embed failed!");
                     return;
                 }
+                await APIHelper.DiscordAPI.ReplyMessageAsync(context, " ", embed);
 
               
             }

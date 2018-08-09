@@ -67,6 +67,8 @@ namespace ThunderED.Classes
                 var isRadiusRegion = dic.ContainsKey("{isRegionMode}") && Convert.ToBoolean(dic["{isRegionMode}"]);
                 if (dic.ContainsKey("{isRegionMode}"))
                     dic.Remove("{isRegionMode}");
+                if(!dic.ContainsKey("{NewLine}"))
+                    dic.Add("{NewLine}", Environment.NewLine);
 
                 var lines = (await File.ReadAllLinesAsync(fileName))
                     .Where(a => !a.StartsWith("//") && !string.IsNullOrWhiteSpace(a)).ToList();

@@ -127,9 +127,6 @@
     <None Update="Templates\Messages\default\def.Template.killMailRadius.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Templates\Messages\Template.killMailGeneral.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

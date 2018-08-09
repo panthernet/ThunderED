@@ -1,4 +1,5 @@
 ﻿//Available variables
+//{NewLine} - adds line break
 //{shipID} - destroyed ship type ID
 //{shipType} - destroyed ship type name
 //{iskValue} - km isk value
