@@ -66,7 +66,7 @@ namespace ThunderED.Helpers
                         Console.ForegroundColor = ConsoleColor.DarkGray;
                         break;
                     case LogSeverity.Module:
-                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.ForegroundColor = ConsoleColor.Gray;
                         break;
                 }
 
