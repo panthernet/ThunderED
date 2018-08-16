@@ -174,8 +174,12 @@ namespace ThunderED.API
                 module?.SendMessage(message.Channel.Id, message.Author.Id, message.Author.Username, message.Content);
             }
 
+
             if (SettingsManager.Settings.Config.ModuleTelegram)
-                TickManager.GetModule<TelegramModule>()?.SendMessage(message.Channel.Id, message.Author.Id, message.Author.Username, message.Content);
+            {
+                var name = APIHelper.DiscordAPI.GetGuild().GetUser(message.Author.Id)?.Nickname ?? message.Author.Username;
+                TickManager.GetModule<TelegramModule>()?.SendMessage(message.Channel.Id, message.Author.Id, name, message.Content);
+            }
 
             int argPos = 0;
 

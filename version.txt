@@ -11,6 +11,7 @@
 + Improved denied access handling for web modules
 + Improved ZKill feeder to don't feed kills if none of the other modules demands them
 + Improved logging
++ Fixed discord user names in TelegramRelay module
 
 ### Highlights - Advanced Web Auth
 Improved web authentication module now supports 3 different modes:
