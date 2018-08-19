@@ -96,13 +96,21 @@ namespace ThunderED
                         {
                             if (!line.StartsWith('[') || relay.Pool.Contains(line)) continue;
 
+                            
+
                             var newLine = line;
                             //change time
                             try
                             {
                                 var end = line.IndexOf(']', 1);
                                 var dt = DateTime.Parse(line.Substring(1, end - 2).Trim());
-                                newLine = $"[{dt.ToString(relay.DateFormat)}] {line.Substring(end + 1, line.Length - end - 1).Trim()}";
+                                var msg = line.Substring(end + 1, line.Length - end - 1).Trim();
+                                //startswith
+                                if(relay.RelayStartsWithText.Count > 0 && !relay.RelayStartsWithText.Any(a=> msg.ToLower().StartsWith(a.ToLower()))) continue;
+                                if(relay.RelayContainsText.Count > 0 && !relay.RelayContainsText.Any(a=> msg.ToLower().Contains(a.ToLower()))) continue;
+                                if(relay.FilterChatContainsText.Any(a=> msg.ToLower().Contains(a.ToLower()))) continue;
+
+                                newLine = $"[{dt.ToString(relay.DateFormat)}] {msg}";
                             }
                             catch
                             {

@@ -8,6 +8,7 @@
 + Added optional ShowGroupName param to liveKillFeedModule and radiusKillFeedModule
 + Added new !authurl command which will return default web auth url based on DefaultAuthGroup param or first auth group found. *!authurl groupName* will return auth url for specified group name (by default known to admin only).
 + Added new KM template param {NewLine} - inserts line break
++ Added message filtering to TED_ChatRelay app
 + Improved denied access handling for web modules
 + Improved ZKill feeder to don't feed kills if none of the other modules demands them
 + Improved logging

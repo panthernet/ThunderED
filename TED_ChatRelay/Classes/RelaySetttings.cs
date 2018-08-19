@@ -21,5 +21,9 @@ namespace TED_ChatRelay.Classes
         public List<string> Pool { get; set; } = new List<string>();
 
         public string DateFormat { get; set; }
+
+        public List<string> RelayStartsWithText { get; set; } = new List<string>();
+        public List<string> RelayContainsText { get; set; } = new List<string>();
+        public List<string> FilterChatContainsText = new List<string>();
     }
 }
