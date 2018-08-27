@@ -47,45 +47,42 @@ namespace ThunderED.Modules.OnDemand
 
                         var message = HttpUtility.UrlDecode(prms[0].Split('=')[1]);
                         var code = Encoding.UTF8.GetString(Convert.FromBase64String($"{HttpUtility.UrlDecode(prms[1].Split('=')[1])?.Replace("-", "+").Replace("_", "/")}"));
-                        var relay = Settings.ChatRelayModule.RelayChannels.FirstOrDefault(a => a.Code == code);
+                        var relays = Settings.ChatRelayModule.RelayChannels.Where(a => a.Code == code);
                         var iChannel = HttpUtility.UrlDecode(prms[2].Split('=')[1]);
-                        //check relay code
-                        if (relay == null)
+
+                        foreach (var relay in relays)
                         {
-                            await LogHelper.LogWarning($"Got message with unknown code {code}. Body: {message}", Category);
-                            await response.WriteContentAsync("ERROR: Bad code");
-                            return true;
+                            if (relay.DiscordChannelId == 0)
+                            {
+                                await LogHelper.LogError($"Relay with code {code} has no discord channel specified!", Category);
+                                await response.WriteContentAsync("ERROR: Bad server config");
+                                return true;
+                            }
+
+                            if (relay.EVEChannelName != iChannel)
+                            {
+                                await LogHelper.LogError($"Relay with code {code} has got message with channel mismatch!", Category);
+                                await response.WriteContentAsync("ERROR: Invalid channel name");
+                                return true;
+
+                            }
+
+                            if (!_pool.ContainsKey(code))
+                                _pool.Add(code, new List<string>());
+                            var list = _pool[code];
+                            if (list.Contains(message))
+                            {
+                                await response.WriteContentAsync("DUPE");
+                                return true;
+                            }
+
+                            await APIHelper.DiscordAPI.SendMessageAsync(relay.DiscordChannelId, message);
+
+                            
+                            list.Add(message);
+                            if (list.Count > 20)
+                                list.RemoveAt(0);
                         }
-
-                        if (relay.DiscordChannelId == 0)
-                        {
-                            await LogHelper.LogError($"Relay with code {code} has no discord channel specified!", Category);
-                            await response.WriteContentAsync("ERROR: Bad server config");
-                            return true;
-                        }
-
-                        if (relay.EVEChannelName != iChannel)
-                        {
-                            await LogHelper.LogError($"Relay with code {code} has got message with channel mismatch!", Category);
-                            await response.WriteContentAsync("ERROR: Invalid channel name");
-                            return true;
-
-                        }
-
-                        if (!_pool.ContainsKey(code))
-                            _pool.Add(code, new List<string>());
-                        var list = _pool[code];
-                        if (list.Contains(message))
-                        {
-                            await response.WriteContentAsync("DUPE");
-                            return true;
-                        }
-
-                        await APIHelper.DiscordAPI.SendMessageAsync(relay.DiscordChannelId, message);
-
-                        list.Add(message);
-                        if (list.Count > 20)
-                            list.RemoveAt(0);
 
                         await response.WriteContentAsync("OK");
 

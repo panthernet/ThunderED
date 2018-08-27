@@ -229,7 +229,7 @@ namespace ThunderED.Modules
                             cFoundList.Add(corpID); //fake reg ;)
                             groupName = inputGroupName;
                             groupPermissions = new List<string>(group.ESICustomAuthRoles);
-
+                            add = true;
                         }
                         else //normal auth
                         {
