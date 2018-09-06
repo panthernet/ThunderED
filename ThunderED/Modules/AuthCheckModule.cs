@@ -33,7 +33,7 @@ namespace ThunderED.Modules
                             group.AllianceIDList.ForEach(a => foundList.Add(a, group.MemberRoles));
                     }
 
-                    await APIHelper.DiscordAPI.UpdateAllUserRoles(foundList, Settings.WebAuthModule.ExemptDiscordRoles);
+                    await APIHelper.DiscordAPI.UpdateAllUserRoles(foundList, Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles);
                     await LogHelper.LogInfo("Auth check complete!", Category);
                 }
             }

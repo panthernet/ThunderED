@@ -271,7 +271,7 @@ namespace ThunderED.API
 
         #endregion
 
-        public async Task UpdateAllUserRoles(Dictionary<int, List<string>> foundList, List<string> exemptRoles)
+        public async Task UpdateAllUserRoles(Dictionary<int, List<string>> foundList, List<string> exemptRoles, List<string> authCheckIgnoreRoles)
         {
             var discordGuild = GetGuild();
             var discordUsers = discordGuild.Users;
@@ -341,8 +341,11 @@ namespace ThunderED.API
                         {
                             if (roles.FirstOrDefault(x => x.Id == role.Id) == null)
                             {
-                                remroles.Add(role);
-                                changed = true;
+                                if (!authCheckIgnoreRoles.Contains(role.Name))
+                                {
+                                    remroles.Add(role);
+                                    changed = true;
+                                }
                             }
                         }
 

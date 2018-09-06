@@ -150,6 +150,7 @@
   "WebAuthModule": {
     "authCheckIntervalMinutes": 480,
     "exemptDiscordRoles": [ "Admins", "Role2" ],
+    "AuthCheckIgnoreRoles":  [ "CustomDiscordRoleToSkipOnAuthCheck" ],
     "authReportChannel": 0,
     "//": "Channels where !auth command is allowed. Empty - everywhere",
     "comAuthChannels":  [],

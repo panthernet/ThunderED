@@ -1208,14 +1208,17 @@ namespace ThunderED.Classes
 #if EDITOR
         [Comment("The list of Discord role names which will not be checked for authentication (admins etc.)")]
         public ObservableCollection<string> ExemptDiscordRoles { get; set; } = new ObservableCollection<string>();
+        [Comment("The list of Discord roles which will not be stripped if character is authed. This will allow you to add custom roles manually.")]
+        public ObservableCollection<string> AuthCheckIgnoreRoles { get; set; } = new ObservableCollection<string>();
         [Comment("The list of channels where !auth command is allowed")]
         [Required]
         public ObservableCollection<ulong> ComAuthChannels { get; set; } = new ObservableCollection<ulong>();
         [Comment("The list of groups to filter auth requests")]
         [Required]
-        public ObservableDictionary<string, WebAuthGroup> AuthGroups { get; set; } = new ObservableDictionary<string, WebAuthGroup>();
+        public ObservableDictionary<string, WebAuthGroup> AuthGroups { get; set; } = new ObservableDictionary<string, WebAuthGroup>();        
 #else
         public List<string> ExemptDiscordRoles { get; set; } = new List<string>();
+        public List<string> AuthCheckIgnoreRoles { get; set; } = new List<string>();
         public List<ulong> ComAuthChannels { get; set; } = new List<ulong>();
         public Dictionary<string, WebAuthGroup> AuthGroups { get; set; } = new Dictionary<string, WebAuthGroup>();
 #endif
