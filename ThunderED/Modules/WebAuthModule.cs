@@ -385,14 +385,16 @@ namespace ThunderED.Modules
                         {
                             if (group.Value.CorpIDList.Count > 0)
                             {
-                                group.Value.CorpIDList.ForEach(c=> foundList.Add(c, group.Value.MemberRoles));                                
-                                groupName = group.Key;
+                                foreach (var c in group.Value.CorpIDList.Where(a => !foundList.ContainsKey(a)))
+                                    foundList.Add(c, group.Value.MemberRoles);
+                               // groupName = group.Key;
                             }
 
                             if (group.Value.AllianceIDList.Count > 0)
                             {
-                                group.Value.AllianceIDList.ForEach(a=> foundList.Add(a, group.Value.MemberRoles));                                
-                                groupName = group.Key;
+                                foreach (var c in group.Value.AllianceIDList.Where(a => !foundList.ContainsKey(a)))
+                                    foundList.Add(c, group.Value.MemberRoles);                             
+                               // groupName = group.Key;
                             }
                         }
 
