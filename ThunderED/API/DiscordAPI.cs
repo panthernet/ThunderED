@@ -407,7 +407,7 @@ namespace ThunderED.API
                         {
                             foreach (var exempt in rroles)
                             {
-                                if (exemptRoles.FirstOrDefault(x => x == exempt.Name) == null)
+                                if (exemptRoles.FirstOrDefault(x => x == exempt.Name) == null && !authCheckIgnoreRoles.Contains(exempt.Name))
                                     rchanged = true;
                             }
                         }

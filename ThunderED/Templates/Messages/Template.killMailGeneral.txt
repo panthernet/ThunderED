@@ -1,0 +1,38 @@
+﻿//Available variables
+//{NewLine} - adds line break
+//{shipID} - destroyed ship type ID
+//{shipType} - destroyed ship type name
+//{iskValue} - km isk value
+//{systemName} - km system name
+//{systemSec} - km system security status
+//{victimName} - victim name
+//{victimCorpName} - victim corp name
+//{victimCorpTicker} - victim corp ticker
+//{victimAllyTicker} - victim ally ticker
+//{isNpcKill} - (BOOL) is this an npc kill
+//{isLoss} - (BOOL) this is loss KM
+//{attackerName} - attacker name
+//{attackerCorpName} - attacker corp name
+//{attackerCorpTicker} - attacker corp ticker
+//{attackerAllyName} - attacker ally name
+//{attackerAllyTicker} - attacker ally ticker
+//{attackersCount} - number of attackers in km
+//{kmId} - zkillboard killmail ID
+//{timestamp} - text timestamp
+EmbedBuilder
+#if {isLoss} .WithColor(0xff0000)
+#if !{isLoss} .WithColor(0x00ff00)
+.WithDescription("[{shipType} | Killmail](https://zkillboard.com/kill/{kmId}/)")
+.WithThumbnailUrl("https://image.eveonline.com/Type/{shipID}_64.png")
+.WithAuthor(
+	.WithName("Kill Reported")
+	.WithUrl("https://zkillboard.com/kill/{kmId}/")
+	.WithIconUrl("https://zkillboard.com/img/wreck.png")
+)
+#if !{isNpcKill} .AddField(" ", "**{victimName}({victimCorpName}{victimAllyTicker})** lost their **{shipType}** in {systemName}({systemSec}). Final blow by **{attackerName}({attackerCorpName} {attackerAllyTicker})**")
+#if {isNpcKill} .AddField(" ", "**{victimName}({victimCorpName}{victimAllyTicker})** lost their **{shipType}** in {systemName}({systemSec})")
+.WithFooter("ISK: {iskValue} * {timestamp}")
+//.AddInlineField("Test Field", "Test message")
+//.WithImageUrl("https://image.eveonline.com/Type/{shipID}_64.png")
+//.WithTitle("xxx")
+//.WithTimestamp()
