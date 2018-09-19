@@ -26,7 +26,14 @@ namespace ThunderED
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
-                Console.ReadKey();
+                try
+                {
+                    Console.ReadKey();
+                }
+                catch
+                {
+                    // ignored
+                }
                 return;
             }
 
@@ -36,7 +43,15 @@ namespace ThunderED
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(result);
-                Console.ReadKey();
+                try
+                {
+                    Console.ReadKey();
+                }
+                catch
+                {
+                    // ignored
+                }
+
                 return;
             }
 
@@ -47,7 +62,14 @@ namespace ThunderED
             {
                 Console.BackgroundColor = ConsoleColor.Red;
                 Console.WriteLine(result);
-                Console.ReadKey();
+                try
+                {
+                    Console.ReadKey();
+                }
+                catch
+                {
+                    // ignored
+                }
                 return;
             }
             //update config settings
@@ -72,7 +94,14 @@ namespace ThunderED
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("[CRITICAL] DiscordGuildId - Discord guild not found!");
-                Console.ReadKey();
+                try
+                {
+                    Console.ReadKey();
+                }
+                catch
+                {
+                    // ignored
+                }
                 return;
             }
 
