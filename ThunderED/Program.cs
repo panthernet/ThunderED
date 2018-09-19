@@ -87,6 +87,13 @@ namespace ThunderED
             //initiate core timer
             _timer = new Timer(TickManager.Tick, new AutoResetEvent(true), 100, 100);
 
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                e.Cancel = false; 
+                _timer.Dispose();
+                APIHelper.DiscordAPI.Stop();
+            }
+
             while (true)
             {
                 var command = Console.ReadLine();
