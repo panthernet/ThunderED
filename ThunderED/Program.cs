@@ -121,7 +121,7 @@ namespace ThunderED
                 e.Cancel = false; 
                 _timer.Dispose();
                 APIHelper.DiscordAPI.Stop();
-            }
+            };
 
             while (true)
             {
