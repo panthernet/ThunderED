@@ -424,7 +424,8 @@ namespace ThunderED.Modules
 
                         if (enable && !esiFailed)
                         {
-                            await AuthGrantRoles(context.Channel.Id, characterID, foundList, characterData, corporationData, remainder, discordId == 0 ? context.Message.Author.Id : discordId );
+                            var ch = SettingsManager.Settings.WebAuthModule.AuthReportChannel == 0 ? (context?.Channel?.Id ?? 0UL) : SettingsManager.Settings.WebAuthModule.AuthReportChannel;
+                            await AuthGrantRoles(ch, characterID, foundList, characterData, corporationData, remainder, discordId == 0 ? context.Message.Author.Id : discordId );
 
                             var chId = Convert.ToInt32(characterID);
                             if (await SQLHelper.IsEntryExists("userTokens", new Dictionary<string, object> {{"characterID", chId}}))
