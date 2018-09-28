@@ -1096,6 +1096,8 @@ namespace ThunderED.Classes
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";
         [Comment("Display welcome message with authentication offer to all new users joining your Discord group hallway")]
         public bool WelcomeMessage { get; set; } = true;
+        [Comment("Welcome message Discord channel ID")]
+        public ulong WelcomeMessageChannelId { get; set; }
         [Comment("Time interval in minutes to purge all outdated cache")]
         public int CachePurgeInterval { get; set; } = 30;
         [Comment("Memory usage limit in Mb. If app reaches that limit it will try to free some memory")]

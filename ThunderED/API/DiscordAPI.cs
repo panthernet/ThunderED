@@ -203,7 +203,7 @@ namespace ThunderED.API
         {
             if (SettingsManager.Settings.Config.WelcomeMessage)
             {
-                var channel = arg.Guild.DefaultChannel;
+                var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0 ? arg.Guild.DefaultChannel : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
                 var authurl = $"http://{SettingsManager.Settings.WebServerModule.WebExternalIP}:{SettingsManager.Settings.WebServerModule.WebExternalPort}/auth.php";
                 if (!string.IsNullOrWhiteSpace(authurl))
                     await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeMessage",arg.Mention,authurl));

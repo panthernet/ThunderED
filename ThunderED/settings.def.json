@@ -37,6 +37,7 @@
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
     "welcomeMessage": true,
+    "WelcomeMessageChannelId":  0, 
     "cachePurgeInterval": 30,
     "memoryUsageLimitMb": 100,
     "logSeverity": "Info",	
