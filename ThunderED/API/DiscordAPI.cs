@@ -417,7 +417,8 @@ namespace ThunderED.API
                             try
                             {
                                 var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
-                                await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{LM.Get("resettingRoles")} {u.Username}");
+                                if(channel != null)
+                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{LM.Get("resettingRoles")} {u.Username}");
                                 await LogHelper.LogInfo($"Resetting roles for {u.Username}", LogCat.AuthCheck);
                                 await u.RemoveRolesAsync(rroles);
                             }
