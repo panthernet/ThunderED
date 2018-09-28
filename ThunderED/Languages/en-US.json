@@ -322,5 +322,6 @@
   "hrmInspectSS":  "Sec Status",
   "hrmInspectBirth":  "Birthday",
   "hrmMembersHeader":  "Members",
-  "hrmAwaitingHeader":  "Awaiting Auth" 
+  "hrmAwaitingHeader":  "Awaiting Auth", 
+  "timersCmdAccessDenied":  "You must be authorized and have correct role to use this command!" 
 }

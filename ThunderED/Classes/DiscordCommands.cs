@@ -42,6 +42,14 @@ namespace ThunderED.Classes
                 return;
             }
 
+            if (await APIHelper.DiscordAPI.IsAdminAccess(Context) == null)
+            {
+                var timers = await TimersModule.GetUpcomingTimersString();
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"```\n{timers}\n```", true);
+                return;
+            }
+
+
             var allys = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsAlliance && a.Id > 0).Select(a => a.Id);
             var corps = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCorporation && a.Id > 0).Select(a => a.Id);
             var chars = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCharacter && a.Id > 0).Select(a => a.Id);
@@ -57,7 +65,7 @@ namespace ThunderED.Classes
                 {
                     if (!skip && (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains((int)chId)))
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("accessDenied"), true);
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersCmdAccessDenied"), true);
                         return;
                     }
                     var timers = await TimersModule.GetUpcomingTimersString();
@@ -65,7 +73,7 @@ namespace ThunderED.Classes
                     return;
                 }
             }
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("accessDenied"), true);
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersCmdAccessDenied"), true);
 
         }
 
@@ -84,6 +92,13 @@ namespace ThunderED.Classes
                 return;
             }
 
+            if (await APIHelper.DiscordAPI.IsAdminAccess(Context) == null)
+            {
+                var timers = await TimersModule.GetUpcomingTimersString();
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"```\n{timers}\n```", true);
+                return;
+            }
+
             var allys = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsAlliance).Select(a => a.Id);
             var corps = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCorporation).Select(a => a.Id);
             var chars = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCharacter).Select(a => a.Id);
@@ -97,7 +112,7 @@ namespace ThunderED.Classes
                 {
                     if (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains((int)chId))
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("accessDenied"), true);
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersCmdAccessDenied"), true);
                         return;
                     }
                     var timers = await TimersModule.GetUpcomingTimersString(value);
@@ -105,7 +120,7 @@ namespace ThunderED.Classes
                     return;
                 }
             }
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("accessDenied"), true);
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersCmdAccessDenied"), true);
         }
 
         internal const string CMD_TURL = "turl";

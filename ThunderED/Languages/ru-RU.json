@@ -323,5 +323,6 @@
   "hrmInspectSS":  "СС",
   "hrmInspectBirth":  "ДР",
   "hrmMembersHeader":  "Участники",
-  "hrmAwaitingHeader":  "Ожидают Авторизации" 
+  "hrmAwaitingHeader":  "Ожидают Авторизации", 
+  "timersCmdAccessDenied":  "Вы должны быть авторизованы и иметь соответствующую роль для использования этой команды!" 
 }
