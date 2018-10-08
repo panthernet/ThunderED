@@ -12,7 +12,7 @@
             public bool npc { get; set; }
             public bool solo { get; set; }
             public bool awox { get; set; }
-            public string href { get; set; }
+          //  public string href { get; set; }
         }
     }
 }

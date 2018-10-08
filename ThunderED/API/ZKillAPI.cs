@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Async;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Json;
 using ThunderED.Json.ZKill;
 
 namespace ThunderED.API
@@ -27,9 +30,13 @@ namespace ThunderED.API
 			var request = string.IsNullOrEmpty(redisqID)
                     ? "https://redisq.zkillboard.com/listen.php?ttw=1"
                     : $"https://redisq.zkillboard.com/listen.php?ttw=1&queueID={redisqID}";
-			var data = await APIHelper.RequestWrapper<JsonZKill.ZKillboard>(request, _reason);
-			if(data == null)
-				await LogHelper.LogError("[GetRedisqResponce] Null data!", LogCat.ZKill, false);
+			var data = await APIHelper.RequestWrapper<JsonZKill.ZKillboard>(request, _reason, null, true);
+            if (data?.package == null)
+            {
+                await Task.Delay(3000);
+                //skip
+            }
+				//await LogHelper.LogError("[GetRedisqResponce] Null data!", LogCat.ZKill, false);
 			return data;
             /*try
             {
@@ -51,9 +58,19 @@ namespace ThunderED.API
             }*/
         }
 
-        internal async Task<List<JsonZKill.Kill>> GetCharacterKills(object characterId)
+        internal async Task<List<JsonClasses.ESIKill>> GetCharacterKills(object characterId)
         {
-			return await APIHelper.RequestWrapper<List<JsonZKill.Kill>>($"https://zkillboard.com/api/kills/characterID/{characterId}/", _reason);
+			var zKills = await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>($"https://zkillboard.com/api/kills/characterID/{characterId}/", _reason);
+            var list = new ConcurrentBag<JsonClasses.ESIKill>();
+            var q = zKills.Count > 20 ? zKills.TakeLast(20) : zKills;
+
+            await q.ParallelForEachAsync(async z =>
+            {
+                var kill = await APIHelper.ESIAPI.GetKillmail(_reason, z.killmail_id, z.zkb.hash);
+                list.Add(kill);
+            }, 5);
+
+            return list.ToList();
             /*var responce = await _zKillhttpClient.GetAsync($"https://zkillboard.com/api/kills/characterID/{characterId}/");
             return responce.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<JsonZKill.Kill>>(await responce.Content.ReadAsStringAsync()) : null;*/
         }
@@ -66,46 +83,22 @@ namespace ThunderED.API
         }
 
         
-        internal async Task<List<JsonZKill.Kill>> GetCharacterLosses(object characterId)
+        internal async Task<List<JsonClasses.ESIKill>> GetCharacterLosses(object characterId)
         {
-			return await APIHelper.RequestWrapper<List<JsonZKill.Kill>>($"https://zkillboard.com/api/losses/characterID/{characterId}/", _reason);
-			
+			var zLosses =  await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>($"https://zkillboard.com/api/losses/characterID/{characterId}/", _reason);
+            var list = new List<JsonClasses.ESIKill>();
+            var q = zLosses.Count > 20 ? zLosses.TakeLast(20) : zLosses;
+
+            await q.ParallelForEachAsync(async z =>
+            {
+                var kill = await APIHelper.ESIAPI.GetKillmail(_reason, z.killmail_id, z.zkb.hash);
+                list.Add(kill);
+            }, 5);
+
+            return list.ToList();
 /*            var responce = await _zKillhttpClient.GetAsync($"https://zkillboard.com/api/losses/characterID/{characterId}/");
             return responce.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<JsonZKill.Kill>>(await responce.Content.ReadAsStringAsync()) : null;*/
         }
-
-        internal async Task<List<JsonZKill.LightKill>> GetLightEntityFeed(bool isAlliance, int id)
-        {
-            var eText = isAlliance ? "allianceID" : "corporationID";
-			return await APIHelper.RequestWrapper<List<JsonZKill.LightKill>>($"https://zkillboard.com/api/{eText}/{id}/no-items/no-attackers/orderDirection/asc/pastSeconds/3600/", _reason);
-
-            /*string content = null;
-            try
-            {
-                var handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
-                using (var httpClient = new HttpClient(handler))
-                {
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
-                    httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
-                    var eText = isAlliance ? "allianceID" : "corporationID";
-                    var responce = await httpClient.GetAsync($"https://zkillboard.com/api/{eText}/{id}/no-items/no-attackers/orderDirection/asc/pastSeconds/3600/");
-                    if (responce.IsSuccessStatusCode)
-                    {
-                        content = await responce.Content.ReadAsStringAsync();
-                        return JsonConvert.DeserializeObject<List<JsonZKill.LightKill>>(content);
-                    }
-
-                    return null;
-                }
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx(ex.Message, ex, LogCat.ZKill);
-                await LogHelper.LogInfo($"GetLightEntityFeed RESPONCE: {content}", LogCat.ZKill);
-                return null;
-            }*/
-        }
-
 
         internal async Task<List<JsonZKill.ZkillOnly>> GetZKillOnlyFeed(bool isAlliance, int id)
         {			
@@ -140,34 +133,5 @@ namespace ThunderED.API
             }*/
         }
 
-        internal async Task<JsonZKill.Kill> GetLightEntityKill(int killmailID)
-        {
-			return (await APIHelper.RequestWrapper<List<JsonZKill.Kill>>($"https://zkillboard.com/api/killID/{killmailID}/", _reason))?.FirstOrDefault();
-
-            /*string content = null;
-            try
-            {
-                var handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
-                using (var httpClient = new HttpClient(handler))
-                {
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
-                    httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
-                    var responce = await httpClient.GetAsync($"https://zkillboard.com/api/killID/{killmailID}/");
-                    if (responce.IsSuccessStatusCode)
-                    {
-                        content = await responce.Content.ReadAsStringAsync();
-                        return JsonConvert.DeserializeObject<List<JsonZKill.Kill>>(content)?.FirstOrDefault();
-                    }
-
-                    return null;
-                }
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx(ex.Message, ex, LogCat.ZKill);
-                await LogHelper.LogInfo($"GetLightEntityKill RESPONCE: {content}", LogCat.ZKill);
-                return null;
-            }*/
-        }
     }
 }

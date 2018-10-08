@@ -40,12 +40,12 @@ namespace ThunderED.Helpers
         }
 
 
-        public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null)
+        public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null, bool noRetries = false)
             where T : class
         {
             string raw = null;
             var retCount = SettingsManager.Settings.Config.RequestRetries;
-            retCount = retCount == 0 ? 1 : retCount;
+            retCount = retCount == 0 || noRetries ? 1 : retCount;
             for (int i = 0; i < retCount; i++)
             {
                 try

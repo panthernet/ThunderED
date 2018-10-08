@@ -86,6 +86,11 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<JsonClasses.Planet>($"https://esi.tech.ccp.is/latest/universe/planets/{planetId}/?datasource=tranquility&language={_language}", reason);
         }
 
+        internal async Task<JsonClasses.ESIKill> GetKillmail(string reason, object killId, object killHash)
+        {
+            return await APIHelper.RequestWrapper<JsonClasses.ESIKill>($"https://esi.tech.ccp.is/latest/killmails/{killId}/{killHash}/?datasource=tranquility&language={_language}", reason);
+        }
+
 
         internal async Task<JsonClasses.StructureData> GetStructureData(string reason, string id, string token)
         {

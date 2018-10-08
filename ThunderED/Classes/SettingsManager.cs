@@ -26,7 +26,7 @@ namespace ThunderED.Classes
         public static string DatabaseFilePath { get; private set; }
 
         public static DateTime NextNotificationCheck { get; set; }
-        public static string DefaultUserAgent = "ThunderED";
+        public static string DefaultUserAgent = "ThunderED v2.0 "+ Guid.NewGuid().ToString("N");
         public static string FileTemplateHRM_Main;
         public static string FileTemplateHRM_Inspect;
         public static string FileTemplateHRM_MailBody;

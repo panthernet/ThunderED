@@ -4,6 +4,7 @@ using System.Web;
 using Discord;
 using Discord.Commands;
 using ThunderED.Helpers;
+using ThunderED.Json;
 using ThunderED.Json.ZKill;
 
 namespace ThunderED.Modules.Static
@@ -38,7 +39,7 @@ namespace ThunderED.Modules.Static
             var characterStats = await APIHelper.ZKillAPI.GetCharacterStats(characterId);
             var zkillLosses = await APIHelper.ZKillAPI.GetCharacterLosses(characterId);
 
-            var zkillLast = zkillContent.Count > 0 ? zkillContent[0] : new JsonZKill.Kill();
+            var zkillLast = zkillContent.Count > 0 ? zkillContent[0] : new JsonClasses.ESIKill();
             var systemData = await APIHelper.ESIAPI.GetSystemData("", zkillLast.solar_system_id);
             var lastShipType = LM.Get("Unknown");
 
