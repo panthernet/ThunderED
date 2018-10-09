@@ -125,12 +125,14 @@ namespace ThunderED.Modules
             {
                 authWebHttpClient.DefaultRequestHeaders.Clear();
                 authWebHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-                var tokenresponse = await authWebHttpClient.GetAsync("https://login.eveonline.com/oauth/verify");
-                var verifyString = await tokenresponse.Content.ReadAsStringAsync();
-                if(JObject.Parse(verifyString)["error"]?.ToString() == "invalid_token")
-                    return null;
-                authWebHttpClient.DefaultRequestHeaders.Clear();
-                return new[] {(string) JObject.Parse(verifyString)["CharacterID"], result[1]};
+                using (var tokenresponse = await authWebHttpClient.GetAsync("https://login.eveonline.com/oauth/verify"))
+                {
+                    var verifyString = await tokenresponse.Content.ReadAsStringAsync();
+                    if (JObject.Parse(verifyString)["error"]?.ToString() == "invalid_token")
+                        return null;
+                    authWebHttpClient.DefaultRequestHeaders.Clear();
+                    return new[] {(string) JObject.Parse(verifyString)["CharacterID"], result[1]};
+                }
             }
 
         }

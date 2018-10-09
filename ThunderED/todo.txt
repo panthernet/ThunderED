@@ -11,3 +11,8 @@ HRM
 - Location: where, last login, ship
 - LP list
 - evewho links
+
+
+Req:
+1. Skills + SP tab fro HRM
+2. Corp notifications https://github.com/panthernet/ThunderED/issues/16

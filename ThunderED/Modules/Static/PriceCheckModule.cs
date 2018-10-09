@@ -43,12 +43,13 @@ namespace ThunderED.Modules.Static
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("ESIFailure"));
                         await Task.CompletedTask;
+                        itemID?.Dispose();
+                        return;
                     }
 
-
                     var itemIDResult = await itemID.Content.ReadAsStringAsync();
-
                     var itemIDResults = JsonConvert.DeserializeObject<JsonClasses.SearchInventoryType>(itemIDResult);
+                    itemID?.Dispose();
 
                     if (string.IsNullOrWhiteSpace(itemIDResults.inventory_type?.ToString()))
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("itemNotExist",command));
@@ -67,11 +68,13 @@ namespace ThunderED.Modules.Static
                         {
                             await APIHelper.DiscordAPI.ReplyMessageAsync(context, channel, LM.Get("ESIFailure")).ConfigureAwait(false);
                             await Task.CompletedTask;
+                            itemName?.Dispose();
+                            return;
                         }
 
                         var itemNameResult = await itemName.Content.ReadAsStringAsync();
-
                         var itemNameResults = JsonConvert.DeserializeObject<List<JsonClasses.SearchName>>(itemNameResult);
+                        itemName?.Dispose();
 
                         await LogHelper.LogInfo($"Sending {context.Message.Author}'s Price check to {channel.Name}", LogCat.PriceCheck);
                         var builder = new EmbedBuilder()
@@ -117,11 +120,13 @@ namespace ThunderED.Modules.Static
                             {
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("ESIFailure"));
                                 await Task.CompletedTask;
+                                itemName?.Dispose();
+                                return;
                             }
 
                             var itemNameResult = await itemName.Content.ReadAsStringAsync();
-
                             var itemNameResults = JsonConvert.DeserializeObject<List<JsonClasses.SearchName>>(itemNameResult)[0];
+                            itemName?.Dispose();
 
                             var url = "https://api.evemarketer.com/ec";
 
@@ -172,7 +177,6 @@ namespace ThunderED.Modules.Static
                                 .AddInlineField(LM.Get("Sell"), $"5%: {marketReply.sell.fivePercent:N2}{Environment.NewLine}" +
                                                             $"{LM.Get("Volume")}: {marketReply.sell.volume:N0}");
                             var embed = builder.Build();
-
                             await APIHelper.DiscordAPI.ReplyMessageAsync(context, "", embed).ConfigureAwait(false);
                             
                         }

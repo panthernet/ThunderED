@@ -59,26 +59,28 @@ namespace ThunderED.Helpers
                         if (!string.IsNullOrEmpty(auth))
                             httpClient.DefaultRequestHeaders.Add("Authorization", auth);
 
-                        var responceMessage = await httpClient.GetAsync(request);
-                        raw = await responceMessage.Content.ReadAsStringAsync();
-                        if (!responceMessage.IsSuccessStatusCode)
+                        using (var responceMessage = await httpClient.GetAsync(request))
                         {
-                            if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
-                                (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout))
-                                await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
-                            continue;
+                            raw = await responceMessage.Content.ReadAsStringAsync();
+                            if (!responceMessage.IsSuccessStatusCode)
+                            {
+                                if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                    (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout))
+                                    await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
+                                continue;
+                            }
+
+                            if (typeof(T) == typeof(string))
+                                return (T) (object) raw;
+
+                            if (!typeof(T).IsClass)
+                                return null;
+
+                            var data = JsonConvert.DeserializeObject<T>(raw);
+                            if (data == null)
+                                await LogHelper.LogError($"[try: {i}][{reason}] Deserialized to null!{Environment.NewLine}Request: {request}", LogCat.ESI, false);
+                            else return data;
                         }
-
-                        if (typeof(T) == typeof(string))
-                            return (T)(object)raw;
-
-                        if (!typeof(T).IsClass)
-                            return null;
-
-                        var data = JsonConvert.DeserializeObject<T>(raw);
-                        if (data == null)
-                            await LogHelper.LogError($"[try: {i}][{reason}] Deserialized to null!{Environment.NewLine}Request: {request}", LogCat.ESI, false);
-                        else return data;
                     }
                 }
                 catch (TaskCanceledException)
