@@ -200,7 +200,7 @@ namespace ThunderED.Modules
                 var id = isAlliance ? allyId : corpId;
                 entity = string.IsNullOrEmpty(entity) ? (isAlliance ? (await APIHelper.ESIAPI.GetAllianceData("Stats", id))?.name :(await APIHelper.ESIAPI.GetCorporationData("Stats", id))?.name) : entity;
 
-                if (command == "t" || command== "today" || command== "newday")
+                if (command == "d" || command == "t" || command== "today" || command== "newday")
                 {
                     var isNewDay = command == "newday";
                     var channel = SettingsManager.Settings.ContinousCheckModule.DailyStatsChannel;

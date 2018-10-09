@@ -1,7 +1,9 @@
 ### V1.1.9
 + Updated ZKB handling with the recent API changes (Oct 2, 2018)
++ Added 'd' param parse for !stats command for current day
 + Refined !char and !corp command to query less data due to excessive ESI load
 + Fixed radius killmail central system name
++ Fixed missing parts in default config file
 
 ### V1.1.8
 + Improved web auth module to process authentication for groups with special ESI permission list 
