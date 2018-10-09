@@ -55,6 +55,7 @@ namespace ThunderED.Modules.OnDemand
                     var radiusChannelId = group.RadiusChannel;
                     var radiusValue = group.MinimumValue;
                     var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId, false, !_enableCache);
+
                     string sysName;
                     bool isUnreachableSystem = systemId == 31000005;
                     if (rSystem != null)
@@ -129,7 +130,8 @@ namespace ThunderED.Modules.OnDemand
                         }
                     }
 
-                    var rSystemName = rSystem?.name ?? LM.Get("Unknown");
+                    //var rSystemName = rSystem?.name ?? LM.Get("Unknown");
+                    var rSystemName = radiusSystemId > 0 ? (await APIHelper.ESIAPI.GetSystemData(Reason, radiusSystemId, false, !_enableCache))?.name ?? LM.Get("Unknown") : LM.Get("Unknown");
 
                     var victimCharacterID = kill.package.killmail.victim.character_id;
                     var victimCorpID = kill.package.killmail.victim.corporation_id;
