@@ -22,6 +22,7 @@
     "moduleJabber": false,
     "moduleMOTD": false,
     "moduleNotificationFeed": false,
+    "ModuleStats": true,
     "moduleTimers": false,
     "moduleMail": false,
     "moduleIRC": false,
