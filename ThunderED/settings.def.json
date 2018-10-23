@@ -98,6 +98,7 @@
     "grantEditRolesToDiscordAdmins": true,
     "announces": [60, 10],
     "announceChannel": 0,
+    "TimeInputFormat":  "DD.MM.YYYY hh:mm", 
     "accessList": {
       "UnitedFleet":{
         "isAlliance": true,
