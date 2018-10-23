@@ -96,7 +96,7 @@ namespace ThunderED.Modules
 
                             var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id, true);
 
-                            if (await AuthGrantRoles(0, characterId.ToString(), roles, rChar, corp, code, discordId))
+                            if (await AuthGrantRoles(0, characterId.ToString(), roles, rChar, corp, code, discordId, true, groupName))
                                 await SQLHelper.UserTokensSetAuthState(characterId, 2);
 
                         }
@@ -453,7 +453,8 @@ namespace ThunderED.Modules
             }
         }
 
-        private static async Task<bool> AuthGrantRoles(ulong channelId, string characterID, Dictionary<int, List<string>> foundList, JsonClasses.CharacterData characterData, JsonClasses.CorporationData corporationData, string remainder, ulong discordId)
+        private static async Task<bool> AuthGrantRoles(ulong channelId, string characterID, Dictionary<int, List<string>> foundList, JsonClasses.CharacterData characterData, 
+            JsonClasses.CorporationData corporationData, string remainder, ulong discordId, bool isPreliminary = false, string authGroupName = null)
         {
             var rolesToAdd = new List<SocketRole>();
 
@@ -493,8 +494,17 @@ namespace ThunderED.Modules
                 var discordUser = APIHelper.DiscordAPI.GetUser(discordId);
 
                 if (authSettings.AuthReportChannel != 0)
-                    await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, LM.Get("grantRolesMessage", characterData.name))
-                        .ConfigureAwait(false);
+                {
+                    if (isPreliminary)
+                        await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, LM.Get("grantRolesPrelMessage", characterData.name, authGroupName))
+                            .ConfigureAwait(false);
+                    else
+                        await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, LM.Get("grantRolesMessage", characterData.name))
+                            .ConfigureAwait(false);
+                }
+
+                await LogHelper.LogInfo($"Granting roles to {characterData.name} {(isPreliminary ? $"[AUTO-AUTH from {authGroupName}]" : "[GENERAL]")}", LogCat.AuthCheck);
+
                 await APIHelper.DiscordAPI.AssignRolesToUser(discordUser, rolesToAdd);
 
                 if (missedRoles.Any())
@@ -553,7 +563,7 @@ namespace ThunderED.Modules
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx($"Failed adding Roles to User {characterData.name}, Reason: {ex.Message}", ex, LogCat.Discord);
+                await LogHelper.LogEx($"Failed adding Roles to User {characterData.name}, Reason: {ex.Message}", ex, LogCat.AuthCheck);
                 return false;
             }
 
