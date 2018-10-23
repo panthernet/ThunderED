@@ -216,10 +216,10 @@ namespace ThunderED.Classes
             }
         }
 
-        private static uint GetColor(string text)
+        public static uint GetColor(string text)
         {
             var index = text.IndexOf('(');
-            var tex = text.Substring(index + 1, text.Length - index - 3);
+            var tex = text.Substring(index + 1, text.Length - index - 2);
             return Convert.ToUInt32(tex, 16);
         }
 

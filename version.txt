@@ -2,6 +2,7 @@
 + Added TimeInputFormat setting to Timers module to be able to specify time format
 + Improved ZKB duplicated kills detection
 + Improved kill logging
++ Fixed coloring issue with custom templates
 
 ### V1.2.0
 + Improved ZKB support
