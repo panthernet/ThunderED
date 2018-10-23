@@ -25,236 +25,235 @@ namespace ThunderED.Modules.OnDemand
 
         private async Task ProcessKill(JsonZKill.ZKillboard kill)
         {
-            if (_lastPosted != kill.package.killID)
+            if (_lastPosted == kill.package.killID) return;
+          
+            var bigKillGlobalValue = Settings.LiveKillFeedModule.BigKill;
+            var bigKillGlobalChan = Settings.LiveKillFeedModule.BigKillChannel;
+
+            var killmailID = kill.package.killmail.killmail_id;
+            var killTime = kill.package.killmail.killmail_time.ToString("dd.MM.yyyy hh:mm");
+            var shipID = kill.package.killmail.victim.ship_type_id;
+            var value = kill.package.zkb.totalValue;
+            var victimCharacterID = kill.package.killmail.victim.character_id;
+            var victimCorpID = kill.package.killmail.victim.corporation_id;
+            var victimAllianceID = kill.package.killmail.victim.alliance_id;
+            var attackers = kill.package.killmail.attackers;
+            var finalBlowAttacker = attackers.FirstOrDefault(a => a.final_blow);
+            var finalBlowAttackerCorpId = finalBlowAttacker?.corporation_id;
+            var finalBlowAttackerAllyId = finalBlowAttacker?.alliance_id;
+            var isNPCKill = kill.package.zkb.npc;
+
+            var systemId = kill.package.killmail.solar_system_id;
+            var npckill = kill.package.zkb.npc;
+
+            var postedGlobalBigKill = false;
+
+            var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId, false, !_enableCache);
+            if (rSystem == null)
             {
-                var bigKillGlobalValue = Settings.LiveKillFeedModule.BigKill;
-                var bigKillGlobalChan =Settings.LiveKillFeedModule.BigKillChannel;
+                //ESI fail - check back later
+                return;
+            }
 
-                var killmailID = kill.package.killmail.killmail_id;
-                var killTime = kill.package.killmail.killmail_time.ToString("dd.MM.yyyy hh:mm");
-                var shipID = kill.package.killmail.victim.ship_type_id;
-                var value = kill.package.zkb.totalValue;
-                var victimCharacterID = kill.package.killmail.victim.character_id;
-                var victimCorpID = kill.package.killmail.victim.corporation_id;
-                var victimAllianceID = kill.package.killmail.victim.alliance_id;
-                var attackers = kill.package.killmail.attackers;
-                var finalBlowAttacker = attackers.FirstOrDefault(a => a.final_blow);
-                var finalBlowAttackerCorpId = finalBlowAttacker?.corporation_id;
-                var finalBlowAttackerAllyId = finalBlowAttacker?.alliance_id;
-                var isNPCKill = kill.package.zkb.npc;
+            var rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, victimCorpID, false, !_enableCache);
+            var rAttackerCorp = finalBlowAttackerCorpId.HasValue && finalBlowAttackerCorpId.Value > 0
+                ? await APIHelper.ESIAPI.GetCorporationData(Reason, finalBlowAttackerCorpId, false, !_enableCache)
+                : null;
+            if (rAttackerCorp == null)
+                isNPCKill = true;
+            var rVictimAlliance = victimAllianceID != 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, victimAllianceID, false, !_enableCache) : null;
+            var rAttackerAlliance = finalBlowAttackerAllyId.HasValue && finalBlowAttackerAllyId.Value > 0
+                ? await APIHelper.ESIAPI.GetAllianceData(Reason, finalBlowAttackerAllyId)
+                : null;
+            var sysName = rSystem.name == rSystem.system_id.ToString() ? "Abyss" : rSystem.name;
+            var rShipType = await APIHelper.ESIAPI.GetTypeId(Reason, shipID);
+            var rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, victimCharacterID, false, !_enableCache);
+            var rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, finalBlowAttacker?.character_id, false, !_enableCache);
+            var systemSecurityStatus = Math.Round(rSystem.security_status, 1).ToString("0.0");
 
-                var systemId = kill.package.killmail.solar_system_id;
-                var npckill = kill.package.zkb.npc;
+            // ulong lastChannel = 0;
 
-                var postedGlobalBigKill = false;
+            var dic = new Dictionary<string, string>
+            {
+                {"{shipID}", shipID.ToString()},
+                {"{shipType}", rShipType?.name},
+                {"{iskValue}", value.ToString("n0")},
+                {"{systemName}", sysName},
+                {"{systemSec}", systemSecurityStatus},
+                {"{victimName}", rVictimCharacter?.name},
+                {"{victimCorpName}", rVictimCorp?.name},
+                {"{victimCorpTicker}", rVictimCorp?.ticker},
+                {"{victimAllyName}", rVictimAlliance?.name},
+                {"{victimAllyTicker}", rVictimAlliance == null ? null : $"<{rVictimAlliance.ticker}>"},
+                {"{attackerName}", rAttackerCharacter?.name},
+                {"{attackerCorpName}", rAttackerCorp?.name},
+                {"{attackerCorpTicker}", rAttackerCorp?.ticker},
+                {"{attackerAllyTicker}", rAttackerAlliance == null ? null : $"<{rAttackerAlliance.ticker}>"},
+                {"{attackerAllyName}", rAttackerAlliance?.name},
+                {"{attackersCount}", attackers.Length.ToString()},
+                {"{kmId}", killmailID.ToString()},
+                {"{isNpcKill}", isNPCKill.ToString()},
+                {"{timestamp}", killTime},
+                {"{isLoss}", "false"}
+            };
 
-                var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId, false, !_enableCache);
-                if (rSystem == null)
+            foreach (var groupPair in Settings.LiveKillFeedModule.GroupsConfig)
+            {
+                var group = groupPair.Value;
+                var minimumValue = @group.MinimumValue;
+                var minimumLossValue = @group.MinimumLossValue;
+                var allianceID = @group.AllianceID;
+                var corpID = @group.CorpID;
+                var bigKillValue = @group.BigKillValue;
+                var c = @group.DiscordChannel;
+                var sendBigToGeneral = @group.BigKillSendToGeneralToo;
+                var bigKillChannel = @group.BigKillChannel;
+                var discordGroupName = groupPair.Key;
+
+                if (c == 0)
                 {
-                    //ESI fail - check back later
-                    return;
+                    await LogHelper.LogWarning($"Group {groupPair.Key} has no 'discordChannel' specified! Kills will be skipped.", Category);
+                    continue;
                 }
 
-                var rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, victimCorpID, false, !_enableCache);
-                var rAttackerCorp = finalBlowAttackerCorpId.HasValue && finalBlowAttackerCorpId.Value > 0
-                    ? await APIHelper.ESIAPI.GetCorporationData(Reason, finalBlowAttackerCorpId, false, !_enableCache)
-                    : null;
-                if (rAttackerCorp == null)
-                    isNPCKill = true;
-                var rVictimAlliance = victimAllianceID != 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, victimAllianceID, false, !_enableCache) : null;
-                var rAttackerAlliance = finalBlowAttackerAllyId.HasValue && finalBlowAttackerAllyId.Value > 0
-                    ? await APIHelper.ESIAPI.GetAllianceData(Reason, finalBlowAttackerAllyId)
-                    : null;
-                var sysName = rSystem.name == rSystem.system_id.ToString() ? "Abyss" : rSystem.name;
-                var rShipType = await APIHelper.ESIAPI.GetTypeId(Reason, shipID);
-                var rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, victimCharacterID, false, !_enableCache);
-                var rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, finalBlowAttacker?.character_id, false, !_enableCache);
-                var systemSecurityStatus = Math.Round(rSystem.security_status, 1).ToString("0.0");
-
-                // ulong lastChannel = 0;
-
-                var dic = new Dictionary<string, string>
+                if (bigKillGlobalChan != 0 && bigKillGlobalValue != 0 && value >= bigKillGlobalValue && !postedGlobalBigKill)
                 {
-                    {"{shipID}", shipID.ToString()},
-                    {"{shipType}", rShipType?.name},
-                    {"{iskValue}", value.ToString("n0")},
-                    {"{systemName}", sysName},
-                    {"{systemSec}", systemSecurityStatus},
-                    {"{victimName}", rVictimCharacter?.name},
-                    {"{victimCorpName}", rVictimCorp?.name},
-                    {"{victimCorpTicker}", rVictimCorp?.ticker},
-                    {"{victimAllyName}", rVictimAlliance?.name},
-                    {"{victimAllyTicker}", rVictimAlliance == null ? null : $"<{rVictimAlliance.ticker}>"},
-                    {"{attackerName}", rAttackerCharacter?.name},
-                    {"{attackerCorpName}", rAttackerCorp?.name},
-                    {"{attackerCorpTicker}", rAttackerCorp?.ticker},
-                    {"{attackerAllyTicker}", rAttackerAlliance == null ? null : $"<{rAttackerAlliance.ticker}>"},
-                    {"{attackerAllyName}", rAttackerAlliance?.name},
-                    {"{attackersCount}", attackers.Length.ToString()},
-                    {"{kmId}", killmailID.ToString()},
-                    {"{isNpcKill}", isNPCKill.ToString()},
-                    {"{timestamp}", killTime},
-                    {"{isLoss}", "false"}
+                    postedGlobalBigKill = true;
 
-                };
-
-                foreach (var groupPair in Settings.LiveKillFeedModule.GroupsConfig)
-                {
-                    var group = groupPair.Value;
-                    var minimumValue = group.MinimumValue;
-                    var minimumLossValue = group.MinimumLossValue;
-                    var allianceID = group.AllianceID;
-                    var corpID = group.CorpID;
-                    var bigKillValue = group.BigKillValue;
-                    var c = group.DiscordChannel;
-                    var sendBigToGeneral = group.BigKillSendToGeneralToo;
-                    var bigKillChannel = group.BigKillChannel;
-                    var discordGroupName = groupPair.Key;
-
-                    if (c == 0)
+                    if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillGlobalChan, discordGroupName))
                     {
-                        await LogHelper.LogWarning($"Group {groupPair.Key} has no 'discordChannel' specified! Kills will be skipped.",Category);
-                        continue;
+                        await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillGlobalChan, new Color(0xFA2FF4), shipID, killmailID, rShipType.name, (long) value,
+                            sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
+                            rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
+                            rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null);
                     }
 
-                    if (bigKillGlobalChan != 0 && bigKillGlobalValue != 0 && value >= bigKillGlobalValue && !postedGlobalBigKill)
-                    {
-                        postedGlobalBigKill = true;
+                    await LogHelper.LogInfo($"Posting Global Big Kill: {kill.package.killID}  Value: {value:n0} ISK", Category);
+                }
 
-                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillGlobalChan, discordGroupName))
+                if (allianceID == 0 && corpID == 0)
+                {
+                    if (value >= minimumValue)
+                    {
+                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
                         {
-                            await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillGlobalChan, new Color(0xFA2FF4), shipID, killmailID, rShipType.name, (long) value,
-                                sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
+                            await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), shipID, killmailID, rShipType.name, (long) value, sysName,
+                                systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
                                 rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
                                 rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null);
                         }
 
-                        await LogHelper.LogInfo($"Posting Global Big Kill: {kill.package.killID}  Value: {value:n0} ISK", Category);
+                        await LogHelper.LogInfo($"Posting Global Kills: {kill.package.killID}  Value: {value:n0} ISK", Category);
+                    }
+                }
+                else
+                {
+                    //ally & corp 
 
+                    //Losses
+                    //Big
+                    if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue)
+                    {
+                        if (victimAllianceID != 0 && victimAllianceID == allianceID || victimCorpID == corpID)
+                        {
+                            dic["{isLoss}"] = "true";
+                            if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
+                            {
+                                await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0xD00000), shipID, killmailID, rShipType.name, (long) value,
+                                    sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
+                                    rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
+                                    rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null,
+                                    groupPair.Value.ShowGroupName ? discordGroupName : " ");
+                                if (sendBigToGeneral && c != bigKillChannel)
+                                    if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, c, discordGroupName))
+                                        await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xD00000), shipID, killmailID, rShipType.name, (long) value,
+                                            sysName,
+                                            systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
+                                            rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
+                                            rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null,
+                                            groupPair.Value.ShowGroupName ? discordGroupName : " ");
+                            }
+
+                            await LogHelper.LogInfo($"Posting     Big Loss: {kill.package.killID}  Value: {value:n0} ISK", Category);
+                            continue;
+                        }
                     }
 
-                    if (allianceID == 0 && corpID == 0)
+                    //Common
+                    if (minimumLossValue == 0 || minimumLossValue <= value)
                     {
-                        if (value >= minimumValue)
+                        if (victimAllianceID != 0 && victimAllianceID == allianceID || victimCorpID == corpID)
                         {
+                            dic["{isLoss}"] = "true";
+                            if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
+                            {
+                                await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xFF0000), shipID, killmailID, rShipType?.name, (long) value, sysName,
+                                    systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType?.name : rVictimCharacter?.name, rVictimCorp?.name,
+                                    rVictimAlliance == null ? "" : $"[{rVictimAlliance?.ticker}]", isNPCKill, rAttackerCharacter?.name, rAttackerCorp?.name,
+                                    rAttackerAlliance == null ? null : $"[{rAttackerAlliance?.ticker}]", attackers.Length, null,
+                                    groupPair.Value.ShowGroupName ? discordGroupName : " ");
+                            }
+
+                            await LogHelper.LogInfo($"Posting         Loss: {kill.package.killID}  Value: {value:n0} ISK", Category);
+
+                            continue;
+                        }
+                    }
+
+                    //Kills
+                    foreach (var attacker in attackers.ToList())
+                    {
+                        if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue && !npckill)
+                        {
+                            if ((attacker.alliance_id != 0 && attacker.alliance_id == allianceID) || (allianceID == 0 && attacker.corporation_id == corpID))
+                            {
+                                dic["{isLoss}"] = "false";
+                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
+                                {
+                                    await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0x00D000), shipID, killmailID, rShipType.name,
+                                        (long) value, sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name,
+                                        rVictimCorp.name,
+                                        rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
+                                        rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null,
+                                        groupPair.Value.ShowGroupName ? discordGroupName : " ");
+                                    if (sendBigToGeneral && c != bigKillChannel)
+                                    {
+                                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, c, discordGroupName))
+                                            await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00D000), shipID, killmailID, rShipType.name, (long) value,
+                                                sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name,
+                                                rVictimCorp.name,
+                                                rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
+                                                rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null,
+                                                groupPair.Value.ShowGroupName ? discordGroupName : " ");
+                                    }
+
+                                    await LogHelper.LogInfo($"Posting     Big Kill: {kill.package.killID}  Value: {value:#,##0} ISK", Category);
+                                }
+
+                                break;
+                            }
+                        }
+                        else if (!npckill && attacker.alliance_id != 0 && allianceID != 0 && attacker.alliance_id == allianceID ||
+                                    !npckill && allianceID == 0 && attacker.corporation_id == corpID)
+                        {
+                            dic["{isLoss}"] = "false";
                             if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
                             {
                                 await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), shipID, killmailID, rShipType.name, (long) value, sysName,
                                     systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
                                     rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-                                    rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null);
+                                    rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null,
+                                    groupPair.Value.ShowGroupName ? discordGroupName : " ");
                             }
 
-                            await LogHelper.LogInfo($"Posting Global Kills: {kill.package.killID}  Value: {value:n0} ISK", Category);
-                        }
-                    }
-                    else
-                    {
-                        //ally & corp 
-
-                        //Losses
-                        //Big
-                        if (bigKillChannel !=0 && bigKillValue != 0 && value >= bigKillValue)
-                        {
-                            if (victimAllianceID != 0 && victimAllianceID == allianceID || victimCorpID == corpID)
-                            {
-                                dic["{isLoss}"] = "true";
-                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
-                                {
-                                    await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0xD00000), shipID, killmailID, rShipType.name, (long) value,
-                                        sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
-                                        rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-                                        rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null, groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                    if (sendBigToGeneral && c != bigKillChannel)
-                                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, c, discordGroupName))
-                                            await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xD00000), shipID, killmailID, rShipType.name, (long) value,
-                                                sysName,
-                                                systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
-                                                rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-                                                rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null, groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                }
-
-                                await LogHelper.LogInfo($"Posting     Big Loss: {kill.package.killID}  Value: {value:n0} ISK", Category);
-                                continue;
-                            }
-                        }
-
-                        //Common
-                        if (minimumLossValue == 0 || minimumLossValue <= value)
-                        {
-                            if (victimAllianceID != 0 && victimAllianceID == allianceID || victimCorpID == corpID)
-                            {
-                                dic["{isLoss}"] = "true";
-                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
-                                {
-                                    await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xFF0000), shipID, killmailID, rShipType?.name, (long) value, sysName,
-                                        systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType?.name : rVictimCharacter?.name, rVictimCorp?.name,
-                                        rVictimAlliance == null ? "" : $"[{rVictimAlliance?.ticker}]", isNPCKill, rAttackerCharacter?.name, rAttackerCorp?.name,
-                                        rAttackerAlliance == null ? null : $"[{rAttackerAlliance?.ticker}]", attackers.Length, null, groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                }
-
-                                await LogHelper.LogInfo($"Posting         Loss: {kill.package.killID}  Value: {value:n0} ISK", Category);
-
-                                continue;
-                            }
-                        }
-
-                        //Kills
-                        foreach (var attacker in attackers.ToList())
-                        {
-                            if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue && !npckill)
-                            {
-                                if ((attacker.alliance_id != 0 && attacker.alliance_id == allianceID) || (allianceID == 0 && attacker.corporation_id == corpID))
-                                {
-                                    dic["{isLoss}"] = "false";
-                                    if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
-                                    {
-                                        await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0x00D000), shipID, killmailID, rShipType.name,
-                                            (long) value, sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name,
-                                            rVictimCorp.name,
-                                            rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-                                            rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null, groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                        if (sendBigToGeneral && c != bigKillChannel)
-                                        {
-                                            if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, c, discordGroupName))
-                                                await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00D000), shipID, killmailID, rShipType.name, (long) value,
-                                                    sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name,
-                                                    rVictimCorp.name,
-                                                    rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-                                                    rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null, groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                        }
-
-                                        await LogHelper.LogInfo($"Posting     Big Kill: {kill.package.killID}  Value: {value:#,##0} ISK", Category);
-                                    }
-
-                                    break;
-                                }
-                            }
-                            else if (!npckill && attacker.alliance_id != 0 && allianceID != 0 && attacker.alliance_id == allianceID ||
-                                     !npckill && allianceID == 0 && attacker.corporation_id == corpID)
-                            {
-                                dic["{isLoss}"] = "false";
-                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
-                                {
-                                    await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), shipID, killmailID, rShipType.name, (long) value, sysName,
-                                        systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
-                                        rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-                                        rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null, groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                }
-
-                                await LogHelper.LogInfo($"Posting         Kill: {kill.package.killID}  Value: {value:#,##0} ISK", Category);
-                                break;
-                            }
+                            await LogHelper.LogInfo($"Posting         Kill: {kill.package.killID}  Value: {value:#,##0} ISK", Category);
+                            break;
                         }
                     }
                 }
+            }
 
-                _lastPosted = killmailID;
-            }
-            else if (kill?.package != null && _lastPosted != 0 && _lastPosted == kill.package.killID)
-            {
-                await LogHelper.LogInfo($"Skipping kill: {kill.package.killID} as its been posted recently", Category);
-            }
+            _lastPosted = killmailID;
         }
     }
 }

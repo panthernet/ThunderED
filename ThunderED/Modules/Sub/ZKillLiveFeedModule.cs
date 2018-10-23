@@ -12,10 +12,9 @@ namespace ThunderED.Modules.Sub
     public class ZKillLiveFeedModule: AppModuleBase, IDisposable
     {
         public override LogCat Category => LogCat.KillFeed;
-
         public static List<Func<JsonZKill.ZKillboard, Task>> Queryables = new List<Func<JsonZKill.ZKillboard, Task>>();
-
         internal static JsonZKill.ZKillboard CurrentEntry;
+        private readonly List<long> _receivedIds = new List<long>();
 
         public override async Task Run(object prm)
         {
@@ -27,6 +26,8 @@ namespace ThunderED.Modules.Sub
 
                 CurrentEntry = await APIHelper.ZKillAPI.GetRedisqResponce();
                 if(CurrentEntry?.package == null ) return;
+                if(!IsUniqueId(CurrentEntry.package.killID)) return;
+
                 await Queryables.ParallelForEachAsync(async q =>
                 {
                     try
@@ -48,6 +49,15 @@ namespace ThunderED.Modules.Sub
             {
                 IsRunning = false;
             }
+        }
+
+        private bool IsUniqueId(long id)
+        {
+            if (_receivedIds.Contains(id)) return false;
+            _receivedIds.Add(id);
+            if(_receivedIds.Count > 20)
+                _receivedIds.RemoveAt(0);
+            return true;
         }
 
         public void Dispose()

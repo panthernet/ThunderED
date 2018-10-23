@@ -1,5 +1,10 @@
+### V1.2.1
++ Improved ZKB duplicated kills detection
++ Improved kill logging
+
 ### V1.2.0
 + Improved ZKB support
++ Fixed auth report message channel selection
 
 ### V1.1.9
 + Updated ZKB handling with the recent API changes (Oct 2, 2018)
