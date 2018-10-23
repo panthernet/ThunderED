@@ -51,10 +51,19 @@
                 event.preventDefault();
                 sendThemAll();
             });
+            $('#acceptButton2').on('click', function (event) {
+                event.preventDefault();
+                sendThemAll2();
+            });
             $('#myModal').on('hidden.bs.modal',
                 function () {
                     $('#error').addClass("d-none");
                 });
+            $('#myModal2').on('hidden.bs.modal',
+                function () {
+                    $('#error2').addClass("d-none");
+                });
+
             $(function () {
                 $('#datetimepicker1').datetimepicker({
                     locale: '{locale}',
@@ -76,6 +85,7 @@
                 "timerET": $("#timerET").val(),
                 "timerNotes": $("#timerNotes").val(),
                 "timerCharId": $("#timerCharId").val()
+
             };
             debugger;
             var str = JSON.stringify(data);
@@ -107,6 +117,48 @@
                 }
             });
         }
+        function sendThemAll2() {
+            let data = {
+                "timerType": $("#timerTypeRf").val(),
+                "timerStage": $("#timerStageRf").val(),
+                "timerLocation": $("#timerLocationRf").val(),
+                "timerOwner": $("#timerOwnerRf").val(),
+                "timerNotes": $("#timerNotesRf").val(),
+                "timerCharId": $("#timerCharId").val(),
+                "timerRfDay": $("#timerRfDay").val(),
+                "timerRfHour": $("#timerRfHour").val(),
+                "timerRfMin": $("#timerRfMin").val()
+            };
+            debugger;
+            var str = JSON.stringify(data);
+            console.log(str);
+
+            var idstr = encodeURIComponent($("#timerCharId").val());
+
+            $.ajax({
+                type: "POST",
+                url: "/timers.php?data=111&id=" + idstr + "&state=11",
+                data: str,
+                dataType: "html",
+                success:
+                    function (result) {
+                        if (result != null && result != "") {
+
+                            $('#error2').removeClass("d-none");
+                            $('#error2').text(result);
+                            return;
+                        }
+                        location.reload(true);
+                    },
+                error: function (xhr, status, error) {
+                    //error
+                },
+                statusCode: {
+                    404: function () {
+                    }
+                }
+            });
+        }
     </script>
 </head>
 
@@ -119,10 +171,13 @@
         <input type="hidden" id="timerCharId" value="{charId}">
 
         <ul class="nav nav-pills float-right">{loggedInAs}<a href="{LogOutUrl}" style="margin-left:10px;">{LogOut}</a></ul>
-        <a class="btn btn-primary {isEditorElement}" data-toggle="modal" data-target="#myModal" href="#" role="button">{addNewTimerHeader}</a>
+        <div>
+            <a class="btn btn-primary {isEditorElement}" data-toggle="modal" data-target="#myModal" href="#" role="button">{addNewTimerHeader}</a>
+            <a class="btn btn-primary {isEditorElement}" data-toggle="modal" data-target="#myModal2" href="#" role="button">{addNewRfTimerHeader}</a>
+        </div>
 
         <table class="table">
-           {body}
+            {body}
         </table>
 
         <!-- Modal -->
@@ -180,7 +235,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">{timersET}</span>
                                     </div>
-                                    <input type='text' class="form-control" id="timerET" placeholder="{timerTooltipET}"/>
+                                    <input type='text' class="form-control" id="timerET" placeholder="{timerTooltipET}" />
                                     <div class="input-group-addon">
                                         <span class="input-group-text" style="width: 50px"><i class="fa fa-calendar"></i></span>
                                     </div>
@@ -190,12 +245,84 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">{timersNotes}</span>
                                 </div>
-                                <input type='text' class="form-control" id="timerNotes"/>
+                                <input type='text' class="form-control" id="timerNotes" />
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-success btn-block" id="acceptButton">{Add}</button>
+                        <button type="button" class="btn btn-default btn-default" data-dismiss="modal">{Cancel}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="myModal2" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{addNewRfTimerHeader}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-danger btn-block d-none" id="error2" style="width: 300px"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form role="form">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersType}</span>
+                                </div>
+                                <select class="custom-select" id="timerTypeRf">
+                                    <option selected>...</option>
+                                    <option value="1">{timerOffensive}</option>
+                                    <option value="2">{timerDefensive}</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersStage}</span>
+                                </div>
+                                <select class="custom-select" id="timerStageRf">
+                                    <option selected>...</option>
+                                    <option value="1">{timerHull}</option>
+                                    <option value="2">{timerArmor}</option>
+                                    <option value="3">{timerShield}</option>
+                                    <option value="4">{timerOther}</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersLocation}</span>
+                                </div>
+                                <input type="text" class="form-control" id="timerLocationRf" placeholder="{timerTooltipLocation}">
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersOwner}</span>
+                                </div>
+                                <input type="text" class="form-control" id="timerOwnerRf" placeholder="{timerTooltipOwner}">
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersRfET}</span>
+                                </div>
+                                <input type="number" min="0" step="1" class="form-control" id="timerRfDay" placeholder="Days">
+                                <input type="number" min="0" max="23" step="1" class="form-control" id="timerRfHour"  placeholder="Hours">
+                                <input type="number" min="0" max="59" step="1" class="form-control" id="timerRfMin"  placeholder="Minutes">
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{timersNotes}</span>
+                                </div>
+                                <input type='text' class="form-control" id="timerNotesRf" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-success btn-block" id="acceptButton2">{Add}</button>
                         <button type="button" class="btn btn-default btn-default" data-dismiss="modal">{Cancel}</button>
                     </div>
                 </div>

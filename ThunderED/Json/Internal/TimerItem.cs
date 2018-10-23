@@ -15,6 +15,9 @@ namespace ThunderED.Json.Internal
         public string timerNotes;
         public string timerChar;
         public int announce;
+        public int timerRfDay;
+        public int timerRfHour;
+        public int timerRfMin;
 
         public string GetModeName()
         {
@@ -31,9 +34,10 @@ namespace ThunderED.Json.Internal
 
         public DateTime? GetDateTime()
         {
-            if (!DateTime.TryParse(timerET, out var result))
-                return null;
-            return result;
+            if (DateTime.TryParse(timerET, out var result)) return result;
+            if (timerRfDay == 0 && timerRfHour == 0 && timerRfMin == 0) return null;
+            var now = DateTime.UtcNow;
+            return now.AddDays(timerRfDay).AddHours(timerRfHour).AddMinutes(timerRfMin);
         }
 
         public string GetStageName()
