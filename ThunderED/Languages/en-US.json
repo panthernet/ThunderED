@@ -61,6 +61,7 @@
   "StructureDestroyed": "{0} lost {1} citadel!",
   "StructureOnline": "Allies onlined {0} citadel!",
   "StructureAnchoring": "{0} has started to anchor {1} citadel!",
+  "StructureUnanchoring": "{0} has started to unanchor {1} citadel!",
   "TimeLeft": "Time Left",
   "Fuel": "Fuel",
   "StructureFuelAlert": "Allied {0} is low on fuel!",

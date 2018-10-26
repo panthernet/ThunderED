@@ -61,6 +61,7 @@
   "StructureDestroyed": "{0} потеряли цитадель {1}!",
   "StructureOnline": "Цитадель {0} успешно установлена!",
   "StructureAnchoring": "{0} начали установку цитадели {1} на якорь!",
+  "StructureUnanchoring": "{0} начали снятие цитадели {1} с якоря!",
   "TimeLeft": "Осталось",
   "Fuel": "Топливо",
   "StructureFuelAlert": "В цитадели {0} кончается топливо!",

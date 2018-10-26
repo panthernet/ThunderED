@@ -1,6 +1,7 @@
 ### V1.2.1
 + Added TimeInputFormat setting to Timers module to be able to specify time format
 + Added new web button to add timers using the remaining time
++ Added StructureUnanchoring notification
 + Improved ZKB duplicated kills detection
 + Improved kill logging
 + Improved preliminary auth status messages

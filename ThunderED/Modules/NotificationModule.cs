@@ -429,6 +429,27 @@ namespace ThunderED.Modules
                                                 await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
                                             }
                                                 break;
+                                            case "StructureUnanchoring":
+                                            {
+                                                await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
+                                                var owner = GetData("ownerCorpName", data) ?? LM.Get("Unknown");
+                                                var text = LM.Get("StructureUnanchoring", owner,
+                                                    structureType == null ? LM.Get("Structure") : structureType.name);
+                                                builder = new EmbedBuilder()
+                                                    .WithColor(new Color(0xff0000))
+                                                    .WithThumbnailUrl(Settings.Resources.ImgCitAnchoring)
+                                                    .WithAuthor(author =>
+                                                        author.WithName(text))
+                                                    .AddInlineField(LM.Get("System"), systemName)
+                                                    .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
+                                                    .AddInlineField(LM.Get("TimeLeft"), timeleft ?? LM.Get("Unknown"))
+                                                    .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                    .WithTimestamp(timestamp);
+                                                embed = builder.Build();
+
+                                                await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                            }
+                                                break;
                                             case "StructureFuelAlert":
                                                 //"text": "listOfTypesAndQty:\n- - 307\n  - 4246\nsolarsystemID: 30045331\nstructureID: &id001 1027052813591\nstructureShowInfoData:\n- showinfo\n- 35835\n- *id001\nstructureTypeID: 35835\n"
                                                 await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
