@@ -98,7 +98,7 @@ namespace ThunderED.Modules
             if ((now - _checkOneSec).TotalSeconds >= 1)
             {      
                 //display day stats on day change
-                await OneSec_ReportDailyStatus(now).ConfigureAwait(false);
+                await OneSec_ReportDailyStatus(now);
 
                 //TQ status post
                // await OneSec_TQStatusPost(now).ConfigureAwait(false);
@@ -153,12 +153,12 @@ namespace ThunderED.Modules
             var d = now.Date;
             if (!_isPostingDailyStats && _checkDailyPost.Date != d)
             {
+                _checkDailyPost = now;
                 _isPostingDailyStats = true;
                 try
                 {
                     await LogHelper.LogInfo("Running auto day stats post...", LogCat.Tick);
                     await Stats(null, "newday").ConfigureAwait(false);
-                    _checkDailyPost = now;
                 }
                 finally
                 {
