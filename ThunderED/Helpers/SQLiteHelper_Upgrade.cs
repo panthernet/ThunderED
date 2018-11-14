@@ -86,6 +86,7 @@ namespace ThunderED.Helpers
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         case "1.2.2":
+                            await BackupDatabase();
                             await RunCommand("CREATE TABLE invTypes(typeID INTEGER PRIMARY KEY NOT NULL,groupID INTEGER,typeName VARCHAR(100),description TEXT,mass FLOAT,volume FLOAT,capacity FLOAT,portionSize INTEGER,raceID INTEGER,basePrice DECIMAL(19,4),published BOOLEAN,marketGroupID INTEGER,iconID INTEGER,soundID INTEGER,graphicID INTEGER);");
                             await RunCommand("CREATE INDEX ix_invTypes_groupID ON invTypes (groupID);");
                             await RunCommand("CREATE TABLE mapConstellations(regionID INTEGER,constellationID INTEGER PRIMARY KEY NOT NULL,constellationName VARCHAR(100),x FLOAT,y FLOAT,z FLOAT,xMin FLOAT,xMax FLOAT,yMin FLOAT,yMax FLOAT,zMin FLOAT,zMax FLOAT,factionID INTEGER,radius FLOAT);");
@@ -95,7 +96,11 @@ namespace ThunderED.Helpers
                             await RunCommand("DELETE FROM `cache`;");
 
                             if (!await CopyTableDataFromDefault("invTypes", "invGroups", "mapConstellations", "mapRegions", "mapSolarSystems"))
+                            {
+                                await RestoreDatabase();
                                 return false;
+                            }
+
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:
@@ -130,6 +135,43 @@ namespace ThunderED.Helpers
             finally
             {
                 SettingsManager.IsNew = false;
+            }
+        }
+
+        private static async Task BackupDatabase()
+        {
+            try
+            {
+                var bkFile = $"{SettingsManager.DatabaseFilePath}.bk";
+                if (File.Exists(bkFile))
+                    File.Delete(bkFile);
+                using (var source = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+                using (var target = new SqliteConnection($"Data Source = {bkFile};"))
+                {
+                    await source.OpenAsync();
+                    await target.OpenAsync();
+                    source.BackupDatabase(target);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("DbBackup", ex, LogCat.SQLite);
+
+            }
+        }
+
+        private static async Task RestoreDatabase()
+        {
+            try
+            {
+                var bkFile = $"{SettingsManager.DatabaseFilePath}.bk";
+                if (!File.Exists(bkFile))
+                    return;
+                File.Copy(bkFile, SettingsManager.DatabaseFilePath, true);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("DbRestore", ex, LogCat.SQLite);
             }
         }
 

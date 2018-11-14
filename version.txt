@@ -5,6 +5,7 @@
 + Added Skills table to HRM character inspection module
 + Added TableSkillEntriesPerPage param to HRMModule config section
 + Added EVE static data into database: types, groups, systems, regions and constellations
++ Added Database backup and restore functions for greater DB upgrade safety
 + Improved ZKB duplicated kills detection
 + Improved kill logging
 + Improved preliminary auth status messages
