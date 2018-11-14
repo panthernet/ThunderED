@@ -92,7 +92,8 @@ namespace ThunderED.Helpers
                             await RunCommand("CREATE TABLE mapRegions(regionID INTEGER PRIMARY KEY NOT NULL,regionName VARCHAR(100),x FLOAT,y FLOAT,z FLOAT,xMin FLOAT,xMax FLOAT,yMin FLOAT,yMax FLOAT,zMin FLOAT,zMax FLOAT,factionID INTEGER,radius FLOAT);");
                             await RunCommand("CREATE TABLE invGroups(groupID INTEGER PRIMARY KEY NOT NULL,categoryID INTEGER,groupName VARCHAR(100),iconID INTEGER,useBasePrice BOOLEAN,anchored BOOLEAN,anchorable BOOLEAN,fittableNonSingleton BOOLEAN,published BOOLEAN);");
                             await RunCommand("CREATE INDEX ix_invGroups_categoryID ON invGroups (categoryID);");
-                            
+                            await RunCommand("DELETE FROM `cache`;");
+
                             if (!await CopyTableDataFromDefault("invTypes", "invGroups", "mapConstellations", "mapRegions", "mapSolarSystems"))
                                 return false;
                             break;
