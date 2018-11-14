@@ -98,6 +98,9 @@ namespace ThunderED.Classes
         public int AuthTimeoutInMinutes { get; set; } = 10;
         [Comment("Number of entries to display in tables")]
         public int TableEntriesPerPage { get; set; } = 10;
+
+        [Comment("Number of skill entries to display in tables")]
+        public int TableSkillEntriesPerPage { get; set; } = 20;
 #if EDITOR
         public override string this[string columnName]
         {
@@ -951,12 +954,12 @@ namespace ThunderED.Classes
         public bool ReportIncursionStatusAfterDT { get; set; }
 #if EDITOR
         [Comment("List of numeric region IDs to filter incursions")]
-        public ObservableCollection<int> Regions { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<long> Regions { get; set; } = new ObservableCollection<long>();
         [Comment("List of numeric constellation IDs to filter incursions")]
-        public ObservableCollection<int> Constellations { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<long> Constellations { get; set; } = new ObservableCollection<long>();
 #else
-        public List<int> Regions { get; set; } = new List<int>();
-        public List<int> Constellations { get; set; } = new List<int>();
+        public List<long> Regions { get; set; } = new List<long>();
+        public List<long> Constellations { get; set; } = new List<long>();
 #endif
 #if EDITOR
         public override string this[string columnName]

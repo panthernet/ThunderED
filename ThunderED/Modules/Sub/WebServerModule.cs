@@ -320,5 +320,10 @@ namespace ThunderED.Modules.Sub
         {
             return $"hrm.php?data=contacts{inspectCharId}&id={authCode}&state=matahari&page=";
         }
+
+        public static string GetHRM_AjaxSkillsListURL(int inspectCharId, string authCode)
+        {
+            return $"hrm.php?data=skills{inspectCharId}&id={authCode}&state=matahari&page=";
+        }
     }
 }

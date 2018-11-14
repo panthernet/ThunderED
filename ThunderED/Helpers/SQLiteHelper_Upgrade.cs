@@ -10,7 +10,7 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2"
         };
 
         public static async Task<bool> Upgrade()
@@ -85,6 +85,17 @@ namespace ThunderED.Helpers
                             await LogHelper.LogWarning("Step 4 finished...");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
+                        case "1.2.2":
+                            await RunCommand("CREATE TABLE invTypes(typeID INTEGER PRIMARY KEY NOT NULL,groupID INTEGER,typeName VARCHAR(100),description TEXT,mass FLOAT,volume FLOAT,capacity FLOAT,portionSize INTEGER,raceID INTEGER,basePrice DECIMAL(19,4),published BOOLEAN,marketGroupID INTEGER,iconID INTEGER,soundID INTEGER,graphicID INTEGER);");
+                            await RunCommand("CREATE INDEX ix_invTypes_groupID ON invTypes (groupID);");
+                            await RunCommand("CREATE TABLE mapConstellations(regionID INTEGER,constellationID INTEGER PRIMARY KEY NOT NULL,constellationName VARCHAR(100),x FLOAT,y FLOAT,z FLOAT,xMin FLOAT,xMax FLOAT,yMin FLOAT,yMax FLOAT,zMin FLOAT,zMax FLOAT,factionID INTEGER,radius FLOAT);");
+                            await RunCommand("CREATE TABLE mapRegions(regionID INTEGER PRIMARY KEY NOT NULL,regionName VARCHAR(100),x FLOAT,y FLOAT,z FLOAT,xMin FLOAT,xMax FLOAT,yMin FLOAT,yMax FLOAT,zMin FLOAT,zMax FLOAT,factionID INTEGER,radius FLOAT);");
+                            await RunCommand("CREATE TABLE invGroups(groupID INTEGER PRIMARY KEY NOT NULL,categoryID INTEGER,groupName VARCHAR(100),iconID INTEGER,useBasePrice BOOLEAN,anchored BOOLEAN,anchorable BOOLEAN,fittableNonSingleton BOOLEAN,published BOOLEAN);");
+                            await RunCommand("CREATE INDEX ix_invGroups_categoryID ON invGroups (categoryID);");
+                            
+                            if (!await CopyTableDataFromDefault("invTypes", "invGroups", "mapConstellations", "mapRegions", "mapSolarSystems"))
+                                return false;
+                            break;
                         default:
                             continue;
                     }
@@ -117,6 +128,43 @@ namespace ThunderED.Helpers
             finally
             {
                 SettingsManager.IsNew = false;
+            }
+        }
+
+        private static async Task<bool> CopyTableDataFromDefault(params string[] tables)
+        {
+            try
+            {
+                using (var source = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+                {
+                    await source.OpenAsync();
+
+                    using (var attach = new SqliteCommand("ATTACH DATABASE 'edb.def.db' AS Y;", source))
+                    {
+                        attach.ExecuteNonQuery();
+                    }
+
+                    foreach (var table in tables)
+                    {
+                        using (var command = new SqliteCommand($"DELETE FROM '{table}';", source))
+                            command.ExecuteNonQuery();
+
+                        using (var command = new SqliteCommand($"INSERT INTO '{table}' SELECT * FROM Y.'{table}';", source))
+                            command.ExecuteNonQuery();
+                    }
+
+                    using (var attach = new SqliteCommand("DETACH DATABASE Y;", source))
+                    {
+                        attach.ExecuteNonQuery();
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("Upgrade CopyTableDataFromDefault", ex, LogCat.SQLite);
+                return false;
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,6 +42,16 @@ namespace ThunderED.Modules.OnDemand
         {
             var entries = await APIHelper.ESIAPI.GetCharacterContacts(Reason, inspectCharId, token);
             return  (entries?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage; 
+        }
+
+        private async Task<int> GetCharSkillsPagesCount(string token, int inspectCharId)
+        {
+            var entries = await APIHelper.ESIAPI.GetCharSkills(Reason, inspectCharId, token);
+            if (entries == null) return 0;
+            await entries.PopulateNames();
+            var groupCount = entries.skills.Select(a => a.DB_Group).Distinct().Count();
+
+            return  (entries.skills.Count + groupCount) / (Settings.HRMModule.TableSkillEntriesPerPage * 3); 
         }
 
 
@@ -280,6 +291,121 @@ namespace ThunderED.Modules.OnDemand
             sb.AppendLine("</tbody>");
             return sb.ToString();
         }
+
+        private async Task<string> GenerateSkillsHtml(string token, int inspectCharId, int page)
+        {
+            var data = await APIHelper.ESIAPI.GetCharSkills(Reason, inspectCharId, token);
+            if (data == null) return null;
+            await data.PopulateNames();
+            var skillGroups = data.skills.GroupBy(a => a.DB_Group, (key, value) => new { ID = key, Value = value.ToList()});
+            var skills = new List<JsonClasses.SkillEntry>();
+            foreach (var skillGroup in skillGroups)
+            {
+                skills.Add(new JsonClasses.SkillEntry { DB_Name = skillGroup.Value[0].DB_GroupName});
+                skills.AddRange(skillGroup.Value.OrderBy(a=> a.DB_Name));
+            }
+
+            var max = Settings.HRMModule.TableSkillEntriesPerPage * 3;
+            var startIndex = (page - 1) * max;
+            skills = skills.GetRange(startIndex, skills.Count > startIndex+max ? max : (skills.Count-startIndex));
+            var sb = new StringBuilder();
+            sb.AppendLine("<thead>");
+            sb.AppendLine("<tr>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">#</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmSkillName")}</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmSkillLevel")}</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmSkillName")}</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmSkillLevel")}</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmSkillName")}</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmSkillLevel")}</th>");
+            sb.AppendLine("</tr>");
+            sb.AppendLine("</thead>");
+            sb.AppendLine("<tbody>");
+            var counter = startIndex + 1;
+
+            var rowEntryCounter = 1;
+            var maxRowEntries = 3;
+            for (var index = 0; index < skills.Count; index++)
+            {
+                var entry = skills[index];
+
+                var bgcolor = GetSkillCellColor(entry.trained_skill_level, string.IsNullOrEmpty(entry.DB_GroupName));
+                if (rowEntryCounter == 1)
+                {
+                    sb.AppendLine("<tr>");
+                }
+
+                //group
+                if (string.IsNullOrEmpty(entry.DB_GroupName))
+                {
+                    if (rowEntryCounter > 1)
+                    {
+                        for (int i = rowEntryCounter; i < maxRowEntries; i++)
+                        {
+                            sb.AppendLine("  <td></td>");
+                            sb.AppendLine("  <td></td>");
+                        }
+
+                        sb.AppendLine("</tr>");
+                        sb.AppendLine("<tr>");
+                        rowEntryCounter = 1;
+                    }
+
+                    sb.AppendLine($"  <th scope=\"row\"></th>");
+                    sb.AppendLine($"  <td><b>{entry.DB_Name}</b></td>");
+                    sb.AppendLine($"  <td></td>");
+                    sb.AppendLine($"  <td></td>");
+                    sb.AppendLine($"  <td></td>");
+                    sb.AppendLine($"  <td></td>");
+                    sb.AppendLine($"  <td></td>");
+                    sb.AppendLine("</tr>");
+                    continue;
+                }
+                //item
+                if(rowEntryCounter == 1)
+                    sb.AppendLine($"  <th bgcolor=\"{bgcolor}\" scope=\"row\">{counter++}</th>");
+
+                sb.AppendLine($"  <td bgcolor=\"{bgcolor}\">{entry.DB_Name}</td>");
+                sb.AppendLine($"  <td bgcolor=\"{bgcolor}\">{entry.trained_skill_level}</td>");
+
+                rowEntryCounter++;
+                if (rowEntryCounter > maxRowEntries)
+                {
+                    sb.AppendLine("</tr>");
+                    rowEntryCounter = 1;
+                }
+
+            }
+
+
+            sb.AppendLine("</tbody>");
+            return sb.ToString();
+        }
+
+        private string GetSkillCellColor(int entryTrainedSkillLevel, bool isCategory)
+        {
+            if (isCategory) entryTrainedSkillLevel = -1;
+            var bgcolor = "white";
+            switch (entryTrainedSkillLevel)
+            {
+                case -1:
+                    return "gray";
+                case 0:
+                    return bgcolor;
+                case var a when a < 5 && a > 2:
+                    bgcolor = "yellow";
+                    break;
+                case var a when a <= 2:
+                    bgcolor = "#C0C0C0";
+                    break;
+                case 5:
+                    bgcolor = "green";
+                    break;
+            }
+
+            return bgcolor;
+        }
+
 
         private async Task<string> GenerateContactsHtml(string token, int inspectCharId, int page)
         {

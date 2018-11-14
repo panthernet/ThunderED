@@ -225,6 +225,62 @@ namespace ThunderED.Helpers
             }).FirstOrDefault();
         }
 
+        internal static async Task<JsonClasses.RegionData> GetRegionById(long id)
+        {
+            return (await SelectData("mapRegions", new[] {"regionID", "regionName"}, new Dictionary<string, object>
+            {
+                {"regionID", id}
+            })).Select(item => new JsonClasses.RegionData
+            {
+                DB_id = Convert.ToInt64(item[0]),
+                name = Convert.ToString(item[1]),
+            }).FirstOrDefault();
+        }
+
+        internal static async Task<JsonClasses.ConstellationData> GetConstellationById(long id)
+        {
+            return (await SelectData("mapConstellations", new[] {"regionID", "constellationID","constellationName"}, new Dictionary<string, object>
+            {
+                {"constellationID", id}
+            })).Select(item => new JsonClasses.ConstellationData
+            {
+                region_id = Convert.ToInt64(item[0]),
+                constellation_id = Convert.ToInt64(item[1]),
+                name = Convert.ToString(item[2]),
+            }).FirstOrDefault();
+        }
+
+        
+        internal static async Task<JsonClasses.Type_id> GetTypeId(long id)
+        {
+            return (await SelectData("invTypes", new[] {"typeID", "groupID","typeName", "description", "mass", "volume"}, new Dictionary<string, object>
+            {
+                {"typeID", id}
+            })).Select(item => new JsonClasses.Type_id
+            {
+                type_id = Convert.ToInt64(item[0]),
+                group_id = Convert.ToInt64(item[1]),
+                name = Convert.ToString(item[2]),
+                description = Convert.ToString(item[3]),
+                mass = (float)Convert.ToDouble(item[4]),
+                volume = (float)Convert.ToDouble(item[5])
+            }).FirstOrDefault();
+        }
+
+        
+        internal static async Task<JsonClasses.invGroup> GetInvGroup(long id)
+        {
+            return (await SelectData("invGroups", new[] {"groupID", "categoryID","groupName"}, new Dictionary<string, object>
+            {
+                {"groupID", id}
+            })).Select(item => new JsonClasses.invGroup
+            {
+                groupId = Convert.ToInt64(item[0]),
+                categoryId = Convert.ToInt64(item[1]),
+                groupName = Convert.ToString(item[2]),
+            }).FirstOrDefault();
+        }
+
         #region pendingUsers table
         public static async Task<bool> PendingUsersIsEntryActive(int characterId)
         {
@@ -381,5 +437,6 @@ namespace ThunderED.Helpers
         {
             return (await UserTokensGetAllEntries(new Dictionary<string, object> {{"characterID", inspectCharId}})).FirstOrDefault();
         }
+
     }
 }

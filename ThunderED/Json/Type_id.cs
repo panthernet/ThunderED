@@ -4,11 +4,11 @@
     {
         public class Type_id
         {
-            public int type_id { get; set; }
+            public long type_id { get; set; }
             public string name { get; set; }
             public string description { get; set; }
             public bool published { get; set; }
-            public int group_id { get; set; }
+            public long group_id { get; set; }
             public float radius { get; set; }
             public float volume { get; set; }
             public float capacity { get; set; }

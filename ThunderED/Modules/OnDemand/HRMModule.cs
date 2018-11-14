@@ -212,6 +212,7 @@ namespace ThunderED.Modules.OnDemand
                                         .Replace("{tabMail}", LM.Get("hrmTabMail"))
                                         .Replace("{tabCorpHistory}", LM.Get("hrmTabCorpHistory"))
                                         .Replace("{tabContacts}", LM.Get("hrmTabContacts"))
+                                        .Replace("{tabSkills}", LM.Get("hrmTabSkills"))
 
                                         .Replace("{mailListUrl}", WebServerModule.GetHRM_AjaxMailListURL(inspectCharId, authCode))
                                         .Replace("{transactListUrl}", WebServerModule.GetHRM_AjaxTransactListURL(inspectCharId, authCode))
@@ -219,6 +220,7 @@ namespace ThunderED.Modules.OnDemand
                                         .Replace("{lysListUrl}", WebServerModule.GetHRM_AjaxLysListURL(inspectCharId, authCode))
                                         .Replace("{contractsListUrl}", WebServerModule.GetHRM_AjaxContractsListURL(inspectCharId, authCode))
                                         .Replace("{contactsListUrl}", WebServerModule.GetHRM_AjaxContactsListURL(inspectCharId, authCode))
+                                        .Replace("{skillsListUrl}", WebServerModule.GetHRM_AjaxSkillsListURL(inspectCharId, authCode))
 
                                         .Replace("{disableMail}", SettingsManager.HasReadMailScope(userTokenEntity.PermissionsList) ? null : "d-none")
                                         .Replace("{allowMailBool}", SettingsManager.HasReadMailScope(userTokenEntity.PermissionsList) ? "true" : "false")
@@ -231,6 +233,8 @@ namespace ThunderED.Modules.OnDemand
                                         .Replace("{disableContacts}", SettingsManager.HasCharContactsScope(userTokenEntity.PermissionsList) ? null : "d-none")
                                         .Replace("{allowContactsBool}", SettingsManager.HasCharContactsScope(userTokenEntity.PermissionsList) ? "true" : "false")
                                         .Replace("{disableSP}", SettingsManager.HasCharSkillsScope(userTokenEntity.PermissionsList) ? null : "d-none")
+                                        .Replace("{disableSkills}", SettingsManager.HasCharSkillsScope(userTokenEntity.PermissionsList) ? null : "d-none")
+                                        .Replace("{allowSkillsBool}", SettingsManager.HasCharSkillsScope(userTokenEntity.PermissionsList) ? "true" : "false")
                                     ;
 
                                 //private info
@@ -273,6 +277,8 @@ namespace ThunderED.Modules.OnDemand
                                     {
                                         var skills = await APIHelper.ESIAPI.GetCharSkills(Reason, inspectCharId, token);
                                         text = text.Replace("{totalSP}", skills.total_sp.ToString("N0"));
+                                        var total = await GetCharSkillsPagesCount(token, inspectCharId);
+                                        text = text.Replace("totalskillsPages!!", total.ToString());
                                     }
                                 }
 
@@ -282,6 +288,7 @@ namespace ThunderED.Modules.OnDemand
                                 text = text.Replace("totalLysPages!!", "0");
                                 text = text.Replace("totalcontractsPages!!", "0");
                                 text = text.Replace("totalcontactsPages!!", "0");
+                                text = text.Replace("totalskillsPages!!", "0");
                                 text = text.Replace("{totalSP}", "0");
 
 
@@ -387,6 +394,26 @@ namespace ThunderED.Modules.OnDemand
                                 var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                     Settings.WebServerModule.CcpAppSecret);
                                 var html = await GenerateContactsHtml(token, inspectCharId, page);
+
+                                var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
+                                    .Replace("{table}", html);
+                                   
+                                await WebServerModule.WriteResponce(text, response);
+                            }
+                        }
+                            break;
+                        case var s when s.StartsWith("skills"):
+                        {
+                            var values = data.Replace("skills", "");
+                            if (!int.TryParse(values, out var inspectCharId))
+                                return true;
+                            var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharId);
+                            var hasToken = userTokenEntity != null;
+                            if (hasToken && page > 0)
+                            {
+                                var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                    Settings.WebServerModule.CcpAppSecret);
+                                var html = await GenerateSkillsHtml(token, inspectCharId, page);
 
                                 var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
                                     .Replace("{table}", html);

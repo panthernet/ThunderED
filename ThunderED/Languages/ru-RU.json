@@ -308,7 +308,8 @@
   "hrmLysCategorySocialDirectTrades":  "Обменов Предметами",
   "hrmLysCategorySocialFleetJoins":  "Флотов Посещено",
   "hrmLysCategorySocialSpaceTime":  "Проведено Времени в HS/LS/NS/WH",
-  "hrmTabContacts": "Contacts",
+  "hrmTabContacts": "Контакты",
+  "hrmTabSkills":  "Навыки" ,
   "hrmContractName":  "Наименование", 
   "hrmContractType":  "Тип", 
   "hrmContractFrom":  "От", 
@@ -328,5 +329,7 @@
   "hrmInspectBirth":  "ДР",
   "hrmMembersHeader":  "Участники",
   "hrmAwaitingHeader":  "Ожидают Авторизации", 
+  "hrmSkillName":  "Навык", 
+  "hrmSkillLevel":  "Уровень", 
   "timersCmdAccessDenied":  "Вы должны быть авторизованы и иметь соответствующую роль для использования этой команды!" 
 }

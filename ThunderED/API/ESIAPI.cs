@@ -59,6 +59,11 @@ namespace ThunderED.API
 
         internal async Task<JsonClasses.Type_id> GetTypeId(string reason, object id, bool forceUpdate = false)
         {
+            
+            var data = await SQLHelper.GetTypeId(Convert.ToInt64(id));
+            if (data != null)
+                return data;
+
             return await GetEntry<JsonClasses.Type_id>($"https://esi.tech.ccp.is/latest/universe/types/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
                 forceUpdate);
         }
@@ -100,11 +105,19 @@ namespace ThunderED.API
 
         internal async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, object id)
         {
+            var data = await SQLHelper.GetConstellationById(Convert.ToInt64(id));
+            if (data != null)
+                return data;
+
             return await GetEntry<JsonClasses.ConstellationData>($"https://esi.tech.ccp.is/latest/universe/constellations/{id}/?datasource=tranquility&language={_language}", reason, id, 180);
         }
 
         internal async Task<JsonClasses.RegionData> GetRegionData(string reason, object id)
         {
+            var data = await SQLHelper.GetRegionById(Convert.ToInt64(id));
+            if (data != null)
+                return data;
+
             return await GetEntry<JsonClasses.RegionData>($"https://esi.tech.ccp.is/latest/universe/regions/{id}/?datasource=tranquility&language={_language}", reason, id, 180);
         }
 

@@ -64,6 +64,7 @@
     "RolesAccessList": [],
     "AuthTimeoutInMinutes":  10,
     "TableEntriesPerPage":  10,
+    "TableSkillEntriesPerPage":  20, 
     "ExcludeNotificationTypes": [ "NPCStandingsLost", "KillReportFinalBlow", "BountyClaimMsg", "SeasonalChallengeCompleted", "StoryLineMissionAvailableMsg", "KillReportVictim", "InsuranceIssuedMsg", "InsuranceFirstShipMsg" ]
 
   },

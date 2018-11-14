@@ -308,6 +308,7 @@
   "hrmLysCategorySocialFleetJoins":  "Fleets Joined",
   "hrmLysCategorySocialSpaceTime":  "Time Spent in HS/LS/NS/WH",
   "hrmTabContacts": "Contacts",
+  "hrmTabSkills":  "Skills" ,
   "hrmContractName":  "Name", 
   "hrmContractType":  "Type", 
   "hrmContractFrom":  "From", 
@@ -327,5 +328,7 @@
   "hrmInspectBirth":  "Birthday",
   "hrmMembersHeader":  "Members",
   "hrmAwaitingHeader":  "Awaiting Auth", 
+  "hrmSkillName":  "Skill", 
+  "hrmSkillLevel":  "Level", 
   "timersCmdAccessDenied":  "You must be authorized and have correct role to use this command!" 
 }

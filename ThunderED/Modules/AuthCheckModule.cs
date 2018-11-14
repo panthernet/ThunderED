@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Helpers;
 
@@ -28,9 +29,26 @@ namespace ThunderED.Modules
                     foreach (var group in Settings.WebAuthModule.AuthGroups.Values)
                     {
                         if (group.CorpIDList.Count > 0)
-                            group.CorpIDList.ForEach(c => foundList.Add(c, group.MemberRoles));
+                            group.CorpIDList.ForEach(c =>
+                            {
+                                //add all roles
+                                if (foundList.ContainsKey(c))
+                                {
+                                    foundList[c].AddRange(group.MemberRoles);
+                                    foundList[c] = foundList[c].Distinct().ToList();
+                                }
+                                else foundList.Add(c, group.MemberRoles);
+                            });
                         if (group.AllianceIDList.Count > 0)
-                            group.AllianceIDList.ForEach(a => foundList.Add(a, group.MemberRoles));
+                            group.AllianceIDList.ForEach(a =>
+                            {                                
+                                if (foundList.ContainsKey(a))
+                                {
+                                    foundList[a].AddRange(group.MemberRoles);
+                                    foundList[a] = foundList[a].Distinct().ToList();
+                                }
+                                else foundList.Add(a, group.MemberRoles);
+                            });
                     }
 
                     await APIHelper.DiscordAPI.UpdateAllUserRoles(foundList, Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles);

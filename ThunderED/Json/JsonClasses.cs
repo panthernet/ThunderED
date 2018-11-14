@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
+using ThunderED.Helpers;
 
 namespace ThunderED.Json
 {
@@ -92,14 +94,15 @@ namespace ThunderED.Json
 
         internal class ConstellationData
         {
-            public int constellation_id;
+            public long constellation_id;
             public string name;
-            public int region_id;
+            public long region_id;
         }
 
         internal class RegionData
         {
             public string name;
+            public long DB_id;
         }
 
         public class MailRecipient
@@ -442,6 +445,21 @@ namespace ThunderED.Json
         {
             public List<SkillEntry> skills;
             public int total_sp;
+
+            public async Task PopulateNames()
+            {
+                foreach (var skill in skills)
+                {
+                    var t = await SQLHelper.GetTypeId(skill.skill_id);
+                    if(t == null) continue;
+                    skill.DB_Name = t.name;
+                    skill.DB_Description = t.description;
+                    skill.DB_Group = t.group_id;
+                    var g = await SQLHelper.GetInvGroup(skill.DB_Group);
+                    if(g == null) continue;
+                    skill.DB_GroupName = g.groupName;
+                }
+            }
         }
 
         public class SkillEntry
@@ -450,6 +468,17 @@ namespace ThunderED.Json
             public long skill_id;
             public long skillpoints_in_skill;
             public int trained_skill_level;
+            public string DB_Name;
+            public string DB_Description;
+            public long DB_Group;
+            public string DB_GroupName;
+        }
+
+        internal class invGroup
+        {
+            public long groupId;
+            public long categoryId;
+            public string groupName;
         }
     }
 }

@@ -1,11 +1,15 @@
-### V1.2.1
+### V1.2.1 - 1.2.2
 + Added TimeInputFormat setting to Timers module to be able to specify time format
 + Added new web button to add timers using the remaining time
 + Added StructureUnanchoring notification
++ Added Skills table to HRM character inspection module
++ Added TableSkillEntriesPerPage param to HRMModule config section
++ Added EVE static data into database: types, groups, systems, regions and constellations
 + Improved ZKB duplicated kills detection
 + Improved kill logging
 + Improved preliminary auth status messages
 + Fixed coloring issue with custom templates
++ Fixed auth check issues with the same corp/ally in different groups
 
 ### V1.2.0
 + Improved ZKB support
