@@ -96,6 +96,7 @@ namespace ThunderED.Helpers
 
                             if (!await CopyTableDataFromDefault("invTypes", "invGroups", "mapConstellations", "mapRegions", "mapSolarSystems"))
                                 return false;
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:
                             continue;
