@@ -56,7 +56,8 @@ With this bot you will have tools to:
 * Incursion notifications - receive notifications when specified regions or constellations has Sansha Incursions
 * Nullsec campaign  - sovereignty contest campaign notifications about TCU/IHUB entosis occurs in specified regions or constellations
 * FWStats - access to !fwstats command to display information about the FW faction along with the LP farming tips
-* (?) Channel MOTD integration - could be done by request
+* HR Module - inspect your members and pilots applying to join your corporation
+* SystemLogFeeder - feed critical bot logs right into the Discord channel
 
 ## Build Requirements
 * Visual Studio 2017 Community Edition
