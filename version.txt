@@ -7,6 +7,7 @@
 + Added EVE static data into database: types, groups, systems, regions and constellations
 + Added Database backup and restore functions for greater DB upgrade safety
 + Added proxy settings for TelegramModule
++ Added several DefaultMention config params to various modules
 + Improved ZKB duplicated kills detection
 + Improved kill logging
 + Improved preliminary auth status messages

@@ -148,7 +148,7 @@ namespace ThunderED.Modules
                         var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
                         lastMailId = mailHeader.mail_id;
 
-                        await SendMailNotification(channel, mail, labelNames);
+                        await SendMailNotification(channel, mail, labelNames, group.DefaultMention);
 
                     }
                     if(prevMailId != lastMailId || lastMailId == 0)
@@ -165,7 +165,7 @@ namespace ThunderED.Modules
             }
         }
 
-        private async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string labelNames)
+        private async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string labelNames, string mention)
         {
             var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.from);
 
@@ -177,7 +177,7 @@ namespace ThunderED.Modules
                 .AddField($"{LM.Get("mailSubject")} {mail.subject}",  await PrepareBodyMessage(mail.body))
                 .WithFooter($"{labels}{LM.Get("mailDate")} {stamp}");
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
-            await APIHelper.DiscordAPI.SendMessageAsync(ch, LM.Get("mailMsgTitle", sender?.name), embed.Build()).ConfigureAwait(false);
+            await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {LM.Get("mailMsgTitle", sender?.name)}", embed.Build()).ConfigureAwait(false);
         }
 
         public static async Task<string> PrepareBodyMessage(string input)

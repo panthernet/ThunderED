@@ -115,7 +115,7 @@ namespace ThunderED.Modules
 
                         if (operation.OperationId > Convert.ToInt32(lastopid) && announcePost)
                         {
-                            await SendMessage(operation, channel, $"@everyone FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
+                            await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
                             await SQLHelper.SQLiteDataUpdate("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");
                         }
 
@@ -132,7 +132,7 @@ namespace ThunderED.Modules
 
                             if (timeDiff >= epic1 && timeDiff <= epic2)
                             {
-                                await SendMessage(operation, channel, $"@everyone {LM.Get("fuFormIn", i, $"http://fleet-up.com/Operation#{operation.OperationId}")}",
+                                await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} {LM.Get("fuFormIn", i, $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                     false);
                                 await SQLHelper.SQLiteDataInsertOrUpdate("fleetup", new Dictionary<string, object>
                                 {
@@ -145,7 +145,7 @@ namespace ThunderED.Modules
                         //NOW
                         if (timeDiff.TotalMinutes < 1)
                         {
-                            await SendMessage(operation, channel, $"@everyone {LM.Get("fuFormNow", $"http://fleet-up.com/Operation#{operation.OperationId}")}",
+                            await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} {LM.Get("fuFormNow", $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                 false);
                             await SQLHelper.SQLiteDataDelete("fleetup", "id", operation.Id.ToString());
                         }

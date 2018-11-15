@@ -84,7 +84,7 @@ namespace ThunderED.Modules
                                     Category);
                                 if (Settings.WebAuthModule.AuthReportChannel != 0)
                                     await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,
-                                        LM.Get("authUnableToProcessUserGroup", characterName, characterId, groupName));
+                                        $"{group.Value.DefaultMention} {LM.Get("authUnableToProcessUserGroup", characterName, characterId, groupName)}");
                             }
 
                             //auth
@@ -302,7 +302,7 @@ namespace ThunderED.Modules
                                         .Replace("{body2}", LM.Get("authTemplateSucc2")).Replace("{body3}", LM.Get("authTemplateSucc3")).Replace("{backText}", LM.Get("backText")),
                                     response);
                                 if (SettingsManager.Settings.WebAuthModule.AuthReportChannel != 0)
-                                    await APIHelper.DiscordAPI.SendMessageAsync(SettingsManager.Settings.WebAuthModule.AuthReportChannel, LM.Get("authManualAcceptMessage", rChar.name, characterID, groupName)).ConfigureAwait(false);
+                                    await APIHelper.DiscordAPI.SendMessageAsync(SettingsManager.Settings.WebAuthModule.AuthReportChannel, $"{group.DefaultMention} {LM.Get("authManualAcceptMessage", rChar.name, characterID, groupName)}").ConfigureAwait(false);
                                 await LogHelper.LogWarning(LM.Get("authManualAcceptMessage", rChar.name, characterID, groupName), LogCat.AuthWeb);
                             }
                             else
@@ -495,11 +495,12 @@ namespace ThunderED.Modules
 
                 if (authSettings.AuthReportChannel != 0)
                 {
+                    var mention = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authGroupName).Value?.DefaultMention;
                     if (isPreliminary)
-                        await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, LM.Get("grantRolesPrelMessage", characterData.name, authGroupName))
+                        await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, $"{mention} {LM.Get("grantRolesPrelMessage", characterData.name, authGroupName)}")
                             .ConfigureAwait(false);
                     else
-                        await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, LM.Get("grantRolesMessage", characterData.name))
+                        await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, $"{mention} {LM.Get("grantRolesMessage", characterData.name)}")
                             .ConfigureAwait(false);
                 }
 

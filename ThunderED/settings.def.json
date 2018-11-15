@@ -77,7 +77,8 @@
         "labels": [ "discord" ],
         "senders": [],
         "includePrivateMail":  false, 
-        "channel": 0
+        "channel": 0,
+        "DefaultMention": "" 
       }
     }
   },
@@ -100,6 +101,7 @@
     "announces": [60, 10],
     "announceChannel": 0,
     "TimeInputFormat":  "DD.MM.YYYY hh:mm", 
+    "DefaultMention":  "@everyone", 
     "accessList": {
       "UnitedFleet":{
         "isAlliance": true,
@@ -170,7 +172,9 @@
         "PreliminaryAuthMode": false,
         "AppInvalidationInHours": 0,
         "ESICustomAuthRoles": [],
-        "CustomButtonText": null 
+        "CustomButtonText": null,
+        "DefaultMention":  ""
+
       },
       "group2": {
         "CorpIDList": [],
@@ -180,6 +184,7 @@
         "PreliminaryAuthMode": true,
         "AppInvalidationInHours": 48,
         "CustomButtonText":  "Custom Discord Auth", 
+        "DefaultMention":  "",
         "ESICustomAuthRoles": [
           "esi-assets.read_assets.v1",
           "esi-characters.read_blueprints.v1",
@@ -314,7 +319,8 @@
     "GroupID": "",
     "channel": 0,
     "announce_post": true,
-    "announce": [ 5, 60 ]
+    "announce": [ 5, 60 ],
+    "DefaultMention":  "@everyone" 
   },
 
   "jabberModule": {
@@ -398,6 +404,7 @@
 
   "incursionNotificationModule": {
 	  "DiscordChannelId": 0,
+    "DefaultMention": "@everyone", 
 	  "Regions": [],
 	  "Constellations": [],
 	  "ReportIncursionStatusAfterDT": true

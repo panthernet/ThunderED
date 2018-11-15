@@ -216,6 +216,8 @@ namespace ThunderED.Classes
         [Required]
         public ulong Channel { get; set; }
         public bool Announce_Post { get; set; }
+        [Comment("Default Discord mention for report")]
+        public string DefaultMention { get; set; }
 #if EDITOR
         public ObservableCollection<int> Announce { get; set; } = new ObservableCollection<int>();
 #else
@@ -443,6 +445,8 @@ namespace ThunderED.Classes
 
         [Comment("Time format for new timers input CAPS SENSITIVE. Default: DD.MM.YYYY hh:mm")]
         public string TimeInputFormat { get; set; } = "DD.MM.YYYY hh:mm";
+        [Comment("Optional Discord defult mention for timer report")]
+        public string DefaultMention { get; set; }
 
 #if EDITOR
         [Comment("List of numeric values representing the time in minutes to send timer reminder message to discord when specified amount of minutes is left before the timer ends")]
@@ -569,6 +573,9 @@ namespace ThunderED.Classes
         [Comment("Numeric Discord channel ID to post mail feed")]
         [Required]
         public ulong Channel { get; set; }
+
+        [Comment("Optional Discord default mention for mail report")]
+        public string DefaultMention { get; set; }
 
 #if EDITOR
         public override string this[string columnName]
@@ -964,6 +971,8 @@ namespace ThunderED.Classes
         public ulong DiscordChannelId { get; set; }
         [Comment("Set to **True** if you want bot to post status update about existing incursions. \nSet to **False** to report only new incursions")]
         public bool ReportIncursionStatusAfterDT { get; set; }
+        [Comment("Optional default mention for Incursions report. Default: @everyone")]
+        public string DefaultMention { get; set; } = "@everyone";
 #if EDITOR
         [Comment("List of numeric region IDs to filter incursions")]
         public ObservableCollection<long> Regions { get; set; } = new ObservableCollection<long>();
@@ -1294,7 +1303,9 @@ namespace ThunderED.Classes
 
         [Comment("Optional text to display in a web-server group auth button if separate button is generated for this group")]
         public string CustomButtonText { get; set; }
-        
+        [Comment("Optional default Discord mention for auth report")]
+        public string DefaultMention { get; set; }
+
 #if EDITOR
         [Comment("The list of ESI access role names to check on auth")]
         public ObservableCollection<string> ESICustomAuthRoles { get; set; } = new ObservableCollection<string>();
