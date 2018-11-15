@@ -50,6 +50,8 @@ namespace ThunderED.Classes
         public JabberModuleSettings JabberModule { get; set; } = new JabberModuleSettings();
         [ConfigEntryName("moduleHRM")]
         public HRMModuleSettings HRMModule { get; set; } = new HRMModuleSettings();
+        [ConfigEntryName("ModuleSystemLogFeeder")]
+        public SystemLogFeederSettings SystemLogFeederModule { get; set; } = new SystemLogFeederSettings();
 
         [ConfigEntryName("")]
         [StaticConfigEntry]
@@ -1117,6 +1119,7 @@ namespace ThunderED.Classes
         public bool ModuleFWStats { get; set; } = true;
         public bool ModuleLPStock { get; set; } = true;
         public bool ModuleHRM { get; set; } = false;
+        public bool ModuleSystemLogFeeder { get; set; } = false;
 
         [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
         public string ZkillLiveFeedRedisqID { get; set; }
@@ -1141,6 +1144,7 @@ namespace ThunderED.Classes
         [Comment("The path to a database file. Default value is 'edb.db'")]
         [Required]
         public string DatabaseFile { get; set; } = "edb.db";
+
 
 #if EDITOR
         public override string this[string columnName]
@@ -1169,6 +1173,16 @@ namespace ThunderED.Classes
             }
         }
 #endif
+    }
+
+    public class SystemLogFeederSettings : ValidatableSettings
+    {
+        [Comment("Discord channel ID")]
+        [Required]
+        public ulong DiscordChannelId { get; set; }
+
+        [Comment("Feed only critical and error messages")]
+        public bool OnlyErrors { get; set; }
     }
 
     public class WebServerModuleSettings: ValidatableSettings

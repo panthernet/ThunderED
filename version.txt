@@ -8,6 +8,7 @@
 + Added Database backup and restore functions for greater DB upgrade safety
 + Added proxy settings for TelegramModule
 + Added several DefaultMention config params to various modules
++ Added new SystemLogFeeder module to be able to feed bot console messages into the Discord channel
 + Improved ZKB duplicated kills detection
 + Improved kill logging
 + Improved preliminary auth status messages

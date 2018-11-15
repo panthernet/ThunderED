@@ -34,6 +34,7 @@
         NullCampaign,
         AutoPost,
         Continuous,
-        HRM
+        HRM,
+        SLF
     }
 }

@@ -33,6 +33,7 @@
     "moduleFWStats": false,
     "ModuleLPStock": false, 
     "moduleHRM":  false, 
+    "ModuleSystemLogFeeder":  false, 
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -46,6 +47,11 @@
     "databaseProvider":  "sqlite",
     "databaseFile": "edb.db",
     "requestRetries": 3
+  },
+
+  "SystemLogFeederModule": {
+    "DiscordChannelId":  0,
+    "OnlyErrors":  false 
   },
 
   "ContinousCheckModule": {

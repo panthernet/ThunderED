@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using ThunderED.Classes;
+using ThunderED.Modules.OnDemand;
 
 namespace ThunderED.Helpers
 {
@@ -71,7 +72,11 @@ namespace ThunderED.Helpers
                 }
 
                 if (logConsole)
-                    Console.WriteLine($"{DateTime.Now,-19} [{severity,8}] [{cat}]: {message}");
+                {
+                    var msg = $"{DateTime.Now,-19} [{severity,8}] [{cat}]: {message}";
+                    Console.WriteLine(msg);
+                    await SystemLogFeeder.FeedMessage(msg, severity == LogSeverity.Critical || severity == LogSeverity.Error);
+                }
             }
             catch
             {
@@ -93,7 +98,10 @@ namespace ThunderED.Helpers
 
                 
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat}]: {message}");
+                var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat}]: {message}";
+                Console.WriteLine(msg);
+                await SystemLogFeeder.FeedMessage(msg, true);
+
             }
             catch
             {
