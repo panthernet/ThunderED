@@ -92,10 +92,12 @@ namespace ThunderED.Modules
             if (relay == null) return;
             if(relay.Discord == 0 || IsMessagePooled(e.Message.Text) || relay.TelegramFilters.Any(e.Message.Text.Contains) || relay.TelegramFiltersStartsWith.Any(e.Message.Text.StartsWith)) return;
 
-            var from = string.IsNullOrEmpty(e.Message.From.Username) ? $"{e.Message.From.FirstName} {e.Message.From.LastName}" : e.Message.From.Username;
-            if(relay.TelegramUsers.Count > 0 && !relay.TelegramUsers.Contains(from)) return;
+            var fromNick = $"{e.Message.From.FirstName} {e.Message.From.LastName}";
+            var fromName = e.Message.From.Username;
+            if(relay.TelegramUsers.Count > 0 && !relay.TelegramUsers.Contains(fromName) && !relay.TelegramUsers.Contains(fromNick)) return;
 
-            var msg = $"[TM][{from}]: {e.Message.Text}";
+            var name = string.IsNullOrWhiteSpace(fromNick) ? fromName : fromNick;
+            var msg = $"[TM][{name}]: {e.Message.Text}";
             UpdatePool(msg);
             RelayMessage?.Invoke(msg, relay.Discord);
         }

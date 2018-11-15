@@ -649,12 +649,15 @@ namespace ThunderED.Classes
         public ObservableCollection<string> TelegramFiltersStartsWith { get; set; } = new ObservableCollection<string>();
         [Comment("Relay messages only from specified Telegram users. \nFirst check for Telegram @username then by First Name + Second Name")]
         public ObservableCollection<string> TelegramUsers { get; set; } = new ObservableCollection<string>();
+        //[Comment("Relay messages only from specified Telegram nicknames. \nFirst check for Telegram @username then by First Name + Second Name")]
+       // public ObservableCollection<string> TelegramNicks { get; set; } = new ObservableCollection<string>();
 #else
         public List<string> DiscordFilters { get; set; } = new List<string>();
         public List<string> DiscordFiltersStartsWith { get; set; } = new List<string>();
         public List<string> TelegramFilters { get; set; } = new List<string>();
         public List<string> TelegramFiltersStartsWith { get; set; } = new List<string>();
         public List<string> TelegramUsers { get; set; } = new List<string>();
+       // public List<string> TelegramNicks { get; set; } = new List<string>();
 #endif
 #if EDITOR
         public override string this[string columnName]
