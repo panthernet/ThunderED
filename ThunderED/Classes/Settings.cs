@@ -596,6 +596,15 @@ namespace ThunderED.Classes
         [Comment("Telegram bot token string obtained upon Telegram bot creation")]
         [Required]
         public string Token { get; set; }
+        [Comment("Optional proxy IP for Telegram bot")]
+        public string ProxyAddress { get; set; }
+        [Comment("Optional proxy Port for Telegram bot")]
+        public int ProxyPort { get; set; }
+        [Comment("Optional proxy Username for Telegram bot")]
+        public string ProxyUsername { get; set; }
+        [Comment("Optional proxy Password  for Telegram bot")]
+        public string ProxyPassword { get; set; }
+
 #if EDITOR
         [Required]
         public ObservableCollection<TelegramRelay> RelayChannels { get; set; } = new ObservableCollection<TelegramRelay>();

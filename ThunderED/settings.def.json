@@ -368,6 +368,10 @@
 
   "telegramModule": {
     "token": "YOUR TOKEN",
+    "ProxyAddress":  "0",
+    "ProxyPort":  0, 
+    "ProxyUsername":  "", 
+    "ProxyPassword":  "", 
     "RelayChannels": [
       {
         "telegram": 0,
