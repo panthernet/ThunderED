@@ -39,6 +39,7 @@ namespace ThunderED.Modules
                 _lastTimersCheck = DateTime.Now;
 
                 await ProcessPreliminaryAppilicants();
+                await ClearOutdatedApplicants();
             }
             catch (Exception ex)
             {
@@ -47,6 +48,29 @@ namespace ThunderED.Modules
             finally
             {
                 IsRunning = false;
+            }
+        }
+
+        private async Task ClearOutdatedApplicants()
+        {
+            var list = await SQLHelper.GetPendingUsers();
+            foreach (var user in list)
+            {
+                var tokenEntry = await SQLHelper.UserTokensGetEntry(user.CharacterId);
+                if(tokenEntry == null || tokenEntry.AuthState == 2) continue;
+                var group = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == tokenEntry.GroupName).Value;
+                if (group == null)
+                {
+                    await SQLHelper.SQLiteDataDelete("pendingUsers", "characterID", user.CharacterId.ToString());
+                    await SQLHelper.SQLiteDataDelete("userTokens", "characterID", user.CharacterId.ToString());
+                    continue;
+                }
+
+                if (group.AppInvalidationInHours > 0 && (DateTime.Now - user.CreateDate).TotalHours >= group.AppInvalidationInHours)
+                {
+                    await SQLHelper.SQLiteDataDelete("pendingUsers", "characterID", user.CharacterId.ToString());
+                    await SQLHelper.SQLiteDataDelete("userTokens", "characterID", user.CharacterId.ToString());
+                }
             }
         }
 

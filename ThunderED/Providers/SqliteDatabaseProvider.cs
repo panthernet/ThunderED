@@ -99,10 +99,22 @@ namespace ThunderED.Providers
                             while (await r.ReadAsync())
                             {
                                 var obj = new List<object>();
-                                for (int i = 0; i < fields.Length; i++)
+
+                                if (field == "*")
                                 {
-                                    obj.Add(r.IsDBNull(i) ? null : r.GetValue(i));
+                                    for (int i = 0; i < r.VisibleFieldCount; i++)
+                                    {
+                                        obj.Add(r.IsDBNull(i) ? null : r.GetValue(i));
+                                    }
                                 }
+                                else
+                                {
+                                    for (int i = 0; i < fields.Length; i++)
+                                    {
+                                        obj.Add(r.IsDBNull(i) ? null : r.GetValue(i));
+                                    }
+                                }
+
                                 list.Add(obj.ToArray());
                             }
                         }

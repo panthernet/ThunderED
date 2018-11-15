@@ -97,6 +97,22 @@ namespace ThunderED.Helpers
             await Provider?.RunCommand(query2, silent);
         }
 
+        internal static async Task<List<PendingUserEntity>> GetPendingUsers()
+        {
+            return (await SelectData("pendingUsers", new[] {"*"})).Select(item => new PendingUserEntity
+            {
+                Id = Convert.ToInt64(item[0]),
+                CharacterId = Convert.ToInt64(item[1]),
+                CorporationId = Convert.ToInt64(item[2]),
+                AllianceId = Convert.ToInt64(item[3]),
+                Groups = Convert.ToString(item[4]),
+                AuthString = Convert.ToString(item[5]),
+                Active = item[6] == "1",
+                CreateDate = Convert.ToDateTime(item[7]),
+                DiscordId = Convert.ToInt64(item[8]),
+            }).ToList();
+        }
+
         internal static async Task<T> SQLiteDataSelectCache<T>(object whereValue, int maxDays)
             where T: class
         {
@@ -433,10 +449,11 @@ namespace ThunderED.Helpers
         }
         #endregion
 
-        public static async Task<UserTokenEntity> UserTokensGetEntry(int inspectCharId)
+        public static async Task<UserTokenEntity> UserTokensGetEntry(long inspectCharId)
         {
             return (await UserTokensGetAllEntries(new Dictionary<string, object> {{"characterID", inspectCharId}})).FirstOrDefault();
         }
+
 
     }
 }

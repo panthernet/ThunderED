@@ -1183,6 +1183,21 @@ namespace ThunderED.Classes
 
         [Comment("Feed only critical and error messages")]
         public bool OnlyErrors { get; set; }
+
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(DiscordChannelId):
+                        return DiscordChannelId == 0 ? Compose(nameof(DiscordChannelId), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                }
+                return null;
+            }
+        }
+#endif
     }
 
     public class WebServerModuleSettings: ValidatableSettings
