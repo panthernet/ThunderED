@@ -77,12 +77,15 @@
         });
 
         function sendThemAll() {
+            debugger;
+            var d = $("#timerET").val();
+            var result = moment.utc(d, '{dateformat}').unix();
             let data = {
                 "timerType": $("#timerType").val(),
                 "timerStage": $("#timerStage").val(),
                 "timerLocation": $("#timerLocation").val(),
                 "timerOwner": $("#timerOwner").val(),
-                "timerET": $("#timerET").val(),
+                "timerET":result,
                 "timerNotes": $("#timerNotes").val(),
                 "timerCharId": $("#timerCharId").val()
 

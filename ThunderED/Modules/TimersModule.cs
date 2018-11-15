@@ -191,9 +191,16 @@ namespace ThunderED.Modules
                                 return true;
                             }
 
-                            if (entry.GetDateTime() == null)
+                            var iDate = entry.GetDateTime();
+                            if (iDate == null)
                             {
                                 await response.WriteContentAsync(LM.Get("invalidTimeFormat"));
+                                return true;
+                            }
+
+                            if (iDate < DateTime.Now)
+                            {
+                                await response.WriteContentAsync(LM.Get("passedTimeValue"));
                                 return true;
                             }
 

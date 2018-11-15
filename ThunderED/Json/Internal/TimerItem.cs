@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
+using ThunderED.Classes;
 
 namespace ThunderED.Json.Internal
 {
@@ -34,7 +36,20 @@ namespace ThunderED.Json.Internal
 
         public DateTime? GetDateTime()
         {
+            if (int.TryParse(timerET, out var iValue))
+            {
+                var x = DateTimeOffset.FromUnixTimeSeconds(iValue).UtcDateTime;
+                return x;
+            }
+
             if (DateTime.TryParse(timerET, out var result)) return result;
+            if (!string.IsNullOrEmpty(SettingsManager.Settings.TimersModule.TimeInputFormat))
+            {
+                var format = SettingsManager.Settings.TimersModule.TimeInputFormat.Replace("D", "d").Replace("Y", "y");
+                if (DateTime.TryParseExact(timerET, format, null, DateTimeStyles.None, out result))
+                    return result;
+            }
+
             if (timerRfDay == 0 && timerRfHour == 0 && timerRfMin == 0) return null;
             var now = DateTime.UtcNow;
             return now.AddDays(timerRfDay).AddHours(timerRfHour).AddMinutes(timerRfMin);

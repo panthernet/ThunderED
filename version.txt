@@ -1,5 +1,7 @@
 ### V1.2.3
 + Fixed preliminary auth applicants removal upon expiration
++ Fixed inability to add timers
++ Fixed possibility to add timer with passed date
 
 ### V1.2.1 - 1.2.2
 + Added TimeInputFormat setting to Timers module to be able to specify time format

@@ -330,5 +330,6 @@
   "hrmAwaitingHeader":  "Awaiting Auth", 
   "hrmSkillName":  "Skill", 
   "hrmSkillLevel":  "Level", 
-  "timersCmdAccessDenied":  "You must be authorized and have correct role to use this command!" 
+  "timersCmdAccessDenied":  "You must be authorized and have correct role to use this command!",
+  "passedTimeValue":  "Specified time has already passed" 
 }
