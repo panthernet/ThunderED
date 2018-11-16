@@ -46,12 +46,11 @@ namespace ThunderED.Helpers
 
                 // var cc = Console.ForegroundColor;
 
-                if (logFile)
-                    await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{severity,8}]: {message}{Environment.NewLine}");
-
                 if (logConsole)
                 {
                     var msg = $"{DateTime.Now,-19} [{severity,8}] [{cat}]: {message}";
+                    await SystemLogFeeder.FeedMessage(msg, severity == LogSeverity.Critical || severity == LogSeverity.Error);
+
                     try
                     {
                         switch (severity)
@@ -82,9 +81,10 @@ namespace ThunderED.Helpers
                     {
                         //ignore
                     }
-
-                    await SystemLogFeeder.FeedMessage(msg, severity == LogSeverity.Critical || severity == LogSeverity.Error);
                 }
+                if (logFile)
+                    await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{severity,8}]: {message}{Environment.NewLine}");
+
             }
             catch
             {
