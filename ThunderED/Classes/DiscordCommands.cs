@@ -609,9 +609,15 @@ namespace ThunderED.Classes
             {
                 try
                 {
+                    var authString = $"http://{SettingsManager.Settings.WebServerModule.WebExternalIP}:{SettingsManager.Settings.WebServerModule.WebExternalPort}/auth.php";
+                    if (!string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup))
+                    {
+                        var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == SettingsManager.Settings.WebAuthModule.DefaultAuthGroup).Value;
+                        if(group != null)
+                            authString = WebServerModule.GetCustomAuthUrl(group.ESICustomAuthRoles, SettingsManager.Settings.WebAuthModule.DefaultAuthGroup);
+                    }
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
-                        LM.Get("authInvite",
-                            $"http://{SettingsManager.Settings.WebServerModule.WebExternalIP}:{SettingsManager.Settings.WebServerModule.WebExternalPort}/auth.php"), true);
+                        LM.Get("authInvite", authString), true);
                 }
                 catch (Exception ex)
                 {
