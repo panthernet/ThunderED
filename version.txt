@@ -3,6 +3,7 @@
 + Fixed inability to add timers
 + Fixed possibility to add timer with passed date
 + Fixed log feeder to work with background service mode
++ Fixed URL display for general auth mode with ESI permissions
 
 ### V1.2.1 - 1.2.2
 + Added TimeInputFormat setting to Timers module to be able to specify time format
@@ -21,7 +22,6 @@
 + Fixed coloring issue with custom templates
 + Fixed auth check issues with the same corp/ally in different groups
 + Fixed TelegramModule to check for both username and nickname
-+ Fixed URL display for general auth mode with ESI permissions
 
 ### V1.2.0
 + Improved ZKB support
