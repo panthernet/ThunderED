@@ -49,32 +49,40 @@ namespace ThunderED.Helpers
                 if (logFile)
                     await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{severity,8}]: {message}{Environment.NewLine}");
 
-                switch (severity)
-                {
-                    case LogSeverity.Critical:
-                    case LogSeverity.Error:
-                        Console.ForegroundColor = ConsoleColor.Red;
-
-                        break;
-                    case LogSeverity.Warning:
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        break;
-                    case LogSeverity.Info:
-                        Console.ForegroundColor = ConsoleColor.White;
-                        break;
-                    case LogSeverity.Verbose:
-                    case LogSeverity.Debug:
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        break;
-                    case LogSeverity.Module:
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        break;
-                }
-
                 if (logConsole)
                 {
                     var msg = $"{DateTime.Now,-19} [{severity,8}] [{cat}]: {message}";
-                    Console.WriteLine(msg);
+                    try
+                    {
+                        switch (severity)
+                        {
+                            case LogSeverity.Critical:
+                            case LogSeverity.Error:
+                                Console.ForegroundColor = ConsoleColor.Red;
+
+                                break;
+                            case LogSeverity.Warning:
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                break;
+                            case LogSeverity.Info:
+                                Console.ForegroundColor = ConsoleColor.White;
+                                break;
+                            case LogSeverity.Verbose:
+                            case LogSeverity.Debug:
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                break;
+                            case LogSeverity.Module:
+                                Console.ForegroundColor = ConsoleColor.Gray;
+                                break;
+                        }
+
+                        Console.WriteLine(msg);
+                    }
+                    catch
+                    {
+                        //ignore
+                    }
+
                     await SystemLogFeeder.FeedMessage(msg, severity == LogSeverity.Critical || severity == LogSeverity.Error);
                 }
             }
@@ -97,9 +105,17 @@ namespace ThunderED.Helpers
                 await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}").ConfigureAwait(false);
 
                 
-                Console.ForegroundColor = ConsoleColor.Red;
                 var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat}]: {message}";
-                Console.WriteLine(msg);
+                try
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(msg);
+                }
+                catch
+                {
+                    //ignore
+                }
+
                 await SystemLogFeeder.FeedMessage(msg, true);
 
             }
