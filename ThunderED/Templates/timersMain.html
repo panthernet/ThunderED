@@ -65,9 +65,11 @@
                 });
 
             $(function () {
+                var todaysDate = moment.utc().format();
                 $('#datetimepicker1').datetimepicker({
                     locale: '{locale}',
-                    format: '{dateformat}'
+                    format: '{dateformat}',
+                    defaultDate: todaysDate
                 });
             });
             $('[data-toggle=confirmation]').confirmation({

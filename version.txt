@@ -1,6 +1,7 @@
 ### V1.2.3
 + Fixed preliminary auth applicants removal upon expiration
 + Fixed inability to add timers
++ Fixed timer notification errors
 + Fixed possibility to add timer with passed date
 + Fixed log feeder to work with background service mode
 + Fixed URL display for general auth mode with ESI permissions

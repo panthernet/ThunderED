@@ -124,7 +124,7 @@ namespace ThunderED.Modules
                 .AddInlineField(LM.Get("incursionBoss"), incursion.has_boss ? LM.Get("Alive") : LM.Get("Defeated"))
                 .WithCurrentTimestamp()
                 .Build();
-            await APIHelper.DiscordAPI.SendMessageAsync(channel, Settings.IncursionNotificationModule.DefaultMention, x);
+            await APIHelper.DiscordAPI.SendMessageAsync(channel, Settings.IncursionNotificationModule.DefaultMention ?? "", x);
         }
     }
 

@@ -511,7 +511,8 @@ namespace ThunderED.Modules
                         var f = APIHelper.DiscordAPI.GetGuildRole(a);
                         if(f != null && !rolesToAdd.Contains(f))
                             rolesToAdd.Add(f);
-                        else missedRoles.Add(a);
+                        else if(!rolesToAdd.Contains(f)) 
+                            missedRoles.Add(a);
                     });
                 }
 
