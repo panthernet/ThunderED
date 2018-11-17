@@ -25,33 +25,7 @@ namespace ThunderED.Modules
 
                     await LogHelper.LogModule("Running AuthCheck module...", Category);
 
-                    var foundList = new Dictionary<int, List<string>>();
-                    foreach (var group in Settings.WebAuthModule.AuthGroups.Values)
-                    {
-                        if (group.CorpIDList.Count > 0)
-                            group.CorpIDList.ForEach(c =>
-                            {
-                                //add all roles
-                                if (foundList.ContainsKey(c))
-                                {
-                                    foundList[c].AddRange(group.MemberRoles);
-                                    foundList[c] = foundList[c].Distinct().ToList();
-                                }
-                                else foundList.Add(c, group.MemberRoles);
-                            });
-                        if (group.AllianceIDList.Count > 0)
-                            group.AllianceIDList.ForEach(a =>
-                            {                                
-                                if (foundList.ContainsKey(a))
-                                {
-                                    foundList[a].AddRange(group.MemberRoles);
-                                    foundList[a] = foundList[a].Distinct().ToList();
-                                }
-                                else foundList.Add(a, group.MemberRoles);
-                            });
-                    }
-
-                    await APIHelper.DiscordAPI.UpdateAllUserRoles(foundList, Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles);
+                    await APIHelper.DiscordAPI.UpdateAllUserRoles(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles);
                     await LogHelper.LogInfo("Auth check complete!", Category);
                 }
             }

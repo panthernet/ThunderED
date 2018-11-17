@@ -90,10 +90,10 @@ namespace ThunderED.Classes
     public class HRMModuleSettings: ValidatableSettings
     {
 #if EDITOR
-        public ObservableCollection<int> UsersAccessList { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<long> UsersAccessList { get; set; } = new ObservableCollection<long>();
         public ObservableCollection<string> RolesAccessList { get; set; } = new ObservableCollection<string>();
 #else
-        public List<int> UsersAccessList { get; set; } = new List<int>();
+        public List<long> UsersAccessList { get; set; } = new List<long>();
         public List<string> RolesAccessList { get; set; } = new List<string>();
 #endif
         [Comment("Authentication timeout in minutes")]
@@ -142,9 +142,9 @@ namespace ThunderED.Classes
         [Comment("Numeric discord channel ID for auto posting daily stats upon new day. Leave 0 to disable")]
         public ulong DailyStatsChannel { get; set; }
         [Comment("Default numeric corporation ID to display stats for. Mutually exclusive with AutodailyStatsDefaultAlliance")]
-        public int DailyStatsDefaultCorp { get; set; }
+        public long DailyStatsDefaultCorp { get; set; }
         [Comment("Default numeric alliance ID to display stats for. Mutually exclusive with AutoDailyStatsDefaultCorp")]
-        public int DailyStatsDefaultAlliance { get; set; }
+        public long DailyStatsDefaultAlliance { get; set; }
 
 #if EDITOR
         public override string this[string columnName]
@@ -221,9 +221,9 @@ namespace ThunderED.Classes
         [Comment("Default Discord mention for report")]
         public string DefaultMention { get; set; }
 #if EDITOR
-        public ObservableCollection<int> Announce { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<long> Announce { get; set; } = new ObservableCollection<long>();
 #else
-        public List<int> Announce { get; set; } = new List<int>();
+        public List<long> Announce { get; set; } = new List<long>();
 #endif
 #if EDITOR
         public override string this[string columnName]
@@ -314,10 +314,10 @@ namespace ThunderED.Classes
         public ulong DiscordChannel { get; set; }
         [Comment("Numeric corporation ID. Specify to fetch all KMs for this corporation. \nMutually exclusive with allianceID.")]
         [Required]
-        public int CorpID { get; set; }
+        public long CorpID { get; set; }
         [Comment("Numeric alliance ID. Specify to fetch all KMs for this alliance. Mutually exclusive with corpID")]
         [Required]
-        public int AllianceID { get; set; }
+        public long AllianceID { get; set; }
         [Comment("Minimum KM ISK value")]
         public long MinimumValue { get; set; }
         [Comment("minimum loss KM ISK value. Set to very high value to disable losses")]
@@ -353,8 +353,8 @@ namespace ThunderED.Classes
     public class StatsModuleSettings: ValidatableSettings
     {
         public ulong AutoDailyStatsChannel { get; set; }
-        public int AutoDailyStatsDefaultCorp { get; set; }
-        public int AutodailyStatsDefaultAlliance { get; set; }
+        public long AutoDailyStatsDefaultCorp { get; set; }
+        public long AutodailyStatsDefaultAlliance { get; set; }
 
 #if EDITOR
         public override string this[string columnName]
@@ -407,9 +407,9 @@ namespace ThunderED.Classes
         [Comment("Discord channel ID to post messages")]
         public ulong RadiusChannel { get; set; }
         [Comment("Numeric radius central system ID (even wormhole J system can be specified). \nYou should specify only one of the following IDs: system, constellation or region")]
-        public int RadiusSystemId { get; set; }
-        public int RadiusConstellationId { get; set; }
-        public int RadiusRegionId { get; set; }
+        public long RadiusSystemId { get; set; }
+        public long RadiusConstellationId { get; set; }
+        public long RadiusRegionId { get; set; }
         [Comment("Minimum ISK value to filter killmails")]
         public long MinimumValue { get; set; }
         [Comment("Post group name into notification message")]
@@ -503,7 +503,7 @@ namespace ThunderED.Classes
         public bool IsCorporation { get; set; }
         [Comment("Numeric ID value of the entity")]
         [Required]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
 #if EDITOR
         public override string this[string columnName]
@@ -559,7 +559,7 @@ namespace ThunderED.Classes
     {
         [Comment("EVE Online character ID")]
         [Required]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Comment("Include private mail to this feed")]
         public bool IncludePrivateMail { get; set; }
@@ -567,10 +567,10 @@ namespace ThunderED.Classes
         [Comment("List of in game EVE mail label names which will be used to mark and fetch mails")]
         public ObservableCollection<string> Labels { get; set; } = new ObservableCollection<string>();
         [Comment("List of 'FROM' character IDs to filter incoming mail")]
-        public ObservableCollection<int> Senders { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<long> Senders { get; set; } = new ObservableCollection<long>();
 #else
         public List<string> Labels { get; set; } = new List<string>();
-        public List<int> Senders { get; set; } = new List<int>();
+        public List<long> Senders { get; set; } = new List<long>();
 #endif
         [Comment("Numeric Discord channel ID to post mail feed")]
         [Required]
@@ -717,15 +717,15 @@ namespace ThunderED.Classes
     public class NullCampaignGroup: ValidatableSettings
     {
 #if EDITOR
-        public ObservableCollection<int> Regions { get; set; } = new ObservableCollection<int>();
-        public ObservableCollection<int> Constellations { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<long> Regions { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<long> Constellations { get; set; } = new ObservableCollection<long>();
         [Comment("List of time marks in minutes before the event starts to send notifications. E.g. 15, 30 - will send notifications when 15 and 30 minutes left for event start.")]
         public ObservableCollection<int> Announces { get; set; } = new ObservableCollection<int>();
         [Comment("The list of Discord mentions to use for this notifications, default is @everyone")]
         public ObservableCollection<string> Mentions { get; set; } = new ObservableCollection<string>();
 #else
-        public List<int> Regions { get; set; } = new List<int>();
-        public List<int> Constellations { get; set; } = new List<int>();
+        public List<long> Regions { get; set; } = new List<long>();
+        public List<long> Constellations { get; set; } = new List<long>();
         public List<int> Announces { get; set; } = new List<int>();
         public List<string> Mentions { get; set; } = new List<string>();
 #endif
@@ -789,7 +789,7 @@ namespace ThunderED.Classes
     {
         [Comment("Numeric EVE character ID")]
         [Required]
-        public int CharacterID { get; set; }
+        public long CharacterID { get; set; }
         [Comment("Numeric default Discord channel ID. All notification filters will use this channel to send messages by default")]
         [Required]
         public ulong DefaultDiscordChannelID { get; set; }
@@ -835,12 +835,12 @@ namespace ThunderED.Classes
         [Required]
         public ObservableCollection<string> Notifications { get; set; } = new ObservableCollection<string>();
         [Comment("List of numeric EVE CHARACTER IDs to mention them in the message. Characters must be authed on the server for this to work \nthus allowing to get their Discord IDs. Leave empty to use **@everyone** mention")]
-        public ObservableCollection<int> CharMentions { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<long> CharMentions { get; set; } = new ObservableCollection<long>();
         [Comment("List of Discord role names to mention. Role must be configured in Discord to be mentionable")]
         public ObservableCollection<string> RoleMentions { get; set; } = new ObservableCollection<string>();
 #else
         public List<string> Notifications { get; set; } = new List<string>();
-        public List<int> CharMentions { get; set; } = new List<int>();
+        public List<long> CharMentions { get; set; } = new List<long>();
         public List<string> RoleMentions { get; set; } = new List<string>();
 #endif
 #if EDITOR
@@ -1307,22 +1307,31 @@ namespace ThunderED.Classes
     public class WebAuthGroup: ValidatableSettings
     {
 #if EDITOR
-        [Comment("The list of exact Discord role names to assign")]
-        [Required]
-        public ObservableCollection<string> MemberRoles { get; set; } = new ObservableCollection<string>();
+        [Comment("Dictionary containing text corporation ID and the list of Discord roles which to assign on successful auth. Additive with AllowedAlliances.")]
+       // [Required]
+        public Dictionary<string, List<string>> AllowedCorporations { get; set; } = new Dictionary<string, List<string>>();
+        [Comment("Dictionary containing text alliance ID and the list of Discord roles which to assign on successful auth.  Additive with AllowedCorporations.")]
+       // [Required]
+        public Dictionary<string, List<string>> AllowedAlliances { get; set; } = new Dictionary<string, List<string>>();
+
+        //[Comment("The list of exact Discord role names to assign")]
+       // [Required]
+       // public ObservableCollection<string> MemberRoles { get; set; } = new ObservableCollection<string>();
         [Comment("The list of exact Discord role names authorized to manually approve applicants")]
         public ObservableCollection<string> AuthRoles { get; set; } = new ObservableCollection<string>();
-        [Comment("Numeric alliance ID list. Checked ADDITIVELY after the corpIDList")]
-        [Required]
-        public ObservableCollection<int> AllianceIDList { get; set; } = new ObservableCollection<int>();
-        [Comment("Numeric corporation ID list. You can leave it empty if you want to filter by entire alliance.")]
-        [Required]
-        public ObservableCollection<int> CorpIDList { get; set; } = new ObservableCollection<int>();
+        //[Comment("Numeric alliance ID list. Checked ADDITIVELY after the corpIDList")]
+        //[Required]
+        //public ObservableCollection<int> AllianceIDList { get; set; } = new ObservableCollection<int>();
+        //[Comment("Numeric corporation ID list. You can leave it empty if you want to filter by entire alliance.")]
+        //[Required]
+        //public ObservableCollection<int> CorpIDList { get; set; } = new ObservableCollection<int>();
 #else
-        public List<string> MemberRoles { get; set; } = new List<string>();
+       // public List<string> MemberRoles { get; set; } = new List<string>();
         public List<string> AuthRoles { get; set; } = new List<string>();
-        public List<int> CorpIDList { get; set; } = new List<int>();
-        public List<int> AllianceIDList { get; set; } = new List<int>();
+        //public List<int> CorpIDList { get; set; } = new List<int>();
+       // public List<int> AllianceIDList { get; set; } = new List<int>();
+        public Dictionary<string, List<string>> AllowedCorporations { get; set; } = new Dictionary<string, List<string>>();
+        public Dictionary<string, List<string>> AllowedAlliances { get; set; } = new Dictionary<string, List<string>>();
 #endif
         [Comment("Enable auth to require manual acceptance from authorized members")]
         public bool PreliminaryAuthMode { get; set; }
@@ -1348,10 +1357,6 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    //case nameof(CorpIDList):
-                        //return CorpIDList.Count == 0 && AllianceIDList.Count == 0 ? Compose(nameof(CorpIDList), "Either CorpID or AllianceID must be specified!") : null;
-                    case nameof(MemberRoles):
-                        return MemberRoles.Count == 0 ? Compose(nameof(MemberRoles), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(PreliminaryAuthMode):
                         return ESICustomAuthRoles.Count == 0 ? Compose(nameof(ESICustomAuthRoles), "ESICustomAuthRoles must contain at least one value when PreliminaryAuthMode is true!") : null;
                     case nameof(ESICustomAuthRoles):

@@ -271,7 +271,7 @@ namespace ThunderED.API
 
         #endregion
 
-        public async Task UpdateAllUserRoles(Dictionary<int, List<string>> foundList, List<string> exemptRoles, List<string> authCheckIgnoreRoles)
+        public async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
         {
             var discordGuild = GetGuild();
             var discordUsers = discordGuild.Users;
@@ -311,6 +311,62 @@ namespace ThunderED.API
                                 isInExempt = true;
                             }
                         }
+
+                        #region Get personalized foundList
+
+                        var groupsToCheck = new List<WebAuthGroup>();
+                        var tokenData = await SQLHelper.UserTokensGetEntry(Convert.ToInt64(characterID));
+                        if (!string.IsNullOrEmpty(tokenData?.GroupName))
+                        {
+                            //check specified group for roles
+                            var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == tokenData.GroupName).Value;
+                            if(group != null)
+                                groupsToCheck.Add(group);
+                        }
+
+                        if(!groupsToCheck.Any())
+                        {
+                            //check only non-ESI groups for roles
+                            groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a=> !a.ESICustomAuthRoles.Any()));
+                        }
+
+                        var foundList = new Dictionary<long, List<string>>();
+                        foreach (var group in groupsToCheck)
+                        {
+                            if (group.AllowedCorporations.Count > 0)
+                            {
+                                foreach (var c in group.AllowedCorporations)
+                                {
+                                    //add all roles
+                                    if(!long.TryParse(c.Key, out var key))
+                                        continue;
+                                    if (foundList.ContainsKey(key))
+                                    {
+                                        foundList[key].AddRange(c.Value);
+                                        foundList[key] = foundList[key].Distinct().ToList();
+                                    }
+                                    else foundList.Add(key, c.Value);
+                                }
+                            }
+
+                            if (group.AllowedAlliances.Count > 0)
+                            {
+                                foreach (var a in group.AllowedAlliances)
+                                {
+                                    if(!long.TryParse(a.Key, out var key))
+                                        continue;
+                                    if (foundList.ContainsKey(key))
+                                    {
+                                        foundList[key].AddRange(a.Value);
+                                        foundList[key] = foundList[key].Distinct().ToList();
+                                    }
+                                    else foundList.Add(key, a.Value);
+                                }
+                            }
+                        }
+                        #endregion
+
+
 
                         if (foundList.Count == 0)
                             isInExempt = true;

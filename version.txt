@@ -1,5 +1,22 @@
-## V1.2.4
+### V1.2.4
 + Fixed kills dupes on !rehash and improved rehash logic
++ Improved auth logic (look for Breaking Changes below)
++ Improved logging
++ Improved app data handling to support unified Int64 value format for identifiers
+
+### Breaking Changes
+
+WebAuthModule settings undergone following refactoring:
+- Removed **CorpIDList, AllianceIDList** and **memberRoles** params
+- Added **AllowedAlliances** and **AllowedCorporations** dictionaries with key corresponding to corp/ally ID and value to a list of Discord roles to assign upon successful auth
+This will now allow different corps and alliances to auth using a single button but receive different Discord roles based on their corp/ally ID.
+
+WARNING! Auth check logic has also been altered. Previously it could search for user corp/ally ID match in ANY auth group regardless of mode (preliminary or not). 
+Now it will first look if user have its auth group remembered in DB (has done auth with ESI permsission specified) and use this group data for check.
+If group hasn't been found (removed from file?) or user don't have token (has done auth without ESI permissions) it will search user corp/ally ID match in all auth groups without
+ESI permissions. If no corp/ally ID match found the user will be stripped of roles and will require proceed with new auth. 
+This is made to maintain check consistency between several different auth groups.
+CONCLUSION: maintain actual auth groups in your settings file
 
 ### V1.2.3
 + Fixed preliminary auth applicants removal upon expiration

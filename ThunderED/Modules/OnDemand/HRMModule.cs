@@ -46,7 +46,7 @@ namespace ThunderED.Modules.OnDemand
 
                     //have code
                     var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
-                    var characterId = result == null ? 0 : Convert.ToInt32(result[0]);
+                    var characterId = result == null ? 0 : Convert.ToInt64(result[0]);
 
 
                     if (result == null || await CheckAccess(characterId) == false)
@@ -104,7 +104,7 @@ namespace ThunderED.Modules.OnDemand
                         return true;
                     }
 
-                    var characterId = Convert.ToInt32(chId);
+                    var characterId = Convert.ToInt64(chId);
 
                         
                     //have charId - had to check it
@@ -450,7 +450,7 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("mail", "").Split('_');
                                 if (!int.TryParse(values[0], out var mailBodyId))
                                     return true;
-                                var inspectCharacterId = Convert.ToInt32(values[1]);
+                                var inspectCharacterId = Convert.ToInt64(values[1]);
                                 var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharacterId);
                                 var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                     Settings.WebServerModule.CcpAppSecret);
@@ -503,7 +503,7 @@ namespace ThunderED.Modules.OnDemand
             return false;
         }
 
-        private async Task<bool> CheckAccess(int characterId)
+        private async Task<bool> CheckAccess(long characterId)
         {
             var firstCheck = !Settings.HRMModule.UsersAccessList.Contains(characterId);
 

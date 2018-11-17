@@ -433,7 +433,7 @@ namespace ThunderED.Providers
             }
         }
 
-        public async Task SQLiteDataDeleteWhereIn(string table, string field, List<int> list, bool not)
+        public async Task SQLiteDataDeleteWhereIn(string table, string field, List<long> list, bool not)
         {
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
             using (var insertSQL = new SqliteCommand($"DELETE FROM {table} where {field} {(not? "not": null)} in ({string.Join(",", list)})", con))

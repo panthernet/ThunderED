@@ -52,7 +52,7 @@ namespace ThunderED.API
             return factions?.FirstOrDefault(a => a.faction_id == id);
         }
 
-        internal async Task<List<JsonClasses.CorporationHistoryEntry>> GetCharCorpHistory(string reason, int charId)
+        internal async Task<List<JsonClasses.CorporationHistoryEntry>> GetCharCorpHistory(string reason, object charId)
         {
             return await APIHelper.RequestWrapper<List<JsonClasses.CorporationHistoryEntry>>($"https://esi.tech.ccp.is/latest/characters/{charId}/corporationhistory/?datasource=tranquility&language={_language}", reason);
         }
@@ -151,7 +151,7 @@ namespace ThunderED.API
 
         internal async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
-            var system = await SQLHelper.GetSystemById(Convert.ToInt32(id));
+            var system = await SQLHelper.GetSystemById(Convert.ToInt64(id));
             if (system != null)
                 return system;
 
@@ -256,7 +256,7 @@ namespace ThunderED.API
         }
         #endregion
 
-        public async Task<List<JsonClasses.MailHeader>> GetMailHeaders(string reason, string id, string token, int lastMailId, List<int> labels, int[] senders)
+        public async Task<List<JsonClasses.MailHeader>> GetMailHeaders(string reason, string id, string token, long lastMailId, List<long> labels, long[] senders)
         {
             var authHeader = $"Bearer {token}";
             var lastIdText = lastMailId == 0 ? null : $"&last_mail_id={lastMailId}";
@@ -305,13 +305,13 @@ namespace ThunderED.API
         }
         
 
-        public async Task<JsonClasses.Mail> GetMail(string reason, object id, string token, int mailId)
+        public async Task<JsonClasses.Mail> GetMail(string reason, object id, string token, long mailId)
         {
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.Mail>($"https://esi.tech.ccp.is/latest/characters/{id}/mail/{mailId}/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
-        public async Task<JsonClasses.MailLabelData> GetMailLabels(string reason, string id, string token)
+        public async Task<JsonClasses.MailLabelData> GetMailLabels(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.MailLabelData>($"https://esi.tech.ccp.is/latest/characters/{id}/mail/labels/?datasource=tranquility&language={_language}", reason, authHeader);

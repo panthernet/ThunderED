@@ -60,7 +60,7 @@ namespace ThunderED.Modules
                             await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                             return true;
                         }
-                        var characterId = Convert.ToInt32(result[0]);
+                        var characterId = Convert.ToInt64(result[0]);
                         await SQLHelper.SQLiteDataInsertOrUpdate("timersAuth", new Dictionary<string, object> {{"id", result[0]}, {"time", DateTime.Now}});
                         //redirect to timers
                         var iid = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
@@ -94,7 +94,7 @@ namespace ThunderED.Modules
                             await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                             return true;
                         }
-                        var characterId = Convert.ToInt32(Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
+                        var characterId = Convert.ToInt64(Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
 
                         var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                         if (rChar == null)
@@ -152,7 +152,7 @@ namespace ThunderED.Modules
                         return false;
                     }
 
-                    var characterId = Convert.ToInt32(Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
+                    var characterId = Convert.ToInt64(Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
 
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                     if (rChar == null)
@@ -220,7 +220,7 @@ namespace ThunderED.Modules
             return false;
         }
 
-        private async Task WriteCorrectResponce(HttpListenerResponse response, bool isEditor, int characterId)
+        private async Task WriteCorrectResponce(HttpListenerResponse response, bool isEditor, long characterId)
         {
             var baseCharId = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
             var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
@@ -264,12 +264,12 @@ namespace ThunderED.Modules
             await WebServerModule.WriteResponce(text, response);
         }
 
-        private bool CheckAccess(int characterId, JsonClasses.CharacterData rChar, out bool isEditor)
+        private bool CheckAccess(long characterId, JsonClasses.CharacterData rChar, out bool isEditor)
         {
             var authgroups = Settings.TimersModule.AccessList;
-            var accessCorps = new List<int>();
-            var accessAlliance = new List<int>();
-            var accessChars = new List<int>();
+            var accessCorps = new List<long>();
+            var accessAlliance = new List<long>();
+            var accessChars = new List<long>();
             isEditor = false;
             bool skip = false;
 
@@ -294,9 +294,9 @@ namespace ThunderED.Modules
             }
 
             authgroups = Settings.TimersModule.EditList;
-            var editCorps = new List<int>();
-            var editAlliance = new List<int>();
-            var editChars = new List<int>();
+            var editCorps = new List<long>();
+            var editAlliance = new List<long>();
+            var editChars = new List<long>();
             bool skip2 = false;
 
             //check for Discord admins

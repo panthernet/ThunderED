@@ -164,7 +164,7 @@ namespace ThunderED.Helpers
             await Provider?.CleanupNotificationsList();
         }
 
-        public static async Task SQLiteDataDeleteWhereIn(string table, string field, List<int> list, bool not)
+        public static async Task SQLiteDataDeleteWhereIn(string table, string field, List<long> list, bool not)
         {
             await Provider?.SQLiteDataDeleteWhereIn(table, field, list, not);
 
@@ -175,31 +175,31 @@ namespace ThunderED.Helpers
             return await Provider?.RunScript(file);
         }
 
-        public static async Task<List<JsonClasses.SystemName>> GetSystemsByConstellation(int constellationId)
+        public static async Task<List<JsonClasses.SystemName>> GetSystemsByConstellation(long constellationId)
         {
             return (await SelectData("mapSolarSystems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
             {
                 {"constellationID", constellationId}
             })).Select(item => new JsonClasses.SystemName
             {
-                system_id = Convert.ToInt32(item[0]),
-                constellation_id = Convert.ToInt32(item[1]),
-                DB_RegionId = Convert.ToInt32(item[2]),
+                system_id = Convert.ToInt64(item[0]),
+                constellation_id = Convert.ToInt64(item[1]),
+                DB_RegionId = Convert.ToInt64(item[2]),
                 name = Convert.ToString(item[3]),
                 security_status = (float)Convert.ToDouble(item[4]),
             }).ToList();
         }
 
-        public static async Task<List<JsonClasses.SystemName>> GetSystemsByRegion(int regionId)
+        public static async Task<List<JsonClasses.SystemName>> GetSystemsByRegion(long regionId)
         {
             return (await SelectData("mapSolarSystems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
             {
                 {"regionID", regionId}
             })).Select(item => new JsonClasses.SystemName
             {
-                system_id = Convert.ToInt32(item[0]),
-                constellation_id = Convert.ToInt32(item[1]),
-                DB_RegionId = Convert.ToInt32(item[2]),
+                system_id = Convert.ToInt64(item[0]),
+                constellation_id = Convert.ToInt64(item[1]),
+                DB_RegionId = Convert.ToInt64(item[2]),
                 name = Convert.ToString(item[3]),
                 security_status = (float)Convert.ToDouble(item[4]),
             }).ToList();
@@ -221,21 +221,21 @@ namespace ThunderED.Helpers
                 .Select(item =>
                 {                    
                     var i = new JsonClasses.NullCampaignItem().FromJson((string) item[0]);
-                    i.LastAnnounce = Convert.ToInt32(item[1]);
+                    i.LastAnnounce = Convert.ToInt64(item[1]);
                     return i;
                 }).ToList();
         }
 
-        public static async Task<JsonClasses.SystemName> GetSystemById(int id)
+        public static async Task<JsonClasses.SystemName> GetSystemById(long id)
         {
             return (await SelectData("mapSolarSystems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
             {
                 {"solarSystemID", id}
             })).Select(item => new JsonClasses.SystemName
             {
-                system_id = Convert.ToInt32(item[0]),
-                constellation_id = Convert.ToInt32(item[1]),
-                DB_RegionId = Convert.ToInt32(item[2]),
+                system_id = Convert.ToInt64(item[0]),
+                constellation_id = Convert.ToInt64(item[1]),
+                DB_RegionId = Convert.ToInt64(item[2]),
                 name = Convert.ToString(item[3]),
                 security_status = (float)Convert.ToDouble(item[4]),
             }).FirstOrDefault();
@@ -298,7 +298,7 @@ namespace ThunderED.Helpers
         }
 
         #region pendingUsers table
-        public static async Task<bool> PendingUsersIsEntryActive(int characterId)
+        public static async Task<bool> PendingUsersIsEntryActive(long characterId)
         {
             return !string.IsNullOrEmpty(await SQLiteDataQuery<string>("pendingUsers", "characterID", "characterID", characterId.ToString()));
         }
@@ -309,7 +309,7 @@ namespace ThunderED.Helpers
                  await SQLiteDataQuery<string>("pendingUsers", "active", "authString", code) == "1";
         }
 
-        public static async Task<string> PendingUsersGetCode(int characterId)
+        public static async Task<string> PendingUsersGetCode(long characterId)
         {
             return await SQLiteDataQuery<string>("pendingUsers", "authString", "characterID", characterId.ToString());
         }
@@ -325,9 +325,9 @@ namespace ThunderED.Helpers
         }
 
         
-        public static async Task<int> PendingUsersGetCharacterId(string code)
+        public static async Task<long> PendingUsersGetCharacterId(string code)
         {
-            return await SQLiteDataQuery<int>("pendingUsers", "characterID", "authString", code);
+            return await SQLiteDataQuery<long>("pendingUsers", "characterID", "authString", code);
 
         }
         
@@ -335,17 +335,17 @@ namespace ThunderED.Helpers
 
         #region userTokens table
 
-        public static async Task<string> UserTokensGetGroupName(int characterId)
+        public static async Task<string> UserTokensGetGroupName(long characterId)
         {
             return await SQLiteDataQuery<string>("userTokens", "groupName", "characterID", characterId);
         }
         public static async Task<string> UserTokensGetGroupName(string code)
         {
             var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
-            return await UserTokensGetGroupName(Convert.ToInt32(characterId));
+            return await UserTokensGetGroupName(Convert.ToInt64(characterId));
         }
 
-        public static async Task<string> UserTokensGetName(int characterId)
+        public static async Task<string> UserTokensGetName(long characterId)
         {
             return await SQLiteDataQuery<string>("userTokens", "characterName", "characterID", characterId);
         }
@@ -353,15 +353,15 @@ namespace ThunderED.Helpers
         public static async Task<string> UserTokensGetName(string code)
         {
             var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
-            return await UserTokensGetName(Convert.ToInt32(characterId));
+            return await UserTokensGetName(Convert.ToInt64(characterId));
         }
 
-        public static async Task<bool> UserTokensIsAuthed(int characterId)
+        public static async Task<bool> UserTokensIsAuthed(long characterId)
         {
             return await SQLiteDataQuery<int>("userTokens", "authState", "characterID", characterId) == 2;
         }
 
-        public static async Task<bool> UserTokensIsConfirmed(int characterId)
+        public static async Task<bool> UserTokensIsConfirmed(long characterId)
         {
             return await SQLiteDataQuery<int>("userTokens", "authState", "characterID", characterId) == 1;
         }
@@ -369,10 +369,10 @@ namespace ThunderED.Helpers
         public static async Task<bool> UserTokensIsConfirmed(string code)
         {
             var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
-            return await UserTokensIsConfirmed(Convert.ToInt32(characterId));
+            return await UserTokensIsConfirmed(Convert.ToInt64(characterId));
         }
 
-        public static async Task<bool> UserTokensIsPending(int characterId)
+        public static async Task<bool> UserTokensIsPending(long characterId)
         {
             return await SQLiteDataQuery<int>("userTokens", "authState", "characterID", characterId) == 0;
         }
@@ -380,19 +380,19 @@ namespace ThunderED.Helpers
         public static async Task<bool> UserTokensIsPending(string code )
         {
             var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
-            return await UserTokensIsPending(Convert.ToInt32(characterId));
+            return await UserTokensIsPending(Convert.ToInt64(characterId));
         }
 
-        public static async Task<bool> UserTokensExists(int characterId)
+        public static async Task<bool> UserTokensExists(long characterId)
         {
-            return await SQLiteDataQuery<int>("userTokens", "characterID", "characterID", characterId) != 0;
+            return await SQLiteDataQuery<long>("userTokens", "characterID", "characterID", characterId) != 0;
         }
 
 
         public static async Task<bool> UserTokensExists(string code)
         {
             var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
-            return await UserTokensExists(Convert.ToInt32(characterId));
+            return await UserTokensExists(Convert.ToInt64(characterId));
 
         }
 
@@ -400,7 +400,7 @@ namespace ThunderED.Helpers
         {
             var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
 
-            await SQLiteDataUpdate("userTokens", "discordUserId", authorId, "characterID", Convert.ToInt32(characterId));
+            await SQLiteDataUpdate("userTokens", "discordUserId", authorId, "characterID", Convert.ToInt64(characterId));
         }
 
         public static async Task<List<object[]>> UserTokensGetConfirmedDataList()
@@ -411,7 +411,7 @@ namespace ThunderED.Helpers
             });
         }
 
-        public static async Task UserTokensSetAuthState(int characterId, int value)
+        public static async Task UserTokensSetAuthState(long characterId, int value)
         {
             await SQLiteDataUpdate("userTokens", "authState", value, "characterID", characterId);
         }
@@ -419,7 +419,7 @@ namespace ThunderED.Helpers
         public static async Task UserTokensSetAuthState(string code, int value)
         {
             var characterId = await SQLiteDataQuery<string>("pendingUsers", "characterID", "authString", code);
-            await SQLiteDataUpdate("userTokens", "authState", value, "characterID", Convert.ToInt32(characterId));
+            await SQLiteDataUpdate("userTokens", "authState", value, "characterID", Convert.ToInt64(characterId));
         }
         
         public static async Task<bool> UserTokensHasDiscordId(string code)
@@ -436,7 +436,7 @@ namespace ThunderED.Helpers
             {
                 list.Add(new UserTokenEntity
                 {
-                    CharacterId = Convert.ToInt32(d[0]),
+                    CharacterId = Convert.ToInt64(d[0]),
                     CharacterName = d[1].ToString(),
                     DiscordUserId = Convert.ToUInt64(d[2]),
                     RefreshToken = d[3].ToString(),

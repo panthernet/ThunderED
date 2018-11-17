@@ -11,34 +11,34 @@ namespace ThunderED.Json
         //ESI Classes
         public class CharacterID
         {
-            public int[] character { get; set; }
+            public long[] character { get; set; }
         }
 
         public class SearchInventoryType
         {
-            public int[] inventory_type { get; set; }
+            public long[] inventory_type { get; set; }
         }
 
 
         public class CorpIDLookup
         {
-            public int[] corporation { get; set; }
+            public long[] corporation { get; set; }
         }
 
         public class IDLookUp
         {
-            public int[] idList;
+            public long[] idList;
         }
 
 
         public class SystemIDSearch
         {
-            public int[] solar_system { get; set; }
+            public long[] solar_system { get; set; }
         }
 
         public class SearchName
         {
-            public int id { get; set; }
+            public long id { get; set; }
             public string name { get; set; }
             public string category { get; set; }
         }
@@ -54,19 +54,19 @@ namespace ThunderED.Json
         public class Planet
         {
             public string name;
-            public int planet_id { get; set; }
-            public int[] moons { get; set; }
+            public long planet_id { get; set; }
+            public long[] moons { get; set; }
         }
 
         public class Dogma_Attributes
         {
-            public int attribute_id { get; set; }
+            public long attribute_id { get; set; }
             public float value { get; set; }
         }
 
         public class Dogma_Effects
         {
-            public int effect_id { get; set; }
+            public long effect_id { get; set; }
             public bool is_default { get; set; }
         }
 
@@ -77,9 +77,9 @@ namespace ThunderED.Json
 
         internal class Notification
         {
-            public int notification_id;
+            public long notification_id;
             public string type;
-            public int sender_id;
+            public long sender_id;
             public string sender_type;
             public string timestamp;
             public bool is_read;
@@ -89,7 +89,7 @@ namespace ThunderED.Json
         internal class StructureData
         {
             public string name;
-            public int solar_system_id;
+            public long solar_system_id;
         }
 
         internal class ConstellationData
@@ -107,16 +107,16 @@ namespace ThunderED.Json
 
         public class MailRecipient
         {
-            public int recipient_id;
+            public long recipient_id;
             public string recipient_type;
         }
 
         public class MailHeader
         {
-            public int from;
+            public long from;
             public bool is_read;
-            public int[] labels;
-            public int mail_id;
+            public long[] labels;
+            public long mail_id;
             public MailRecipient[] recipients;
             public string subject;
             public string timestamp;
@@ -128,8 +128,8 @@ namespace ThunderED.Json
         public class Mail
         {
             public string body;
-            public int from;
-            public int[] labels;
+            public long from;
+            public long[] labels;
             public bool read;
             public string subject;
             public string timestamp;
@@ -144,7 +144,7 @@ namespace ThunderED.Json
         public class MailLabel
         {
             public string color;
-            public int label_id;
+            public long label_id;
             public string name;
             public int unread_count;
         }
@@ -156,12 +156,12 @@ namespace ThunderED.Json
 
         public class IncursionData
         {
-            public int constellation_id;
-            public int faction_id;
+            public long constellation_id;
+            public long faction_id;
             public bool has_boss;
-            public List<int> infested_solar_systems = new List<int>();
+            public List<long> infested_solar_systems = new List<long>();
             public float influence;
-            public int staging_solar_system_id;
+            public long staging_solar_system_id;
             public string state;
             public string type;
         }
@@ -176,26 +176,26 @@ namespace ThunderED.Json
         public class NullCampaignItem
         {
             public float attackers_score;
-            public int campaign_id;
-            public int constellation_id;
-            public int defender_id;
+            public long campaign_id;
+            public long constellation_id;
+            public long defender_id;
             public float defender_score;
             public string event_type;
-            public int solar_system_id;
+            public long solar_system_id;
             public string start_time;
             public long structure_id;
 
             [JsonIgnore]
             public DateTimeOffset Time => DateTimeOffset.Parse(start_time);
 
-            [JsonIgnore] public int LastAnnounce;
+            [JsonIgnore] public long LastAnnounce;
         }
 
         internal class FWSystemStat
         {
             public string contested;
-            public int occupier_faction_id;
-            public int owner_faction_id;
+            public long occupier_faction_id;
+            public long owner_faction_id;
             public long solar_system_id;
             public int victory_points;
             public int victory_points_threshold;
@@ -203,7 +203,7 @@ namespace ThunderED.Json
 
         public class FWStats
         {
-            public int faction_id;
+            public long faction_id;
             public FWStatsKills kills;
 
             public int pilots;
@@ -219,8 +219,8 @@ namespace ThunderED.Json
 
         public class CorporationHistoryEntry
         {
-            public int corporation_id;
-            public int record_id;
+            public long corporation_id;
+            public long record_id;
             public string start_date;
             public bool is_deleted;
 

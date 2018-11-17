@@ -161,42 +161,53 @@
   },
   "WebAuthModule": {
     "authCheckIntervalMinutes": 480,
-    "exemptDiscordRoles": [ "Admins", "Role2" ],
+    "exemptDiscordRoles": [ "Admins" ],
     "AuthCheckIgnoreRoles":  [ "CustomDiscordRoleToSkipOnAuthCheck" ],
     "authReportChannel": 0,
     "//": "Channels where !auth command is allowed. Empty - everywhere",
     "comAuthChannels":  [],
-    "DefaultAuthGroup": "group1",
+    "DefaultAuthGroup": "Mode1",
     "enforceCorpTickers": true,
     "enforceCharName": true,
     "authGroups": {
-      "General": {
-        "CorpIDList": [],
-        "AllianceIDList": [],
-        "memberRoles": ["ExactDiscordRoleName"],
-        "authRoles": ["Admins","Admin"],
-        "PreliminaryAuthMode": false
-      },
-      "group1": {
-        "CorpIDList": [],
-        "AllianceIDList": [],
-        "memberRoles": ["ExactDiscordRoleName"],
-        "authRoles": [],
+      "Mode1": {
+        "AllowedCorporations":{
+          "98499225": ["Member", "TestRole2"],
+          "98499226": ["Ally"]
+        },
+        "AllowedAlliances":{
+          "99003557": ["Member"],
+          "99003558": ["Ally", "Dummy"]
+        },
+        "authRoles": ["Admins"],
         "PreliminaryAuthMode": false,
         "AppInvalidationInHours": 0,
         "ESICustomAuthRoles": [],
-        "CustomButtonText": null,
+        "CustomButtonText": "General Auth",
+        "DefaultMention":  ""
+      },
+      "Mode2": {
+        "AllowedCorporations": {},
+        "AllowedAlliances":{
+          "99003599": ["Member"]
+        },
+        "authRoles": [],
+        "PreliminaryAuthMode": false,
+        "AppInvalidationInHours": 0,
+        "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
+        "CustomButtonText": "General Token Auth",
         "DefaultMention":  ""
 
       },
-      "group2": {
-        "CorpIDList": [],
-        "AllianceIDList": [],
-        "memberRoles": ["ExactDiscordRoleName"],
-        "authRoles": ["AuthorizedDiscordRoleName"],
+      "Mode3": {
+        "AllowedCorporations": {},
+        "AllowedAlliances":{
+          "99003599": ["Member"]
+        },
+        "authRoles": ["Admins"],
         "PreliminaryAuthMode": true,
-        "AppInvalidationInHours": 48,
-        "CustomButtonText":  "Custom Discord Auth", 
+        "AppInvalidationInHours": 480,
+        "CustomButtonText":  "Preliminary Auth", 
         "DefaultMention":  "",
         "ESICustomAuthRoles": [
           "esi-assets.read_assets.v1",

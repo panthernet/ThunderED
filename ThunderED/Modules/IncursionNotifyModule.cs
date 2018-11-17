@@ -93,7 +93,7 @@ namespace ThunderED.Modules
 
         private async Task ReportIncursion(JsonClasses.IncursionData incursion, JsonClasses.ConstellationData c, IMessageChannel channel)
         {
-            var result = await SQLHelper.SQLiteDataQuery<int>("incursions", "constId", "constId", incursion.constellation_id);
+            var result = await SQLHelper.SQLiteDataQuery<long>("incursions", "constId", "constId", incursion.constellation_id);
             //skip existing incursion report
             var isUpdate = result > 0 && Settings.IncursionNotificationModule.ReportIncursionStatusAfterDT;
             if(!isUpdate && result > 0)

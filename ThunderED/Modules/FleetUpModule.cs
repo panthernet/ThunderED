@@ -111,9 +111,9 @@ namespace ThunderED.Modules
 
                     foreach (var operation in result.Data)
                     {
-                        var lastAnnounce = await SQLHelper.SQLiteDataQuery<int>("fleetup", "announce", "id", operation.Id.ToString());
+                        var lastAnnounce = await SQLHelper.SQLiteDataQuery<long>("fleetup", "announce", "id", operation.Id.ToString());
 
-                        if (operation.OperationId > Convert.ToInt32(lastopid) && announcePost)
+                        if (operation.OperationId > Convert.ToInt64(lastopid) && announcePost)
                         {
                             await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
                             await SQLHelper.SQLiteDataUpdate("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");

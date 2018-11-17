@@ -39,7 +39,7 @@ namespace ThunderED.Modules
 
                     var systemIds = systems.Select(a => a.system_id);
                     var campaigns = allCampaigns.Where(a => systemIds.Contains(a.solar_system_id));
-                    var existIds = (await SQLHelper.SelectData("nullCampaigns", new [] {"campaignId"}, new Dictionary<string, object> {{"groupKey", groupName}})).Select(a=> Convert.ToInt32(a[0])).ToList();
+                    var existIds = (await SQLHelper.SelectData("nullCampaigns", new [] {"campaignId"}, new Dictionary<string, object> {{"groupKey", groupName}})).Select(a=> Convert.ToInt64(a[0])).ToList();
                     campaigns = campaigns.Where(a => !existIds.Contains(a.campaign_id));
 
                     foreach (var campaign in campaigns)

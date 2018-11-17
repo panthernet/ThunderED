@@ -114,7 +114,7 @@ namespace ThunderED.Modules
                         continue;
                     }
 
-                    var lastMailId = await SQLHelper.SQLiteDataQuery<int>("mail", "mailId", "id", group.Id.ToString());
+                    var lastMailId = await SQLHelper.SQLiteDataQuery<long>("mail", "mailId", "id", group.Id.ToString());
                     var prevMailId = lastMailId;
                     var labelsData= await APIHelper.ESIAPI.GetMailLabels(Reason, group.Id.ToString(), token);
                     if(labelsData == null) continue;

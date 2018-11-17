@@ -19,7 +19,7 @@ namespace ThunderED.Modules
     public class NotificationModule: AppModuleBase
     {
         private DateTime _nextNotificationCheck = DateTime.FromFileTime(0);
-        private int _lastNotification;
+        private long _lastNotification;
 
         public override LogCat Category => LogCat.Notification;
 
@@ -65,6 +65,8 @@ namespace ThunderED.Modules
             }
         }
 
+        private Dictionary<string, bool> _warnings = new Dictionary<string, bool>();
+
         #region Notifications
         private async Task NotificationFeed()
         {
@@ -101,7 +103,12 @@ namespace ThunderED.Modules
                             await LogHelper.LogInfo($"Checking characterID:{group.CharacterID}", Category, LogToConsole, false);
                         else
                         {
-                            await LogHelper.LogInfo($"Failed to get refresh token for {groupPair.Key} group!", Category, LogToConsole);
+                            if (!_warnings.ContainsKey(groupPair.Key))
+                            {
+                                _warnings.Add(groupPair.Key, true);
+                                await LogHelper.LogWarning($"Failed to get refresh token for {groupPair.Key} group!", Category, LogToConsole);
+                            }
+
                             continue;
                         }
 
@@ -115,7 +122,7 @@ namespace ThunderED.Modules
                         foreach (var filterPair in group.Filters)
                         {
                             var filter = filterPair.Value;
-                            _lastNotification = await SQLHelper.SQLiteDataQuery<int>("notificationsList", "id", new Dictionary<string, object>{
+                            _lastNotification = await SQLHelper.SQLiteDataQuery<long>("notificationsList", "id", new Dictionary<string, object>{
                                 {"groupName", groupPair.Key},
                                 {"filterName", filterPair.Key}
                                 });
@@ -882,7 +889,7 @@ namespace ThunderED.Modules
                     }
 
                     var characterID = result[0];
-                    var numericCharId = Convert.ToInt32(characterID);
+                    var numericCharId = Convert.ToInt64(characterID);
 
                     if (string.IsNullOrEmpty(characterID))
                     {
@@ -939,7 +946,7 @@ namespace ThunderED.Modules
 
         }
 
-        private async Task SetLastNotificationId(int id, string groupName = null, string filterName = null)
+        private async Task SetLastNotificationId(long id, string groupName = null, string filterName = null)
         {
             bool isNew = _lastNotification == 0;
             _lastNotification = id;

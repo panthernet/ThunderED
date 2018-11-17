@@ -266,7 +266,7 @@ namespace ThunderED.Modules.Sub
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=matahari";
         }
 
-        public static string GetHRMInspectURL(int id, string authCode)
+        public static string GetHRMInspectURL(long id, string authCode)
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
@@ -306,22 +306,22 @@ namespace ThunderED.Modules.Sub
             ModuleConnectors.Clear();
         }
 
-        public static string GetHRM_AjaxLysListURL(int inspectCharId, string authCode)
+        public static string GetHRM_AjaxLysListURL(long inspectCharId, string authCode)
         {
             return $"hrm.php?data=lys{inspectCharId}&id={authCode}&state=matahari&page=";
         }
 
-        public static string GetHRM_AjaxContractsListURL(int inspectCharId, string authCode)
+        public static string GetHRM_AjaxContractsListURL(long inspectCharId, string authCode)
         {
             return $"hrm.php?data=contracts{inspectCharId}&id={authCode}&state=matahari&page=";
         }
 
-        public static string GetHRM_AjaxContactsListURL(int inspectCharId, string authCode)
+        public static string GetHRM_AjaxContactsListURL(long inspectCharId, string authCode)
         {
             return $"hrm.php?data=contacts{inspectCharId}&id={authCode}&state=matahari&page=";
         }
 
-        public static string GetHRM_AjaxSkillsListURL(int inspectCharId, string authCode)
+        public static string GetHRM_AjaxSkillsListURL(long inspectCharId, string authCode)
         {
             return $"hrm.php?data=skills{inspectCharId}&id={authCode}&state=matahari&page=";
         }

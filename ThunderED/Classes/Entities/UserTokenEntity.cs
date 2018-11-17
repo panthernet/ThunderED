@@ -6,7 +6,7 @@ namespace ThunderED.Classes.Entities
 {
     public class UserTokenEntity
     {
-        public int CharacterId { get; set; }
+        public long CharacterId { get; set; }
         public string CharacterName { get; set; }
         public ulong DiscordUserId { get; set; }
         public string RefreshToken { get; set; }

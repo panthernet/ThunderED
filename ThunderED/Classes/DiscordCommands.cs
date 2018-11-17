@@ -228,7 +228,7 @@ namespace ThunderED.Classes
                 try
                 {
                     string code;
-                    int characterId;
+                    long characterId;
                     if (!data.All(char.IsDigit))
                     {
                         code = data;
@@ -237,7 +237,7 @@ namespace ThunderED.Classes
                     else
                     {
                         code = null;
-                        characterId = Convert.ToInt32(data);
+                        characterId = Convert.ToInt64(data);
                     }
                     code = code ?? await SQLHelper.PendingUsersGetCode(characterId);
 
