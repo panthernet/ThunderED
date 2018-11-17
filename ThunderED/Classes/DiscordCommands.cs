@@ -162,11 +162,7 @@ namespace ThunderED.Classes
             }
        }
 
-        [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
-        public async Task Help()
-        {
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpText")}");
-        }
+
 
         [Command("web", RunMode = RunMode.Async), Summary("Displays web site address")]
         public async Task Web()
@@ -190,7 +186,11 @@ namespace ThunderED.Classes
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
                 else
                 {
-                    var grp = !string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) ? SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a=> a.Key == SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) : SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault();
+                    var grp =
+                        !string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) &&
+                        SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
+                            ? SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
+                            : SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault();
                     if (grp.Value != null)
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl(grp.Value.ESICustomAuthRoles, grp.Key)}");
@@ -335,6 +335,12 @@ namespace ThunderED.Classes
             }
 
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
+        }
+
+        [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
+        public async Task Help()
+        {
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpText")}");
         }
 
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
@@ -611,13 +617,7 @@ namespace ThunderED.Classes
             {
                 try
                 {
-                    var authString = $"http://{SettingsManager.Settings.WebServerModule.WebExternalIP}:{SettingsManager.Settings.WebServerModule.WebExternalPort}/auth.php";
-                    if (!string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup))
-                    {
-                        var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == SettingsManager.Settings.WebAuthModule.DefaultAuthGroup).Value;
-                        if(group != null)
-                            authString = WebServerModule.GetCustomAuthUrl(group.ESICustomAuthRoles, SettingsManager.Settings.WebAuthModule.DefaultAuthGroup);
-                    }
+                    var authString = WebServerModule.GetAuthPageUrl();
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
                         LM.Get("authInvite", authString), true);
                 }

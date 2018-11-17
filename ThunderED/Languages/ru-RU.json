@@ -9,7 +9,7 @@
   "LowPower": "Низкая Мощность",
   "StructureWentLowPower": "Цитадель {0} в режиме {1}!",
   "helpText":
-    "Приват команды: ** !auth | !authnotify | !web | !evetime | !stat | !about | !char | !corp | !jita | !amarr | !dodixie | !rens | !pc | !tq**\nВведите !help ИМЯ КОМАНДЫ боту в приват для подробной информации о команде",
+    "Приват команды: ** !auth | !authnotify | !web | !evetime | !stat | !about | !char | !corp | !jita | !amarr | !dodixie | !rens | !pc | !tq | !fwstats | !turl | !timers**\nКоманды админа: !rehash | !reauth\nВведите !help ИМЯ КОМАНДЫ боту в приват для подробной информации о команде",
   "helpHelp": "не tcp мое ip!",
   "helpAuth":
     "Команда *auth* регистрирует Вас под персонажем EVE Online, отправьте команду *!auth* сообщением для подробной информации",

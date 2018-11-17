@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json.Linq;
@@ -186,7 +187,25 @@ namespace ThunderED.Modules
             {
                 if (request.Url.LocalPath == "/auth.php" || request.Url.LocalPath == $"{extPort}/auth.php"|| request.Url.LocalPath == $"{port}/auth.php")
                 {
-                    var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{callbackurl}", callbackurl).Replace("{client_id}", Settings.WebServerModule.CcpAppClientId)
+                    var prms = request.Url.Query.TrimStart('?').Split('&');
+                    
+                    if (prms.Length == 0 || prms[0].Split('=').Length == 0 || string.IsNullOrEmpty(prms[0]))
+                    {
+                        await WebServerModule.WriteResponce(await WebServerModule.Get404Page(), response);
+                        return true;
+                    }
+
+                    var groupName = HttpUtility.UrlDecode(prms[0].Split('=')[1]);//string.IsNullOrEmpty(Settings.WebAuthModule.DefaultAuthGroup) || !Settings.WebAuthModule.AuthGroups.ContainsKey(Settings.WebAuthModule.DefaultAuthGroup) ? Settings.WebAuthModule.AuthGroups.Keys.FirstOrDefault() : Settings.WebAuthModule.DefaultAuthGroup;
+                    if (!Settings.WebAuthModule.AuthGroups.ContainsKey(groupName))
+                    {
+                        await WebServerModule.WriteResponce(await WebServerModule.Get404Page(), response);
+                        return true;
+                    }
+
+                    var grp = Settings.WebAuthModule.AuthGroups[groupName];
+                    var url = grp.ESICustomAuthRoles.Any() ? WebServerModule.GetCustomAuthUrl(grp.ESICustomAuthRoles, groupName) : WebServerModule.GetAuthUrl();
+
+                    var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{authUrl}", url)
                         .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{body}", LM.Get("authTemplateInv")).Replace("{backText}", LM.Get("backText"));
                     await WebServerModule.WriteResponce(text, response);
                     return true;

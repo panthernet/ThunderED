@@ -3,12 +3,16 @@
 + Improved auth logic (look for Breaking Changes below)
 + Improved logging
 + Improved app data handling to support unified Int64 value format for identifiers
++ Improved and fixed auth buttons to always point to **auth.php** page with correct auth url according to button group
++ Updated !help command text for missing commands
 
 ### Breaking Changes
 
 WebAuthModule settings undergone following refactoring:
 - Removed **CorpIDList, AllianceIDList** and **memberRoles** params
 - Added **AllowedAlliances** and **AllowedCorporations** dictionaries with key corresponding to corp/ally ID and value to a list of Discord roles to assign upon successful auth
+- !auth command currently displays web site main page and is similar to !web command
+- General Discord auth button name now can be changed using the **CustomButtonText** parameter
 This will now allow different corps and alliances to auth using a single button but receive different Discord roles based on their corp/ally ID.
 
 WARNING! Auth check logic has also been altered. Previously it could search for user corp/ally ID match in ANY auth group regardless of mode (preliminary or not). 

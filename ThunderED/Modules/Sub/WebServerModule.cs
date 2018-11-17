@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Modules.OnDemand;
@@ -85,18 +86,28 @@ namespace ThunderED.Modules.Sub
                             //auth controls
                             var authText = string.Empty;
                             //auth
-                            if (SettingsManager.Settings.Config.ModuleAuthWeb)
+                            if (Settings.Config.ModuleAuthWeb)
                             {
-                                var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Where(a => a.Value.PreliminaryAuthMode || a.Value.ESICustomAuthRoles.Any()).ToList();
+                                //var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Where(a => a.Value.PreliminaryAuthMode || a.Value.ESICustomAuthRoles.Any()).ToList();
                                 //no default auth if there are no default groups
-                                if (groups.Count != SettingsManager.Settings.WebAuthModule.AuthGroups.Count)
-                                    authText = $"<a href=\"{authUrl}\" class=\"btn btn-info btn-block {(!Settings.Config.ModuleAuthWeb ? "disabled" : "")}\" role=\"button\">{LM.Get("authButtonDiscordText")}</a>";
+                               // if (groups.Count != SettingsManager.Settings.WebAuthModule.AuthGroups.Count)
+                                //    authText = $"<a href=\"{authUrl}\" class=\"btn btn-info btn-block {(!Settings.Config.ModuleAuthWeb ? "disabled" : "")}\" role=\"button\">{LM.Get("authButtonDiscordText")}</a>";
 
-                                foreach (var @group in groups)
+                                foreach (var @group in SettingsManager.Settings.WebAuthModule.AuthGroups)
                                 {
-                                    var customAuthString = GetCustomAuthUrl(group.Value.ESICustomAuthRoles, group.Key);
-                                    var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
-                                    authText += $"\n<a href=\"{customAuthString}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>";
+                                    if (group.Value.ESICustomAuthRoles.Any())
+                                    {
+                                        //var customAuthString = GetCustomAuthUrl(group.Value.ESICustomAuthRoles, group.Key);
+                                        var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Key)}";
+                                        var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
+                                        authText += $"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>";
+                                    }
+                                    else
+                                    {
+                                        var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Key)}";
+                                        var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
+                                        authText += $"<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>";
+                                    }
                                 }
                             }
 
@@ -153,10 +164,7 @@ namespace ThunderED.Modules.Sub
 
                         if (!result)
                         {
-                            await WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", "404 Not Found!")
-                                .Replace("{header}", LM.Get("authTemplateHeader"))
-                                .Replace("{body}", LM.Get("WebRequestUnexpected"))
-                                .Replace("{backText}", LM.Get("backText")), response);
+                            await WriteResponce(await Get404Page(), response);
                         }
                     }
                     catch (Exception ex)
@@ -179,15 +187,23 @@ namespace ThunderED.Modules.Sub
             }
         }
 
+        internal static async Task<string> Get404Page()
+        {
+            return File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", "404 Not Found!")
+                .Replace("{header}", LM.Get("authTemplateHeader"))
+                .Replace("{body}", LM.Get("WebRequestUnexpected"))
+                .Replace("{backText}", LM.Get("backText"));
+        }
 
 
-        public static string GetAccessDeniedPage(string header, string message, string description = null)
+        internal static string GetAccessDeniedPage(string header, string message, string description = null)
         {
             return File.ReadAllText(SettingsManager.FileTemplateAuth3)
                 .Replace("{message}", message)
                 .Replace("{header}", header)
                 .Replace("{header2}", header)
                 .Replace("{description}", description)
+                .Replace("{body}", "")
                 .Replace("{backText}", LM.Get("backText"));
         }
 
@@ -231,6 +247,22 @@ namespace ThunderED.Modules.Sub
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-mail.read_mail.v1+esi-mail.send_mail.v1+esi-mail.organize_mail.v1&state=12";
+        }
+
+        internal static string GetAuthPageUrl()
+        {
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            return $"http://{extIp}:{extPort}/";
+        }
+
+        internal static string GetAuthUrl()
+        {
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&amp;redirect_uri={callbackurl}&amp;client_id={clientID}";
         }
 
         internal static string GetCustomAuthUrl(List<string> permissions, string group = null)
