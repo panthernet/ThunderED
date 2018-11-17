@@ -559,6 +559,8 @@ namespace ThunderED.Classes
                 }
 
                 SettingsManager.UpdateSettings();
+                WebServerModule.ModuleConnectors.Clear();
+                ZKillLiveFeedModule.Queryables.Clear();
                 TickManager.LoadModules();
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, "REHASH COMPLETED", true);
             }

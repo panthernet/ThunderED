@@ -170,6 +170,13 @@
     "enforceCorpTickers": true,
     "enforceCharName": true,
     "authGroups": {
+      "General": {
+        "CorpIDList": [],
+        "AllianceIDList": [],
+        "memberRoles": ["ExactDiscordRoleName"],
+        "authRoles": ["Admins","Admin"],
+        "PreliminaryAuthMode": false
+      },
       "group1": {
         "CorpIDList": [],
         "AllianceIDList": [],

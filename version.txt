@@ -1,3 +1,6 @@
+## V1.2.4
++ Fixed kills dupes on !rehash and improved rehash logic
+
 ### V1.2.3
 + Fixed preliminary auth applicants removal upon expiration
 + Fixed inability to add timers
