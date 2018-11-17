@@ -161,7 +161,7 @@ namespace ThunderED.Modules
             }
             finally
             {
-                IsRunning = false;
+                IsRunning = false; 
             }
         }
 
