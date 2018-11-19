@@ -97,6 +97,26 @@ namespace TED_ConfigEditor.Classes
             return false;
         }
 
+        
+        public static bool IsList(this Type valueType)
+        {
+            if (valueType != null)
+            {
+                if (valueType.IsGenericType)
+                {
+                    var baseType = valueType.GetGenericTypeDefinition();
+                    if (baseType == typeof(List<>))
+                    {
+                        //Type[] argTypes = baseType.GetGenericArguments();
+                        // now process the values
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public static object GetValueFromPair(this object value)
         {
             return value.GetType().GetProperty("Value").GetValue(value);

@@ -32,11 +32,19 @@ namespace TED_ConfigEditor.Controls.Modules
         {
             Title = null;
             var curItem = Item;
-            if (getType.IsKeyValuePair())
+            if (getType.IsList())
             {
-                getType = getType.ExtractValueTypeFromPair();
-                curItem = Item.GetValueFromPair();
+              //  getType = getType.ExtractValueTypeFromPair();
             }
+            else
+            {
+                if (getType.IsKeyValuePair())
+                {
+                    getType = getType.ExtractValueTypeFromPair();
+                    curItem = Item.GetValueFromPair();
+                }
+            }
+
 
             var makeme = Type.GetType("TED_ConfigEditor.Controls.Modules.ConfigModuleBase`1").MakeGenericType(getType);
             Settings = (IModuleControl)Activator.CreateInstance(makeme, new object[] {curItem, container});

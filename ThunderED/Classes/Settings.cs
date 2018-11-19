@@ -1309,10 +1309,10 @@ namespace ThunderED.Classes
 #if EDITOR
         [Comment("Dictionary containing text corporation ID and the list of Discord roles which to assign on successful auth. Additive with AllowedAlliances.")]
        // [Required]
-        public Dictionary<string, List<string>> AllowedCorporations { get; set; } = new Dictionary<string, List<string>>();
+        public Dictionary<string, ObservableCollection<string>> AllowedCorporations { get; set; } = new Dictionary<string, ObservableCollection<string>>();
         [Comment("Dictionary containing text alliance ID and the list of Discord roles which to assign on successful auth.  Additive with AllowedCorporations.")]
        // [Required]
-        public Dictionary<string, List<string>> AllowedAlliances { get; set; } = new Dictionary<string, List<string>>();
+        public Dictionary<string, ObservableCollection<string>> AllowedAlliances { get; set; } = new Dictionary<string, ObservableCollection<string>>();
 
         //[Comment("The list of exact Discord role names to assign")]
        // [Required]

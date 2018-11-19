@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -76,11 +77,26 @@ namespace TED_ConfigEditor.Controls.Modules
         public void GenerateFields()
         {
             if(ContainerControl == null || Settings == null) return;
+
             var props = Settings.GetType().GetProperties().Where(a=> a.CanWrite);
             var label = new Label { FontWeight =  FontWeights.Bold};
             var labelMinWidth = props.Max(a => MeasureString(a.Name, label).Width) + 10;
 
             var configurableModuleNames = MainWindow.Instance.GetAvailableModuleNames().Select(a=> a.ToLower());
+
+            if (Settings.GetType().UnderlyingSystemType.Name == "ObservableCollection`1" || Settings.GetType().UnderlyingSystemType.Name == "List`1")
+            {                
+                var d = new DockPanel();
+                DockPanel.SetDock(d, Dock.Top);
+
+               // var property = Settings.GetType()
+               //     .GetProperties().FirstOrDefault(p => p.Name=="Item");
+
+                var property = this.GetType().GetProperty("Settings");
+                GenerateListBoxInstance(property, d);
+                ContainerControl.Children.Add(d);
+                return;
+            }
 
             foreach (var property in props)
             {
@@ -171,29 +187,55 @@ namespace TED_ConfigEditor.Controls.Modules
                 {
                     //var makeme = Type.GetType("TED_ConfigEditor.Controls.ListBoxControlBase`1").MakeGenericType(property.PropertyType.GenericTypeArguments);
 
-                    if (Activator.CreateInstance(typeof(ListBoxControlBase)) is ListBoxControlBase el)
-                    {
-                        el.IsDictionary = typeof(IDictionary).IsAssignableFrom(property.PropertyType);
-                        el.IsValidatableCollection = typeof(IList).IsAssignableFrom(property.PropertyType) && typeof(IValidatable).IsAssignableFrom(property.PropertyType.GenericTypeArguments.Last());
-                        el.ItemType = el.IsDictionary ? property.PropertyType.GenericTypeArguments.LastOrDefault() : property.PropertyType.GenericTypeArguments.FirstOrDefault();
-                        var dp = el.GetType()
-                            .GetFields(BindingFlags.Static | BindingFlags.Public).FirstOrDefault(p => p.FieldType == typeof(DependencyProperty) && p.Name=="ItemsListProperty");
-                      //  var name = dp.FieldType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-                       //     .Single(t => t.Name == "Name");
-                        
-                        var myBinding = new Binding//(name.GetValue(dp))
-                        {
-                            Source = Settings,
-                            Path = new PropertyPath(property.Name),
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-                        };
-
-                        el.SetBinding((DependencyProperty)dp.GetValue(el), myBinding);
-                        d.Children.Add(el);
-                    }
+                    GenerateDictionaryBoxInstance(property, d);
                 }
                 ContainerControl.Children.Add(d);
+            }
+        }
+
+        public void GenerateDictionaryBoxInstance(PropertyInfo property, DockPanel d)
+        {
+            if (Activator.CreateInstance(typeof(ListBoxControlBase)) is ListBoxControlBase el)
+            {
+                el.IsDictionary = typeof(IDictionary).IsAssignableFrom(property.PropertyType);
+                el.IsValidatableCollection = typeof(IList).IsAssignableFrom(property.PropertyType) && typeof(IValidatable).IsAssignableFrom(property.PropertyType.GenericTypeArguments.Last());
+                el.ItemType = el.IsDictionary ? property.PropertyType.GenericTypeArguments.LastOrDefault() : property.PropertyType.GenericTypeArguments.FirstOrDefault();
+                var dp = el.GetType()
+                    .GetFields(BindingFlags.Static | BindingFlags.Public).FirstOrDefault(p => p.FieldType == typeof(DependencyProperty) && p.Name=="ItemsListProperty");
+                        
+                var myBinding = new Binding//(name.GetValue(dp))
+                {
+                    Source = Settings,
+                    Path = new PropertyPath(property.Name),
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                };
+
+                el.SetBinding((DependencyProperty)dp.GetValue(el), myBinding);
+                d.Children.Add(el);
+            }
+        }
+
+        public void GenerateListBoxInstance(PropertyInfo property, DockPanel d)
+        {
+            if (Activator.CreateInstance(typeof(ListBoxControlBase)) is ListBoxControlBase el)
+            {
+                el.IsDictionary = false;
+                el.IsValidatableCollection = typeof(IList).IsAssignableFrom(property.PropertyType) && typeof(IValidatable).IsAssignableFrom(property.PropertyType.GenericTypeArguments.Last());
+                el.ItemType = property.PropertyType.GenericTypeArguments.FirstOrDefault();
+                var dp = el.GetType()
+                    .GetFields(BindingFlags.Static | BindingFlags.Public).FirstOrDefault(p => p.FieldType == typeof(DependencyProperty) && p.Name=="ItemsListProperty");
+                        
+                var myBinding = new Binding//(name.GetValue(dp))
+                {
+                    Source = this,
+                    Path = new PropertyPath(property.Name),
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                };
+
+                el.SetBinding((DependencyProperty)dp.GetValue(el), myBinding);
+                d.Children.Add(el);
             }
         }
     }

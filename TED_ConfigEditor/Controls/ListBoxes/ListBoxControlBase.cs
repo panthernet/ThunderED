@@ -93,10 +93,11 @@ namespace TED_ConfigEditor.Controls
             list.ForEach(item=>
             {
                 if (!IsDictionary)
-                    ((IList)ItemsList).Remove(item);
-                else 
-                    ((IDictionary)ItemsList).Remove(item.GetKeyFromPair());              
+                    ((IList) ItemsList).Remove(item);
+                else
+                    ((IDictionary) ItemsList).Remove(item.GetKeyFromPair());
             });
+            OnPropertyChanged2("ItemsList");
         }
 
         protected async void AddCommandMethod(object obj)
@@ -104,6 +105,7 @@ namespace TED_ConfigEditor.Controls
             if (IsValidatableCollection)
             {
                 ((IList) ItemsList).Add(Activator.CreateInstance(ItemType));
+                OnPropertyChanged2("ItemsList");
                 return;
             }
 
@@ -125,6 +127,7 @@ namespace TED_ConfigEditor.Controls
                     else ((IDictionary) ItemsList).Add(res, Activator.CreateInstance(ItemType));
                 }else
                     ((IList) ItemsList).Add(Convert.ChangeType(res, ItemType));
+                OnPropertyChanged2("ItemsList");
             }
             catch
             {
@@ -148,6 +151,11 @@ namespace TED_ConfigEditor.Controls
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected virtual void OnPropertyChanged2(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
