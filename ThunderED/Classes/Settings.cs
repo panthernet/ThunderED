@@ -445,8 +445,8 @@ namespace ThunderED.Classes
         [Comment("Link to a tiny url representation which is created manually and overrides standard URL for !turl command")]
         public string TinyUrl { get; set; }
 
-        [Comment("Time format for new timers input CAPS SENSITIVE. Default: DD.MM.YYYY hh:mm")]
-        public string TimeInputFormat { get; set; } = "DD.MM.YYYY hh:mm";
+        [Comment("Time format for new timers input CAPS SENSITIVE. Default: DD.MM.YYYY HH:mm")]
+        public string TimeInputFormat { get; set; } = "DD.MM.YYYY HH:mm";
         [Comment("Optional Discord defult mention for timer report")]
         public string DefaultMention { get; set; }
 

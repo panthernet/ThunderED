@@ -568,11 +568,12 @@ namespace ThunderED.Classes
                 WebServerModule.ModuleConnectors.Clear();
                 ZKillLiveFeedModule.Queryables.Clear();
                 TickManager.LoadModules();
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, "REHASH COMPLETED", true);
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ":white_check_mark: REHASH COMPLETED", true);
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx("rehash", ex);
+                await LogHelper.LogEx("Rehash command error", ex);
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ":no_entry_sign: REHASH FAILED :no_entry_sign: Check your config file for errors! (https://jsonformatter.org/)", true);
 
             }
         }

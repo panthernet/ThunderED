@@ -106,7 +106,7 @@
     "grantEditRolesToDiscordAdmins": true,
     "announces": [60, 10],
     "announceChannel": 0,
-    "TimeInputFormat":  "DD.MM.YYYY hh:mm", 
+    "TimeInputFormat":  "DD.MM.YYYY HH:mm", 
     "DefaultMention":  "@everyone", 
     "accessList": {
       "UnitedFleet":{

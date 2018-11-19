@@ -4,6 +4,7 @@
 + Improved logging
 + Improved app data handling to support unified Int64 value format for identifiers
 + Improved and fixed auth buttons to always point to **auth.php** page with correct auth url according to button group
++ Improved config error check during startup and rehash
 + Updated !help command text for missing commands
 
 ### Breaking Changes

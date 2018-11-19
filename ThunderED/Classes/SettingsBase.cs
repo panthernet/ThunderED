@@ -30,6 +30,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using ThunderED.Helpers;
 
@@ -181,6 +182,16 @@ namespace ThunderED.Classes
 
                                 if(settings == null)
                                     throw new Exception($"Config file errors: \n{listErrors}");
+                                if (listErrors.Length > 0)
+                                {
+                                    LogHelper.LogWarning($"Possible config errors: \n{listErrors}").GetAwaiter().GetResult();
+                                }
+
+                                var msg = IsValidJson(File.ReadAllText(filePath));
+                                if (!string.IsNullOrEmpty(msg))
+                                {
+                                    throw new Exception($"Config error: {msg}\n You can always validate your config on https://jsonformatter.org/ or similar service!");
+                                }
                             }
 
                             return settings;
@@ -190,6 +201,34 @@ namespace ThunderED.Classes
             }
             LogHelper.LogError($"Failed to load configuration for type {typeName} from settings.json (File not found?). Default config loaded.").GetAwaiter().GetResult();
             return new T();
+        }
+
+        private static string IsValidJson(string strInput)
+        {
+            strInput = strInput.Trim();
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
+                (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
+            {
+                try
+                {
+                    var obj = JToken.Parse(strInput);
+                    return null;
+                }
+                catch (JsonReaderException jex)
+                {
+                    //Exception in parsing json
+                    return jex.Message;
+                }
+                catch (Exception ex) //some other exception
+                {
+                    Console.WriteLine(ex.ToString());
+                    return ex.Message;
+                }
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
