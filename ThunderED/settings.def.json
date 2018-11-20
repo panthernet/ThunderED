@@ -283,6 +283,7 @@
               "StructureFuelAlert", 
               "StructureOnline", 
               "StructureAnchoring", 
+              "StructureUnanchoring",
               "StructureDestroyed",
               "OrbitalAttacked",
               "AllAnchoringMsg",
