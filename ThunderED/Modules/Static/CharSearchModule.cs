@@ -59,6 +59,7 @@ namespace ThunderED.Modules.Static
             var allianceData = await APIHelper.ESIAPI.GetAllianceData("", characterData.alliance_id);
 
             var alliance = allianceData?.name ?? LM.Get("None");
+            var allianceTicker = allianceData != null ? $"[{allianceData?.ticker}]" : "";
             var lastSeenSystem = systemData?.name ?? LM.Get("None");
             var lastSeenShip = lastShip?.name ?? LM.Get("None");
             var lastSeenTime = lastSeen == DateTime.MinValue ? LM.Get("longTimeAgo") : $"{lastSeen}";
@@ -96,8 +97,8 @@ namespace ThunderED.Modules.Static
                         .WithName($"{characterData.name}");
                 })
                 .AddField(LM.Get("Additionaly"), "\u200b")
-                .AddInlineField($"{LM.Get("Corporation")}:", $"{corporationData.name}")
-                .AddInlineField($"{LM.Get("Alliance")}:", $"{alliance}")
+                .AddInlineField($"{LM.Get("Corporation")}:", $"{corporationData.name}[{corporationData.ticker}]")
+                .AddInlineField($"{LM.Get("Alliance")}:", $"{alliance}{allianceTicker} ")
                 .AddInlineField($"{LM.Get("HasBeenSeen")}:", $"{lastSeenSystem}")
                 .AddInlineField($"{LM.Get("OnShip")}:", $"{lastSeenShip}")
                 .AddInlineField($"{LM.Get("Seen")}:", $"{lastSeenTime}")

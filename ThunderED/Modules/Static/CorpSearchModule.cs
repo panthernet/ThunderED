@@ -15,7 +15,7 @@ namespace ThunderED.Modules.Static
         {
             var reason = LogCat.CorpSearch.ToString();
             var corpIDLookup = await APIHelper.ESIAPI.SearchCorporationId(reason, name);
-            if (corpIDLookup == null)
+            if (corpIDLookup == null || corpIDLookup.corporation == null)
             {
                 await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("corpNotFound"));
                 return;
@@ -23,15 +23,17 @@ namespace ThunderED.Modules.Static
             var corporationData = await APIHelper.ESIAPI.GetCorporationData(reason, corpIDLookup.corporation[0]);
             var allianceData = await APIHelper.ESIAPI.GetAllianceData(reason, corporationData.alliance_id);
             var ceo = await APIHelper.ESIAPI.GetCharacterData(reason, corporationData.ceo_id);
-            var alliance = allianceData?.name ?? "None";
+            var alliance = allianceData?.name ?? LM.Get("None");
+            var allianceTicker = allianceData != null ? $"[{allianceData?.ticker}]" : "";
 
+            //TODO ADD TICKERS!!!! TO CHAR ALSO!
             
 
             var lite = await APIHelper.ZKillAPI.GetLiteCorporationData(corpIDLookup.corporation[0]);
             var zkillContent = await APIHelper.ZKillAPI.GetCorporationData(corpIDLookup.corporation[0], !lite.hasSupers);
 
             var textNames = $"{LM.Get("Corporation")}:\n{LM.Get("Alliance")}:\n{LM.Get("CEO")}\n{LM.Get("Pilots")}";
-            var textValues = $"{corporationData.name}\n{alliance}\n[{ceo.name}](https://zkillboard.com/character/{corporationData.ceo_id}/)\n{corporationData.member_count}";
+            var textValues = $"{corporationData.name}[{corporationData.ticker}]\n{alliance}{allianceTicker}\n[{ceo.name}](https://zkillboard.com/character/{corporationData.ceo_id}/)\n{corporationData.member_count}";
 
             var supersCount = zkillContent.hasSupers ? zkillContent.supers.titans?.data.Length : 0;
             var titansCount = zkillContent.hasSupers ? zkillContent.supers.supercarriers?.data.Length : 0;
