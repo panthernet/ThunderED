@@ -27,19 +27,22 @@ namespace ThunderED.Modules.Static
 
             
 
-            var zkillContent = await APIHelper.ZKillAPI.GetCorporationData(corpIDLookup.corporation[0]);
+            var lite = await APIHelper.ZKillAPI.GetLiteCorporationData(corpIDLookup.corporation[0]);
+            var zkillContent = await APIHelper.ZKillAPI.GetCorporationData(corpIDLookup.corporation[0], !lite.hasSupers);
 
-            var textNames = $"{LM.Get("Corporation")}:\n{LM.Get("Alliance")}:\n{ceo.name}\n{corporationData.member_count}";
-            var textValues = $"{corporationData.name}\n{alliance}\n[{LM.Get("CEO")}](https://zkillboard.com/character/{corporationData.ceo_id}/)\n{LM.Get("Pilots")}";
+            var textNames = $"{LM.Get("Corporation")}:\n{LM.Get("Alliance")}:\n{LM.Get("CEO")}\n{LM.Get("Pilots")}";
+            var textValues = $"{corporationData.name}\n{alliance}\n[{ceo.name}](https://zkillboard.com/character/{corporationData.ceo_id}/)\n{corporationData.member_count}";
 
-            var supersCount = zkillContent.hasSupers ? zkillContent.supers.FirstOrDefault(a=>a.title == "Titans")?.data.Length : 0;
-            var titansCount = zkillContent.hasSupers ? zkillContent.supers.FirstOrDefault(a => a.title == "Supercarriers")?.data.Length : 0;
+            var supersCount = zkillContent.hasSupers ? zkillContent.supers.titans?.data.Length : 0;
+            var titansCount = zkillContent.hasSupers ? zkillContent.supers.supercarriers?.data.Length : 0;
             var system = zkillContent.topLists.FirstOrDefault(a => a.type == "solarSystem")?.values.FirstOrDefault()?.solarSystemName ?? "???";
             var textPvpNames = $"{LM.Get("Dangerous")}:\n{LM.Get("FleetCHance2")}:\n{LM.Get("corpSoloKills")}\n{LM.Get("corpTotalKills")}\n{LM.Get("corpKnownSupers")}\n{LM.Get("corpActiveSystem")}";
             var textPvpValues = $"{zkillContent.dangerRatio}%\n{zkillContent.gangRatio}%\n{zkillContent.soloKills}\n{zkillContent.shipsDestroyed}\n{supersCount}/{titansCount}\n{system}";
 
 
             var desc = await MailModule.PrepareBodyMessage(corporationData.description);
+            if (desc.Length > 1024)
+                desc = desc.Substring(0, 1023);
             var builder = new EmbedBuilder()
                 .WithDescription(
                     $"[zKillboard](https://zkillboard.com/corporation/{corpIDLookup.corporation[0]}) / [EVEWho](https://evewho.com/corp/{HttpUtility.UrlEncode(corporationData.name)})")

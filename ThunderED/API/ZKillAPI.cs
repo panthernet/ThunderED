@@ -83,9 +83,36 @@ namespace ThunderED.API
 		
         }
 
-        public async Task<JsonZKill.CorpStats> GetCorporationData(long id)
+        public async Task<JsonZKill.CorpStats> GetCorporationData(long id, bool nosupers)
         {
+            if (nosupers)
+            {
+                var res =  await APIHelper.RequestWrapper<JsonZKill.CorpStatsNoSupers>($"https://zkillboard.com/api/stats/corporationID/{id}/", _reason);
+                return new JsonZKill.CorpStats
+                {
+                    hasSupers = false,
+                    topLists = res.topLists,
+                    shipsDestroyed = res.shipsDestroyed,
+                    allTimeSum = res.allTimeSum,
+                    dangerRatio = res.dangerRatio,
+                    gangRatio = res.gangRatio,
+                    id = res.id,
+                    info = res.info,
+                    iskDestroyed = res.iskDestroyed,
+                    iskLost = res.iskLost,
+                    shipsLost = res.shipsLost,
+                    soloKills = res.soloKills,
+                    soloLosses = res.soloLosses,
+                    topIskKillIDs = res.topIskKillIDs
+                };
+            }
             return await APIHelper.RequestWrapper<JsonZKill.CorpStats>($"https://zkillboard.com/api/stats/corporationID/{id}/", _reason);
+        }
+
+        public async Task<JsonZKill.CorpStats> GetLiteCorporationData(long id)
+        {
+            var res =  await APIHelper.RequestWrapper<JsonZKill.CorpStatsLite>($"https://zkillboard.com/api/stats/corporationID/{id}/", _reason);
+            return new JsonZKill.CorpStats { hasSupers = res.hasSupers};
         }
     }
 }
