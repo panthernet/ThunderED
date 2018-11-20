@@ -54,7 +54,7 @@ namespace ThunderED.Modules.Static
                 }
             }
 
-            var lastShip = await APIHelper.ESIAPI.GetTypeId("", lastShipType);
+            var lastShip = lastShipType == LM.Get("Unknown") ? null : await APIHelper.ESIAPI.GetTypeId("", lastShipType);
             var lastSeen = zkillLast.killmail_time;
             var allianceData = await APIHelper.ESIAPI.GetAllianceData("", characterData.alliance_id);
 

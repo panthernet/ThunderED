@@ -1,5 +1,6 @@
 ### V1.2.4
 + Fixed kills dupes on !rehash and improved rehash logic
++ Fixed !char command on chars with no history
 + Improved auth logic (look for Breaking Changes below)
 + Improved logging
 + Improved app data handling to support unified Int64 value format for identifiers
