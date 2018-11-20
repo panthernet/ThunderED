@@ -134,7 +134,7 @@ namespace ThunderED.Modules.OnDemand
             {
                 sb.AppendLine("<tr>");
                 sb.AppendLine($"  <th scope=\"row\">{counter++}</th>");
-                sb.AppendLine($"  <td><a href=\"http://www.zkillboard.com/corporation/{entry.corporation_id}\">{entry.CorpName}</a>[{entry.CorpTicker}]{(entry.IsNpcCorp ? " (npc)" : null)}{(entry.is_deleted ? " (closed)" : null)}</td>");
+                sb.AppendLine($"  <td><a href=\"https://zkillboard.com/corporation/{entry.corporation_id}\">{entry.CorpName}</a>[{entry.CorpTicker}]{(entry.IsNpcCorp ? " (npc)" : null)}{(entry.is_deleted ? " (closed)" : null)}</td>");
                 sb.AppendLine($"  <td>{entry.Date.ToShortDateString()}</td>");
                 sb.AppendLine($"  <td>{entry.Days}</td>");
                 sb.AppendLine("</tr>");

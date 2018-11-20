@@ -83,5 +83,9 @@ namespace ThunderED.API
 		
         }
 
+        public async Task<JsonZKill.CorpStats> GetCorporationData(long id)
+        {
+            return await APIHelper.RequestWrapper<JsonZKill.CorpStats>($"https://zkillboard.com/api/stats/corporationID/{id}/", _reason);
+        }
     }
 }

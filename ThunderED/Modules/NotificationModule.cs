@@ -292,7 +292,7 @@ namespace ThunderED.Modules
                                                     .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
                                                     .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_OrbitalAttacked",
                                                         struc?.name, feederCorp?.name))
-                                                        .WithUrl($"http://www.zkillboard.com/character/{GetData("aggressorID", data)}"))
+                                                        .WithUrl($"https://zkillboard.com/character/{GetData("aggressorID", data)}"))
                                                     .AddInlineField(LM.Get("Location"), $"{systemName} - {planet?.name ?? LM.Get("Unknown")}")
                                                     .AddInlineField(LM.Get("Aggressor"), aggText)
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
@@ -321,7 +321,7 @@ namespace ThunderED.Modules
                                                     .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
                                                     .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_StructureUnderAttack",
                                                         structureType == null ? LM.Get("structure").ToLower() : structureType.name))
-                                                        .WithUrl($"http://www.zkillboard.com/character/{aggCharId}"))
+                                                        .WithUrl($"https://zkillboard.com/character/{aggCharId}"))
                                                     .AddInlineField(LM.Get("System"), systemName)
                                                     .AddInlineField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"))
                                                     .AddInlineField(LM.Get("Aggressor"), aggText) //.WithUrl(")
@@ -707,8 +707,8 @@ namespace ThunderED.Modules
                                                     : new Color(0x00ff00);
 
                                                 var url = isAllianceDecl
-                                                    ? $"http://www.zkillboard.com/alliance/{declaredById}"
-                                                    : $"http://www.zkillboard.com/corporation/{declaredById}";
+                                                    ? $"https://zkillboard.com/alliance/{declaredById}"
+                                                    : $"https://zkillboard.com/corporation/{declaredById}";
 
                                                 builder = new EmbedBuilder()
                                                     .WithColor(color)
@@ -734,7 +734,7 @@ namespace ThunderED.Modules
                                                     .WithColor(new Color(0xff0000))
                                                     .WithThumbnailUrl(Settings.Resources.ImgWarAssist)
                                                     .WithAuthor(author => author.WithName(LM.Get("AllyJoinedWarAggressorMsg", ally, defender))
-                                                        .WithUrl( $"http://www.zkillboard.com/alliance/{allyID}"))
+                                                        .WithUrl( $"https://zkillboard.com/alliance/{allyID}"))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
                                                 embed = builder.Build();
@@ -772,7 +772,7 @@ namespace ThunderED.Modules
                                                     .WithThumbnailUrl(Settings.Resources.ImgWarAssist)
                                                     .WithAuthor(author =>
                                                         author.WithName(LM.Get("AllyJoinedWarDefenderMsg", allyStr, defenderStr, agressorStr))
-                                                            .WithUrl( $"http://www.zkillboard.com/alliance/{allyID}"))
+                                                            .WithUrl( $"https://zkillboard.com/alliance/{allyID}"))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
                                                 embed = builder.Build();
@@ -795,7 +795,7 @@ namespace ThunderED.Modules
                                                     .WithThumbnailUrl(Settings.Resources.ImgWarAssist)
                                                     .WithAuthor(author =>
                                                         author.WithName(LM.Get("AllyJoinedWarAllyMsg", allyStr2, defenderStr2, agressorStr2))
-                                                            .WithUrl( $"http://www.zkillboard.com/alliance/{allyID}"))
+                                                            .WithUrl( $"https://zkillboard.com/alliance/{allyID}"))
                                                     .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                     .WithTimestamp(timestamp);
                                                 embed = builder.Build();
