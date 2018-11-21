@@ -26,9 +26,6 @@ namespace ThunderED.Modules.Static
             var alliance = allianceData?.name ?? LM.Get("None");
             var allianceTicker = allianceData != null ? $"[{allianceData?.ticker}]" : "";
 
-            //TODO ADD TICKERS!!!! TO CHAR ALSO!
-            
-
             var lite = await APIHelper.ZKillAPI.GetLiteCorporationData(corpIDLookup.corporation[0]);
             var zkillContent = await APIHelper.ZKillAPI.GetCorporationData(corpIDLookup.corporation[0], !lite.hasSupers);
 
@@ -45,6 +42,7 @@ namespace ThunderED.Modules.Static
             var desc = await MailModule.PrepareBodyMessage(corporationData.description);
             if (desc.Length > 1024)
                 desc = desc.Substring(0, 1023);
+            desc = string.IsNullOrEmpty(desc) ? "-" : desc;
             var builder = new EmbedBuilder()
                 .WithDescription(
                     $"[zKillboard](https://zkillboard.com/corporation/{corpIDLookup.corporation[0]}) / [EVEWho](https://evewho.com/corp/{HttpUtility.UrlEncode(corporationData.name)})")
