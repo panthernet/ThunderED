@@ -135,7 +135,7 @@ namespace ThunderED.Modules
                         mails = mails.Where(a => a.mail_id > lastMailId).OrderBy(a=> a.mail_id).ToList();
                     else
                     {
-                        lastMailId = mails.LastOrDefault()?.mail_id ?? 0;
+                        lastMailId = mails.OrderBy(a=> a.mail_id).LastOrDefault()?.mail_id ?? 0;
                         mails.Clear();
                     }
 

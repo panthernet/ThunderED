@@ -525,6 +525,9 @@ namespace ThunderED.Providers
 
             var mail = string.IsNullOrEmpty(mailToken) ? await SQLiteDataQuery<string>("refreshTokens", "mail", "id", userId) : mailToken;
             var token = string.IsNullOrEmpty(notifyToken) ? await SQLiteDataQuery<string>("refreshTokens", "token", "id", userId) : notifyToken;
+            token = token ?? "";
+            mail = mail ?? "";
+
 
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
             using (var insertSQL = new SqliteCommand("INSERT OR REPLACE INTO refreshTokens (id, token, mail) VALUES(@id,@token,@mail)", con))

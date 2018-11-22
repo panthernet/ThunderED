@@ -2,6 +2,7 @@
 + Fixed kills dupes on !rehash and improved rehash logic
 + Fixed !char command on chars with no history
 + Fixed various ZKB redirect urls
++ Fixed Mail module printing old emails
 + Improved auth logic (look for Breaking Changes below)
 + Improved logging
 + Improved app data handling to support unified Int64 value format for identifiers
