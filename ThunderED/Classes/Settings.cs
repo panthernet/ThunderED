@@ -564,13 +564,9 @@ namespace ThunderED.Classes
         [Comment("Include private mail to this feed")]
         public bool IncludePrivateMail { get; set; }
 #if EDITOR
-        [Comment("List of in game EVE mail label names which will be used to mark and fetch mails")]
-        public ObservableCollection<string> Labels { get; set; } = new ObservableCollection<string>();
-        [Comment("List of 'FROM' character IDs to filter incoming mail")]
-        public ObservableCollection<long> Senders { get; set; } = new ObservableCollection<long>();
+        public ObservableDictionary<string, MailAuthFilter> Filters { get; set; } = new ObservableDictionary<string, MailAuthFilter>();
 #else
-        public List<string> Labels { get; set; } = new List<string>();
-        public List<long> Senders { get; set; } = new List<long>();
+        public Dictionary<string, MailAuthFilter> Filters { get; set; } = new Dictionary<string, MailAuthFilter>();
 #endif
         [Comment("Numeric Discord channel ID to post mail feed")]
         [Required]
@@ -578,6 +574,7 @@ namespace ThunderED.Classes
 
         [Comment("Optional Discord default mention for mail report")]
         public string DefaultMention { get; set; }
+
 
 #if EDITOR
         public override string this[string columnName]
@@ -588,10 +585,41 @@ namespace ThunderED.Classes
                 {
                     case nameof(Id):
                         return Id == 0 ? Compose(nameof(Id), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                    case nameof(Labels):
-                        return Labels.Count == 0 && Senders.Count == 0 ? Compose(nameof(Senders), "Labels or Senders must be specified!") : null;
                     case nameof(Channel):
                         return Channel == 0 ? Compose(nameof(Channel), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                }
+
+                return null;
+            }
+        }
+#endif
+    }
+
+    public class MailAuthFilter: ValidatableSettings
+    {
+#if EDITOR
+        [Comment("List of in game EVE mail label names which will be used to mark and fetch mails")]
+        public ObservableCollection<string> FilterLabels { get; set; } = new ObservableCollection<string>();
+        [Comment("List of 'FROM' character IDs to filter incoming mail")]
+        public ObservableCollection<long> FilterSenders { get; set; } = new ObservableCollection<long>();
+        [Comment("List of EVE MailList names to filter incoming mail")]
+        public ObservableCollection<string> FilterMailList { get; set; } = new ObservableCollection<string>();
+#else
+        public List<string> FilterLabels { get; set; } = new List<string>();
+        public List<long> FilterSenders { get; set; } = new List<long>();
+        public List<string> FilterMailList { get; set; } = new List<string>();
+#endif
+
+        
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(FilterLabels):
+                        return FilterLabels.Count == 0 && FilterSenders.Count == 0 && FilterMailList.Count == 0 ? Compose(nameof(FilterSenders), "Labels, MailLists or Senders must be specified!") : null;
                 }
 
                 return null;

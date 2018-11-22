@@ -480,5 +480,11 @@ namespace ThunderED.Json
             public long categoryId;
             public string groupName;
         }
+
+        public class MailList
+        {
+            public long mailing_list_id;
+            public string name;
+        }
     }
 }

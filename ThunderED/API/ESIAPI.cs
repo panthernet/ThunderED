@@ -256,15 +256,27 @@ namespace ThunderED.API
         }
         #endregion
 
-        public async Task<List<JsonClasses.MailHeader>> GetMailHeaders(string reason, string id, string token, long lastMailId, List<long> labels, long[] senders)
+        public async Task<List<JsonClasses.MailHeader>> GetMailHeaders(string reason, string id, string token, long lastMailId)
         {
+           // if (senders.Count == 0 && labels.Count == 0 && mailListsIds.Count == 0) return null;
             var authHeader = $"Bearer {token}";
             var lastIdText = lastMailId == 0 ? null : $"&last_mail_id={lastMailId}";
-            var mailLabels = labels == null || labels.Count == 0 ? null : $"&labels={string.Join("%2C", labels)}";
+            //var mailLabels = labels == null || labels.Count == 0 ? null : $"&labels={string.Join("%2C", labels)}";
 
             var data = await APIHelper.RequestWrapper<List<JsonClasses.MailHeader>>(
-                $"https://esi.tech.ccp.is/latest/characters/{id}/mail/?datasource=tranquility{lastIdText}{mailLabels}&language={_language}", reason, authHeader);
-            return senders == null || senders.Length == 0 || data == null ? data : data.Where(a=> senders.Contains(a.from)).ToList();
+                $"https://esi.tech.ccp.is/latest/characters/{id}/mail/?datasource=tranquility{lastIdText}&language={_language}", reason, authHeader);
+            return data;
+        }
+
+        public async Task<List<JsonClasses.MailList>> GetMailLists(string reason, long id, string token)
+        {
+            if (id == 0) return new List<JsonClasses.MailList>();
+            var authHeader = $"Bearer {token}";
+
+            var data = await APIHelper.RequestWrapper<List<JsonClasses.MailList>>(
+                $"https://esi.tech.ccp.is/latest/characters/{id}/mail/lists/?datasource=tranquility&language={_language}", reason, authHeader);
+
+            return data ?? new List<JsonClasses.MailList>();
         }
 
         public async Task<double> GetCharacterWalletBalance(string reason, object id, string token)
@@ -360,5 +372,7 @@ namespace ThunderED.API
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.SkillsData>($"https://esi.tech.ccp.is/latest/characters/{id}/skills/?datasource=tranquility&language={_language}", reason, authHeader);
         }
+
+
     }
 }

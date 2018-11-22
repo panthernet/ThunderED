@@ -93,13 +93,12 @@ namespace ThunderED.Modules
                 foreach(var groupPair in Settings.MailModule.AuthGroups)
                 {
                     var group = groupPair.Value;
-                    var terms = group.Labels;
                     if(group.Channel == 0)
                         continue;
                     var channel = group.Channel;
-
-                    if (group.Id == 0 || terms == null || terms.Count == 0) continue;
                     var charId = group.Id;
+
+                    if (group.Id == 0) continue; 
 
                     var rToken = await SQLHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", charId);
                     if (string.IsNullOrEmpty(rToken))
@@ -116,41 +115,61 @@ namespace ThunderED.Modules
 
                     var lastMailId = await SQLHelper.SQLiteDataQuery<long>("mail", "mailId", "id", group.Id.ToString());
                     var prevMailId = lastMailId;
-                    var labelsData= await APIHelper.ESIAPI.GetMailLabels(Reason, group.Id.ToString(), token);
-                    if(labelsData == null) continue;
-                    var searchLabels = labelsData.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received").ToList();
-                    var senders = group.Senders;
                     var includePrivate = group.IncludePrivateMail;
 
-                    if (senders.Count == 0 && (searchLabels.Count == 0 || terms.Count == 0))
+                    if (group.Filters.Values.All(a=> a.FilterSenders.Count == 0 && a.FilterLabels.Count == 0 && a.FilterMailList.Count == 0))
                     {
-                        await LogHelper.LogWarning($"Mail feed for user {group.Id} has no labels and senders configured or user has no required labels in-game!", Category);
+                        await LogHelper.LogWarning($"Mail feed for user {group.Id} has no labels, lists or senders configured!", Category);
                         continue;
                     }
 
-                    var labelIds = labelsData.labels.Where(a=> terms.Contains(a.name)).Select(a => a.label_id).ToList();
-                    var mails = (await APIHelper.ESIAPI.GetMailHeaders(Reason, group.Id.ToString(), token, 0, labelIds, senders.ToArray()));
-
+                    var labelsData = await APIHelper.ESIAPI.GetMailLabels(Reason, group.Id.ToString(), token);
+                    var searchLabels = labelsData?.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received").ToList() ?? new List<JsonClasses.MailLabel>();
+                    var mailLists = await APIHelper.ESIAPI.GetMailLists(Reason, group.Id, token);
+                    var mailsHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, group.Id.ToString(), token, 0);
+                    
                     if (lastMailId > 0)
-                        mails = mails.Where(a => a.mail_id > lastMailId).OrderBy(a=> a.mail_id).ToList();
+                        mailsHeaders = mailsHeaders.Where(a => a.mail_id > lastMailId).OrderBy(a=> a.mail_id).ToList();
                     else
                     {
-                        lastMailId = mails.OrderBy(a=> a.mail_id).LastOrDefault()?.mail_id ?? 0;
-                        mails.Clear();
+                        lastMailId = mailsHeaders.OrderBy(a=> a.mail_id).LastOrDefault()?.mail_id ?? 0;
+                        mailsHeaders.Clear();
                     }
 
-                    foreach (var mailHeader in mails)
+                    foreach (var mailHeader in mailsHeaders)
                     {
                         if(mailHeader.mail_id <= lastMailId) continue;
-                        if(!includePrivate && mailHeader.recipients.Count(a => a.recipient_id == charId) > 0) continue;
-
-                        var mail = await APIHelper.ESIAPI.GetMail(Reason, group.Id.ToString(), token, mailHeader.mail_id);
-                        var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
                         lastMailId = mailHeader.mail_id;
+                        if(!includePrivate && (mailHeader.recipients.Count(a => a.recipient_id == charId) > 0)) continue;
 
-                        await SendMailNotification(channel, mail, labelNames, group.DefaultMention);
+                        foreach (var filter in group.Filters.Values)
+                        {
+                            //filter by senders
+                            if(filter.FilterSenders.Count > 0 && !filter.FilterSenders.Contains(mailHeader.from))
+                                continue;
+                            //filter by labels
+                            var labelIds = searchLabels.Where(a=> filter.FilterLabels.Contains(a.name)).Select(a => a.label_id).ToList();
+                            if(labelIds.Count > 0 && !mailHeader.labels.Any(a=> labelIds.Contains(a)))
+                                continue;
+                            //filter by mail lists
+                            var mailListIds = filter.FilterMailList.Count > 0
+                                ? mailLists.Where(a => filter.FilterMailList.Any(b => a.name.Equals(b, StringComparison.OrdinalIgnoreCase))).Select(a => a.mailing_list_id).ToList()
+                                : new List<long>();
+                            if(mailListIds.Count > 0 && !mailHeader.recipients.Where(a=> a.recipient_type == "mailing_list").Any(a=> mailListIds.Contains(a.recipient_id)))
+                                continue;
 
+                            var mail = await APIHelper.ESIAPI.GetMail(Reason, group.Id.ToString(), token, mailHeader.mail_id);
+                           // var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
+                            var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.from);
+                            var from = sender?.name;
+                            var ml = mailHeader.recipients.FirstOrDefault(a => a.recipient_type == "mailing_list" && mailListIds.Contains(a.recipient_id));
+                            if (ml != null)
+                                from = $"{sender?.name}[{mailLists.First(a => a.mailing_list_id == ml.recipient_id).name}]";
+                            await SendMailNotification(channel, mail, from, group.DefaultMention);
+                            break;
+                        }
                     }
+     
                     if(prevMailId != lastMailId || lastMailId == 0)
                         await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", group.Id.ToString()}, {"mailId", lastMailId}});
                 }
@@ -165,19 +184,15 @@ namespace ThunderED.Modules
             }
         }
 
-        private async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string labelNames, string mention)
+        private async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string from, string mention)
         {
-            var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.from);
-
-            var labels = string.IsNullOrEmpty(labelNames) ? null : $"{LM.Get("mailLabels")}  {labelNames} | ";
-
             var stamp = DateTime.Parse(mail.timestamp).ToString(Settings.Config.ShortTimeFormat);
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(Settings.Resources.ImgMail)
                 .AddField($"{LM.Get("mailSubject")} {mail.subject}",  await PrepareBodyMessage(mail.body))
-                .WithFooter($"{labels}{LM.Get("mailDate")} {stamp}");
+                .WithFooter($"{LM.Get("mailDate")} {stamp}");
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
-            await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {LM.Get("mailMsgTitle", sender?.name)}", embed.Build()).ConfigureAwait(false);
+            await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {LM.Get("mailMsgTitle", from)}", embed.Build()).ConfigureAwait(false);
         }
 
         public static async Task<string> PrepareBodyMessage(string input)

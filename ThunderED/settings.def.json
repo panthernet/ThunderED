@@ -77,14 +77,24 @@
 
   "mailModule": {
     "checkIntervalInMinutes": 2,
-    "authGroups":{
-      "group1": {
-        "id": 0,
-        "labels": [ "discord" ],
-        "senders": [],
-        "includePrivateMail":  false, 
-        "channel": 0,
-        "DefaultMention": "" 
+    "AuthGroups": {
+      "VesNa": {
+        "Id": 0,
+        "IncludePrivateMail": true,
+        "Channel": 0,
+        "DefaultMention": "",
+        "Filters": {
+          "CorpMailFilter": {
+            "FilterLabels": ["[Corp]", "[Alliance]"],
+            "FilterSenders": [],
+            "FilterMailList": ["TestListVesna"]	
+          },
+          "MailListFilter": {
+            "FilterLabels": [],
+            "FilterSenders": [],
+            "FilterMailList": ["TestListVesna"]	
+          }
+        }
       }
     }
   },

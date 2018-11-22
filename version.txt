@@ -9,6 +9,7 @@
 + Improved and fixed auth buttons to always point to **auth.php** page with correct auth url according to button group
 + Improved config error check during startup and rehash
 + Improved !corp command
++ Improved mail parsing and filtering
 + Updated !help command text for missing commands
 
 ### Breaking Changes
@@ -26,6 +27,12 @@ If group hasn't been found (removed from file?) or user don't have token (has do
 ESI permissions. If no corp/ally ID match found the user will be stripped of roles and will require proceed with new auth. 
 This is made to maintain check consistency between several different auth groups.
 CONCLUSION: maintain actual auth groups in your settings file
+
+MailModule settings undergone following changes:
+ - Labels, Senders props removed
+ - Added Filters list with the underlying FilterLabels, FilterSenders and FilterMailList settings
+ - All data inside a single filter block will follow exclusive rules meaning it will only include mail passed through ALL specified filters
+ - It is now possible to specify mail list names in filtering
 
 ### V1.2.3
 + Fixed preliminary auth applicants removal upon expiration
