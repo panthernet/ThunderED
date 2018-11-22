@@ -87,12 +87,12 @@
           "CorpMailFilter": {
             "FilterLabels": ["[Corp]", "[Alliance]"],
             "FilterSenders": [],
-            "FilterMailList": ["TestListVesna"]	
+            "FilterMailList": ["TestList"]	
           },
           "MailListFilter": {
             "FilterLabels": [],
             "FilterSenders": [],
-            "FilterMailList": ["TestListVesna"]	
+            "FilterMailList": ["TestList"]	
           }
         }
       }
