@@ -81,18 +81,20 @@
       "VesNa": {
         "Id": 0,
         "IncludePrivateMail": true,
-        "Channel": 0,
+        "DefaultChannel": 0,
         "DefaultMention": "",
         "Filters": {
           "CorpMailFilter": {
             "FilterLabels": ["[Corp]", "[Alliance]"],
             "FilterSenders": [],
-            "FilterMailList": ["TestList"]	
+            "FilterMailList": ["TestList"],
+            "FeedChannel": 0	
           },
           "MailListFilter": {
             "FilterLabels": [],
             "FilterSenders": [],
-            "FilterMailList": ["TestList"]	
+            "FilterMailList": ["TestList"],
+            "FeedChannel": 0	
           }
         }
       }

@@ -93,9 +93,9 @@ namespace ThunderED.Modules
                 foreach(var groupPair in Settings.MailModule.AuthGroups)
                 {
                     var group = groupPair.Value;
-                    if(group.Channel == 0)
+                    if(group.DefaultChannel == 0)
                         continue;
-                    var channel = group.Channel;
+                    var defaultChannel = group.DefaultChannel;
                     var charId = group.Id;
 
                     if (group.Id == 0) continue; 
@@ -168,6 +168,7 @@ namespace ThunderED.Modules
                                 var ml = mailHeader.recipients.FirstOrDefault(a => a.recipient_type == "mailing_list" && mailListIds.Contains(a.recipient_id));
                                 if (ml != null)
                                     from = $"{sender?.name}[{mailLists.First(a => a.mailing_list_id == ml.recipient_id).name}]";
+                                var channel = filter.FeedChannel > 0 ? filter.FeedChannel : defaultChannel;
                                 await SendMailNotification(channel, mail, from, group.DefaultMention);
                                 break;
                             }

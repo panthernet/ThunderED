@@ -30,9 +30,10 @@ CONCLUSION: maintain actual auth groups in your settings file
 
 MailModule settings undergone following changes:
  - Labels, Senders props removed
- - Added Filters list with the underlying FilterLabels, FilterSenders and FilterMailList settings
+ - Channel property renamed to DefaultChannel and used when FeedChannel isn't specified
+ - Added Filters list with the underlying FilterLabels, FilterSenders, FilterMailList and FeedChannel settings
  - All data inside a single filter block will follow exclusive rules meaning it will only include mail passed through ALL specified filters
- - It is now possible to specify mail list names in filtering
+ - It is now possible to specify mail list names in filtering and feed mail into different channels
 
 ### V1.2.3
 + Fixed preliminary auth applicants removal upon expiration

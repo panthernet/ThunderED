@@ -570,7 +570,7 @@ namespace ThunderED.Classes
 #endif
         [Comment("Numeric Discord channel ID to post mail feed")]
         [Required]
-        public ulong Channel { get; set; }
+        public ulong DefaultChannel { get; set; }
 
         [Comment("Optional Discord default mention for mail report")]
         public string DefaultMention { get; set; }
@@ -585,8 +585,8 @@ namespace ThunderED.Classes
                 {
                     case nameof(Id):
                         return Id == 0 ? Compose(nameof(Id), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                    case nameof(Channel):
-                        return Channel == 0 ? Compose(nameof(Channel), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(DefaultChannel):
+                        return DefaultChannel == 0 ? Compose(nameof(DefaultChannel), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }
 
                 return null;
@@ -609,7 +609,8 @@ namespace ThunderED.Classes
         public List<long> FilterSenders { get; set; } = new List<long>();
         public List<string> FilterMailList { get; set; } = new List<string>();
 #endif
-
+        [Comment("Optional numeric Discord channel ID to post filtered mail feed")]
+        public ulong FeedChannel { get; set; }
         
 #if EDITOR
         public override string this[string columnName]
