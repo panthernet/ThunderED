@@ -138,35 +138,43 @@ namespace ThunderED.Modules
 
                     foreach (var mailHeader in mailsHeaders)
                     {
-                        if(mailHeader.mail_id <= lastMailId) continue;
-                        lastMailId = mailHeader.mail_id;
-                        if(!includePrivate && (mailHeader.recipients.Count(a => a.recipient_id == charId) > 0)) continue;
-
-                        foreach (var filter in group.Filters.Values)
+                        try
                         {
-                            //filter by senders
-                            if(filter.FilterSenders.Count > 0 && !filter.FilterSenders.Contains(mailHeader.from))
-                                continue;
-                            //filter by labels
-                            var labelIds = searchLabels.Where(a=> filter.FilterLabels.Contains(a.name)).Select(a => a.label_id).ToList();
-                            if(labelIds.Count > 0 && !mailHeader.labels.Any(a=> labelIds.Contains(a)))
-                                continue;
-                            //filter by mail lists
-                            var mailListIds = filter.FilterMailList.Count > 0
-                                ? mailLists.Where(a => filter.FilterMailList.Any(b => a.name.Equals(b, StringComparison.OrdinalIgnoreCase))).Select(a => a.mailing_list_id).ToList()
-                                : new List<long>();
-                            if(mailListIds.Count > 0 && !mailHeader.recipients.Where(a=> a.recipient_type == "mailing_list").Any(a=> mailListIds.Contains(a.recipient_id)))
-                                continue;
+                            if (mailHeader.mail_id <= lastMailId) continue;
+                            lastMailId = mailHeader.mail_id;
+                            if (!includePrivate && (mailHeader.recipients.Count(a => a.recipient_id == charId) > 0)) continue;
 
-                            var mail = await APIHelper.ESIAPI.GetMail(Reason, group.Id.ToString(), token, mailHeader.mail_id);
-                           // var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
-                            var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.from);
-                            var from = sender?.name;
-                            var ml = mailHeader.recipients.FirstOrDefault(a => a.recipient_type == "mailing_list" && mailListIds.Contains(a.recipient_id));
-                            if (ml != null)
-                                from = $"{sender?.name}[{mailLists.First(a => a.mailing_list_id == ml.recipient_id).name}]";
-                            await SendMailNotification(channel, mail, from, group.DefaultMention);
-                            break;
+                            foreach (var filter in group.Filters.Values)
+                            {
+                                //filter by senders
+                                if (filter.FilterSenders.Count > 0 && !filter.FilterSenders.Contains(mailHeader.from))
+                                    continue;
+                                //filter by labels
+                                var labelIds = searchLabels.Where(a => filter.FilterLabels.Contains(a.name)).Select(a => a.label_id).ToList();
+                                if (labelIds.Count > 0 && !mailHeader.labels.Any(a => labelIds.Contains(a)))
+                                    continue;
+                                //filter by mail lists
+                                var mailListIds = filter.FilterMailList.Count > 0
+                                    ? mailLists.Where(a => filter.FilterMailList.Any(b => a.name.Equals(b, StringComparison.OrdinalIgnoreCase))).Select(a => a.mailing_list_id)
+                                        .ToList()
+                                    : new List<long>();
+                                if (mailListIds.Count > 0 && !mailHeader.recipients.Where(a => a.recipient_type == "mailing_list").Any(a => mailListIds.Contains(a.recipient_id)))
+                                    continue;
+
+                                var mail = await APIHelper.ESIAPI.GetMail(Reason, group.Id.ToString(), token, mailHeader.mail_id);
+                                // var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
+                                var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.from);
+                                var from = sender?.name;
+                                var ml = mailHeader.recipients.FirstOrDefault(a => a.recipient_type == "mailing_list" && mailListIds.Contains(a.recipient_id));
+                                if (ml != null)
+                                    from = $"{sender?.name}[{mailLists.First(a => a.mailing_list_id == ml.recipient_id).name}]";
+                                await SendMailNotification(channel, mail, from, group.DefaultMention);
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            await LogHelper.LogEx($"MailCheck: {mailHeader?.mail_id} {mailHeader?.subject}", ex);
                         }
                     }
      
@@ -197,7 +205,7 @@ namespace ThunderED.Modules
 
         public static async Task<string> PrepareBodyMessage(string input)
         {
-            if (string.IsNullOrEmpty(input)) return input;
+            if (string.IsNullOrEmpty(input)) return "";
 
             var body = input.Replace("<br>", Environment.NewLine)
                 .Replace("<b>", "**").Replace("</b>", "**")
@@ -238,6 +246,7 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, LogCat.Mail);
+                return "";
             }
 
             return body;
