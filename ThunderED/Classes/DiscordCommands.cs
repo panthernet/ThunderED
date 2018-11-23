@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
 using ThunderED.Helpers;
@@ -16,6 +17,138 @@ namespace ThunderED.Classes
     /// </summary>
     public partial class DiscordCommands : ModuleBase
     {
+
+        [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
+        public async Task Help()
+        {
+            var sb = new StringBuilder();
+            sb.Append(LM.Get("helpTextPrivateCommands"));
+            sb.Append(": ** !about | !tq ");
+            if (SettingsManager.Settings.Config.ModuleAuthWeb)
+            {
+                sb.Append("| !auth | !authnotify | !web ");
+                if (SettingsManager.Settings.Config.ModuleTimers)
+                {
+                    sb.Append("| !timers | !turl ");
+                }
+            }
+
+            if (SettingsManager.Settings.Config.ModuleTime)
+            {
+                sb.Append("| !evetime ");
+            }
+
+            if (SettingsManager.Settings.Config.ModuleStats)
+            {
+                sb.Append("| !stat ");
+            }
+
+            if (SettingsManager.Settings.Config.ModuleCharCorp)
+            {
+                sb.Append("| !char | !corp ");
+            }
+
+            if (SettingsManager.Settings.Config.ModulePriceCheck)
+            {
+                sb.Append("| !char | !corp ");
+            }
+
+            if (SettingsManager.Settings.Config.ModuleFWStats)
+            {
+                sb.Append("| !fwstats ");
+            }
+
+            if (SettingsManager.Settings.Config.ModuleFleetup)
+            {
+                sb.Append("| !ops ");
+            }
+
+            sb.Append("**\n");
+            if (string.IsNullOrEmpty(await APIHelper.DiscordAPI.IsAdminAccess(Context)))
+            {
+                sb.Append(LM.Get("helpTextAdminCommands"));
+                sb.Append(": ** !rehash | !reauth **\n");
+            }
+            sb.Append(LM.Get("helpExpanded"));
+
+            //  "helpText":
+//            "Private commands: * !tq | !fwstats **\nAdmin commands: !rehash | !reauth\nEnter !help COMMAND in the bot private message for additional info",
+
+
+
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, sb.ToString());
+        }
+
+        [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
+        public async Task Help([Remainder] string x)
+        {
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
+            switch (x)
+            {
+                case "help":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpHelp")}", true);
+                    break;   
+                case "web":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpWeb")}", true);
+                    break;   
+                case "auth":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAuth")}", true);
+                    break;                        
+                case "authnotify":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAuthNotify")}", true);
+                    break;                        
+                case "evetime":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTime")}", true);
+                    break;                        
+                case "stat":
+                case "stats":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpStat")}", true);
+                    break;                        
+                case "about":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAbout")}", true);
+                    break;                        
+                case "char":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpChar")}", true);
+                    break;                        
+                case "corp":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpCorp")}", true);
+                    break;                        
+                case CMD_TQ:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTQ")}", true);
+                    break;                        
+                case "jita":
+                case "amarr":
+                case "dodixie":
+                case "rens":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpJita")}", true);
+                    break;                        
+                case "pc":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpPc")}", true);
+                    break;            
+                case "ops":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpOps")}", true);
+                    break;            
+                case CMD_FWSTATS:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpFwstats", CMD_FWSTATS)}", true);
+                    break;  
+                case CMD_TURL:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTurl")}", true);
+                    break;
+                case CMD_TIMERS:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTimers")}", true);
+                    break;
+
+                case "rehash":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpRehash")}", true);
+                    break;
+                case "reauth":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpReauth")}", true);
+                    break;
+
+            }
+        }
 
         internal const string CMD_TQ= "tq";
         [Command(CMD_TQ, RunMode = RunMode.Async), Summary("Reports TQ status")]
@@ -335,73 +468,6 @@ namespace ThunderED.Classes
             }
 
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
-        }
-
-        [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
-        public async Task Help()
-        {
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpText")}");
-        }
-
-        [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
-        public async Task Help([Remainder] string x)
-        {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-            switch (x)
-            {
-                case "help":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpHelp")}", true);
-                    break;   
-                case "web":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpWeb")}", true);
-                    break;   
-                case "auth":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAuth")}", true);
-                    break;                        
-                case "authnotify":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAuthNotify")}", true);
-                    break;                        
-                case "evetime":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTime")}", true);
-                    break;                        
-                case "stat":
-                case "stats":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpStat")}", true);
-                    break;                        
-                case "about":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAbout")}", true);
-                    break;                        
-                case "char":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpChar")}", true);
-                    break;                        
-                case "corp":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpCorp")}", true);
-                    break;                        
-                case CMD_TQ:
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTQ")}", true);
-                    break;                        
-                case "jita":
-                case "amarr":
-                case "dodixie":
-                case "rens":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpJita")}", true);
-                    break;                        
-                case "pc":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpPc")}", true);
-                    break;            
-                case CMD_FWSTATS:
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpFwstats", CMD_FWSTATS)}", true);
-                    break;  
-                case CMD_TURL:
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTurl")}", true);
-                    break;
-                case CMD_TIMERS:
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTimers")}", true);
-                    break;
-
-            }
         }
 
         /// <summary>
@@ -863,7 +929,7 @@ namespace ThunderED.Classes
             {
                 try
                 {
-                    await FleetUpModule.Ops(Context, null);
+                    await FleetUpModule.Ops(Context, x);
                 }
                 catch (Exception ex)
                 {
@@ -877,7 +943,7 @@ namespace ThunderED.Classes
         /// 
         /// </summary>
         /// <returns></returns>
-        [Command("about", RunMode = RunMode.Async), Summary("About Opux")]
+        [Command("about", RunMode = RunMode.Async), Summary("About the bot")]
         public async Task About()
         {
             var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();

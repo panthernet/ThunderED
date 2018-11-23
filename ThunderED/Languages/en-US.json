@@ -8,8 +8,6 @@
   "HighPower": "High Power",
   "LowPower": "Low Power",
   "StructureWentLowPower": "Allied {0} is on {1}!",
-  "helpText":
-    "Private commands: ** !auth | !authnotify | !web | !evetime | !stat | !about | !char | !corp | !jita | !amarr | !dodixie | !rens | !pc | !tq | !fwstats | !turl | !timers **\nAdmin commands: !rehash | !reauth\nEnter !help COMMAND in the bot private message for additional info",
   "helpHelp": "don't tcp my ip!",
   "helpAuth":
     "*auth* command helps to authenticate you by EVE Online character. Send *!auth* command to the bot for additional details.",
@@ -339,5 +337,11 @@
   "corpKnownSupers":  "Known Supers/Titans" ,
   "corpActiveSystem":  "Active System",
   "corpDescription":  "Description",
+  "helpTextPrivateCommands":  "Private commands", 
+  "helpTextAdminCommands":  "Admin commands",
+  "helpExpanded":  "Enter !help COMMAND in the bot private message for additional info",
+  "helpOps":  "Displays upcoming FleetUp operations. Enter !ops 3 to limit the list by 3 entries",
+  "helpRehash":  "Reloads settings from file and reinitializes the bot" ,
+  "helpReauth":  "Runs Discord authentication check for all users in a group"
 
 }
