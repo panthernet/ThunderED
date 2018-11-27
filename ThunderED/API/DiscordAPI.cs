@@ -272,6 +272,206 @@ namespace ThunderED.API
 
         #endregion
 
+        public class RoleSearchResult
+        {
+            public string GroupName;
+            public List<SocketRole> UpdatedRoles = new List<SocketRole>();
+            public List<string> ValidManualAssignmentRoles = new List<string>();
+        }
+
+        public async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId)
+        {
+            var discordGuild = GetGuild();
+            var u = discordGuild.GetUser(discordUserId);
+            var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
+            var result = new RoleSearchResult();
+            result.UpdatedRoles.Add(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
+
+            #region Get personalized foundList
+
+            var groupsToCheck = new List<WebAuthGroup>();
+            var tokenData = await SQLHelper.UserTokensGetEntry(characterID);
+                    
+            if (!string.IsNullOrEmpty(tokenData?.GroupName))
+            {
+                //check specified group for roles
+                var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == tokenData.GroupName).Value;
+                if(group != null)
+                    groupsToCheck.Add(group);
+            }
+
+            if(!groupsToCheck.Any())
+            {
+                //check only non-ESI groups for roles
+                groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a=> !a.ESICustomAuthRoles.Any()));
+            }
+            #endregion
+
+            string groupName = null;
+            //Check for Corp roles
+            //Find first available corp
+            var textCorpId = characterData.corporation_id.ToString();
+            var foundGroup = groupsToCheck.FirstOrDefault(a => a.AllowedCorporations.ContainsKey(textCorpId));
+            if (foundGroup != null)
+            {
+                var cinfo = foundGroup.AllowedCorporations[textCorpId];
+                var aRoles = discordGuild.Roles.Where(a=> cinfo.Contains(a.Name)).ToList();
+                if (aRoles.Count > 0)
+                    result.UpdatedRoles.AddRange(aRoles);
+                result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssigmentRoles);
+                groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == foundGroup).Key;
+            }
+            else
+            {
+                //If no corps found, search for an alliance
+                if (characterData.alliance_id != null)
+                {
+                    var textAllianceId = characterData.alliance_id.ToString();
+                    foundGroup = groupsToCheck.FirstOrDefault(a => a.AllowedAlliances.ContainsKey(textAllianceId));
+                    if (foundGroup != null)
+                    {
+                        var ainfo = foundGroup.AllowedAlliances[textAllianceId];
+                        var aRoles = discordGuild.Roles.Where(a => ainfo.Contains(a.Name)).ToList();
+                        if (aRoles.Count > 0)
+                            result.UpdatedRoles.AddRange(aRoles);
+                        result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssigmentRoles);
+                        groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == foundGroup).Key;
+                    }
+                }
+            }
+
+            result.UpdatedRoles = result.UpdatedRoles.Distinct().ToList();
+            result.GroupName = groupName;
+            return result;
+        }
+
+        public async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles)
+        {
+            var discordGuild = GetGuild();
+            var u = discordGuild.GetUser(discordUserId);
+            try
+            {
+                if (u.Id == Client.CurrentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name)))
+                    return null;
+
+               // await LogHelper.LogInfo($"Running Auth Check on {u.Username}", LogCat.AuthCheck, false);
+
+                var responce = await SQLHelper.GetAuthUser(u.Id);
+
+                if (responce.Count > 0)
+                {
+                    //get data
+                    var characterID = responce.OrderByDescending(x => x["id"]).FirstOrDefault()["characterID"];
+                    var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
+                    //skip bad requests
+                    if(characterData == null) return null;
+
+                    var initialUserRoles = new List<SocketRole>(u.Roles);
+                    var remroles = new List<SocketRole>();
+                    var result = await GetRoleGroup(Convert.ToInt64(characterID), discordUserId);
+
+                    var changed = false;
+                    var isAuthed = result.UpdatedRoles.Count > 0;
+
+                    var invalidRoles = initialUserRoles.Where(a => result.UpdatedRoles.FirstOrDefault(b => b.Id == a.Id) == null);
+                    foreach (var invalidRole in invalidRoles)
+                    {
+                        //if role is not ignored and not in valid roles while char is authed
+                        if (!authCheckIgnoreRoles.Contains(invalidRole.Name) && !(isAuthed && result.ValidManualAssignmentRoles.Contains(invalidRole.Name)))
+                        {
+                            remroles.Add(invalidRole);
+                            changed = true;
+                        }
+                    }
+
+                    //mark changed if we have at least one new role to add
+                    changed = changed || result.UpdatedRoles.Any(role => initialUserRoles.FirstOrDefault(x => x.Id == role.Id) == null);
+    
+
+                    if (changed)
+                    {
+                        result.UpdatedRoles.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
+                        if (SettingsManager.Settings.WebAuthModule.AuthReportChannel != 0)
+                        {
+                            var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
+                            await SendMessageAsync(channel, $"{LM.Get("renewingRoles")} {characterData.name} ({u.Username})");
+                        }
+
+                        await LogHelper.LogInfo($"Adjusting roles for {characterData.name} ({u.Username})", LogCat.AuthCheck);
+                        await u.AddRolesAsync(result.UpdatedRoles);
+                        if(!string.IsNullOrEmpty(result.GroupName))
+                            await u.RemoveRolesAsync(remroles);
+                    }
+
+                    var eveName = characterData.name;
+
+                    if (SettingsManager.Settings.WebAuthModule.EnforceCorpTickers || SettingsManager.Settings.WebAuthModule.EnforceCharName)
+                    {
+                        var corporationData = await APIHelper.ESIAPI.GetCorporationData("authCheck", characterData.corporation_id, true);
+                        var nickname = $"{(SettingsManager.Settings.WebAuthModule.EnforceCorpTickers  ? $"[{corporationData.ticker}] " : null)}{(SettingsManager.Settings.WebAuthModule.EnforceCharName ? eveName : u.Username)}";
+                        if (nickname != u.Nickname && !string.IsNullOrWhiteSpace(u.Nickname) || string.IsNullOrWhiteSpace(u.Nickname) && u.Username != nickname)
+                        {
+                            await u.ModifyAsync(x => x.Nickname = nickname);
+                            await LogHelper.LogInfo($"Changed name of {u.Nickname} to {nickname}", LogCat.AuthCheck);
+                        }
+                    }
+
+                    return isAuthed && !string.IsNullOrEmpty(result.GroupName) ? result.GroupName : null;
+                }
+                else
+                {
+                    var rroles = new List<SocketRole>();
+                    var rolesOrig = new List<SocketRole>(u.Roles);
+                    foreach (var rrole in rolesOrig)
+                    {
+                        var exemptRole = exemptRoles.FirstOrDefault(x => x == rrole.Name);
+                        if (exemptRole == null)
+                        {
+                            rroles.Add(rrole);
+                        }
+                    }
+
+                    rolesOrig.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
+                    rroles.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
+
+                    bool rchanged = false;
+
+                    if (rroles != rolesOrig)
+                    {
+                        foreach (var exempt in rroles)
+                        {
+                            if (exemptRoles.FirstOrDefault(x => x == exempt.Name) == null && !authCheckIgnoreRoles.Contains(exempt.Name))
+                                rchanged = true;
+                        }
+                    }
+
+                    if (rchanged)
+                    {
+                        try
+                        {
+                            var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
+                            if(channel != null)
+                                await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{LM.Get("resettingRoles")} {u.Username}");
+                            await LogHelper.LogInfo($"Resetting roles for {u.Username}", LogCat.AuthCheck);
+                            await u.RemoveRolesAsync(rroles);
+                        }
+                        catch (Exception ex)
+                        {
+                            await LogHelper.LogEx($"Error removing roles: {ex.Message}", ex, LogCat.AuthCheck);
+                        }
+                    }
+
+                    return null;
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx($"Fatal Error: {ex.Message}", ex, LogCat.AuthCheck);
+                return null;
+            }
+        }
+
         public async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
         {
             var discordGuild = GetGuild();
@@ -279,217 +479,7 @@ namespace ThunderED.API
 
             foreach (var u in discordUsers)
             {
-                try
-                {
-                    if (u.Id == Client.CurrentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name)))
-                        continue;
-
-                    await LogHelper.LogInfo($"Running Auth Check on {u.Username}", LogCat.AuthCheck, false);
-
-                    var responce = await SQLHelper.GetAuthUser(u.Id);
-
-                    if (responce.Count > 0)
-                    {
-                        var characterID = responce.OrderByDescending(x => x["id"]).FirstOrDefault()["characterID"];
-
-                        var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
-                        //skip bad requests
-                        if(characterData == null) continue;
-                        var corporationData = await APIHelper.ESIAPI.GetCorporationData("authCheck", characterData.corporation_id, true);
-
-                        var roles = new List<SocketRole>();
-                        var rolesOrig = new List<SocketRole>(u.Roles);
-                        var remroles = new List<SocketRole>();
-                        roles.Add(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
-                        bool isInExempt = false;
-
-                        foreach (var role in exemptRoles)
-                        {
-                            var exemptRole = GetUserRole(u, role);
-                            if (exemptRole != null)
-                            {
-                                roles.Add(exemptRole);
-                                isInExempt = true;
-                            }
-                        }
-
-                        #region Get personalized foundList
-
-                        var groupsToCheck = new List<WebAuthGroup>();
-                        var tokenData = await SQLHelper.UserTokensGetEntry(Convert.ToInt64(characterID));
-                        if (!string.IsNullOrEmpty(tokenData?.GroupName))
-                        {
-                            //check specified group for roles
-                            var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == tokenData.GroupName).Value;
-                            if(group != null)
-                                groupsToCheck.Add(group);
-                        }
-
-                        if(!groupsToCheck.Any())
-                        {
-                            //check only non-ESI groups for roles
-                            groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a=> !a.ESICustomAuthRoles.Any()));
-                        }
-
-                        var foundList = new Dictionary<long, List<string>>();
-                        foreach (var group in groupsToCheck)
-                        {
-                            if (group.AllowedCorporations.Count > 0)
-                            {
-                                foreach (var c in group.AllowedCorporations)
-                                {
-                                    //add all roles
-                                    if(!long.TryParse(c.Key, out var key))
-                                        continue;
-                                    if (foundList.ContainsKey(key))
-                                    {
-                                        foundList[key].AddRange(c.Value);
-                                        foundList[key] = foundList[key].Distinct().ToList();
-                                    }
-                                    else foundList.Add(key, c.Value);
-                                }
-                            }
-
-                            if (group.AllowedAlliances.Count > 0)
-                            {
-                                foreach (var a in group.AllowedAlliances)
-                                {
-                                    if(!long.TryParse(a.Key, out var key))
-                                        continue;
-                                    if (foundList.ContainsKey(key))
-                                    {
-                                        foundList[key].AddRange(a.Value);
-                                        foundList[key] = foundList[key].Distinct().ToList();
-                                    }
-                                    else foundList.Add(key, a.Value);
-                                }
-                            }
-                        }
-                        #endregion
-
-
-
-                        if (foundList.Count == 0)
-                            isInExempt = true;
-
-                        //Check for Corp roles
-                        if (foundList.ContainsKey(characterData.corporation_id))
-                        {
-                            var cinfo = foundList[characterData.corporation_id];
-                            var aRoles = discordGuild.Roles.Where(a=> cinfo.Contains(a.Name)).ToList();
-                            if (aRoles.Count > 0)
-                                roles.AddRange(aRoles);
-                        }
-
-                        //Check for Alliance roles
-                        if (characterData.alliance_id != null)
-                        {
-                            if (foundList.ContainsKey(characterData.alliance_id ?? 0))
-                            {
-                                var ainfo = foundList[characterData.alliance_id ?? 0];
-                                var aRoles = discordGuild.Roles.Where(a=> ainfo.Contains(a.Name)).ToList();
-                                if (aRoles.Count > 0)
-                                    roles.AddRange(aRoles);
-                            }
-                        }
-
-                        bool changed = false;
-                        foreach (var role in rolesOrig)
-                        {
-                            if (roles.FirstOrDefault(x => x.Id == role.Id) == null)
-                            {
-                                if (!authCheckIgnoreRoles.Contains(role.Name))
-                                {
-                                    remroles.Add(role);
-                                    changed = true;
-                                }
-                            }
-                        }
-
-                        foreach (var role in roles)
-                        {
-                            if (rolesOrig.FirstOrDefault(x => x.Id == role.Id) == null)
-                                changed = true;
-                        }
-
-                        if (changed)
-                        {
-                            roles.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
-                            if (SettingsManager.Settings.WebAuthModule.AuthReportChannel != 0)
-                            {
-                                var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
-                                await SendMessageAsync(channel, $"{LM.Get("renewingRoles")} {characterData.name} ({u.Username})");
-                            }
-
-                            await LogHelper.LogInfo($"Adjusting roles for {characterData.name} ({u.Username})", LogCat.AuthCheck);
-                            await u.AddRolesAsync(roles);
-                            if(!isInExempt)
-                                await u.RemoveRolesAsync(remroles);
-                            //remove notifications token if user has been stripped of roles
-                           // if (!isInExempt && !isAddedRole && isRemovedRole)
-                            //    await SQLHelper.SQLiteDataDelete("notificationsList", "characterID", characterID);
-                        }
-
-                        var eveName = characterData.name;
-
-                        if (SettingsManager.Settings.WebAuthModule.EnforceCorpTickers || SettingsManager.Settings.WebAuthModule.EnforceCharName)
-                        {
-                            var nickname = $"{(SettingsManager.Settings.WebAuthModule.EnforceCorpTickers  ? $"[{corporationData.ticker}] " : null)}{(SettingsManager.Settings.WebAuthModule.EnforceCharName ? eveName : u.Username)}";
-                            if (nickname != u.Nickname && !string.IsNullOrWhiteSpace(u.Nickname) || string.IsNullOrWhiteSpace(u.Nickname) && u.Username != nickname)
-                            {
-                                await u.ModifyAsync(x => x.Nickname = nickname);
-                                await LogHelper.LogInfo($"Changed name of {u.Nickname} to {nickname}", LogCat.AuthCheck);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var rroles = new List<SocketRole>();
-                        var rolesOrig = new List<SocketRole>(u.Roles);
-                        foreach (var rrole in rolesOrig)
-                        {
-                            var exemptRole = exemptRoles.FirstOrDefault(x => x == rrole.Name);
-                            if (exemptRole == null)
-                            {
-                                rroles.Add(rrole);
-                            }
-                        }
-
-                        rolesOrig.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
-                        rroles.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
-
-                        bool rchanged = false;
-
-                        if (rroles != rolesOrig)
-                        {
-                            foreach (var exempt in rroles)
-                            {
-                                if (exemptRoles.FirstOrDefault(x => x == exempt.Name) == null && !authCheckIgnoreRoles.Contains(exempt.Name))
-                                    rchanged = true;
-                            }
-                        }
-
-                        if (rchanged)
-                        {
-                            try
-                            {
-                                var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
-                                if(channel != null)
-                                    await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{LM.Get("resettingRoles")} {u.Username}");
-                                await LogHelper.LogInfo($"Resetting roles for {u.Username}", LogCat.AuthCheck);
-                                await u.RemoveRolesAsync(rroles);
-                            }
-                            catch (Exception ex)
-                            {
-                                await LogHelper.LogEx($"Error removing roles: {ex.Message}", ex, LogCat.AuthCheck);
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx($"Fatal Error: {ex.Message}", ex, LogCat.AuthCheck);
-                }
+                await UpdateUserRoles(u.Id, exemptRoles, authCheckIgnoreRoles);
             }
         }
 

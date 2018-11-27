@@ -40,7 +40,7 @@ namespace ThunderED.Helpers
         }
 
 
-        public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null, bool noRetries = false)
+        public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null, bool noRetries = false, bool silent = false)
             where T : class
         {
             string raw = null;
@@ -65,7 +65,7 @@ namespace ThunderED.Helpers
                             if (!responceMessage.IsSuccessStatusCode)
                             {
                                 if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
-                                    (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout))
+                                    (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
                                     await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
                                 continue;
                             }
@@ -89,8 +89,14 @@ namespace ThunderED.Helpers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx(request, ex, LogCat.ESI);
-                    await LogHelper.LogInfo($"[try: {i}][{reason}]{Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONCE: {raw}", LogCat.ESI);
+                    if (TickManager.IsNoConnection && request.StartsWith("https://esi.tech.ccp.is"))
+                        return null;
+
+                    if (!silent)
+                    {
+                        await LogHelper.LogEx(request, ex, LogCat.ESI);
+                        await LogHelper.LogInfo($"[try: {i}][{reason}]{Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONCE: {raw}", LogCat.ESI);
+                    }
                 }
             }
 

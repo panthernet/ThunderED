@@ -146,7 +146,9 @@
         "radiusChannel": 0,
         "radiusSystemId": 0,
         "showGroupName":  false, 
-        "minimumValue": 0
+        "minimumValue": 0,
+        "FeedPvpKills":  true, 
+        "FeedPveKills":  true 
       }
     }
   },
@@ -167,7 +169,9 @@
         "bigKillValue": 300000000,
         "//": "Post BIG kills to general chat channel",
         "bigKillChannel": 0,		
-        "bigKillSendToGeneralToo": true
+        "bigKillSendToGeneralToo": true,
+        "FeedPvpKills":  true, 
+        "FeedPveKills":  true 
       }
     }
   },
@@ -192,6 +196,7 @@
           "99003558": ["Ally", "Dummy"]
         },
         "authRoles": ["Admins"],
+        "ManualAssigmentRoles":  [ ], 
         "PreliminaryAuthMode": false,
         "AppInvalidationInHours": 0,
         "ESICustomAuthRoles": [],
@@ -204,6 +209,7 @@
           "99003599": ["Member"]
         },
         "authRoles": [],
+        "ManualAssigmentRoles":  [ ], 
         "PreliminaryAuthMode": false,
         "AppInvalidationInHours": 0,
         "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
@@ -217,6 +223,7 @@
           "99003599": ["Member"]
         },
         "authRoles": ["Admins"],
+        "ManualAssigmentRoles":  [ ], 
         "PreliminaryAuthMode": true,
         "AppInvalidationInHours": 480,
         "CustomButtonText":  "Preliminary Auth", 

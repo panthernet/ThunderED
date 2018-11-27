@@ -87,9 +87,21 @@ namespace ThunderED.Helpers
             return await Provider?.GetAuthUser(uId, order);
         }
 
-        internal static async Task<List<IDictionary<string, object>>> GetPendingUser(string remainder)
+        internal static async Task<PendingUserEntity> GetPendingUser(string remainder)
         {
-            return await Provider?.GetPendingUser(remainder);
+            var res = await SelectData("pendingUsers", new[] {"*"}, new Dictionary<string, object> {{"authString", remainder}});
+            return res.Select(item => new PendingUserEntity
+            {
+                Id = Convert.ToInt64(item[0]),
+                CharacterId = Convert.ToInt64(item[1]),
+                CorporationId = Convert.ToInt64(item[2]),
+                AllianceId = Convert.ToInt64(item[3]),
+                Groups = Convert.ToString(item[4]),
+                AuthString = Convert.ToString(item[5]),
+                Active = (string)item[6] == "1",
+                CreateDate = Convert.ToDateTime(item[7]),
+                DiscordId = Convert.ToInt64(item[8]),
+            }).ToList().FirstOrDefault();
         }
 
         internal static async Task RunCommand(string query2, bool silent = false)
@@ -454,6 +466,14 @@ namespace ThunderED.Helpers
             return (await UserTokensGetAllEntries(new Dictionary<string, object> {{"characterID", inspectCharId}})).FirstOrDefault();
         }
 
+        public static async Task DeleteAuthUsers(string discordId)
+        {
+            await SQLiteDataDelete("authUsers", "discordID", discordId);
+        }
 
+        public static async Task InvalidatePendingUser(string remainder)
+        {
+            await SQLiteDataUpdate("pendingUsers", "active", "0", "authString", remainder);
+        }
     }
 }

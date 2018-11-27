@@ -75,6 +75,55 @@ namespace ThunderED.Modules
             }
         }
 
+        public async Task ProcessPreliminaryApplicant(string remainder)
+        {
+            var pu = await SQLHelper.GetPendingUser(remainder);
+            if(pu == null) return;
+            var data = (await SQLHelper.UserTokensGetAllEntries(new Dictionary<string, object> {{"characterID", pu.CharacterId}})).FirstOrDefault();
+            if (data == null) return;
+            await ProcessPreliminaryApplicant(data.CharacterId, data.CharacterName, data.DiscordUserId, data.GroupName);
+        }
+
+
+        public async Task ProcessPreliminaryApplicant(long characterId, string characterName, ulong discordId, string groupName)
+        {
+            try
+            {
+                var group = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == groupName);
+                if (group.Value == null)
+                {
+                    await LogHelper.LogWarning($"Group {groupName} not found for character {characterName} awaiting auth...");
+                    return;
+                }
+
+                var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
+                if (rChar == null) return;
+
+                var textCorpId = rChar.corporation_id.ToString();
+                var textAllyId = rChar.alliance_id?.ToString();
+                if (group.Value.AllowedCorporations.ContainsKey(textCorpId) || (rChar.alliance_id > 0 && group.Value.AllowedAlliances.ContainsKey(textAllyId)))
+                {
+                    if (group.Value == null)
+                    {
+                        await LogHelper.LogWarning($"Unable to auth {characterName}({characterId}) as its auth group {groupName} do not exist in the settings file!",
+                            Category);
+                        if (Settings.WebAuthModule.AuthReportChannel != 0)
+                            await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,
+                                $"{group.Value.DefaultMention} {LM.Get("authUnableToProcessUserGroup", characterName, characterId, groupName)}");
+                    }
+
+                    //auth
+                    var code = await SQLHelper.PendingUsersGetCode(characterId);
+                    await AuthUser(null, code, discordId);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx($"Auth check for {characterName}", ex, Category);
+            }
+        }
+
+
         private async Task ProcessPreliminaryAppilicants()
         {
             try
@@ -83,59 +132,11 @@ namespace ThunderED.Modules
                 var list = await SQLHelper.UserTokensGetConfirmedDataList();
                 foreach (var data in list.Where(a => Convert.ToUInt64(a[2]) != 0))
                 {
-                    string characterName = null;
-                    try
-                    {
-                        var characterId = Convert.ToInt64(data[0]);
-                        characterName = data[1].ToString();
-                        var discordId = Convert.ToUInt64(data[2]);
-                        var groupName = data[3].ToString();
-
-                        var group = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == groupName);
-                        if (group.Value == null)
-                        {
-                            await LogHelper.LogWarning($"Group {groupName} not found for character {characterName} awaiting auth...");
-                            continue;
-                        }
-
-                        var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
-                        if (rChar == null) return;
-
-                        var textCorpId = rChar.corporation_id.ToString();
-                        var textAllyId = rChar.alliance_id?.ToString();
-                        if (group.Value.AllowedCorporations.ContainsKey(textCorpId) || (rChar.alliance_id > 0 && group.Value.AllowedAlliances.ContainsKey(textAllyId)))
-                        {
-                            if (group.Value == null)
-                            {
-                                await LogHelper.LogWarning($"Unable to auth {characterName}({characterId}) as its auth group {groupName} do not exist in the settings file!",
-                                    Category);
-                                if (Settings.WebAuthModule.AuthReportChannel != 0)
-                                    await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,
-                                        $"{group.Value.DefaultMention} {LM.Get("authUnableToProcessUserGroup", characterName, characterId, groupName)}");
-                            }
-
-                            //auth
-                            var code = await SQLHelper.PendingUsersGetCode(characterId);
-                            var rolesList = group.Value.AllowedCorporations.ContainsKey(textCorpId)
-                                ? group.Value.AllowedCorporations[textCorpId]
-                                : group.Value.AllowedAlliances[textAllyId];
-                            var roles = new Dictionary<long, List<string>>
-                            {
-                                {rChar.corporation_id, rolesList}
-                            };
-
-                            var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id, true);
-
-                            if (await AuthGrantRoles(0, characterId.ToString(), roles, rChar, corp, code, discordId, true, groupName))
-                                await SQLHelper.UserTokensSetAuthState(characterId, 2);
-
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await LogHelper.LogEx($"Auth check for {characterName}", ex, Category);
-                    }
-
+                    var characterId = Convert.ToInt64(data[0]);
+                    var characterName = data[1].ToString();
+                    var discordId = Convert.ToUInt64(data[2]);
+                    var groupName = data[3].ToString();
+                    await ProcessPreliminaryApplicant(characterId, characterName, discordId, groupName);
                 }
             }
             catch (Exception ex)
@@ -143,6 +144,7 @@ namespace ThunderED.Modules
                 await LogHelper.LogEx(ex.Message, ex, Category);
             }
         }
+
 
         public static async Task<string[]> GetCharacterIdFromCode(string code, string clientID, string secret)
         {
@@ -413,253 +415,97 @@ namespace ThunderED.Modules
 
         internal static async Task AuthUser(ICommandContext context, string remainder, ulong discordId)
         {
+            JsonClasses.CharacterData characterData = null;
             try
             {
-                var esiFailed = false;
-                var responce = await SQLHelper.GetPendingUser(remainder);
+                discordId = discordId > 0 ? discordId : context.Message.Author.Id;
 
-                if (!responce.Any())
+                //check pending user validity
+                var pendingUser = await SQLHelper.GetPendingUser(remainder);
+                if (pendingUser == null)
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel, LM.Get("authHasInvalidKey"), true).ConfigureAwait(false);
+                    return;
                 }
-                else switch (responce[0]["active"].ToString())
+                if(!pendingUser.Active)
                 {
-                    case "0":
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey"), true).ConfigureAwait(false);
-                        break;
-                    case "1":
-                       // var authgroups = SettingsManager.GetSubList("auth", "authgroups");
-                       // var corps = new Dictionary<string, string>();
-                       // var alliance = new Dictionary<string, string>();
-                        var characterID = responce[0]["characterID"].ToString();
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey"), true).ConfigureAwait(false);
+                    return;
+                }
+                
+                var characterID = pendingUser.CharacterId.ToString();
 
-                        #region Generate roles list
-                        var groupsToCheck = new List<WebAuthGroup>();
-                        var tokenData = await SQLHelper.UserTokensGetEntry(Convert.ToInt64(characterID));
-                        if (!string.IsNullOrEmpty(tokenData?.GroupName))
-                        {
-                            //check specified group for roles
-                            var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == tokenData.GroupName).Value;
-                            if(group != null)
-                                groupsToCheck.Add(group);
-                        }
-
-                        if(!groupsToCheck.Any())
-                        {
-                            //check only non-ESI groups for roles
-                            groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a=> !a.ESICustomAuthRoles.Any()));
-                        }
-
-                        var foundList = new Dictionary<long, List<string>>();
-                        //var groupName = string.Empty;
-                        foreach (var group in groupsToCheck)
-                        {
-                            if (group.AllowedCorporations.Count > 0)
-                            {
-                                foreach (var c in group.AllowedCorporations.Where(a => !foundList.ContainsKey(Convert.ToInt64(a.Key))))
-                                {
-                                    var key = Convert.ToInt64(c.Key);
-                                    if(!foundList.ContainsKey(key))
-                                        foundList.Add(key, c.Value);
-                                    else
-                                    {
-                                        foundList[key].AddRange(c.Value);
-                                        foundList[key] = foundList[key].Distinct().ToList();
-                                    }
-                                }
-
-                                // groupName = group.Key;
-                            }
-
-                            if (group.AllowedAlliances.Count > 0)
-                            {
-                                foreach (var c in group.AllowedAlliances.Where(a => !foundList.ContainsKey(Convert.ToInt64(a.Key))))
-                                {
-                                    var key = Convert.ToInt64(c.Key);
-                                    if(!foundList.ContainsKey(key))
-                                        foundList.Add(key, c.Value);
-                                    else
-                                    {
-                                        foundList[key].AddRange(c.Value);
-                                        foundList[key] = foundList[key].Distinct().ToList();
-                                    }
-                                }
-
-                                // groupName = group.Key;
-                            }
-                        }
-                        #endregion
-
-                        var characterData = await APIHelper.ESIAPI.GetCharacterData("WebAuth", characterID, true);
-                        if (characterData == null)
-                            esiFailed = true;
-
-                        var corporationData = await APIHelper.ESIAPI.GetCorporationData("WebAuth", characterData.corporation_id);
-                        if (corporationData == null)
-                            esiFailed = true;
-
-                        var allianceID = characterData.alliance_id ?? 0;
-                        var corpID = characterData.corporation_id;
-
-                        bool enable = foundList.ContainsKey(corpID) || characterData.alliance_id != null && foundList.ContainsKey(allianceID) || foundList.Count == 0;
-
-                        if (!enable)
-                        {
-                            //check for manual auth group without assignable roles
-                            var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value.AllowedCorporations.Count == 0 && a.Value.AllowedAlliances.Count == 0);
-                            if (grp.Value != null)
-                            {
-                                enable = true;
-                                //groupName = grp.Key;
-                            }
-                        }
-
-                        if (enable && !esiFailed)
-                        {
-                            var ch = context?.Channel?.Id ?? SettingsManager.Settings.WebAuthModule.AuthReportChannel;
-                            await AuthGrantRoles(ch, characterID, foundList, characterData, corporationData, remainder, discordId == 0 ? context.Message.Author.Id : discordId );
-
-                            var chId = Convert.ToInt64(characterID);
-                            if (await SQLHelper.IsEntryExists("userTokens", new Dictionary<string, object> {{"characterID", chId}}))
-                            {
-                                var discordUser = APIHelper.DiscordAPI.GetUser(discordId == 0 ? context.Message.Author.Id : discordId);
-                               // await SQLHelper.SQLiteDataUpdate("userTokens", "groupName", groupName, "characterID", chId);
-                                await SQLHelper.SQLiteDataUpdate("userTokens", "discordUserId", discordUser.Id, "characterID", chId);
-                                await SQLHelper.SQLiteDataUpdate("userTokens", "authState", 2, "characterID", chId);
-                            }
-                        }
+                //check if we fit some group
+                var result = await APIHelper.DiscordAPI.GetRoleGroup(Convert.ToInt64(characterID), discordId);
+                var groupName = result?.GroupName;
+                //pass auth
+                if (!string.IsNullOrEmpty(groupName))
+                {
+                    var group = SettingsManager.Settings.WebAuthModule.AuthGroups[groupName];
+                    var channel = context?.Channel?.Id ?? SettingsManager.Settings.WebAuthModule.AuthReportChannel;
+                    characterData = await APIHelper.ESIAPI.GetCharacterData("Auth", characterID);
+                    
+                    //report to discord
+                    var reportChannel = SettingsManager.Settings.WebAuthModule.AuthReportChannel;
+                    if (reportChannel != 0)
+                    {
+                        var mention = group.DefaultMention;
+                        if (group.PreliminaryAuthMode)
+                            await APIHelper.DiscordAPI.SendMessageAsync(reportChannel, $"{mention} {LM.Get("grantRolesPrelMessage", characterData.name, groupName)}")
+                                .ConfigureAwait(false);
                         else
-                        {
-                            await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, LM.Get("ESIFailure")).ConfigureAwait(false);
-                            await LogHelper.LogError("ESI Failure", LogCat.AuthWeb);
-                        }
+                            await APIHelper.DiscordAPI.SendMessageAsync(reportChannel, $"{mention} {LM.Get("grantRolesMessage", characterData.name)}")
+                                .ConfigureAwait(false);
+                    }
+                    await LogHelper.LogInfo($"Granting roles to {characterData.name} {(group.PreliminaryAuthMode ? $"[AUTO-AUTH from {groupName}]" : "[GENERAL]")}", LogCat.AuthCheck);
 
-                        break;
+                    //disable pending user
+                    await SQLHelper.InvalidatePendingUser(remainder);
+
+                    //remove all prevoius users associated with discordID
+                    await SQLHelper.DeleteAuthUsers(discordId.ToString());
+                    //insert new authUsers
+                    await SQLHelper.SQLiteDataInsertOrUpdate("authUsers", new Dictionary<string, object>
+                    {
+                        {"eveName", characterData.name},
+                        {"characterID", characterID},
+                        {"discordID", discordId.ToString()},
+                        {"role", groupName},
+                        {"active", "yes"},
+                        {"addedOn", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}
+                    });
+
+                    if (group.PreliminaryAuthMode)
+                    {
+                        await SQLHelper.UserTokensSetAuthState(characterID, 2);
+                    }
+
+                    //save tokens
+                    var chId = Convert.ToInt64(characterID);
+                    if (await SQLHelper.IsEntryExists("userTokens", new Dictionary<string, object> {{"characterID", chId}}))
+                    {
+                        await SQLHelper.SQLiteDataUpdate("userTokens", "discordUserId", discordId, "characterID", chId);
+                        await SQLHelper.SQLiteDataUpdate("userTokens", "authState", 2, "characterID", chId);
+                    }
+
+                    //run roles assignment
+                    await APIHelper.DiscordAPI.UpdateUserRoles(discordId, SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles,
+                        SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles);
+
+                    //notify about success
+                    if(channel != 0)
+                        await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("msgAuthSuccess", APIHelper.DiscordAPI.GetUserMention(discordId), characterData.name));
+                }
+                else
+                {
+                    await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, LM.Get("ESIFailure")).ConfigureAwait(false);
+                    await LogHelper.LogError("ESI Failure", LogCat.AuthWeb);
                 }
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx($"Error: {ex.Message}", ex, LogCat.AuthWeb);
+                await LogHelper.LogEx($"Failed adding Roles to User {characterData?.name}, Reason: {ex.Message}", ex, LogCat.AuthCheck);
             }
-        }
-
-        private static async Task<bool> AuthGrantRoles(ulong channelId, string characterID, Dictionary<long, List<string>> foundList, JsonClasses.CharacterData characterData, 
-            JsonClasses.CorporationData corporationData, string remainder, ulong discordId, bool isPreliminary = false, string authGroupName = null)
-        {
-            var rolesToAdd = new List<SocketRole>();
-
-            var allianceID = characterData.alliance_id ?? 0;
-            var corpID = characterData.corporation_id;
-
-            var authSettings = TickManager.GetModule<WebAuthModule>()?.Settings.WebAuthModule;
-            var missedRoles = new List<string>();
-            try
-            {
-                //Check for Corp roles
-                if (foundList.ContainsKey(corpID))
-                {
-                    var cRoles = foundList[corpID];
-                    cRoles.ForEach(a =>
-                    {
-                        var f = APIHelper.DiscordAPI.GetGuildRole(a);
-                        if(f != null && !rolesToAdd.Contains(f))
-                            rolesToAdd.Add(f);
-                        else missedRoles.Add(a);
-                    });
-                }
-
-                //Check for Alliance roles
-                if (foundList.ContainsKey(allianceID))
-                {
-                    var cRoles = foundList[allianceID];
-                    cRoles.ForEach(a =>
-                    {
-                        var f = APIHelper.DiscordAPI.GetGuildRole(a);
-                        if(f != null && !rolesToAdd.Contains(f))
-                            rolesToAdd.Add(f);
-                        else if(!rolesToAdd.Contains(f)) 
-                            missedRoles.Add(a);
-                    });
-                }
-
-                var discordUser = APIHelper.DiscordAPI.GetUser(discordId);
-
-                if (authSettings.AuthReportChannel != 0)
-                {
-                    var mention = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authGroupName).Value?.DefaultMention;
-                    if (isPreliminary)
-                        await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, $"{mention} {LM.Get("grantRolesPrelMessage", characterData.name, authGroupName)}")
-                            .ConfigureAwait(false);
-                    else
-                        await APIHelper.DiscordAPI.SendMessageAsync(authSettings.AuthReportChannel, $"{mention} {LM.Get("grantRolesMessage", characterData.name)}")
-                            .ConfigureAwait(false);
-                }
-
-                await LogHelper.LogInfo($"Granting roles to {characterData.name} {(isPreliminary ? $"[AUTO-AUTH from {authGroupName}]" : "[GENERAL]")}", LogCat.AuthCheck);
-
-                await APIHelper.DiscordAPI.AssignRolesToUser(discordUser, rolesToAdd);
-
-                if (missedRoles.Any())
-                    await LogHelper.LogWarning($"Missing discord roles: {string.Join(',', missedRoles)}");
-
-                var rolesString = new StringBuilder();
-                foreach (var role in discordUser.Roles)
-                {
-                    if(role.Name.StartsWith("@everyone")) continue;
-                    rolesString.Append(role.Name.Replace("\"", "&br;"));
-                    rolesString.Append(",");
-                }
-                if(rolesString.Length > 0)
-                    rolesString.Remove(rolesString.Length-1, 1);
-
-                await SQLHelper.SQLiteDataUpdate("pendingUsers", "active", "0", "authString", remainder);
-
-                if(channelId != 0)
-                    await APIHelper.DiscordAPI.SendMessageAsync(channelId, LM.Get("msgAuthSuccess", discordUser.Mention, characterData.name));
-                var eveName = characterData.name;
-                var discordID = discordUser.Id;
-                var addedOn = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-                await SQLHelper.SQLiteDataInsertOrUpdate("authUsers", new Dictionary<string, object>
-                {
-                    {"eveName", eveName},
-                    {"characterID", characterID},
-                    {"discordID", discordID.ToString()},
-                    {"role", rolesString.ToString()},
-                    {"active", "yes"},
-                    {"addedOn", addedOn}
-                });
-               
-                if (authSettings.EnforceCorpTickers || authSettings.EnforceCharName)
-                {
-                    var nickname = "";
-                    if (authSettings.EnforceCorpTickers)
-                        nickname = $"[{corporationData.ticker}] ";
-                    if (authSettings.EnforceCharName)
-                        nickname += $"{eveName}";
-                    else
-                        nickname += $"{discordUser.Username}";
-
-                    try
-                    {
-                        //will throw ex on admins
-                        await discordUser.ModifyAsync(x => x.Nickname = nickname);
-                    }
-                    catch
-                    {
-                        //ignore
-                    }
-
-                    await APIHelper.DiscordAPI.Dupes(discordUser);
-                }
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx($"Failed adding Roles to User {characterData.name}, Reason: {ex.Message}", ex, LogCat.AuthCheck);
-                return false;
-            }
-
-            return true;
         }
     }
 }

@@ -585,43 +585,7 @@ namespace ThunderED.Providers
             return list;
         }
 
-        public async Task<List<IDictionary<string, object>>> GetPendingUser(string remainder)
-        {
-            var list = new List<IDictionary<string, object>>(); ;
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand($"SELECT * FROM pendingUsers WHERE authString=\"{remainder}\"", con))
-            {
-                await con.OpenAsync();
-                try
-                {
-                    using (var r = await querySQL.ExecuteReaderAsync())
-                    {
-                        while (await r.ReadAsync())
-                        {
-                            var record = new Dictionary<string, object>();
-
-                            for (var i = 0; i < r.FieldCount; i++)
-                            {
-                                var key = r.GetName(i);
-                                var value = r[i];
-                                record.Add(key, value);
-                            }
-
-                            list.Add(record);
-                        }
-
-                        return list;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("GetPendingUser", ex, LogCat.SQLite);
-                }
-            }
-            await Task.Yield();
-            return list;
-            
-        }
+      
 
         public async Task RunCommand(string query2, bool silent = false)
         {

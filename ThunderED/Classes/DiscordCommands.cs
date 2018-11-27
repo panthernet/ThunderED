@@ -453,7 +453,7 @@ namespace ThunderED.Classes
                             await SQLHelper.PendingUsersSetCode(code, Context.Message.Author.Id);
                             await SQLHelper.UserTokensSetAuthState(code, 1);
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserConfirmed", name));
-
+                            await TickManager.GetModule<WebAuthModule>().ProcessPreliminaryApplicant(code);
                             return;
                         default:
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("invalidCommandSyntax"));

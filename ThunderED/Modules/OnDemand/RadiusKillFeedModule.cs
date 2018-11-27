@@ -142,7 +142,10 @@ namespace ThunderED.Modules.OnDemand
                     var finalBlowAttackerAllyId = finalBlowAttacker?.alliance_id;
                     var shipID = kill.package.killmail.victim.ship_type_id;
                     var isNPCKill = kill.package.zkb.npc;
-                    var killTime = kill.package.killmail.killmail_time.ToString("dd.MM.yyyy hh:mm");
+                    var killTime = kill.package.killmail.killmail_time.ToString(SettingsManager.Settings.Config.ShortTimeFormat);
+
+                    if((!group.FeedPveKills && isNPCKill) || (!group.FeedPvpKills && !isNPCKill)) continue;
+
 
                     var rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, victimCorpID, false, !_enableCache);
                     var rAttackerCorp = finalBlowAttackerCorpId.HasValue && finalBlowAttackerCorpId.Value > 0

@@ -341,7 +341,7 @@ namespace ThunderED.API
 
         public async Task<JsonClasses.ServerStatus> GetServerStatus(string reason)
         {
-            return await APIHelper.RequestWrapper<JsonClasses.ServerStatus>($"https://esi.tech.ccp.is/latest/status/?datasource=tranquility&language={_language}", reason);
+            return await APIHelper.RequestWrapper<JsonClasses.ServerStatus>($"https://esi.tech.ccp.is/latest/status/?datasource=tranquility&language={_language}", reason, null, false, true);
         }
 
         public async Task<List<JsonClasses.NullCampaignItem>> GetNullCampaigns(string reason)

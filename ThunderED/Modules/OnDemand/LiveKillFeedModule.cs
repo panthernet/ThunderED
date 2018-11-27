@@ -31,7 +31,7 @@ namespace ThunderED.Modules.OnDemand
             var bigKillGlobalChan = Settings.LiveKillFeedModule.BigKillChannel;
 
             var killmailID = kill.package.killmail.killmail_id;
-            var killTime = kill.package.killmail.killmail_time.ToString("dd.MM.yyyy hh:mm");
+            var killTime = kill.package.killmail.killmail_time.ToString(SettingsManager.Settings.Config.ShortTimeFormat);
             var shipID = kill.package.killmail.victim.ship_type_id;
             var value = kill.package.zkb.totalValue;
             var victimCharacterID = kill.package.killmail.victim.character_id;
@@ -109,6 +109,8 @@ namespace ThunderED.Modules.OnDemand
                 var sendBigToGeneral = @group.BigKillSendToGeneralToo;
                 var bigKillChannel = @group.BigKillChannel;
                 var discordGroupName = groupPair.Key;
+
+                if((!group.FeedPveKills && isNPCKill) || (!group.FeedPvpKills && !isNPCKill)) continue;
 
                 if (c == 0)
                 {

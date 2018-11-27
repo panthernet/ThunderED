@@ -331,6 +331,9 @@ namespace ThunderED.Classes
         [Comment("Post group name into notification message")]
         public bool ShowGroupName { get; set; }
 
+        public bool FeedPvpKills { get; set; } = true;
+        public bool FeedPveKills { get; set; } = true;
+
 #if EDITOR
         public override string this[string columnName]
         {
@@ -414,6 +417,9 @@ namespace ThunderED.Classes
         public long MinimumValue { get; set; }
         [Comment("Post group name into notification message")]
         public bool ShowGroupName { get; set; }
+
+        public bool FeedPvpKills { get; set; } = true;
+        public bool FeedPveKills { get; set; } = true;
 
 #if EDITOR
         public override string this[string columnName]
@@ -1354,6 +1360,10 @@ namespace ThunderED.Classes
         //[Comment("Numeric corporation ID list. You can leave it empty if you want to filter by entire alliance.")]
         //[Required]
         //public ObservableCollection<int> CorpIDList { get; set; } = new ObservableCollection<int>();
+        
+        [Comment("Text Discord roles list which can be added manually to a user and will persist while he passes auth check for this group. Stripped when he is not in a specified corp/ally anymore.")]
+        public ObservableCollection<string> ManualAssigmentRoles { get; set; } = new ObservableCollection<string>();
+
 #else
        // public List<string> MemberRoles { get; set; } = new List<string>();
         public List<string> AuthRoles { get; set; } = new List<string>();
@@ -1361,6 +1371,7 @@ namespace ThunderED.Classes
        // public List<int> AllianceIDList { get; set; } = new List<int>();
         public Dictionary<string, List<string>> AllowedCorporations { get; set; } = new Dictionary<string, List<string>>();
         public Dictionary<string, List<string>> AllowedAlliances { get; set; } = new Dictionary<string, List<string>>();
+        public List<string> ManualAssigmentRoles { get; set; } = new List<string>();
 #endif
         [Comment("Enable auth to require manual acceptance from authorized members")]
         public bool PreliminaryAuthMode { get; set; }
