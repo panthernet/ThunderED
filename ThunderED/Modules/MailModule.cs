@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using Discord;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -197,10 +198,20 @@ namespace ThunderED.Modules
         {
             var stamp = DateTime.Parse(mail.timestamp).ToString(Settings.Config.ShortTimeFormat);
             var body = await PrepareBodyMessage(mail.body);
+            var fields = Split(body, 1023);
+
             var embed = new EmbedBuilder()
-                .WithThumbnailUrl(Settings.Resources.ImgMail)
-                .AddField($"{LM.Get("mailSubject")} {mail.subject}",  string.IsNullOrWhiteSpace(body) ? "---" : body)
-                .WithFooter($"{LM.Get("mailDate")} {stamp}");
+                .WithThumbnailUrl(Settings.Resources.ImgMail);
+            var cnt = 0;
+            foreach (var field in fields)
+            {
+                if (cnt == 0)
+                    embed.AddField($"{LM.Get("mailSubject")} {mail.subject}", string.IsNullOrWhiteSpace(field) ? "---" : field);
+                else
+                    embed.AddField($"-", string.IsNullOrWhiteSpace(field) ? "---" : field);
+                cnt++;
+            }
+            embed.WithFooter($"{LM.Get("mailDate")} {stamp}");
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
             await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {LM.Get("mailMsgTitle", from)}", embed.Build()).ConfigureAwait(false);
         }
@@ -238,12 +249,82 @@ namespace ThunderED.Modules
                     var url = body.Substring(urlStart, urlEnd - urlStart + 1);
                     var text = body.Substring(lst + 1, endTagStart - lst - 1);
 
+                    //parse data
+                    var data = $"{text}({url})";
+                    bool isEmpty = false;
+                    try
+                    {
+                        if (url.StartsWith("fitting"))
+                        {
+
+                        }
+                        else if (url.StartsWith("killReport"))
+                        {
+                            var id = url.Substring(11, url.Length - 11);
+                            data = $"[{text}](https://zkillboard.com/kill/{id})";
+                        }
+                        else
+                        {
+                            var mid1 = url.Split(':');
+                            var mid2 = mid1.Length > 1 ? mid1[1].Split("//") : null;
+                            var type = Convert.ToInt32(mid2[0]);
+                            var id = Convert.ToInt64(mid2[1]);
+                            var newUrl = string.Empty;
+                            var addon = string.Empty;
+                            switch (type)
+                            {
+                                case 2:
+                                    newUrl = $"https://zkillboard.com/corporation/{id}/";
+                                    addon = $"[(who)](https://evewho.com/corp/{HttpUtility.UrlPathEncode(text)})";
+                                    break;
+                                case 16159:
+                                    newUrl = $"https://zkillboard.com/alliance/{id}/";
+                                    addon = $"[(who)](https://evewho.com/alli/{HttpUtility.UrlPathEncode(text)})";
+                                    break;
+                                case 5:
+                                    newUrl = $"https://zkillboard.com/system/{id}/";
+                                    addon = $"[(dotlan)](http://evemaps.dotlan.net/system/{id})";
+                                    break;
+                                case 3:
+                                    newUrl = $"https://zkillboard.com/region/{id}/";
+                                    addon = $"[(dotlan)](http://evemaps.dotlan.net/map/{id})";
+                                    break;
+                                case 4:
+                                    newUrl = $"https://zkillboard.com/constellation/{id}/";
+                                    break;
+                                case var s when s >= 1373 && s <= 1386:
+                                    newUrl = $"https://zkillboard.com/character/{id}/";
+                                    addon = $"[(who)](https://evewho.com/pilot/{HttpUtility.UrlPathEncode(text)})";
+                                    break;
+                                default:
+                                    isEmpty = true;
+                                    break;
+                            }
+
+                            if (isEmpty)
+                            {
+                                data = text;
+                            }
+                            else if (!string.IsNullOrEmpty(newUrl))
+                            {
+                                data = $"[{text}]({newUrl}) {addon}";
+                            }
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+
                     body = index != 0
-                        ? $"{body.Substring(0, index)}{text}({url}){body.Substring(endTagStart, body.Length - endTagStart)}"
-                        : $"{text}({url}){body.Substring(endTagStart, body.Length - endTagStart)}";
+                        ? $"{body.Substring(0, index)}{data}{body.Substring(endTagStart, body.Length - endTagStart)}"
+                        : $"{data}{body.Substring(endTagStart, body.Length - endTagStart)}";
                 }
 
                 body = body.Replace("</a>", null);
+
+                //data parsing
+
             }
             catch (Exception ex)
             {
@@ -252,6 +333,17 @@ namespace ThunderED.Modules
             }
 
             return body;
+        }
+
+        static IEnumerable<string> Split(string str, int chunkSize)
+        {
+            IEnumerable<string> retVal = Enumerable.Range(0, str.Length / chunkSize)
+                .Select(i => str.Substring(i * chunkSize, chunkSize));
+
+            if (str.Length % chunkSize > 0)
+                retVal = retVal.Append(str.Substring(str.Length / chunkSize * chunkSize, str.Length % chunkSize));
+
+            return retVal;
         }
     }
 }

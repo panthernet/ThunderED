@@ -15,6 +15,7 @@
 + Improved mail parsing and filtering
 + Improved commands help display to be modular depending on the modules being used
 + Improved auth logic (completely rewritten) to use unified secure algorithm
++ Improved mail parsing logic to process links to ZKB, evewho and dotlan
 + Updated !help command text for missing commands
 
 ### Breaking Changes
