@@ -39,7 +39,6 @@ With this bot you will have tools to:
 * Web Auth - authenticate EVE characters in Discord using built-in web server, use JackKnife utility to inspect them before you accept them into your community
 * Auth Check - check users access rights and strip permissions when char leaves your corp or ally
 * Live Kill Feed - feed live EVE killmails using ZKill RedisQ into multiple channels 
-* Reliable Kill Feed - feed killmails for selected corps or alliances in a reliable way using ZKill API
 * Radius Kill Feed - feed live killmails in a radius around selected systems, constellations and regions into multiple channels
 * Notifications Feed - feed EVE notifications from different characters into multiple channels
 * Char & corp search - fetch information about characters and corps using special commands
@@ -48,7 +47,7 @@ With this bot you will have tools to:
 * Ally & Corp Stats - get KM stats for selected alliances or corporations by day, month or year
 * FleetUP integration - announces and reminders for FleetUp ops
 * Timers - built-in web server for important timers and events. Auto add timers for reinforced structure events!
-* Mail Feeder - feed mail by labels from authenticated characters 
+* Mail Feeder - feed mail from characters and mail lists with parsed ingame links
 * Jabber relay - connect with jabbers for cross messaging support
 * IRC relay - exchange messages between IRC & Discord channels
 * Telegram relay - exchange messages between Telegram & Discord channels
