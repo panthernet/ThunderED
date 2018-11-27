@@ -50,7 +50,7 @@ namespace ThunderED.Classes
 
             if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
-                sb.Append("| !pc ");
+                sb.Append("| !pc | !jita | !amarr | !dodixie | !rens ");
             }
 
             if (SettingsManager.Settings.Config.ModuleFWStats)
