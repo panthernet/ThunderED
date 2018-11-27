@@ -196,9 +196,10 @@ namespace ThunderED.Modules
         private async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string from, string mention)
         {
             var stamp = DateTime.Parse(mail.timestamp).ToString(Settings.Config.ShortTimeFormat);
+            var body = await PrepareBodyMessage(mail.body);
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(Settings.Resources.ImgMail)
-                .AddField($"{LM.Get("mailSubject")} {mail.subject}",  await PrepareBodyMessage(mail.body))
+                .AddField($"{LM.Get("mailSubject")} {mail.subject}",  string.IsNullOrWhiteSpace(body) ? "---" : body)
                 .WithFooter($"{LM.Get("mailDate")} {stamp}");
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
             await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {LM.Get("mailMsgTitle", from)}", embed.Build()).ConfigureAwait(false);
@@ -206,7 +207,7 @@ namespace ThunderED.Modules
 
         public static async Task<string> PrepareBodyMessage(string input)
         {
-            if (string.IsNullOrEmpty(input)) return "";
+            if (string.IsNullOrEmpty(input)) return " ";
 
             var body = input.Replace("<br>", Environment.NewLine)
                 .Replace("<b>", "**").Replace("</b>", "**")
@@ -247,7 +248,7 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, LogCat.Mail);
-                return "";
+                return " ";
             }
 
             return body;
