@@ -196,7 +196,7 @@
           "99003558": ["Ally", "Dummy"]
         },
         "authRoles": ["Admins"],
-        "ManualAssigmentRoles":  [ ], 
+        "ManualAssignmentRoles":  [ ], 
         "PreliminaryAuthMode": false,
         "AppInvalidationInHours": 0,
         "ESICustomAuthRoles": [],
@@ -209,7 +209,7 @@
           "99003599": ["Member"]
         },
         "authRoles": [],
-        "ManualAssigmentRoles":  [ ], 
+        "ManualAssignmentRoles":  [ ], 
         "PreliminaryAuthMode": false,
         "AppInvalidationInHours": 0,
         "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
@@ -223,7 +223,7 @@
           "99003599": ["Member"]
         },
         "authRoles": ["Admins"],
-        "ManualAssigmentRoles":  [ ], 
+        "ManualAssignmentRoles":  [ ], 
         "PreliminaryAuthMode": true,
         "AppInvalidationInHours": 480,
         "CustomButtonText":  "Preliminary Auth", 

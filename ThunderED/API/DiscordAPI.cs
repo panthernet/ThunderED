@@ -318,7 +318,7 @@ namespace ThunderED.API
                 var aRoles = discordGuild.Roles.Where(a=> cinfo.Contains(a.Name)).ToList();
                 if (aRoles.Count > 0)
                     result.UpdatedRoles.AddRange(aRoles);
-                result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssigmentRoles);
+                result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssignmentRoles);
                 groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == foundGroup).Key;
             }
             else
@@ -334,7 +334,7 @@ namespace ThunderED.API
                         var aRoles = discordGuild.Roles.Where(a => ainfo.Contains(a.Name)).ToList();
                         if (aRoles.Count > 0)
                             result.UpdatedRoles.AddRange(aRoles);
-                        result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssigmentRoles);
+                        result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssignmentRoles);
                         groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == foundGroup).Key;
                     }
                 }

@@ -24,7 +24,7 @@ WebAuthModule settings undergone following refactoring:
 - Added **AllowedAlliances** and **AllowedCorporations** dictionaries with key corresponding to corp/ally ID and value to a list of Discord roles to assign upon successful auth
 - !auth command currently displays web site main page and is similar to !web command
 - General Discord auth button name now can be changed using the **CustomButtonText** parameter
-- Added ManualAssigmentRoles param to AuthGroup which contains Discord roles which can be granted manually but will be stripped if character leave group corp/ally
+- Added ManualAssignmentRoles param to AuthGroup which contains Discord roles which can be granted manually but will be stripped if character leave group corp/ally
 This will now allow different corps and alliances to auth using a single button but receive different Discord roles based on their corp/ally ID.
 
 WARNING! Auth check logic has also been altered. Previously it could search for user corp/ally ID match in ANY auth group regardless of mode (preliminary or not). 
