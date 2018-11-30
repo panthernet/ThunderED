@@ -196,7 +196,7 @@ namespace ThunderED.Modules
                 if(allyId == 0 && corpId == 0)
                     return;
 
-                bool isAlliance = corpId == 0;
+                bool isAlliance = allyId > 0;
                 var id = isAlliance ? allyId : corpId;
                 entity = string.IsNullOrEmpty(entity) ? (isAlliance ? (await APIHelper.ESIAPI.GetAllianceData("Stats", id))?.name :(await APIHelper.ESIAPI.GetCorporationData("Stats", id))?.name) : entity;
 
