@@ -22,7 +22,7 @@
 
 WebAuthModule settings undergone following refactoring:
 - Removed **CorpIDList, AllianceIDList** and **memberRoles** params
-- Added **AllowedAlliances** and **AllowedCorporations** dictionaries with key corresponding to corp/ally ID and value to a list of Discord roles to assign upon successful auth
+- Added **AllowedAlliances** and **AllowedCorporations** dictionaries with corp and alliance entities inside. **Id** = corp/ally ID and **DiscordRoles** to a list of Discord roles to assign upon successful auth
 - !auth command currently displays web site main page and is similar to !web command
 - General Discord auth button name now can be changed using the **CustomButtonText** parameter
 - Added ManualAssignmentRoles param to AuthGroup which contains Discord roles which can be granted manually but will be stripped if character leave group corp/ally

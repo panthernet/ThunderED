@@ -84,6 +84,69 @@ namespace ThunderED.Modules
             await ProcessPreliminaryApplicant(data.CharacterId, data.CharacterName, data.DiscordUserId, data.GroupName);
         }
 
+        public static AuthRoleEntity GetCorpEntityById(List<WebAuthGroup> groups,long id)
+        {
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
+            foreach (var authGroup in groups)
+            {
+                foreach (var entity in authGroup.AllowedCorporations.Values)
+                {
+                    if (entity.Id == id)
+                        return entity;
+                }
+            }
+
+            return null;
+        }
+
+        public static AuthRoleEntity GetAllyEntityById(List<WebAuthGroup> groups,long id)
+        {
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
+            foreach (var authGroup in groups)
+            {
+                foreach (var entity in authGroup.AllowedAlliances.Values)
+                {
+                    if (entity.Id == id)
+                        return entity;
+                }
+            }
+
+            return null;
+        }
+
+        public static AuthRoleEntity GetAllyEntityById(WebAuthGroup group, long id)
+        {
+            foreach (var entity in group.AllowedAlliances.Values)
+            {
+                if (entity.Id == id)
+                    return entity;
+            }
+
+            return null;
+        }
+
+        public static AuthRoleEntity GetCorpEntityById(WebAuthGroup group,long id)
+        {
+            foreach (var entity in group.AllowedCorporations.Values)
+            {
+                if (entity.Id == id)
+                    return entity;
+            }
+
+            return null;
+        }
+
+        public static WebAuthGroup GetAuthGroupByCorpId(List<WebAuthGroup> groups, long id)
+        {
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
+            return groups.FirstOrDefault(a => a.AllowedCorporations.Values.Any(b=> b.Id == id));
+        }
+
+        public static WebAuthGroup GetAuthGroupByAllyId(List<WebAuthGroup> groups, long id)
+        {
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
+            return groups.FirstOrDefault(a => a.AllowedAlliances.Values.Any(b=> b.Id == id));
+        }
 
         public async Task ProcessPreliminaryApplicant(long characterId, string characterName, ulong discordId, string groupName)
         {
@@ -99,9 +162,9 @@ namespace ThunderED.Modules
                 var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                 if (rChar == null) return;
 
-                var textCorpId = rChar.corporation_id.ToString();
-                var textAllyId = rChar.alliance_id?.ToString();
-                if (group.Value.AllowedCorporations.ContainsKey(textCorpId) || (rChar.alliance_id > 0 && group.Value.AllowedAlliances.ContainsKey(textAllyId)))
+                var longCorpId = rChar.corporation_id;
+                var longAllyId = rChar.alliance_id ?? 0;
+                if (GetCorpEntityById(group.Value, longCorpId) != null || (rChar.alliance_id > 0 && GetAllyEntityById(group.Value, longAllyId) != null))
                 {
                     if (group.Value == null)
                     {
@@ -285,14 +348,14 @@ namespace ThunderED.Modules
                         }
                         else //normal auth
                         {
-                            var textCorpId = rChar.corporation_id.ToString();
-                            var textAllyId = allianceID.ToString();
+                            var longCorpId = rChar.corporation_id;
+                            var longAllyId = allianceID;
 
                             //has custom ESI roles
                             if (inputGroup != null)
                             {
                                 group = inputGroup;
-                                if (group.AllowedCorporations.ContainsKey(textCorpId) || (allianceID != 0 && group.AllowedAlliances.ContainsKey(textAllyId)))
+                                if (GetCorpEntityById(group, longCorpId) != null || (allianceID != 0 && GetAllyEntityById(group, longAllyId) != null))
                                 {
                                     groupName = inputGroupName;
                                     groupPermissions = new List<string>(group.ESICustomAuthRoles);
@@ -306,7 +369,7 @@ namespace ThunderED.Modules
                                 //general auth
                                 foreach (var grp in Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode))
                                 {
-                                    if (grp.Value.AllowedCorporations.ContainsKey(textCorpId) || (allianceID != 0 && grp.Value.AllowedAlliances.ContainsKey(textAllyId)))
+                                    if (GetCorpEntityById(grp.Value, longCorpId) != null || (allianceID != 0 && GetAllyEntityById(grp.Value, longAllyId) != null))
                                     {
                                         cFoundList.Add(rChar.corporation_id);
                                         groupName = grp.Key;

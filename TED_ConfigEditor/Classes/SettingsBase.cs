@@ -140,7 +140,10 @@ namespace TED_ConfigEditor.Classes
                                     var serializer = new JsonSerializer();
                                     serializer.Converters.Add(new StringEnumConverter());
                                     serializer.ObjectCreationHandling = ObjectCreationHandling.Replace;
-                                    serializer.Error += (sender, e) => e.ErrorContext.Handled = true;
+                                    serializer.Error += (sender, e) =>
+                                    {
+                                        e.ErrorContext.Handled = true;
+                                    };
                                     settings = serializer.Deserialize<T>(jsonReader);
                                 }
 

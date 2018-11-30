@@ -1344,10 +1344,10 @@ namespace ThunderED.Classes
 #if EDITOR
         [Comment("Dictionary containing text corporation ID and the list of Discord roles which to assign on successful auth. Additive with AllowedAlliances.")]
        // [Required]
-        public Dictionary<string, ObservableCollection<string>> AllowedCorporations { get; set; } = new Dictionary<string, ObservableCollection<string>>();
+        public ObservableDictionary<string, AuthRoleEntity> AllowedCorporations { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
         [Comment("Dictionary containing text alliance ID and the list of Discord roles which to assign on successful auth.  Additive with AllowedCorporations.")]
        // [Required]
-        public Dictionary<string, ObservableCollection<string>> AllowedAlliances { get; set; } = new Dictionary<string, ObservableCollection<string>>();
+        public ObservableDictionary<string, AuthRoleEntity> AllowedAlliances { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
 
         //[Comment("The list of exact Discord role names to assign")]
        // [Required]
@@ -1369,8 +1369,8 @@ namespace ThunderED.Classes
         public List<string> AuthRoles { get; set; } = new List<string>();
         //public List<int> CorpIDList { get; set; } = new List<int>();
        // public List<int> AllianceIDList { get; set; } = new List<int>();
-        public Dictionary<string, List<string>> AllowedCorporations { get; set; } = new Dictionary<string, List<string>>();
-        public Dictionary<string, List<string>> AllowedAlliances { get; set; } = new Dictionary<string, List<string>>();
+        public Dictionary<string, AuthRoleEntity> AllowedCorporations { get; set; } = new Dictionary<string, AuthRoleEntity>();
+        public Dictionary<string, AuthRoleEntity> AllowedAlliances { get; set; } = new Dictionary<string, AuthRoleEntity>();
         public List<string> ManualAssignmentRoles { get; set; } = new List<string>();
 #endif
         [Comment("Enable auth to require manual acceptance from authorized members")]
@@ -1409,4 +1409,35 @@ namespace ThunderED.Classes
         }
 #endif
     }
+
+    public class AuthRoleEntity: ValidatableSettings
+    {
+        [Comment("Id of the entity (corp or alliance)")]
+        [Required]
+        public long Id { get; set; }
+        
+        [Comment("The list of Discord role names to assign after successful auth")]
+#if EDITOR
+        public ObservableCollection<string> DiscordRoles { get; set; } = new ObservableCollection<string>();
+#else
+        public List<string> DiscordRoles { get; set; } = new List<string>();
+#endif
+
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(Id):
+                        return Id <= 0 ? Compose(nameof(Id), "Id must be greater than zero!") : null;
+                }
+
+                return null;
+            }
+        }
+#endif
+    }
+    
 }

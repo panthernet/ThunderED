@@ -187,13 +187,25 @@
     "enforceCharName": true,
     "authGroups": {
       "Mode1": {
-        "AllowedCorporations":{
-          "98499225": ["Member", "TestRole2"],
-          "98499226": ["Ally"]
+        "AllowedCorporations": {
+          "corp1": {
+            "Id": 98499225,
+            "DiscordRoles": ["Member", "TestRole2"]
+          },
+          "corp2": {
+            "Id": 98499226,
+            "DiscordRoles": ["Ally"]
+          } 
         },
         "AllowedAlliances":{
-          "99003557": ["Member"],
-          "99003558": ["Ally", "Dummy"]
+          "ally1": {
+            "Id": 99003557,
+            "DiscordRoles": ["Member"]
+          },
+          "ally2": {
+            "Id": 99003558,
+            "DiscordRoles": ["Ally", "Dummy"]
+          }
         },
         "authRoles": ["Admins"],
         "ManualAssignmentRoles":  [ ], 
@@ -206,7 +218,10 @@
       "Mode2": {
         "AllowedCorporations": {},
         "AllowedAlliances":{
-          "99003599": ["Member"]
+          "ally1": {
+            "Id": 99003599,
+            "DiscordRoles": ["Member"]
+          }
         },
         "authRoles": [],
         "ManualAssignmentRoles":  [ ], 
@@ -220,7 +235,10 @@
       "Mode3": {
         "AllowedCorporations": {},
         "AllowedAlliances":{
-          "99003599": ["Member"]
+          "ally1": {
+            "Id": 99003599,
+            "DiscordRoles": ["Member"]
+          }
         },
         "authRoles": ["Admins"],
         "ManualAssignmentRoles":  [ ], 

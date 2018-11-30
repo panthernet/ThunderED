@@ -279,6 +279,8 @@ namespace ThunderED.API
             public List<string> ValidManualAssignmentRoles = new List<string>();
         }
 
+
+
         public async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId)
         {
             var discordGuild = GetGuild();
@@ -310,12 +312,12 @@ namespace ThunderED.API
             string groupName = null;
             //Check for Corp roles
             //Find first available corp
-            var textCorpId = characterData.corporation_id.ToString();
-            var foundGroup = groupsToCheck.FirstOrDefault(a => a.AllowedCorporations.ContainsKey(textCorpId));
+            var corpId = characterData.corporation_id;
+            var foundGroup = WebAuthModule.GetAuthGroupByCorpId(groupsToCheck, corpId);
             if (foundGroup != null)
             {
-                var cinfo = foundGroup.AllowedCorporations[textCorpId];
-                var aRoles = discordGuild.Roles.Where(a=> cinfo.Contains(a.Name)).ToList();
+                var cinfo = WebAuthModule.GetCorpEntityById(groupsToCheck, corpId);
+                var aRoles = discordGuild.Roles.Where(a=> cinfo.DiscordRoles.Contains(a.Name)).ToList();
                 if (aRoles.Count > 0)
                     result.UpdatedRoles.AddRange(aRoles);
                 result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssignmentRoles);
@@ -326,12 +328,12 @@ namespace ThunderED.API
                 //If no corps found, search for an alliance
                 if (characterData.alliance_id != null)
                 {
-                    var textAllianceId = characterData.alliance_id.ToString();
-                    foundGroup = groupsToCheck.FirstOrDefault(a => a.AllowedAlliances.ContainsKey(textAllianceId));
+                    var allianceId = characterData.alliance_id ?? 0;
+                    foundGroup = WebAuthModule.GetAuthGroupByAllyId(groupsToCheck, allianceId);
                     if (foundGroup != null)
                     {
-                        var ainfo = foundGroup.AllowedAlliances[textAllianceId];
-                        var aRoles = discordGuild.Roles.Where(a => ainfo.Contains(a.Name)).ToList();
+                        var ainfo = WebAuthModule.GetAllyEntityById(groupsToCheck, allianceId);
+                        var aRoles = discordGuild.Roles.Where(a => ainfo.DiscordRoles.Contains(a.Name)).ToList();
                         if (aRoles.Count > 0)
                             result.UpdatedRoles.AddRange(aRoles);
                         result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssignmentRoles);
