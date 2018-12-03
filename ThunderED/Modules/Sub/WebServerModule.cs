@@ -253,7 +253,11 @@ namespace ThunderED.Modules.Sub
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"http://{extIp}:{extPort}/";
+            var text = !string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) && SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.Contains(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
+                ? $"auth.php?group={HttpUtility.UrlEncode(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)}"
+                : null;
+            return $"http://{extIp}:{extPort}/{text}";
+            //http://185.104.63.172:30001/auth.php?group=Mode2
         }
 
         internal static string GetAuthUrl()
