@@ -52,6 +52,8 @@ namespace ThunderED.Classes
         public HRMModuleSettings HRMModule { get; set; } = new HRMModuleSettings();
         [ConfigEntryName("ModuleSystemLogFeeder")]
         public SystemLogFeederSettings SystemLogFeederModule { get; set; } = new SystemLogFeederSettings();
+        [ConfigEntryName("ModuleStats")]
+        public StatsModuleSettings StatsModule { get; set; } = new StatsModuleSettings();
 
         [ConfigEntryName("")]
         [StaticConfigEntry]
@@ -86,6 +88,45 @@ namespace ThunderED.Classes
         }
 #endif
     }
+
+    public class StatsModuleSettings
+    {
+        public bool EnableStatsCommand { get; set; } = true;
+#if EDITOR
+        public ObservableDictionary<string, DailyStatsGroup> DailyStatsGroups { get; set; } = new  ObservableDictionary<string, DailyStatsGroup>();
+#else
+        public Dictionary<string, DailyStatsGroup> DailyStatsGroups { get; set; } = new  Dictionary<string, DailyStatsGroup>();
+#endif
+
+    }
+
+    public class DailyStatsGroup: ValidatableSettings
+    {
+        [Comment("Numeric discord channel ID for auto posting daily stats upon new day")]
+        public ulong DailyStatsChannel { get; set; }
+        [Comment("Default numeric corporation ID to display stats for. Mutually exclusive with DailyStatsAlliance")]
+        public long DailyStatsCorp { get; set; }
+        [Comment("Default numeric alliance ID to display stats for. Mutually exclusive with DailyStatsCorp")]
+        public long DailyStatsAlliance { get; set; }
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(DailyStatsChannel):
+                        return DailyStatsChannel == 0? Compose(nameof(DailyStatsChannel), "DailyStatsChannel must be specified!") : null;
+                    case nameof(DailyStatsCorp):
+                        return DailyStatsCorp == 0 && DailyStatsAlliance == 0? Compose(nameof(DailyStatsAlliance), "DailyStatsCorp or DailyStatsAlliance must be specified!") : null;
+                }
+
+                return null;
+            }
+        }
+#endif
+    }
+
 
     public class HRMModuleSettings: ValidatableSettings
     {
@@ -136,28 +177,12 @@ namespace ThunderED.Classes
 #else
         public List<ulong> TQStatusPostChannels { get; set; } = new List<ulong>();
 #endif
-        [Comment("Enable posting daily stats about corp or alliance into a Discord channel")]
-        public bool EnableDalyStatsPost { get; set; }
-
-        [Comment("Numeric discord channel ID for auto posting daily stats upon new day. Leave 0 to disable")]
-        public ulong DailyStatsChannel { get; set; }
-        [Comment("Default numeric corporation ID to display stats for. Mutually exclusive with AutodailyStatsDefaultAlliance")]
-        public long DailyStatsDefaultCorp { get; set; }
-        [Comment("Default numeric alliance ID to display stats for. Mutually exclusive with AutoDailyStatsDefaultCorp")]
-        public long DailyStatsDefaultAlliance { get; set; }
 
 #if EDITOR
         public override string this[string columnName]
         {
             get
             {
-                switch (columnName)
-                {
-                    case nameof(DailyStatsDefaultCorp):
-                        return EnableDalyStatsPost && DailyStatsDefaultCorp == 0 && DailyStatsDefaultAlliance == 0? Compose(nameof(DailyStatsDefaultCorp), "Either DailyStatsDefaultCorp or DailyStatsDefaultAlliance must be specified!") : null;
-
-                }
-
                 return null;
             }
         }
@@ -345,29 +370,6 @@ namespace ThunderED.Classes
                         return DiscordChannel == 0? Compose(nameof(DiscordChannel), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(CorpID):
                         return CorpID == 0 && AllianceID == 0? Compose(nameof(AllianceID), "Either CorpID or AllianceID must be specified!") : null;
-                }
-
-                return null;
-            }
-        }
-#endif
-    }
-
-    public class StatsModuleSettings: ValidatableSettings
-    {
-        public ulong AutoDailyStatsChannel { get; set; }
-        public long AutoDailyStatsDefaultCorp { get; set; }
-        public long AutodailyStatsDefaultAlliance { get; set; }
-
-#if EDITOR
-        public override string this[string columnName]
-        {
-            get
-            {
-                switch (columnName)
-                {
-                    case nameof(AutoDailyStatsDefaultCorp):
-                        return AutoDailyStatsDefaultCorp == 0 && AutodailyStatsDefaultAlliance == 0? Compose(nameof(AutoDailyStatsDefaultCorp), "Either AutoDailyStatsDefaultCorp or AutodailyStatsDefaultAlliance must be specified!") : null;
                 }
 
                 return null;

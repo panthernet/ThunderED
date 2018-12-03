@@ -835,7 +835,10 @@ namespace ThunderED.Classes
 
             try
             {
-                await ContinuousCheckModule.Stats(Context, "m");
+                if(SettingsManager.Settings.Config.ModuleStats && SettingsManager.Settings.StatsModule.EnableStatsCommand)
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpStat")}");
+
+               // await ContinuousCheckModule.Stats(Context, "m");
             }
             catch (Exception ex)
             {
@@ -854,7 +857,10 @@ namespace ThunderED.Classes
 
             try
             {
-                await ContinuousCheckModule.Stats(Context, "m");
+               // await ContinuousCheckModule.Stats(Context, "m");
+                if(SettingsManager.Settings.Config.ModuleStats && SettingsManager.Settings.StatsModule.EnableStatsCommand)
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpStat")}");
+
             }
             catch (Exception ex)
             {

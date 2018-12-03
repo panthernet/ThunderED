@@ -22,7 +22,6 @@
     "moduleJabber": false,
     "moduleMOTD": false,
     "moduleNotificationFeed": false,
-    "ModuleStats": true,
     "moduleTimers": false,
     "moduleMail": false,
     "moduleIRC": false,
@@ -34,6 +33,7 @@
     "ModuleLPStock": false, 
     "moduleHRM":  false, 
     "ModuleSystemLogFeeder":  false, 
+    "ModuleStats":  true, 
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -57,12 +57,18 @@
   "ContinousCheckModule": {
     "EnableTQStatusPost": true,
     "TQStatusPostMention": "@here",
-    "TQStatusPostChannels": [],
+    "TQStatusPostChannels": []
+  },
 
-    "EnableDalyStatsPost":  false,
-    "DailyStatsChannel": 0,
-    "DailyStatsDefaultCorp": 0,
-    "DailyStatsDefaultAlliance": 0
+  "StatsModule": {
+    "EnableStatsCommand":  true, 
+    "DailyStatsGroups": {
+      "group1": {
+        "DailyStatsChannel": 0,
+        "DailyStatsCorp": 0,
+        "DailyStatsAlliance": 0
+      } 
+    } 
   },
 
   "HRMModule": {
