@@ -419,7 +419,7 @@ namespace ThunderED.Classes
                            // code = code ?? await SQLHelper.PendingUsersGetCode(characterId);
                             var discordUserId = await SQLHelper.PendingUsersGetDiscordId(code);
 
-                            await WebAuthModule.AuthUser(Context, code, discordUserId);
+                            await WebAuthModule.AuthUser(Context, code, discordUserId, true);
                             await SQLHelper.UserTokensSetAuthState(code, 2);
                             return;
                         }
@@ -748,7 +748,7 @@ namespace ThunderED.Classes
                     }
                     else
                     {
-                        await WebAuthModule.AuthUser(Context, x, 0);
+                        await WebAuthModule.AuthUser(Context, x, 0, true);
                     }
                 }
                 catch (Exception ex)

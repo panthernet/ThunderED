@@ -177,7 +177,7 @@ namespace ThunderED.Modules
 
                     //auth
                     var code = await SQLHelper.PendingUsersGetCode(characterId);
-                    await AuthUser(null, code, discordId);
+                    await AuthUser(null, code, discordId, false);
                 }
             }
             catch (Exception ex)
@@ -476,7 +476,7 @@ namespace ThunderED.Modules
         }
 
 
-        internal static async Task AuthUser(ICommandContext context, string remainder, ulong discordId)
+        internal static async Task AuthUser(ICommandContext context, string remainder, ulong discordId, bool isManualAuth)
         {
             JsonClasses.CharacterData characterData = null;
             try
@@ -499,7 +499,7 @@ namespace ThunderED.Modules
                 var characterID = pendingUser.CharacterId.ToString();
 
                 //check if we fit some group
-                var result = await APIHelper.DiscordAPI.GetRoleGroup(Convert.ToInt64(characterID), discordId);
+                var result = await APIHelper.DiscordAPI.GetRoleGroup(Convert.ToInt64(characterID), discordId, isManualAuth);
                 var groupName = result?.GroupName;
                 //pass auth
                 if (!string.IsNullOrEmpty(groupName))
@@ -553,7 +553,7 @@ namespace ThunderED.Modules
 
                     //run roles assignment
                     await APIHelper.DiscordAPI.UpdateUserRoles(discordId, SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles,
-                        SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles);
+                        SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles, isManualAuth);
 
                     //notify about success
                     if(channel != 0)
@@ -561,8 +561,8 @@ namespace ThunderED.Modules
                 }
                 else
                 {
-                    await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, LM.Get("ESIFailure")).ConfigureAwait(false);
-                    await LogHelper.LogError("ESI Failure", LogCat.AuthWeb);
+                    await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, "Unable to accept user as he don't fit into auth group access criteria!").ConfigureAwait(false);
+                    await LogHelper.LogError("ESI Failure or No Access", LogCat.AuthWeb);
                 }
             }
             catch (Exception ex)

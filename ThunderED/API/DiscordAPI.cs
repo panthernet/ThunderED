@@ -281,7 +281,7 @@ namespace ThunderED.API
 
 
 
-        public async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId)
+        public async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId, bool isManualAuth = false)
         {
             var discordGuild = GetGuild();
             var u = discordGuild.GetUser(discordUserId);
@@ -342,12 +342,23 @@ namespace ThunderED.API
                 }
             }
 
+            if (foundGroup == null && isManualAuth)
+            {
+                var token = await SQLHelper.UserTokensGetEntry(characterID);
+                if (token != null && !string.IsNullOrEmpty(token.GroupName))
+                {
+                    var group = SettingsManager.Settings.WebAuthModule.AuthGroups[token.GroupName];
+                    if (!group.AllowedAlliances.Any() && !group.AllowedCorporations.Any())
+                        groupName = token.GroupName;
+                }
+            }
+
             result.UpdatedRoles = result.UpdatedRoles.Distinct().ToList();
             result.GroupName = groupName;
             return result;
         }
 
-        public async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles)
+        public async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles, bool isManualAuth)
         {
             var discordGuild = GetGuild();
             var u = discordGuild.GetUser(discordUserId);
@@ -370,7 +381,7 @@ namespace ThunderED.API
 
                     var initialUserRoles = new List<SocketRole>(u.Roles);
                     var remroles = new List<SocketRole>();
-                    var result = await GetRoleGroup(Convert.ToInt64(characterID), discordUserId);
+                    var result = await GetRoleGroup(Convert.ToInt64(characterID), discordUserId, isManualAuth);
 
                     var changed = false;
                     var isAuthed = result.UpdatedRoles.Count > 0;
@@ -481,7 +492,7 @@ namespace ThunderED.API
 
             foreach (var u in discordUsers)
             {
-                await UpdateUserRoles(u.Id, exemptRoles, authCheckIgnoreRoles);
+                await UpdateUserRoles(u.Id, exemptRoles, authCheckIgnoreRoles, false);
             }
         }
 
