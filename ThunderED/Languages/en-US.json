@@ -344,5 +344,6 @@
   "helpRehash":  "Reloads settings from file and reinitializes the bot" ,
   "helpReauth":  "Runs Discord authentication check for all users in a group",
   "statUnknownCommandSyntax":  "Unknown !stat command parameter or wrong syntax",
-  "statNoDataFound":  "No data found for requested time period" 
+  "statNoDataFound":  "No data found for requested time period",
+  "authAcceptHelp":  ":no_entry_sign: Please specify code or character ID for authentication" 
 }

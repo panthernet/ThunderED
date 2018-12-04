@@ -338,6 +338,7 @@
   "helpRehash":  "Перезагружает настройки из файла и переинциализирует бота " ,
   "helpReauth":  "Запускает проверку аутентификации Discord для всех пользователей группы",
   "statUnknownCommandSyntax":  "Неизвестный параметр команды !stat или неправильный синтаксис",
-  "statNoDataFound":  "No data found for requested time period" 
+  "statNoDataFound":  "No data found for requested time period",
+  "authAcceptHelp":  ":no_entry_sign: Пожалуйста, укажите код или идентификатор персонажа для аутентификации" 
 
 }

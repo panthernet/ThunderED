@@ -341,6 +341,7 @@ namespace ThunderED.Classes
         {
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
+
                 var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a=> a.Key == group);
                 if (grp.Value != null)
                 {
@@ -742,6 +743,17 @@ namespace ThunderED.Classes
             {
                 try
                 {
+                    if (!string.IsNullOrEmpty(x))
+                    {
+                        switch (x)
+                        {
+                            case "accept":
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authAcceptHelp"));
+                                return;
+                        }
+
+                    }
+
                     if (APIHelper.DiscordAPI.IsUserMention(Context))
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authInvite"), true);
