@@ -1,6 +1,7 @@
 ### V1.2.5
 + Fixed auth url display based on DefaultGroup param. Points to the web root if this param is empty.
 + Fixed manual auth accept for users applied under groups with no allowed corp or allies specified
++ Improved mail url parsing
 + Improved stats handling allowing multiple daily stats posts and moved it into the separate module
 
 ### BREAKING CHANGES

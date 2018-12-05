@@ -254,7 +254,11 @@ namespace ThunderED.Modules
                     bool isEmpty = false;
                     try
                     {
-                        if (url.StartsWith("fitting"))
+                        if (url.StartsWith("http"))
+                        {
+                            data = url;
+                        }
+                        else if (url.StartsWith("fitting"))
                         {
 
                         }

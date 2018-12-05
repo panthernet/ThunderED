@@ -492,6 +492,7 @@ namespace ThunderED.API
 
             foreach (var u in discordUsers)
             {
+                await LogHelper.LogInfo($"AuthCheck =-> {u.Nickname} ({u.Username})", LogCat.AuthCheck, true, false);
                 await UpdateUserRoles(u.Id, exemptRoles, authCheckIgnoreRoles, false);
             }
         }
