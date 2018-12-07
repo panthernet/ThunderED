@@ -97,11 +97,18 @@ namespace ThunderED.API
         }
 
 
-        internal async Task<JsonClasses.StructureData> GetStructureData(string reason, string id, string token)
+        internal async Task<JsonClasses.StructureData> GetStructureData(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.StructureData>($"https://esi.tech.ccp.is/latest/universe/structures/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
         }
+
+        internal async Task<JsonClasses.StationData> GetStationData(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<JsonClasses.StationData>($"https://esi.tech.ccp.is/latest/universe/stations/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
 
         internal async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, object id)
         {
@@ -361,6 +368,27 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<List<JsonClasses.Contract>>($"https://esi.tech.ccp.is/latest/characters/{id}/contracts/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
+        public async Task<List<JsonClasses.Contract>> GetCorpContracts(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.Contract>>($"https://esi.tech.ccp.is/latest/corporations/{id}/contracts/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
+        public async Task<List<JsonClasses.ContractItem>> GetCharacterContractItems(string reason, object charId, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.ContractItem>>($"https://esi.tech.ccp.is/latest/characters/{charId}/contracts/{id}/items/?datasource=tranquility&language={_language}", reason, authHeader);
+
+        }
+
+        public async Task<List<JsonClasses.ContractItem>> GetCorpContractItems(string reason, object corpId, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.ContractItem>>($"https://esi.tech.ccp.is/latest/corporation/{corpId}/contracts/{id}/items/?datasource=tranquility&language={_language}", reason, authHeader);
+
+        }
+
+
         public async Task<List<JsonClasses.Contact>> GetCharacterContacts(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
@@ -374,5 +402,6 @@ namespace ThunderED.API
         }
 
 
+        
     }
 }

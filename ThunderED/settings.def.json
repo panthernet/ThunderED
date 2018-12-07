@@ -34,6 +34,7 @@
     "moduleHRM":  false, 
     "ModuleSystemLogFeeder":  false, 
     "ModuleStats":  true, 
+    "ModuleContractNotifications":  false, 
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -47,6 +48,23 @@
     "databaseProvider":  "sqlite",
     "databaseFile": "edb.db",
     "requestRetries": 3
+  },
+
+  "ContractNotificationsModule": {
+    "CheckIntervalInMinutes":  1,
+    "MaxTrackingCount":  150, 
+    "Groups": {
+      "group1": {
+        "CharacterIDs": [],
+        "DiscordChannelId": 0, 
+        "FeedPersonalContracts":  true,
+        "FeedCorporateContracts":  true,
+        "ContractAvailability":  ["public", "personal", "corporation", "alliance"],
+        "ContractTypes":  ["unknown", "item_exchange", "auction", "courier", "loan"],
+        "ButtonText":  "Default Contracts Auth",
+        "DefaultMention": ""
+      } 
+    } 
   },
 
   "SystemLogFeederModule": {
@@ -305,7 +323,9 @@
     "ImgFactionGallente":  "https://wiki.eveuniversity.org/images/b/b9/Logo_faction_gallente_federation.png", 
     "ImgFactionAmarr":  "https://wiki.eveuniversity.org/images/a/a0/Logo_faction_amarr_empire.png",
     "ImgFactionMinmatar":  "https://wiki.eveuniversity.org/images/1/1f/Logo_faction_minmatar_republic.png",
-    "imgEntosisAlert":  "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgEntosisAlert.png" 
+    "imgEntosisAlert":  "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgEntosisAlert.png",
+    "ImgContract": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgContract.png",
+    "ImgContractDelete": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgContractDelete.png"
   },
 
   "notificationFeedModule": {

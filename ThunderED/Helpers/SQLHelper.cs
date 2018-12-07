@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Json;
@@ -77,9 +78,9 @@ namespace ThunderED.Helpers
         }
         #endregion
 
-        internal static async Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken)
+        internal static async Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken, string contractsToken)
         {
-            await Provider?.SQLiteDataInsertOrUpdateTokens(notifyToken, userId, mailToken);
+            await Provider?.SQLiteDataInsertOrUpdateTokens(notifyToken, userId, mailToken, contractsToken);
         }
 
         internal static async Task<IList<IDictionary<string, object>>> GetAuthUser(ulong uId, bool order = false)
@@ -423,6 +424,11 @@ namespace ThunderED.Helpers
             });
         }
 
+        public static async Task<string> GetRefreshTokenForContracts(long charId)
+        {
+            return await SQLHelper.SQLiteDataQuery<string>("refreshTokens", "ctoken", "id", charId);
+        }
+
         public static async Task UserTokensSetAuthState(long characterId, int value)
         {
             await SQLiteDataUpdate("userTokens", "authState", value, "characterID", characterId);
@@ -475,5 +481,31 @@ namespace ThunderED.Helpers
         {
             await SQLiteDataUpdate("pendingUsers", "active", "0", "authString", remainder);
         }
+
+        public static async Task DeleteAuthDataByCharId(long characterID)
+        {
+            await SQLiteDataDelete("userTokens", "characterID", characterID);
+            await SQLiteDataDelete("pendingUsers", "characterID", characterID.ToString());
+            await SQLiteDataDelete("authUsers", "characterID", characterID.ToString());
+        }
+
+        public static async Task<List<JsonClasses.Contract>> LoadContracts(long characterID, bool isCorp)
+        {
+            var data = (string)(await SelectData("contracts", new [] {"data"}, new Dictionary<string, object> {{"type", isCorp ? 0 : 1}, {"characterID", characterID}}))?.FirstOrDefault()?.FirstOrDefault();
+            return string.IsNullOrEmpty(data) ? null : JsonConvert.DeserializeObject<List<JsonClasses.Contract>>(data).OrderByDescending(a=> a.contract_id).ToList();
+        }
+
+        public static async Task SaveContracts(long characterID, List<JsonClasses.Contract> data, bool isCorp)
+        {
+            var result = JsonConvert.SerializeObject(data);
+            await SQLiteDataInsertOrUpdate("contracts", new Dictionary<string, object>
+            {
+                {"characterID", characterID},
+                {"type", isCorp ? 0 : 1},
+                {"data", result}
+            });
+        }
+
+
     }
 }

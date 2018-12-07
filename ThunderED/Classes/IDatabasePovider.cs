@@ -19,7 +19,7 @@ namespace ThunderED.Classes
 
         Task SQLiteDataDelete(string table, string whereField = null, object whereValue = null);
         Task SQLiteDataDelete(string table, Dictionary<string, object> where);
-        Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken);
+        Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken, string contractsToken);
         Task<IList<IDictionary<string, object>>> GetAuthUser(ulong uId, bool order = false);
         Task RunCommand(string query2, bool silent);
         Task<T> SQLiteDataSelectCache<T>(object whereValue, int maxDays);

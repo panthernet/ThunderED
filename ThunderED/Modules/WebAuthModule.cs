@@ -294,7 +294,7 @@ namespace ThunderED.Modules
                        // var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
 
                         var x = prms.Last().Split('=');
-                        var inputGroupName = x.Length > 1 ? x[1].Substring(1, x[1].Length - 1) : null;
+                        var inputGroupName = x.Length > 1 ? HttpUtility.UrlDecode(x[1].Substring(1, x[1].Length - 1)) : null;
                         var inputGroup = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key.Equals(inputGroupName, StringComparison.OrdinalIgnoreCase)).Value;
 
                         var result = await GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
@@ -378,11 +378,29 @@ namespace ThunderED.Modules
                                         break;
                                     }
                                 }
+
+                                //for guest mode during general auth
+                                if (!add)
+                                {
+                                    var grp = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a =>
+                                        a.Value.AllowedAlliances.Values.All(b => b.Id == 0) && a.Value.AllowedCorporations.Values.All(b => b.Id == 0));
+                                    if (grp.Value != null)
+                                    {
+                                        add = true;
+                                        groupName = grp.Key;
+                                        group = grp.Value;
+                                        cFoundList.Add(rChar.corporation_id);
+                                    }
+                                }
+
                             }
                         }
 
                         if (add)
                         {
+                            //cleanup prev auth
+                            await SQLHelper.DeleteAuthDataByCharId(Convert.ToInt64(characterID));
+
                             if (!string.IsNullOrEmpty(result[1]))
                             {
                                 await SQLHelper.SQLiteDataInsertOrUpdate("userTokens", new Dictionary<string, object>

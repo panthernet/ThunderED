@@ -10,7 +10,7 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6"
         };
 
         public static async Task<bool> Upgrade()
@@ -101,6 +101,12 @@ namespace ThunderED.Helpers
                                 return false;
                             }
 
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
+                        case "1.2.6":
+                            await BackupDatabase();
+                            await RunCommand("ALTER TABLE `refreshTokens` ADD COLUMN `ctoken` TEXT;");
+                            await RunCommand("CREATE TABLE contracts(`characterID` INTEGER PRIMARY KEY NOT NULL,`type` INTEGER NOT NULL,`data` TEXT NOT NULL);");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:

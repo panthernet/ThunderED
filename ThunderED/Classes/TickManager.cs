@@ -75,6 +75,9 @@ namespace ThunderED.Classes
             if(SettingsManager.Settings.Config.ModuleNullsecCampaign)
                 Modules.Add(new NullCampaignModule());
 
+            if(SettingsManager.Settings.Config.ModuleContractNotifications)
+                Modules.Add(new ContractNotificationsModule());
+
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
                 OnDemandModules.Add(new LiveKillFeedModule());

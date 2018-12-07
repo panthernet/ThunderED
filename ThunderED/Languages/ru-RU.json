@@ -183,7 +183,6 @@
   "mailAuthSuccessBody": "Теперь почта вашего персонажа может быть перенаправлена в Discord!", 
   "authButtonMailText":  "Почта",
   "webWelcomeHeader":  "Добро пожаловать на сервер ThunderED!",
-  "webAuthHeader":  "Аутентификация", 
   "mailSubject":  "Тема:", 
   "mailLabels":  "Ярлыки:", 
   "mailDate":  "Дата:", 
@@ -339,6 +338,12 @@
   "helpReauth":  "Запускает проверку аутентификации Discord для всех пользователей группы",
   "statUnknownCommandSyntax":  "Неизвестный параметр команды !stat или неправильный синтаксис",
   "statNoDataFound":  "No data found for requested time period",
-  "authAcceptHelp":  ":no_entry_sign: Пожалуйста, укажите код или идентификатор персонажа для аутентификации" 
+  "authAcceptHelp":  ":no_entry_sign: Пожалуйста, укажите код или идентификатор персонажа для аутентификации",
+  "contractAuthSuccessHeader": "Аутентификация выполнена!",
+  "contractAuthSuccessBody": "Теперь информация о контрактах может быть перенаправлена в Discord!",
+  "contractSubject":  "Контракт",
+  "butGeneralAuthPage":  "Аутентификация",
+  "authWebDiscordHeader":   "Аутентификация Discord",
+  "authWebSystemHeader":   "Системная Аутентификация"
 
 }

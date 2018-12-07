@@ -182,7 +182,6 @@
   "mailAuthSuccessBody": "Now your characters mail сan be read and redirected to Discord!",
   "authButtonMailText": "Mail Auth",
   "webWelcomeHeader": "Welcome to ThunderED server!",
-  "webAuthHeader": "Authentication",
   "mailSubject": "Subject:",
   "mailLabels": "Labels:",
   "mailDate": "Date:",
@@ -345,5 +344,11 @@
   "helpReauth":  "Runs Discord authentication check for all users in a group",
   "statUnknownCommandSyntax":  "Unknown !stat command parameter or wrong syntax",
   "statNoDataFound":  "No data found for requested time period",
-  "authAcceptHelp":  ":no_entry_sign: Please specify code or character ID for authentication" 
+  "authAcceptHelp":  ":no_entry_sign: Please specify code or character ID for authentication",
+  "contractAuthSuccessHeader": "Authentication complete!",
+  "contractAuthSuccessBody": "Now your contracts data сan be read and redirected to Discord!",
+  "contractSubject":  "Contract",
+  "butGeneralAuthPage":  "Authentication",
+  "authWebDiscordHeader":   "Discord Authentication",
+  "authWebSystemHeader":   "System Authentication"
 }

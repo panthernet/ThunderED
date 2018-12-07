@@ -911,7 +911,7 @@ namespace ThunderED.Modules
 
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
 
-                    await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null);
+                    await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null, "");
                     await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                         .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))

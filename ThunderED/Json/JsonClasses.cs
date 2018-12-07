@@ -92,6 +92,14 @@ namespace ThunderED.Json
             public long solar_system_id;
         }
 
+        
+        internal class StationData
+        {
+            public string name;
+            public long system_id;
+            public long station_id;
+        }
+
         internal class ConstellationData
         {
             public long constellation_id;
@@ -290,6 +298,7 @@ namespace ThunderED.Json
             public long acceptor_id;
             public long assignee_id;
             public string availability;//"public", "personal"
+            public double buyout;
             public double collateral;
             public long contract_id;
             public string date_accepted;
@@ -310,13 +319,13 @@ namespace ThunderED.Json
             public double volume;
 
             [JsonIgnore]
-            public DateTime? DateExpired => string.IsNullOrEmpty(date_expired) ? null : (DateTime?)DateTime.Parse(date_expired);
+            public DateTime? DateExpired => string.IsNullOrEmpty(date_expired) ? null : (DateTime?)DateTime.Parse(date_expired).ToUniversalTime();
             [JsonIgnore]
-            public DateTime? DateIssued => string.IsNullOrEmpty(date_issued) ? null : (DateTime?)DateTime.Parse(date_issued);
+            public DateTime? DateIssued => string.IsNullOrEmpty(date_issued) ? null : (DateTime?)DateTime.Parse(date_issued).ToUniversalTime();
             [JsonIgnore]
-            public DateTime? DateCompleted => string.IsNullOrEmpty(date_completed) ? null : (DateTime?)DateTime.Parse(date_completed);
+            public DateTime? DateCompleted => string.IsNullOrEmpty(date_completed) ? null : (DateTime?)DateTime.Parse(date_completed).ToUniversalTime();
             [JsonIgnore]
-            public DateTime? DateAccepted => string.IsNullOrEmpty(date_accepted) ? null : (DateTime?)DateTime.Parse(date_accepted);
+            public DateTime? DateAccepted => string.IsNullOrEmpty(date_accepted) ? null : (DateTime?)DateTime.Parse(date_accepted).ToUniversalTime();
         }
 
         public class Contact
@@ -485,6 +494,16 @@ namespace ThunderED.Json
         {
             public long mailing_list_id;
             public string name;
+        }
+
+        public class ContractItem
+        {
+            public bool is_included;
+            public bool is_singleton;
+            public long quantity;
+            public long record_id;
+            public long type_id;
+
         }
     }
 }

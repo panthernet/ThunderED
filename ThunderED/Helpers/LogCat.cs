@@ -35,6 +35,7 @@
         AutoPost,
         Continuous,
         HRM,
-        SLF
+        SLF,
+        ContractNotification
     }
 }

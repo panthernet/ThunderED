@@ -62,7 +62,15 @@ namespace ThunderED.Modules
                             return true;
                         }
 
-                        await SQLHelper.SQLiteDataInsertOrUpdateTokens("", result[0], result[1]);
+                        var lCharId = Convert.ToInt64(result[0]);
+
+                        if (Settings.MailModule.AuthGroups.Values.All(a => a.Id != lCharId))
+                        {
+                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Mail Module", LM.Get("accessDenied")), response);
+                            return true;
+                        }
+
+                        await SQLHelper.SQLiteDataInsertOrUpdateTokens("", result[0], result[1], "");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
                             .Replace("{header}", "authTemplateHeader")
                             .Replace("{body}", LM.Get("mailAuthSuccessHeader"))
@@ -183,10 +191,12 @@ namespace ThunderED.Modules
                     if(prevMailId != lastMailId || lastMailId == 0)
                         await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", group.Id.ToString()}, {"mailId", lastMailId}});
                 }
+                await LogHelper.LogModule("Completed", Category);
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
+                await LogHelper.LogModule("Completed", Category);
             }
             finally
             {
@@ -198,7 +208,7 @@ namespace ThunderED.Modules
         {
             var stamp = DateTime.Parse(mail.timestamp).ToString(Settings.Config.ShortTimeFormat);
             var body = await PrepareBodyMessage(mail.body);
-            var fields = Split(body, 1023);
+            var fields = body.Split(1023);
 
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(Settings.Resources.ImgMail);
@@ -258,9 +268,13 @@ namespace ThunderED.Modules
                         {
                             data = url;
                         }
+                        else if (url.StartsWith("joinChannel"))
+                        {
+                            data = $"[{text}](<url={url}>{text}</url>)";
+                        }
                         else if (url.StartsWith("fitting"))
                         {
-
+                            data = text;
                         }
                         else if (url.StartsWith("killReport"))
                         {
@@ -339,15 +353,6 @@ namespace ThunderED.Modules
             return body;
         }
 
-        static IEnumerable<string> Split(string str, int chunkSize)
-        {
-            IEnumerable<string> retVal = Enumerable.Range(0, str.Length / chunkSize)
-                .Select(i => str.Substring(i * chunkSize, chunkSize));
 
-            if (str.Length % chunkSize > 0)
-                retVal = retVal.Append(str.Substring(str.Length / chunkSize * chunkSize, str.Length % chunkSize));
-
-            return retVal;
-        }
     }
 }

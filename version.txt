@@ -1,3 +1,20 @@
+### V1.2.6
++ Added new ContractNotificationsModule
++ Added guest auth mode
++ Fixed whitespaces in auth group names preventing correct auth
++ Improved auth cleanup
++ Moved authentication buttons to the separate page
+
+### Breaking Changes
+
+- Added two new images into config: ImgContract and ImgContractDelete
+- Added new translations
+
+### FEATURE HIGHLIGHT - CONTRACTS FEED
+
+It is now possible to track contracts for character/corporation and feed notifications into different channels.
+This feed supports different filters by contract type, availability and asignee.
+
 ### V1.2.5
 + Fixed auth url display based on DefaultGroup param. Points to the web root if this param is empty.
 + Fixed manual auth accept for users applied under groups with no allowed corp or allies specified

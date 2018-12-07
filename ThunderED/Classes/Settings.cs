@@ -59,6 +59,9 @@ namespace ThunderED.Classes
         [StaticConfigEntry]
         public ContinousCheckModuleSettings ContinousCheckModule { get; set; } = new ContinousCheckModuleSettings();
 
+        [ConfigEntryName("ModuleContractNotifications")]
+        public ContractNotificationsModuleSettings ContractNotificationsModule { get; set; } = new ContractNotificationsModuleSettings();
+
 #if EDITOR
         public string Validate(List<string> usedModules)
         {
@@ -85,6 +88,70 @@ namespace ThunderED.Classes
             }
 
             return sb.ToString();
+        }
+#endif
+    }
+
+    public class ContractNotificationsModuleSettings: ValidatableSettings
+    {
+        [Required]
+        [Comment("Check interval in minutes")]
+        public int CheckIntervalInMinutes { get; set; } = 1;
+
+        [Comment("Maximum number of last contracts to check")]
+        public int MaxTrackingCount { get; set; } = 150;
+#if EDITOR
+        public ObservableDictionary<string, ContractNotifyGroup> Groups = new ObservableDictionary<string, ContractNotifyGroup>();
+#else
+        public Dictionary<string, ContractNotifyGroup> Groups = new Dictionary<string, ContractNotifyGroup>();
+#endif
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(CheckIntervalInMinutes):
+                        return CheckIntervalInMinutes == 0? Compose(nameof(CheckIntervalInMinutes), "CheckIntervalInMinutes must be greater than 0!") : null;
+                }
+
+                return null;
+            }
+        }
+#endif
+    }
+
+    public class ContractNotifyGroup: ValidatableSettings
+    {
+#if EDITOR
+        public ObservableCollection<long> CharacterIDs { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<string> ContractAvailability { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> ContractTypes { get; set; } = new ObservableCollection<string>();
+#else
+        public List<long> CharacterIDs { get; set; } = new List<long>();
+        public List<string> ContractAvailability { get; set; } = new List<string>();
+        public List<string> ContractTypes { get; set; } = new List<string>();
+#endif
+        public ulong DiscordChannelId { get; set; }
+        public bool FeedPersonalContracts { get; set; } = true;
+        public bool FeedCorporateContracts { get; set; } = true;
+        public string ButtonText { get; set; } = "Default Contracts Auth";
+        public string DefaultMention { get; set; }
+
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(CharacterIDs):
+                        return CharacterIDs.Count == 0? Compose(nameof(CharacterIDs), "CharacterIDs must be set!") : null;
+                }
+
+                return null;
+            }
         }
 #endif
     }
@@ -300,6 +367,8 @@ namespace ThunderED.Classes
         public string ImgFactionAmarr { get; set; }
         public string ImgFactionMinmatar { get; set; }
         public string ImgEntosisAlert { get; set; }
+        public string ImgContract { get; set; }
+        public string ImgContractDelete { get; set; }
     }
 
     public class LiveKillFeedModuleSettings: ValidatableSettings
@@ -1157,6 +1226,7 @@ namespace ThunderED.Classes
         public bool ModuleLPStock { get; set; } = true;
         public bool ModuleHRM { get; set; } = false;
         public bool ModuleSystemLogFeeder { get; set; } = false;
+        public bool ModuleContractNotifications { get; set; } = false;
 
         [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
         public string ZkillLiveFeedRedisqID { get; set; }

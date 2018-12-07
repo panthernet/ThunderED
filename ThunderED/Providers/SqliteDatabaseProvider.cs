@@ -519,23 +519,30 @@ namespace ThunderED.Providers
             }
         }
 
-        public async Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken)
+        public async Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken, string contractsToken)
         {
-            if(string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) || string.IsNullOrEmpty(userId)) return;
+            if (string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) || string.IsNullOrEmpty(userId))
+            {
+                if(string.IsNullOrEmpty(contractsToken))
+                    return;
+            }
 
             var mail = string.IsNullOrEmpty(mailToken) ? await SQLiteDataQuery<string>("refreshTokens", "mail", "id", userId) : mailToken;
             var token = string.IsNullOrEmpty(notifyToken) ? await SQLiteDataQuery<string>("refreshTokens", "token", "id", userId) : notifyToken;
+            var ctoken = string.IsNullOrEmpty(contractsToken) ? await SQLiteDataQuery<string>("refreshTokens", "ctoken", "id", userId) : contractsToken;
             token = token ?? "";
             mail = mail ?? "";
+            ctoken = ctoken ?? "";
 
 
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand("INSERT OR REPLACE INTO refreshTokens (id, token, mail) VALUES(@id,@token,@mail)", con))
+            using (var insertSQL = new SqliteCommand("INSERT OR REPLACE INTO refreshTokens (id, token, mail, ctoken) VALUES(@id,@token,@mail,@ctoken)", con))
             {
                 await con.OpenAsync();
                 insertSQL.Parameters.Add(new SqliteParameter("@id", userId));
                 insertSQL.Parameters.Add(new SqliteParameter("@token", token));
                 insertSQL.Parameters.Add(new SqliteParameter("@mail", mail ?? (object)DBNull.Value));
+                insertSQL.Parameters.Add(new SqliteParameter("@ctoken", ctoken ?? (object)DBNull.Value));
                 try
                 {
                     insertSQL.ExecuteNonQuery();

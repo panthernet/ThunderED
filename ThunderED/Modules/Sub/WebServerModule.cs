@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using ThunderED.Classes;
@@ -75,24 +76,50 @@ namespace ThunderED.Modules.Sub
 
                         if (request.Url.LocalPath == "/" || request.Url.LocalPath == $"{port}/" || request.Url.LocalPath == $"{extPort}/")
                         {
+                           // var extIp = Settings.WebServerModule.WebExternalIP;
+
+                            var text = File.ReadAllText(SettingsManager.FileTemplateMain)
+                                    .Replace("{header}", LM.Get("authTemplateHeader"))                                    
+                                    .Replace("{webWelcomeHeader}", LM.Get("webWelcomeHeader"))
+                                    .Replace("{authButtonText}", LM.Get("butGeneralAuthPage"));
+
+                            //managecontrols
+                            var manageText = new StringBuilder();
+                            //timers
+                            if (Settings.Config.ModuleTimers)
+                            {
+                                var authNurl = GetTimersURL();
+                                manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonTimersText")}</a>");
+                            }
+
+                            if (Settings.Config.ModuleHRM)
+                            {
+                                var authNurl = GetHRMAuthURL();
+                                manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonHRMText")}</a>");
+                            }
+
+                            text = text.Replace("{manageControls}", manageText.ToString());
+                            await WriteResponce(text, response);
+
+                            return;
+                        }
+
+                        if (request.Url.LocalPath == "/authPage.html" || request.Url.LocalPath == $"{port}/authPage.html" || request.Url.LocalPath == $"{extPort}/authPage.html")
+                        {
                             var extIp = Settings.WebServerModule.WebExternalIP;
                             var authUrl = $"http://{extIp}:{extPort}/auth.php";
 
-                            var text = File.ReadAllText(SettingsManager.FileTemplateMain)
-                                    .Replace("{header}", LM.Get("authTemplateHeader"))
-                                    .Replace("{webAuthHeader}", LM.Get("webAuthHeader"))
-                                    .Replace("{webWelcomeHeader}", LM.Get("webWelcomeHeader"));
+                            var text = File.ReadAllText(SettingsManager.FileTemplateAuthPage)
+                                .Replace("{header}", LM.Get("authTemplateHeader"))
+                                .Replace("{backText}", LM.Get("backText"));
 
                             //auth controls
-                            var authText = string.Empty;
+                            var authText = new StringBuilder();
                             //auth
                             if (Settings.Config.ModuleAuthWeb)
                             {
-                                //var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Where(a => a.Value.PreliminaryAuthMode || a.Value.ESICustomAuthRoles.Any()).ToList();
-                                //no default auth if there are no default groups
-                               // if (groups.Count != SettingsManager.Settings.WebAuthModule.AuthGroups.Count)
-                                //    authText = $"<a href=\"{authUrl}\" class=\"btn btn-info btn-block {(!Settings.Config.ModuleAuthWeb ? "disabled" : "")}\" role=\"button\">{LM.Get("authButtonDiscordText")}</a>";
-
+                                if (SettingsManager.Settings.WebAuthModule.AuthGroups.Count > 0)
+                                    authText.Append($"<h4>{LM.Get("authWebDiscordHeader")}</h4>");
                                 foreach (var @group in SettingsManager.Settings.WebAuthModule.AuthGroups)
                                 {
                                     if (group.Value.ESICustomAuthRoles.Any())
@@ -100,52 +127,53 @@ namespace ThunderED.Modules.Sub
                                         //var customAuthString = GetCustomAuthUrl(group.Value.ESICustomAuthRoles, group.Key);
                                         var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Key)}";
                                         var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
-                                        authText += $"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>";
+                                        authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>");
                                     }
                                     else
                                     {
                                         var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Key)}";
                                         var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
-                                        authText += $"<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>";
+                                        authText.Append($"<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>");
                                     }
                                 }
                             }
 
+                            var len = authText.Length;
+                            bool smth = false;
                             //notifications
                             if (Settings.Config.ModuleNotificationFeed)
                             {
                                 var authNurl = GetAuthNotifyURL();
-                                authText += $"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonNotifyText")}</a>";
+                                authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonNotifyText")}</a>");
+                                smth = true;
                             }
                             //mail
                             if (Settings.Config.ModuleMail)
                             {
                                 var authNurl = GetMailAuthURL();
-                                authText += $"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonMailText")}</a>";
+                                authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonMailText")}</a>");
+                                smth = true;
                             }
-                            text = text.Replace("{authControls}", authText);
-
-                            //managecontrols
-                            var manageText = string.Empty;
-                            //timers
-                            if (Settings.Config.ModuleTimers)
+                            if (Settings.Config.ModuleContractNotifications)
                             {
-                                var authNurl = GetTimersURL();
-                                manageText += $"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonTimersText")}</a>";
+                                foreach (var notifyGroup in Settings.ContractNotificationsModule.Groups)
+                                {
+                                    var group = notifyGroup.Value;
+                                    var authNurl = GetContractsAuthURL(group.FeedPersonalContracts, group.FeedCorporateContracts, notifyGroup.Key);
+                                    authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{group.ButtonText}</a>");
+                                    
+                                }
+                                smth = true;
                             }
 
-                            if (Settings.Config.ModuleHRM)
-                            {
-                                var authNurl = GetHRMAuthURL();
-                                manageText += $"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonHRMText")}</a>";
-                            }
+                            if (smth)
+                                authText.Insert(len, $"<h4>{LM.Get("authWebSystemHeader")}</h4>");
 
-                            text = text.Replace("{manageControls}", manageText);
+                            text = text.Replace("{authControls}", authText.ToString());
                             await WriteResponce(text, response);
-
                             return;
                         }
-
+                        
                         var result = false;
 
                         foreach (var method in ModuleConnectors.Values)
@@ -276,7 +304,7 @@ namespace ThunderED.Modules.Sub
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
 
-            var grp = string.IsNullOrEmpty(group) ? null : $"&state=x{group}";
+            var grp = string.IsNullOrEmpty(group) ? null : $"&state=x{HttpUtility.UrlEncode(group)}";
 
             var pString = string.Join('+', permissions);
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}{grp}";
@@ -300,6 +328,21 @@ namespace ThunderED.Modules.Sub
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=matahari";
+        }
+
+        public static string GetContractsAuthURL(bool readChar, bool readCorp, string groupName)
+        {
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            var list = new List<string>();
+            if(readChar)
+                list.Add("esi-contracts.read_character_contracts.v1");
+            if(readCorp)
+                list.Add("esi-contracts.read_corporation_contracts.v1");
+            var pString = string.Join('+', list);
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=cauth{HttpUtility.UrlEncode(groupName)}";
         }
 
         public static string GetHRMInspectURL(long id, string authCode)
