@@ -34,6 +34,7 @@ With this bot you will have tools to:
 * Monitor recent killmails in your space
 * Query any char or corp info including the cyno and danger probability
 * Receive pings from external messengers like Jabber, IRC, Telegram
+* Keep track of personal and corp contracts
 
 ## Supported Modules
 * Web Auth - authenticate EVE characters in Discord using built-in web server, use JackKnife utility to inspect them before you accept them into your community
@@ -57,6 +58,7 @@ With this bot you will have tools to:
 * FWStats - access to !fwstats command to display information about the FW faction along with the LP farming tips
 * HR Module - inspect your members and pilots applying to join your corporation
 * SystemLogFeeder - feed critical bot logs right into the Discord channel
+* Contracts Feeder - keep track on contracts with flexible filtering capabilities
 
 ## Build Requirements
 * Visual Studio 2017 Community Edition
