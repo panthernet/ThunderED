@@ -24,7 +24,7 @@ This feed supports different filters by contract type, availability and asignee.
 ### BREAKING CHANGES
 
 - Removed AutoDailyStats params from ContinousCheckModule
-- Introduced new StatsModule with similar 
+- Introduced new StatsModule with similar functionality
 
 
 ### V1.2.4
