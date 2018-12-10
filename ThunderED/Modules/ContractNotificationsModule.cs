@@ -167,8 +167,9 @@ namespace ThunderED.Modules
 
             if (lst == null)
             {
+                var cs = contracts.Where(a => !_finishedStatuses.Contains(a.status)).TakeSmart(maxContracts).ToList();
                 //initial cache - only progressing contracts
-                await SQLHelper.SaveContracts(characterID, contracts.Where(a=> !_finishedStatuses.Contains(a.status)).TakeSmart(maxContracts).ToList(), isCorp);
+                await SQLHelper.SaveContracts(characterID, cs, isCorp);
                 return;
             }
 
@@ -185,7 +186,7 @@ namespace ThunderED.Modules
                 //check for completion
                 if (_finishedStatuses.Contains(freshContract.status))
                 {
-                    await PrepareFinishedDiscordMessage(group.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, token);
+                    await PrepareFinishedDiscordMessage(group.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token);
                     await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is expired!", Category);
                     lst.Remove(contract);
                     continue;
@@ -193,7 +194,7 @@ namespace ThunderED.Modules
                 //check for accepted
                 if (contract.type == "courier" && contract.status == "outstanding" && freshContract.status == "in_progress")
                 {
-                    await PrepareAcceptedDiscordMessage(group.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, token);
+                    await PrepareAcceptedDiscordMessage(group.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token);
                     var index = lst.IndexOf(contract);
                     lst.Remove(contract);
                     lst.Insert(index, freshContract);
@@ -213,7 +214,7 @@ namespace ThunderED.Modules
                     try
                     {
                     await LogHelper.LogModule($"--> New Contract {contract.contract_id} found!", Category);
-                        await PrepareDiscordMessage(group.DiscordChannelId, contract, group.DefaultMention, isCorp, characterID, token);
+                        await PrepareDiscordMessage(group.DiscordChannelId, contract, group.DefaultMention, isCorp, characterID, corpID, token);
                     }
                     catch (Exception ex)
                     {
@@ -239,18 +240,18 @@ namespace ThunderED.Modules
         }
 
 
-        private async Task PrepareAcceptedDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, string token)
+        private async Task PrepareAcceptedDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, long corpId, string token)
         {
-            await PrepareDiscordMessage(channelId, contract, mention, isCorp, characterId, token);
+            await PrepareDiscordMessage(channelId, contract, mention, isCorp, characterId, corpId, token);
 
         }
 
-        private async Task PrepareFinishedDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, string token)
+        private async Task PrepareFinishedDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, long corpId, string token)
         {
-            await PrepareDiscordMessage(channelId, contract, mention, isCorp, characterId, token);
+            await PrepareDiscordMessage(channelId, contract, mention, isCorp, characterId, corpId, token);
         }
 
-        private async Task PrepareDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, string token)
+        private async Task PrepareDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, long corpId, string token)
         {
             var image = string.Empty;
             var typeName = string.Empty;
@@ -346,10 +347,34 @@ namespace ThunderED.Modules
             }
             var subject = $"{typeName} {LM.Get("contractSubject")}";
 
+            //var lookupCorp = corpId > 0 ? await APIHelper.ESIAPI.GetCorporationData(Reason, corpId) : null;
 
             var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, contract.issuer_id);
-            var issuerName = ch.name;
-            
+            var issuerName = $"[{ch.name}](https://zkillboard.com/character/{contract.issuer_id}/)";
+            if (contract.for_corporation)
+            {
+            var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, contract.issuer_corporation_id);
+                issuerName = $"[{corp.name}](https://zkillboard.com/corporation/{contract.issuer_corporation_id}/)";
+            }
+
+            var ach = await APIHelper.ESIAPI.GetCharacterData(Reason, contract.assignee_id);
+            var asigneeName = "public";
+            if(ach != null)
+                asigneeName = $"[{ach.name}](https://zkillboard.com/character/{contract.assignee_id}/)";
+            else
+            {
+                var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, contract.assignee_id);
+                if(corp != null)
+                    asigneeName = $"[{corp.name}](https://zkillboard.com/corporation/{contract.assignee_id}/)";
+                else
+                {
+                    var ally = await APIHelper.ESIAPI.GetAllianceData(Reason, contract.assignee_id);
+                    if(ally != null)
+                        asigneeName = $"[{ally.name}](https://zkillboard.com/alliance/{contract.assignee_id}/)";
+                }
+            }
+
+
             //location
 
             var startLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.start_location_id, token))?.name;
@@ -360,7 +385,7 @@ namespace ThunderED.Modules
             var sbNames = new StringBuilder();
             var sbValues = new StringBuilder();
 
-            sbNames.Append("Type: \nIssued By: \nAvailability: ");
+            sbNames.Append("Type: \nIssued By: \nIssued To: ");
             if(contract.acceptor_id > 0)
                 sbNames.Append("\nContractor: ");
             sbNames.Append("\nStatus: ");
@@ -368,12 +393,14 @@ namespace ThunderED.Modules
                 sbNames.Append("\nCollateral: \nReward: \nComplete in: \n Expire in: ");
             else
             {
-                sbNames.Append(contract.price > 0 ? "\nPrice: " : "\nREWARD: ");
+                if(contract.price > 0) sbNames.Append("\nPrice: ");
+                else if(contract.reward > 0) sbNames.Append("\nREWARD: ");
+                
                 if(contract.type == "auction")
                     sbNames.Append("\nBuyout: ");
             }
 
-            sbValues.Append($"{typeName}\n[{issuerName}](https://zkillboard.com/character/{contract.issuer_id}/)\n{availName}");
+            sbValues.Append($"{typeName}\n{issuerName}\n{asigneeName}");
             if (contract.acceptor_id > 0)
             {
                 ch = await APIHelper.ESIAPI.GetCharacterData(Reason, contract.acceptor_id);
@@ -384,7 +411,8 @@ namespace ThunderED.Modules
                 sbValues.Append($"\n{contract.collateral:N}\n{contract.reward:N}\n{days} days\n{expire} days");
             else
             {
-                sbValues.Append(contract.price > 0 ? $"\n{contract.price:N}" : $"\n{contract.reward:N}");
+                if(contract.price > 0 || contract.reward > 0)
+                    sbValues.Append(contract.price > 0 ? $"\n{contract.price:N}" : $"\n{contract.reward:N}");
                 if(contract.type == "auction")
                     sbValues.Append($"\n{contract.buyout:N}");
             }
@@ -396,7 +424,7 @@ namespace ThunderED.Modules
             var stampExpired = contract.DateExpired?.ToString(Settings.Config.ShortTimeFormat);
 
             var items = isCorp ?
-                await APIHelper.ESIAPI.GetCorpContractItems(Reason, contract.issuer_corporation_id, contract.contract_id, token) :
+                await APIHelper.ESIAPI.GetCorpContractItems(Reason, corpId, contract.contract_id, token) :
                 await APIHelper.ESIAPI.GetCharacterContractItems(Reason, characterId, contract.contract_id, token);
 
            // var x2 =  await APIHelper.ESIAPI.GetPublicContractItems(Reason, contract.contract_id);
@@ -448,6 +476,10 @@ namespace ThunderED.Modules
                 foreach (var field in fields)
                     embed.AddField($"-", string.IsNullOrWhiteSpace(field) ? "---" : field);
             }
+
+           // if(sbItemsAsking.Length == 0 && sbItemsSubmitted.Length == 0)
+            //    embed.AddField($"Items", "This contract do not include items or it is impossible to fetch them due to CCP API restrictions");
+
 
             await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channelId), $"{mention} >>>\n", embed.Build()).ConfigureAwait(false);
         }

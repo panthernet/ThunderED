@@ -391,7 +391,7 @@ namespace ThunderED.API
         public async Task<List<JsonClasses.ContractItem>> GetCorpContractItems(string reason, object corpId, object id, string token)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<List<JsonClasses.ContractItem>>($"https://esi.tech.ccp.is/latest/corporation/{corpId}/contracts/{id}/items/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await APIHelper.RequestWrapper<List<JsonClasses.ContractItem>>($"https://esi.tech.ccp.is/latest/corporations/{corpId}/contracts/{id}/items/?datasource=tranquility&language={_language}", reason, authHeader);
 
         }
 

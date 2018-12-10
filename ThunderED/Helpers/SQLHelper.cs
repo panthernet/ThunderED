@@ -491,18 +491,21 @@ namespace ThunderED.Helpers
 
         public static async Task<List<JsonClasses.Contract>> LoadContracts(long characterID, bool isCorp)
         {
-            var data = (string)(await SelectData("contracts", new [] {"data"}, new Dictionary<string, object> {{"type", isCorp ? 0 : 1}, {"characterID", characterID}}))?.FirstOrDefault()?.FirstOrDefault();
+            var data = (string)(await SelectData("contracts", new [] {isCorp ? "corpdata" : "data"}, new Dictionary<string, object> {{"characterID", characterID}}))?.FirstOrDefault()?.FirstOrDefault();
             return string.IsNullOrEmpty(data) ? null : JsonConvert.DeserializeObject<List<JsonClasses.Contract>>(data).OrderByDescending(a=> a.contract_id).ToList();
         }
 
         public static async Task SaveContracts(long characterID, List<JsonClasses.Contract> data, bool isCorp)
         {
             var result = JsonConvert.SerializeObject(data);
+
+            var d = (string)(await SelectData("contracts", new [] {isCorp ? "data" : "corpdata"}, new Dictionary<string, object> {{"characterID", characterID}}))?.FirstOrDefault()?.FirstOrDefault();
+
             await SQLiteDataInsertOrUpdate("contracts", new Dictionary<string, object>
             {
                 {"characterID", characterID},
-                {"type", isCorp ? 0 : 1},
-                {"data", result}
+                {isCorp ? "corpdata" : "data", string.IsNullOrEmpty(result) ? "[]" : result},
+                {isCorp ? "data" : "corpdata", string.IsNullOrEmpty(d) ? "[]" : d}
             });
         }
 
