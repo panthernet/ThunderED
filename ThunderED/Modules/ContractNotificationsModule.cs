@@ -117,12 +117,13 @@ namespace ThunderED.Modules
                             if (group.FeedPersonalContracts)
                             {
                                 var contracts = await SQLHelper.LoadContracts(characterID, false);
-                                await ProcessContracts(false, contracts, group, characterID, token);
+                                await ProcessContracts(false, contracts, group, characterID, 0, token);
                             }
                             if (group.FeedCorporateContracts)
                             {
                                 var contracts = await SQLHelper.LoadContracts(characterID, true);
-                                await ProcessContracts(true, contracts, group, characterID, token);
+                                var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID);
+                                await ProcessContracts(true, contracts, group, characterID, ch.corporation_id, token);
                             }
 
                         }
@@ -147,14 +148,20 @@ namespace ThunderED.Modules
             }
         }
 
-        private async Task ProcessContracts(bool isCorp, List<JsonClasses.Contract> lst, ContractNotifyGroup group, long characterID, string token)
+        private async Task ProcessContracts(bool isCorp, List<JsonClasses.Contract> lst, ContractNotifyGroup group, long characterID, long corpID, string token)
         {
             var maxContracts = Settings.ContractNotificationsModule.MaxTrackingCount > 0 ? Settings.ContractNotificationsModule.MaxTrackingCount : 150;
             var contracts = isCorp ? 
-                (await APIHelper.ESIAPI.GetCorpContracts(Reason, characterID, token))?.OrderByDescending(a => a.contract_id).ToList() :
+                (await APIHelper.ESIAPI.GetCorpContracts(Reason, corpID, token))?.OrderByDescending(a => a.contract_id).ToList() :
                 (await APIHelper.ESIAPI.GetCharacterContracts(Reason, characterID, token))?.OrderByDescending(a => a.contract_id).ToList();
             if (contracts == null)
                 return;
+
+            if (!group.FeedIssuedBy)
+                contracts = contracts.Where(a => a.issuer_id != characterID && (a.issuer_corporation_id != corpID || a.issuer_corporation_id == 0)).ToList();
+            if (!group.FeedIssuedTo)
+                contracts = contracts.Where(a => a.assignee_id != characterID && a.assignee_id != corpID).ToList();
+
             var lastContractId = contracts.FirstOrDefault()?.contract_id ?? 0;
             if (lastContractId == 0) return;
 
@@ -179,6 +186,7 @@ namespace ThunderED.Modules
                 if (_finishedStatuses.Contains(freshContract.status))
                 {
                     await PrepareFinishedDiscordMessage(group.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, token);
+                    await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is expired!", Category);
                     lst.Remove(contract);
                     continue;
                 }
@@ -189,6 +197,7 @@ namespace ThunderED.Modules
                     var index = lst.IndexOf(contract);
                     lst.Remove(contract);
                     lst.Insert(index, freshContract);
+                    await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is accepted!", Category);
                     continue;
                 }
             }
@@ -203,6 +212,7 @@ namespace ThunderED.Modules
                 {
                     try
                     {
+                    await LogHelper.LogModule($"--> New Contract {contract.contract_id} found!", Category);
                         await PrepareDiscordMessage(group.DiscordChannelId, contract, group.DefaultMention, isCorp, characterID, token);
                     }
                     catch (Exception ex)
@@ -391,7 +401,7 @@ namespace ThunderED.Modules
 
             var sbItemsSubmitted = new StringBuilder();
             var sbItemsAsking = new StringBuilder();
-            if (items.Count > 0)
+            if (items != null && items.Count > 0)
             {
                 foreach (var item in items)
                 {

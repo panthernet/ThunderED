@@ -59,6 +59,8 @@
         "DiscordChannelId": 0, 
         "FeedPersonalContracts":  true,
         "FeedCorporateContracts":  true,
+        "FeedIssuedBy":  true,
+        "FeedIssuedTo":  true,
         "ContractAvailability":  ["public", "personal", "corporation", "alliance"],
         "ContractTypes":  ["unknown", "item_exchange", "auction", "courier", "loan"],
         "ButtonText":  "Default Contracts Auth",

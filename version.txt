@@ -1,3 +1,8 @@
+### V1.2.7
++ Fixed incorrect contracts module deployment
++ Fixed corporate contracts feed
++ Added two new contract filters FeedIssuedBy and FeedIssuedTo which are checked against char and corp ID
+
 ### V1.2.6
 + Added new ContractNotificationsModule
 + Added guest auth mode

@@ -136,6 +136,8 @@ namespace ThunderED.Classes
         public ulong DiscordChannelId { get; set; }
         public bool FeedPersonalContracts { get; set; } = true;
         public bool FeedCorporateContracts { get; set; } = true;
+        public bool FeedIssuedBy { get; set; } = true;
+        public bool FeedIssuedTo { get; set; } = true;
         public string ButtonText { get; set; } = "Default Contracts Auth";
         public string DefaultMention { get; set; }
 
