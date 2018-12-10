@@ -1,3 +1,7 @@
+### V1.2.8
+
++ Fixed contracts module and updates lang files
+
 ### V1.2.7
 + Added two new contract filters FeedIssuedBy and FeedIssuedTo which are checked against char and corp ID
 + Fixed incorrect contracts module deployment
