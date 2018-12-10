@@ -163,6 +163,8 @@ namespace ThunderED.Modules
             if (!group.FeedIssuedTo)
                 contracts = contracts.Where(a => a.assignee_id != characterID && a.assignee_id != corpID).ToList();
 
+            contracts = contracts.Where(a => group.ContractAvailability.Contains(a.availability) && group.ContractTypes.Contains(a.type)).ToList();
+
             var lastContractId = contracts.FirstOrDefault()?.contract_id ?? 0;
             if (lastContractId == 0) return;
 
@@ -489,6 +491,29 @@ namespace ThunderED.Modules
 
 
             await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channelId), $"{mention} >>>\n", embed.Build()).ConfigureAwait(false);
+        }
+
+        public static async Task<string[]> GetContarctItemsString(string reason, bool isCorp, long corpId, long charId, long contractId, string token)
+        {
+            var sbItemsSubmitted = new StringBuilder();
+            var sbItemsAsking = new StringBuilder();
+
+            var items = isCorp ?
+                await APIHelper.ESIAPI.GetCorpContractItems(reason, corpId, contractId, token) :
+                await APIHelper.ESIAPI.GetCharacterContractItems(reason, charId, contractId, token);
+
+            if (items != null && items.Count > 0)
+            {
+                foreach (var item in items)
+                {
+                    var t = await APIHelper.ESIAPI.GetTypeId(reason, item.type_id);
+                    if(item.is_included)
+                        sbItemsSubmitted.Append($"{t?.name} x{item.quantity}\n");
+                    else sbItemsAsking.Append($"{t?.name} x{item.quantity}\n");
+                }
+            }
+
+            return new[] {sbItemsSubmitted.ToString(), sbItemsAsking.ToString()};
         }
     }
 }

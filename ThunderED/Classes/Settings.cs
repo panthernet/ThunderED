@@ -1254,6 +1254,8 @@ namespace ThunderED.Classes
         [Required]
         public string DatabaseFile { get; set; } = "edb.db";
 
+        public bool ExtendedESILogging { get; set; } = false;
+
 
 #if EDITOR
         public override string this[string columnName]

@@ -1,3 +1,8 @@
+### V1.2.9
+
++ Added extendedESILogging param to general config
++ Fixed contracts filtering
+
 ### V1.2.8
 
 + Fixed contracts module and updates lang files

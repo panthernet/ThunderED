@@ -47,7 +47,8 @@
     "logNewNotifications": true,
     "databaseProvider":  "sqlite",
     "databaseFile": "edb.db",
-    "requestRetries": 3
+    "requestRetries": 3,
+    "extendedESILogging":  false 
   },
 
   "ContractNotificationsModule": {

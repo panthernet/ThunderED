@@ -69,7 +69,8 @@ namespace ThunderED.Helpers
                                     await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
                                 if (raw.StartsWith("{\"error\""))
                                 {
-                                    await LogHelper.LogError($"[{reason}] Request failure: {request}\n{raw}", LogCat.ESI, false);
+                                    if(SettingsManager.Settings.Config.ExtendedESILogging)
+                                        await LogHelper.LogError($"[{reason}] Request failure: {request}\n{raw}", LogCat.ESI, false);
                                     return null;
                                 }
                                 continue;
