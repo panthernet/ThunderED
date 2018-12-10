@@ -2,6 +2,7 @@
 + Added two new contract filters FeedIssuedBy and FeedIssuedTo which are checked against char and corp ID
 + Fixed incorrect contracts module deployment
 + Fixed corporate contracts feed
++ Fixed items display and contracts feed
 + Fixed unaccessible contract queries
 
 ### V1.2.6

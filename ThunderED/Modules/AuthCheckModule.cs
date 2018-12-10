@@ -26,7 +26,7 @@ namespace ThunderED.Modules
                     await LogHelper.LogModule("Running AuthCheck module...", Category);
 
                     await APIHelper.DiscordAPI.UpdateAllUserRoles(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles);
-                    await LogHelper.LogInfo("Auth check complete!", Category);
+                   // await LogHelper.LogInfo("Auth check complete!", Category);
                 }
             }
             finally

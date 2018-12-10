@@ -114,16 +114,17 @@ namespace ThunderED.Modules
                             if(token == null)
                                 continue;
 
+                            List<JsonClasses.Contract> personalList = null;
                             if (group.FeedPersonalContracts)
                             {
-                                var contracts = await SQLHelper.LoadContracts(characterID, false);
-                                await ProcessContracts(false, contracts, group, characterID, 0, token);
+                                personalList = await SQLHelper.LoadContracts(characterID, false);
+                                await ProcessContracts(false, personalList, group, characterID, 0, token);
                             }
                             if (group.FeedCorporateContracts)
                             {
                                 var contracts = await SQLHelper.LoadContracts(characterID, true);
                                 var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID);
-                                await ProcessContracts(true, contracts, group, characterID, ch.corporation_id, token);
+                                await ProcessContracts(true, contracts, group, characterID, ch.corporation_id, token, personalList);
                             }
 
                         }
@@ -135,12 +136,12 @@ namespace ThunderED.Modules
                 }
 
 
-                await LogHelper.LogModule("Completed", Category);
+               // await LogHelper.LogModule("Completed", Category);
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
-                await LogHelper.LogModule("Completed", Category);
+               // await LogHelper.LogModule("Completed", Category);
             }
             finally
             {
@@ -148,7 +149,7 @@ namespace ThunderED.Modules
             }
         }
 
-        private async Task ProcessContracts(bool isCorp, List<JsonClasses.Contract> lst, ContractNotifyGroup group, long characterID, long corpID, string token)
+        private async Task ProcessContracts(bool isCorp, List<JsonClasses.Contract> lst, ContractNotifyGroup group, long characterID, long corpID, string token, List<JsonClasses.Contract> otherList = null)
         {
             var maxContracts = Settings.ContractNotificationsModule.MaxTrackingCount > 0 ? Settings.ContractNotificationsModule.MaxTrackingCount : 150;
             var contracts = isCorp ? 
@@ -209,6 +210,10 @@ namespace ThunderED.Modules
             {
                 //get and report new contracts, forget already finished
                 var list = contracts.Where(a => a.contract_id > lastRememberedId && !_finishedStatuses.Contains(a.status)).ToList();
+                if (otherList != null)
+                {
+                    list = list.Where(a => otherList.All(b => b.contract_id != a.contract_id)).ToList();
+                }
                 foreach (var contract in list)
                 {
                     try
@@ -267,7 +272,7 @@ namespace ThunderED.Modules
                     break;
             }
 
-            var availName = string.Empty;
+           /* var availName = string.Empty;
             switch (contract.availability)
             {
                 case "public":
@@ -284,7 +289,7 @@ namespace ThunderED.Modules
                     break;
                 default:
                     return;
-            }
+            }*/
 
             var statusName = string.Empty;
             switch (contract.status)
@@ -328,19 +333,19 @@ namespace ThunderED.Modules
             switch (contract.type)
             {
                 case "item_exchange":
-                    typeName = "Item Exchange";
+                    typeName = LM.Get("contractTypeExchange");
                     break;
                 case "auction":
-                    typeName = "Auction";
+                    typeName = LM.Get("contractTypeAuction");
                     break;
                 case "courier":
-                    typeName = "Courier";
+                    typeName = LM.Get("contractTypeCourier");
                     days = contract.days_to_complete;
                     expire = (int)(contract.DateExpired - contract.DateIssued).Value.TotalDays;
                     endLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.end_location_id, token))?.name;
                     if(endLocation == null)
                         endLocation = (await APIHelper.ESIAPI.GetStationData(Reason, contract.end_location_id, token))?.name;
-                    endLocation = string.IsNullOrEmpty(endLocation) ? "(Some Citadel)" : endLocation;
+                    endLocation = string.IsNullOrEmpty(endLocation) ? LM.Get("contractSomeCitadel") : endLocation;
                     break;
                 default: 
                     return;
@@ -380,24 +385,24 @@ namespace ThunderED.Modules
             var startLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.start_location_id, token))?.name;
             if(startLocation == null)
                 startLocation = (await APIHelper.ESIAPI.GetStationData(Reason, contract.start_location_id, token))?.name;
-            startLocation = string.IsNullOrEmpty(startLocation) ? "(Some Citadel)" : startLocation;
+            startLocation = string.IsNullOrEmpty(startLocation) ? LM.Get("contractSomeCitadel") : startLocation;
 
             var sbNames = new StringBuilder();
             var sbValues = new StringBuilder();
 
-            sbNames.Append("Type: \nIssued By: \nIssued To: ");
+            sbNames.Append($"{LM.Get("contractMsgType")}: \n{LM.Get("contractMsgIssuedBy")}: \n{LM.Get("contractMsgIssuedTo")}: ");
             if(contract.acceptor_id > 0)
-                sbNames.Append("\nContractor: ");
-            sbNames.Append("\nStatus: ");
+                sbNames.Append($"\n{LM.Get("contractMsgContractor")}: ");
+            sbNames.Append($"\n{LM.Get("contractMsgStatus")}: ");
             if (contract.type == "courier")
-                sbNames.Append("\nCollateral: \nReward: \nComplete in: \n Expire in: ");
+                sbNames.Append($"\n{LM.Get("contractMsgCollateral")}: \n{LM.Get("contractMsgReward")}: \n{LM.Get("contractMsgCompleteIn")}: \n{LM.Get("contractMsgExpireIn")}: ");
             else
             {
-                if(contract.price > 0) sbNames.Append("\nPrice: ");
-                else if(contract.reward > 0) sbNames.Append("\nREWARD: ");
+                if(contract.price > 0) sbNames.Append($"\n{LM.Get("contractMsgPrice")}: ");
+                else if(contract.reward > 0) sbNames.Append($"\n{LM.Get("contractMsgReward2")}: ");
                 
                 if(contract.type == "auction")
-                    sbNames.Append("\nBuyout: ");
+                    sbNames.Append($"\n{LM.Get("contractMsgBuyout")}: ");
             }
 
             sbValues.Append($"{typeName}\n{issuerName}\n{asigneeName}");
@@ -408,7 +413,7 @@ namespace ThunderED.Modules
             }
             sbValues.Append($"\n{statusName}");
             if (contract.type == "courier")
-                sbValues.Append($"\n{contract.collateral:N}\n{contract.reward:N}\n{days} days\n{expire} days");
+                sbValues.Append($"\n{contract.collateral:N}\n{contract.reward:N}\n{days} {LM.Get("contractMsgDays")}\n{expire} {LM.Get("contractMsgDays")}");
             else
             {
                 if(contract.price > 0 || contract.reward > 0)
@@ -442,19 +447,21 @@ namespace ThunderED.Modules
                 }
             }
 
-            var issuedText = $"Issued: {stampIssued}";
+            var issuedText = $"{LM.Get("contractMsgIssued")}: {stampIssued}";
 
+            var loc = LM.Get("contractMsgIssued");
+            loc = string.IsNullOrWhiteSpace(loc) ? "-" : loc;
 
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(image)
                 .WithColor(color)
                 .AddField(subject, title)
-                .AddField("Location", startLocation);
+                .AddField(loc, startLocation);
 
             if (contract.type == "courier")
-                embed.AddField("Destination", endLocation);
+                embed.AddField(LM.Get("contractMsgDestination"), endLocation);
 
-            embed.AddInlineField("Details", sbNames.ToString())
+            embed.AddInlineField(LM.Get("contractMsgDetails"), sbNames.ToString())
                 .AddInlineField("-", sbValues.ToString())
                 .WithFooter(issuedText);
 
@@ -463,7 +470,7 @@ namespace ThunderED.Modules
                 var fields = sbItemsSubmitted.ToString().Split(1023).TakeSmart(5).ToList();
                 var head = fields.FirstOrDefault();
                 fields.RemoveAt(0);
-                embed.AddField($"Included Items", string.IsNullOrWhiteSpace(head) ? "---" : head);
+                embed.AddField(LM.Get("contractMsgIncludedItems"), string.IsNullOrWhiteSpace(head) ? "---" : head);
                 foreach (var field in fields)
                     embed.AddField($"-", string.IsNullOrWhiteSpace(field) ? "---" : field);
             }
@@ -472,7 +479,7 @@ namespace ThunderED.Modules
                 var fields = sbItemsAsking.ToString().Split(1023).TakeSmart(5).ToList();
                 var head = fields.FirstOrDefault();
                 fields.RemoveAt(0);
-                embed.AddField($"Asking Items", string.IsNullOrWhiteSpace(head) ? "---" : head);
+                embed.AddField(LM.Get("contractMsgAskingItems"), string.IsNullOrWhiteSpace(head) ? "---" : head);
                 foreach (var field in fields)
                     embed.AddField($"-", string.IsNullOrWhiteSpace(field) ? "---" : field);
             }

@@ -847,7 +847,7 @@ namespace ThunderED.Modules
                     var interval = Settings.NotificationFeedModule.CheckIntervalInMinutes;
                     await SQLHelper.SQLiteDataUpdate("cacheData", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
                     _nextNotificationCheck = DateTime.Now.AddMinutes(interval);
-                    await LogHelper.LogInfo("Check complete", Category, LogToConsole, false);
+                   // await LogHelper.LogInfo("Check complete", Category, LogToConsole, false);
                 }
             }
             catch (Exception ex)

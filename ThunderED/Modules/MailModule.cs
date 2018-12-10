@@ -191,12 +191,12 @@ namespace ThunderED.Modules
                     if(prevMailId != lastMailId || lastMailId == 0)
                         await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", group.Id.ToString()}, {"mailId", lastMailId}});
                 }
-                await LogHelper.LogModule("Completed", Category);
+               // await LogHelper.LogModule("Completed", Category);
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
-                await LogHelper.LogModule("Completed", Category);
+               // await LogHelper.LogModule("Completed", Category);
             }
             finally
             {
