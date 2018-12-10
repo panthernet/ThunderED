@@ -67,6 +67,11 @@ namespace ThunderED.Helpers
                                 if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
                                     (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
                                     await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
+                                if (raw.StartsWith("{\"error\""))
+                                {
+                                    await LogHelper.LogError($"[{reason}] Request failure: {request}\n{raw}", LogCat.ESI, false);
+                                    return null;
+                                }
                                 continue;
                             }
 

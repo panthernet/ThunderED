@@ -399,6 +399,8 @@ namespace ThunderED.Modules
                 await APIHelper.ESIAPI.GetCorpContractItems(Reason, contract.issuer_corporation_id, contract.contract_id, token) :
                 await APIHelper.ESIAPI.GetCharacterContractItems(Reason, characterId, contract.contract_id, token);
 
+           // var x2 =  await APIHelper.ESIAPI.GetPublicContractItems(Reason, contract.contract_id);
+            items = items ?? await APIHelper.ESIAPI.GetCharacterContractItems(Reason, contract.issuer_id, contract.contract_id, token);
             var sbItemsSubmitted = new StringBuilder();
             var sbItemsAsking = new StringBuilder();
             if (items != null && items.Count > 0)
