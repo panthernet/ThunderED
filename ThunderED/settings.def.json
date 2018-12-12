@@ -57,15 +57,20 @@
     "Groups": {
       "group1": {
         "CharacterIDs": [],
-        "DiscordChannelId": 0, 
+        "ButtonText":  "Default Contracts Auth",
+        "DefaultMention": "",
         "FeedPersonalContracts":  true,
         "FeedCorporateContracts":  true,
         "FeedIssuedBy":  true,
         "FeedIssuedTo":  true,
-        "ContractAvailability":  ["public", "personal", "corporation", "alliance"],
-        "ContractTypes":  ["unknown", "item_exchange", "auction", "courier", "loan"],
-        "ButtonText":  "Default Contracts Auth",
-        "DefaultMention": ""
+        "Filters":  {
+           "defaultFilter": {
+             "Statuses": ["finished", "cancelled", "rejected", "failed", "deleted", "reversed", "in_progress", "outstanding"],
+             "Availability":  ["public", "personal", "corporation", "alliance"],
+             "Types":  ["unknown", "item_exchange", "auction", "courier", "loan"], 
+             "DiscordChannelId": 0
+           }   
+        }
       } 
     } 
   },
@@ -263,7 +268,7 @@
         "AllowedCorporations": {},
         "AllowedAlliances":{
           "ally1": {
-            "Id": 99003599,
+            "Id": 0,
             "DiscordRoles": ["Member"]
           }
         },
@@ -287,6 +292,7 @@
           "esi-clones.read_clones.v1",
           "esi-clones.read_implants.v1",
           "esi-contracts.read_character_contracts.v1",
+          "esi-contracts.read_corporation_contracts.v1",
           "esi-industry.read_character_jobs.v1",
           "esi-industry.read_character_mining.v1",
           "esi-killmails.read_killmails.v1",

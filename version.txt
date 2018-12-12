@@ -1,7 +1,14 @@
 ### V1.2.9
 
 + Added extendedESILogging param to general config
++ Added contract items to HRM inspection page
 + Fixed contracts filtering
++ Fixed HRM mail generation failing in rare case
++ Improved contracts settings and added Filters property
+
+BREAKING CHANGES
+
+- Look in default config file for contracts module changes
 
 ### V1.2.8
 

@@ -89,7 +89,8 @@ namespace ThunderED.Modules
 
         private readonly Dictionary<long, List<JsonClasses.Contract>> _lastContracts = new Dictionary<long, List<JsonClasses.Contract>>();
         private readonly Dictionary<long, List<JsonClasses.Contract>> _lastCorpContracts = new Dictionary<long, List<JsonClasses.Contract>>();
-        private readonly List<string> _finishedStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed"};
+        private readonly List<string> _completeStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed"};
+        private readonly List<string> _finishedStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished"};
 
         public override async Task Run(object prm)
         {
@@ -163,14 +164,12 @@ namespace ThunderED.Modules
             if (!group.FeedIssuedTo)
                 contracts = contracts.Where(a => a.assignee_id != characterID && a.assignee_id != corpID).ToList();
 
-            contracts = contracts.Where(a => group.ContractAvailability.Contains(a.availability) && group.ContractTypes.Contains(a.type)).ToList();
-
             var lastContractId = contracts.FirstOrDefault()?.contract_id ?? 0;
             if (lastContractId == 0) return;
 
             if (lst == null)
             {
-                var cs = contracts.Where(a => !_finishedStatuses.Contains(a.status)).TakeSmart(maxContracts).ToList();
+                var cs = contracts.Where(a => !_completeStatuses.Contains(a.status)).TakeSmart(maxContracts).ToList();
                 //initial cache - only progressing contracts
                 await SQLHelper.SaveContracts(characterID, cs, isCorp);
                 return;
@@ -186,24 +185,36 @@ namespace ThunderED.Modules
                     lst.Remove(contract);
                     continue;                                        
                 }
-                //check for completion
-                if (_finishedStatuses.Contains(freshContract.status))
+
+                foreach (var filter in group.Filters.Values)
                 {
-                    await PrepareFinishedDiscordMessage(group.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token);
-                    await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is expired!", Category);
-                    lst.Remove(contract);
-                    continue;
+                    //check for completion
+                    if (_completeStatuses.Contains(freshContract.status) && filter.Statuses.Contains(freshContract.status))
+                    {
+                        await PrepareFinishedDiscordMessage(filter.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token);
+                        await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is expired!", Category);
+                        lst.Remove(contract);
+                        continue;
+                    }
+                    //check for accepted
+                    if (contract.type == "courier" && contract.status == "outstanding" && freshContract.status == "in_progress" && filter.Statuses.Contains("in_progress"))
+                    {
+                        await PrepareAcceptedDiscordMessage(filter.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token);
+                        var index = lst.IndexOf(contract);
+                        lst.Remove(contract);
+                        lst.Insert(index, freshContract);
+                        await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is accepted!", Category);
+                        continue;
+                    }
                 }
-                //check for accepted
-                if (contract.type == "courier" && contract.status == "outstanding" && freshContract.status == "in_progress")
+
+                //silently remove filtered out expired contracts
+                var lefties = lst.Where(a => _completeStatuses.Contains(a.status));
+                foreach (var lefty in lefties)
                 {
-                    await PrepareAcceptedDiscordMessage(group.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token);
-                    var index = lst.IndexOf(contract);
-                    lst.Remove(contract);
-                    lst.Insert(index, freshContract);
-                    await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is accepted!", Category);
-                    continue;
+                    lst.Remove(lefty);
                 }
+
             }
 
             //update cache list and look for new contracts
@@ -216,12 +227,15 @@ namespace ThunderED.Modules
                 {
                     list = list.Where(a => otherList.All(b => b.contract_id != a.contract_id)).ToList();
                 }
+
+                var crFilterChannel = group.Filters.Values.FirstOrDefault(a => a.Statuses.Contains("outstanding"))?.DiscordChannelId ?? 0;
                 foreach (var contract in list)
                 {
                     try
                     {
-                    await LogHelper.LogModule($"--> New Contract {contract.contract_id} found!", Category);
-                        await PrepareDiscordMessage(group.DiscordChannelId, contract, group.DefaultMention, isCorp, characterID, corpID, token);
+                        await LogHelper.LogModule($"--> New Contract {contract.contract_id} found!", Category);
+                        if(crFilterChannel != 0)
+                            await PrepareDiscordMessage(crFilterChannel, contract, group.DefaultMention, isCorp, characterID, corpID, token);
                     }
                     catch (Exception ex)
                     {

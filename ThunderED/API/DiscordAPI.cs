@@ -456,8 +456,15 @@ namespace ThunderED.API
                         var nickname = $"{(SettingsManager.Settings.WebAuthModule.EnforceCorpTickers  ? $"[{corporationData.ticker}] " : null)}{(SettingsManager.Settings.WebAuthModule.EnforceCharName ? eveName : u.Username)}";
                         if (nickname != u.Nickname && !string.IsNullOrWhiteSpace(u.Nickname) || string.IsNullOrWhiteSpace(u.Nickname) && u.Username != nickname)
                         {
-                            await u.ModifyAsync(x => x.Nickname = nickname);
-                            await LogHelper.LogInfo($"Changed name of {u.Nickname} to {nickname}", LogCat.AuthCheck);
+                            await LogHelper.LogInfo($"Trying to change name of {u.Nickname} to {nickname}", LogCat.AuthCheck);
+                            try
+                            {
+                                await u.ModifyAsync(x => x.Nickname = nickname);
+                            }
+                            catch
+                            {
+                                await LogHelper.LogError($"Name change failed, probably due to insufficient rights", LogCat.AuthCheck);
+                            }
                         }
                     }
 

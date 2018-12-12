@@ -103,7 +103,7 @@ namespace ThunderED.Classes
 #if EDITOR
         public ObservableDictionary<string, ContractNotifyGroup> Groups = new ObservableDictionary<string, ContractNotifyGroup>();
 #else
-        public Dictionary<string, ContractNotifyGroup> Groups = new Dictionary<string, ContractNotifyGroup>();
+        public Dictionary<string, ContractNotifyGroup> Groups = new Dictionary<string, ContractNotifyGroup>();        
 #endif
 #if EDITOR
         public override string this[string columnName]
@@ -114,6 +114,8 @@ namespace ThunderED.Classes
                 {
                     case nameof(CheckIntervalInMinutes):
                         return CheckIntervalInMinutes == 0? Compose(nameof(CheckIntervalInMinutes), "CheckIntervalInMinutes must be greater than 0!") : null;
+                   // case nameof(Groups):
+                   //     return Groups.Values.SelectMany(a=> a.CharacterIDs).Count() != Groups.Values.SelectMany(a=> a.CharacterIDs).Distinct().Count() ? Compose(nameof(Groups), "Groups must have unique character IDs!") : null;
                 }
 
                 return null;
@@ -126,14 +128,11 @@ namespace ThunderED.Classes
     {
 #if EDITOR
         public ObservableCollection<long> CharacterIDs { get; set; } = new ObservableCollection<long>();
-        public ObservableCollection<string> ContractAvailability { get; set; } = new ObservableCollection<string>();
-        public ObservableCollection<string> ContractTypes { get; set; } = new ObservableCollection<string>();
+        public ObservableDictionary<string, ContractNotifyFilter> Filters { get; set; } = new ObservableDictionary<string, ContractNotifyFilter>();
 #else
         public List<long> CharacterIDs { get; set; } = new List<long>();
-        public List<string> ContractAvailability { get; set; } = new List<string>();
-        public List<string> ContractTypes { get; set; } = new List<string>();
+        public Dictionary<string, ContractNotifyFilter> Filters { get; set; } = new Dictionary<string, ContractNotifyFilter>();
 #endif
-        public ulong DiscordChannelId { get; set; }
         public bool FeedPersonalContracts { get; set; } = true;
         public bool FeedCorporateContracts { get; set; } = true;
         public bool FeedIssuedBy { get; set; } = true;
@@ -156,6 +155,20 @@ namespace ThunderED.Classes
             }
         }
 #endif
+    }
+
+    public class ContractNotifyFilter
+    {
+#if EDITOR
+        public ObservableCollection<string> Availability { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> Types { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> Statuses { get; set; } = new ObservableCollection<string>();
+#else
+        public List<string> Availability { get; set; } = new List<string>();
+        public List<string> Types { get; set; } = new List<string>();
+        public List<string> Statuses { get; set; } = new List<string>();
+#endif
+        public ulong DiscordChannelId { get; set; }
     }
 
     public class StatsModuleSettings

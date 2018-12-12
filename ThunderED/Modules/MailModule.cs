@@ -256,8 +256,19 @@ namespace ThunderED.Modules
                     var lst = body.IndexOf('>', index + 1);
                     var endTagStart = body.IndexOf('<', lst + 1);
 
-                    var url = body.Substring(urlStart, urlEnd - urlStart + 1);
-                    var text = body.Substring(lst + 1, endTagStart - lst - 1);
+
+                    string url = null;
+                    string text = null;
+
+                    try
+                    {
+                        url = body.Substring(urlStart, urlEnd - urlStart + 1);
+                        text = body.Substring(lst + 1, endTagStart - lst - 1);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
 
                     //parse data
                     var data = $"{text}({url})";

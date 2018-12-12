@@ -367,6 +367,7 @@
   "contractMsgDestination":  "Назначение", 
   "contractMsgDetails":  "Детализация", 
   "contractMsgIncludedItems":  "Включенные Предметы", 
-  "contractMsgAskingItems":  "Требуемые Предметы"
+  "contractMsgAskingItems":  "Требуемые Предметы",
+  "hrmContractItems":  "Предметы" 
 
 }

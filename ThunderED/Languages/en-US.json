@@ -373,5 +373,6 @@
   "contractMsgDestination":  "Destination", 
   "contractMsgDetails":  "Details", 
   "contractMsgIncludedItems":  "Included Items", 
-  "contractMsgAskingItems":  "Asking Items"
+  "contractMsgAskingItems":  "Asking Items",
+  "hrmContractItems":  "Items" 
 }

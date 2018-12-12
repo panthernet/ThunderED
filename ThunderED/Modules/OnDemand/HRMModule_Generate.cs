@@ -95,7 +95,7 @@ namespace ThunderED.Modules.OnDemand
             return sb.ToString();
         }
 
-        private async Task<string> GenerateCorpHistory(int charId)
+        private async Task<string> GenerateCorpHistory(long charId)
         {
             var history = (await APIHelper.ESIAPI.GetCharCorpHistory(Reason, charId))?.OrderByDescending(a=> a.record_id).ToList();
             if (history == null || history.Count == 0) return null;
@@ -189,7 +189,7 @@ namespace ThunderED.Modules.OnDemand
             return sb.ToString();
         }
 
-        private async Task<string> GenerateTransactionsHtml(string token, int inspectCharId, int page)
+        private async Task<string> GenerateTransactionsHtml(string token, long inspectCharId, int page)
         {
             var items = await APIHelper.ESIAPI.GetCharacterWalletTransactions(Reason, inspectCharId, token);
             //var totalCount = mailHeaders.Count;
@@ -238,9 +238,9 @@ namespace ThunderED.Modules.OnDemand
             return sb.ToString();
         }
 
-        private async Task<string> GenerateContractsHtml(string token, int inspectCharId, int page)
+        private async Task<string> GenerateContractsHtml(string token, long inspectCharId, int page)
         {
-            var items = await APIHelper.ESIAPI.GetCharacterContracts(Reason, inspectCharId, token);
+            var items = (await APIHelper.ESIAPI.GetCharacterContracts(Reason, inspectCharId, token)).OrderByDescending(a=> a.contract_id).ToList();
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
             items = items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
             var sb = new StringBuilder();
@@ -254,6 +254,7 @@ namespace ThunderED.Modules.OnDemand
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmContractStatus")}</th>");
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmContractDate")}</th>");
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmContractInfo")}</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmContractItems")}</th>");
             sb.AppendLine("</tr>");
             sb.AppendLine("</thead>");
             sb.AppendLine("<tbody>");
@@ -272,15 +273,25 @@ namespace ThunderED.Modules.OnDemand
                     var to = entry.for_corporation
                         ? (await APIHelper.ESIAPI.GetCorporationData(Reason, entry.acceptor_id))?.name
                         : (await APIHelper.ESIAPI.GetCharacterData(Reason, entry.acceptor_id))?.name;
+
+                    var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, inspectCharId);
+                    var itemList = await ContractNotificationsModule.GetContarctItemsString(Reason, entry.for_corporation, ch.corporation_id ,inspectCharId , entry.contract_id, token);
+
                     sb.AppendLine($"<tr>");
                     sb.AppendLine($"  <th scope=\"row\">{counter++}</th>");
                     sb.AppendLine($"  <td>Contract</td>");
                     sb.AppendLine($"  <td>{entry.type}</td>");
                     sb.AppendLine($"  <td><a href=\"https://zkillboard.com/{fromPlace}/{fromId}/\">{from}</a></td>");
-                    sb.AppendLine($"  <td><a href=\"https://zkillboard.com/{toPlace}/{toId}/\">{to}</a></td>");
+                    sb.AppendLine(toId > 0 ? $"  <td><a href=\"https://zkillboard.com/{toPlace}/{toId}/\">{to}</a></td>" : "  <td>-</td>");
                     sb.AppendLine($"  <td>{entry.status}</td>");
                     sb.AppendLine($"  <td>{entry.DateCompleted?.ToString(Settings.Config.ShortTimeFormat) ?? LM.Get("hrmContractInProgress")}</td>");
                     sb.AppendLine($"  <td>{entry.title}</td>");
+                    if(!string.IsNullOrEmpty(itemList[0]))
+                        sb.AppendLine($"  <td>{LM.Get("contractMsgIncludedItems")}<img src=\"https://github.com/panthernet/ThunderED/blob/master/ThunderED/Content/Icons/itemIconSmall.png?raw=true\" alt=\"\" title=\"{itemList[0]}\"/></td>");
+                    if(!string.IsNullOrEmpty(itemList[1]))
+                        sb.AppendLine($"  <td>{LM.Get("contractMsgAskingItems")}<img src=\"https://github.com/panthernet/ThunderED/blob/master/ThunderED/Content/Icons/itemIconSmall.png?raw=true\" alt=\"\" title=\"{itemList[1]}\"/></td>");
+                    if(string.IsNullOrEmpty(itemList[0]) && string.IsNullOrEmpty(itemList[1]))
+                    sb.AppendLine($"  <td>-</td>");
                     sb.AppendLine("</tr>");
                 }
                 catch (Exception ex)
