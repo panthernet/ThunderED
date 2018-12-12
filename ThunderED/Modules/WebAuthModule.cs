@@ -91,7 +91,7 @@ namespace ThunderED.Modules
             {
                 foreach (var entity in authGroup.AllowedCorporations.Values)
                 {
-                    if (entity.Id == id)
+                    if (entity.Id.Contains(id))
                         return entity;
                 }
             }
@@ -106,7 +106,7 @@ namespace ThunderED.Modules
             {
                 foreach (var entity in authGroup.AllowedAlliances.Values)
                 {
-                    if (entity.Id == id)
+                    if (entity.Id.Contains(id))
                         return entity;
                 }
             }
@@ -118,7 +118,7 @@ namespace ThunderED.Modules
         {
             foreach (var entity in group.AllowedAlliances.Values)
             {
-                if (entity.Id == id)
+                if (entity.Id.Contains(id))
                     return entity;
             }
 
@@ -129,7 +129,7 @@ namespace ThunderED.Modules
         {
             foreach (var entity in group.AllowedCorporations.Values)
             {
-                if (entity.Id == id)
+                if (entity.Id.Contains(id))
                     return entity;
             }
 
@@ -139,13 +139,13 @@ namespace ThunderED.Modules
         public static WebAuthGroup GetAuthGroupByCorpId(List<WebAuthGroup> groups, long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
-            return groups.FirstOrDefault(a => a.AllowedCorporations.Values.Any(b=> b.Id == id));
+            return groups.FirstOrDefault(a => a.AllowedCorporations.Values.Any(b=> b.Id.Contains(id)));
         }
 
         public static WebAuthGroup GetAuthGroupByAllyId(List<WebAuthGroup> groups, long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
-            return groups.FirstOrDefault(a => a.AllowedAlliances.Values.Any(b=> b.Id == id));
+            return groups.FirstOrDefault(a => a.AllowedAlliances.Values.Any(b=> b.Id.Contains(id)));
         }
 
         public async Task ProcessPreliminaryApplicant(long characterId, string characterName, ulong discordId, string groupName)
@@ -383,7 +383,7 @@ namespace ThunderED.Modules
                                 if (!add)
                                 {
                                     var grp = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a =>
-                                        a.Value.AllowedAlliances.Values.All(b => b.Id == 0) && a.Value.AllowedCorporations.Values.All(b => b.Id == 0));
+                                        a.Value.AllowedAlliances.Values.All(b => b.Id.All(c=> c== 0)) && a.Value.AllowedCorporations.Values.All(b => b.Id.All(c=> c == 0)));
                                     if (grp.Value != null)
                                     {
                                         add = true;

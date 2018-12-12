@@ -221,21 +221,21 @@
       "Mode1": {
         "AllowedCorporations": {
           "corp1": {
-            "Id": 98499225,
+            "Id": [98499225],
             "DiscordRoles": ["Member", "TestRole2"]
           },
           "corp2": {
-            "Id": 98499226,
+            "Id": [98499226],
             "DiscordRoles": ["Ally"]
           } 
         },
         "AllowedAlliances":{
           "ally1": {
-            "Id": 99003557,
+            "Id": [99003557],
             "DiscordRoles": ["Member"]
           },
           "ally2": {
-            "Id": 99003558,
+            "Id": [99003558],
             "DiscordRoles": ["Ally", "Dummy"]
           }
         },
@@ -251,7 +251,7 @@
         "AllowedCorporations": {},
         "AllowedAlliances":{
           "ally1": {
-            "Id": 99003599,
+            "Id": [99003599],
             "DiscordRoles": ["Member"]
           }
         },

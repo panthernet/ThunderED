@@ -1505,15 +1505,17 @@ namespace ThunderED.Classes
 
     public class AuthRoleEntity: ValidatableSettings
     {
-        [Comment("Id of the entity (corp or alliance)")]
-        [Required]
-        public long Id { get; set; }
+
         
         [Comment("The list of Discord role names to assign after successful auth")]
 #if EDITOR
         public ObservableCollection<string> DiscordRoles { get; set; } = new ObservableCollection<string>();
+        [Comment("Id of the entity (corp or alliance)")]
+        [Required]
+        public ObservableCollection<long> Id { get; set; } = new ObservableCollection<long>();
 #else
         public List<string> DiscordRoles { get; set; } = new List<string>();
+        public List<long> Id { get; set; } = new List<long>();
 #endif
 
 #if EDITOR
@@ -1524,7 +1526,7 @@ namespace ThunderED.Classes
                 switch (columnName)
                 {
                     case nameof(Id):
-                        return Id <= 0 ? Compose(nameof(Id), "Id must be greater than zero!") : null;
+                        return Id.Count == 0 || Id.Any(a=> a == 0) ? Compose(nameof(Id), "Id must be greater than zero!") : null;
                 }
 
                 return null;

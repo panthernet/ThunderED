@@ -348,8 +348,8 @@ namespace ThunderED.API
                 if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
                 {
                     var group = SettingsManager.Settings.WebAuthModule.AuthGroups[token.GroupName];
-                    if ((!group.AllowedAlliances.Any() || group.AllowedAlliances.Values.All(a => a.Id == 0)) &&
-                        (!group.AllowedCorporations.Any() || group.AllowedCorporations.Values.All(a => a.Id == 0)))
+                    if ((!group.AllowedAlliances.Any() || group.AllowedAlliances.Values.All(a => a.Id.All(b=> b == 0))) &&
+                        (!group.AllowedCorporations.Any() || group.AllowedCorporations.Values.All(a => a.Id.All(b=> b == 0))))
                         groupName = token.GroupName;
                 }
 
@@ -357,7 +357,7 @@ namespace ThunderED.API
                 if (string.IsNullOrEmpty(groupName))
                 {
                     var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a =>
-                        a.Value.AllowedAlliances.Values.All(b => b.Id == 0) && a.Value.AllowedCorporations.Values.All(b => b.Id == 0));
+                        a.Value.AllowedAlliances.Values.All(b => b.Id.All(c => c == 0)) && a.Value.AllowedCorporations.Values.All(b => b.Id.All(c=> c== 0)));
                     if (grp.Value != null)
                     {
                         groupName = grp.Key;
