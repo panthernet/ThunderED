@@ -135,8 +135,6 @@ namespace ThunderED.Classes
 #endif
         public bool FeedPersonalContracts { get; set; } = true;
         public bool FeedCorporateContracts { get; set; } = true;
-        public bool FeedIssuedBy { get; set; } = true;
-        public bool FeedIssuedTo { get; set; } = true;
         public string ButtonText { get; set; } = "Default Contracts Auth";
         public string DefaultMention { get; set; }
 
@@ -160,15 +158,21 @@ namespace ThunderED.Classes
     public class ContractNotifyFilter
     {
 #if EDITOR
+        [Comment("Availability filter. Values: public, personal, corporation, alliance")]
         public ObservableCollection<string> Availability { get; set; } = new ObservableCollection<string>();
+        [Comment("Type filter. Values: unknown, item_exchange, auction, courier, loan")]
         public ObservableCollection<string> Types { get; set; } = new ObservableCollection<string>();
+        [Comment("Status filter. Values: finished_issuer, finished_contractor, finished, cancelled, rejected, failed, deleted, reversed, in_progress, outstanding")]
         public ObservableCollection<string> Statuses { get; set; } = new ObservableCollection<string>();
-#else
+#else        
         public List<string> Availability { get; set; } = new List<string>();
         public List<string> Types { get; set; } = new List<string>();
         public List<string> Statuses { get; set; } = new List<string>();
 #endif
         public ulong DiscordChannelId { get; set; }
+        public bool FeedIssuedBy { get; set; } = true;
+        public bool FeedIssuedTo { get; set; } = true;
+
     }
 
     public class StatsModuleSettings

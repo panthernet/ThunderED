@@ -159,11 +159,6 @@ namespace ThunderED.Modules
             if (contracts == null)
                 return;
 
-            if (!group.FeedIssuedBy)
-                contracts = contracts.Where(a => a.issuer_id != characterID && (a.issuer_corporation_id != corpID || a.issuer_corporation_id == 0)).ToList();
-            if (!group.FeedIssuedTo)
-                contracts = contracts.Where(a => a.assignee_id != characterID && a.assignee_id != corpID).ToList();
-
             var lastContractId = contracts.FirstOrDefault()?.contract_id ?? 0;
             if (lastContractId == 0) return;
 
@@ -228,7 +223,15 @@ namespace ThunderED.Modules
                     list = list.Where(a => otherList.All(b => b.contract_id != a.contract_id)).ToList();
                 }
 
-                var crFilterChannel = group.Filters.Values.FirstOrDefault(a => a.Statuses.Contains("outstanding"))?.DiscordChannelId ?? 0;
+                var crFilter = group.Filters.Values.FirstOrDefault(a => a.Statuses.Contains("outstanding"));
+                var crFilterChannel = crFilter?.DiscordChannelId ?? 0;
+
+                //filter by issue target
+                if(!crFilter?.FeedIssuedBy ?? false)
+                    list = list.Where(a => a.issuer_id != characterID && (a.issuer_corporation_id != corpID || a.issuer_corporation_id == 0)).ToList();
+                if (!crFilter?.FeedIssuedTo ?? false)
+                    list = list.Where(a => a.assignee_id != characterID && a.assignee_id != corpID).ToList();
+
                 foreach (var contract in list)
                 {
                     try

@@ -61,11 +61,11 @@
         "DefaultMention": "",
         "FeedPersonalContracts":  true,
         "FeedCorporateContracts":  true,
-        "FeedIssuedBy":  true,
-        "FeedIssuedTo":  true,
         "Filters":  {
            "defaultFilter": {
-             "Statuses": ["finished", "cancelled", "rejected", "failed", "deleted", "reversed", "in_progress", "outstanding"],
+             "FeedIssuedBy":  true,
+             "FeedIssuedTo":  true,
+             "Statuses": ["finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed", "in_progress", "outstanding"],
              "Availability":  ["public", "personal", "corporation", "alliance"],
              "Types":  ["unknown", "item_exchange", "auction", "courier", "loan"], 
              "DiscordChannelId": 0
