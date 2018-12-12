@@ -6,6 +6,7 @@
 + Fixed contracts filtering
 + Fixed HRM mail generation failing in rare case
 + Improved contracts settings and added Filters property
++ Improved log feeder to send batch messages reducing Discord channel spam
 
 BREAKING CHANGES
 
