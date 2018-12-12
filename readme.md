@@ -17,6 +17,7 @@
 * Effective caching logic for less network and memory load
 * Highly customizable Message templates for killmails without any source-code modifications
 * Modular design for new extensions such as templates, modules and DB support
+* Have **config editor** utility with validation and tooltips
 
 ## Effective Corp and Alliance Management
 With this bot you will have tools to:
