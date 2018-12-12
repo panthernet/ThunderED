@@ -133,7 +133,7 @@ namespace ThunderED.Modules.OnDemand
                     await LogHelper.LogInfo($"Posting Global Big Kill: {kill.package.killID}  Value: {value:n0} ISK", Category);
                 }
 
-                if (allianceID == 0 && corpID == 0)
+                if (!allianceID.Any() && !corpID.Any())
                 {
                     if (value >= minimumValue)
                     {
@@ -156,7 +156,7 @@ namespace ThunderED.Modules.OnDemand
                     //Big
                     if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue)
                     {
-                        if (victimAllianceID != 0 && victimAllianceID == allianceID || victimCorpID == corpID)
+                        if (victimAllianceID != 0 && allianceID.Contains(victimAllianceID) || corpID.Contains(victimCorpID))
                         {
                             dic["{isLoss}"] = "true";
                             if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
@@ -184,7 +184,7 @@ namespace ThunderED.Modules.OnDemand
                     //Common
                     if (minimumLossValue == 0 || minimumLossValue <= value)
                     {
-                        if (victimAllianceID != 0 && victimAllianceID == allianceID || victimCorpID == corpID)
+                        if (victimAllianceID != 0 && allianceID.Contains(victimAllianceID) || corpID.Contains(victimCorpID))
                         {
                             dic["{isLoss}"] = "true";
                             if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))
@@ -207,7 +207,7 @@ namespace ThunderED.Modules.OnDemand
                     {
                         if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue && !npckill)
                         {
-                            if ((attacker.alliance_id != 0 && attacker.alliance_id == allianceID) || (allianceID == 0 && attacker.corporation_id == corpID))
+                            if ((attacker.alliance_id != 0 && allianceID.Contains(attacker.alliance_id)) || (!allianceID.Any() && corpID.Contains(attacker.corporation_id)))
                             {
                                 dic["{isLoss}"] = "false";
                                 if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, dic, bigKillChannel, discordGroupName))
@@ -235,8 +235,8 @@ namespace ThunderED.Modules.OnDemand
                                 break;
                             }
                         }
-                        else if (!npckill && attacker.alliance_id != 0 && allianceID != 0 && attacker.alliance_id == allianceID ||
-                                    !npckill && allianceID == 0 && attacker.corporation_id == corpID)
+                        else if (!npckill && attacker.alliance_id != 0 && allianceID.Any() && allianceID.Contains(attacker.alliance_id) ||
+                                    !npckill && !allianceID.Any() && corpID.Contains(attacker.corporation_id))
                         {
                             dic["{isLoss}"] = "false";
                             if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, dic, c, discordGroupName))

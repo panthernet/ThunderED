@@ -154,18 +154,16 @@
     "DefaultMention":  "@everyone", 
     "accessList": {
       "UnitedFleet":{
-        "isAlliance": true,
-        "isCharacter": false,
-        "isCorporation": false, 
-        "id": 0
+        "AllianceIDs": [0],
+        "CharacterIDs": [0],
+        "CorporationIDs": [0]
       }
     },
     "editList": {
       "UnitedFleet":{
-        "isAlliance": true,
-        "isCharacter": false,
-        "isCorporation": false, 
-        "id": 0
+        "AllianceIDs": [0],
+        "CharacterIDs": [0],
+        "CorporationIDs": [0]
       }
     }
   },
@@ -193,8 +191,8 @@
     "groupsConfig": {
       "groupName": {
         "discordChannel": 0,
-        "corpID": 0,
-        "allianceID": 0,
+        "corpID": [0],
+        "allianceID": [0],
         "showGroupName":  false, 
         "minimumValue": 0,
         "minimumLossValue": 0,
@@ -268,7 +266,7 @@
         "AllowedCorporations": {},
         "AllowedAlliances":{
           "ally1": {
-            "Id": 0,
+            "Id": [0],
             "DiscordRoles": ["Member"]
           }
         },
@@ -341,7 +339,7 @@
     "checkIntervalInMinutes": 2,
     "groups": {
       "groupName1": {
-        "characterID": 0,
+        "characterID": [0],
         "defaultDiscordChannelID": 0,
         "fetchLastNotifDays":  0,
         "filters": {

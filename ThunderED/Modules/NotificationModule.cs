@@ -82,7 +82,7 @@ namespace ThunderED.Modules
                     foreach (var groupPair in Settings.NotificationFeedModule.Groups)
                     {
                         var group = groupPair.Value;
-                        if (group.CharacterID == 0)
+                        if (!group.CharacterID.Any() || group.CharacterID.All(a=> a==0))
                         {
                             await LogHelper.LogError($"[CONFIG] Notification group {groupPair.Key} has no characterID specified!");
                             continue;
@@ -900,7 +900,7 @@ namespace ThunderED.Modules
                         return true;
                     }
 
-                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.Groups.Values.All(g => g.CharacterID != numericCharId))
+                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.Groups.Values.All(g => !g.CharacterID.Contains(numericCharId)))
                     {
                         await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)

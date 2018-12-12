@@ -183,9 +183,9 @@ namespace ThunderED.Classes
             }
 
 
-            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsAlliance && a.Id > 0).Select(a => a.Id);
-            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCorporation && a.Id > 0).Select(a => a.Id);
-            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCharacter && a.Id > 0).Select(a => a.Id);
+            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.AllianceIDs.Where(b=> b > 0)).Distinct().ToList();
+            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CorporationIDs.Where(b=> b > 0)).Distinct().ToList();
+            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CharacterIDs.Where(b=> b > 0)).Distinct().ToList();
 
             var skip = !allys.Any() && !corps.Any() && !chars.Any();
 
@@ -232,9 +232,9 @@ namespace ThunderED.Classes
                 return;
             }
 
-            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsAlliance).Select(a => a.Id);
-            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCorporation).Select(a => a.Id);
-            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.Where(a => a.IsCharacter).Select(a => a.Id);
+            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.AllianceIDs.Where(b=> b > 0)).Distinct().ToList();
+            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CorporationIDs.Where(b=> b > 0)).Distinct().ToList();
+            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CharacterIDs.Where(b=> b > 0)).Distinct().ToList();
 
             var dataList = (await SQLHelper.GetAuthUser(Context.User.Id))?.FirstOrDefault();
             if (dataList != null && dataList.Count > 0 && dataList.ContainsKey("characterId"))

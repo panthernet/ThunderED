@@ -7,14 +7,21 @@
 + Fixed HRM mail generation failing in rare case
 + Improved contracts settings and added Filters property
 + Improved log feeder to send batch messages reducing Discord channel spam
-+ Improved auth module IDs to accept list of values
++ Improved WebAuthModule IDs to accept list of values
++ Improved notificationFeedModule IDs to accept list of values
++ Improved liveKillFeedModule IDs to accept list of values
++ Improved timersModule IDs to accept list of values
 
-BREAKING CHANGES
+### BREAKING CHANGES
 
 - Look in default config file for contracts module changes
 - WebAuthModule -> authGroups -> AllowedCorporations -> Id is now a list of values
 - WebAuthModule -> authGroups -> AllowedAlliances -> Id is now a list of values
-
+- notificationFeedModule -> groups -> characterID - is now a list of values
+- liveKillFeedModule -> groupsConfig -> corpID - is now a list of values
+- liveKillFeedModule -> groupsConfig -> allianceID - is now a list of values
+- timersModule -> accessList replaced with AllianceIDs, CharacterIDs and CorporationIDs params
+- timersModule -> editList replaced with AllianceIDs, CharacterIDs and CorporationIDs params
 
 ### V1.2.8
 

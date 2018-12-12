@@ -425,12 +425,6 @@ namespace ThunderED.Classes
         [Comment("Numeric ID of the Discord channel to post KMs of this group into")]
         [Required]
         public ulong DiscordChannel { get; set; }
-        [Comment("Numeric corporation ID. Specify to fetch all KMs for this corporation. \nMutually exclusive with allianceID.")]
-        [Required]
-        public long CorpID { get; set; }
-        [Comment("Numeric alliance ID. Specify to fetch all KMs for this alliance. Mutually exclusive with corpID")]
-        [Required]
-        public long AllianceID { get; set; }
         [Comment("Minimum KM ISK value")]
         public long MinimumValue { get; set; }
         [Comment("minimum loss KM ISK value. Set to very high value to disable losses")]
@@ -448,6 +442,19 @@ namespace ThunderED.Classes
         public bool FeedPveKills { get; set; } = true;
 
 #if EDITOR
+        [Comment("Numeric corporation ID. Specify to fetch all KMs for this corporation. \nMutually exclusive with allianceID.")]
+        [Required]
+        public ObservableCollection<long> CorpID { get; set; } = new ObservableCollection<long>();
+        [Comment("Numeric alliance ID. Specify to fetch all KMs for this alliance. Mutually exclusive with corpID")]
+        [Required]
+        public ObservableCollection<long> AllianceID { get; set; } = new ObservableCollection<long>();
+
+#else
+        public List<long> CorpID { get; set; } = new List<long>();
+        public List<long> AllianceID { get; set; } = new List<long>();
+#endif
+
+#if EDITOR
         public override string this[string columnName]
         {
             get
@@ -457,7 +464,7 @@ namespace ThunderED.Classes
                     case nameof(DiscordChannel):
                         return DiscordChannel == 0? Compose(nameof(DiscordChannel), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(CorpID):
-                        return CorpID == 0 && AllianceID == 0? Compose(nameof(AllianceID), "Either CorpID or AllianceID must be specified!") : null;
+                        return !CorpID.Any() && !AllianceID.Any()? Compose(nameof(AllianceID), "Either CorpID or AllianceID must be specified!") : null;
                 }
 
                 return null;
@@ -591,28 +598,25 @@ namespace ThunderED.Classes
 
     public class TimersAccessGroup: ValidatableSettings
     {
-        [Comment("Is this an alliance or corporation ID")]
-        public bool IsAlliance { get; set; }
-        [Comment("Is this a character ID. Has priority over **isAlliance** value")]
-        public bool IsCharacter { get; set; }
-        [Comment("Is this a corporation ID")]
-        public bool IsCorporation { get; set; }
-        [Comment("Numeric ID value of the entity")]
-        [Required]
-        public long Id { get; set; }
+#if EDITOR
+        [Comment("Alliance ID list")]
+        public ObservableCollection<long> AllianceIDs { get; set; } = new ObservableCollection<long>();
+        [Comment("Character IDs list")]
+        public ObservableCollection<long> CharacterIDs { get; set; } = new ObservableCollection<long>();
+        [Comment("Corporation ID list")]
+        public ObservableCollection<long> CorporationIDs { get; set; } = new ObservableCollection<long>();
+#else
+        public List<long> AllianceIDs { get; set; } = new List<long>();
+        public List<long> CharacterIDs { get; set; } = new List<long>();
+        public List<long> CorporationIDs { get; set; } = new List<long>();
+#endif
+
 
 #if EDITOR
         public override string this[string columnName]
         {
             get
             {
-                switch (columnName)
-                {
-                    case nameof(IsAlliance):
-                        return !IsAlliance && !IsCorporation && !IsCharacter ? Compose(nameof(IsAlliance), "Either IsAlliance, IsCorporation or IsCharacter must be selected!") : null;
-                    case nameof(Id):
-                        return Id == 0 ? Compose(nameof(Id), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                }
 
                 return null;
             }
@@ -912,9 +916,6 @@ namespace ThunderED.Classes
 
     public class NotificationSettingsGroup: ValidatableSettings
     {
-        [Comment("Numeric EVE character ID")]
-        [Required]
-        public long CharacterID { get; set; }
         [Comment("Numeric default Discord channel ID. All notification filters will use this channel to send messages by default")]
         [Required]
         public ulong DefaultDiscordChannelID { get; set; }
@@ -925,8 +926,13 @@ namespace ThunderED.Classes
         [Comment("The list of filters to sort incoming notifications")]
         [Required]
         public ObservableDictionary<string, NotificationSettingsFilter> Filters { get; set; } = new ObservableDictionary<string, NotificationSettingsFilter>();
+        [Comment("Numeric EVE character ID")]
+        [Required]
+        public ObservableCollection<long> CharacterID { get; set; } = new ObservableCollection<long>();
+
 #else
         public Dictionary<string, NotificationSettingsFilter> Filters { get; set; } = new Dictionary<string, NotificationSettingsFilter>();
+        public List<long> CharacterID { get; set; } = new List<long>();
 #endif
 #if EDITOR
         public override string this[string columnName]
@@ -938,7 +944,7 @@ namespace ThunderED.Classes
                     case nameof(Filters):
                         return Filters.Count == 0 ? Compose(nameof(Filters), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(CharacterID):
-                        return CharacterID == 0 ? Compose(nameof(CharacterID), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                        return !CharacterID.Any() || CharacterID.All(a=> a == 0) ? Compose(nameof(CharacterID), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(DefaultDiscordChannelID):
                         return DefaultDiscordChannelID == 0 ? Compose(nameof(DefaultDiscordChannelID), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }

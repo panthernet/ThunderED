@@ -273,7 +273,7 @@ namespace ThunderED.Modules
             isEditor = false;
             bool skip = false;
 
-            if (authgroups.Count == 0 || authgroups.All(a => a.Value.Id == 0))
+            if (authgroups.Count == 0 || authgroups.Values.All(a => !a.AllianceIDs.Any() && !a.CorporationIDs.Any() && !a.CharacterIDs.Any()))
             {
                 skip = true;
             }
@@ -281,15 +281,9 @@ namespace ThunderED.Modules
             {
                 foreach (var config in authgroups)
                 {
-                    var id = config.Value.Id;
-                    if (config.Value.IsCharacter)
-                        accessChars.Add(id);
-                    else
-                    {
-                        if (config.Value.IsAlliance)
-                            accessAlliance.Add(id);
-                        else accessCorps.Add(id);
-                    }
+                    accessChars.AddRange(config.Value.CharacterIDs.Where(a=> a > 0));
+                    accessAlliance.AddRange(config.Value.AllianceIDs.Where(a=> a > 0));
+                    accessCorps.AddRange(config.Value.CorporationIDs.Where(a=> a > 0));
                 }
             }
 
@@ -310,7 +304,7 @@ namespace ThunderED.Modules
                 }
             }
 
-            if (authgroups.Count == 0 || authgroups.All(a => a.Value.Id == 0))
+            if (authgroups.Count == 0 ||  authgroups.Values.All(a => !a.AllianceIDs.Any() && !a.CorporationIDs.Any() && !a.CharacterIDs.Any()))
             {
                 skip2 = true;
             }
@@ -318,15 +312,9 @@ namespace ThunderED.Modules
             {
                 foreach (var config in authgroups)
                 {
-                    var id = config.Value.Id;
-                    if (config.Value.IsCharacter)
-                        editChars.Add(id);
-                    else
-                    {
-                        if (config.Value.IsAlliance)
-                            editAlliance.Add(id);
-                        else editCorps.Add(id);
-                    }
+                    editChars.AddRange(config.Value.CharacterIDs.Where(a=> a > 0));
+                    editAlliance.AddRange(config.Value.AllianceIDs.Where(a=> a > 0));
+                    editCorps.AddRange(config.Value.CorporationIDs.Where(a=> a > 0));
                 }
             }
 
