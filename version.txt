@@ -11,6 +11,7 @@
 + Improved notificationFeedModule IDs to accept list of values
 + Improved liveKillFeedModule IDs to accept list of values
 + Improved timersModule IDs to accept list of values
++ Improved mailModule IDs to accept list of values
 
 ### BREAKING CHANGES
 
@@ -22,6 +23,7 @@
 - liveKillFeedModule -> groupsConfig -> allianceID - is now a list of values
 - timersModule -> accessList replaced with AllianceIDs, CharacterIDs and CorporationIDs params
 - timersModule -> editList replaced with AllianceIDs, CharacterIDs and CorporationIDs params
+- mailModule -> AuthGroups -> Id - is now a list of values
 
 ### V1.2.8
 

@@ -657,15 +657,15 @@ namespace ThunderED.Classes
 
     public class MailAuthGroup: ValidatableSettings
     {
-        [Comment("EVE Online character ID")]
-        [Required]
-        public long Id { get; set; }
-
         [Comment("Include private mail to this feed")]
         public bool IncludePrivateMail { get; set; }
 #if EDITOR
+        [Comment("EVE Online character ID")]
+        [Required]
+        public ObservableCollection<long> Id { get; set; } = new ObservableCollection<long>();
         public ObservableDictionary<string, MailAuthFilter> Filters { get; set; } = new ObservableDictionary<string, MailAuthFilter>();
 #else
+        public List<long> Id { get; set; } = new List<long>();
         public Dictionary<string, MailAuthFilter> Filters { get; set; } = new Dictionary<string, MailAuthFilter>();
 #endif
         [Comment("Numeric Discord channel ID to post mail feed")]
@@ -684,7 +684,7 @@ namespace ThunderED.Classes
                 switch (columnName)
                 {
                     case nameof(Id):
-                        return Id == 0 ? Compose(nameof(Id), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                        return !Id.Any() ? Compose(nameof(Id), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(DefaultChannel):
                         return DefaultChannel == 0 ? Compose(nameof(DefaultChannel), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }

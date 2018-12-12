@@ -64,7 +64,7 @@ namespace ThunderED.Modules
 
                         var lCharId = Convert.ToInt64(result[0]);
 
-                        if (Settings.MailModule.AuthGroups.Values.All(a => a.Id != lCharId))
+                        if (Settings.MailModule.AuthGroups.Values.All(a => !a.Id.Contains(lCharId)))
                         {
                             await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Mail Module", LM.Get("accessDenied")), response);
                             return true;
@@ -99,99 +99,104 @@ namespace ThunderED.Modules
                 _lastCheckTime = DateTime.Now;
                 await LogHelper.LogModule("Running Mail module check...", Category);
 
-                foreach(var groupPair in Settings.MailModule.AuthGroups)
+                foreach (var groupPair in Settings.MailModule.AuthGroups)
                 {
                     var group = groupPair.Value;
-                    if(group.DefaultChannel == 0)
+                    if (group.DefaultChannel == 0)
                         continue;
                     var defaultChannel = group.DefaultChannel;
-                    var charId = group.Id;
 
-                    if (group.Id == 0) continue; 
-
-                    var rToken = await SQLHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", charId);
-                    if (string.IsNullOrEmpty(rToken))
+                    foreach (var charId in group.Id)
                     {
-                        continue;
-                    }
+                        if (charId == 0) continue;
 
-                    var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
-                    if (string.IsNullOrEmpty(rToken))
-                    {
-                        await LogHelper.LogWarning("Unable to get correct token using refresh token! Refresh token might be expired!", Category);
-                        continue;
-                    }
-
-                    var lastMailId = await SQLHelper.SQLiteDataQuery<long>("mail", "mailId", "id", group.Id.ToString());
-                    var prevMailId = lastMailId;
-                    var includePrivate = group.IncludePrivateMail;
-
-                    if (group.Filters.Values.All(a=> a.FilterSenders.Count == 0 && a.FilterLabels.Count == 0 && a.FilterMailList.Count == 0))
-                    {
-                        await LogHelper.LogWarning($"Mail feed for user {group.Id} has no labels, lists or senders configured!", Category);
-                        continue;
-                    }
-
-                    var labelsData = await APIHelper.ESIAPI.GetMailLabels(Reason, group.Id.ToString(), token);
-                    var searchLabels = labelsData?.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received").ToList() ?? new List<JsonClasses.MailLabel>();
-                    var mailLists = await APIHelper.ESIAPI.GetMailLists(Reason, group.Id, token);
-                    var mailsHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, group.Id.ToString(), token, 0);
-                    
-                    if (lastMailId > 0)
-                        mailsHeaders = mailsHeaders.Where(a => a.mail_id > lastMailId).OrderBy(a=> a.mail_id).ToList();
-                    else
-                    {
-                        lastMailId = mailsHeaders.OrderBy(a=> a.mail_id).LastOrDefault()?.mail_id ?? 0;
-                        mailsHeaders.Clear();
-                    }
-
-                    foreach (var mailHeader in mailsHeaders)
-                    {
-                        try
+                        var rToken = await SQLHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", charId);
+                        if (string.IsNullOrEmpty(rToken))
                         {
-                            if (mailHeader.mail_id <= lastMailId) continue;
-                            lastMailId = mailHeader.mail_id;
-                            if (!includePrivate && (mailHeader.recipients.Count(a => a.recipient_id == charId) > 0)) continue;
+                            continue;
+                        }
 
-                            foreach (var filter in group.Filters.Values)
+                        var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                        if (string.IsNullOrEmpty(rToken))
+                        {
+                            await LogHelper.LogWarning("Unable to get correct token using refresh token! Refresh token might be expired!", Category);
+                            continue;
+                        }
+
+                        var lastMailId = await SQLHelper.SQLiteDataQuery<long>("mail", "mailId", "id", group.Id.ToString());
+                        var prevMailId = lastMailId;
+                        var includePrivate = group.IncludePrivateMail;
+
+                        if (group.Filters.Values.All(a => a.FilterSenders.Count == 0 && a.FilterLabels.Count == 0 && a.FilterMailList.Count == 0))
+                        {
+                            await LogHelper.LogWarning($"Mail feed for user {group.Id} has no labels, lists or senders configured!", Category);
+                            continue;
+                        }
+
+                        var labelsData = await APIHelper.ESIAPI.GetMailLabels(Reason, group.Id.ToString(), token);
+                        var searchLabels = labelsData?.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received").ToList() ??
+                                           new List<JsonClasses.MailLabel>();
+                        var mailLists = await APIHelper.ESIAPI.GetMailLists(Reason, charId, token);
+                        var mailsHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, charId.ToString(), token, 0);
+
+                        if (lastMailId > 0)
+                            mailsHeaders = mailsHeaders.Where(a => a.mail_id > lastMailId).OrderBy(a => a.mail_id).ToList();
+                        else
+                        {
+                            lastMailId = mailsHeaders.OrderBy(a => a.mail_id).LastOrDefault()?.mail_id ?? 0;
+                            mailsHeaders.Clear();
+                        }
+
+                        foreach (var mailHeader in mailsHeaders)
+                        {
+                            try
                             {
-                                //filter by senders
-                                if (filter.FilterSenders.Count > 0 && !filter.FilterSenders.Contains(mailHeader.from))
-                                    continue;
-                                //filter by labels
-                                var labelIds = searchLabels.Where(a => filter.FilterLabels.Contains(a.name)).Select(a => a.label_id).ToList();
-                                if (labelIds.Count > 0 && !mailHeader.labels.Any(a => labelIds.Contains(a)))
-                                    continue;
-                                //filter by mail lists
-                                var mailListIds = filter.FilterMailList.Count > 0
-                                    ? mailLists.Where(a => filter.FilterMailList.Any(b => a.name.Equals(b, StringComparison.OrdinalIgnoreCase))).Select(a => a.mailing_list_id)
-                                        .ToList()
-                                    : new List<long>();
-                                if (mailListIds.Count > 0 && !mailHeader.recipients.Where(a => a.recipient_type == "mailing_list").Any(a => mailListIds.Contains(a.recipient_id)))
-                                    continue;
+                                if (mailHeader.mail_id <= lastMailId) continue;
+                                lastMailId = mailHeader.mail_id;
+                                if (!includePrivate && (mailHeader.recipients.Count(a => a.recipient_id == charId) > 0)) continue;
 
-                                var mail = await APIHelper.ESIAPI.GetMail(Reason, group.Id.ToString(), token, mailHeader.mail_id);
-                                // var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
-                                var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.from);
-                                var from = sender?.name;
-                                var ml = mailHeader.recipients.FirstOrDefault(a => a.recipient_type == "mailing_list" && mailListIds.Contains(a.recipient_id));
-                                if (ml != null)
-                                    from = $"{sender?.name}[{mailLists.First(a => a.mailing_list_id == ml.recipient_id).name}]";
-                                var channel = filter.FeedChannel > 0 ? filter.FeedChannel : defaultChannel;
-                                await SendMailNotification(channel, mail, from, group.DefaultMention);
-                                break;
+                                foreach (var filter in group.Filters.Values)
+                                {
+                                    //filter by senders
+                                    if (filter.FilterSenders.Count > 0 && !filter.FilterSenders.Contains(mailHeader.from))
+                                        continue;
+                                    //filter by labels
+                                    var labelIds = searchLabels.Where(a => filter.FilterLabels.Contains(a.name)).Select(a => a.label_id).ToList();
+                                    if (labelIds.Count > 0 && !mailHeader.labels.Any(a => labelIds.Contains(a)))
+                                        continue;
+                                    //filter by mail lists
+                                    var mailListIds = filter.FilterMailList.Count > 0
+                                        ? mailLists.Where(a => filter.FilterMailList.Any(b => a.name.Equals(b, StringComparison.OrdinalIgnoreCase))).Select(a => a.mailing_list_id)
+                                            .ToList()
+                                        : new List<long>();
+                                    if (mailListIds.Count > 0 && !mailHeader.recipients.Where(a => a.recipient_type == "mailing_list")
+                                            .Any(a => mailListIds.Contains(a.recipient_id)))
+                                        continue;
+
+                                    var mail = await APIHelper.ESIAPI.GetMail(Reason, group.Id.ToString(), token, mailHeader.mail_id);
+                                    // var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
+                                    var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.from);
+                                    var from = sender?.name;
+                                    var ml = mailHeader.recipients.FirstOrDefault(a => a.recipient_type == "mailing_list" && mailListIds.Contains(a.recipient_id));
+                                    if (ml != null)
+                                        from = $"{sender?.name}[{mailLists.First(a => a.mailing_list_id == ml.recipient_id).name}]";
+                                    var channel = filter.FeedChannel > 0 ? filter.FeedChannel : defaultChannel;
+                                    await SendMailNotification(channel, mail, from, group.DefaultMention);
+                                    break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                await LogHelper.LogEx($"MailCheck: {mailHeader?.mail_id} {mailHeader?.subject}", ex);
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            await LogHelper.LogEx($"MailCheck: {mailHeader?.mail_id} {mailHeader?.subject}", ex);
-                        }
+
+                        if (prevMailId != lastMailId || lastMailId == 0)
+                            await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object> {{"id", group.Id.ToString()}, {"mailId", lastMailId}});
                     }
-     
-                    if(prevMailId != lastMailId || lastMailId == 0)
-                        await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object>{{"id", group.Id.ToString()}, {"mailId", lastMailId}});
                 }
-               // await LogHelper.LogModule("Completed", Category);
+
+                // await LogHelper.LogModule("Completed", Category);
             }
             catch (Exception ex)
             {
