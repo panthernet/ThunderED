@@ -374,5 +374,7 @@
   "contractMsgDetails":  "Details", 
   "contractMsgIncludedItems":  "Included Items", 
   "contractMsgAskingItems":  "Asking Items",
-  "hrmContractItems":  "Items" 
+  "hrmContractItems":  "Items",
+  "contractMsgVolume":  "Volume" 
+
 }

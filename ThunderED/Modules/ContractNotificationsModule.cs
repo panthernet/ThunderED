@@ -209,7 +209,7 @@ namespace ThunderED.Modules
                 }
 
                 //silently remove filtered out expired contracts
-                var lefties = lst.Where(a => _completeStatuses.Contains(a.status));
+                var lefties = lst.Where(a => _completeStatuses.Contains(a.status)).ToList();
                 foreach (var lefty in lefties)
                 {
                     lst.Remove(lefty);
@@ -222,7 +222,7 @@ namespace ThunderED.Modules
             if (lastContractId > lastRememberedId)
             {
                 //get and report new contracts, forget already finished
-                var list = contracts.Where(a => a.contract_id > lastRememberedId && !_finishedStatuses.Contains(a.status)).ToList();
+                var list = contracts.Where(a => a.contract_id > lastRememberedId && !_completeStatuses.Contains(a.status)).ToList();
                 if (otherList != null)
                 {
                     list = list.Where(a => otherList.All(b => b.contract_id != a.contract_id)).ToList();
@@ -457,10 +457,18 @@ namespace ThunderED.Modules
                 foreach (var item in items)
                 {
                     var t = await APIHelper.ESIAPI.GetTypeId(Reason, item.type_id);
-                    if(item.is_included)
+                    if (item.is_included)
+                    {
                         sbItemsSubmitted.Append($"{t?.name} x{item.quantity}\n");
+                    }
                     else sbItemsAsking.Append($"{t?.name} x{item.quantity}\n");
                 }
+            }
+
+            if (contract.volume > 0)
+            {
+                sbNames.Append($"\n{LM.Get("contractMsgVolume")}: ");
+                sbValues.Append($"\n{contract.volume:N1} m3");
             }
 
             var issuedText = $"{LM.Get("contractMsgIssued")}: {stampIssued}";

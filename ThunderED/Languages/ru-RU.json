@@ -368,6 +368,8 @@
   "contractMsgDetails":  "Детализация", 
   "contractMsgIncludedItems":  "Включенные Предметы", 
   "contractMsgAskingItems":  "Требуемые Предметы",
-  "hrmContractItems":  "Предметы" 
+  "hrmContractItems":  "Предметы",
+  "contractMsgVolume":  "Объем" 
+
 
 }

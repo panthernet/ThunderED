@@ -2,6 +2,7 @@
 
 + Added extendedESILogging param to general config
 + Added contract items to HRM inspection page
++ Added volume to contracts
 + Fixed contracts filtering
 + Fixed HRM mail generation failing in rare case
 + Improved contracts settings and added Filters property
