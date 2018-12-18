@@ -1,3 +1,8 @@
+### V1.2.10
+
+
+
+
 ### V1.2.9
 
 + Added extendedESILogging param to general config
@@ -5,6 +10,7 @@
 + Added volume to contracts
 + Fixed contracts filtering
 + Fixed HRM mail generation failing in rare case
++ Fixed Discord name length error
 + Improved contracts settings and added Filters property
 + Improved log feeder to send batch messages reducing Discord channel spam
 + Improved WebAuthModule IDs to accept list of values

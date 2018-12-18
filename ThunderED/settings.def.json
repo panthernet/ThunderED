@@ -56,7 +56,7 @@
     "MaxTrackingCount":  150, 
     "Groups": {
       "group1": {
-        "CharacterIDs": [],
+        "CharacterIDs": [0],
         "ButtonText":  "Default Contracts Auth",
         "DefaultMention": "",
         "FeedPersonalContracts":  true,
@@ -111,7 +111,7 @@
     "checkIntervalInMinutes": 2,
     "AuthGroups": {
       "VesNa": {
-        "Id": 0,
+        "Id": [0],
         "IncludePrivateMail": true,
         "DefaultChannel": 0,
         "DefaultMention": "",

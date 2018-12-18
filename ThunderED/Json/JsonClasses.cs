@@ -331,7 +331,7 @@ namespace ThunderED.Json
         public class Contact
         {
             public long contact_id;
-            public string contact_type;// "character",
+            public string contact_type;// "character",character, corporation, alliance, faction 
             public bool is_blocked;
             public bool is_watched;
             public double standing;

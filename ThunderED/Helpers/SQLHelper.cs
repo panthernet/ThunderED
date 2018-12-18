@@ -509,6 +509,37 @@ namespace ThunderED.Helpers
             });
         }
 
+        public static async Task SaveAuthStands(AuthStandsEntity data)
+        {
+            await SQLiteDataInsertOrUpdate("standAuth", new Dictionary<string, object>
+            {
+                {"characterID", data.CharacterID},
+                {"token", data.Token},
+                {"personalStands", JsonConvert.SerializeObject(data.PersonalStands)},
+                {"corpStands", JsonConvert.SerializeObject(data.CorpStands)},
+                {"allianceStands", JsonConvert.SerializeObject(data.AllianceStands)},
+            });
+        }
+
+        public static async Task<AuthStandsEntity> LoadAuthStands(long id)
+        {
+            var data = (await SelectData("standAuth", new [] {"token", "personalStands", "corpStands", "allianceStands"}, new Dictionary<string, object> {{"characterID", id}}))?.FirstOrDefault();
+            if (data == null)
+                return null;
+            return new AuthStandsEntity
+            {
+                CharacterID = id,
+                Token = (string)data[0],
+                PersonalStands = JsonConvert.DeserializeObject<List<JsonClasses.Contact>>((string)data[1]),
+                CorpStands = JsonConvert.DeserializeObject<List<JsonClasses.Contact>>((string)data[2]),
+                AllianceStands = JsonConvert.DeserializeObject<List<JsonClasses.Contact>>((string)data[3]),
+            };
+        }
+
+        public static async Task DeleteAuthStands(long id)
+        {
+            await SQLiteDataDelete("standAuth", "characterID", id);
+        }
 
     }
 }

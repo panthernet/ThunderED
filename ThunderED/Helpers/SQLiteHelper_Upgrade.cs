@@ -120,6 +120,10 @@ namespace ThunderED.Helpers
                             await RunCommand("CREATE TABLE contracts(`characterID` INTEGER PRIMARY KEY NOT NULL,`data` TEXT, `corpdata` TEXT);");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
+                        case "1.2.10":
+                            await BackupDatabase();
+                            await RunCommand("CREATE TABLE standAuth(`characterID` INTEGER PRIMARY KEY NOT NULL, `token` TEXT, `personalStands` TEXT, `corpStands` TEXT, `allianceStands` TEXT);");
+                            break;
                         default:
                             continue;
                     }

@@ -61,6 +61,8 @@ namespace ThunderED.Classes
 
         [ConfigEntryName("ModuleContractNotifications")]
         public ContractNotificationsModuleSettings ContractNotificationsModule { get; set; } = new ContractNotificationsModuleSettings();
+        [ConfigEntryName("ModuleAuthStandings")]
+        public AuthStandingsModuleSettings AuthStandingsModule { get; set; } = new AuthStandingsModuleSettings();
 
 #if EDITOR
         public string Validate(List<string> usedModules)
@@ -92,6 +94,91 @@ namespace ThunderED.Classes
 #endif
     }
 
+    public class AuthStandingsModuleSettings: ValidatableSettings
+    {
+#if EDITOR
+        public ObservableDictionary<string, AuthStandGroup> AuthGroups {get;set;} = new ObservableDictionary<string, AuthStandGroup>();
+
+#else
+        public Dictionary<string, AuthStandGroup> AuthGroups {get;set;} = new Dictionary<string, AuthStandGroup>();
+#endif
+
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(AuthGroups):
+                        return !AuthGroups.Any() ? Compose(nameof(AuthGroups), "AuthGroups must be specified!") : null;
+                }
+                return null;
+            }
+        }
+#endif
+    }
+
+    public class AuthStandGroup: ValidatableSettings
+    {
+#if EDITOR
+        public ObservableCollection<long> CharacterIDs { get; set; } = new ObservableCollection<long>();
+        public ObservableDictionary<string, StandingGroup> StandingFilters { get; set; } = new ObservableDictionary<string, StandingGroup>();
+#else
+        public List<long> CharacterIDs { get; set; } = new List<long>();
+        public Dictionary<string, StandingGroup> StandingFilters { get; set; } = new Dictionary<string, StandingGroup>();
+#endif
+
+        public string WebApplicantButtonText { get; set; } = "Standings App Auth";
+        public string WebAdminButtonText { get; set; } = "Standings Admin Auth";
+        public bool UseCharacterStandings { get; set; } = true;
+        public bool UseCorporationStandings { get; set; } = false;
+        public bool UseAllianceStandings { get; set; } = false;
+
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(UseCharacterStandings):
+                        return !UseCharacterStandings && !UseAllianceStandings && !UseCorporationStandings ? Compose(nameof(UseCharacterStandings), "Use at least one type of settings!") : null;
+                }
+                return null;
+            }
+        }
+#endif
+    }
+
+    public class StandingGroup: ValidatableSettings
+    {
+#if EDITOR
+        public ObservableCollection<int> Standings { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<string> DiscordRoles { get; set; } = new ObservableCollection<string>();
+#else
+        public List<int> Standings { get; set; } = new List<int>();
+        public List<string> DiscordRoles { get; set; } = new List<string>();
+#endif
+        public string Modifier { get; set; } = "eq";
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(Standings):
+                        return !Standings.Any() ? Compose(nameof(Standings), "Standings must be specified!") : null;
+                    case nameof(Modifier):
+                        return !string.IsNullOrEmpty(Modifier)? Compose(nameof(Modifier), "Modifier must be specified!") : null;
+                }
+                return null;
+            }
+        }
+#endif
+    }
+
     public class ContractNotificationsModuleSettings: ValidatableSettings
     {
         [Required]
@@ -101,9 +188,9 @@ namespace ThunderED.Classes
         [Comment("Maximum number of last contracts to check")]
         public int MaxTrackingCount { get; set; } = 150;
 #if EDITOR
-        public ObservableDictionary<string, ContractNotifyGroup> Groups = new ObservableDictionary<string, ContractNotifyGroup>();
+        public ObservableDictionary<string, ContractNotifyGroup> Groups { get; set; } = new ObservableDictionary<string, ContractNotifyGroup>();
 #else
-        public Dictionary<string, ContractNotifyGroup> Groups = new Dictionary<string, ContractNotifyGroup>();        
+        public Dictionary<string, ContractNotifyGroup> Groups { get; set; } = new Dictionary<string, ContractNotifyGroup>();        
 #endif
 #if EDITOR
         public override string this[string columnName]
@@ -1252,6 +1339,7 @@ namespace ThunderED.Classes
         public bool ModuleHRM { get; set; } = false;
         public bool ModuleSystemLogFeeder { get; set; } = false;
         public bool ModuleContractNotifications { get; set; } = false;
+        public bool ModuleAuthStandings { get; set; } = false;
 
         [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
         public string ZkillLiveFeedRedisqID { get; set; }
