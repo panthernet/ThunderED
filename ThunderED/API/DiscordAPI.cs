@@ -195,8 +195,10 @@ namespace ThunderED.API
         private async Task Event_Ready()
         {
             IsAvailable = true;
-
-            await GetGuild().CurrentUser.ModifyAsync(x => x.Nickname = SettingsManager.Settings.Config.BotDiscordName);
+            var name = SettingsManager.Settings.Config.BotDiscordName.Length > 31
+                ? SettingsManager.Settings.Config.BotDiscordName.Substring(0, 31)
+                : SettingsManager.Settings.Config.BotDiscordName;
+            await GetGuild().CurrentUser.ModifyAsync(x => x.Nickname = name);
             await Client.SetGameAsync(SettingsManager.Settings.Config.BotDiscordGame);
         }
 
@@ -459,6 +461,9 @@ namespace ThunderED.API
                             await LogHelper.LogInfo($"Trying to change name of {u.Nickname} to {nickname}", LogCat.AuthCheck);
                             try
                             {
+                                nickname = nickname.Length > 31
+                                    ? nickname.Substring(0, 31)
+                                    : nickname;
                                 await u.ModifyAsync(x => x.Nickname = nickname);
                             }
                             catch
