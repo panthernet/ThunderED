@@ -115,6 +115,18 @@ namespace ThunderED.Modules.Sub
 
                             //auth controls
                             var authText = new StringBuilder();
+
+                            //stands auth
+                            if (Settings.Config.ModuleAuthStandings)
+                            {
+                                foreach (var groupPair in Settings.AuthStandingsModule.AuthGroups)
+                                {
+                                    var group = groupPair.Value;
+                                    var url = $"{authUrl}?group={HttpUtility.UrlEncode(groupPair.Key)}";
+                                    authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.WebApplicantButtonText}</a>");                                    
+                                }
+                            }
+
                             //auth
                             if (Settings.Config.ModuleAuthWeb)
                             {
@@ -140,6 +152,21 @@ namespace ThunderED.Modules.Sub
 
                             var len = authText.Length;
                             bool smth = false;
+
+                            //stands auth
+                            if (Settings.Config.ModuleAuthStandings)
+                            {
+                                foreach (var groupPair in Settings.AuthStandingsModule.AuthGroups)
+                                {
+                                    var group = groupPair.Value;
+                                    //TODO process group name in default callback (search standings first)
+                                    //TODO process reply from GetStandsAuthURL
+                                    var url = GetStandsAuthURL();
+                                    authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.WebAdminButtonText}</a>");                 
+                                }
+                                smth = true;
+                            }
+
                             //notifications
                             if (Settings.Config.ModuleNotificationFeed)
                             {
@@ -257,6 +284,15 @@ namespace ThunderED.Modules.Sub
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-characters.read_notifications.v1+esi-universe.read_structures.v1+esi-characters.read_chat_channels.v1&state=9";
+        }
+
+        public static string GetStandsAuthURL()
+        {
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=authst";
         }
 
         public static string GetTimersAuthURL()

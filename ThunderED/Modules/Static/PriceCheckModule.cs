@@ -33,10 +33,10 @@ namespace ThunderED.Modules.Static
 
                     HttpResponseMessage itemID;
                     if (command.ToLower().StartsWith("search"))
-                        itemID = await httpClient.GetAsync("https://esi.tech.ccp.is/latest/search/?categories=inventory_type&datasource=tranquility&language=en-us&search=" +
+                        itemID = await httpClient.GetAsync($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=inventory_type&datasource=tranquility&language=en-us&search=" +
                                                            $"{command.TrimStart(new char[] {'s', 'e', 'a', 'r', 'c', 'h'})}&strict=false");
                     else
-                        itemID = await httpClient.GetAsync("https://esi.tech.ccp.is/latest/search/?categories=inventory_type&datasource=tranquility&language=en-us&search=" +
+                        itemID = await httpClient.GetAsync($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=inventory_type&datasource=tranquility&language=en-us&search=" +
                                                            $"{command.ToLower()}&strict=true");
 
                     if (!itemID.IsSuccessStatusCode)
@@ -62,7 +62,7 @@ namespace ThunderED.Modules.Static
                         var tmp = JsonConvert.SerializeObject(itemIDResults.inventory_type);
                         var httpContent = new StringContent(tmp);
 
-                        var itemName = await httpClient.PostAsync($"https://esi.tech.ccp.is/latest/universe/names/?datasource=tranquility", httpContent);
+                        var itemName = await httpClient.PostAsync($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/names/?datasource=tranquility", httpContent);
 
                         if (!itemName.IsSuccessStatusCode)
                         {
@@ -114,7 +114,7 @@ namespace ThunderED.Modules.Static
                         {
                             var httpContent = new StringContent($"[{itemIDResults.inventory_type[0]}]", Encoding.UTF8, "application/json");
                             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                            var itemName = await httpClient.PostAsync("https://esi.tech.ccp.is/latest/universe/names/?datasource=tranquility", httpContent);
+                            var itemName = await httpClient.PostAsync($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/names/?datasource=tranquility", httpContent);
 
                             if (!itemName.IsSuccessStatusCode)
                             {

@@ -48,7 +48,8 @@
     "databaseProvider":  "sqlite",
     "databaseFile": "edb.db",
     "requestRetries": 3,
-    "extendedESILogging":  false 
+    "extendedESILogging":  false,
+    "ESIAddress": "https://esi.evetech.net/" 
   },
 
   "ContractNotificationsModule": {
@@ -216,7 +217,7 @@
     "enforceCorpTickers": true,
     "enforceCharName": true,
     "authGroups": {
-      "Mode1": {
+      "Mode1_GeneralAuth": {
         "AllowedCorporations": {
           "corp1": {
             "Id": [98499225],
@@ -239,13 +240,10 @@
         },
         "authRoles": ["Admins"],
         "ManualAssignmentRoles":  [ ], 
-        "PreliminaryAuthMode": false,
-        "AppInvalidationInHours": 0,
-        "ESICustomAuthRoles": [],
         "CustomButtonText": "General Auth",
         "DefaultMention":  ""
       },
-      "Mode2": {
+      "Mode2_GeneralWithESIFetch": {
         "AllowedCorporations": {},
         "AllowedAlliances":{
           "ally1": {
@@ -255,14 +253,11 @@
         },
         "authRoles": [],
         "ManualAssignmentRoles":  [ ], 
-        "PreliminaryAuthMode": false,
-        "AppInvalidationInHours": 0,
         "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
         "CustomButtonText": "General Token Auth",
         "DefaultMention":  ""
-
       },
-      "Mode3": {
+      "Mode3_Preliminary": {
         "AllowedCorporations": {},
         "AllowedAlliances":{
           "ally1": {
@@ -303,8 +298,28 @@
           "esi-skills.read_skills.v1",
           "esi-wallet.read_character_wallet.v1"
         ]
-      }
+      },
+      "_WIP_Mode4_StandingsBased_WIP_": {
+        "ManualAssignmentRoles":  [ ], 
+        "PreliminaryAuthMode": false,
+        "ESICustomAuthRoles": [],
+        "CustomButtonText": "Standings Based Auth",
+        "DefaultMention":  "",
 
+        "StandCharacterIDs":  [0],
+        "WebApplicantButtonText": "Standings App Auth", 
+        "WebAdminButtonText": "Standings Admin Auth", 
+        "UseCharacterStandings":  true, 
+        "UseCorporationStandings":  false, 
+        "UseAllianceStandings":  false, 
+        "StandingFilters": {
+          "defaultFilter": {
+            "Standings": [0],
+            "Modifier":  "eq",
+            "DiscordRoles": ["Role1"]
+          }
+        }
+      }
     }
   },
   "resources": {

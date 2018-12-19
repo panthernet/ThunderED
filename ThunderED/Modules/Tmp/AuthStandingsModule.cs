@@ -75,6 +75,7 @@ namespace ThunderED.Modules
                     await SQLHelper.SaveAuthStands(data);
                     
                     await LogHelper.LogInfo($"Auth stands feed added for character: {characterID}({rChar.name})", LogCat.AuthWeb);
+                    //TODO better screen?
                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                         .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
                         .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")), response);

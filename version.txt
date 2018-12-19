@@ -1,6 +1,10 @@
 ### V1.2.10
 
++ ESI address fix
 
+### BREAKING CHANGES
+
+- Introduced new config param **ESIAddress**
 
 
 ### V1.2.9

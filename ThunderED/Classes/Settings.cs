@@ -124,9 +124,14 @@ namespace ThunderED.Classes
 #if EDITOR
         public ObservableCollection<long> CharacterIDs { get; set; } = new ObservableCollection<long>();
         public ObservableDictionary<string, StandingGroup> StandingFilters { get; set; } = new ObservableDictionary<string, StandingGroup>();
+        [Comment("The list of ESI access role names to check on auth")]
+        public ObservableCollection<string> ESICustomAuthRoles { get; set; } = new ObservableCollection<string>();
+
 #else
         public List<long> CharacterIDs { get; set; } = new List<long>();
         public Dictionary<string, StandingGroup> StandingFilters { get; set; } = new Dictionary<string, StandingGroup>();
+        public List<string> ESICustomAuthRoles { get; set; } = new List<string>();
+
 #endif
 
         public string WebApplicantButtonText { get; set; } = "Standings App Auth";
@@ -1366,6 +1371,7 @@ namespace ThunderED.Classes
         public string DatabaseFile { get; set; } = "edb.db";
 
         public bool ExtendedESILogging { get; set; } = false;
+        public string ESIAddress { get; set; } = "https://esi.evetech.net/";
 
 
 #if EDITOR
