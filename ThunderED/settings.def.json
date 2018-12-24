@@ -310,7 +310,7 @@
         "DefaultMention":  "",
 
         "StandingsAuth": {
-          "StandCharacterIDs": [0],
+          "CharacterIDs": [0],
           "WebAdminButtonText": "Standings Admin Auth",
           "UseCharacterStandings": true,
           "UseCorporationStandings": false,
