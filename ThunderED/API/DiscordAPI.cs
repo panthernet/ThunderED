@@ -315,15 +315,15 @@ namespace ThunderED.API
             //Check for Corp roles
             //Find first available corp
             var corpId = characterData.corporation_id;
-            var foundGroup = WebAuthModule.GetAuthGroupByCorpId(groupsToCheck, corpId);
-            if (foundGroup != null)
+            var authResult = await WebAuthModule.GetAuthGroupByCorpId(groupsToCheck, corpId);
+            if (authResult != null)
             {
-                var cinfo = WebAuthModule.GetCorpEntityById(groupsToCheck, corpId);
-                var aRoles = discordGuild.Roles.Where(a=> cinfo.DiscordRoles.Contains(a.Name)).ToList();
+                //var cinfo = au await WebAuthModule.GetCorpEntityById(groupsToCheck, corpId);
+                var aRoles = discordGuild.Roles.Where(a=> authResult.RoleEntity.DiscordRoles.Contains(a.Name)).ToList();
                 if (aRoles.Count > 0)
                     result.UpdatedRoles.AddRange(aRoles);
-                result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssignmentRoles);
-                groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == foundGroup).Key;
+                result.ValidManualAssignmentRoles.AddRange(authResult.Group.ManualAssignmentRoles);
+                groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResult.Group).Key;
             }
             else
             {
@@ -331,27 +331,45 @@ namespace ThunderED.API
                 if (characterData.alliance_id != null)
                 {
                     var allianceId = characterData.alliance_id ?? 0;
-                    foundGroup = WebAuthModule.GetAuthGroupByAllyId(groupsToCheck, allianceId);
-                    if (foundGroup != null)
+                    authResult = await WebAuthModule.GetAuthGroupByAllyId(groupsToCheck, allianceId);
+                    if (authResult != null)
                     {
-                        var ainfo = WebAuthModule.GetAllyEntityById(groupsToCheck, allianceId);
-                        var aRoles = discordGuild.Roles.Where(a => ainfo.DiscordRoles.Contains(a.Name)).ToList();
+                        //var ainfo = await WebAuthModule.GetAllyEntityById(groupsToCheck, allianceId);
+                        var aRoles = discordGuild.Roles.Where(a => authResult.RoleEntity.DiscordRoles.Contains(a.Name)).ToList();
                         if (aRoles.Count > 0)
                             result.UpdatedRoles.AddRange(aRoles);
-                        result.ValidManualAssignmentRoles.AddRange(foundGroup.ManualAssignmentRoles);
-                        groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == foundGroup).Key;
+                        result.ValidManualAssignmentRoles.AddRange(authResult.Group.ManualAssignmentRoles);
+                        groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResult.Group).Key;
+                    }
+                }
+                else
+                {
+                    //search for personal stands
+                    var grList = groupsToCheck.Where(a => a.StandingsAuth != null).ToList();
+                    if (grList.Count > 0)
+                    {
+                        var ar = await WebAuthModule.GetAuthGroupByCharacterId(groupsToCheck, characterID);
+                        if (ar != null)
+                        {
+                            var aRoles = discordGuild.Roles.Where(a=> ar.RoleEntity.DiscordRoles.Contains(a.Name)).ToList();
+                            if (aRoles.Count > 0)
+                                result.UpdatedRoles.AddRange(aRoles);
+                            result.ValidManualAssignmentRoles.AddRange(ar.Group.ManualAssignmentRoles);
+                            groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == ar.Group).Key;
+
+                        }
                     }
                 }
             }
 
-            if (foundGroup == null && isManualAuth)
+            if (authResult == null && isManualAuth)
             {
                 var token = await SQLHelper.UserTokensGetEntry(characterID);
                 if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
                 {
                     var group = SettingsManager.Settings.WebAuthModule.AuthGroups[token.GroupName];
                     if ((!group.AllowedAlliances.Any() || group.AllowedAlliances.Values.All(a => a.Id.All(b=> b == 0))) &&
-                        (!group.AllowedCorporations.Any() || group.AllowedCorporations.Values.All(a => a.Id.All(b=> b == 0))))
+                        (!group.AllowedCorporations.Any() || group.AllowedCorporations.Values.All(a => a.Id.All(b=> b == 0))) && group.StandingsAuth == null)
                         groupName = token.GroupName;
                 }
 
@@ -395,7 +413,7 @@ namespace ThunderED.API
                 if (responce.Count > 0)
                 {
                     //get data
-                    var characterID = responce.OrderByDescending(x => x["id"]).FirstOrDefault()["characterID"];
+                    var characterID = responce.OrderByDescending(x => x["id"]).FirstOrDefault()?["characterID"];
                     var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
                     //skip bad requests
                     if(characterData == null) return null;
@@ -405,7 +423,7 @@ namespace ThunderED.API
                     var result = await GetRoleGroup(Convert.ToInt64(characterID), discordUserId, isManualAuth);
 
                     var changed = false;
-                    var isAuthed = result.UpdatedRoles.Count > 0;
+                    var isAuthed = result.UpdatedRoles.Count > 1;
 
                     var invalidRoles = initialUserRoles.Where(a => result.UpdatedRoles.FirstOrDefault(b => b.Id == a.Id) == null);
                     foreach (var invalidRole in invalidRoles)
@@ -433,7 +451,7 @@ namespace ThunderED.API
                             actuallyDone = true;
                         }
 
-                        if (!string.IsNullOrEmpty(result.GroupName))
+                        if (remroles.Count > 0)
                         {
                             await u.RemoveRolesAsync(remroles);
                             actuallyDone = true;
@@ -441,12 +459,15 @@ namespace ThunderED.API
 
                         if (actuallyDone)
                         {
+                            var stripped = remroles.Count > 0 ? $" {LM.Get("authStripped")}: {string.Join(',', remroles.Select(a => a.Name))}" : null;
+                            var added = result.UpdatedRoles.Count > 0 ? $" {LM.Get("authAddedRoles")}: {string.Join(',', result.UpdatedRoles.Select(a => a.Name))}" : null;
                             if (SettingsManager.Settings.WebAuthModule.AuthReportChannel != 0)
                             {
                                 var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
-                                await SendMessageAsync(channel, $"{LM.Get("renewingRoles")} {characterData.name} ({u.Username})");
+                                await SendMessageAsync(channel, $"{LM.Get("renewingRoles")} {characterData.name} ({u.Username}){stripped}{added}");
                             }
-                            await LogHelper.LogInfo($"Adjusting roles for {characterData.name} ({u.Username})", LogCat.AuthCheck);
+
+                            await LogHelper.LogInfo($"Adjusting roles for {characterData.name} ({u.Username}) {stripped}{added}", LogCat.AuthCheck);
                         }
                     }
 

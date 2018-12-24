@@ -61,8 +61,6 @@ namespace ThunderED.Classes
 
         [ConfigEntryName("ModuleContractNotifications")]
         public ContractNotificationsModuleSettings ContractNotificationsModule { get; set; } = new ContractNotificationsModuleSettings();
-        [ConfigEntryName("ModuleAuthStandings")]
-        public AuthStandingsModuleSettings AuthStandingsModule { get; set; } = new AuthStandingsModuleSettings();
 
 #if EDITOR
         public string Validate(List<string> usedModules)
@@ -94,75 +92,13 @@ namespace ThunderED.Classes
 #endif
     }
 
-    public class AuthStandingsModuleSettings: ValidatableSettings
-    {
-#if EDITOR
-        public ObservableDictionary<string, AuthStandGroup> AuthGroups {get;set;} = new ObservableDictionary<string, AuthStandGroup>();
-
-#else
-        public Dictionary<string, AuthStandGroup> AuthGroups {get;set;} = new Dictionary<string, AuthStandGroup>();
-#endif
-
-#if EDITOR
-        public override string this[string columnName]
-        {
-            get
-            {
-                switch (columnName)
-                {
-                    case nameof(AuthGroups):
-                        return !AuthGroups.Any() ? Compose(nameof(AuthGroups), "AuthGroups must be specified!") : null;
-                }
-                return null;
-            }
-        }
-#endif
-    }
-
-    public class AuthStandGroup: ValidatableSettings
-    {
-#if EDITOR
-        public ObservableCollection<long> CharacterIDs { get; set; } = new ObservableCollection<long>();
-        public ObservableDictionary<string, StandingGroup> StandingFilters { get; set; } = new ObservableDictionary<string, StandingGroup>();
-        [Comment("The list of ESI access role names to check on auth")]
-        public ObservableCollection<string> ESICustomAuthRoles { get; set; } = new ObservableCollection<string>();
-
-#else
-        public List<long> CharacterIDs { get; set; } = new List<long>();
-        public Dictionary<string, StandingGroup> StandingFilters { get; set; } = new Dictionary<string, StandingGroup>();
-        public List<string> ESICustomAuthRoles { get; set; } = new List<string>();
-
-#endif
-
-        public string WebApplicantButtonText { get; set; } = "Standings App Auth";
-        public string WebAdminButtonText { get; set; } = "Standings Admin Auth";
-        public bool UseCharacterStandings { get; set; } = true;
-        public bool UseCorporationStandings { get; set; } = false;
-        public bool UseAllianceStandings { get; set; } = false;
-
-#if EDITOR
-        public override string this[string columnName]
-        {
-            get
-            {
-                switch (columnName)
-                {
-                    case nameof(UseCharacterStandings):
-                        return !UseCharacterStandings && !UseAllianceStandings && !UseCorporationStandings ? Compose(nameof(UseCharacterStandings), "Use at least one type of settings!") : null;
-                }
-                return null;
-            }
-        }
-#endif
-    }
-
     public class StandingGroup: ValidatableSettings
     {
 #if EDITOR
-        public ObservableCollection<int> Standings { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<double> Standings { get; set; } = new ObservableCollection<double>();
         public ObservableCollection<string> DiscordRoles { get; set; } = new ObservableCollection<string>();
 #else
-        public List<int> Standings { get; set; } = new List<int>();
+        public List<double> Standings { get; set; } = new List<double>();
         public List<string> DiscordRoles { get; set; } = new List<string>();
 #endif
         public string Modifier { get; set; } = "eq";
@@ -1344,7 +1280,6 @@ namespace ThunderED.Classes
         public bool ModuleHRM { get; set; } = false;
         public bool ModuleSystemLogFeeder { get; set; } = false;
         public bool ModuleContractNotifications { get; set; } = false;
-        public bool ModuleAuthStandings { get; set; } = false;
 
         [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
         public string ZkillLiveFeedRedisqID { get; set; }
@@ -1372,6 +1307,8 @@ namespace ThunderED.Classes
 
         public bool ExtendedESILogging { get; set; } = false;
         public string ESIAddress { get; set; } = "https://esi.evetech.net/";
+        public bool UseHTTPS { get; set; } = false;
+        public bool RunAsServiceCompatibility { get; set; } = false;
 
 
 #if EDITOR
@@ -1483,6 +1420,10 @@ namespace ThunderED.Classes
         [Comment("Numeric time interval in minutes to run auth checks of existing users")]
         [Required]
         public int AuthCheckIntervalMinutes { get; set; } = 30;
+        
+        [Comment("Numeric time interval in minutes to run standings update for feed users")]
+        public int StandingsRefreshIntervalInMinutes { get; set; } = 60;
+
         [Comment("Numeric ID of the Discord channel to report bot auth actions. Preferably for admins only. Leave 0 to disable")]
         public ulong AuthReportChannel { get; set; }
         [Comment("Automatically assign corp tickers to users")]
@@ -1577,6 +1518,9 @@ namespace ThunderED.Classes
         [Comment("Optional default Discord mention for auth report")]
         public string DefaultMention { get; set; }
 
+        [Comment("Optional data for standings based auth")]
+        public StandingsAuthGroupExtension StandingsAuth { get; set; } = null;
+
 #if EDITOR
         [Comment("The list of ESI access role names to check on auth")]
         public ObservableCollection<string> ESICustomAuthRoles { get; set; } = new ObservableCollection<string>();
@@ -1601,6 +1545,25 @@ namespace ThunderED.Classes
             }
         }
 #endif
+    }
+
+    public class StandingsAuthGroupExtension
+    {
+        
+#if EDITOR
+        public ObservableCollection<long> CharacterIDs { get; set; } = new ObservableCollection<long>();
+        public ObservableDictionary<string, StandingGroup> StandingFilters { get; set; } = new ObservableDictionary<string, StandingGroup>();
+
+#else
+        public List<long> CharacterIDs { get; set; } = new List<long>();
+        public Dictionary<string, StandingGroup> StandingFilters { get; set; } = new Dictionary<string, StandingGroup>();
+
+#endif
+
+        public string WebAdminButtonText { get; set; } = "Standings Admin Auth";
+        public bool UseCharacterStandings { get; set; } = true;
+        public bool UseCorporationStandings { get; set; } = false;
+        public bool UseAllianceStandings { get; set; } = false;
     }
 
     public class AuthRoleEntity: ValidatableSettings

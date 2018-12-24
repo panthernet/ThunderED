@@ -18,6 +18,8 @@ namespace ThunderED.Modules.Sub
         private static System.Net.Http.HttpListener _listener;
         public override LogCat Category => LogCat.WebServer;
 
+        public static string HttpPrefix => SettingsManager.Settings.Config.UseHTTPS ? "https" : "http";
+
         public static Dictionary<string, Func<HttpListenerRequestEventArgs, Task<bool>>> ModuleConnectors { get; } = new Dictionary<string, Func<HttpListenerRequestEventArgs, Task<bool>>>();
 
         public WebServerModule()
@@ -37,6 +39,8 @@ namespace ThunderED.Modules.Sub
                 var port = Settings.WebServerModule.WebListenPort;
                 var extPort = Settings.WebServerModule.WebExternalPort;
                 var ip = Settings.WebServerModule.WebListenIP;
+
+
                 _listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), port);
                 _listener.Request += async (sender, context) =>
                 {
@@ -107,7 +111,7 @@ namespace ThunderED.Modules.Sub
                         if (request.Url.LocalPath == "/authPage.html" || request.Url.LocalPath == $"{port}/authPage.html" || request.Url.LocalPath == $"{extPort}/authPage.html")
                         {
                             var extIp = Settings.WebServerModule.WebExternalIP;
-                            var authUrl = $"http://{extIp}:{extPort}/auth.php";
+                            var authUrl = $"{HttpPrefix}://{extIp}:{extPort}/auth.php";
 
                             var text = File.ReadAllText(SettingsManager.FileTemplateAuthPage)
                                 .Replace("{header}", LM.Get("authTemplateHeader"))
@@ -117,22 +121,23 @@ namespace ThunderED.Modules.Sub
                             var authText = new StringBuilder();
 
                             //stands auth
-                            if (Settings.Config.ModuleAuthStandings)
+                            if (Settings.Config.ModuleAuthWeb)
                             {
-                                foreach (var groupPair in Settings.AuthStandingsModule.AuthGroups)
+                                if (SettingsManager.Settings.WebAuthModule.AuthGroups.Count > 0)
+                                    authText.Append($"<h4>{LM.Get("authWebDiscordHeader")}</h4>");
+
+                                foreach (var groupPair in Settings.WebAuthModule.AuthGroups.Where(a=> a.Value.StandingsAuth != null))
                                 {
                                     var group = groupPair.Value;
                                     var url = $"{authUrl}?group={HttpUtility.UrlEncode(groupPair.Key)}";
-                                    authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.WebApplicantButtonText}</a>");                                    
+                                    authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.CustomButtonText}</a>");                                    
                                 }
                             }
 
                             //auth
                             if (Settings.Config.ModuleAuthWeb)
                             {
-                                if (SettingsManager.Settings.WebAuthModule.AuthGroups.Count > 0)
-                                    authText.Append($"<h4>{LM.Get("authWebDiscordHeader")}</h4>");
-                                foreach (var @group in SettingsManager.Settings.WebAuthModule.AuthGroups)
+                                foreach (var @group in SettingsManager.Settings.WebAuthModule.AuthGroups.Where(a=> a.Value.StandingsAuth == null))
                                 {
                                     if (group.Value.ESICustomAuthRoles.Any())
                                     {
@@ -154,15 +159,13 @@ namespace ThunderED.Modules.Sub
                             bool smth = false;
 
                             //stands auth
-                            if (Settings.Config.ModuleAuthStandings)
+                            if (Settings.Config.ModuleAuthWeb)
                             {
-                                foreach (var groupPair in Settings.AuthStandingsModule.AuthGroups)
+                                foreach (var groupPair in Settings.WebAuthModule.AuthGroups.Where(a=> a.Value.StandingsAuth != null))
                                 {
                                     var group = groupPair.Value;
-                                    //TODO process group name in default callback (search standings first)
-                                    //TODO process reply from GetStandsAuthURL
                                     var url = GetStandsAuthURL();
-                                    authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.WebAdminButtonText}</a>");                 
+                                    authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.StandingsAuth.WebAdminButtonText}</a>");                 
                                 }
                                 smth = true;
                             }
@@ -273,7 +276,7 @@ namespace ThunderED.Modules.Sub
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return  $"http://{extIp}:{extPort}";
+            return  $"{HttpPrefix}://{extIp}:{extPort}";
         }
 
         
@@ -282,7 +285,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-characters.read_notifications.v1+esi-universe.read_structures.v1+esi-characters.read_chat_channels.v1&state=9";
         }
 
@@ -291,8 +294,15 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
-            return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=authst";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var permissions = new []
+            {
+                "esi-alliances.read_contacts.v1",
+                "esi-characters.read_contacts.v1",
+                "esi-corporations.read_contacts.v1"
+            };
+            var pString = string.Join('+', permissions);
+            return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=authst";
         }
 
         public static string GetTimersAuthURL()
@@ -300,7 +310,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=11";
         }
 
@@ -309,7 +319,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-mail.read_mail.v1+esi-mail.send_mail.v1+esi-mail.organize_mail.v1&state=12";
         }
 
@@ -320,8 +330,7 @@ namespace ThunderED.Modules.Sub
             var text = !string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) && SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.Contains(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
                 ? $"auth.php?group={HttpUtility.UrlEncode(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)}"
                 : null;
-            return $"http://{extIp}:{extPort}/{text}";
-            //http://185.104.63.172:30001/auth.php?group=Mode2
+            return $"{HttpPrefix}://{extIp}:{extPort}/{text}";
         }
 
         internal static string GetAuthUrl()
@@ -329,7 +338,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&amp;redirect_uri={callbackurl}&amp;client_id={clientID}";
         }
 
@@ -338,7 +347,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
 
             var grp = string.IsNullOrEmpty(group) ? null : $"&state=x{HttpUtility.UrlEncode(group)}";
 
@@ -351,7 +360,7 @@ namespace ThunderED.Modules.Sub
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"http://{extIp}:{extPort}/timers.php";
+            return $"{HttpPrefix}://{extIp}:{extPort}/timers.php";
         }
 
 
@@ -362,7 +371,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=matahari";
         }
 
@@ -371,7 +380,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
             var list = new List<string>();
             if(readChar)
                 list.Add("esi-contracts.read_character_contracts.v1");
@@ -385,14 +394,14 @@ namespace ThunderED.Modules.Sub
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"http://{extIp}:{extPort}/hrm.php?data=inspect{id}&id={authCode}&state=matahari";
+            return $"{HttpPrefix}://{extIp}:{extPort}/hrm.php?data=inspect{id}&id={authCode}&state=matahari";
         }
 
         public static string GetHRMMainURL(string authCode)
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"http://{extIp}:{extPort}/hrm.php?data=0&id={authCode}&state=matahari";
+            return $"{HttpPrefix}://{extIp}:{extPort}/hrm.php?data=0&id={authCode}&state=matahari";
         }
 
         public static string GetHRM_AjaxMailURL(long mailId, long inspectCharId, string authCode)

@@ -43,6 +43,8 @@ namespace ThunderED.Modules.OnDemand
             var finalBlowAttackerAllyId = finalBlowAttacker?.alliance_id;
             var isNPCKill = kill.package.zkb.npc;
 
+           // if(victimCorpID != 98370861) return;
+
             var systemId = kill.package.killmail.solar_system_id;
             var npckill = kill.package.zkb.npc;
 
@@ -56,6 +58,7 @@ namespace ThunderED.Modules.OnDemand
             }
 
             var rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, victimCorpID, false, !_enableCache);
+            
             var rAttackerCorp = finalBlowAttackerCorpId.HasValue && finalBlowAttackerCorpId.Value > 0
                 ? await APIHelper.ESIAPI.GetCorporationData(Reason, finalBlowAttackerCorpId, false, !_enableCache)
                 : null;

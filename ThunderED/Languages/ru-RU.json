@@ -369,7 +369,12 @@
   "contractMsgIncludedItems":  "Включенные Предметы", 
   "contractMsgAskingItems":  "Требуемые Предметы",
   "hrmContractItems":  "Предметы",
-  "contractMsgVolume":  "Объем" 
+  "contractMsgVolume":  "Объем",
+  "authStandsTokenHeader": "Токен аутентификации по стендам EVE Online",
+  "authStandsTokenRcv": "Проверка стендов для персонажа {0} успешно активирована",
+  "authStripped":  "Сняты",
+  "authAddedRoles":  "Добавлены" 
+
 
 
 }

@@ -1,3 +1,10 @@
+### V1.2.11
+
++ Added support for HTTPS with new UseHTTPS param (WIP)
++ Added new auth functionality: Standings Based Auth (check WIKI for details)
++ Added new param RunAsServiceCompatibility for experimental service mode tweaks when bot is running as bg task
+
+
 ### V1.2.10
 
 + ESI address fix

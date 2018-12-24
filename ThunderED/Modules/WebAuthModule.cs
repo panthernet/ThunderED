@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Discord.Commands;
-using Discord.WebSocket;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
@@ -22,6 +21,8 @@ namespace ThunderED.Modules
     {
         private DateTime _lastTimersCheck = DateTime.MinValue;
         public override LogCat Category => LogCat.AuthWeb;
+        private static int _standsInterval;
+        private static DateTime _lastStandsUpdateDate = DateTime.MinValue;
 
         public WebAuthModule()
         {
@@ -37,6 +38,39 @@ namespace ThunderED.Modules
             IsRunning = true;
             try
             {
+                _standsInterval = _standsInterval != 0? _standsInterval : SettingsManager.Settings.WebAuthModule.StandingsRefreshIntervalInMinutes;
+                if ((DateTime.Now - _lastStandsUpdateDate).TotalMinutes >= _standsInterval)
+                {
+                    _lastStandsUpdateDate = DateTime.Now;
+                    await LogHelper.LogInfo("Running standings update...", Category);
+                    try
+                    {
+                        var sb = new StringBuilder();
+                        foreach (var numericCharId in Settings.WebAuthModule.AuthGroups.Values.Where(a => a.StandingsAuth != null).SelectMany(a => a.StandingsAuth.CharacterIDs)
+                            .Distinct())
+                        {
+                            var st = await SQLHelper.LoadAuthStands(numericCharId);
+                            if (st == null) return;
+                            var token = await APIHelper.ESIAPI.RefreshToken(st.Token, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+
+                            await RefreshStandings(st, token);
+                            await SQLHelper.DeleteAuthStands(numericCharId);
+                            await SQLHelper.SaveAuthStands(st);
+                            sb.Append($"{numericCharId},");
+                        }
+
+                        if (sb.Length > 0)
+                        {
+                            sb.Remove(sb.Length - 1, 1);
+                            await LogHelper.LogInfo($"Standings updated for: {sb}", Category);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await LogHelper.LogEx("Stands Feed Update", ex, Category);
+                    }
+                }
+
                 if ((DateTime.Now - _lastTimersCheck).TotalMinutes < 1 ) return;
                 _lastTimersCheck = DateTime.Now;
 
@@ -85,68 +119,175 @@ namespace ThunderED.Modules
             await ProcessPreliminaryApplicant(data.CharacterId, data.CharacterName, data.DiscordUserId, data.GroupName);
         }
 
-        public static AuthRoleEntity GetCorpEntityById(List<WebAuthGroup> groups,long id)
+        public static async Task<AuthRoleEntity> GetCorpEntityById(List<WebAuthGroup> groups,long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
             foreach (var authGroup in groups)
             {
-                foreach (var entity in authGroup.AllowedCorporations.Values)
+                if (authGroup.StandingsAuth == null)
                 {
-                    if (entity.Id.Contains(id))
-                        return entity;
+                    foreach (var entity in authGroup.AllowedCorporations.Values)
+                    {
+                        if (entity.Id.Contains(id))
+                            return entity;
+                    }
+                }
+                else
+                {
+                    return await GetEntityForStandingsAuth(authGroup, id, 1);
                 }
             }
 
             return null;
         }
 
-        public static AuthRoleEntity GetAllyEntityById(List<WebAuthGroup> groups,long id)
+        public static async Task<AuthRoleEntity> GetAllyEntityById(List<WebAuthGroup> groups,long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
             foreach (var authGroup in groups)
             {
-                foreach (var entity in authGroup.AllowedAlliances.Values)
+                if (authGroup.StandingsAuth == null)
                 {
-                    if (entity.Id.Contains(id))
-                        return entity;
+                    foreach (var entity in authGroup.AllowedAlliances.Values)
+                    {
+                        if (entity.Id.Contains(id))
+                            return entity;
+                    }
+                }
+                else
+                {
+                    return await GetEntityForStandingsAuth(authGroup, id, 2);
                 }
             }
 
             return null;
         }
 
-        public static AuthRoleEntity GetAllyEntityById(WebAuthGroup group, long id)
+        public static async Task<AuthRoleEntity> GetAllyEntityById(WebAuthGroup group, long id)
         {
-            foreach (var entity in group.AllowedAlliances.Values)
+            if (group.StandingsAuth == null)
             {
-                if (entity.Id.Contains(id))
-                    return entity;
+                foreach (var entity in group.AllowedAlliances.Values)
+                {
+                    if (entity.Id.Contains(id))
+                        return entity;
+                }
+            }
+            else
+            {
+                return await GetEntityForStandingsAuth(group, id, 2);
+
             }
 
             return null;
         }
 
-        public static AuthRoleEntity GetCorpEntityById(WebAuthGroup group,long id)
+        public static async Task<AuthRoleEntity> GetCorpEntityById(WebAuthGroup group, long id)
         {
-            foreach (var entity in group.AllowedCorporations.Values)
+            if (group.StandingsAuth == null)
             {
-                if (entity.Id.Contains(id))
-                    return entity;
+                foreach (var entity in group.AllowedCorporations.Values)
+                {
+                    if (entity.Id.Contains(id))
+                        return entity;
+                }
+            }
+            else
+            {
+                return await GetEntityForStandingsAuth(group, id, 1);
             }
 
             return null;
         }
 
-        public static WebAuthGroup GetAuthGroupByCorpId(List<WebAuthGroup> groups, long id)
+        private static async Task<AuthRoleEntity> GetEntityForStandingsAuth(WebAuthGroup group, long id, int type) //0 personal, 1 corp, 2 ally, 3 faction
         {
-            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
-            return groups.FirstOrDefault(a => a.AllowedCorporations.Values.Any(b=> b.Id.Contains(id)));
+            foreach (var characterID in group.StandingsAuth.CharacterIDs)
+            {
+                string typeName;
+                switch (type)
+                {
+                    case 0:
+                        typeName = "character";
+                        break;
+                    case 1:
+                        typeName = "corporation";
+                        break;
+                    case 2:
+                        typeName = "alliance";
+                        break;
+                    default:
+                        return null;
+                }
+
+                var standings = await SQLHelper.LoadAuthStands(characterID);
+                var st = new List<JsonClasses.Contact>();
+                st.AddRange(group.StandingsAuth.UseCharacterStandings && standings.PersonalStands != null ? standings.PersonalStands : new List<JsonClasses.Contact>());
+                st.AddRange(group.StandingsAuth.UseCorporationStandings && standings.CorpStands != null ? standings.CorpStands : new List<JsonClasses.Contact>());
+                st.AddRange(group.StandingsAuth.UseAllianceStandings && standings.AllianceStands != null? standings.AllianceStands : new List<JsonClasses.Contact>());
+
+                var stands = st.Where(a => a.contact_type == typeName && a.contact_id == id).Select(a=> a.standing).Distinct();
+                var s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "eq").FirstOrDefault(a => a.Standings.Any(b => stands.Contains(b)));
+                if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
+                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "lt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c < b)));
+                if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
+                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "gt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c > b)));
+                if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
+
+                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "le").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c <= b)));
+                if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
+                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "ge").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c >= b)));
+                if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
+
+            }
+
+            return null;
         }
 
-        public static WebAuthGroup GetAuthGroupByAllyId(List<WebAuthGroup> groups, long id)
+        public static async Task<WebAuthResult> GetAuthGroupByCorpId(List<WebAuthGroup> groups, long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
-            return groups.FirstOrDefault(a => a.AllowedAlliances.Values.Any(b=> b.Id.Contains(id)));
+            var result = groups.FirstOrDefault(a => a.AllowedCorporations.Values.Any(b=> b.Id.Contains(id)));
+            if (result != null) return new WebAuthResult {Group = result, RoleEntity = await GetCorpEntityById(groups, id)};
+
+            foreach (var authGroup in groups.Where(a=> a.StandingsAuth != null))
+            {
+                var res = await GetEntityForStandingsAuth(authGroup, id, 1);
+                if (res != null) return new WebAuthResult {Group = authGroup, RoleEntity = res };
+            }
+
+            return null;
+        }
+
+        public static async Task<WebAuthResult> GetAuthGroupByCharacterId(List<WebAuthGroup> groups, long id)
+        {
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
+            var result = groups.FirstOrDefault(a => a.AllowedCorporations.Values.Any(b=> b.Id.Contains(id)));
+            if (result != null) return new WebAuthResult {Group = result, RoleEntity = await GetCorpEntityById(groups, id)};
+
+            foreach (var authGroup in groups.Where(a=> a.StandingsAuth != null))
+            {
+                var res = await GetEntityForStandingsAuth(authGroup, id, 0);
+                if (res != null) return new WebAuthResult {Group = authGroup, RoleEntity = res };
+            }
+
+            return null;
+        }
+
+
+        public static async Task<WebAuthResult> GetAuthGroupByAllyId(List<WebAuthGroup> groups, long id)
+        {
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
+            var result = groups.FirstOrDefault(a => a.AllowedAlliances.Values.Any(b=> b.Id.Contains(id)));
+            if (result != null) return new WebAuthResult {Group = result, RoleEntity = await GetAllyEntityById(groups, id)};
+
+            foreach (var authGroup in groups.Where(a=> a.StandingsAuth != null))
+            {
+                var res = await GetEntityForStandingsAuth(authGroup, id, 2);
+                if (res != null) return new WebAuthResult {Group = authGroup, RoleEntity = res };
+            }
+
+            return null;
         }
 
         public async Task ProcessPreliminaryApplicant(long characterId, string characterName, ulong discordId, string groupName)
@@ -165,7 +306,7 @@ namespace ThunderED.Modules
 
                 var longCorpId = rChar.corporation_id;
                 var longAllyId = rChar.alliance_id ?? 0;
-                if (GetCorpEntityById(group.Value, longCorpId) != null || (rChar.alliance_id > 0 && GetAllyEntityById(group.Value, longAllyId) != null))
+                if (await GetCorpEntityById(group.Value, longCorpId) != null || (rChar.alliance_id > 0 && await GetAllyEntityById(group.Value, longAllyId) != null))
                 {
                     if (group.Value == null)
                     {
@@ -237,14 +378,12 @@ namespace ThunderED.Modules
         {
             if (!Settings.Config.ModuleAuthWeb) return false;
 
-            var esiFailure = false;
             var request = context.Request;
             var response = context.Response;
 
             var extIp = Settings.WebServerModule.WebExternalIP;
             var extPort = Settings.WebServerModule.WebExternalPort;
             var port = Settings.WebServerModule.WebListenPort;
-            var callbackurl =  $"http://{extIp}:{extPort}/callback.php";
 
 
             if (request.HttpMethod != HttpMethod.Get.ToString())
@@ -283,7 +422,7 @@ namespace ThunderED.Modules
                     var prms = request.Url.Query.TrimStart('?').Split('&');
                     var code = prms[0].Split('=')[1];
 
-                    var result = await WebAuthModule.GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    var result = await GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                     if (result == null)
                     {
                         var message = LM.Get("ESIFailure");
@@ -304,7 +443,7 @@ namespace ThunderED.Modules
                         return true;
                     }
 
-                    if (Settings.AuthStandingsModule.AuthGroups.Values.All(g => !g.CharacterIDs.Contains(numericCharId)))
+                    if (Settings.WebAuthModule.AuthGroups.Values.All(g => g.StandingsAuth == null ||  !g.StandingsAuth.CharacterIDs.Contains(numericCharId)))
                     {
                         await LogHelper.LogWarning($"Unathorized auth stands feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
@@ -326,8 +465,8 @@ namespace ThunderED.Modules
                     await LogHelper.LogInfo($"Auth stands feed added for character: {characterID}({rChar.name})", LogCat.AuthWeb);
                     //TODO better screen?
                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
-                        .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
-                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")), response);
+                        .Replace("{body2}", LM.Get("authStandsTokenRcv", rChar.name))
+                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authStandsTokenHeader")).Replace("{backText}", LM.Get("backText")), response);
                     return true;
                 }
                 
@@ -410,7 +549,7 @@ namespace ThunderED.Modules
                             if (inputGroup != null)
                             {
                                 group = inputGroup;
-                                if (GetCorpEntityById(group, longCorpId) != null || (allianceID != 0 && GetAllyEntityById(group, longAllyId) != null))
+                                if (await GetCorpEntityById(group, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(group, longAllyId) != null))
                                 {
                                     groupName = inputGroupName;
                                     groupPermissions = new List<string>(group.ESICustomAuthRoles);
@@ -424,7 +563,7 @@ namespace ThunderED.Modules
                                 //general auth
                                 foreach (var grp in Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode))
                                 {
-                                    if (GetCorpEntityById(grp.Value, longCorpId) != null || (allianceID != 0 && GetAllyEntityById(grp.Value, longAllyId) != null))
+                                    if (await GetCorpEntityById(grp.Value, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(grp.Value, longAllyId) != null))
                                     {
                                         cFoundList.Add(rChar.corporation_id);
                                         groupName = grp.Key;
@@ -533,8 +672,9 @@ namespace ThunderED.Modules
         private async Task RefreshStandings(AuthStandsEntity data, string token)
         {
             data.PersonalStands = await APIHelper.ESIAPI.GetCharacterContacts(Reason, data.CharacterID, token);
-            data.CorpStands = await APIHelper.ESIAPI.GetCharacterContacts(Reason, data.CharacterID, token);
-            data.PersonalStands = await APIHelper.ESIAPI.GetCharacterContacts(Reason, data.CharacterID, token);
+            var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, data.CharacterID, true);
+            data.CorpStands = await APIHelper.ESIAPI.GetCorpContacts(Reason, rChar?.corporation_id ?? 0, token);
+            data.AllianceStands = await APIHelper.ESIAPI.GetAllianceContacts(Reason, rChar?.alliance_id ?? 0, token);
         }
 
         public static string GetUniqID()

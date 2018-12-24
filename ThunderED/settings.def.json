@@ -49,7 +49,9 @@
     "databaseFile": "edb.db",
     "requestRetries": 3,
     "extendedESILogging":  false,
-    "ESIAddress": "https://esi.evetech.net/" 
+    "ESIAddress": "https://esi.evetech.net/",
+    "UseHTTPS":  false,
+    "RunAsServiceCompatibility":  false 
   },
 
   "ContractNotificationsModule": {
@@ -208,6 +210,7 @@
   },
   "WebAuthModule": {
     "authCheckIntervalMinutes": 480,
+    "StandingsRefreshIntervalInMinutes": 60,
     "exemptDiscordRoles": [ "Admins" ],
     "AuthCheckIgnoreRoles":  [ "CustomDiscordRoleToSkipOnAuthCheck" ],
     "authReportChannel": 0,
@@ -299,24 +302,25 @@
           "esi-wallet.read_character_wallet.v1"
         ]
       },
-      "_WIP_Mode4_StandingsBased_WIP_": {
+      "Mode4_StandingsBased": {
         "ManualAssignmentRoles":  [ ], 
         "PreliminaryAuthMode": false,
         "ESICustomAuthRoles": [],
         "CustomButtonText": "Standings Based Auth",
         "DefaultMention":  "",
 
-        "StandCharacterIDs":  [0],
-        "WebApplicantButtonText": "Standings App Auth", 
-        "WebAdminButtonText": "Standings Admin Auth", 
-        "UseCharacterStandings":  true, 
-        "UseCorporationStandings":  false, 
-        "UseAllianceStandings":  false, 
-        "StandingFilters": {
-          "defaultFilter": {
-            "Standings": [0],
-            "Modifier":  "eq",
-            "DiscordRoles": ["Role1"]
+        "StandingsAuth": {
+          "StandCharacterIDs": [0],
+          "WebAdminButtonText": "Standings Admin Auth",
+          "UseCharacterStandings": true,
+          "UseCorporationStandings": false,
+          "UseAllianceStandings": false,
+          "StandingFilters": {
+            "defaultFilter": {
+              "Standings": [0],
+              "Modifier": "eq",
+              "DiscordRoles": ["Role1"]
+            }
           }
         }
       }

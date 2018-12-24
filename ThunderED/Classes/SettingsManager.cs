@@ -20,6 +20,7 @@ namespace ThunderED.Classes
         public static string FileTemplateAuth3;
         public static string FileTemplateAuthNotifyFail;
         public static string FileTemplateAuthNotifySuccess;
+
         public static string FileTemplateTimersPage;
         public static string FileTemplateMailAuthSuccess;
         public static string FileTemplateAccessDenied;

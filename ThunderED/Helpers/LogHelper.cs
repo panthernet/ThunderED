@@ -46,6 +46,8 @@ namespace ThunderED.Helpers
 
                 // var cc = Console.ForegroundColor;
 
+                logConsole = !SettingsManager.Settings.Config.RunAsServiceCompatibility && logConsole;
+
                 if (logConsole)
                 {
                     var msg = $"{DateTime.Now,-19} [{severity,8}] [{cat}]: {message}";
@@ -106,14 +108,19 @@ namespace ThunderED.Helpers
 
                 
                 var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat}]: {message}";
-                try
+                var logConsole = !SettingsManager.Settings.Config.RunAsServiceCompatibility;
+
+                if (logConsole)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(msg);
-                }
-                catch
-                {
-                    //ignore
+                    try
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(msg);
+                    }
+                    catch
+                    {
+                        //ignore
+                    }
                 }
 
                 await SystemLogFeeder.FeedMessage(msg, true);

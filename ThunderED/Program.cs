@@ -120,41 +120,48 @@ namespace ThunderED
 
             while (true)
             {
-                var command = Console.ReadLine();
-                var arr = command?.Split(" ");
-                if((arr?.Length ?? 0) == 0) continue;
-                switch (arr[0])
+                if (!SettingsManager.Settings.Config.RunAsServiceCompatibility)
                 {
-                    case "quit":
-                        Console.WriteLine("Quitting...");
-                        _timer.Dispose();
-                        APIHelper.DiscordAPI.Stop();
-                        return;
-                    case "flushn":
-                        Console.WriteLine("Flushing all notifications DB list");
-                        SQLHelper.RunCommand("delete from notificationsList").GetAwaiter().GetResult();
-                        break;
-                    case "flushcache":
-                        Console.WriteLine("Flushing all cache from DB");
-                        SQLHelper.RunCommand("delete from cache").GetAwaiter().GetResult();
-                        break;
-                    case "help":
-                        Console.WriteLine("List of available commands:");
-                        Console.WriteLine(" quit    - quit app");
-                        Console.WriteLine(" flushn  - flush all notification IDs from database");
-                        Console.WriteLine(" getnurl - display notification auth url");
-                        Console.WriteLine(" flushcache - flush all cache from database");
-                        Console.WriteLine(" token [ID] - refresh and display EVE character token from database");
-                        break;
-                    case "token":
-                        if(arr.Length == 1) continue;
-                        if(!long.TryParse(arr[1], out var id))
-                            continue;
-                        var rToken = SQLHelper.SQLiteDataQuery<string>("refreshTokens", "token", "id", id).GetAwaiter().GetResult();
-                        Console.WriteLine(APIHelper.ESIAPI.RefreshToken(rToken, SettingsManager.Settings.WebServerModule.CcpAppClientId, SettingsManager.Settings.WebServerModule.CcpAppSecret).GetAwaiter().GetResult());
-                        break;
+                    var command = Console.ReadLine();
+                    var arr = command?.Split(" ");
+                    if ((arr?.Length ?? 0) == 0) continue;
+                    switch (arr[0])
+                    {
+                        case "quit":
+                            Console.WriteLine("Quitting...");
+                            _timer.Dispose();
+                            APIHelper.DiscordAPI.Stop();
+                            return;
+                        case "flushn":
+                            Console.WriteLine("Flushing all notifications DB list");
+                            SQLHelper.RunCommand("delete from notificationsList").GetAwaiter().GetResult();
+                            break;
+                        case "flushcache":
+                            Console.WriteLine("Flushing all cache from DB");
+                            SQLHelper.RunCommand("delete from cache").GetAwaiter().GetResult();
+                            break;
+                        case "help":
+                            Console.WriteLine("List of available commands:");
+                            Console.WriteLine(" quit    - quit app");
+                            Console.WriteLine(" flushn  - flush all notification IDs from database");
+                            Console.WriteLine(" getnurl - display notification auth url");
+                            Console.WriteLine(" flushcache - flush all cache from database");
+                            Console.WriteLine(" token [ID] - refresh and display EVE character token from database");
+                            break;
+                        case "token":
+                            if (arr.Length == 1) continue;
+                            if (!long.TryParse(arr[1], out var id))
+                                continue;
+                            var rToken = SQLHelper.SQLiteDataQuery<string>("refreshTokens", "token", "id", id).GetAwaiter().GetResult();
+                            Console.WriteLine(APIHelper.ESIAPI
+                                .RefreshToken(rToken, SettingsManager.Settings.WebServerModule.CcpAppClientId, SettingsManager.Settings.WebServerModule.CcpAppSecret).GetAwaiter()
+                                .GetResult());
+                            break;
+                    }
+
+                    Thread.Sleep(10);
                 }
-                Thread.Sleep(10);
+                else Thread.Sleep(500);
             }
         }
 

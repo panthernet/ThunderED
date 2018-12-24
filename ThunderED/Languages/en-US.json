@@ -375,6 +375,11 @@
   "contractMsgIncludedItems":  "Included Items", 
   "contractMsgAskingItems":  "Asking Items",
   "hrmContractItems":  "Items",
-  "contractMsgVolume":  "Volume" 
+  "contractMsgVolume":  "Volume",
+  "authStandsTokenHeader": "EVE Online standings auth token",
+  "authStandsTokenRcv": "Auth standings feed successfuly added for {0} character",
+  "authStripped":  "Stripped",
+  "authAddedRoles":  "Added" 
+
 
 }
