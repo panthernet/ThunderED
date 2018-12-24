@@ -229,15 +229,17 @@ namespace ThunderED.Modules
                 var stands = st.Where(a => a.contact_type == typeName && a.contact_id == id).Select(a=> a.standing).Distinct();
                 var s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "eq").FirstOrDefault(a => a.Standings.Any(b => stands.Contains(b)));
                 if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
-                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "lt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c < b)));
-                if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
-                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "gt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c > b)));
-                if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
 
                 s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "le").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c <= b)));
                 if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
                 s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "ge").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c >= b)));
                 if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
+
+                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "lt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c < b)));
+                if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
+                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "gt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c > b)));
+                if (s != null) return new AuthRoleEntity {Id = new List<long> {id}, DiscordRoles = s.DiscordRoles};
+
 
             }
 
