@@ -3,6 +3,7 @@
 + Added support for HTTPS with new UseHTTPS param (WIP)
 + Added new auth functionality: Standings Based Auth (check WIKI for details)
 + Added new param RunAsServiceCompatibility for experimental service mode tweaks when bot is running as bg task
++ Improved help text to display actual command prefix
 
 
 ### V1.2.10

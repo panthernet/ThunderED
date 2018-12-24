@@ -198,7 +198,7 @@ namespace ThunderED.Modules
                 {
                     if (command != "d" && command != "t" && command != "today" && command != "m" && command != "month" && !command.All(char.IsDigit) && !command.Contains('/'))
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, $"{LM.Get("statUnknownCommandSyntax")}");
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statUnknownCommandSyntax", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
                         return;
                     }
                     await ProcessStats(context, command, entity, null);
@@ -314,13 +314,13 @@ namespace ThunderED.Modules
                     var tmp = command.Split("/");
                     if (!tmp[0].All(char.IsDigit) || tmp[0].Length != 4)
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statUnknownCommandSyntax"), true).ConfigureAwait(false);           
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statUnknownCommandSyntax", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);           
                         return;
                     }
 
                     if (!tmp[1].All(char.IsDigit) || tmp[1].Length < 1 || tmp[1].Length > 2)
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statUnknownCommandSyntax"), true).ConfigureAwait(false);           
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statUnknownCommandSyntax", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);           
                         return;
                     }
                     var m = int.Parse(tmp[1]);

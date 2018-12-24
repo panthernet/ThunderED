@@ -69,7 +69,7 @@ namespace ThunderED.Classes
                 sb.Append(LM.Get("helpTextAdminCommands"));
                 sb.Append(": ** !rehash | !reauth **\n");
             }
-            sb.Append(LM.Get("helpExpanded"));
+            sb.Append(LM.Get("helpExpanded", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
 
             //  "helpText":
 //            "Private commands: * !tq | !fwstats **\nAdmin commands: !rehash | !reauth\nEnter !help COMMAND in the bot private message for additional info",
@@ -94,26 +94,26 @@ namespace ThunderED.Classes
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpWeb")}", true);
                     break;   
                 case "auth":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAuth")}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpAuth", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;                        
                 case "authnotify":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAuthNotify")}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpAuthNotify", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;                        
                 case "evetime":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTime")}", true);
                     break;                        
                 case "stat":
                 case "stats":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpStat")}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpStat", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;                        
                 case "about":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpAbout")}", true);
                     break;                        
                 case "char":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpChar")}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpChar", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;                        
                 case "corp":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpCorp")}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpCorp", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;                        
                 case CMD_TQ:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTQ")}", true);
@@ -122,22 +122,22 @@ namespace ThunderED.Classes
                 case "amarr":
                 case "dodixie":
                 case "rens":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpJita")}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpJita", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;                        
                 case "pc":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpPc")}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpPc", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;            
                 case "ops":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpOps")}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpOps", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;            
                 case CMD_FWSTATS:
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpFwstats", CMD_FWSTATS)}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpFwstats", CMD_FWSTATS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;  
                 case CMD_TURL:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTurl")}", true);
                     break;
                 case CMD_TIMERS:
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTimers")}", true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpTimers", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;
 
                 case "rehash":
@@ -848,7 +848,7 @@ namespace ThunderED.Classes
             try
             {
                 if(SettingsManager.Settings.Config.ModuleStats && SettingsManager.Settings.StatsModule.EnableStatsCommand)
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpStat")}");
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpStat", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
 
                // await ContinuousCheckModule.Stats(Context, "m");
             }
@@ -871,7 +871,7 @@ namespace ThunderED.Classes
             {
                // await ContinuousCheckModule.Stats(Context, "m");
                 if(SettingsManager.Settings.Config.ModuleStats && SettingsManager.Settings.StatsModule.EnableStatsCommand)
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpStat")}");
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpStat", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
 
             }
             catch (Exception ex)

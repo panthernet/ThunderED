@@ -709,12 +709,12 @@ namespace ThunderED.Modules
                 var pendingUser = await SQLHelper.GetPendingUser(remainder);
                 if (pendingUser == null)
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel, LM.Get("authHasInvalidKey"), true).ConfigureAwait(false);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel, LM.Get("authHasInvalidKey", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);
                     return;
                 }
                 if(!pendingUser.Active)
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey"), true).ConfigureAwait(false);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);
                     return;
                 }
                 
