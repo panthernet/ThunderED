@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Discord;
 using ThunderED.Classes;
+using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.OnDemand;
@@ -117,9 +119,9 @@ namespace ThunderED.Modules
                         }
 
                         var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
-                        if (string.IsNullOrEmpty(rToken))
+                        if (string.IsNullOrEmpty(token))
                         {
-                            await LogHelper.LogWarning("Unable to get correct token using refresh token! Refresh token might be expired!", Category);
+                            await LogHelper.LogWarning($"Unable to get correct token using refresh token! Refresh token might be expired! Character: {charId}", Category);
                             continue;
                         }
 
@@ -370,5 +372,269 @@ namespace ThunderED.Modules
         }
 
 
+        public static async Task<string> SearchRelated(long searchCharId, HRMModule.SearchMailItem item, string authCode)
+        {
+            var isGlobal = searchCharId == 0;
+            var users = new List<UserTokenEntity>();
+            if (isGlobal)
+            {
+                users = await SQLHelper.UserTokensGetAllEntries();
+                switch (item.smAuthType)
+                {
+                    case 1:
+                        users = users.Where(a => a.AuthState == 2).ToList();
+                        break;
+                    case 2:
+                        users = users.Where(a => a.AuthState < 2).ToList();
+                        break;
+                    default:
+                        return null;
+                }
+            }
+            else
+            {
+                var u = await SQLHelper.UserTokensGetEntry(searchCharId);
+                if (u == null)
+                    return LM.Get("hrmSearchMailErrorSourceNotFound");
+                users.Add(u);
+            }
+
+            if (users.Count == 0) return LM.Get("hrmSearchMailNoUsersToCheck");
+            var Reason = "HRM";
+
+            long charId = 0;
+            long corpId = 0;
+            long allyId = 0;
+            //JsonClasses.CharacterData rChar = null;
+            switch (item.smSearchType)
+            {
+                case 1:
+                    var charIdLookup = await APIHelper.ESIAPI.SearchCharacterId(Reason, item.smText);
+                    charId = charIdLookup?.character?.FirstOrDefault() ?? 0;
+                   // rChar = charIdLookup?.character == null || charIdLookup.character.Length == 0 ? null : await APIHelper.ESIAPI.GetCharacterData(Reason, charIdLookup.character.FirstOrDefault());
+                    if (charId == 0)
+                        return LM.Get("hrmSearchMailErrorCharNotFound");
+                    break;
+                case 2:
+                    var corpIdLookup = await APIHelper.ESIAPI.SearchCorporationId(Reason, item.smText);
+                    corpId = corpIdLookup?.corporation == null || corpIdLookup.corporation.Length == 0 ? 0 : corpIdLookup.corporation.FirstOrDefault();
+                    if (corpId == 0)
+                        return LM.Get("hrmSearchMailErrorCorpNotFound");
+                    break;
+                case 3:
+                    var allyIdLookup = await APIHelper.ESIAPI.SearchAllianceId(Reason, item.smText);
+                    allyId = allyIdLookup?.alliance == null || allyIdLookup.alliance.Length == 0 ? 0 : allyIdLookup.alliance.FirstOrDefault();
+                    if (allyId == 0)
+                        return LM.Get("hrmSearchMailErrorAllianceNotFound");
+                    break;
+            }
+
+           /* JsonClasses.CorporationData sCorp = null;
+            if (!isGlobal && corpId > 0)
+                sCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, corpId);
+            JsonClasses.AllianceData sAlly = null;
+            if (!isGlobal && allyId > 0)
+                sAlly = await APIHelper.ESIAPI.GetAllianceData(Reason, allyId);
+                */
+            var sb = new StringBuilder();
+            foreach (var user in users)
+            {
+                if (!SettingsManager.HasReadMailScope(user.PermissionsList))
+                    continue;
+
+                var token = await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                    SettingsManager.Settings.WebServerModule.CcpAppSecret);
+
+                var mailHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, user.CharacterId.ToString(), token, 0);
+
+                //filter
+                switch (item.smSearchType)
+                {
+                    case 1:
+                    {
+                        var newList = new List<JsonClasses.MailHeader>();
+                        newList.AddRange(mailHeaders.Where(a => a.@from == charId).ToList());
+                        newList.ForEach(header =>
+                        {
+                            header.ToName = user.CharacterName;
+                            header.FromName = item.smText;
+                        });
+
+                        var tmp = mailHeaders.Where(a => a.recipients.Any(b => b.recipient_id == charId)).ToList();
+                        tmp.ForEach(header =>
+                        {
+                            header.ToName = item.smText;
+                            header.FromName = user.CharacterName;
+                        });
+
+                        mailHeaders = newList;
+                        mailHeaders.AddRange(tmp);
+                    }
+                        break;
+                    case 2: //corp
+                    {
+                        var newList = new List<JsonClasses.MailHeader>();
+                        foreach (var header in mailHeaders)
+                        {
+                            var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, header.@from);
+                            if (ch == null) continue;
+                            if (ch.corporation_id == corpId)
+                            {
+                                header.ToName = user.CharacterName;
+                                header.FromName = item.smText;
+                                newList.Add(header);
+                                continue;
+                            }
+
+                            if (isGlobal)
+                            {
+                                if (header.recipients.Any(b => b.recipient_id == corpId))
+                                {
+                                    header.ToName = item.smText;
+                                    header.FromName = user.CharacterName;
+                                    newList.Add(header);
+                                    continue;
+                                }
+                            }
+                            else //detailed personal search
+                            {
+                                foreach (var recipient in header.recipients)
+                                {
+                                    if (recipient.recipient_type == "character")
+                                    {
+                                        var r = await APIHelper.ESIAPI.GetCharacterData(Reason, recipient.recipient_id);
+                                        if(r == null) continue;
+                                        if (r.corporation_id == corpId)
+                                        {
+                                            header.ToName = item.smText;
+                                            header.FromName = user.CharacterName;
+                                            newList.Add(header);
+                                            break;
+                                        }
+                                    }else if (recipient.recipient_type == "corporation")
+                                    {
+                                        if(recipient.recipient_id == corpId)
+                                        {
+                                            header.ToName = item.smText;
+                                            header.FromName = user.CharacterName;
+                                            newList.Add(header);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        mailHeaders = newList.ToList();
+                    }
+                        break;
+                    case 3: //ally
+                    {
+                        var newList = new List<JsonClasses.MailHeader>();
+                        foreach (var header in mailHeaders)
+                        {
+                            var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, header.@from);
+                            if (ch?.alliance_id != null && (ch.alliance_id == allyId || header.@from == allyId))
+                            {
+                                header.ToName = user.CharacterName;
+                                header.FromName = item.smText;
+                                newList.Add(header);
+                                continue;
+                            }
+
+                            if (isGlobal)
+                            {
+                                if (ch?.alliance_id != null && header.recipients.Any(b => b.recipient_id == allyId))
+                                {
+                                    header.ToName = item.smText;
+                                    header.FromName = user.CharacterName;
+                                    newList.Add(header);
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                foreach (var recipient in header.recipients)
+                                {
+                                    if (recipient.recipient_type == "character")
+                                    {
+                                        var r = await APIHelper.ESIAPI.GetCharacterData(Reason, recipient.recipient_id);
+                                        if(r == null) continue;
+                                        if (r.alliance_id.HasValue && r.alliance_id == allyId)
+                                        {
+                                            header.ToName = item.smText;
+                                            header.FromName = user.CharacterName;
+                                            newList.Add(header);
+                                            break;
+                                        }
+
+                                    }else if (recipient.recipient_type == "corporation")
+                                    {
+                                        var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, recipient.recipient_id);
+                                        if(corp == null) continue;
+                                        if (corp.alliance_id.HasValue && corp.alliance_id == allyId)
+                                        {
+                                            header.ToName = item.smText;
+                                            header.FromName = user.CharacterName;
+                                            newList.Add(header);
+                                            break;
+                                        }
+                                    }else if (recipient.recipient_type == "alliance")
+                                    {
+                                        if(recipient.recipient_id == allyId)
+                                        {
+                                            header.ToName = item.smText;
+                                            header.FromName = user.CharacterName;
+                                            newList.Add(header);
+                                            break;
+                                        }
+                                    }
+                                }
+                                continue;
+                            }
+                        }
+
+                        mailHeaders = newList.ToList();
+                    }
+                        break;
+                    case 4: //header text
+                    {
+                        mailHeaders = mailHeaders.Where(a => a.subject.Contains(item.smText, StringComparison.OrdinalIgnoreCase)).ToList();
+                    }
+                        break;
+                }
+
+                foreach (var entry in mailHeaders)
+                {
+                    var mailBodyUrl = WebServerModule.GetHRM_AjaxMailURL(entry.mail_id, user.CharacterId, authCode);
+
+                    sb.AppendLine("<tr>");
+                    sb.AppendLine($"  <td><a href=\"#\" onclick=\"openMailDialog('{mailBodyUrl}')\">{entry.subject}</td>");
+                    sb.AppendLine($"  <td>{entry.FromName ?? LM.Get("Unknown")}</td>");
+                    sb.AppendLine($"  <td>{entry.ToName ?? LM.Get("Unknown")}</td>");
+                    sb.AppendLine($"  <td>{entry.Date.ToShortDateString()}</td>");
+                    sb.AppendLine("</tr>");
+                }
+            }
+
+            if (sb.Length > 0)
+            {
+                var sbFinal = new StringBuilder();
+                sbFinal.AppendLine("<thead>");
+                sbFinal.AppendLine("<tr>");
+                sbFinal.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("mailSubjectHeader")}</th>");
+                sbFinal.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("mailFromHeader")}</th>");
+                sbFinal.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("mailToHeader")}</th>");
+                sbFinal.AppendLine($"<th scope=\"col\">{LM.Get("mailDateHeader")}</th>");
+                sbFinal.AppendLine("</tr>");
+                sbFinal.AppendLine("</thead>");
+                sbFinal.AppendLine("<tbody>");
+                sbFinal.Append(sb.ToString());
+                sbFinal.AppendLine("</tbody>");
+                return sbFinal.ToString();
+            }
+
+            return "No results";
+        }
     }
 }

@@ -33,6 +33,7 @@ namespace ThunderED.Classes
         public static string FileTemplateHRM_Inspect;
         public static string FileTemplateHRM_MailBody;
         public static string FileTemplateHRM_Table;
+        public static string FileTemplateHRM_SearchMailPage;
 
         public static ThunderSettings Settings { get; private set; }
 
@@ -55,6 +56,7 @@ namespace ThunderED.Classes
                 FileTemplateHRM_Inspect = Path.Combine(RootDirectory, "Templates", "hrm_inspect.html");
                 FileTemplateHRM_MailBody = Path.Combine(RootDirectory, "Templates", "hrm_inspect_mail.html");
                 FileTemplateHRM_Table = Path.Combine(RootDirectory, "Templates", "hrm_inspect_table.html");
+                FileTemplateHRM_SearchMailPage = Path.Combine(RootDirectory, "Templates", "hrmMailSearch.html");
                 return null;
             }
             catch (Exception ex)

@@ -136,7 +136,8 @@ namespace ThunderED.Modules
                         await WriteCorrectResponce(response, isEditor, characterId);
                         return true;
                     }
-                }else if (request.HttpMethod == HttpMethod.Post.ToString())
+                }
+                else if (request.HttpMethod == HttpMethod.Post.ToString())
                 {
                     var prms = request.Url.Query.TrimStart('?').Split('&');
                     if (prms.Length != 3)
@@ -157,8 +158,8 @@ namespace ThunderED.Modules
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                     if (rChar == null)
                     {
-                        await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
-                        return true;
+                       // await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                        return false;
                     }
 
                     if(!CheckAccess(characterId, rChar, out var isEditor))

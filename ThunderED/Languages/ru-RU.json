@@ -373,8 +373,28 @@
   "authStandsTokenHeader": "Токен аутентификации по стендам EVE Online",
   "authStandsTokenRcv": "Проверка стендов для персонажа {0} успешно активирована",
   "authStripped":  "Сняты",
-  "authAddedRoles":  "Добавлены" 
-
-
+  "authAddedRoles":  "Добавлены", 
+  "hrmButSearchMail": "Поиск в почте", 
+  "hrmSearchMailHeader": "Поиск в почте", 
+  "hrmEntryUserType": "Пользователи",
+  "mailToHeader":  "Кому",
+  "hrmSearchMailAuthenticated": "Аутентифицированные", 
+  "hrmSearchMailAwaitingAuth": "Ожидающие", 
+  "hrmSearchMailSearchButton": "Поиск", 
+  "hrmSearchMailSearchFor": "Искать", 
+  "hrmSearchMailSearchForChar": "Персонаж", 
+  "hrmSearchMailSearchForCorp": "Корпорация", 
+  "hrmSearchMailSearchForAlliance": "Альянс", 
+  "hrmSearchMailSearchForSubject": "Тема письма содержит", 
+  "hrmSearchMailTerm": "Текст", 
+  "hrmSearchMailTermTooltip": "Введите текст для поиска..", 
+  "hrmSearchMailResultsHeader": "Результаты поиска", 
+  "hrmSearchMailInvalidRequest": "Неверный запрос! Заполните поля и аовторите попытку", 
+  "hrmSearchMailErrorSourceNotFound": "Ошибка: исходный пользователь не найден!", 
+  "hrmSearchMailNoUsersToCheck": "Нет персонажей для проверки!", 
+  "hrmSearchMailErrorCharNotFound": "Ошибка: персонаж не найден!", 
+  "hrmSearchMailErrorCorpNotFound": "Ошибка: корпорация не найдена!", 
+  "hrmSearchMailErrorAllianceNotFound": "Ошибка: альянс не найден!", 
+  "hrmSearchMailNoResults": "Нет результатов"
 
 }

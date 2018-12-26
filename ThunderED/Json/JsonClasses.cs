@@ -131,6 +131,13 @@ namespace ThunderED.Json
 
             [JsonIgnore]
             public DateTime Date => DateTime.Parse(timestamp);
+
+            [JsonIgnore]
+            public long To { get; set; }
+            [JsonIgnore]
+            public string ToName { get; set; }
+            [JsonIgnore]
+            public string FromName { get; set; }
         }
 
         public class Mail

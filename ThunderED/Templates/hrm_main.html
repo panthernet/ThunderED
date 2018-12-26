@@ -27,49 +27,54 @@
         margin-top: 0;
     }
 </style>
+
 <body>
         
-    <input type="hidden" id="timerCharId" value="{charId}">
-    <ul class="nav nav-pills float-right">{loggedInAs}<a href="{LogOutUrl}" style="margin-left:10px; margin-right: 30px;">{LogOut}</a></ul>
+<ul class="nav nav-pills float-right">{loggedInAs}<a href="{LogOutUrl}" style="margin-left:10px; margin-right: 30px;">{LogOut}</a></ul>
 
-    <div class="container">
-        <h2>{header}</h2>
-        <div class="accordion" id="accordionExample">
-            <div class="card">
-                <div class="card-header" id="headingOne">
-                    <h4 class="mb-0">
-                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                            {membersHeader}
-                        </button>
-                    </h4>
-                </div>
-                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
-                    <div class="card-body">
-                        <div class="container">
-                            {membersContent}
-                        </div>
+<div class="container">
+    <h2>{header}</h2>
+
+    <div>
+        <a href="{butSearchMailUrl}" class="btn btn-primary" role="button" style="margin: 10px; min-width: 200px;">{butSearchMail}</a>
+    </div>
+    <div class="accordion" id="accordionExample">
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <h4 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        {membersHeader}
+                    </button>
+                </h4>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+                <div class="card-body">
+                    <div class="container">
+                        {membersContent}
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header" id="headingTwo">
-                    <h4 class="mb-0">
-                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-                            {awaitingHeader}
-                        </button>
-                    </h4>
-                </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        </div>
+        <div class="card">
+            <div class="card-header" id="headingTwo">
+                <h4 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                        {awaitingHeader}
+                    </button>
+                </h4>
+            </div>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                <div class="card-body">
                     <div class="card-body">
-                        <div class="card-body">
-                            <div class="container">
-                                {awaitingContent}
-                            </div>
+                        <div class="container">
+                            {awaitingContent}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+</div>
 </body>
 </html>

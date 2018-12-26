@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Modules.OnDemand;
@@ -449,5 +450,12 @@ namespace ThunderED.Modules.Sub
         {
             return $"hrm.php?data=skills{inspectCharId}&id={authCode}&state=matahari&page=";
         }
+
+        public static string GetHRM_SearchMailURL(long inspectCharId, string authCode)
+        {
+            return $"hrm.php?data=searchMail{inspectCharId}&id={authCode}&state=matahari&query=";
+
+        }
+
     }
 }

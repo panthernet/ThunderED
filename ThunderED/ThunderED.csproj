@@ -97,6 +97,9 @@
     <None Update="Templates\hrm_inspect_mail.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Templates\hrmMailSearch.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\hrm_main.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

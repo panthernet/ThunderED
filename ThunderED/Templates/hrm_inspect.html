@@ -164,7 +164,10 @@
 <body>
     <div class="container">
         <input type="hidden" id="timerCharId" value="{charId}">
-        <a class="btn btn-primary" href="{backUrl}" role="button" style="margin: 10px;">{Back}</a>
+        <div>
+            <a class="btn btn-primary" href="{backUrl}" role="button" style="margin: 10px; min-width: 100px;">{Back}</a>
+            <a class="btn btn-primary" href="{butSearchMailUrl}" role="button" style="margin: 10px; min-width: 200px;">{butSearchMail}</a>
+        </div>
         <ul class="nav nav-pills float-right">{loggedInAs}<a href="{LogOutUrl}" style="margin-left:10px; margin-right: 30px;">{LogOut}</a></ul>
 
         <div class="container-fluid">

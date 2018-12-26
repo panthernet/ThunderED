@@ -379,7 +379,29 @@
   "authStandsTokenHeader": "EVE Online standings auth token",
   "authStandsTokenRcv": "Auth standings feed successfuly added for {0} character",
   "authStripped":  "Stripped",
-  "authAddedRoles":  "Added" 
+  "authAddedRoles":  "Added",
+  "hrmButSearchMail": "Search Mail",
+  "hrmSearchMailHeader": "Mail Search",
+  "hrmEntryUserType": "Users",
+  "mailToHeader":  "To",
+  "hrmSearchMailAuthenticated": "Authenticated", 
+  "hrmSearchMailAwaitingAuth": "Awaiting Auth", 
+  "hrmSearchMailSearchButton": "Search", 
+  "hrmSearchMailSearchFor": "Search For", 
+  "hrmSearchMailSearchForChar": "Character", 
+  "hrmSearchMailSearchForCorp": "Corporation", 
+  "hrmSearchMailSearchForAlliance": "Alliance", 
+  "hrmSearchMailSearchForSubject": "Mail subject contains", 
+  "hrmSearchMailTerm": "Term", 
+  "hrmSearchMailTermTooltip": "Type text to search for..", 
+  "hrmSearchMailResultsHeader": "Search Results", 
+  "hrmSearchMailInvalidRequest": "Invalid request! Please fill all input fields and try again", 
+  "hrmSearchMailErrorSourceNotFound": "Error: source user not found!", 
+  "hrmSearchMailNoUsersToCheck": "No characters to check!", 
+  "hrmSearchMailErrorCharNotFound": "Error: character not found!", 
+  "hrmSearchMailErrorCorpNotFound": "Error: corporation not found!", 
+  "hrmSearchMailErrorAllianceNotFound": "Error: alliance not found!", 
+  "hrmSearchMailNoResults": "No results"
 
 
 }

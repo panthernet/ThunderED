@@ -88,6 +88,9 @@ namespace ThunderED.Helpers
             return await Provider?.GetAuthUser(uId, order);
         }
 
+        
+       
+
         internal static async Task<PendingUserEntity> GetPendingUser(string remainder)
         {
             var res = await SelectData("pendingUsers", new[] {"*"}, new Dictionary<string, object> {{"authString", remainder}});
