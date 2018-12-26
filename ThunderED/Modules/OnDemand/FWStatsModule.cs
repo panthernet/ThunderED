@@ -57,7 +57,7 @@ namespace ThunderED.Modules.OnDemand
                         oppFactionId = 500003;
                         factionName = "Minmatar";
                         factionImage = SettingsManager.Settings.Resources.ImgFactionMinmatar;
-                        factionCorpId = 1000179;
+                        factionCorpId = 1000182;
                         break;
                     default:
                         return;
