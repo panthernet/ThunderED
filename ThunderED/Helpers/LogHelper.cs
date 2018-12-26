@@ -48,6 +48,8 @@ namespace ThunderED.Helpers
 
                 logConsole = !SettingsManager.Settings.Config.RunAsServiceCompatibility && logConsole;
 
+                logFile = logFile && !SettingsManager.Settings.Config.DisableLogIntoFiles;
+
                 if (logConsole)
                 {
                     var msg = $"{DateTime.Now,-19} [{severity,8}] [{cat}]: {message}";
@@ -104,8 +106,8 @@ namespace ThunderED.Helpers
                 if (!Directory.Exists(_logPath))
                     Directory.CreateDirectory(_logPath);
 
+               // if(!SettingsManager.Settings.Config.DisableLogIntoFiles)
                 await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}").ConfigureAwait(false);
-
                 
                 var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat}]: {message}";
                 var logConsole = !SettingsManager.Settings.Config.RunAsServiceCompatibility;

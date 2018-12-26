@@ -51,7 +51,8 @@
     "extendedESILogging":  false,
     "ESIAddress": "https://esi.evetech.net/",
     "UseHTTPS":  false,
-    "RunAsServiceCompatibility":  false 
+    "RunAsServiceCompatibility":  false,
+    "DisableLogIntoFiles": false 
   },
 
   "ContractNotificationsModule": {

@@ -1309,6 +1309,7 @@ namespace ThunderED.Classes
         public string ESIAddress { get; set; } = "https://esi.evetech.net/";
         public bool UseHTTPS { get; set; } = false;
         public bool RunAsServiceCompatibility { get; set; } = false;
+        public bool DisableLogIntoFiles { get; set; } = false;
 
 
 #if EDITOR

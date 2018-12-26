@@ -74,6 +74,7 @@ namespace ThunderED.Modules.OnDemand
             sb.AppendLine($"<th scope=\"col-md-auto\">#</th>");
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("mailSubjectHeader")}</th>");
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("mailFromHeader")}</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("mailToHeader")}</th>");
             sb.AppendLine($"<th scope=\"col\">{LM.Get("mailDateHeader")}</th>");
             sb.AppendLine("</tr>");
             sb.AppendLine("</thead>");
@@ -88,6 +89,7 @@ namespace ThunderED.Modules.OnDemand
                 sb.AppendLine($"  <th scope=\"row\">{counter++}</th>");
                 sb.AppendLine($"  <td><a href=\"#\" onclick=\"openMailDialog('{mailBodyUrl}')\">{entry.subject}</td>");
                 sb.AppendLine($"  <td>{from?.name ?? LM.Get("Unknown")}</td>");
+                sb.AppendLine($"  <td>{LM.Get("Unknown")}</td>");
                 sb.AppendLine($"  <td>{entry.Date.ToShortDateString()}</td>");
                 sb.AppendLine("</tr>");
             }
@@ -416,7 +418,6 @@ namespace ThunderED.Modules.OnDemand
 
             return bgcolor;
         }
-
 
         private async Task<string> GenerateContactsHtml(string token, int inspectCharId, int page)
         {
