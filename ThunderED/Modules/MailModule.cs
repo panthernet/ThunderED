@@ -125,17 +125,17 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        var lastMailId = await SQLHelper.SQLiteDataQuery<long>("mail", "mailId", "id", group.Id.ToString());
+                        var lastMailId = await SQLHelper.SQLiteDataQuery<long>("mail", "mailId", "id", charId.ToString());
                         var prevMailId = lastMailId;
                         var includePrivate = group.IncludePrivateMail;
 
                         if (group.Filters.Values.All(a => a.FilterSenders.Count == 0 && a.FilterLabels.Count == 0 && a.FilterMailList.Count == 0))
                         {
-                            await LogHelper.LogWarning($"Mail feed for user {group.Id} has no labels, lists or senders configured!", Category);
+                            await LogHelper.LogWarning($"Mail feed for user {charId} has no labels, lists or senders configured!", Category);
                             continue;
                         }
 
-                        var labelsData = await APIHelper.ESIAPI.GetMailLabels(Reason, group.Id.ToString(), token);
+                        var labelsData = await APIHelper.ESIAPI.GetMailLabels(Reason, charId.ToString(), token);
                         var searchLabels = labelsData?.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received").ToList() ??
                                            new List<JsonClasses.MailLabel>();
                         var mailLists = await APIHelper.ESIAPI.GetMailLists(Reason, charId, token);
@@ -194,7 +194,7 @@ namespace ThunderED.Modules
                         }
 
                         if (prevMailId != lastMailId || lastMailId == 0)
-                            await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object> {{"id", group.Id.ToString()}, {"mailId", lastMailId}});
+                            await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object> {{"id", charId.ToString()}, {"mailId", lastMailId}});
                     }
                 }
 
