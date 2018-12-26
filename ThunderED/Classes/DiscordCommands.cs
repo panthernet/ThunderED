@@ -265,6 +265,13 @@ namespace ThunderED.Classes
             else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersModuleDisabled"), true);
         }
 
+        [Command(CMD_FWSTATS, RunMode = RunMode.Async), Summary("Reports FW status for a faction")]
+        public async Task FWStats()
+        {
+            if (!SettingsManager.Settings.Config.ModuleFWStats) return;
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpFwstats", CMD_FWSTATS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
+        }
+
         internal const string CMD_FWSTATS = "fwstats";
         [Command(CMD_FWSTATS, RunMode = RunMode.Async), Summary("Reports FW status for a faction")]
         public async Task FWStats(string faction)
