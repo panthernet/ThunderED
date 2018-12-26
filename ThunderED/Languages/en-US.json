@@ -401,7 +401,7 @@
   "hrmSearchMailErrorCharNotFound": "Error: character not found!", 
   "hrmSearchMailErrorCorpNotFound": "Error: corporation not found!", 
   "hrmSearchMailErrorAllianceNotFound": "Error: alliance not found!", 
-  "hrmSearchMailNoResults": "No results"
-
-
+  "hrmSearchMailNoResults": "No results",
+  "hrmButDeleteUserAuth":  "Delete Auth",
+  "hrmButDeleteUserAuthConfirm":  "Delete character authentication?"
 }

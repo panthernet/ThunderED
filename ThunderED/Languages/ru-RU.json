@@ -395,6 +395,7 @@
   "hrmSearchMailErrorCharNotFound": "Ошибка: персонаж не найден!", 
   "hrmSearchMailErrorCorpNotFound": "Ошибка: корпорация не найдена!", 
   "hrmSearchMailErrorAllianceNotFound": "Ошибка: альянс не найден!", 
-  "hrmSearchMailNoResults": "Нет результатов"
-
+  "hrmSearchMailNoResults": "Нет результатов",
+  "hrmButDeleteUserAuth":  "Удалить",
+  "hrmButDeleteUserAuthConfirm":  "Удалить аутентификацию?"
 }

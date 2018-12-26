@@ -146,6 +146,23 @@ namespace ThunderED.Modules.OnDemand
 
                         switch (data)
                         {
+                            case var s when s.StartsWith("deleteAuth"):
+                            {
+                                try
+                                {
+                                    var searchCharId = Convert.ToInt64(s.Replace("deleteAuth", ""));
+                                    if (searchCharId == 0) return true;
+
+                                    await SQLHelper.DeleteAuthDataByCharId(searchCharId);
+                                    await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
+                                }
+                                catch (Exception ex)
+                                {
+                                    await LogHelper.LogEx(s, ex, Category);
+                                }
+
+                                return true;
+                            }
                             case var s when s.StartsWith("searchMail"):
                             {
                                 try
@@ -316,6 +333,10 @@ namespace ThunderED.Modules.OnDemand
                                         
                                             .Replace("{butSearchMail}", LM.Get("hrmButSearchMail"))
                                             .Replace("{butSearchMailUrl}", WebServerModule.GetHRM_SearchMailURL(inspectCharId, authCode))
+
+                                            .Replace("{ConfirmUserDelete}", LM.Get("hrmButDeleteUserAuthConfirm"))
+                                            .Replace("{butDeleteUserUrl}", WebServerModule.GetHRM_DeleteCharAuthURL(inspectCharId, authCode))
+                                            .Replace("{butDeleteUser}", LM.Get("hrmButDeleteUserAuth"))
                                         ;
 
                                     //private info
