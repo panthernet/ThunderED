@@ -397,5 +397,6 @@
   "hrmSearchMailErrorAllianceNotFound": "Ошибка: альянс не найден!", 
   "hrmSearchMailNoResults": "Нет результатов",
   "hrmButDeleteUserAuth":  "Удалить",
-  "hrmButDeleteUserAuthConfirm":  "Удалить аутентификацию?"
+  "hrmButDeleteUserAuthConfirm":  "Удалить аутентификацию?",
+  "mailUnkList":  "Неизв. рассылка"
 }

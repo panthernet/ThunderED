@@ -4,6 +4,7 @@
 + Added new auth functionality: Standings Based Auth (check WIKI for details)
 + Added new param RunAsServiceCompatibility for experimental service mode tweaks when bot is running as bg task
 + Added new mail search functionality to HRM module
++ Added TO field for HRM mail
 + Added delete auth button to HRM module
 + Improved help text to display actual command prefix
 + Fixed minmatar fwstats command

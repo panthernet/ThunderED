@@ -403,5 +403,6 @@
   "hrmSearchMailErrorAllianceNotFound": "Error: alliance not found!", 
   "hrmSearchMailNoResults": "No results",
   "hrmButDeleteUserAuth":  "Delete Auth",
-  "hrmButDeleteUserAuthConfirm":  "Delete character authentication?"
+  "hrmButDeleteUserAuthConfirm":  "Delete character authentication?",
+  "mailUnkList":  "Unk List"
 }

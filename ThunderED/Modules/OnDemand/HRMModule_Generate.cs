@@ -85,17 +85,21 @@ namespace ThunderED.Modules.OnDemand
                 var from = await APIHelper.ESIAPI.GetCharacterData(Reason, entry.@from);
                 var mailBodyUrl = WebServerModule.GetHRM_AjaxMailURL(entry.mail_id, inspectCharId, authCode);
 
+                var rcp = await MailModule.GetRecepientNames(Reason, entry.recipients, inspectCharId, token);
+
                 sb.AppendLine("<tr>");
                 sb.AppendLine($"  <th scope=\"row\">{counter++}</th>");
                 sb.AppendLine($"  <td><a href=\"#\" onclick=\"openMailDialog('{mailBodyUrl}')\">{entry.subject}</td>");
                 sb.AppendLine($"  <td>{from?.name ?? LM.Get("Unknown")}</td>");
-                sb.AppendLine($"  <td>{LM.Get("Unknown")}</td>");
+                sb.AppendLine($"  <td>{(rcp.Length > 0 ? rcp : LM.Get("Unknown"))}</td>");
                 sb.AppendLine($"  <td>{entry.Date.ToShortDateString()}</td>");
                 sb.AppendLine("</tr>");
             }
             sb.AppendLine("</tbody>");
             return sb.ToString();
         }
+
+        
 
         private async Task<string> GenerateCorpHistory(long charId)
         {
