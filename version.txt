@@ -7,6 +7,7 @@
 + Added delete auth button to HRM module
 + Improved help text to display actual command prefix
 + Fixed minmatar fwstats command
++ Fixed mail feed
 
 
 ### V1.2.10

@@ -175,7 +175,7 @@ namespace ThunderED.Modules
                                             .Any(a => mailListIds.Contains(a.recipient_id)))
                                         continue;
 
-                                    var mail = await APIHelper.ESIAPI.GetMail(Reason, group.Id.ToString(), token, mailHeader.mail_id);
+                                    var mail = await APIHelper.ESIAPI.GetMail(Reason, charId.ToString(), token, mailHeader.mail_id);
                                     // var labelNames = string.Join(",", mail.labels.Select(a => searchLabels.FirstOrDefault(l => l.label_id == a)?.name)).Trim(',');
                                     var sender = await APIHelper.ESIAPI.GetCharacterData(Reason, mail.from);
                                     var from = sender?.name;
