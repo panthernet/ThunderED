@@ -1429,6 +1429,8 @@ namespace ThunderED.Classes
         public ulong AuthReportChannel { get; set; }
         [Comment("Automatically assign corp tickers to users")]
         public bool EnforceCorpTickers { get; set; }
+        [Comment("Automatically assign alliance tickers to users")]
+        public bool EnforceAllianceTickers { get; set; }
         [Comment("Automatically assign character names to users (setup Discord group to disallow name change also)")]
         public bool EnforceCharName { get; set; }
         [Comment("Default group to use for auth url display")]

@@ -219,6 +219,7 @@
     "comAuthChannels":  [],
     "DefaultAuthGroup": "Mode1",
     "enforceCorpTickers": true,
+    "enforceAllianceTickers": true,
     "enforceCharName": true,
     "authGroups": {
       "Mode1_GeneralAuth": {
