@@ -4,6 +4,7 @@
 + Added !lp command to display lp goodies rating for NPC corps
 + Added colored standings comparsion in HRM char inspection page between char contact and HR contact for the same entity
 + Added FinalTimeMention param for FleetUp module to use custom Discord mention when event is starting
++ Improved TQ status post to recognise ESI problems and do not post excessive messages
 
 ### V1.2.11
 

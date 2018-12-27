@@ -112,7 +112,7 @@ namespace ThunderED.Modules
             if (!_IsTQOnline.HasValue)
                 _IsTQOnline = TickManager.IsConnected;
 
-            if (!_isTQOnlineRunning && SettingsManager.Settings.ContinousCheckModule.EnableTQStatusPost && SettingsManager.Settings.ContinousCheckModule.TQStatusPostChannels.Any() && _IsTQOnline != TickManager.IsConnected)
+            if (!_isTQOnlineRunning && SettingsManager.Settings.ContinousCheckModule.EnableTQStatusPost && SettingsManager.Settings.ContinousCheckModule.TQStatusPostChannels.Any() && _IsTQOnline != TickManager.IsConnected && !TickManager.IsESIUnreachable)
             {
                 try
                 {

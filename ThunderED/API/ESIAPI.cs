@@ -346,6 +346,13 @@ namespace ThunderED.API
             return ((await GetServerStatus(reason))?.players ?? 0) > 20;
         }
 
+        public async Task<int> IsServerOnlineEx(string reason)
+        {
+            var res = await GetServerStatus(reason);
+            if (res == null) return -1; //esi down
+            return res.players > 20 ? 1 : 0;
+        }
+
         public async Task<JsonClasses.ServerStatus> GetServerStatus(string reason)
         {
             return await APIHelper.RequestWrapper<JsonClasses.ServerStatus>($"{SettingsManager.Settings.Config.ESIAddress}latest/status/?datasource=tranquility&language={_language}", reason, null, false, true);
