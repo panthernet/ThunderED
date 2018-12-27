@@ -43,10 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TED_ConfigEditor\TED_ConfigEditor.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Content\Icons\imgContract.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
