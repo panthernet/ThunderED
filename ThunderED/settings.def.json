@@ -436,7 +436,8 @@
     "channel": 0,
     "announce_post": true,
     "announce": [ 5, 60 ],
-    "DefaultMention":  "@everyone" 
+    "DefaultMention":  "@everyone",
+    "FinalTimeMention": "@here" 
   },
 
   "jabberModule": {

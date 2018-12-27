@@ -145,7 +145,7 @@ namespace ThunderED.Modules
                         //NOW
                         if (timeDiff.TotalMinutes < 1)
                         {
-                            await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} {LM.Get("fuFormNow", $"http://fleet-up.com/Operation#{operation.OperationId}")}",
+                            await SendMessage(operation, channel, $"{Settings.FleetupModule.FinalTimeMention} {LM.Get("fuFormNow", $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                 false);
                             await SQLHelper.SQLiteDataDelete("fleetup", "id", operation.Id.ToString());
                         }

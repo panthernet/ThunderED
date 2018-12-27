@@ -358,7 +358,10 @@ namespace ThunderED.Classes
         public ulong Channel { get; set; }
         public bool Announce_Post { get; set; }
         [Comment("Default Discord mention for report")]
-        public string DefaultMention { get; set; }
+        public string DefaultMention { get; set; } = "@everyone";
+
+        [Comment("Discord mention for the final event time report")]
+        public string FinalTimeMention { get; set; } = "@here";
 #if EDITOR
         public ObservableCollection<long> Announce { get; set; } = new ObservableCollection<long>();
 #else
