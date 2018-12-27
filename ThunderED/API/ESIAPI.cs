@@ -421,5 +421,30 @@ namespace ThunderED.API
         }
 
 
+        public async Task<string> GetCorporationIcons(string reason, long id, int size)
+        {
+            var res =  await APIHelper.RequestWrapper<JsonClasses.CorpIconsData>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/icons/?datasource=tranquility&language={_language}", reason);
+            if (res == null)
+                return null;
+
+            switch (size)
+            {
+                case 64:
+                    return res.px64x64;
+                case 128:
+                    return res.px128x128;
+                case 256:
+                    return res.px256x256;
+                default:
+                    return null;
+            }
+
+        }
+
+        public async Task<List<long>> GetNpcCorps(string reason)
+        {
+            return await APIHelper.RequestWrapper<List<long>>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/npccorps/?datasource=tranquility&language={_language}", reason);
+
+        }
     }
 }

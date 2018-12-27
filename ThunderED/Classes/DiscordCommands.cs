@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
@@ -56,6 +57,11 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleFWStats)
             {
                 sb.Append("| !fwstats ");
+            }
+
+            if (SettingsManager.Settings.Config.ModuleLPStock)
+            {
+                sb.Append("! !lp ");
             }
 
             if (SettingsManager.Settings.Config.ModuleFleetup)
@@ -145,6 +151,9 @@ namespace ThunderED.Classes
                     break;
                 case "reauth":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpReauth")}", true);
+                    break;
+                case "lp":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpLp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "lp"), true);
                     break;
 
             }
@@ -270,6 +279,24 @@ namespace ThunderED.Classes
         {
             if (!SettingsManager.Settings.Config.ModuleFWStats) return;
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpFwstats", CMD_FWSTATS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
+        }
+
+        [Command("lp", RunMode = RunMode.Async), Summary("Reports LP prices")]
+        public async Task LpCommand()
+        {
+            if (!SettingsManager.Settings.Config.ModuleLPStock) return;
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpLp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "lp"), true);
+        }
+
+        [Command("lp", RunMode = RunMode.Async), Summary("Reports LP prices")]
+        public async Task LpCommand([Remainder]string command)
+        {
+            if (!SettingsManager.Settings.Config.ModuleLPStock) return;
+            var result = await LPStockModule.SendTopLP(Context, command);
+            if (!result)
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpLp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "lp"), true);
+            }
         }
 
         internal const string CMD_FWSTATS = "fwstats";

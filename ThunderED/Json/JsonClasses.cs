@@ -512,5 +512,12 @@ namespace ThunderED.Json
             public long type_id;
 
         }
+
+        public class CorpIconsData
+        {
+            public string px128x128;
+            public string px256x256;
+            public string px64x64;
+        }
     }
 }

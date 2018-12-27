@@ -398,5 +398,12 @@
   "hrmSearchMailNoResults": "Нет результатов",
   "hrmButDeleteUserAuth":  "Удалить",
   "hrmButDeleteUserAuthConfirm":  "Удалить аутентификацию?",
-  "mailUnkList":  "Неизв. рассылка"
+  "mailUnkList":  "Неизв. рассылка",
+  "lpStock_title":  "Рейтинг LP для {0}", 
+  "lpStock_DataHeader":  "Данные", 
+  "lpStock_AverageLp":  "Средний курс LP: {0}", 
+  "lpStock_ItemsHeader":  "Топовые товары", 
+  "helpLp":  "Отображает рейтинг товаров за LP для указанной НПЦ корпорации или фракции. Примеры: {0}{1} Caldari Navy   {0}{1} caldari   {0}{1} c",
+  "lpStock_PageText":  "Посетить страницу LPStock"
+
 }

@@ -64,7 +64,8 @@ With this bot you will have tools to:
 * Contracts Feeder - keep track on contracts with flexible filtering capabilities
 
 ## Build Requirements
-* Visual Studio 2017 Community Edition
+* Visual Studio 2017 Community Edition (Windows)
+* Docker (Linux)
 * .NET Core 2.1
 
 ## Pics
