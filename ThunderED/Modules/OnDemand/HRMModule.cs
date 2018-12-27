@@ -496,7 +496,7 @@ namespace ThunderED.Modules.OnDemand
                                 {
                                     var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
-                                    var html = await GenerateContactsHtml(token, inspectCharId, page);
+                                    var html = await GenerateContactsHtml(token, inspectCharId, page, characterId);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
                                         .Replace("{table}", html);

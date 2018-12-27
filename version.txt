@@ -2,6 +2,7 @@
 
 + Added option to enforce alliance tickers for users
 + Added !lp command to display lp goodies rating for NPC corps
++ Added colored standings comparsion in HRM char inspection page between char contact and HR contact for the same entity
 
 ### V1.2.11
 

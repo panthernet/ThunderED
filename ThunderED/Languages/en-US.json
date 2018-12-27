@@ -410,5 +410,6 @@
   "lpStock_AverageLp":  "Avg LP rate: {0}", 
   "lpStock_ItemsHeader":  "Top goods", 
   "helpLp":  "Displays LP goods rating for specified NPC corporation or faction. Examples: {0}{1} Caldari Navy   {0}{1} caldari   {0}{1} c",
-  "lpStock_PageText":  "Visit LPStock Page"
+  "lpStock_PageText":  "Visit LPStock Page",
+  "hrmContractHrStand":  "HR stand" 
 }

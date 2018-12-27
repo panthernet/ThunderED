@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.Sub;
@@ -16,13 +17,13 @@ namespace ThunderED.Modules.OnDemand
             return data.StartsWith("mail");
         }
 
-        private async Task<int> GetMailPagesCount(string token, int inspectCharId)
+        private async Task<int> GetMailPagesCount(string token, long inspectCharId)
         {
             var mailHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, inspectCharId.ToString(), token, 0);
             return  (mailHeaders?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage;        
         }
 
-        private async Task<int> GetCharJournalPagesCount(string token, int inspectCharId)
+        private async Task<int> GetCharJournalPagesCount(string token, long inspectCharId)
         {
             var entries = await APIHelper.ESIAPI.GetCharacterWalletJournal(Reason, inspectCharId, token);
             return  (entries?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage;        
@@ -33,18 +34,18 @@ namespace ThunderED.Modules.OnDemand
             return 3;
         }
 
-        private async Task<int> GetCharContractsPagesCount(string token, int inspectCharId)
+        private async Task<int> GetCharContractsPagesCount(string token, long inspectCharId)
         {
             var entries = await APIHelper.ESIAPI.GetCharacterContracts(Reason, inspectCharId, token);
             return  (entries?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage; 
         }
-        private async Task<int> GetCharContactsPagesCount(string token, int inspectCharId)
+        private async Task<int> GetCharContactsPagesCount(string token, long inspectCharId)
         {
             var entries = await APIHelper.ESIAPI.GetCharacterContacts(Reason, inspectCharId, token);
             return  (entries?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage; 
         }
 
-        private async Task<int> GetCharSkillsPagesCount(string token, int inspectCharId)
+        private async Task<int> GetCharSkillsPagesCount(string token, long inspectCharId)
         {
             var entries = await APIHelper.ESIAPI.GetCharSkills(Reason, inspectCharId, token);
             if (entries == null) return 0;
@@ -55,13 +56,13 @@ namespace ThunderED.Modules.OnDemand
         }
 
 
-        private async Task<int> GetCharTransactPagesCount(string token, int inspectCharId)
+        private async Task<int> GetCharTransactPagesCount(string token, long inspectCharId)
         {
             var entries = await APIHelper.ESIAPI.GetCharacterWalletTransactions(Reason, inspectCharId, token);
             return  (entries?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage;        
         }
 
-        private async Task<string> GenerateMailHtml(string token, int inspectCharId, string authCode, int page)
+        private async Task<string> GenerateMailHtml(string token, long inspectCharId, string authCode, int page)
         {
             var mailHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, inspectCharId.ToString(), token, 0);
             //var totalCount = mailHeaders.Count;
@@ -309,7 +310,7 @@ namespace ThunderED.Modules.OnDemand
             return sb.ToString();
         }
 
-        private async Task<string> GenerateSkillsHtml(string token, int inspectCharId, int page)
+        private async Task<string> GenerateSkillsHtml(string token, long inspectCharId, int page)
         {
             var data = await APIHelper.ESIAPI.GetCharSkills(Reason, inspectCharId, token);
             if (data == null) return null;
@@ -423,11 +424,24 @@ namespace ThunderED.Modules.OnDemand
             return bgcolor;
         }
 
-        private async Task<string> GenerateContactsHtml(string token, int inspectCharId, int page)
+        private async Task<string> GenerateContactsHtml(string token, long inspectCharId, int page, long hrId = 0)
         {
             var items = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, inspectCharId, token)).OrderByDescending(a=> a.standing).ToList();
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
             items = items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
+
+            List<JsonClasses.Contact> hrContacts = null;
+            if (hrId > 0)
+            {
+                var hrTokenInfo = await SQLHelper.UserTokensGetEntry(hrId);
+                if (hrTokenInfo != null && SettingsManager.HasCharContactsScope(hrTokenInfo.PermissionsList))
+                {
+                    var hrToken = await APIHelper.ESIAPI.RefreshToken(hrTokenInfo.RefreshToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    if(!string.IsNullOrEmpty(hrToken))
+                        hrContacts = await APIHelper.ESIAPI.GetCharacterContacts(Reason, hrId, hrToken);
+                }
+            }
+
             var sb = new StringBuilder();
             sb.AppendLine("<thead>");
             sb.AppendLine("<tr>");
@@ -436,15 +450,20 @@ namespace ThunderED.Modules.OnDemand
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmContactType")}</th>");
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmContractBlocked")}</th>");
             sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmContractStand")}</th>");
+            if(hrContacts != null)
+                sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmContractHrStand")}</th>");
             sb.AppendLine("</tr>");
             sb.AppendLine("</thead>");
             sb.AppendLine("<tbody>");
             var counter = startIndex + 1;
+
             foreach (var entry in items)
             {
                 try
                 {
                     string name;
+                    string color = "transparent";
+                    string fontColor = "black";
                     switch (entry.contact_type)
                     {
                         case "character":
@@ -468,6 +487,31 @@ namespace ThunderED.Modules.OnDemand
                             break;
                     }
 
+                    var hrc = hrContacts?.FirstOrDefault(a => a.contact_type == entry.contact_type && a.contact_id == entry.contact_id)?.standing;
+                    string hrStand = hrc.HasValue ? hrc.Value.ToString() : "-";
+                    if (hrc.HasValue)
+                    {
+                        switch (hrc.Value)
+                        {
+                            case var s when s > 0 && s <= 5:
+                                color = "#2B68C6";
+                                fontColor = "white";
+                                break;
+                            case var s when s > 5 && s <= 10:
+                                color = "#041B5D";
+                                fontColor = "white";
+                                break;
+                            case var s when s < 0 && s >= -5:
+                                color = "#BF4908";
+                                fontColor = "white";
+                                break;
+                            case var s when s < -5 && s >= -10:
+                                color = "#8D0808";
+                                fontColor = "white";
+                                break;
+                        }                        
+                    }
+
 
                     sb.AppendLine($"<tr>");
                     sb.AppendLine($"  <th scope=\"row\">{counter++}</th>");
@@ -475,6 +519,8 @@ namespace ThunderED.Modules.OnDemand
                     sb.AppendLine($"  <td>{entry.contact_type}</td>");
                     sb.AppendLine($"  <td>{entry.is_blocked}</td>");
                     sb.AppendLine($"  <td>{entry.standing}</td>");
+                    if(hrContacts != null)
+                        sb.AppendLine($"  <td style=\"background-color:{color};color:{fontColor}\">{hrStand}</td>");
                     sb.AppendLine("</tr>");
                 }
                 catch (Exception ex)
