@@ -321,6 +321,10 @@ namespace ThunderED.Classes
         {
             if (!SettingsManager.Settings.Config.ModuleFWStats) return;
 
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
+
             switch (faction.ToLower())
             {
                 case "caldari":

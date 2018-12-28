@@ -349,7 +349,12 @@ namespace ThunderED.API
         public async Task<int> IsServerOnlineEx(string reason)
         {
             var res = await GetServerStatus(reason);
-            if (res == null) return -1; //esi down
+            if (res == null)
+            {
+                if (DateTime.UtcNow.Hour == 11 && DateTime.UtcNow.Minute <= 30)
+                    return 0;
+                return -1; //esi down
+            }
             return res.players > 20 ? 1 : 0;
         }
 
