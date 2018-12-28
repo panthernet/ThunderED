@@ -272,6 +272,10 @@ namespace ThunderED.Classes
         [Command(CMD_TURL, RunMode = RunMode.Async), Summary("Display timers url")]
         public async Task TimersUrl()
         {
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
+
             if(SettingsManager.Settings.Config.ModuleTimers)
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersUrlText", string.IsNullOrEmpty(SettingsManager.Settings.TimersModule.TinyUrl) ? WebServerModule.GetTimersAuthURL() : SettingsManager.Settings.TimersModule.TinyUrl), true);
             else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersModuleDisabled"), true);
@@ -281,6 +285,9 @@ namespace ThunderED.Classes
         public async Task FWStats()
         {
             if (!SettingsManager.Settings.Config.ModuleFWStats) return;
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpFwstats", CMD_FWSTATS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
         }
 
@@ -288,6 +295,9 @@ namespace ThunderED.Classes
         public async Task LpCommand()
         {
             if (!SettingsManager.Settings.Config.ModuleLPStock) return;
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpLp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "lp"), true);
         }
 
@@ -295,6 +305,9 @@ namespace ThunderED.Classes
         public async Task LpCommand([Remainder]string command)
         {
             if (!SettingsManager.Settings.Config.ModuleLPStock) return;
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
             var result = await LPStockModule.SendTopLP(Context, command);
             if (!result)
             {
