@@ -519,5 +519,12 @@ namespace ThunderED.Json
             public string px256x256;
             public string px64x64;
         }
+
+        public class StandingData
+        {
+            public long from_id;
+            public string from_type; //agent, npc_corp, faction 
+            public double standing;
+        }
     }
 }

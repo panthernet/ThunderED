@@ -453,5 +453,11 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<List<long>>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/npccorps/?datasource=tranquility&language={_language}", reason);
 
         }
+
+        public async Task<List<JsonClasses.StandingData>> GetcharacterStandings(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.StandingData>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/standings/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
     }
 }

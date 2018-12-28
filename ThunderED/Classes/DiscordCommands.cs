@@ -24,56 +24,56 @@ namespace ThunderED.Classes
         {
             var sb = new StringBuilder();
             sb.Append(LM.Get("helpTextPrivateCommands"));
-            sb.Append(": ** !about | !tq ");
+            sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}about | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}tq ");
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
-                sb.Append("| !auth | !authnotify | !web ");
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}auth | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}authnotify | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}web ");
                 if (SettingsManager.Settings.Config.ModuleTimers)
                 {
-                    sb.Append("| !timers | !turl ");
+                    sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}timers | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}turl ");
                 }
             }
 
             if (SettingsManager.Settings.Config.ModuleTime)
             {
-                sb.Append("| !evetime ");
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}evetime ");
             }
 
             if (SettingsManager.Settings.Config.ModuleStats)
             {
-                sb.Append("| !stat ");
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}stat ");
             }
 
             if (SettingsManager.Settings.Config.ModuleCharCorp)
             {
-                sb.Append("| !char | !corp ");
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}char | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}corp ");
             }
 
             if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
-                sb.Append("| !pc | !jita | !amarr | !dodixie | !rens ");
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}pc | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}jita | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}amarr | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}dodixie | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rens ");
             }
 
             if (SettingsManager.Settings.Config.ModuleFWStats)
             {
-                sb.Append("| !fwstats ");
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}fwstats | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}badstand or {SettingsManager.Settings.Config.BotDiscordCommandPrefix}bs ");
             }
 
             if (SettingsManager.Settings.Config.ModuleLPStock)
             {
-                sb.Append("! !lp ");
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}lp ");
             }
 
             if (SettingsManager.Settings.Config.ModuleFleetup)
             {
-                sb.Append("| !ops ");
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}ops ");
             }
 
             sb.Append("**\n");
             if (string.IsNullOrEmpty(await APIHelper.DiscordAPI.IsAdminAccess(Context)))
             {
                 sb.Append(LM.Get("helpTextAdminCommands"));
-                sb.Append(": ** !rehash | !reauth **\n");
+                sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rehash | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}reauth **\n");
             }
             sb.Append(LM.Get("helpExpanded", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
 
@@ -154,6 +154,9 @@ namespace ThunderED.Classes
                     break;
                 case "lp":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpLp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "lp"), true);
+                    break;
+                case "badstand":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("badstandHelp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "badstand"), true);
                     break;
 
             }
@@ -889,7 +892,6 @@ namespace ThunderED.Classes
             catch (Exception ex)
             {
                 await LogHelper.LogEx("stat", ex);
-                await Task.FromException(ex);
             }
         }
 
@@ -911,7 +913,6 @@ namespace ThunderED.Classes
             catch (Exception ex)
             {
                 await LogHelper.LogEx("stat", ex);
-                await Task.FromException(ex);
             }
         }
 
@@ -936,7 +937,6 @@ namespace ThunderED.Classes
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx("motd", ex);
-                    await Task.FromException(ex);
                 }
             }
         }
@@ -961,7 +961,6 @@ namespace ThunderED.Classes
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx("ops", ex);
-                    await Task.FromException(ex);
                 }
             }
         }
@@ -986,7 +985,6 @@ namespace ThunderED.Classes
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx("ops", ex);
-                    await Task.FromException(ex);
                 }
             }
         }
@@ -1012,7 +1010,6 @@ namespace ThunderED.Classes
             catch (Exception ex)
             {
                 await LogHelper.LogEx("about", ex);
-                await Task.FromException(ex);
             }
         }
 
@@ -1036,8 +1033,14 @@ namespace ThunderED.Classes
             catch (Exception ex)
             {
                 await LogHelper.LogEx("char", ex);
-                await Task.FromException(ex);
             }
+        }
+
+        [Command("corp", RunMode = RunMode.Async), Summary("")]
+        public async Task Corp()
+        {
+            if (!SettingsManager.Settings.Config.ModuleFWStats) return;
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("badstandHelp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "badstand"));
         }
 
         /// <summary>
@@ -1060,7 +1063,45 @@ namespace ThunderED.Classes
             catch (Exception ex)
             {
                 await LogHelper.LogEx("corp", ex);
-                await Task.FromException(ex);
+            }
+        }
+
+        [Command("badstand", RunMode = RunMode.Async), Summary("")]
+        public async Task BadStandCommand()
+        {
+            if (!SettingsManager.Settings.Config.ModuleFWStats) return;
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("badstandHelp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "badstand"));
+        }
+
+        [Command("bs", RunMode = RunMode.Async), Summary("")]
+        public async Task BadStandCommand2([Remainder] string x)
+        {
+            await BadStandCommand(x);
+        }
+
+        [Command("bs", RunMode = RunMode.Async), Summary("")]
+        public async Task BadStandCommand2()
+        {
+            await BadStandCommand();
+        }
+
+        [Command("badstand", RunMode = RunMode.Async), Summary("")]
+        public async Task BadStandCommand([Remainder] string x)
+        {
+            try
+            {
+                if (!SettingsManager.Settings.Config.ModuleFWStats) return;
+                var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+                if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                    return;
+                await FWStatsModule.DisplayBadStandings(Context, x);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("badstand", ex);
             }
         }
     }

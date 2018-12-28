@@ -133,6 +133,7 @@ namespace ThunderED.Classes
 
         public static bool IsNoConnection { get; private set; }
         public static bool IsConnected => !IsNoConnection;
+        public static bool IsESIUnreachable { get; private set; }
 
         private static async Task Async_Tick(object stateInfo)
         {
@@ -144,11 +145,17 @@ namespace ThunderED.Classes
                 if ((_asyncNow - _lastOnlineCheck).TotalSeconds > 5)
                 {
                     _lastOnlineCheck = _asyncNow;
-                    if (!await APIHelper.ESIAPI.IsServerOnline("General"))
+                    var onlineType = await APIHelper.ESIAPI.IsServerOnlineEx("General");
+                    IsESIUnreachable = onlineType == -1;
+
+                    if (onlineType != 1)
                     {
                         if (IsConnected)
                         {
-                            await LogHelper.LogWarning("EVE server is offline or there is a connection problem!", LogCat.ESI);
+                            if(onlineType == 0)
+                                await LogHelper.LogWarning("EVE server is offline!", LogCat.ESI);
+                            if(onlineType == -1)
+                                await LogHelper.LogWarning("EVE ESI API is unreachable!", LogCat.ESI);
                             await LogHelper.LogWarning("Waiting for connection....", LogCat.ESI);
                         }
                         IsNoConnection = true;

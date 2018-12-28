@@ -411,5 +411,12 @@
   "lpStock_ItemsHeader":  "Top goods", 
   "helpLp":  "Displays LP goods rating for specified NPC corporation or faction. Examples: {0}{1} Caldari Navy   {0}{1} caldari   {0}{1} c",
   "lpStock_PageText":  "Visit LPStock Page",
-  "hrmContractHrStand":  "HR stand" 
+  "hrmContractHrStand":  "HR stand",
+  "badstandTitle":  "Lowest standings to {0}", 
+  "badstandTopTenTitle":  "Top 10 baddies", 
+  "badstandNoUsers":  "No characters found", 
+  "badstandHelp":  "This command displays top 10 members with lowest standing to specified NPC corp or faction. Usage: {0}{1} TEXT or {0}bs TEXT\nExample: {0}{1} c  {0}bs caldari  {0}{1} state protectorate",
+  "badstandNoNegative":  "No characters with negative standings found",
+  "badstandBusy": "Unable to execute command. Please try again in a few seconds" 
+  
 }

@@ -113,5 +113,10 @@ namespace ThunderED.Classes
             "esi-characterstats.read.v1"
         };
 
+        public static bool HasCharStandingsScope(List<string> permissions)
+        {
+            return permissions.Any(a => a.Equals("esi-characters.read_standings.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
     }
 }

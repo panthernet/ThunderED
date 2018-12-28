@@ -405,6 +405,12 @@
   "lpStock_ItemsHeader":  "Топовые товары", 
   "helpLp":  "Отображает рейтинг товаров за LP для указанной НПЦ корпорации или фракции. Примеры: {0}{1} Caldari Navy   {0}{1} caldari   {0}{1} c",
   "lpStock_PageText":  "Посетить страницу LPStock",
-  "hrmContractHrStand":  "Стенд HR" 
+  "hrmContractHrStand":  "Стенд HR",
+  "badstandTitle":  "Самые низкие стенды к {0}", 
+  "badstandTopTenTitle":  "Топ 10 плохишей", 
+  "badstandNoUsers":  "персонажей не найдено", 
+  "badstandHelp":  "Эта команда отображает топ 10 участников с негативными стендами к указанной НПЦ корпе или фракции. Пример: {0}{1} c  {0}{1} caldari  {0}{1} state protectorate",
+  "badstandNoNegative":  "Не найдено персонажей с отрицательными стендами",
+  "badstandBusy": "Невозможно выполнить команду. Попробуйте повторить запрос через несколько секунд" 
 
 }
