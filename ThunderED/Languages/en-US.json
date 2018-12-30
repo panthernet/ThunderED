@@ -15,7 +15,7 @@
     "*authnotify* command provides you with a link to auth you by EVE Online character as notifications feeder. Send *{0}authnotify* command to the bot for additional details.",
   "helpTime": "*evetime* command displays current EVE Online time",
   "helpStat":
-    "*stat* or *stats* command displays corp or alliance stats by time interval\nExamples: {0}stat m United Fleet | {0}stat d Nebula Alba | {0}stat 2018 Nebula Alba| {0}stat 2018/03 Nebula Alba",
+    "*stat* or *stats* command displays corp or alliance stats by time interval\nExamples: {0}stat m United Fleet | {0}stat d Goonswarm Federation | {0}stat y Perkone | {0}stat 2018 Nebula Alba| {0}stat 2018/03 Nebula Alba",
   "helpAbout": "*about* command displays information about the bot",
   "helpChar": "*char* command displays information about in game character by name\nExample: *{0}char Don Chack*",
   "helpCorp": "*corp* command displays information about corporation by name\nExample: *{0}corp Nebula Alba*",
@@ -409,13 +409,13 @@
   "lpStock_DataHeader":  "Data", 
   "lpStock_AverageLp":  "Avg LP rate: {0}", 
   "lpStock_ItemsHeader":  "Top goods", 
-  "helpLp":  "Displays LP goods rating for specified NPC corporation or faction. Examples: {0}{1} Caldari Navy   {0}{1} caldari   {0}{1} c",
+  "helpLp":  "Displays LP goods rating for specified NPC corporation or faction. Examples: {0}{1} Caldari Navy | {0}{1} caldari | {0}{1} c",
   "lpStock_PageText":  "Visit LPStock Page",
   "hrmContractHrStand":  "HR stand",
   "badstandTitle":  "Lowest standings to {0}", 
   "badstandTopTenTitle":  "Top 10 baddies", 
   "badstandNoUsers":  "No characters found", 
-  "badstandHelp":  "This command displays top 10 members with lowest standing to specified NPC corp or faction. Usage: {0}{1} TEXT or {0}bs TEXT\nExample: {0}{1} c  {0}bs caldari  {0}{1} state protectorate",
+  "badstandHelp":  "This command displays top 10 members with lowest standing to specified NPC corp or faction. Usage: {0}{1} TEXT or {0}bs TEXT\nExample: {0}{1} c | {0}bs caldari | {0}{1} state protectorate",
   "badstandNoNegative":  "No characters with negative standings found",
   "badstandBusy": "Unable to execute command. Please try again in a few seconds" 
   

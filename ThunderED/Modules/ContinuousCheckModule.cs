@@ -196,7 +196,7 @@ namespace ThunderED.Modules
                 }
                 else
                 {
-                    if (command != "d" && command != "t" && command != "today" && command != "m" && command != "month" && !command.All(char.IsDigit) && !command.Contains('/'))
+                    if (command != "d" && command != "t" && command != "today" && command != "y" && command != "year" && command != "m" && command != "month" && !command.All(char.IsDigit) && !command.Contains('/'))
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statUnknownCommandSyntax", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
                         return;
@@ -293,6 +293,16 @@ namespace ThunderED.Modules
                     }
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context,
                         $"**{LM.Get("monthlyStats", result.Info.Name)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                }else if (command == "year" || command == "y")
+                {
+                    var data = result.Months.FirstOrDefault(a => a.Value.Year == now.Year).Value;
+                    if (data == null)
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statNoDataFound"), true).ConfigureAwait(false);
+                        return;
+                    }
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
+                        $"**{LM.Get("yearlyStats", result.Info.Name, now.Year)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
                 }
                 else if (command.All(char.IsDigit))
                 {
