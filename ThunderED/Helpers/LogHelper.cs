@@ -46,8 +46,6 @@ namespace ThunderED.Helpers
 
                 // var cc = Console.ForegroundColor;
 
-                logConsole = !SettingsManager.Settings.Config.RunAsServiceCompatibility && logConsole;
-
                 logFile = logFile && !SettingsManager.Settings.Config.DisableLogIntoFiles;
 
                 if (logConsole)
@@ -55,35 +53,38 @@ namespace ThunderED.Helpers
                     var msg = $"{DateTime.Now,-19} [{severity,8}] [{cat}]: {message}";
                     await SystemLogFeeder.FeedMessage(msg, severity == LogSeverity.Critical || severity == LogSeverity.Error);
 
-                    try
+                    if (!SettingsManager.Settings.Config.RunAsServiceCompatibility)
                     {
-                        switch (severity)
+                        try
                         {
-                            case LogSeverity.Critical:
-                            case LogSeverity.Error:
-                                Console.ForegroundColor = ConsoleColor.Red;
+                            switch (severity)
+                            {
+                                case LogSeverity.Critical:
+                                case LogSeverity.Error:
+                                    Console.ForegroundColor = ConsoleColor.Red;
 
-                                break;
-                            case LogSeverity.Warning:
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                break;
-                            case LogSeverity.Info:
-                                Console.ForegroundColor = ConsoleColor.White;
-                                break;
-                            case LogSeverity.Verbose:
-                            case LogSeverity.Debug:
-                                Console.ForegroundColor = ConsoleColor.DarkGray;
-                                break;
-                            case LogSeverity.Module:
-                                Console.ForegroundColor = ConsoleColor.Gray;
-                                break;
+                                    break;
+                                case LogSeverity.Warning:
+                                    Console.ForegroundColor = ConsoleColor.Yellow;
+                                    break;
+                                case LogSeverity.Info:
+                                    Console.ForegroundColor = ConsoleColor.White;
+                                    break;
+                                case LogSeverity.Verbose:
+                                case LogSeverity.Debug:
+                                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                                    break;
+                                case LogSeverity.Module:
+                                    Console.ForegroundColor = ConsoleColor.Gray;
+                                    break;
+                            }
+
+                            Console.WriteLine(msg);
                         }
-
-                        Console.WriteLine(msg);
-                    }
-                    catch
-                    {
-                        //ignore
+                        catch
+                        {
+                            //ignore
+                        }
                     }
                 }
                 if (logFile)
