@@ -83,9 +83,19 @@ namespace ThunderED.Helpers
             await Provider?.SQLiteDataInsertOrUpdateTokens(notifyToken, userId, mailToken, contractsToken);
         }
 
-        internal static async Task<IList<IDictionary<string, object>>> GetAuthUser(ulong uId, bool order = false)
+        internal static async Task<AuthUserEntity> GetAuthUser(ulong discordId, bool order = false)
         {
-            return await Provider?.GetAuthUser(uId, order);
+            var res = await SelectData("authUsers", new[] {"*"}, new Dictionary<string, object> {{"discordID", discordId}});
+
+            return res?.Select(item => new AuthUserEntity
+            {
+                Id = Convert.ToInt64(item[0]),
+                EveName = Convert.ToString(item[1]),
+                CharacterId = Convert.ToInt64(item[2]),
+                DiscordId = Convert.ToUInt64(item[3]),
+                Group = Convert.ToString(item[4]),
+                IsActive = (string) item[5] == "yes"
+            }).FirstOrDefault();
         }
 
         

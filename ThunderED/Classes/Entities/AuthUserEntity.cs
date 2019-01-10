@@ -6,6 +6,12 @@ namespace ThunderED.Classes.Entities
 {
     public class AuthUserEntity
     {
+        public long Id;
+        public string EveName;
+        public long CharacterId;
+        public ulong DiscordId;
+        public string Group;
+        public bool IsActive;
 
     }
 }

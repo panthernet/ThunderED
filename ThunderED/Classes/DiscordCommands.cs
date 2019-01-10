@@ -201,14 +201,13 @@ namespace ThunderED.Classes
 
             var skip = !allys.Any() && !corps.Any() && !chars.Any();
 
-            var dataList = (await SQLHelper.GetAuthUser(Context.User.Id))?.FirstOrDefault();
-            if (skip || (dataList != null && dataList.Count > 0 && dataList.ContainsKey("characterID")))
+            var authUser = await SQLHelper.GetAuthUser(Context.User.Id);
+            if (skip || authUser != null)
             {
-                var chId = Convert.ToInt64(dataList["characterID"]);
-                var ch = await APIHelper.ESIAPI.GetCharacterData("Discord", chId, true);
+                var ch = await APIHelper.ESIAPI.GetCharacterData("Discord", authUser.CharacterId, true);
                 if (skip || ch != null)
                 {
-                    if (!skip && (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains((int)chId)))
+                    if (!skip && (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains(authUser.CharacterId)))
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersCmdAccessDenied"), true);
                         return;
@@ -248,14 +247,13 @@ namespace ThunderED.Classes
             var corps = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CorporationIDs.Where(b=> b > 0)).Distinct().ToList();
             var chars = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CharacterIDs.Where(b=> b > 0)).Distinct().ToList();
 
-            var dataList = (await SQLHelper.GetAuthUser(Context.User.Id))?.FirstOrDefault();
-            if (dataList != null && dataList.Count > 0 && dataList.ContainsKey("characterId"))
+            var authUser = await SQLHelper.GetAuthUser(Context.User.Id);
+            if (authUser != null)
             {
-                var chId = Convert.ToInt64(dataList["characterId"]);
-                var ch = await APIHelper.ESIAPI.GetCharacterData("Discord", chId, true);
+                var ch = await APIHelper.ESIAPI.GetCharacterData("Discord", authUser.CharacterId, true);
                 if (ch != null)
                 {
-                    if (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains((int)chId))
+                    if (!ch.alliance_id.HasValue || !allys.Contains(ch.alliance_id.Value) && !corps.Contains(ch.corporation_id) && !chars.Contains(authUser.CharacterId))
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersCmdAccessDenied"), true);
                         return;

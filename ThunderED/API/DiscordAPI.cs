@@ -295,11 +295,13 @@ namespace ThunderED.API
 
             var groupsToCheck = new List<WebAuthGroup>();
             var tokenData = await SQLHelper.UserTokensGetEntry(characterID);
-                    
-            if (!string.IsNullOrEmpty(tokenData?.GroupName))
+            var authData = await SQLHelper.GetAuthUser(discordUserId);
+            var cGroup = tokenData?.GroupName ?? authData?.Group;
+
+            if (!string.IsNullOrEmpty(cGroup))
             {
                 //check specified group for roles
-                var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == tokenData.GroupName).Value;
+                var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == cGroup).Value;
                 if(group != null)
                     groupsToCheck.Add(group);
             }
@@ -362,7 +364,7 @@ namespace ThunderED.API
                 }
             }
 
-            if (authResult == null && isManualAuth)
+            if (authResult == null && (isManualAuth || !string.IsNullOrEmpty(cGroup)))
             {
                 var token = await SQLHelper.UserTokensGetEntry(characterID);
                 if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
@@ -408,19 +410,18 @@ namespace ThunderED.API
 
                // await LogHelper.LogInfo($"Running Auth Check on {u.Username}", LogCat.AuthCheck, false);
 
-                var responce = await SQLHelper.GetAuthUser(u.Id);
+                var authUser = await SQLHelper.GetAuthUser(u.Id);
 
-                if (responce.Count > 0)
+                if (authUser != null)
                 {
                     //get data
-                    var characterID = responce.OrderByDescending(x => x["id"]).FirstOrDefault()?["characterID"];
-                    var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
+                    var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", authUser.CharacterId, true);
                     //skip bad requests
                     if(characterData == null) return null;
 
                     var initialUserRoles = new List<SocketRole>(u.Roles);
                     var remroles = new List<SocketRole>();
-                    var result = await GetRoleGroup(Convert.ToInt64(characterID), discordUserId, isManualAuth);
+                    var result = await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth);
 
                     var changed = false;
                     var isAuthed = result.UpdatedRoles.Count > 1;
@@ -597,38 +598,6 @@ namespace ThunderED.API
             var channel = GetGuild()?.GetTextChannel(channelId);
             if (channel != null)
                 await SendMessageAsync(channel, msg, embed).ConfigureAwait(false);
-        }
-
-
-        public async Task Dupes(SocketUser user)
-        {
-            if (user == null)
-            {
-                var discordUsers = GetGuild().Users;
-
-                foreach (var u in discordUsers)
-                {
-                    int count = 0;
-                    var responce = await SQLHelper.GetAuthUser(u.Id, true);
-                    foreach (var r in responce)
-                    {
-                        if (count != 0)
-                            await SQLHelper.RunCommand($"DELETE FROM authUsers WHERE id = {r["id"]}");
-                        count++;
-                    }
-                }
-            }
-            else
-            {
-                int count = 0;
-                var responce = await SQLHelper.GetAuthUser(user.Id, true);
-                foreach (var r in responce)
-                {
-                    if (count != 0)
-                        await SQLHelper.RunCommand($"DELETE FROM authUsers WHERE id = {r["id"]}");
-                    count++;
-                }
-            }
         }
 
         public IMessageChannel GetChannel(ulong guildID, ulong noid)

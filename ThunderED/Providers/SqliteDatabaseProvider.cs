@@ -555,43 +555,7 @@ namespace ThunderED.Providers
             }
         }
 
-        public async Task<IList<IDictionary<string, object>>> GetAuthUser(ulong uId, bool order = false)
-        {
-            var list = new List<IDictionary<string, object>>(); ;
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand($"SELECT * FROM authUsers WHERE discordID={uId}{(order? " ORDER BY addedOn DESC" : null)}", con))
-            {
-                await con.OpenAsync();
-                try
-                {
-                    using (var r = await querySQL.ExecuteReaderAsync())
-                    {
-                        while (await r.ReadAsync())
-                        {
-                            var record = new Dictionary<string, object>();
-
-                            for (var i = 0; i < r.FieldCount; i++)
-                            {
-                                var key = r.GetName(i);
-                                var value = r.IsDBNull(i) ? null : r[i];
-                                record.Add(key, value);
-                            }
-
-                            list.Add(record);
-                        }
-
-                        return list;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("GetAuthUser", ex, LogCat.SQLite);
-                }
-            }
-            await Task.Yield();
-            return list;
-        }
-
+      
       
 
         public async Task RunCommand(string query2, bool silent = false)
