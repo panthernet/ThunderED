@@ -53,7 +53,8 @@
     "UseHTTPS":  false,
     "RunAsServiceCompatibility":  false,
     "DisableLogIntoFiles": false,
-    "UseSocketsForZKillboard":  true 
+    "UseSocketsForZKillboard":  true,
+    "ZKillboardWebSocketUrl":  "wss://zkillboard.com:2096" 
   },
 
   "ContractNotificationsModule": {

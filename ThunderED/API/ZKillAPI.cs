@@ -45,8 +45,9 @@ namespace ThunderED.API
                 {
                     if (_webSocket?.State == WebSocketState.Connecting) return null;
                     var o = new PureWebSocketOptions();
-                    _webSocket = new PureWebSocket("wss://zkillboard.com:2096", o);
+                    _webSocket = new PureWebSocket(SettingsManager.Settings.Config.ZKillboardWebSocketUrl, o);
                     _webSocket.OnMessage += _webSocket_OnMessage;
+                    _webSocket.OnError += async exception => { await LogHelper.LogEx("_webSocket.OnError", exception, LogCat.ZKill); };
 
                     if (!_webSocket.Connect())
                     {
@@ -62,6 +63,8 @@ namespace ThunderED.API
                             _webSocket = null;
                             return null;
                         }
+
+                        await LogHelper.LogInfo("ZKB feed core WebSocket connect successful!", LogCat.ZKill);
                     }
 
                 }

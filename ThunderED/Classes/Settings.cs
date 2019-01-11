@@ -1314,6 +1314,7 @@ namespace ThunderED.Classes
         public bool RunAsServiceCompatibility { get; set; } = false;
         public bool DisableLogIntoFiles { get; set; } = false;
         public bool UseSocketsForZKillboard { get; set; } = true;
+        public string ZKillboardWebSocketUrl { get; set; } = "wss://zkillboard.com:2096";
 
 
 #if EDITOR
