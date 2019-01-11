@@ -7,15 +7,12 @@ using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Helpers;
-using ThunderED.Json.Internal;
 
 namespace ThunderED.Providers
 {
     internal class SqliteDatabaseProvider : IDatabasePovider
     {
-         //SQLite Query
-        #region SQLiteQuery
-
+        #region Query
 
         public async Task<bool> IsEntryExists(string table, Dictionary<string, object> where)
         {
@@ -129,7 +126,7 @@ namespace ThunderED.Providers
             }
         }
       
-        public async Task<T> SQLiteDataQuery<T>(string table, string field, Dictionary<string, object> where)
+        public async Task<T> Query<T>(string table, string field, Dictionary<string, object> where)
         {
             if (where == null)
             {
@@ -186,11 +183,11 @@ namespace ThunderED.Providers
             }
         }
 
-        public async Task<List<T>> SQLiteDataQueryList<T>(string table, string field, Dictionary<string, object> where)
+        public async Task<List<T>> QueryList<T>(string table, string field, Dictionary<string, object> where)
         {
             if (where == null)
             {
-                await LogHelper.LogError($"[SQLiteDataQuery]: {table}-{field} query has empty values!");
+                await LogHelper.LogError($"[DataQuery]: {table}-{field} query has empty values!");
                 return default;
             }
 
@@ -240,32 +237,31 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[SQLiteDataQuery]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[DataQuery]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                     return res;
                 }
             }
         }
 
-        public async Task<T> SQLiteDataQuery<T>(string table, string field, string whereField, object whereData)
+        public async Task<T> Query<T>(string table, string field, string whereField, object whereData)
         {
-            return await SQLiteDataQuery<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
+            return await Query<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
         }
 
-        public async Task<List<T>> SQLiteDataQueryList<T>(string table, string field, string whereField, object whereData)
+        public async Task<List<T>> QueryList<T>(string table, string field, string whereField, object whereData)
         {
-            return await SQLiteDataQueryList<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
+            return await QueryList<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
         }
 
         #endregion
         
-        //SQLite Update
-        #region SQLiteUpdate
+        #region Update
 
-        public async Task SQLiteDataInsertOrUpdate(string table, Dictionary<string, object> values)
+        public async Task InsertOrUpdate(string table, Dictionary<string, object> values)
         {
             if (values == null)
             {
-                await LogHelper.LogError($"[SQLiteDataInsertOrUpdate]: {table} query has empty values!");
+                await LogHelper.LogError($"[{nameof(InsertOrUpdate)}]: {table} query has empty values!");
                 return;
             }
             var fromText = string.Empty;
@@ -295,16 +291,16 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[SQLiteDataInsertOrUpdate]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(InsertOrUpdate)}]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                 }
             }
         }
 
-        public async Task SQLiteDataInsert(string table, Dictionary<string, object> values)
+        public async Task Insert(string table, Dictionary<string, object> values)
         {
             if (values == null)
             {
-                await LogHelper.LogError($"[SQLiteDataInsert]: {table} query has empty values!");
+                await LogHelper.LogError($"[{nameof(Insert)}]: {table} query has empty values!");
                 return;
             }
             var fromText = string.Empty;
@@ -334,21 +330,21 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[SQLiteDataInsert]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(Insert)}]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                 }
             }
         }
 
-        public async Task SQLiteDataUpdate(string table, string setField, object setData, string whereField, object whereData)
+        public async Task Update(string table, string setField, object setData, string whereField, object whereData)
         {
-            await SQLiteDataUpdate(table, setField, setData, new Dictionary<string, object> {{whereField, whereData}});
+            await Update(table, setField, setData, new Dictionary<string, object> {{whereField, whereData}});
         }
 
-        public async Task SQLiteDataUpdate(string table, string setField, object setData, Dictionary<string, object> where)
+        public async Task Update(string table, string setField, object setData, Dictionary<string, object> where)
         {
             if (where == null)
             {
-                await LogHelper.LogError($"[SQLiteDataUpdate]: {table} query has empty values!");
+                await LogHelper.LogError($"[{nameof(Update)}]: {table} query has empty values!");
                 return;
             }
             var whereText = string.Empty;
@@ -375,15 +371,14 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[SQLiteDataUpdate]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(Update)}]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                 }
             }
         }
         #endregion
 
-        //SQLite Delete
-        #region SQLiteDelete
-        public async Task SQLiteDataDelete(string table, Dictionary<string, object> where)
+        #region Delete
+        public async Task Delete(string table, Dictionary<string, object> where)
         {
             var whereText = string.Empty;
             int count = 1;
@@ -408,12 +403,12 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("SQLiteDataDelete", ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(Delete), ex, LogCat.SQLite);
                 }
             }
         }
 
-        public async Task SQLiteDataDelete(string table, string whereField = null, object whereValue = null)
+        public async Task Delete(string table, string whereField = null, object whereValue = null)
         {
             var where = string.IsNullOrEmpty(whereField) || whereValue == null ? null : $" WHERE {whereField} = @name";
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
@@ -428,12 +423,12 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("SQLiteDataDelete", ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(Delete), ex, LogCat.SQLite);
                 }
             }
         }
 
-        public async Task SQLiteDataDeleteWhereIn(string table, string field, List<long> list, bool not)
+        public async Task DeleteWhereIn(string table, string field, List<long> list, bool not)
         {
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
             using (var insertSQL = new SqliteCommand($"DELETE FROM {table} where {field} {(not? "not": null)} in ({string.Join(",", list)})", con))
@@ -446,56 +441,13 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("SQLiteDataDeleteWhereIn", ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(DeleteWhereIn), ex, LogCat.SQLite);
                 }
             }
         }
-
-
-
         #endregion
 
-        #region Selection
-        public async Task<List<TimerItem>> SQLiteDataSelectTimers()
-        {
-            var list = new List<TimerItem>();
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand("select * from timers", con))
-            {
-                await con.OpenAsync();
-                try
-                {
-                    using (var r = await querySQL.ExecuteReaderAsync())
-                    {
-                        while (await r.ReadAsync())
-                        {
-                            var record = new TimerItem
-                            {
-                                id = r.GetInt32(0),
-                                timerType = r.GetInt32(1),
-                                timerStage = r.GetInt32(2),
-                                timerLocation = r.GetString(3),
-                                timerOwner = r.GetString(4),
-                                timerET = r.GetString(5),
-                                timerNotes = r.IsDBNull(6) ? null : r.GetString(6),
-                                timerChar = r.GetString(7),
-                                announce = r.GetInt32(8)
-                            };
-                            list.Add(record);
-                        }
-
-                        return list;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("SQLiteDataUpdate", ex, LogCat.SQLite);
-                    return new List<TimerItem>();
-                }
-            }
-        }
-
-        #endregion
+        #region Run
 
         public async Task<bool> RunScript(string file)
         {
@@ -511,53 +463,14 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("RunScript", ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(RunScript), ex, LogCat.SQLite);
                     return false;
                 }
 
                 return true;
             }
         }
-
-        public async Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken, string contractsToken)
-        {
-            if (string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) || string.IsNullOrEmpty(userId))
-            {
-                if(string.IsNullOrEmpty(contractsToken))
-                    return;
-            }
-
-            var mail = string.IsNullOrEmpty(mailToken) ? await SQLiteDataQuery<string>("refreshTokens", "mail", "id", userId) : mailToken;
-            var token = string.IsNullOrEmpty(notifyToken) ? await SQLiteDataQuery<string>("refreshTokens", "token", "id", userId) : notifyToken;
-            var ctoken = string.IsNullOrEmpty(contractsToken) ? await SQLiteDataQuery<string>("refreshTokens", "ctoken", "id", userId) : contractsToken;
-            token = token ?? "";
-            mail = mail ?? "";
-            ctoken = ctoken ?? "";
-
-
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand("INSERT OR REPLACE INTO refreshTokens (id, token, mail, ctoken) VALUES(@id,@token,@mail,@ctoken)", con))
-            {
-                await con.OpenAsync();
-                insertSQL.Parameters.Add(new SqliteParameter("@id", userId));
-                insertSQL.Parameters.Add(new SqliteParameter("@token", token));
-                insertSQL.Parameters.Add(new SqliteParameter("@mail", mail ?? (object)DBNull.Value));
-                insertSQL.Parameters.Add(new SqliteParameter("@ctoken", ctoken ?? (object)DBNull.Value));
-                try
-                {
-                    insertSQL.ExecuteNonQuery();
-
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("SQLiteDataUpdate", ex, LogCat.SQLite);
-                }
-            }
-        }
-
       
-      
-
         public async Task RunCommand(string query2, bool silent = false)
         {
             try
@@ -572,11 +485,14 @@ namespace ThunderED.Providers
             catch (Exception ex)
             {
                 if (!silent)
-                    await LogHelper.LogEx($"[RunCommand]: {query2}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(RunCommand)}]: {query2}", ex, LogCat.SQLite);
             }
         }
+        #endregion
 
-        public async Task<T> SQLiteDataSelectCache<T>(object whereValue, int maxDays)
+        #region Cache
+
+        public async Task<T> SelectCache<T>(object whereValue, int maxDays)
         {
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
             using (var querySQL = new SqliteCommand("SELECT text, lastUpdate FROM cache WHERE id=@value and type=@tt", con))
@@ -600,15 +516,15 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("SQLiteDataSelectCache", ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(SelectCache), ex, LogCat.SQLite);
                     return (T)(object)null;
                 }
             }
         }
 
-        public async Task SQLiteDataUpdateCache<T>(T data, object id, int days = 1)
+        public async Task UpdateCache<T>(T data, object id, int days = 1)
         {
-            var entry = await SQLiteDataSelectCache<T>(id, int.MaxValue);
+            var entry = await SelectCache<T>(id, int.MaxValue);
             var q = entry == null
                 ? "INSERT OR REPLACE INTO cache (type, id, lastAccess, lastUpdate, text, days) VALUES(@type,@id,@access,@update,@text,@days)"
                 : "UPDATE cache set lastAccess=@access, lastUpdate=@update where type=@type and id=@id";
@@ -631,12 +547,12 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[SQLiteDataUpdateCache]: {q}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(UpdateCache)}]: {q}", ex, LogCat.SQLite);
                 }
             }
         }
 
-        public async Task SQLiteDataPurgeCache()
+        public async Task PurgeCache()
         {
             using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
             {
@@ -649,7 +565,7 @@ namespace ThunderED.Providers
                     }
                     catch (Exception ex)
                     {
-                        await LogHelper.LogEx("SQLiteDataPurgeCache", ex, LogCat.SQLite);
+                        await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.SQLite);
                     }
                 }
 
@@ -661,12 +577,12 @@ namespace ThunderED.Providers
                     }
                     catch (Exception ex)
                     {
-                        await LogHelper.LogEx("SQLiteDataPurgeCache", ex, LogCat.SQLite);
+                        await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.SQLite);
                     }
                 }
             }
         }
-
+        #endregion
 
         public async Task CleanupNotificationsList()
         {

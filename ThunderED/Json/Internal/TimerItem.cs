@@ -8,7 +8,7 @@ namespace ThunderED.Json.Internal
 {
     public class TimerItem
     {
-        public int id;
+        public long id;
         public int timerType;
         public int timerStage;
         public string timerLocation;

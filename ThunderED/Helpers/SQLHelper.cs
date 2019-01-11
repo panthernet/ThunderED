@@ -20,22 +20,22 @@ namespace ThunderED.Helpers
 
         internal static async Task<T> SQLiteDataQuery<T>(string table, string field, string whereField, object whereData)
         {
-            return await Provider?.SQLiteDataQuery<T>(table, field, whereField, whereData);
+            return await Provider?.Query<T>(table, field, whereField, whereData);
         }
 
         internal static async Task<T> SQLiteDataQuery<T>(string table, string field, Dictionary<string, object> where)
         {
-            return await Provider?.SQLiteDataQuery<T>(table, field, where);
+            return await Provider?.Query<T>(table, field, where);
         }
 
         internal static async Task<List<T>> SQLiteDataQueryList<T>(string table, string field, string whereField, object whereData)
         {
-            return await Provider?.SQLiteDataQueryList<T>(table, field, whereField, whereData);
+            return await Provider?.QueryList<T>(table, field, whereField, whereData);
         }
 
         internal static async Task<List<T>> SQLiteDataQueryList<T>(string table, string field, Dictionary<string, object> where)
         {
-            return await Provider?.SQLiteDataQueryList<T>(table, field, where);
+            return await Provider?.QueryList<T>(table, field, where);
         }
 
         #endregion
@@ -45,23 +45,23 @@ namespace ThunderED.Helpers
 
         internal static async Task SQLiteDataUpdate(string table, string setField, object setData, string whereField, object whereData)
         {
-            await Provider?.SQLiteDataUpdate(table, setField, setData, whereField, whereData);
+            await Provider?.Update(table, setField, setData, whereField, whereData);
         }
 
         internal static async Task SQLiteDataUpdate(string table, string setField, object setData, Dictionary<string, object> where)
         {
-            await Provider?.SQLiteDataUpdate(table, setField, setData, where);
+            await Provider?.Update(table, setField, setData, where);
 
         }
 
         internal static async Task SQLiteDataInsertOrUpdate(string table, Dictionary<string, object> values)
         {
-            await Provider?.SQLiteDataInsertOrUpdate(table, values);
+            await Provider?.InsertOrUpdate(table, values);
         }
 
         internal static async Task SQLiteDataInsert(string table, Dictionary<string, object> values)
         {
-            await Provider?.SQLiteDataInsert(table, values);
+            await Provider?.Insert(table, values);
         }
         #endregion
 
@@ -69,18 +69,37 @@ namespace ThunderED.Helpers
         #region SQLiteDelete
         internal static async Task SQLiteDataDelete(string table, string whereField = null, object whereValue = null)
         {
-            await Provider?.SQLiteDataDelete(table, whereField, whereValue);
+            await Provider?.Delete(table, whereField, whereValue);
         }
 
         internal static async Task SQLiteDataDelete(string table, Dictionary<string, object> where)
         {
-            await Provider?.SQLiteDataDelete(table, where);
+            await Provider?.Delete(table, where);
         }
         #endregion
 
         internal static async Task SQLiteDataInsertOrUpdateTokens(string notifyToken, string userId, string mailToken, string contractsToken)
-        {
-            await Provider?.SQLiteDataInsertOrUpdateTokens(notifyToken, userId, mailToken, contractsToken);
+        {   
+            if (string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) || string.IsNullOrEmpty(userId))
+            {
+                if(string.IsNullOrEmpty(contractsToken))
+                    return;
+            }
+
+            var mail = string.IsNullOrEmpty(mailToken) ? await Provider.Query<string>("refreshTokens", "mail", "id", userId) : mailToken;
+            var token = string.IsNullOrEmpty(notifyToken) ? await Provider.Query<string>("refreshTokens", "token", "id", userId) : notifyToken;
+            var ctoken = string.IsNullOrEmpty(contractsToken) ? await Provider.Query<string>("refreshTokens", "ctoken", "id", userId) : contractsToken;
+            token = token ?? "";
+            mail = mail ?? "";
+            ctoken = ctoken ?? "";
+
+            await Provider.InsertOrUpdate("refreshTokens", new Dictionary<string, object>
+            {
+                {"id", userId},
+                {"token", token},
+                {"mail", mail},
+                {"ctoken", ctoken}
+            });
         }
 
         internal static async Task<AuthUserEntity> GetAuthUser(ulong discordId, bool order = false)
@@ -142,18 +161,18 @@ namespace ThunderED.Helpers
         internal static async Task<T> SQLiteDataSelectCache<T>(object whereValue, int maxDays)
             where T: class
         {
-            return await Provider?.SQLiteDataSelectCache<T>(whereValue, maxDays);
+            return await Provider?.SelectCache<T>(whereValue, maxDays);
         }
 
         internal static async Task SQLiteDataUpdateCache<T>(T data, object id, int days = 1) 
             where T : class
         {
-            await Provider?.SQLiteDataUpdateCache(data, id, days);
+            await Provider?.UpdateCache(data, id, days);
         }
 
         internal static async Task SQLiteDataPurgeCache()
         {
-            await Provider?.SQLiteDataPurgeCache();
+            await Provider?.PurgeCache();
         }
 
         public static string LoadProvider()
@@ -182,7 +201,18 @@ namespace ThunderED.Helpers
 
         public static async Task<List<TimerItem>> SQLiteDataSelectTimers()
         {
-            return await Provider?.SQLiteDataSelectTimers();
+            return (await SelectData("timers", new[] {"*"})).Select(item => new TimerItem
+            {
+                id = Convert.ToInt64(item[0]),
+                timerType = Convert.ToInt32(item[1]),
+                timerStage = Convert.ToInt32(item[2]),
+                timerLocation = (string)item[3],
+                timerOwner = (string)item[4],
+                timerET = (string)item[5],
+                timerNotes = (string)item[6],
+                timerChar = (string)item[7],
+                announce = Convert.ToInt32(item[8])
+            }).ToList();
         }
 
         public static async Task CleanupNotificationsList()
@@ -192,7 +222,7 @@ namespace ThunderED.Helpers
 
         public static async Task SQLiteDataDeleteWhereIn(string table, string field, List<long> list, bool not)
         {
-            await Provider?.SQLiteDataDeleteWhereIn(table, field, list, not);
+            await Provider?.DeleteWhereIn(table, field, list, not);
 
         }
 
