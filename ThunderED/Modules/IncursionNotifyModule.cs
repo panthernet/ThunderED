@@ -19,16 +19,16 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            if (_runAt.Date != DateTime.UtcNow.Date)
-            {
-                _isChecked = false;
-                _runAt = DateTime.UtcNow.Date + TimeSpan.FromHours(11) + TimeSpan.FromMinutes(5);
-            }
-
             if(IsRunning) return;
             IsRunning = true;
             try
             {
+                if (_runAt.Date != DateTime.UtcNow.Date)
+                {
+                    _isChecked = false;
+                    _runAt = DateTime.UtcNow.Date + TimeSpan.FromHours(11) + TimeSpan.FromMinutes(5);
+                }
+
                 if (_runAt < DateTime.UtcNow && !_isChecked)
                 {
                     if (!await APIHelper.ESIAPI.IsServerOnline(Reason))

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Helpers;
 
@@ -11,10 +9,11 @@ namespace ThunderED.Modules
         private DateTime _lastAuthCheck = DateTime.MinValue;
         public override LogCat Category => LogCat.AuthCheck;
 
-        public async Task AuthCheck(bool? manual = false)
+        public override async Task Run(object prm)
         {
             if(IsRunning) return;
             IsRunning = true;
+            var manual = (bool?) prm;
             try
             {
                 manual = manual ?? false;
@@ -26,18 +25,13 @@ namespace ThunderED.Modules
                     await LogHelper.LogModule("Running AuthCheck module...", Category);
 
                     await APIHelper.DiscordAPI.UpdateAllUserRoles(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles);
-                   // await LogHelper.LogInfo("Auth check complete!", Category);
+                    // await LogHelper.LogInfo("Auth check complete!", Category);
                 }
             }
             finally
             {
                 IsRunning = false;
             }
-        }
-
-        public override async Task Run(object prm)
-        {
-            await AuthCheck((bool?)prm);
         }
     }
 }

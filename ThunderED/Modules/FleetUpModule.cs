@@ -19,7 +19,16 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            await FleetUp();
+            if(IsRunning) return;
+            IsRunning = true;
+            try
+            {
+                await FleetUp();
+            }
+            finally
+            {
+                IsRunning = false;
+            }
         }
 
         private static async Task SendMessage(JsonFleetup.Datum operation, IMessageChannel channel, string message, bool addReactions)
@@ -63,10 +72,8 @@ namespace ThunderED.Modules
             }
         }
 
-        public async Task FleetUp()
+        protected async Task FleetUp()
         {
-            if(IsRunning) return;
-            IsRunning = true;
             try
             {
                 //Check Fleetup Operations
@@ -155,10 +162,6 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx($"ERROR {ex.Message}", ex, Category);
-            }
-            finally
-            {
-                IsRunning = false;
             }
         }
 

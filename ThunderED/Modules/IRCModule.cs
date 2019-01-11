@@ -57,17 +57,11 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            await Connect();
-        }
-
-        public async Task Connect()
-        {
             if(IsRunning) return;
             IsRunning = true;
-
-            if(IRC?.IsWorking ?? false) return;
             try
             {
+                if(IRC?.IsWorking ?? false) return;
                 await LogHelper.LogModule("Inititalizing IRC module...", Category);
                 IRC = new IRC();
                 IRC.Message += IRC_Message;

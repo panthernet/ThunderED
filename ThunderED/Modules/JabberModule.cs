@@ -21,12 +21,12 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            var username = Settings.JabberModule.Username;
-            var password = Settings.JabberModule.Password;
-            var domain = Settings.JabberModule.Domain;
-
             if (!IsRunning)
             {
+                var username = Settings.JabberModule.Username;
+                var password = Settings.JabberModule.Password;
+                var domain = Settings.JabberModule.Domain;
+
                 try
                 {
                     var xmppWrapper = new ReconnectXmppWrapper(domain, username, password);

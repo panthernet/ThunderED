@@ -575,7 +575,7 @@ namespace ThunderED.API
             }
         }
 
-        public async Task SendEmbedKillMessage(ulong channelId, Color color, int shipID, int kmId, string shipName, long value, string sysName, string secstatus, string killTime, string cName, string corpName
+        public async Task SendEmbedKillMessage(ulong channelId, Color color, long shipID, long kmId, string shipName, long value, string sysName, string secstatus, string killTime, string cName, string corpName
             , string aTicker, bool isNpcKill, string atName, string atCorp, string atTicker, int atCount, string radiusMessage, string msg = "")
         {
             msg = msg ?? "";

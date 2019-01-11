@@ -16,12 +16,14 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            await ProcessExistingCampaigns();
 
             if (IsRunning) return;
+            IsRunning = true;
+
+            await ProcessExistingCampaigns();
+
             try
             {
-                IsRunning = true;
                 if (DateTime.Now <= _nextNotificationCheck) return;
                 _nextNotificationCheck = DateTime.Now.AddMinutes(Settings.NullCampaignModule.CheckIntervalInMinutes);
 

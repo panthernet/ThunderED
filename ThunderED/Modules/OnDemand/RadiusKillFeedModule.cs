@@ -208,6 +208,7 @@ namespace ThunderED.Modules.OnDemand
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
+                await LogHelper.LogWarning($"Error processing kill ID {kill?.package?.killID} ! Msg: {ex.Message}", Category);
             }
         }
     }

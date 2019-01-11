@@ -108,40 +108,14 @@ namespace ThunderED.Classes
 
         public static async void Tick(object stateInfo)
         {
-            try
-            {
-                if (!_running && APIHelper.DiscordAPI.IsAvailable)
-                {
-                    _running = true;
-                    try
-                    {
-                        await Async_Tick(stateInfo);
-                    }
-                    finally
-                    {
-                        _running = false;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx(ex.Message, ex,LogCat.Tick );
-            }
-        }
+            if (_running || !APIHelper.DiscordAPI.IsAvailable) return;
 
-        private static DateTime _lastOnlineCheck;
-
-        public static bool IsNoConnection { get; private set; }
-        public static bool IsConnected => !IsNoConnection;
-        public static bool IsESIUnreachable { get; private set; }
-
-        private static async Task Async_Tick(object stateInfo)
-        {
+            _running = true;
             _asyncNow = DateTime.Now;
-          //  _asyncToday = DateTime.Today;
 
             try
             {
+                #region ONLINE CHECK
                 if ((_asyncNow - _lastOnlineCheck).TotalSeconds > 5)
                 {
                     _lastOnlineCheck = _asyncNow;
@@ -169,12 +143,17 @@ namespace ThunderED.Classes
                         }
                     }
                 }
+                #endregion
 
                 await ContinuousCheckModule.OneSec_TQStatusPost(_asyncNow);
 
                 if(IsNoConnection) return;
 
-                Parallel.ForEach(Modules, module => module.Run(null));
+                foreach (var module in Modules)
+                {
+                    await module.Run(null).ConfigureAwait(false);
+                }
+                //Parallel.ForEach(Modules, module => module.Run(null));
             }
             catch (Exception ex)
             {
@@ -184,7 +163,15 @@ namespace ThunderED.Classes
             {
                 _running = false;
             }
+
         }
+
+        private static DateTime _lastOnlineCheck;
+
+        public static bool IsNoConnection { get; private set; }
+        public static bool IsConnected => !IsNoConnection;
+        public static bool IsESIUnreachable { get; private set; }
+
 
         public static Task RunModule(Type type, ICommandContext context, object prm = null)
         {

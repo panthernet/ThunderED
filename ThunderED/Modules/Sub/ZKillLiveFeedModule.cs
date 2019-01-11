@@ -28,7 +28,12 @@ namespace ThunderED.Modules.Sub
                 if(CurrentEntry?.package == null ) return;
                 if(!IsUniqueId(CurrentEntry.package.killID)) return;
 
-                await Queryables.ParallelForEachAsync(async q =>
+                foreach (var q in Queryables)
+                {
+                    await q(CurrentEntry).ConfigureAwait(false);
+                }
+
+               /* await Queryables.ParallelForEachAsync(async q =>
                 {
                     try
                     {
@@ -39,7 +44,7 @@ namespace ThunderED.Modules.Sub
                         await LogHelper.LogEx(ex.Message, ex, Category);
                         await LogHelper.LogWarning($"[ZKillCore] error processing {q.Method.Name}! Msg: {ex.Message}", Category);
                     }
-                });
+                });*/
             }
             catch (Exception ex)
             {

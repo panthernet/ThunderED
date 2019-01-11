@@ -386,13 +386,20 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            await ProcessTimers();
+            if(IsRunning) return;
+            IsRunning = true;
+            try
+            {
+                await ProcessTimers();
+            }
+            finally
+            {
+                IsRunning = false;
+            }
         }
 
         private async Task ProcessTimers()
         {
-            if(IsRunning) return;
-            IsRunning = true;
             try
             {
                 if (_lastTimersCheck != null && (DateTime.Now - _lastTimersCheck.Value).TotalMinutes <= 1) return;
@@ -450,10 +457,6 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
-            }
-            finally
-            {
-                IsRunning = false;
             }
         }
 

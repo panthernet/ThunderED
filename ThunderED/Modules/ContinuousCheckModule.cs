@@ -28,10 +28,12 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
+            if(IsRunning) return;
+            IsRunning = true;
             try
             {
                 var now = DateTime.Now;
-                
+
                 //onesec ops
                 await OneSecOps(now);
 
@@ -46,6 +48,11 @@ namespace ThunderED.Modules
             {
                 await LogHelper.LogEx("Continous", ex, Category);
             }
+            finally
+            {
+                IsRunning = false;
+            }
+
         }
 
         private async Task Custom_CacheCheck(DateTime now)

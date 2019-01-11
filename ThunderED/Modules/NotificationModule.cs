@@ -25,9 +25,18 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            await NotificationFeed();
+            if(IsRunning) return;
+            IsRunning = true;
+            try
+            {
+                await NotificationFeed();
 
-            await CleanupNotifyList();
+                await CleanupNotifyList();
+            }
+            finally
+            {
+                IsRunning = false;
+            }
         }
 
         public NotificationModule()
@@ -70,8 +79,6 @@ namespace ThunderED.Modules
         #region Notifications
         private async Task NotificationFeed()
         {
-            if(IsRunning) return;
-            IsRunning = true;
             try
             {
                 if (DateTime.Now > _nextNotificationCheck)
@@ -873,10 +880,6 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
-            }
-            finally
-            {
-                IsRunning = false;
             }
         }
 

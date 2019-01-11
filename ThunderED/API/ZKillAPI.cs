@@ -33,7 +33,7 @@ namespace ThunderED.API
 			var data = await APIHelper.RequestWrapper<JsonZKill.ZKillboard>(request, _reason, null, true);
             if (data?.package == null)
             {
-                await Task.Delay(3000);
+                await Task.Delay(1500);
                 //skip
             }
 				//await LogHelper.LogError("[GetRedisqResponce] Null data!", LogCat.ZKill, false);
