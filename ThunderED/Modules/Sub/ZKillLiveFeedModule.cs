@@ -12,8 +12,7 @@ namespace ThunderED.Modules.Sub
     public class ZKillLiveFeedModule: AppModuleBase, IDisposable
     {
         public override LogCat Category => LogCat.KillFeed;
-        public static List<Func<JsonZKill.ZKillboard, Task>> Queryables = new List<Func<JsonZKill.ZKillboard, Task>>();
-        internal static JsonZKill.ZKillboard CurrentEntry;
+        public static List<Func<JsonZKill.Killmail, Task>> Queryables = new List<Func<JsonZKill.Killmail, Task>>();
         private readonly List<long> _receivedIds = new List<long>();
 
         public override async Task Run(object prm)
@@ -23,28 +22,30 @@ namespace ThunderED.Modules.Sub
             try
             {
                 if(TickManager.IsNoConnection || !Queryables.Any()) return;
+                JsonZKill.Killmail entry = null;
 
-                CurrentEntry = await APIHelper.ZKillAPI.GetRedisqResponce();
-                if(CurrentEntry?.package == null ) return;
-                if(!IsUniqueId(CurrentEntry.package.killID)) return;
+                if (Settings.Config.UseSocketsForZKillboard)
+                {
+                    var currentEntry = await APIHelper.ZKillAPI.GetSocketResponce();
+                    if (currentEntry == null) return;
+                    if (!IsUniqueId(currentEntry.killmail_id)) return;
+                    entry = currentEntry;
+                }
+                else
+                {
+
+                    var currentEntry =  await APIHelper.ZKillAPI.GetRedisqResponce();
+                    if (currentEntry?.package == null) return;
+                    if (!IsUniqueId(currentEntry.package.killID)) return;
+                    currentEntry.package.killmail.zkb = currentEntry.package.zkb;
+                    entry = currentEntry.package.killmail;
+                }
 
                 foreach (var q in Queryables)
                 {
-                    await q(CurrentEntry).ConfigureAwait(false);
+                    await q(entry).ConfigureAwait(false);
                 }
 
-               /* await Queryables.ParallelForEachAsync(async q =>
-                {
-                    try
-                    {
-                        await q(CurrentEntry);
-                    }
-                    catch (Exception ex)
-                    {
-                        await LogHelper.LogEx(ex.Message, ex, Category);
-                        await LogHelper.LogWarning($"[ZKillCore] error processing {q.Method.Name}! Msg: {ex.Message}", Category);
-                    }
-                });*/
             }
             catch (Exception ex)
             {

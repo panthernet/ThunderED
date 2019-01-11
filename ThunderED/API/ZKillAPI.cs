@@ -1,8 +1,15 @@
-﻿using System.Collections.Async;
+﻿using System;
+using System.Collections.Async;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
+using System.Net.WebSockets;
+using System.Text;
 using System.Threading.Tasks;
+using Discord.Net.WebSockets;
+using Newtonsoft.Json;
+using PureWebSockets;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
@@ -13,7 +20,7 @@ namespace ThunderED.API
     /// <summary>
     /// Use partial class to implement additional methods
     /// </summary>
-    public partial class ZKillAPI: CacheBase
+    public partial class ZKillAPI: CacheBase, IDisposable
     {
         private readonly string _reason = LogCat.ZKill.ToString();
         //private readonly HttpClient _zKillhttpClient = new HttpClient();
@@ -23,6 +30,66 @@ namespace ThunderED.API
             _zKillhttpClient.Timeout = new TimeSpan(0, 0, 10);
             _zKillhttpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
         }*/
+
+        private PureWebSocket _webSocket;
+
+        private readonly ConcurrentQueue<JsonZKill.Killmail> _webMailsQueue = new ConcurrentQueue<JsonZKill.Killmail>();
+
+        internal async Task<JsonZKill.Killmail> GetSocketResponce()
+        {
+            try
+            {
+
+
+                if (_webSocket == null || _webSocket.State != WebSocketState.Open)
+                {
+                    if (_webSocket?.State == WebSocketState.Connecting) return null;
+                    var o = new PureWebSocketOptions();
+                    _webSocket = new PureWebSocket("wss://zkillboard.com:2096", o);
+                    _webSocket.OnMessage += _webSocket_OnMessage;
+
+                    if (!_webSocket.Connect())
+                    {
+                        _webSocket.Dispose();
+                        _webSocket = null;
+                        return null;
+                    }
+                    else
+                    {
+                        if (!_webSocket.Send("{\"action\":\"sub\",\"channel\":\"killstream\"}"))
+                        {
+                            _webSocket?.Dispose();
+                            _webSocket = null;
+                            return null;
+                        }
+                    }
+
+                }
+
+                if (!_webMailsQueue.IsEmpty && _webMailsQueue.TryDequeue(out var km))
+                    return km;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("GetSocketResponce", ex, LogCat.ZKill);
+
+            }
+
+            return null;
+        }
+
+        private async void _webSocket_OnMessage(string data)
+        {
+            try
+            {
+                var entry = JsonConvert.DeserializeObject<JsonZKill.Killmail>(data);
+                _webMailsQueue.Enqueue(entry);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("_webSocket_OnData", ex, LogCat.ZKill);
+            }
+        }
 
         internal async Task<JsonZKill.ZKillboard> GetRedisqResponce()
         {
@@ -113,6 +180,11 @@ namespace ThunderED.API
         {
             var res =  await APIHelper.RequestWrapper<JsonZKill.CorpStatsLite>($"https://zkillboard.com/api/stats/corporationID/{id}/", _reason);
             return new JsonZKill.CorpStats { hasSupers = res.hasSupers};
+        }
+
+        public void Dispose()
+        {
+            _webSocket?.Dispose();
         }
     }
 }

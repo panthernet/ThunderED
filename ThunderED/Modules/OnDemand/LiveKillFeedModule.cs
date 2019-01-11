@@ -23,32 +23,32 @@ namespace ThunderED.Modules.OnDemand
             _enableCache = Settings.LiveKillFeedModule.EnableCache;
         }
 
-        private async Task ProcessKill(JsonZKill.ZKillboard kill)
+        private async Task ProcessKill(JsonZKill.Killmail kill)
         {
             try
             {
-                if (_lastPosted == kill.package.killID) return;
+                if (_lastPosted == kill.killmail_id) return;
 
                 var bigKillGlobalValue = Settings.LiveKillFeedModule.BigKill;
                 var bigKillGlobalChan = Settings.LiveKillFeedModule.BigKillChannel;
 
-                var killmailID = kill.package.killmail.killmail_id;
-                var killTime = kill.package.killmail.killmail_time.ToString(SettingsManager.Settings.Config.ShortTimeFormat);
-                var shipID = kill.package.killmail.victim.ship_type_id;
-                var value = kill.package.zkb.totalValue;
-                var victimCharacterID = kill.package.killmail.victim.character_id;
-                var victimCorpID = kill.package.killmail.victim.corporation_id;
-                var victimAllianceID = kill.package.killmail.victim.alliance_id;
-                var attackers = kill.package.killmail.attackers;
+                var killmailID = kill.killmail_id;
+                var killTime = kill.killmail_time.ToString(SettingsManager.Settings.Config.ShortTimeFormat);
+                var shipID = kill.victim.ship_type_id;
+                var value = kill.zkb.totalValue;
+                var victimCharacterID = kill.victim.character_id;
+                var victimCorpID = kill.victim.corporation_id;
+                var victimAllianceID = kill.victim.alliance_id;
+                var attackers = kill.attackers;
                 var finalBlowAttacker = attackers.FirstOrDefault(a => a.final_blow);
                 var finalBlowAttackerCorpId = finalBlowAttacker?.corporation_id;
                 var finalBlowAttackerAllyId = finalBlowAttacker?.alliance_id;
-                var isNPCKill = kill.package.zkb.npc;
+                var isNPCKill = kill.zkb.npc;
 
                 // if(victimCorpID != 98370861) return;
 
-                var systemId = kill.package.killmail.solar_system_id;
-                var npckill = kill.package.zkb.npc;
+                var systemId = kill.solar_system_id;
+                var npckill = kill.zkb.npc;
 
                 var postedGlobalBigKill = false;
 
@@ -135,7 +135,7 @@ namespace ThunderED.Modules.OnDemand
                                 rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null);
                         }
 
-                        await LogHelper.LogInfo($"Posting Global Big Kill: {kill.package.killID}  Value: {value:n0} ISK", Category);
+                        await LogHelper.LogInfo($"Posting Global Big Kill: {kill.killmail_id}  Value: {value:n0} ISK", Category);
                     }
 
                     if (!allianceIdList.Any() && !corpIdList.Any())
@@ -150,7 +150,7 @@ namespace ThunderED.Modules.OnDemand
                                     rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length, null);
                             }
 
-                            await LogHelper.LogInfo($"Posting Global Kills: {kill.package.killID}  Value: {value:n0} ISK", Category);
+                            await LogHelper.LogInfo($"Posting Global Kills: {kill.killmail_id}  Value: {value:n0} ISK", Category);
                         }
                     }
                     else
@@ -181,7 +181,7 @@ namespace ThunderED.Modules.OnDemand
                                                 groupPair.Value.ShowGroupName ? discordGroupName : " ");
                                 }
 
-                                await LogHelper.LogInfo($"Posting     Big Loss: {kill.package.killID}  Value: {value:n0} ISK", Category);
+                                await LogHelper.LogInfo($"Posting     Big Loss: {kill.killmail_id}  Value: {value:n0} ISK", Category);
                                 continue;
                             }
                         }
@@ -201,7 +201,7 @@ namespace ThunderED.Modules.OnDemand
                                         groupPair.Value.ShowGroupName ? discordGroupName : " ");
                                 }
 
-                                await LogHelper.LogInfo($"Posting         Loss: {kill.package.killID}  Value: {value:n0} ISK", Category);
+                                await LogHelper.LogInfo($"Posting         Loss: {kill.killmail_id}  Value: {value:n0} ISK", Category);
 
                                 continue;
                             }
@@ -235,7 +235,7 @@ namespace ThunderED.Modules.OnDemand
                                                     groupPair.Value.ShowGroupName ? discordGroupName : " ");
                                         }
 
-                                        await LogHelper.LogInfo($"Posting     Big Kill: {kill.package.killID}  Value: {value:#,##0} ISK", Category);
+                                        await LogHelper.LogInfo($"Posting     Big Kill: {kill.killmail_id}  Value: {value:#,##0} ISK", Category);
                                     }
 
                                     break;
@@ -254,7 +254,7 @@ namespace ThunderED.Modules.OnDemand
                                         groupPair.Value.ShowGroupName ? discordGroupName : " ");
                                 }
 
-                                await LogHelper.LogInfo($"Posting         Kill: {kill.package.killID}  Value: {value:#,##0} ISK", Category);
+                                await LogHelper.LogInfo($"Posting         Kill: {kill.killmail_id}  Value: {value:#,##0} ISK", Category);
                                 break;
                             }
                         }
@@ -266,7 +266,7 @@ namespace ThunderED.Modules.OnDemand
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
-                await LogHelper.LogWarning($"Error processing kill ID {kill?.package?.killID} ! Msg: {ex.Message}", Category);
+                await LogHelper.LogWarning($"Error processing kill ID {kill?.killmail_id} ! Msg: {ex.Message}", Category);
             }
         }
     }

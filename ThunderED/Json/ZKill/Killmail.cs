@@ -11,6 +11,7 @@ namespace ThunderED.Json.ZKill
             public Victim victim { get; set; }
             public Attacker[] attackers { get; set; }
             public int solar_system_id { get; set; }
+            public Zkb zkb;
         }
     }
 }

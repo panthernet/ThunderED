@@ -1313,6 +1313,7 @@ namespace ThunderED.Classes
         public bool UseHTTPS { get; set; } = false;
         public bool RunAsServiceCompatibility { get; set; } = false;
         public bool DisableLogIntoFiles { get; set; } = false;
+        public bool UseSocketsForZKillboard { get; set; } = true;
 
 
 #if EDITOR

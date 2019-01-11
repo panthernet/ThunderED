@@ -52,7 +52,8 @@
     "ESIAddress": "https://esi.evetech.net/",
     "UseHTTPS":  false,
     "RunAsServiceCompatibility":  false,
-    "DisableLogIntoFiles": false 
+    "DisableLogIntoFiles": false,
+    "UseSocketsForZKillboard":  true 
   },
 
   "ContractNotificationsModule": {

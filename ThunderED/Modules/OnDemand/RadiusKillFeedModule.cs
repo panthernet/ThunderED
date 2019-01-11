@@ -32,7 +32,7 @@ namespace ThunderED.Modules.OnDemand
             Region
         }
 
-        private async Task ProcessKill(JsonZKill.ZKillboard kill)
+        private async Task ProcessKill(JsonZKill.Killmail kill)
         {
             try
             {
@@ -42,12 +42,12 @@ namespace ThunderED.Modules.OnDemand
                     if(!_lastPosted.ContainsKey(groupPair.Key))
                         _lastPosted.Add(groupPair.Key, 0);
 
-                    if (_lastPosted[groupPair.Key] == kill.package.killID) continue;
-                    _lastPosted[groupPair.Key] = kill.package.killID;
+                    if (_lastPosted[groupPair.Key] == kill.killmail_id) continue;
+                    _lastPosted[groupPair.Key] = kill.killmail_id;
 
-                    var killmailID = kill.package.killmail.killmail_id;
-                    var value = kill.package.zkb.totalValue;
-                    var systemId = kill.package.killmail.solar_system_id;
+                    var killmailID = kill.killmail_id;
+                    var value = kill.zkb.totalValue;
+                    var systemId = kill.solar_system_id;
                     var radius = group.Radius;
                     var radiusSystemId = group.RadiusSystemId;
                     var radiusConstId = group.RadiusConstellationId;
@@ -133,16 +133,16 @@ namespace ThunderED.Modules.OnDemand
                     //var rSystemName = rSystem?.name ?? LM.Get("Unknown");
                     var rSystemName = radiusSystemId > 0 ? (await APIHelper.ESIAPI.GetSystemData(Reason, radiusSystemId, false, !_enableCache))?.name ?? LM.Get("Unknown") : LM.Get("Unknown");
 
-                    var victimCharacterID = kill.package.killmail.victim.character_id;
-                    var victimCorpID = kill.package.killmail.victim.corporation_id;
-                    var victimAllianceID = kill.package.killmail.victim.alliance_id;
-                    var attackers = kill.package.killmail.attackers;
+                    var victimCharacterID = kill.victim.character_id;
+                    var victimCorpID = kill.victim.corporation_id;
+                    var victimAllianceID = kill.victim.alliance_id;
+                    var attackers = kill.attackers;
                     var finalBlowAttacker = attackers.FirstOrDefault(a => a.final_blow);
                     var finalBlowAttackerCorpId = finalBlowAttacker?.corporation_id;
                     var finalBlowAttackerAllyId = finalBlowAttacker?.alliance_id;
-                    var shipID = kill.package.killmail.victim.ship_type_id;
-                    var isNPCKill = kill.package.zkb.npc;
-                    var killTime = kill.package.killmail.killmail_time.ToString(SettingsManager.Settings.Config.ShortTimeFormat);
+                    var shipID = kill.victim.ship_type_id;
+                    var isNPCKill = kill.zkb.npc;
+                    var killTime = kill.killmail_time.ToString(SettingsManager.Settings.Config.ShortTimeFormat);
 
                     if((!group.FeedPveKills && isNPCKill) || (!group.FeedPvpKills && !isNPCKill)) continue;
 
@@ -201,14 +201,14 @@ namespace ThunderED.Modules.OnDemand
                             rAttackerAlliance == null ? null : $"[{rAttackerAlliance?.ticker}]", attackers.Length, jumpsText,  groupPair.Value.ShowGroupName ? groupPair.Key : " ");
                     }
 
-                    await LogHelper.LogInfo($"Posting  Radius Kill: {kill.package.killID}  Value: {value:n0} ISK", Category);
+                    await LogHelper.LogInfo($"Posting  Radius Kill: {kill.killmail_id}  Value: {value:n0} ISK", Category);
 
                 }
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
-                await LogHelper.LogWarning($"Error processing kill ID {kill?.package?.killID} ! Msg: {ex.Message}", Category);
+                await LogHelper.LogWarning($"Error processing kill ID {kill?.killmail_id} ! Msg: {ex.Message}", Category);
             }
         }
     }

@@ -5,6 +5,7 @@
 + Added colored standings comparsion in HRM char inspection page between char contact and HR contact for the same entity
 + Added FinalTimeMention param for FleetUp module to use custom Discord mention when event is starting
 + Added !bs command to display list of lowest standings to NPC corp or faction (nice for FW)
++ Added new WebSocket mode for kill feeds (UseSocketsForZKillboard params which is TRUE BY DEFAULT)
 + Improved TQ status post to recognize ESI problems and do not post excessive messages
 + Improved internal logic in terms of async performance
 + Fixed log feed in compatibility mode
