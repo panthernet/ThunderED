@@ -8,8 +8,10 @@
 + Added new WebSocket mode for kill feeds (UseSocketsForZKillboard params which is TRUE BY DEFAULT)
 + Improved TQ status post to recognize ESI problems and do not post excessive messages
 + Improved internal logic in terms of async performance
++ Improved kill feeds in terms of performance and query minimization
 + Fixed log feed in compatibility mode
 + Fixed guest role stripping in some cases
++ Removed EnableCache param from liveKillFeedModule and radiusKillFeedModule
 
 ### V1.2.11
 

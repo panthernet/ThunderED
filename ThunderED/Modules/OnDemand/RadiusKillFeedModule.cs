@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
+using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.ZKill;
@@ -14,15 +15,13 @@ namespace ThunderED.Modules.OnDemand
 {
     public class RadiusKillFeedModule: AppModuleBase
     {
-        private readonly Dictionary<string, int> _lastPosted = new Dictionary<string, int>();
+        private readonly Dictionary<string, long> _lastPosted = new Dictionary<string, long>();
         public override LogCat Category => LogCat.RadiusKill;
-        private readonly bool _enableCache;
 
         public RadiusKillFeedModule()
         {
             LogHelper.LogModule("Inititalizing RadiusKillFeed module...", Category).GetAwaiter().GetResult();
             ZKillLiveFeedModule.Queryables.Add(ProcessKill);
-            _enableCache = Settings.RadiusKillFeedModule.EnableCache;
         }
 
         private enum RadiusMode
@@ -45,60 +44,54 @@ namespace ThunderED.Modules.OnDemand
                     if (_lastPosted[groupPair.Key] == kill.killmail_id) continue;
                     _lastPosted[groupPair.Key] = kill.killmail_id;
 
-                    var killmailID = kill.killmail_id;
-                    var value = kill.zkb.totalValue;
-                    var systemId = kill.solar_system_id;
+                    var isNPCKill = kill.zkb.npc;
+                    if((!group.FeedPveKills && isNPCKill) || (!group.FeedPvpKills && !isNPCKill)) continue;
+
+                    var isUrlOnly = group.FeedUrlsOnly;
+
                     var radius = group.Radius;
                     var radiusSystemId = group.RadiusSystemId;
                     var radiusConstId = group.RadiusConstellationId;
                     var radiusRegionId = group.RadiusRegionId;
                     var radiusChannelId = group.RadiusChannel;
                     var radiusValue = group.MinimumValue;
-                    var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, systemId, false, !_enableCache);
-
-                    string sysName;
-                    bool isUnreachableSystem = systemId == 31000005;
-                    if (rSystem != null)
-                    {
-                        sysName = rSystem.name == rSystem.system_id.ToString() ? "Abyss" : (rSystem.name ?? "J");               
-                        isUnreachableSystem = isUnreachableSystem || systemId.ToString() == rSystem.name || sysName[0] == 'J';
-                    }
-                    else sysName = "?";
                     if (radiusSystemId == 0 && radiusConstId == 0 && radiusRegionId == 0)
                     {
                         await LogHelper.LogError("Radius feed must have systemId, constId or regionId defined!", Category);
                         continue;
                     }
-
                     if (radiusChannelId == 0)
                     {
                         await LogHelper.LogWarning($"Group {groupPair.Key} has no 'radiusChannel' specified! Kills will be skipped.", Category);
                         continue;
                     }
-
                     var mode = radiusSystemId != 0 ? RadiusMode.Range : (radiusConstId != 0 ? RadiusMode.Constellation : RadiusMode.Region);
 
+
+                    var km = new KillDataEntry();
+                    await km.Refresh(Reason, kill);
+
                     //validity check
-                    if (radiusChannelId <= 0 || (sysName[0] == 'J' && int.TryParse(sysName.Substring(1), out int _) && radiusSystemId != systemId) || (radiusValue > 0 && value < radiusValue)) continue;
+                    if (radiusChannelId <= 0 || (km.sysName[0] == 'J' && int.TryParse(km.sysName.Substring(1), out int _) && radiusSystemId != km.systemId) || (radiusValue > 0 && km.value < radiusValue)) continue;
 
                     var routeLength = 0;
                     JsonClasses.ConstellationData rConst = null;
                     JsonClasses.RegionData rRegion= null;
-                    if (radiusSystemId == systemId)
+                    if (radiusSystemId == km.systemId)
                     {
                         //right there
-                        rConst = rSystem.constellation_id == 0 ? null : await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
+                        rConst = km.rSystem.constellation_id == 0 ? null : await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
                         rRegion =  rConst?.region_id == null ||  rConst.region_id == 0 ? null : await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
                     }
                     else
                     {
-                        if (isUnreachableSystem) //Thera WH Abyss
+                        if (km.isUnreachableSystem) //Thera WH Abyss
                             continue;
 
                         switch (mode)
                         {
                             case RadiusMode.Range:
-                                var route = await APIHelper.ESIAPI.GetRawRoute(Reason, radiusSystemId, systemId);
+                                var route = await APIHelper.ESIAPI.GetRawRoute(Reason, radiusSystemId, km.systemId);
                                 if(string.IsNullOrEmpty(route)) continue;
                                 JArray data;
                                 try
@@ -114,16 +107,16 @@ namespace ThunderED.Modules.OnDemand
                                 routeLength = data.Count - 1;
                                 //not in range
                                 if (routeLength > radius) continue;
-                                rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
+                                rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
                                 rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
                                 break;
                             case RadiusMode.Constellation:
-                                if(rSystem.constellation_id != radiusConstId) continue;
-                                rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
+                                if(km.rSystem.constellation_id != radiusConstId) continue;
+                                rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
                                 rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
                                 break;
                             case RadiusMode.Region:
-                                rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, rSystem.constellation_id);
+                                rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
                                 if(rConst == null || rConst.region_id != radiusRegionId) continue;
                                 rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
                                 break;
@@ -131,77 +124,28 @@ namespace ThunderED.Modules.OnDemand
                     }
 
                     //var rSystemName = rSystem?.name ?? LM.Get("Unknown");
-                    var rSystemName = radiusSystemId > 0 ? (await APIHelper.ESIAPI.GetSystemData(Reason, radiusSystemId, false, !_enableCache))?.name ?? LM.Get("Unknown") : LM.Get("Unknown");
+                    var rSystemName = radiusSystemId > 0 ? (await APIHelper.ESIAPI.GetSystemData(Reason, radiusSystemId))?.name ?? LM.Get("Unknown") : LM.Get("Unknown");
 
-                    var victimCharacterID = kill.victim.character_id;
-                    var victimCorpID = kill.victim.corporation_id;
-                    var victimAllianceID = kill.victim.alliance_id;
-                    var attackers = kill.attackers;
-                    var finalBlowAttacker = attackers.FirstOrDefault(a => a.final_blow);
-                    var finalBlowAttackerCorpId = finalBlowAttacker?.corporation_id;
-                    var finalBlowAttackerAllyId = finalBlowAttacker?.alliance_id;
-                    var shipID = kill.victim.ship_type_id;
-                    var isNPCKill = kill.zkb.npc;
-                    var killTime = kill.killmail_time.ToString(SettingsManager.Settings.Config.ShortTimeFormat);
-
-                    if((!group.FeedPveKills && isNPCKill) || (!group.FeedPvpKills && !isNPCKill)) continue;
+                    km.dic.Add("{radiusSystem}", rSystemName);
+                    km.dic.Add("{radiusJumps}", routeLength.ToString());
+                    km.dic.Add("{isRangeMode}", (mode == RadiusMode.Range).ToString());
+                    km.dic.Add("{isConstMode}", (mode == RadiusMode.Constellation).ToString());
+                    km.dic.Add("{isRegionMode}", (mode == RadiusMode.Region).ToString());
+                    km.dic.Add("{constName}", rConst?.name);
+                    km.dic.Add("{regionName}", rRegion?.name);
 
 
-                    var rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, victimCorpID, false, !_enableCache);
-                    var rAttackerCorp = finalBlowAttackerCorpId.HasValue && finalBlowAttackerCorpId.Value > 0
-                        ? await APIHelper.ESIAPI.GetCorporationData(Reason, finalBlowAttackerCorpId)
-                        : null;
-                    var rVictimAlliance = victimAllianceID != 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, victimAllianceID, false, !_enableCache) : null;
-                    var rAttackerAlliance = finalBlowAttackerAllyId.HasValue && finalBlowAttackerAllyId.Value > 0
-                        ? await APIHelper.ESIAPI.GetAllianceData(Reason, finalBlowAttackerAllyId)
-                        : null;
-                    var rShipType = await APIHelper.ESIAPI.GetTypeId(Reason, shipID);
-                    var rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, victimCharacterID, false, !_enableCache);
-                    var rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, finalBlowAttacker?.character_id, false, !_enableCache);
-                    var systemSecurityStatus = Math.Round(rSystem.security_status, 1).ToString("0.0");
-
-                    var dic = new Dictionary<string, string>
+                    if (isUrlOnly)
                     {
-                        {"{shipID}", shipID.ToString()},
-                        {"{shipType}", rShipType?.name},
-                        {"{iskValue}", value.ToString("n0")},
-                        {"{systemName}", sysName},
-                        {"{systemSec}", systemSecurityStatus},
-                        {"{victimName}", rVictimCharacter?.name},
-                        {"{victimCorpName}", rVictimCorp?.name},
-                        {"{victimCorpTicker}", rVictimCorp?.ticker},
-                        {"{victimAllyName}", rVictimAlliance?.name},
-                        {"{victimAllyTicker}", rVictimAlliance == null ? null : $"<{rVictimAlliance.ticker}>"},
-                        {"{attackerName}", rAttackerCharacter?.name},
-                        {"{attackerCorpName}", rAttackerCorp?.name},
-                        {"{attackerCorpTicker}", rAttackerCorp?.ticker},
-                        {"{attackerAllyTicker}", rAttackerAlliance == null ? null : $"<{rAttackerAlliance.ticker}>"},
-                        {"{attackerAllyName}", rAttackerAlliance?.name},
-                        {"{attackersCount}", attackers?.Length.ToString()},
-                        {"{kmId}", killmailID.ToString()},
-                        {"{isNpcKill}", isNPCKill.ToString()},
-                        {"{timestamp}", killTime},
-                        {"{radiusSystem}", rSystemName.ToString()},
-                        {"{radiusJumps}", routeLength.ToString()},
-                        {"{isRangeMode}", (mode == RadiusMode.Range).ToString()},
-                        {"{isConstMode}", (mode == RadiusMode.Constellation).ToString()},
-                        {"{isRegionMode}", (mode == RadiusMode.Region).ToString()},
-                        {"{constName}", rConst?.name},
-                        {"{regionName}", rRegion?.name},
-
-                    };
-
-                    if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailRadius, dic, radiusChannelId, groupPair.Key))
+                        await APIHelper.DiscordAPI.SendMessageAsync(radiusChannelId, kill.zkb.url);
+                    } else if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailRadius, km.dic, radiusChannelId, groupPair.Key))
                     {
-                        var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {rSystemName}" : $"{LM.Get("InSmall")} {sysName} ({systemSecurityStatus})";
-                        await APIHelper.DiscordAPI.SendEmbedKillMessage(radiusChannelId, new Color(0x989898), shipID, killmailID, rShipType?.name, (long) value,
-                            sysName,
-                            systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType?.name : rVictimCharacter?.name, rVictimCorp?.name,
-                            rVictimAlliance == null ? "" : $"[{rVictimAlliance?.ticker}]", isNPCKill, rAttackerCharacter?.name, rAttackerCorp?.name,
-                            rAttackerAlliance == null ? null : $"[{rAttackerAlliance?.ticker}]", attackers.Length, jumpsText,  groupPair.Value.ShowGroupName ? groupPair.Key : " ");
+                        var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {rSystemName}" : $"{LM.Get("InSmall")} {km.sysName} ({km.systemSecurityStatus})";
+                        await APIHelper.DiscordAPI.SendEmbedKillMessage(radiusChannelId, new Color(0x989898), km, jumpsText,
+                            groupPair.Value.ShowGroupName ? groupPair.Key : " ");
                     }
 
-                    await LogHelper.LogInfo($"Posting  Radius Kill: {kill.killmail_id}  Value: {value:n0} ISK", Category);
+                    await LogHelper.LogInfo($"Posting  Radius Kill: {kill.killmail_id}  Value: {km.value:n0} ISK", Category);
 
                 }
             }

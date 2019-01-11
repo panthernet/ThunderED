@@ -9,8 +9,11 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using ThunderED.Classes;
+using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
+using ThunderED.Json.ZKill;
 using ThunderED.Modules;
+using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Sub;
 using LogSeverity = ThunderED.Classes.LogSeverity;
 
@@ -575,21 +578,31 @@ namespace ThunderED.API
             }
         }
 
-        public async Task SendEmbedKillMessage(ulong channelId, Color color, long shipID, long kmId, string shipName, long value, string sysName, string secstatus, string killTime, string cName, string corpName
-            , string aTicker, bool isNpcKill, string atName, string atCorp, string atTicker, int atCount, string radiusMessage, string msg = "")
+        internal async Task SendEmbedKillMessage(ulong channelId, Color color, KillDataEntry km, string radiusMessage, string msg = "")
         {
+
+            //long shipID, long kmId, string shipName, long value, string sysName, string secstatus, string killTime, string cName, string corpName
+            //, string aTicker, bool isNpcKill, string atName, string atCorp, string atTicker, int atCount
+
+           // shipID, killmailID, rShipType.name, (long) value,
+           // sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
+          //  rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
+          //  rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length
+
             msg = msg ?? "";
-            var killString = LM.Get("killFeedString", !string.IsNullOrEmpty(radiusMessage) ? "R " : null, shipName, value, cName,
-                corpName, string.IsNullOrEmpty(aTicker) ? null : aTicker, sysName, secstatus, killTime);
-            var killedBy = isNpcKill ? null : LM.Get("killFeedBy", atName, atCorp, string.IsNullOrEmpty(atTicker) ? null : atTicker, atCount);
+            var aTicker = km.rVictimAlliance == null ? "" : $"[{km.rVictimAlliance.ticker}]";
+            var atTicker = km.rAttackerAlliance == null ? null : $"[{km.rAttackerAlliance.ticker}]";
+            var killString = LM.Get("killFeedString", !string.IsNullOrEmpty(radiusMessage) ? "R " : null, km.rShipType?.name, km.value, km.rVictimCharacter == null ? km.rShipType?.name : km.rVictimCharacter.name,
+                km.rVictimCorp.name, string.IsNullOrEmpty(aTicker) ? null : aTicker, km.sysName, km.systemSecurityStatus, km.killTime);
+            var killedBy = km.isNPCKill ? null : LM.Get("killFeedBy", km.rAttackerCharacter.name, km.rAttackerCorp.name, string.IsNullOrEmpty(atTicker) ? null : atTicker, km.attackers.Length);
             var builder = new EmbedBuilder()
                 .WithColor(color)
-                .WithThumbnailUrl($"https://image.eveonline.com/Type/{shipID}_32.png")
+                .WithThumbnailUrl($"https://image.eveonline.com/Type/{km.shipID}_32.png")
                 .WithAuthor(author =>
                 {
                     author.WithName($"{killString} {killedBy}")
-                        .WithUrl($"https://zkillboard.com/kill/{kmId}/");
-                    if (isNpcKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
+                        .WithUrl($"https://zkillboard.com/kill/{km.killmailID}/");
+                    if (km.isNPCKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
                 });
             if (!string.IsNullOrEmpty(radiusMessage))
                 builder.AddInlineField(LM.Get("radiusInfoHeader"), radiusMessage);

@@ -423,8 +423,8 @@ namespace ThunderED.Classes
 
     public class LiveKillFeedModuleSettings: ValidatableSettings
     {
-        [Comment("Enable or disable caching. If you're getting many global KMs it might be better to disable it to free database from large chunks of one time data")]
-        public bool EnableCache { get; set; }
+        //[Comment("Enable or disable caching. If you're getting many global KMs it might be better to disable it to free database from large chunks of one time data")]
+        //public bool EnableCache { get; set; }
         [Comment("Numeric value in ISK to consider the kill to be BIG enough")]
         public long BigKill { get; set; }
         [Comment("Numeric channel ID to post all GLOBAL big kills in EVE, 0 to skip")]
@@ -471,6 +471,8 @@ namespace ThunderED.Classes
 
         public bool FeedPvpKills { get; set; } = true;
         public bool FeedPveKills { get; set; } = true;
+        [Comment("Bot will send message containing only ZKB url and Discord will unfurl it automatically")]
+        public bool FeedUrlsOnly { get; set; } = false;
 
 #if EDITOR
         [Comment("Numeric corporation ID. Specify to fetch all KMs for this corporation. \nMutually exclusive with allianceID.")]
@@ -506,8 +508,8 @@ namespace ThunderED.Classes
 
     public class RadiusKillFeedModuleSettings: ValidatableSettings
     {
-        [Comment("Enable or disable caching. If you're getting many global KMs it might be better \nto disable it to free database from large chunks of one time data.")]
-        public bool EnableCache { get; set; }
+        //[Comment("Enable or disable caching. If you're getting many global KMs it might be better \nto disable it to free database from large chunks of one time data.")]
+        //public bool EnableCache { get; set; }
 #if EDITOR
         [Comment("Can have several feeds (groups) defined")]
         public ObservableDictionary<string, RadiusGroup> GroupsConfig { get; set; } = new ObservableDictionary<string, RadiusGroup>();
@@ -548,7 +550,8 @@ namespace ThunderED.Classes
 
         public bool FeedPvpKills { get; set; } = true;
         public bool FeedPveKills { get; set; } = true;
-
+        [Comment("Bot will send message containing only ZKB url and Discord will unfurl it automatically")]
+        public bool FeedUrlsOnly { get; set; } = false;
 #if EDITOR
         public override string this[string columnName]
         {
