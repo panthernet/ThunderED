@@ -12,7 +12,12 @@
 + Improved kill feeds in terms of performance and query minimization
 + Fixed log feed in compatibility mode
 + Fixed guest role stripping in some cases
-+ Removed EnableCache param from liveKillFeedModule and radiusKillFeedModule
+
+### NOTABLE CHANGES
+
++ Added UseSocketsForZKillboard and ZKillboardWebSocketUrl params to Config section
++ Added FeedUrlsOnly param to kill feed modules groups
+- Removed EnableCache param from liveKillFeedModule and radiusKillFeedModule
 
 ### V1.2.11
 

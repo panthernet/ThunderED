@@ -1,9 +1,7 @@
 ﻿- Services offline page when TQ is offline for webserver
-- move SQL queries to SQLDatahelper
 - loading screen for ajax queries
 
 HRM
-- interesting skills
 - notifications
 - clones
 - assets
@@ -12,10 +10,6 @@ HRM
 - evewho links
 
 
-Req:
-2. Corp notifications https://github.com/panthernet/ThunderED/issues/16
+USER SERVICES
+1. Skill queue is finishing soon
 
-
-
-TODO
-authcheck before assigning roles on auth to strip existing roles
