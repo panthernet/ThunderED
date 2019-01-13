@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Discord;
 using Discord.Commands;
+using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.ZKill;
@@ -66,7 +67,7 @@ namespace ThunderED.Modules.Static
             }
 
             var lastShip = lastShipType == LM.Get("Unknown") ? null : await APIHelper.ESIAPI.GetTypeId("Default", lastShipType);
-            var lastSeenTime = km?.killmail_time.ToString() ?? LM.Get("Unknown");
+            var lastSeenTime = km?.killmail_time.ToString(SettingsManager.Settings.Config.ShortTimeFormat) ?? LM.Get("Unknown");
             var allianceData = await APIHelper.ESIAPI.GetAllianceData("Default", characterData.alliance_id);
 
             var alliance = allianceData?.name ?? LM.Get("None");
