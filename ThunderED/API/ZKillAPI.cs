@@ -122,7 +122,7 @@ namespace ThunderED.API
                 list.Add(kill);
             }, 5);
 
-            return list.ToList();
+            return list.OrderByDescending(a=> a.killmail_id).ToList();
         }
 
         internal async Task<JsonZKill.CharacterStats> GetCharacterStats(object characterId)
@@ -143,7 +143,7 @@ namespace ThunderED.API
                 list.Add(kill);
             }, 5);
 
-            return list.ToList();
+            return list.OrderByDescending(a=> a.killmail_id).ToList();
         }
 
         internal async Task<List<JsonZKill.ZkillOnly>> GetZKillOnlyFeed(bool isAlliance, int id)
