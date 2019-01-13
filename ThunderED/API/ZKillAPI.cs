@@ -112,9 +112,9 @@ namespace ThunderED.API
 
         internal async Task<List<JsonClasses.ESIKill>> GetCharacterKills(object characterId)
         {
-			var zKills = await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>($"https://zkillboard.com/api/kills/characterID/{characterId}/", _reason);
+			var zKills = await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>($"https://zkillboard.com/api/kills/characterID/{characterId}/page/1/", _reason);
             var list = new ConcurrentBag<JsonClasses.ESIKill>();
-            var q = zKills.Count > 20 ? zKills.TakeLast(20) : zKills;
+            var q = zKills.Count > 20 ? zKills.TakeSmart(20) : zKills;
 
             await q.ParallelForEachAsync(async z =>
             {
@@ -133,9 +133,9 @@ namespace ThunderED.API
         
         internal async Task<List<JsonClasses.ESIKill>> GetCharacterLosses(object characterId)
         {
-			var zLosses =  await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>($"https://zkillboard.com/api/losses/characterID/{characterId}/", _reason);
+			var zLosses =  await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>($"https://zkillboard.com/api/losses/characterID/{characterId}/page/1/", _reason);
             var list = new List<JsonClasses.ESIKill>();
-            var q = zLosses.Count > 20 ? zLosses.TakeLast(20) : zLosses;
+            var q = zLosses.Count > 20 ? zLosses.TakeSmart(20) : zLosses;
 
             await q.ParallelForEachAsync(async z =>
             {

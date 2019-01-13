@@ -39,30 +39,40 @@ namespace ThunderED.Modules.Static
             var characterStats = await APIHelper.ZKillAPI.GetCharacterStats(characterId);
             var zkillLosses = await APIHelper.ZKillAPI.GetCharacterLosses(characterId);
 
-            var zkillLast = zkillContent.Count > 0 ? zkillContent[0] : new JsonClasses.ESIKill();
-            var systemData = await APIHelper.ESIAPI.GetSystemData("", zkillLast.solar_system_id);
+            var zkillLast = zkillContent.Count > 0 ? zkillContent[0] : null;
+            var zLosslast = zkillLosses.Count > 0 ? zkillLosses[0] : new JsonClasses.ESIKill();
+            var km = zkillLast == null ? zLosslast : (zLosslast == null ? zkillLast : (zLosslast.killmail_time > zkillLast.killmail_time ? zLosslast : zkillLast));
+
+            JsonClasses.SystemName systemData = null;
             var lastShipType = LM.Get("Unknown");
 
-            if (zkillLast.victim != null && zkillLast.victim.character_id == characterId)
-                lastShipType = zkillLast.victim.ship_type_id.ToString();
-            else if (zkillLast.victim != null)
+            if (km != null)
             {
-                foreach (var attacker in zkillLast.attackers)
+                systemData = await APIHelper.ESIAPI.GetSystemData("Default", km.solar_system_id);
+          
+                if (km.victim != null && km.victim.character_id == characterId)
+                    lastShipType = km.victim.ship_type_id.ToString();
+                else if (km.victim != null)
                 {
-                    if (attacker.character_id == characterId)
-                        lastShipType = attacker.ship_type_id.ToString();
+                    foreach (var attacker in km.attackers)
+                    {
+                        if (attacker.character_id == characterId)
+                        {
+                            lastShipType = attacker.ship_type_id.ToString();
+                            break;
+                        }
+                    }
                 }
             }
 
-            var lastShip = lastShipType == LM.Get("Unknown") ? null : await APIHelper.ESIAPI.GetTypeId("", lastShipType);
-            var lastSeen = zkillLast.killmail_time;
-            var allianceData = await APIHelper.ESIAPI.GetAllianceData("", characterData.alliance_id);
+            var lastShip = lastShipType == LM.Get("Unknown") ? null : await APIHelper.ESIAPI.GetTypeId("Default", lastShipType);
+            var lastSeenTime = km?.killmail_time.ToString() ?? LM.Get("Unknown");
+            var allianceData = await APIHelper.ESIAPI.GetAllianceData("Default", characterData.alliance_id);
 
             var alliance = allianceData?.name ?? LM.Get("None");
             var allianceTicker = allianceData != null ? $"[{allianceData?.ticker}]" : "";
             var lastSeenSystem = systemData?.name ?? LM.Get("None");
             var lastSeenShip = lastShip?.name ?? LM.Get("None");
-            var lastSeenTime = lastSeen == DateTime.MinValue ? LM.Get("longTimeAgo") : $"{lastSeen}";
             var dangerous = characterStats.dangerRatio > 75 ? LM.Get("Dangerous") : LM.Get("Snuggly");
             var gang = characterStats.gangRatio > 70 ? LM.Get("fleetChance") : LM.Get("soloChance");
 
