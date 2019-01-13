@@ -1,6 +1,12 @@
 ### V1.2.13
 
++ Added AllowedCharacters param group to authentication block which allows individual chars auth the same way as corps and alliances
 + Fixed !char command to display actual Last Seen data for character
+
+### NOTABLE CHANGES
+
++ Added AllowedCharacters param group to authentication block
+
 
 ### V1.2.12
 

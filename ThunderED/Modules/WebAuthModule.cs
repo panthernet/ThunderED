@@ -141,6 +141,28 @@ namespace ThunderED.Modules
             return null;
         }
 
+        public static async Task<AuthRoleEntity> GetCharEntityById(List<WebAuthGroup> groups, long id)
+        {
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
+            foreach (var authGroup in groups)
+            {
+                if (authGroup.StandingsAuth == null)
+                {
+                    foreach (var entity in authGroup.AllowedCharacters.Values)
+                    {
+                        if (entity.Id.Contains(id))
+                            return entity;
+                    }
+                }
+                else
+                {
+                    return await GetEntityForStandingsAuth(authGroup, id, 0);
+                }
+            }
+
+            return null;
+        }
+
         public static async Task<AuthRoleEntity> GetAllyEntityById(List<WebAuthGroup> groups,long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
@@ -195,6 +217,24 @@ namespace ThunderED.Modules
             else
             {
                 return await GetEntityForStandingsAuth(group, id, 1);
+            }
+
+            return null;
+        }
+
+        public static async Task<AuthRoleEntity> GetCharEntityById(WebAuthGroup group, long id)
+        {
+            if (group.StandingsAuth == null)
+            {
+                foreach (var entity in group.AllowedCharacters.Values)
+                {
+                    if (entity.Id.Contains(id))
+                        return entity;
+                }
+            }
+            else
+            {
+                return await GetEntityForStandingsAuth(group, id, 0);
             }
 
             return null;
@@ -264,8 +304,8 @@ namespace ThunderED.Modules
         public static async Task<WebAuthResult> GetAuthGroupByCharacterId(List<WebAuthGroup> groups, long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
-            var result = groups.FirstOrDefault(a => a.AllowedCorporations.Values.Any(b=> b.Id.Contains(id)));
-            if (result != null) return new WebAuthResult {Group = result, RoleEntity = await GetCorpEntityById(groups, id)};
+            var result = groups.FirstOrDefault(a => a.AllowedCharacters.Values.Any(b=> b.Id.Contains(id)));
+            if (result != null) return new WebAuthResult {Group = result, RoleEntity = await GetCharEntityById(groups, id)};
 
             foreach (var authGroup in groups.Where(a=> a.StandingsAuth != null))
             {
@@ -279,6 +319,7 @@ namespace ThunderED.Modules
 
         public static async Task<WebAuthResult> GetAuthGroupByAllyId(List<WebAuthGroup> groups, long id)
         {
+            if (id == 0) return null;
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
             var result = groups.FirstOrDefault(a => a.AllowedAlliances.Values.Any(b=> b.Id.Contains(id)));
             if (result != null) return new WebAuthResult {Group = result, RoleEntity = await GetAllyEntityById(groups, id)};
@@ -308,7 +349,7 @@ namespace ThunderED.Modules
 
                 var longCorpId = rChar.corporation_id;
                 var longAllyId = rChar.alliance_id ?? 0;
-                if (await GetCorpEntityById(group.Value, longCorpId) != null || (rChar.alliance_id > 0 && await GetAllyEntityById(group.Value, longAllyId) != null))
+                if (await GetCharEntityById(group.Value, characterId) != null || await GetCorpEntityById(group.Value, longCorpId) != null || (rChar.alliance_id > 0 && await GetAllyEntityById(group.Value, longAllyId) != null))
                 {
                     if (group.Value == null)
                     {

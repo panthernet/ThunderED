@@ -225,6 +225,7 @@
     "enforceCharName": true,
     "authGroups": {
       "Mode1_GeneralAuth": {
+        "AllowedCharacters":  {} ,
         "AllowedCorporations": {
           "corp1": {
             "Id": [98499225],
@@ -251,6 +252,7 @@
         "DefaultMention":  ""
       },
       "Mode2_GeneralWithESIFetch": {
+        "AllowedCharacters":  {} ,
         "AllowedCorporations": {},
         "AllowedAlliances":{
           "ally1": {
@@ -265,6 +267,7 @@
         "DefaultMention":  ""
       },
       "Mode3_Preliminary": {
+        "AllowedCharacters":  {} ,
         "AllowedCorporations": {},
         "AllowedAlliances":{
           "ally1": {

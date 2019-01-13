@@ -1487,24 +1487,17 @@ namespace ThunderED.Classes
     public class WebAuthGroup: ValidatableSettings
     {
 #if EDITOR
+        [Comment("Dictionary containing text character ID and the list of Discord roles which to assign on successful auth")]
+        public ObservableDictionary<string, AuthRoleEntity> AllowedCharacters { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
+
         [Comment("Dictionary containing text corporation ID and the list of Discord roles which to assign on successful auth. Additive with AllowedAlliances.")]
-       // [Required]
         public ObservableDictionary<string, AuthRoleEntity> AllowedCorporations { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
         [Comment("Dictionary containing text alliance ID and the list of Discord roles which to assign on successful auth.  Additive with AllowedCorporations.")]
-       // [Required]
         public ObservableDictionary<string, AuthRoleEntity> AllowedAlliances { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
 
-        //[Comment("The list of exact Discord role names to assign")]
-       // [Required]
-       // public ObservableCollection<string> MemberRoles { get; set; } = new ObservableCollection<string>();
         [Comment("The list of exact Discord role names authorized to manually approve applicants")]
         public ObservableCollection<string> AuthRoles { get; set; } = new ObservableCollection<string>();
-        //[Comment("Numeric alliance ID list. Checked ADDITIVELY after the corpIDList")]
-        //[Required]
-        //public ObservableCollection<int> AllianceIDList { get; set; } = new ObservableCollection<int>();
-        //[Comment("Numeric corporation ID list. You can leave it empty if you want to filter by entire alliance.")]
-        //[Required]
-        //public ObservableCollection<int> CorpIDList { get; set; } = new ObservableCollection<int>();
+
         
         [Comment("Text Discord roles list which can be added manually to a user and will persist while he passes auth check for this group. Stripped when he is not in a specified corp/ally anymore.")]
         public ObservableCollection<string> ManualAssignmentRoles { get; set; } = new ObservableCollection<string>();
@@ -1514,6 +1507,7 @@ namespace ThunderED.Classes
         public List<string> AuthRoles { get; set; } = new List<string>();
         //public List<int> CorpIDList { get; set; } = new List<int>();
        // public List<int> AllianceIDList { get; set; } = new List<int>();
+        public Dictionary<string, AuthRoleEntity> AllowedCharacters { get; set; } = new Dictionary<string, AuthRoleEntity>();
         public Dictionary<string, AuthRoleEntity> AllowedCorporations { get; set; } = new Dictionary<string, AuthRoleEntity>();
         public Dictionary<string, AuthRoleEntity> AllowedAlliances { get; set; } = new Dictionary<string, AuthRoleEntity>();
         public List<string> ManualAssignmentRoles { get; set; } = new List<string>();
