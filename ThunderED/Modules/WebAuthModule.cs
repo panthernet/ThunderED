@@ -750,12 +750,14 @@ namespace ThunderED.Modules
                 var pendingUser = await SQLHelper.GetPendingUser(remainder);
                 if (pendingUser == null)
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel, LM.Get("authHasInvalidKey", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);
+                    if(context != null)
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel, LM.Get("authHasInvalidKey", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);
                     return;
                 }
                 if(!pendingUser.Active)
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);
+                    if(context != null)
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);
                     return;
                 }
                 
@@ -803,15 +805,10 @@ namespace ThunderED.Modules
 
                     if (group.PreliminaryAuthMode)
                     {
-                        await SQLHelper.UserTokensSetAuthState(characterID, 2);
-                    }
-
-                    //save tokens
-                    var chId = Convert.ToInt64(characterID);
-                    if (await SQLHelper.IsEntryExists("userTokens", new Dictionary<string, object> {{"characterID", chId}}))
-                    {
+                        var chId = Convert.ToInt64(characterID);
+                        await SQLHelper.DeletUserTokenByDiscordId(discordId); //cleanup previous regs for this ID to avoid inconsistency
                         await SQLHelper.SQLiteDataUpdate("userTokens", "discordUserId", discordId, "characterID", chId);
-                        await SQLHelper.SQLiteDataUpdate("userTokens", "authState", 2, "characterID", chId);
+                        await SQLHelper.UserTokensSetAuthState(characterID, 2);
                     }
 
                     //run roles assignment

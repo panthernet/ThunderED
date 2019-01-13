@@ -584,5 +584,10 @@ namespace ThunderED.Helpers
             await SQLiteDataDelete("standAuth", "characterID", id);
         }
 
+        public static async Task DeletUserTokenByDiscordId(ulong discordId)
+        {
+            await SQLiteDataDelete("standAuth", "discordID", discordId);
+
+        }
     }
 }
