@@ -15,13 +15,16 @@ namespace ThunderED.Helpers
         public static ZKillAPI ZKillAPI { get; private set; }
         public static FleetUpAPI FleetUpAPI { get; private set; }
 
-        public static async Task Prepare()
+        public static void Prepare()
         {
             DiscordAPI = new DiscordAPI();
             ESIAPI = new ESIAPI();
             ZKillAPI = new ZKillAPI();
             FleetUpAPI = new FleetUpAPI();
+        }
 
+        public static async Task StartDiscord()
+        {
             await DiscordAPI.Start();
         }
 

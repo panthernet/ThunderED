@@ -152,45 +152,38 @@ namespace ThunderED.Modules.OnDemand
 
         private async Task<string> GenerateMembersListHtml(string authCode)
         {
-            var list = await SQLHelper.UserTokensGetAllEntries();
+            var list = await SQLHelper.GetAuthUsersWithPerms(2);
             var sb = new StringBuilder();
-            foreach (var item in list.Where(a=> a.AuthState == 2))
+            foreach (var item in list)
             {
-                var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, item.CharacterId, true);
-                var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
-                var ally = corp.alliance_id.HasValue ?  await APIHelper.ESIAPI.GetAllianceData(Reason, corp.alliance_id) : null;
+                //var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, item.CharacterId, true);
+               // var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
+                //var ally = corp.alliance_id.HasValue ?  await APIHelper.ESIAPI.GetAllianceData(Reason, corp.alliance_id) : null;
                 var charUrl = WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
-                int counter = 1;
                 sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
                 sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
                 sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
-                sb.Append($@"<div class=""container""><div class=""row""><b>{item.CharacterName}</b></div><div class=""row"">{corp.name} [{corp.ticker}]{(ally != null ? $" - {ally.name}[{ally.ticker}]" : null)}</div></div>");
+                sb.Append($@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
                 sb.Append(@"</a>");
                 sb.Append($"</div>");
-                counter++;
             }
             
             return sb.ToString();
         }
 
-        private async Task<string> GenerateAwaitingListHtml(string authCode)
+        private static async Task<string> GenerateAwaitingListHtml(string authCode)
         {
-            var list = await SQLHelper.UserTokensGetAllEntries();
+            var list = await SQLHelper.GetAuthUsersWithPerms();
             var sb = new StringBuilder();
             foreach (var item in list.Where(a=> a.AuthState != 2))
             {
-                var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, item.CharacterId, true);
-                var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
-                var ally = corp.alliance_id.HasValue ?  await APIHelper.ESIAPI.GetAllianceData(Reason, corp.alliance_id) : null;
                 var charUrl = WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
-                int counter = 1;
                 sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
                 sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
                 sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
-                sb.Append($@"<div class=""container""><div class=""row""><b>{item.CharacterName}</b></div><div class=""row"">{corp.name} [{corp.ticker}]{(ally != null ? $" - {ally.name}[{ally.ticker}]" : null)}</div></div>");
+                sb.Append($@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
                 sb.Append(@"</a>");
                 sb.Append($"</div>");
-                counter++;
             }
             
             return sb.ToString();
@@ -433,10 +426,10 @@ namespace ThunderED.Modules.OnDemand
             List<JsonClasses.Contact> hrContacts = null;
             if (hrId > 0)
             {
-                var hrTokenInfo = await SQLHelper.UserTokensGetEntry(hrId);
-                if (hrTokenInfo != null && SettingsManager.HasCharContactsScope(hrTokenInfo.PermissionsList))
+                var hrUserInfo = await SQLHelper.GetAuthUserByCharacterId(hrId);
+                if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.Data.PermissionsList))
                 {
-                    var hrToken = await APIHelper.ESIAPI.RefreshToken(hrTokenInfo.RefreshToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    var hrToken = await APIHelper.ESIAPI.RefreshToken(hrUserInfo.RefreshToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                     if(!string.IsNullOrEmpty(hrToken))
                         hrContacts = await APIHelper.ESIAPI.GetCharacterContacts(Reason, hrId, hrToken);
                 }

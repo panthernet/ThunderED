@@ -61,7 +61,7 @@ namespace ThunderED.Modules
                             return true;
                         }
                         var characterId = Convert.ToInt64(result[0]);
-                        await SQLHelper.SQLiteDataInsertOrUpdate("timersAuth", new Dictionary<string, object> {{"id", result[0]}, {"time", DateTime.Now}});
+                        await SQLHelper.InsertOrUpdate("timersAuth", new Dictionary<string, object> {{"id", result[0]}, {"time", DateTime.Now}});
                         //redirect to timers
                         var iid = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
                         iid = HttpUtility.UrlEncode(iid);
@@ -108,7 +108,7 @@ namespace ThunderED.Modules
                         var timeout = Settings.TimersModule.AuthTimeoutInMinutes;
                         if (timeout != 0)
                         {
-                            var result = await SQLHelper.SQLiteDataQuery<string>("timersAuth", "time", "id", characterId.ToString());
+                            var result = await SQLHelper.Query<string>("timersAuth", "time", "id", characterId.ToString());
                             if (result == null || (DateTime.Now - DateTime.Parse(result)).TotalMinutes > timeout)
                             {
                                 //redirect to auth
@@ -126,7 +126,7 @@ namespace ThunderED.Modules
                         if (isEditor && data.StartsWith("delete"))
                         {
                             data = data.Substring(6, data.Length - 6);
-                            await SQLHelper.SQLiteDataDelete("timers", "id", data);
+                            await SQLHelper.Delete("timers", "id", data);
                             var x = HttpUtility.ParseQueryString(request.Url.Query);
                             x.Set("data", "0");
                             await response.RedirectAsync(new Uri($"{request.Url.ToString().Split('?')[0]}?{x}"));
@@ -172,7 +172,7 @@ namespace ThunderED.Modules
                         if (data.StartsWith("delete"))
                         {
                             data = data.Substring(6, data.Length - 6);
-                            await SQLHelper.SQLiteDataDelete("timers", "id", data);
+                            await SQLHelper.Delete("timers", "id", data);
                         }
                         else
                         {
@@ -207,7 +207,7 @@ namespace ThunderED.Modules
 
                             //save
                             entry.timerChar = rChar.name;
-                            await SQLHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
+                            await SQLHelper.InsertOrUpdate("timers", entry.GetDictionary());
                         }
                         return true;
                     }
@@ -297,7 +297,8 @@ namespace ThunderED.Modules
             //check for Discord admins
             if (Settings.TimersModule.GrantEditRolesToDiscordAdmins)
             {
-                var roles = SQLHelper.SQLiteDataQuery<string>("authUsers", "role", "characterID", characterId.ToString()).GetAwaiter().GetResult();
+                var discordId = SQLHelper.GetAuthUserDiscordId(characterId).GetAwaiter().GetResult();
+                var roles = string.Join(',', APIHelper.DiscordAPI.GetUserRoleNames(discordId));
                 if (!string.IsNullOrEmpty(roles))
                 {
                     var exemptRoles = Settings.Config.DiscordAdminRoles;
@@ -341,7 +342,7 @@ namespace ThunderED.Modules
 
         public async Task<string> GenerateTimersHtml(bool isEditor, string baseCharId)
         {
-            var timers = await SQLHelper.SQLiteDataSelectTimers();
+            var timers = await SQLHelper.SelectTimers();
             int counter = 1;
             var sb = new StringBuilder();
 
@@ -406,7 +407,7 @@ namespace ThunderED.Modules
                 _lastTimersCheck = DateTime.Now;
 
                 await LogHelper.LogModule("Running timers check...", Category);
-                var timers = await SQLHelper.SQLiteDataSelectTimers();
+                var timers = await SQLHelper.SelectTimers();
                 timers?.ForEach(async timer =>
                 {
                     var channel = Settings.TimersModule.AnnounceChannel;
@@ -415,7 +416,7 @@ namespace ThunderED.Modules
                     {
                         if (channel != 0)
                             await SendNotification(timer, channel);
-                        await SQLHelper.SQLiteDataDelete("timers", "id", timer.id);
+                        await SQLHelper.Delete("timers", "id", timer.id);
                         return;
                     }
 
@@ -436,7 +437,7 @@ namespace ThunderED.Modules
                             value = value == 0 ? announces.Min() : value;
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLHelper.SQLiteDataUpdate("timers", "announce", value, "id", timer.id);
+                            await SQLHelper.Update("timers", "announce", value, "id", timer.id);
                         }
                     }
                     else
@@ -449,7 +450,7 @@ namespace ThunderED.Modules
                         {
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLHelper.SQLiteDataUpdate("timers", "announce", an, "id", timer.id);
+                            await SQLHelper.Update("timers", "announce", an, "id", timer.id);
                         }
                     }
                 });
@@ -487,13 +488,13 @@ namespace ThunderED.Modules
 
         public static async Task AddTimer(TimerItem entry)
         {
-            await SQLHelper.SQLiteDataInsertOrUpdate("timers", entry.GetDictionary());
+            await SQLHelper.InsertOrUpdate("timers", entry.GetDictionary());
 
         }
 
         public static async Task<string> GetUpcomingTimersString(int count = 5)
         {
-            var timers = await SQLHelper.SQLiteDataSelectTimers();
+            var timers = await SQLHelper.SelectTimers();
             var sb = new StringBuilder();
             if (timers.Count > 0)
             {

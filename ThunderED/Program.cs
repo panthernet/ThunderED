@@ -50,6 +50,7 @@ namespace ThunderED
                 return;
             }
 
+            APIHelper.Prepare();
             LogHelper.LogInfo($"ThunderED v{VERSION} is running!").GetAwaiter().GetResult();
             //load database provider
             var rs = SQLHelper.LoadProvider();
@@ -70,7 +71,7 @@ namespace ThunderED
             //update config settings
             if (SettingsManager.Settings.Config.ModuleNotificationFeed)
             {
-                var dateStr = SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult();
+                var dateStr = SQLHelper.Query<string>("cacheData", "data", "name", "nextNotificationCheck").GetAwaiter().GetResult();
                 if(DateTime.TryParseExact(dateStr, new [] {"dd.MM.yyyy HH:mm:ss", $"{CultureInfo.InvariantCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.InvariantCulture.DateTimeFormat.LongTimePattern}"}, CultureInfo.InvariantCulture.DateTimeFormat, DateTimeStyles.None, out var x))
                     SettingsManager.NextNotificationCheck = x;
             }
@@ -78,7 +79,7 @@ namespace ThunderED
             //load language
             LM.Load().GetAwaiter().GetResult();
             //load APIs
-            APIHelper.Prepare().GetAwaiter().GetResult();
+            APIHelper.StartDiscord().GetAwaiter().GetResult();
 
             while (!APIHelper.DiscordAPI.IsAvailable)
             {
@@ -152,7 +153,7 @@ namespace ThunderED
                             if (arr.Length == 1) continue;
                             if (!long.TryParse(arr[1], out var id))
                                 continue;
-                            var rToken = SQLHelper.SQLiteDataQuery<string>("refreshTokens", "token", "id", id).GetAwaiter().GetResult();
+                            var rToken = SQLHelper.Query<string>("refreshTokens", "token", "id", id).GetAwaiter().GetResult();
                             Console.WriteLine(APIHelper.ESIAPI
                                 .RefreshToken(rToken, SettingsManager.Settings.WebServerModule.CcpAppClientId, SettingsManager.Settings.WebServerModule.CcpAppSecret).GetAwaiter()
                                 .GetResult());

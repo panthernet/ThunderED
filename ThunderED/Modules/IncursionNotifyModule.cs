@@ -77,7 +77,7 @@ namespace ThunderED.Modules
                             await ReportIncursion(incursion, c, channel);
                     }
 
-                    await SQLHelper.SQLiteDataDeleteWhereIn("incursions", "constId", incursions.Select(a => a.constellation_id).ToList(), not:true);
+                    await SQLHelper.DeleteWhereIn("incursions", "constId", incursions.Select(a => a.constellation_id).ToList(), not:true);
                 }
             }
             catch (Exception ex)
@@ -93,14 +93,14 @@ namespace ThunderED.Modules
 
         private async Task ReportIncursion(JsonClasses.IncursionData incursion, JsonClasses.ConstellationData c, IMessageChannel channel)
         {
-            var result = await SQLHelper.SQLiteDataQuery<long>("incursions", "constId", "constId", incursion.constellation_id);
+            var result = await SQLHelper.Query<long>("incursions", "constId", "constId", incursion.constellation_id);
             //skip existing incursion report
             var isUpdate = result > 0 && Settings.IncursionNotificationModule.ReportIncursionStatusAfterDT;
             if(!isUpdate && result > 0)
                 return;
 
             if (!isUpdate)
-                await SQLHelper.SQLiteDataInsertOrUpdate("incursions", new Dictionary<string, object>
+                await SQLHelper.InsertOrUpdate("incursions", new Dictionary<string, object>
                 {
                     { "constId", incursion.constellation_id }
                 });

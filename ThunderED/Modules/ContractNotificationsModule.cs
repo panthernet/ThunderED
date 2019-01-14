@@ -69,7 +69,7 @@ namespace ThunderED.Modules
                             return true;
                         }
 
-                        await SQLHelper.SQLiteDataInsertOrUpdateTokens("", result[0], "", result[1]);
+                        await SQLHelper.InsertOrUpdateTokens("", result[0], "", result[1]);
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
                                 .Replace("{header}", "authTemplateHeader")
                                 .Replace("{body}", LM.Get("contractAuthSuccessHeader"))

@@ -72,7 +72,7 @@ namespace ThunderED.Modules
                             return true;
                         }
 
-                        await SQLHelper.SQLiteDataInsertOrUpdateTokens("", result[0], result[1], "");
+                        await SQLHelper.InsertOrUpdateTokens("", result[0], result[1], "");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
                             .Replace("{header}", "authTemplateHeader")
                             .Replace("{body}", LM.Get("mailAuthSuccessHeader"))
@@ -112,7 +112,7 @@ namespace ThunderED.Modules
                     {
                         if (charId == 0) continue;
 
-                        var rToken = await SQLHelper.SQLiteDataQuery<string>("refreshTokens", "mail", "id", charId);
+                        var rToken = await SQLHelper.Query<string>("refreshTokens", "mail", "id", charId);
                         if (string.IsNullOrEmpty(rToken))
                         {
                             continue;
@@ -125,7 +125,7 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        var lastMailId = await SQLHelper.SQLiteDataQuery<long>("mail", "mailId", "id", charId.ToString());
+                        var lastMailId = await SQLHelper.Query<long>("mail", "mailId", "id", charId.ToString());
                         var prevMailId = lastMailId;
                         var includePrivate = group.IncludePrivateMail;
 
@@ -194,7 +194,7 @@ namespace ThunderED.Modules
                         }
 
                         if (prevMailId != lastMailId || lastMailId == 0)
-                            await SQLHelper.SQLiteDataInsertOrUpdate("mail", new Dictionary<string, object> {{"id", charId.ToString()}, {"mailId", lastMailId}});
+                            await SQLHelper.InsertOrUpdate("mail", new Dictionary<string, object> {{"id", charId.ToString()}, {"mailId", lastMailId}});
                     }
                 }
 
@@ -375,10 +375,10 @@ namespace ThunderED.Modules
         public static async Task<string> SearchRelated(long searchCharId, HRMModule.SearchMailItem item, string authCode)
         {
             var isGlobal = searchCharId == 0;
-            var users = new List<UserTokenEntity>();
+            var users = new List<AuthUserEntity>();
             if (isGlobal)
             {
-                users = await SQLHelper.UserTokensGetAllEntries();
+                users = await SQLHelper.GetAuthUsersWithPerms();
                 switch (item.smAuthType)
                 {
                     case 1:
@@ -393,7 +393,7 @@ namespace ThunderED.Modules
             }
             else
             {
-                var u = await SQLHelper.UserTokensGetEntry(searchCharId);
+                var u = await SQLHelper.GetAuthUserByCharacterId(searchCharId);
                 if (u == null)
                     return LM.Get("hrmSearchMailErrorSourceNotFound");
                 users.Add(u);
@@ -439,7 +439,7 @@ namespace ThunderED.Modules
             var sb = new StringBuilder();
             foreach (var user in users)
             {
-                if (!SettingsManager.HasReadMailScope(user.PermissionsList))
+                if (!SettingsManager.HasReadMailScope(user.Data.PermissionsList))
                     continue;
 
                 var token = await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
@@ -456,7 +456,7 @@ namespace ThunderED.Modules
                         newList.AddRange(mailHeaders.Where(a => a.@from == charId).ToList());
                         foreach (var header in newList)
                         {
-                            header.ToName = isGlobal ? user.CharacterName : (await GetRecepientNames(Reason, header.recipients, user.CharacterId, token));
+                            header.ToName = isGlobal ? user.Data.CharacterName : (await GetRecepientNames(Reason, header.recipients, user.CharacterId, token));
                             header.FromName = item.smText;
                         }
 
@@ -464,7 +464,7 @@ namespace ThunderED.Modules
                         foreach (var header in tmp)
                         {
                             header.ToName = isGlobal ? item.smText : (await GetRecepientNames(Reason, header.recipients, user.CharacterId, token));
-                            header.FromName = user.CharacterName;
+                            header.FromName = user.Data.CharacterName;
                         }
 
                         mailHeaders = newList;
@@ -480,7 +480,7 @@ namespace ThunderED.Modules
                             if (ch == null) continue;
                             if (ch.corporation_id == corpId)
                             {
-                                header.ToName = isGlobal ? user.CharacterName : (await GetRecepientNames(Reason, header.recipients, user.CharacterId, token));
+                                header.ToName = isGlobal ? user.Data.CharacterName : (await GetRecepientNames(Reason, header.recipients, user.CharacterId, token));
                                 header.FromName = item.smText;
                                 newList.Add(header);
                                 continue;
@@ -491,7 +491,7 @@ namespace ThunderED.Modules
                                 if (header.recipients.Any(b => b.recipient_id == corpId))
                                 {
                                     header.ToName = item.smText;
-                                    header.FromName = user.CharacterName;
+                                    header.FromName = user.Data.CharacterName;
                                     newList.Add(header);
                                     continue;
                                 }
@@ -507,7 +507,7 @@ namespace ThunderED.Modules
                                         if (r.corporation_id == corpId)
                                         {
                                             header.ToName = await GetRecepientNames(Reason, header.recipients, user.CharacterId, token);
-                                            header.FromName = user.CharacterName;
+                                            header.FromName = user.Data.CharacterName;
                                             newList.Add(header);
                                             break;
                                         }
@@ -516,7 +516,7 @@ namespace ThunderED.Modules
                                         if(recipient.recipient_id == corpId)
                                         {
                                             header.ToName = await GetRecepientNames(Reason, header.recipients, user.CharacterId, token);
-                                            header.FromName = user.CharacterName;
+                                            header.FromName = user.Data.CharacterName;
                                             newList.Add(header);
                                             break;
                                         }
@@ -536,7 +536,7 @@ namespace ThunderED.Modules
                             var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, header.@from);
                             if (ch?.alliance_id != null && (ch.alliance_id == allyId || header.@from == allyId))
                             {
-                                header.ToName = isGlobal ? user.CharacterName : (await GetRecepientNames(Reason, header.recipients, user.CharacterId, token));
+                                header.ToName = isGlobal ? user.Data.CharacterName : (await GetRecepientNames(Reason, header.recipients, user.CharacterId, token));
                                 header.FromName = item.smText;
                                 newList.Add(header);
                                 continue;
@@ -547,7 +547,7 @@ namespace ThunderED.Modules
                                 if (ch?.alliance_id != null && header.recipients.Any(b => b.recipient_id == allyId))
                                 {
                                     header.ToName = item.smText;
-                                    header.FromName = user.CharacterName;
+                                    header.FromName = user.Data.CharacterName;
                                     newList.Add(header);
                                     continue;
                                 }
@@ -563,7 +563,7 @@ namespace ThunderED.Modules
                                         if (r.alliance_id.HasValue && r.alliance_id == allyId)
                                         {
                                             header.ToName = await GetRecepientNames(Reason, header.recipients, user.CharacterId, token);
-                                            header.FromName = user.CharacterName;
+                                            header.FromName = user.Data.CharacterName;
                                             newList.Add(header);
                                             break;
                                         }
@@ -575,7 +575,7 @@ namespace ThunderED.Modules
                                         if (corp.alliance_id.HasValue && corp.alliance_id == allyId)
                                         {
                                             header.ToName = await GetRecepientNames(Reason, header.recipients, user.CharacterId, token);
-                                            header.FromName = user.CharacterName;
+                                            header.FromName = user.Data.CharacterName;
                                             newList.Add(header);
                                             break;
                                         }
@@ -584,7 +584,7 @@ namespace ThunderED.Modules
                                         if(recipient.recipient_id == allyId)
                                         {
                                             header.ToName = await GetRecepientNames(Reason, header.recipients, user.CharacterId, token);
-                                            header.FromName = user.CharacterName;
+                                            header.FromName = user.Data.CharacterName;
                                             newList.Add(header);
                                             break;
                                         }

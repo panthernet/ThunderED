@@ -297,14 +297,12 @@ namespace ThunderED.API
             #region Get personalized foundList
 
             var groupsToCheck = new List<WebAuthGroup>();
-            var tokenData = await SQLHelper.UserTokensGetEntry(characterID);
-            var authData = await SQLHelper.GetAuthUser(discordUserId);
-            var cGroup = tokenData?.GroupName ?? authData?.Group;
+            var authData = await SQLHelper.GetAuthUserByCharacterId(characterID);
 
-            if (!string.IsNullOrEmpty(cGroup))
+            if (!string.IsNullOrEmpty(authData.GroupName))
             {
                 //check specified group for roles
-                var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == cGroup).Value;
+                var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authData.GroupName).Value;
                 if(group != null)
                     groupsToCheck.Add(group);
             }
@@ -350,9 +348,9 @@ namespace ThunderED.API
                 }
             }
 
-            if (authResult == null && (isManualAuth || !string.IsNullOrEmpty(cGroup)))
+            if (authResult == null && (isManualAuth || !string.IsNullOrEmpty(authData.GroupName)))
             {
-                var token = await SQLHelper.UserTokensGetEntry(characterID);
+                var token = await SQLHelper.GetAuthUserByCharacterId(characterID);
                 if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
                 {
                     var group = SettingsManager.Settings.WebAuthModule.AuthGroups[token.GroupName];
@@ -397,7 +395,7 @@ namespace ThunderED.API
 
                // await LogHelper.LogInfo($"Running Auth Check on {u.Username}", LogCat.AuthCheck, false);
 
-                var authUser = await SQLHelper.GetAuthUser(u.Id);
+                var authUser = await SQLHelper.GetAuthUserByDiscordId(u.Id);
 
                 if (authUser != null)
                 {

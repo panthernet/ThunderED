@@ -63,7 +63,7 @@ namespace ThunderED.Modules.OnDemand
                         }
 
                         var authCode = WebAuthModule.GetUniqID();
-                        await SQLHelper.SQLiteDataInsertOrUpdate("hrmAuth", new Dictionary<string, object> {{"id", result[0]}, {"time", DateTime.Now}, {"code", authCode}});
+                        await SQLHelper.InsertOrUpdate("hrmAuth", new Dictionary<string, object> {{"id", result[0]}, {"time", DateTime.Now}, {"code", authCode}});
                         //redirect to timers
                         await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
 
@@ -102,7 +102,7 @@ namespace ThunderED.Modules.OnDemand
                             return true;
                         }
 
-                        var chId = await SQLHelper.SQLiteDataQuery<string>("hrmAuth", "id", "code", authCode);
+                        var chId = await SQLHelper.Query<string>("hrmAuth", "id", "code", authCode);
 
                         var rChar = string.IsNullOrEmpty(chId) ? null : await APIHelper.ESIAPI.GetCharacterData(Reason, chId, true);
                         if (rChar == null)
@@ -121,7 +121,7 @@ namespace ThunderED.Modules.OnDemand
                         var timeout = Settings.HRMModule.AuthTimeoutInMinutes;
                         if (timeout != 0)
                         {
-                            var result = await SQLHelper.SQLiteDataQuery<string>("hrmAuth", "time", "id", chId);
+                            var result = await SQLHelper.Query<string>("hrmAuth", "time", "id", chId);
                             if (result == null || (DateTime.Now - DateTime.Parse(result)).TotalMinutes > timeout)
                             {
                                 if (IsNoRedirect(data))
@@ -133,7 +133,7 @@ namespace ThunderED.Modules.OnDemand
 
                             //prolong session
                             if (data == "0" || data.StartsWith("inspect"))
-                                await SQLHelper.SQLiteDataUpdate("hrmAuth", "time", DateTime.Now, "code", authCode);
+                                await SQLHelper.Update("hrmAuth", "time", DateTime.Now, "code", authCode);
                         }
 
                         if (await CheckAccess(characterId) == false)
@@ -264,11 +264,11 @@ namespace ThunderED.Modules.OnDemand
                                     var iChar = await APIHelper.ESIAPI.GetCharacterData(Reason, inspectCharId, true);
                                     var iCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, iChar.corporation_id, true);
                                     var iAlly = iCorp.alliance_id.HasValue ? await APIHelper.ESIAPI.GetAllianceData(Reason, iCorp.alliance_id.Value, true) : null;
-                                    var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharId);
-                                    var hasToken = userTokenEntity != null;
+                                    var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                    var hasToken = authUserEntity != null && authUserEntity.HasToken;
 
                                     var corpHistoryHtml = await GenerateCorpHistory(inspectCharId);
-
+                                    var pList = authUserEntity?.Data.PermissionsList;
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Inspect).Replace("{header}", LM.Get("hrmInspectingHeader", iChar.name))
                                             .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
                                             .Replace("{charId}", characterId.ToString())
@@ -317,19 +317,19 @@ namespace ThunderED.Modules.OnDemand
                                             .Replace("{contactsListUrl}", WebServerModule.GetHRM_AjaxContactsListURL(inspectCharId, authCode))
                                             .Replace("{skillsListUrl}", WebServerModule.GetHRM_AjaxSkillsListURL(inspectCharId, authCode))
 
-                                            .Replace("{disableMail}", SettingsManager.HasReadMailScope(userTokenEntity.PermissionsList) ? null : "d-none")
-                                            .Replace("{allowMailBool}", SettingsManager.HasReadMailScope(userTokenEntity.PermissionsList) ? "true" : "false")
-                                            .Replace("{disableWallet}", SettingsManager.HasCharWalletScope(userTokenEntity.PermissionsList) ? null : "d-none")
-                                            .Replace("{allowWalletBool}", SettingsManager.HasCharWalletScope(userTokenEntity.PermissionsList) ? "true" : "false")
-                                            .Replace("{disableCharStats}", SettingsManager.HasCharWalletScope(userTokenEntity.PermissionsList) ? null : "d-none")
-                                            .Replace("{allowCharStatsBool}", SettingsManager.HasCharWalletScope(userTokenEntity.PermissionsList) ? "true" : "false")
-                                            .Replace("{disableContracts}", SettingsManager.HasCharWalletScope(userTokenEntity.PermissionsList) ? null : "d-none")
-                                            .Replace("{allowContractsBool}", SettingsManager.HasCharWalletScope(userTokenEntity.PermissionsList) ? "true" : "false")
-                                            .Replace("{disableContacts}", SettingsManager.HasCharContactsScope(userTokenEntity.PermissionsList) ? null : "d-none")
-                                            .Replace("{allowContactsBool}", SettingsManager.HasCharContactsScope(userTokenEntity.PermissionsList) ? "true" : "false")
-                                            .Replace("{disableSP}", SettingsManager.HasCharSkillsScope(userTokenEntity.PermissionsList) ? null : "d-none")
-                                            .Replace("{disableSkills}", SettingsManager.HasCharSkillsScope(userTokenEntity.PermissionsList) ? null : "d-none")
-                                            .Replace("{allowSkillsBool}", SettingsManager.HasCharSkillsScope(userTokenEntity.PermissionsList) ? "true" : "false")
+                                            .Replace("{disableMail}", SettingsManager.HasReadMailScope(pList) ? null : "d-none")
+                                            .Replace("{allowMailBool}", SettingsManager.HasReadMailScope(pList) ? "true" : "false")
+                                            .Replace("{disableWallet}", SettingsManager.HasCharWalletScope(pList) ? null : "d-none")
+                                            .Replace("{allowWalletBool}", SettingsManager.HasCharWalletScope(pList) ? "true" : "false")
+                                            .Replace("{disableCharStats}", SettingsManager.HasCharWalletScope(pList) ? null : "d-none")
+                                            .Replace("{allowCharStatsBool}", SettingsManager.HasCharWalletScope(pList) ? "true" : "false")
+                                            .Replace("{disableContracts}", SettingsManager.HasCharWalletScope(pList) ? null : "d-none")
+                                            .Replace("{allowContractsBool}", SettingsManager.HasCharWalletScope(pList) ? "true" : "false")
+                                            .Replace("{disableContacts}", SettingsManager.HasCharContactsScope(pList) ? null : "d-none")
+                                            .Replace("{allowContactsBool}", SettingsManager.HasCharContactsScope(pList) ? "true" : "false")
+                                            .Replace("{disableSP}", SettingsManager.HasCharSkillsScope(pList) ? null : "d-none")
+                                            .Replace("{disableSkills}", SettingsManager.HasCharSkillsScope(pList) ? null : "d-none")
+                                            .Replace("{allowSkillsBool}", SettingsManager.HasCharSkillsScope(pList) ? "true" : "false")
                                         
                                             .Replace("{butSearchMail}", LM.Get("hrmButSearchMail"))
                                             .Replace("{butSearchMailUrl}", WebServerModule.GetHRM_SearchMailURL(inspectCharId, authCode))
@@ -342,15 +342,15 @@ namespace ThunderED.Modules.OnDemand
                                     //private info
                                     if (hasToken)
                                     {
-                                        var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                             Settings.WebServerModule.CcpAppSecret);
-                                        if (SettingsManager.HasReadMailScope(userTokenEntity.PermissionsList))
+                                        if (SettingsManager.HasReadMailScope(pList))
                                         {
                                             var total = await GetMailPagesCount(token, inspectCharId);
                                             text = text.Replace("totalMailPages!!", total.ToString());
                                         }
 
-                                        if (SettingsManager.HasCharWalletScope(userTokenEntity.PermissionsList))
+                                        if (SettingsManager.HasCharWalletScope(pList))
                                         {
                                             var total = await GetCharTransactPagesCount(token, inspectCharId);
                                             text = text.Replace("totalTransactPages!!", total.ToString());
@@ -358,25 +358,25 @@ namespace ThunderED.Modules.OnDemand
                                             text = text.Replace("totalJournalPages!!", total.ToString());
                                         }
 
-                                        if (SettingsManager.HasCharStatsScope(userTokenEntity.PermissionsList))
+                                        if (SettingsManager.HasCharStatsScope(pList))
                                         {
                                             var total = GetCharJournalPagesCount();
                                             text = text.Replace("totalLysPages!!", total.ToString());
                                         }
 
-                                        if (SettingsManager.HasCharContractsScope(userTokenEntity.PermissionsList))
+                                        if (SettingsManager.HasCharContractsScope(pList))
                                         {
                                             var total = await GetCharContractsPagesCount(token, inspectCharId);
                                             text = text.Replace("totalcontractsPages!!", total.ToString());
                                         }
 
-                                        if (SettingsManager.HasCharContactsScope(userTokenEntity.PermissionsList))
+                                        if (SettingsManager.HasCharContactsScope(pList))
                                         {
                                             var total = await GetCharContactsPagesCount(token, inspectCharId);
                                             text = text.Replace("totalcontactsPages!!", total.ToString());
                                         }
 
-                                        if (SettingsManager.HasCharSkillsScope(userTokenEntity.PermissionsList))
+                                        if (SettingsManager.HasCharSkillsScope(pList))
                                         {
                                             var skills = await APIHelper.ESIAPI.GetCharSkills(Reason, inspectCharId, token);
                                             text = text.Replace("{totalSP}", skills.total_sp.ToString("N0"));
@@ -410,8 +410,8 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("maillist", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharId);
-                                var hasToken = userTokenEntity != null;
+                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
                                     var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
@@ -430,8 +430,8 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("transactlist", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharId);
-                                var hasToken = userTokenEntity != null;
+                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
                                     var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
@@ -450,8 +450,8 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("journallist", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharId);
-                                var hasToken = userTokenEntity != null;
+                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
                                     var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
@@ -470,8 +470,8 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("contracts", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharId);
-                                var hasToken = userTokenEntity != null;
+                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
                                     var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
@@ -490,8 +490,8 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("contacts", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharId);
-                                var hasToken = userTokenEntity != null;
+                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
                                     var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
@@ -510,8 +510,8 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("skills", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharId);
-                                var hasToken = userTokenEntity != null;
+                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
                                     var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
@@ -531,8 +531,8 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("lys", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharId);
-                                var hasToken = userTokenEntity != null;
+                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
                                     var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
@@ -554,7 +554,7 @@ namespace ThunderED.Modules.OnDemand
                                     if (!int.TryParse(values[0], out var mailBodyId))
                                         return true;
                                     var inspectCharacterId = Convert.ToInt64(values[1]);
-                                    var userTokenEntity = await SQLHelper.UserTokensGetEntry(inspectCharacterId);
+                                    var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharacterId);
                                     var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var mail = await APIHelper.ESIAPI.GetMail(Reason, inspectCharacterId, token, mailBodyId);
@@ -624,7 +624,7 @@ namespace ThunderED.Modules.OnDemand
 
             if (firstCheck)
             {
-                var discordId = await SQLHelper.SQLiteDataQuery<ulong>("authUsers", "discordID", "characterID", characterId);
+                var discordId = await SQLHelper.GetAuthUserDiscordId(characterId);
                 if (discordId > 0)
                 {
                     firstCheck = !APIHelper.DiscordAPI.GetUserRoleNames(discordId).Intersect(Settings.HRMModule.RolesAccessList).Any();

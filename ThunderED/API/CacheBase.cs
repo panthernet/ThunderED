@@ -78,9 +78,9 @@ namespace ThunderED.API
         protected async Task<T> GetFromDbCache<T>(object id, int days)
             where T: class
         {
-            var data = await SQLHelper.SQLiteDataSelectCache<T>(id, days);
+            var data = await SQLHelper.SelectCache<T>(id, days);
             if (data == null) return null;
-            await SQLHelper.SQLiteDataUpdate("cache", "lastAccess", DateTime.Now, new Dictionary<string, object>
+            await SQLHelper.Update("cache", "lastAccess", DateTime.Now, new Dictionary<string, object>
             {
                 {"id", id},
                 {"type", typeof(T).Name}
@@ -91,7 +91,7 @@ namespace ThunderED.API
         protected async Task UpdateDbCache<T>(T data, object id, int days) 
             where T : class
         {
-            await SQLHelper.SQLiteDataUpdateCache(data, id, days);
+            await SQLHelper.UpdateCache(data, id, days);
         }
 
         #endregion

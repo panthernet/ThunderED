@@ -53,7 +53,7 @@ namespace ThunderED.Modules
                         var totalMinutes = DateTime.UtcNow >= startTime ? 0 : (int)(startTime - DateTime.UtcNow).TotalMinutes;
                         if(totalMinutes == 0) continue;
 
-                        await SQLHelper.SQLiteDataInsertOrUpdate("nullCampaigns", new Dictionary<string, object>
+                        await SQLHelper.InsertOrUpdate("nullCampaigns", new Dictionary<string, object>
                         {
                             {"groupKey",groupName},
                             {"campaignId",campaign.campaign_id},
@@ -104,7 +104,7 @@ namespace ThunderED.Modules
                             if (!pair.Value.Announces.Any())
                                 await PrepareMessage(campaign, pair.Value, LM.Get("NC_LessThanMinsLeft", TimeSpan.FromMinutes(0).ToFormattedString()), 0xFF0000);
 
-                            await SQLHelper.SQLiteDataDelete("nullCampaigns", new Dictionary<string, object> {{"groupKey", pair.Key}, {"campaignId", campaign.campaign_id}});
+                            await SQLHelper.Delete("nullCampaigns", new Dictionary<string, object> {{"groupKey", pair.Key}, {"campaignId", campaign.campaign_id}});
                             await LogHelper.LogInfo($"Nullsec Campaign {campaign.campaign_id} has been deleted...", Category, true, false);
                             continue;
                         }
@@ -133,7 +133,7 @@ namespace ThunderED.Modules
                                     }*/
 
                                     //update last announce
-                                    await SQLHelper.SQLiteDataUpdate("nullCampaigns", "lastAnnounce", announce, new Dictionary<string, object>
+                                    await SQLHelper.Update("nullCampaigns", "lastAnnounce", announce, new Dictionary<string, object>
                                     {
                                         {"groupKey", pair.Key},
                                         {"campaignId", campaign.campaign_id}

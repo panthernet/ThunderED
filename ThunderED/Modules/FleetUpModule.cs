@@ -80,7 +80,7 @@ namespace ThunderED.Modules
 
                 if (_lastChecked == null)
                 {
-                    var dateStr = await SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastChecked");
+                    var dateStr = await SQLHelper.Query<string>("cacheData", "data", "name", "fleetUpLastChecked");
                     _lastChecked = DateTime.TryParseExact(dateStr,
                         new[]
                         {
@@ -98,12 +98,12 @@ namespace ThunderED.Modules
                     var appKey = SettingsManager.Settings.FleetupModule.AppKey;
                     var groupID = SettingsManager.Settings.FleetupModule.GroupID;
                     var channelid = SettingsManager.Settings.FleetupModule.Channel;
-                    var lastopid = await SQLHelper.SQLiteDataQuery<string>("cacheData", "data", "name", "fleetUpLastPostedOperation");
+                    var lastopid = await SQLHelper.Query<string>("cacheData", "data", "name", "fleetUpLastPostedOperation");
                     var announcePost = SettingsManager.Settings.FleetupModule.Announce_Post;
                     var channel = channelid == 0 ? null : APIHelper.DiscordAPI.GetChannel(channelid);
 
                     _lastChecked = DateTime.Now;
-                    await SQLHelper.SQLiteDataUpdate("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
+                    await SQLHelper.Update("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
 
                     if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(apiCode) || string.IsNullOrWhiteSpace(groupID) || string.IsNullOrWhiteSpace(appKey)
                         || channel == null)
@@ -118,12 +118,12 @@ namespace ThunderED.Modules
 
                     foreach (var operation in result.Data)
                     {
-                        var lastAnnounce = await SQLHelper.SQLiteDataQuery<long>("fleetup", "announce", "id", operation.Id.ToString());
+                        var lastAnnounce = await SQLHelper.Query<long>("fleetup", "announce", "id", operation.Id.ToString());
 
                         if (operation.OperationId > Convert.ToInt64(lastopid) && announcePost)
                         {
                             await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
-                            await SQLHelper.SQLiteDataUpdate("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");
+                            await SQLHelper.Update("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");
                         }
 
                         var timeDiff = TimeSpan.FromTicks(operation.Start.Ticks - DateTime.UtcNow.Ticks);
@@ -141,7 +141,7 @@ namespace ThunderED.Modules
                             {
                                 await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} {LM.Get("fuFormIn", i, $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                     false);
-                                await SQLHelper.SQLiteDataInsertOrUpdate("fleetup", new Dictionary<string, object>
+                                await SQLHelper.InsertOrUpdate("fleetup", new Dictionary<string, object>
                                 {
                                     { "id", operation.Id.ToString()},
                                     { "announce", i}
@@ -154,7 +154,7 @@ namespace ThunderED.Modules
                         {
                             await SendMessage(operation, channel, $"{Settings.FleetupModule.FinalTimeMention} {LM.Get("fuFormNow", $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                 false);
-                            await SQLHelper.SQLiteDataDelete("fleetup", "id", operation.Id.ToString());
+                            await SQLHelper.Delete("fleetup", "id", operation.Id.ToString());
                         }
                     }
                 }

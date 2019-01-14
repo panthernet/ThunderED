@@ -107,7 +107,7 @@ namespace ThunderED.Modules
 
                         foreach (var charId in group.CharacterID)
                         {
-                            var rToken = await SQLHelper.SQLiteDataQuery<string>("refreshTokens", "token", "id", charId);
+                            var rToken = await SQLHelper.Query<string>("refreshTokens", "token", "id", charId);
                             var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                             if (!string.IsNullOrEmpty(token))
                                 await LogHelper.LogInfo($"Checking characterID:{charId}", Category, LogToConsole, false);
@@ -132,7 +132,7 @@ namespace ThunderED.Modules
                             foreach (var filterPair in group.Filters)
                             {
                                 var filter = filterPair.Value;
-                                _lastNotification = await SQLHelper.SQLiteDataQuery<long>("notificationsList", "id", new Dictionary<string, object>
+                                _lastNotification = await SQLHelper.Query<long>("notificationsList", "id", new Dictionary<string, object>
                                 {
                                     {"groupName", groupPair.Key},
                                     {"filterName", filterPair.Key}
@@ -246,7 +246,7 @@ namespace ThunderED.Modules
                                             if (filter.CharMentions.Count > 0)
                                             {
                                                 var list = filter.CharMentions.Select(a =>
-                                                        SQLHelper.SQLiteDataQuery<ulong>("authUsers", "discordID", "characterID", a).GetAwaiter().GetResult()).Where(a => a != 0)
+                                                        SQLHelper.GetAuthUserDiscordId(a).GetAwaiter().GetResult()).Where(a => a != 0)
                                                     .ToList();
                                                 if (list.Count > 0)
                                                 {
@@ -872,7 +872,7 @@ namespace ThunderED.Modules
                     }
 
                     var interval = Settings.NotificationFeedModule.CheckIntervalInMinutes;
-                    await SQLHelper.SQLiteDataUpdate("cacheData", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
+                    await SQLHelper.Update("cacheData", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
                     _nextNotificationCheck = DateTime.Now.AddMinutes(interval);
                    // await LogHelper.LogInfo("Check complete", Category, LogToConsole, false);
                 }
@@ -934,7 +934,7 @@ namespace ThunderED.Modules
 
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
 
-                    await SQLHelper.SQLiteDataInsertOrUpdateTokens(result[1] ?? "", characterID, null, "");
+                    await SQLHelper.InsertOrUpdateTokens(result[1] ?? "", characterID, null, "");
                     await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                         .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
@@ -954,14 +954,14 @@ namespace ThunderED.Modules
         private async Task UpdateNotificationList(string groupName, string filterName, bool isNew)
         {
             if (isNew)
-                await SQLHelper.SQLiteDataInsertOrUpdate("notificationsList", new Dictionary<string, object>
+                await SQLHelper.InsertOrUpdate("notificationsList", new Dictionary<string, object>
                 {
                     {"id", _lastNotification},
                     {"groupName", groupName},
                     {"filterName", filterName},
                 });
             else 
-                await SQLHelper.SQLiteDataUpdate("notificationsList", "id", _lastNotification, new Dictionary<string, object>
+                await SQLHelper.Update("notificationsList", "id", _lastNotification, new Dictionary<string, object>
                 {
                     {"groupName", groupName},
                     {"filterName", filterName},

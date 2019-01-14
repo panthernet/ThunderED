@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Async;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using ThunderED.Classes;
+using ThunderED.Classes.Entities;
 
 namespace ThunderED.Helpers
 {
@@ -10,12 +14,12 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14"
         };
 
         public static async Task<bool> Upgrade()
         {
-            var version = await SQLiteDataQuery<string>("cacheData", "data", "name", "version");
+            var version = await Query<string>("cacheData", "data", "name", "version");
             bool fullUpdate = string.IsNullOrEmpty(version);
             var vDbVersion = fullUpdate ? (SettingsManager.IsNew ? new Version(Program.VERSION) : new Version(1,0,0)) : new Version(version);
           //  var vAppVersion = new Version(Program.VERSION);
@@ -123,6 +127,105 @@ namespace ThunderED.Helpers
                         case "1.2.10":
                             await BackupDatabase();
                             await RunCommand("CREATE TABLE standAuth(`characterID` INTEGER PRIMARY KEY NOT NULL, `token` TEXT, `personalStands` TEXT, `corpStands` TEXT, `allianceStands` TEXT);");
+                            break;
+                        case "1.2.14":
+                            await BackupDatabase();
+                            await LogHelper.LogWarning("Upgrading DB! Please wait...");
+                            var users = await GetAuthUsersEx();
+                            var tokens = await UserTokensGetAllEntriesEx();
+                            await RunCommand("DROP TABLE `authUsers`;");
+                            await RunCommand("CREATE TABLE authUsers(`Id` INTEGER PRIMARY KEY NOT NULL, `characterID` INTEGER NOT NULL, `discordID` INTEGER, `groupName` TEXT, `refreshToken` TEXT, `authState` INTEGER NOT NULL DEFAULT 0, `data` TEXT);");
+                            await RunCommand("CREATE INDEX ix_authUsers_characterID ON authUsers (characterID);");
+                            await RunCommand("CREATE INDEX ix_authUsers_discordID ON authUsers (discordID);");
+                            await users.ParallelForEachAsync(async user =>
+                            {
+                                var t = tokens.FirstOrDefault(a => a.CharacterId == user.CharacterId);
+                                user.AuthState = t?.AuthState ?? (user.IsActive ? 2 : 0);
+                                user.GroupName = user.Group;
+                                user.DiscordId = user.DiscordId == 0 ? (t?.DiscordUserId ?? 0) : user.DiscordId;
+                                user.RefreshToken = t?.RefreshToken;
+                                user.Data.Permissions = t?.Permissions;
+                                user.Data.CharacterName = user.EveName;
+
+                                var cData = await APIHelper.ESIAPI.GetCharacterData("DB_UPGRADE", user.CharacterId);
+                                if (cData != null)
+                                {
+                                    var corp = await APIHelper.ESIAPI.GetCorporationData("DB_UPGRADE", cData.corporation_id);
+                                    user.Data.CorporationName = corp?.name;
+                                    user.Data.CorporationTicker = corp?.ticker;
+                                    user.Data.CorporationId = cData.corporation_id;
+                                    var ally = cData.alliance_id.HasValue ? await APIHelper.ESIAPI.GetAllianceData("DB_UPGRADE", cData.alliance_id) : null;
+                                    user.Data.AllianceName = ally?.name;
+                                    user.Data.AllianceTicker = ally?.ticker;
+                                    user.Data.AllianceId = cData.alliance_id ?? 0;
+                                }
+                            }, 10);
+
+                            var cUsers = new ConcurrentBag<AuthUserEntity>(users);
+                            var lTokens = tokens.Where(a => users.All(b => b.CharacterId != a.CharacterId));
+                            await lTokens.ParallelForEachAsync(async token =>
+                            {
+                                var item = new AuthUserEntity
+                                {
+                                    CharacterId = token.CharacterId,
+                                    DiscordId = token.DiscordUserId,
+                                    GroupName = token.GroupName,
+                                    AuthState = token.AuthState,
+                                    RefreshToken = token.RefreshToken,
+                                    Data = {CharacterName = token.CharacterName, Permissions = token.Permissions}
+                                };
+                                var cData = await APIHelper.ESIAPI.GetCharacterData("DB_UPGRADE", token.CharacterId);
+                                if (cData != null)
+                                {
+                                    var corp = await APIHelper.ESIAPI.GetCorporationData("DB_UPGRADE", cData.corporation_id);
+                                    item.Data.CorporationName = corp?.name;
+                                    item.Data.CorporationId = cData.corporation_id;
+                                    item.Data.CorporationTicker = corp?.ticker;
+                                    var ally = cData.alliance_id.HasValue ? await APIHelper.ESIAPI.GetAllianceData("DB_UPGRADE", cData.alliance_id) : null;
+                                    item.Data.AllianceName = ally?.name;
+                                    item.Data.AllianceId = cData.alliance_id ?? 0;
+                                    item.Data.AllianceTicker = ally?.ticker;
+                                }
+                                cUsers.Add(item);
+                            }, 10);
+
+
+                            var oUsers = cUsers.ToList();
+                            oUsers.ToList().Select(a => a.DiscordId).Distinct().ToList().ForEach(item =>
+                            {
+                                if(item == 0) return;
+                                var l = oUsers.Where(a => a.DiscordId == item).ToList();
+                                if (l.Count > 1)
+                                {
+                                    var pending = l.Where(a => a.IsPending).ToList();
+                                    if (pending.Count == l.Count)
+                                    {
+                                        l.Remove(pending[0]);
+                                        oUsers.Remove(pending[0]);
+                                        pending.RemoveAt(0);
+                                    }
+
+                                    pending.ForEach(d =>
+                                    {
+                                        l.Remove(d);
+                                        oUsers.Remove(d);
+                                    });
+                                    if (l.Count > 1)
+                                    {
+                                        l.RemoveAt(0);
+                                        l.ForEach(d => { oUsers.Remove(d); });                                        
+                                    }
+                                }
+
+                            });
+
+                            foreach (var a in oUsers)
+                            {
+                                a.Id = 0;
+                                await SaveAuthUser(a, true);
+                            }
+
+                            await RunCommand("DROP TABLE `userTokens`;");
                             break;
                         default:
                             continue;

@@ -247,7 +247,7 @@ namespace ThunderED.API
         /// </summary>
         internal override async void PurgeCache()
         {
-            await SQLHelper.SQLiteDataPurgeCache();
+            await SQLHelper.PurgeCache();
         }
 
         /// <summary>
@@ -257,8 +257,8 @@ namespace ThunderED.API
         internal override async void ResetCache(string type = null)
         {
             if (string.IsNullOrEmpty(type))
-                await SQLHelper.SQLiteDataDelete("cache");
-            else await SQLHelper.SQLiteDataDelete("cache", "type", type);
+                await SQLHelper.Delete("cache");
+            else await SQLHelper.Delete("cache", "type", type);
             SettingsManager.UpdateSettings();
         }
         #endregion

@@ -1,7 +1,10 @@
-### V1.2.13
+### V1.2.14
 
 + Added AllowedCharacters param group to authentication block which allows individual chars auth the same way as corps and alliances
++ Improved and optimized internal database handling
++ Improved HR module char list loading time
 + Fixed !char command to display actual Last Seen data for character
++ Fixed timers auth using discord admin roles
 
 ### NOTABLE CHANGES
 
