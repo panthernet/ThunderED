@@ -8,6 +8,8 @@
 
 ### NOTABLE CHANGES
 
++ This release features some internal DB upgrades. DB backup is created automatically but please do backup before the first launch to be able to rollback just in case.
++ Duplicated user Discord IDs will be purged from DB leaving only one user registration per Discord account (dupes were been possible before)
 + Added AllowedCharacters param group to authentication block
 
 
