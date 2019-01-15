@@ -93,17 +93,14 @@ namespace ThunderED.Modules
 
         private async Task ReportIncursion(JsonClasses.IncursionData incursion, JsonClasses.ConstellationData c, IMessageChannel channel)
         {
-            var result = await SQLHelper.Query<long>("incursions", "constId", "constId", incursion.constellation_id);
+            var result = await SQLHelper.IsIncurionExists(incursion.constellation_id);
             //skip existing incursion report
-            var isUpdate = result > 0 && Settings.IncursionNotificationModule.ReportIncursionStatusAfterDT;
-            if(!isUpdate && result > 0)
+            var isUpdate = result && Settings.IncursionNotificationModule.ReportIncursionStatusAfterDT;
+            if(!isUpdate && result)
                 return;
 
             if (!isUpdate)
-                await SQLHelper.InsertOrUpdate("incursions", new Dictionary<string, object>
-                {
-                    { "constId", incursion.constellation_id }
-                });
+                await SQLHelper.AddIncursion(incursion.constellation_id);
 
             c = c ?? await APIHelper.ESIAPI.GetConstellationData(Reason, incursion.constellation_id);
             var r = await APIHelper.ESIAPI.GetRegionData(Reason, c.region_id);

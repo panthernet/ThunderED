@@ -107,7 +107,7 @@ namespace ThunderED.Modules
 
                         foreach (var charId in group.CharacterID)
                         {
-                            var rToken = await SQLHelper.Query<string>("refreshTokens", "token", "id", charId);
+                            var rToken = await SQLHelper.GetRefreshTokenDefault(charId);
                             var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                             if (!string.IsNullOrEmpty(token))
                                 await LogHelper.LogInfo($"Checking characterID:{charId}", Category, LogToConsole, false);
@@ -132,11 +132,7 @@ namespace ThunderED.Modules
                             foreach (var filterPair in group.Filters)
                             {
                                 var filter = filterPair.Value;
-                                _lastNotification = await SQLHelper.Query<long>("notificationsList", "id", new Dictionary<string, object>
-                                {
-                                    {"groupName", groupPair.Key},
-                                    {"filterName", filterPair.Key}
-                                });
+                                _lastNotification = await SQLHelper.GetLastNotification(groupPair.Key, filterPair.Key);
 
                                 List<JsonClasses.Notification> fNotifications;
                                 if (_lastNotification == 0)
@@ -394,7 +390,7 @@ namespace ThunderED.Modules
 
                                                     if (Settings.Config.ModuleTimers && Settings.TimersModule.AutoAddTimerForReinforceNotifications)
                                                     {
-                                                        await TimersModule.AddTimer(new TimerItem
+                                                        await SQLHelper.UpdateTimer(new TimerItem
                                                         {
                                                             timerChar = "Auto",
                                                             timerET = (timestamp + TimeSpan.FromTicks(Convert.ToInt64(strTime))).ToString(),
@@ -872,7 +868,7 @@ namespace ThunderED.Modules
                     }
 
                     var interval = Settings.NotificationFeedModule.CheckIntervalInMinutes;
-                    await SQLHelper.Update("cacheData", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
+                    await SQLHelper.SetCacheDataNextNotificationCheck(interval);
                     _nextNotificationCheck = DateTime.Now.AddMinutes(interval);
                    // await LogHelper.LogInfo("Check complete", Category, LogToConsole, false);
                 }
@@ -954,19 +950,9 @@ namespace ThunderED.Modules
         private async Task UpdateNotificationList(string groupName, string filterName, bool isNew)
         {
             if (isNew)
-                await SQLHelper.InsertOrUpdate("notificationsList", new Dictionary<string, object>
-                {
-                    {"id", _lastNotification},
-                    {"groupName", groupName},
-                    {"filterName", filterName},
-                });
-            else 
-                await SQLHelper.Update("notificationsList", "id", _lastNotification, new Dictionary<string, object>
-                {
-                    {"groupName", groupName},
-                    {"filterName", filterName},
-                });
-
+                await SQLHelper.SetLastNotification(groupName, filterName, _lastNotification, true);
+            else
+                await SQLHelper.SetLastNotification(groupName, filterName, _lastNotification);
         }
 
         private async Task SetLastNotificationId(long id, string groupName = null, string filterName = null)

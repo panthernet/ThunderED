@@ -112,7 +112,7 @@ namespace ThunderED.Modules
                     {
                         if (charId == 0) continue;
 
-                        var rToken = await SQLHelper.Query<string>("refreshTokens", "mail", "id", charId);
+                        var rToken = await SQLHelper.GetRefreshTokenMail(charId);
                         if (string.IsNullOrEmpty(rToken))
                         {
                             continue;
@@ -125,7 +125,7 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        var lastMailId = await SQLHelper.Query<long>("mail", "mailId", "id", charId);
+                        var lastMailId = await SQLHelper.GetLastMailId(charId);
                         var prevMailId = lastMailId;
                         var includePrivate = group.IncludePrivateMail;
 
@@ -194,7 +194,7 @@ namespace ThunderED.Modules
                         }
 
                         if (prevMailId != lastMailId || lastMailId == 0)
-                            await SQLHelper.InsertOrUpdate("mail", new Dictionary<string, object> {{"id", charId}, {"mailId", lastMailId}});
+                            await SQLHelper.UpdateMail(charId, lastMailId);
                     }
                 }
 

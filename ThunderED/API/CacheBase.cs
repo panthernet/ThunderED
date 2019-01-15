@@ -80,11 +80,7 @@ namespace ThunderED.API
         {
             var data = await SQLHelper.SelectCache<T>(id, days);
             if (data == null) return null;
-            await SQLHelper.Update("cache", "lastAccess", DateTime.Now, new Dictionary<string, object>
-            {
-                {"id", id},
-                {"type", typeof(T).Name}
-            });
+            await SQLHelper.SetCacheLastUpdate(id, typeof(T).Name);
             return data;
         }
 

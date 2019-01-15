@@ -63,7 +63,7 @@ namespace ThunderED.Modules.OnDemand
                         }
 
                         var authCode = WebAuthModule.GetUniqID();
-                        await SQLHelper.InsertOrUpdate("hrmAuth", new Dictionary<string, object> {{"id", characterId}, {"time", DateTime.Now}, {"code", authCode}});
+                        await SQLHelper.UpdateHrmAuth(characterId, authCode);
                         //redirect to timers
                         await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
 
@@ -102,7 +102,7 @@ namespace ThunderED.Modules.OnDemand
                             return true;
                         }
 
-                        var characterId = await SQLHelper.Query<long>("hrmAuth", "id", "code", authCode);
+                        var characterId = await SQLHelper.GetHRAuthCharacterId(authCode);
 
                         var rChar = characterId == 0 ? null : await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                         if (rChar == null)
@@ -119,7 +119,7 @@ namespace ThunderED.Modules.OnDemand
                         var timeout = Settings.HRMModule.AuthTimeoutInMinutes;
                         if (timeout != 0)
                         {
-                            var result = await SQLHelper.Query<string>("hrmAuth", "time", "id", characterId);
+                            var result = await SQLHelper.GetHRAuthTime(characterId);
                             if (result == null || (DateTime.Now - DateTime.Parse(result)).TotalMinutes > timeout)
                             {
                                 if (IsNoRedirect(data))
@@ -131,7 +131,7 @@ namespace ThunderED.Modules.OnDemand
 
                             //prolong session
                             if (data == "0" || data.StartsWith("inspect"))
-                                await SQLHelper.Update("hrmAuth", "time", DateTime.Now, "code", authCode);
+                                await SQLHelper.SetHRAuthTime(authCode);
                         }
 
                         if (await CheckAccess(characterId) == false)

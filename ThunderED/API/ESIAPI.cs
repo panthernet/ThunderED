@@ -256,9 +256,7 @@ namespace ThunderED.API
         /// <param name="type">Cahce type</param>
         internal override async void ResetCache(string type = null)
         {
-            if (string.IsNullOrEmpty(type))
-                await SQLHelper.Delete("cache");
-            else await SQLHelper.Delete("cache", "type", type);
+            await SQLHelper.DeleteCache(type);
             SettingsManager.UpdateSettings();
         }
         #endregion

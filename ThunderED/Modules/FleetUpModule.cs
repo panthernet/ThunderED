@@ -80,7 +80,7 @@ namespace ThunderED.Modules
 
                 if (_lastChecked == null)
                 {
-                    var dateStr = await SQLHelper.Query<string>("cacheData", "data", "name", "fleetUpLastChecked");
+                    var dateStr = await SQLHelper.GetCacheDataFleetUpLastChecked();
                     _lastChecked = DateTime.TryParseExact(dateStr,
                         new[]
                         {
@@ -98,12 +98,12 @@ namespace ThunderED.Modules
                     var appKey = SettingsManager.Settings.FleetupModule.AppKey;
                     var groupID = SettingsManager.Settings.FleetupModule.GroupID;
                     var channelid = SettingsManager.Settings.FleetupModule.Channel;
-                    var lastopid = Convert.ToInt64(await SQLHelper.Query<string>("cacheData", "data", "name", "fleetUpLastPostedOperation"));
+                    var lastopid = Convert.ToInt64(await SQLHelper.GetCacheDataFleetUpLastPosted());
                     var announcePost = SettingsManager.Settings.FleetupModule.Announce_Post;
                     var channel = channelid == 0 ? null : APIHelper.DiscordAPI.GetChannel(channelid);
 
                     _lastChecked = DateTime.Now;
-                    await SQLHelper.Update("cacheData", "data", _lastChecked.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
+                    await SQLHelper.SetCacheDataFleetUpLastChecked(_lastChecked);
 
                     if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(apiCode) || string.IsNullOrWhiteSpace(groupID) || string.IsNullOrWhiteSpace(appKey)
                         || channel == null)
@@ -118,12 +118,12 @@ namespace ThunderED.Modules
 
                     foreach (var operation in result.Data)
                     {
-                        var lastAnnounce = await SQLHelper.Query<long>("fleetup", "announce", "id", operation.Id);
+                        var lastAnnounce = await SQLHelper.GetFleetupAnnounce(operation.Id);
 
                         if (operation.OperationId > lastopid && announcePost)
                         {
                             await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
-                            await SQLHelper.Update("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");
+                            await SQLHelper.SetCacheDataFleetUpLastPosted(operation.OperationId);
                         }
 
                         var timeDiff = TimeSpan.FromTicks(operation.Start.Ticks - DateTime.UtcNow.Ticks);
@@ -141,11 +141,7 @@ namespace ThunderED.Modules
                             {
                                 await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} {LM.Get("fuFormIn", i, $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                     false);
-                                await SQLHelper.InsertOrUpdate("fleetup", new Dictionary<string, object>
-                                {
-                                    { "id", operation.Id.ToString()},
-                                    { "announce", i}
-                                });
+                                await SQLHelper.AddFleetupOp(operation.Id, i);
                             }
                         }
 
@@ -154,7 +150,7 @@ namespace ThunderED.Modules
                         {
                             await SendMessage(operation, channel, $"{Settings.FleetupModule.FinalTimeMention} {LM.Get("fuFormNow", $"http://fleet-up.com/Operation#{operation.OperationId}")}",
                                 false);
-                            await SQLHelper.Delete("fleetup", "id", operation.Id.ToString());
+                            await SQLHelper.DeleteFleetupOp(operation.Id);
                         }
                     }
                 }

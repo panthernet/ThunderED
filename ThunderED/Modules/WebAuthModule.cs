@@ -657,16 +657,17 @@ namespace ThunderED.Modules
                             }
 
                             var uid = GetUniqID();
-                            await SQLHelper.InsertOrUpdate("pendingUsers", new Dictionary<string, object>
+                            var pu = new PendingUserEntity
                             {
-                                {"characterID", characterID},
-                                {"corporationID", corpID.ToString()},
-                                {"allianceID", allianceID.ToString()},
-                                {"authString", uid},
-                                {"active", "1"},
-                                {"groups", "[]"},
-                                {"dateCreated", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}
-                            });
+                                CharacterId = Convert.ToInt64(characterID),
+                                CorporationId = corpID,
+                                AllianceId = allianceID,
+                                AuthString = uid,
+                                Active = true,
+                                Groups = "[]",
+                                CreateDate = DateTime.Now
+                            };
+                            await SQLHelper.UpdatePendingUser(pu);
 
                             if (!group.PreliminaryAuthMode)
                             {

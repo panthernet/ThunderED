@@ -61,7 +61,7 @@ namespace ThunderED.Modules
                             return true;
                         }
                         var characterId = Convert.ToInt64(result[0]);
-                        await SQLHelper.InsertOrUpdate("timersAuth", new Dictionary<string, object> {{"id", characterId}, {"time", DateTime.Now}});
+                        await SQLHelper.UpdateTimersAuth(characterId);
                         //redirect to timers
                         var iid = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
                         iid = HttpUtility.UrlEncode(iid);
@@ -108,7 +108,7 @@ namespace ThunderED.Modules
                         var timeout = Settings.TimersModule.AuthTimeoutInMinutes;
                         if (timeout != 0)
                         {
-                            var result = await SQLHelper.Query<string>("timersAuth", "time", "id", characterId);
+                            var result = await SQLHelper.GetTimersAuthTime(characterId);
                             if (result == null || (DateTime.Now - DateTime.Parse(result)).TotalMinutes > timeout)
                             {
                                 //redirect to auth
@@ -126,7 +126,7 @@ namespace ThunderED.Modules
                         if (isEditor && data.StartsWith("delete"))
                         {
                             data = data.Substring(6, data.Length - 6);
-                            await SQLHelper.Delete("timers", "id", data);
+                            await SQLHelper.DeleteTimer(Convert.ToInt64(data));
                             var x = HttpUtility.ParseQueryString(request.Url.Query);
                             x.Set("data", "0");
                             await response.RedirectAsync(new Uri($"{request.Url.ToString().Split('?')[0]}?{x}"));
@@ -172,7 +172,7 @@ namespace ThunderED.Modules
                         if (data.StartsWith("delete"))
                         {
                             data = data.Substring(6, data.Length - 6);
-                            await SQLHelper.Delete("timers", "id", data);
+                            await SQLHelper.DeleteTimer(Convert.ToInt64(data));
                         }
                         else
                         {
@@ -207,7 +207,7 @@ namespace ThunderED.Modules
 
                             //save
                             entry.timerChar = rChar.name;
-                            await SQLHelper.InsertOrUpdate("timers", entry.GetDictionary());
+                            await SQLHelper.UpdateTimer(entry);
                         }
                         return true;
                     }
@@ -416,7 +416,7 @@ namespace ThunderED.Modules
                     {
                         if (channel != 0)
                             await SendNotification(timer, channel);
-                        await SQLHelper.Delete("timers", "id", timer.id);
+                        await SQLHelper.DeleteTimer(timer.id);
                         return;
                     }
 
@@ -437,7 +437,7 @@ namespace ThunderED.Modules
                             value = value == 0 ? announces.Min() : value;
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLHelper.Update("timers", "announce", value, "id", timer.id);
+                            await SQLHelper.SetTimerAnnounce(timer.id, value);
                         }
                     }
                     else
@@ -450,7 +450,7 @@ namespace ThunderED.Modules
                         {
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLHelper.Update("timers", "announce", an, "id", timer.id);
+                            await SQLHelper.SetTimerAnnounce(timer.id, an);
                         }
                     }
                 });
@@ -484,12 +484,6 @@ namespace ThunderED.Modules
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
             }
-        }
-
-        public static async Task AddTimer(TimerItem entry)
-        {
-            await SQLHelper.InsertOrUpdate("timers", entry.GetDictionary());
-
         }
 
         public static async Task<string> GetUpcomingTimersString(int count = 5)
