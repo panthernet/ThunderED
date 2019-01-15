@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
 using ThunderED.Json.Internal;
 
 namespace ThunderED.Classes
@@ -30,5 +32,6 @@ namespace ThunderED.Classes
         Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where = null);
         Task<bool> IsEntryExists(string table, Dictionary<string, object> where);
         Task Insert(string table, Dictionary<string, object> values);
+        Task<bool> EnsureDBExists();
     }
 }

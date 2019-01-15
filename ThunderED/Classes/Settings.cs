@@ -55,6 +55,10 @@ namespace ThunderED.Classes
         [ConfigEntryName("ModuleStats")]
         public StatsModuleSettings StatsModule { get; set; } = new StatsModuleSettings();
 
+        [ConfigEntryName("Database")]
+        [StaticConfigEntry]
+        public Database Database { get; set; } = new Database();
+
         [ConfigEntryName("")]
         [StaticConfigEntry]
         public ContinousCheckModuleSettings ContinousCheckModule { get; set; } = new ContinousCheckModuleSettings();
@@ -1224,6 +1228,23 @@ namespace ThunderED.Classes
 #endif
     }
 
+    public class Database
+    {
+        [Comment("Database provider. Values: sqlite, mysql. Default value is 'sqlite'")]
+        public string DatabaseProvider { get; set; } = "sqlite";
+        [Comment("The path to a database file for file-based providers like SQlite. Default value is 'edb.db'")]
+        [Required]
+        public string DatabaseFile { get; set; } = "edb.db";
+
+        public string ServerAddress { get; set; }
+        public int ServerPort { get; set; }
+        public string DatabaseName { get; set; }
+        public string UserId { get; set; }
+        public string Password { get; set; }
+        public string CustomConnectionString { get; set; }
+    }
+
+
     public class ConfigSettings: ValidatableSettings
     {
         [Comment("Discord bot token value")]
@@ -1303,13 +1324,8 @@ namespace ThunderED.Classes
         public string LogSeverity { get; set; } = "Info";
         [Comment("FALSE by default. Set to TRUE if you want to log all raw notifications data the bot will fetch. This is needed to catch notifications which the bot could not yet process. Send me acquired data to add notifications you will like to be processed by the bot")]
         public bool LogNewNotifications { get; set; } = true;
-        [Comment("Database provider. Default value is 'sqlite'")]
-        public string DatabaseProvider { get; set; } = "sqlite";
         [Comment("Number of web-request retries before treating it as failed")]
         public int RequestRetries { get; set; } = 3;
-        [Comment("The path to a database file. Default value is 'edb.db'")]
-        [Required]
-        public string DatabaseFile { get; set; } = "edb.db";
 
         public bool ExtendedESILogging { get; set; } = false;
         public string ESIAddress { get; set; } = "https://esi.evetech.net/";
@@ -1339,8 +1355,8 @@ namespace ThunderED.Classes
                         return DiscordGuildId == 0 ? Compose(nameof(DiscordGuildId), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(DiscordAdminRoles):
                         return DiscordAdminRoles.Count == 0 ? Compose(nameof(DiscordAdminRoles), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                    case nameof(DatabaseFile):
-                        return string.IsNullOrEmpty(DatabaseFile) ? Compose(nameof(DatabaseFile), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    //case nameof(DatabaseFile):
+                    //    return string.IsNullOrEmpty(DatabaseFile) ? Compose(nameof(DatabaseFile), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }
 
                 return null;

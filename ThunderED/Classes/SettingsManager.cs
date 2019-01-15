@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using ThunderED.Helpers;
 
 namespace ThunderED.Classes
 {
@@ -74,12 +75,11 @@ namespace ThunderED.Classes
 
         public static void UpdateSettings()
         {
-            Settings = ThunderSettings.Load(FileSettingsPath);      
-            DatabaseFilePath = Settings.Config.DatabaseFile == "edb.db" ? Path.Combine(RootDirectory, "edb.db") : Settings.Config.DatabaseFile;
-            if (!File.Exists(DatabaseFilePath))
+            Settings = ThunderSettings.Load(FileSettingsPath);
+
+            if (Settings.Database.DatabaseProvider == "sqlite")
             {
-                File.Copy(Path.Combine(RootDirectory,"edb.def.db"), DatabaseFilePath);
-                IsNew = true;
+                DatabaseFilePath = Settings.Database.DatabaseFile == "edb.db" ? Path.Combine(RootDirectory, "edb.db") : Settings.Database.DatabaseFile;
             }
         }
     }

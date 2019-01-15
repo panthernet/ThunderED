@@ -30,31 +30,29 @@ namespace ThunderED.Providers
             var whereTrueText = string.IsNullOrEmpty(whereText) ? null : $"WHERE {whereText}";
 
             var query = $"SELECT * FROM {table} {whereTrueText}";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand(query, con))
-            {
-                await con.OpenAsync();
 
+            return await SessionWrapper(query, async command =>
+            {
                 if (!string.IsNullOrEmpty(whereText) && where != null)
                 {
                     count = 1;
                     foreach (var pair in where)
-                        querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
+                        command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
                 }
 
                 try
                 {
-                    using (var r = await querySQL.ExecuteReaderAsync())
+                    using (var r = await command.ExecuteReaderAsync())
                     {
                         return r.HasRows;
                     }
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[SQLiteDataQuery]: {query} - {string.Join("|", where?.Select(a=> $"{a.Key}:{a.Value} ") ?? new List<string>())}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[IsEntryExists]: {query} - {string.Join("|", where?.Select(a=> $"{a.Key}:{a.Value} ") ?? new List<string>())}", ex, LogCat.SQLite);
                     return false;
                 }
-            }
+            });  
         }
 
         public async Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where = null)
@@ -74,21 +72,19 @@ namespace ThunderED.Providers
             var whereTrueText = string.IsNullOrEmpty(whereText) ? null : $"WHERE {whereText}";
 
             var query = $"SELECT {field} FROM {table} {whereTrueText}";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand(query, con))
-            {
-                await con.OpenAsync();
 
+            return await SessionWrapper(query, async command =>
+            {
                 if (!string.IsNullOrEmpty(whereText) && where != null)
                 {
                     count = 1;
                     foreach (var pair in where)
-                        querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
+                        command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
                 }
 
                 try
                 {
-                    using (var r = await querySQL.ExecuteReaderAsync())
+                    using (var r = await command.ExecuteReaderAsync())
                     {
                         var list = new List<object[]>();
                         if (r.HasRows)
@@ -120,17 +116,18 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[SQLiteDataQuery]: {query} - {string.Join("|", where?.Select(a=> $"{a.Key}:{a.Value} ") ?? new List<string>())}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[SelectData]: {query} - {string.Join("|", where?.Select(a=> $"{a.Key}:{a.Value} ") ?? new List<string>())}", ex, LogCat.SQLite);
                     return default;
                 }
-            }
+
+            });
         }
       
         public async Task<T> Query<T>(string table, string field, Dictionary<string, object> where)
         {
             if (where == null)
             {
-                await LogHelper.LogError($"[SQLiteDataQuery]: {table}-{field} query has empty values!");
+                await LogHelper.LogError($"[Query]: {table}-{field} query has empty values!");
                 return default;
             }
 
@@ -143,19 +140,17 @@ namespace ThunderED.Providers
             }
 
             var query = $"SELECT {field} FROM {table} WHERE {whereText}";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand(query, con))
-            {
-                await con.OpenAsync();
 
+            return await SessionWrapper(query, async command =>
+            {
                 count = 1;
                 foreach (var pair in where)
                 {
-                    querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
+                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
                 }
                 try
                 {
-                    using (var r = await querySQL.ExecuteReaderAsync())
+                    using (var r = await command.ExecuteReaderAsync())
                     {
                         if (r.HasRows)
                         {
@@ -177,17 +172,18 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[SQLiteDataQuery]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[Query]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                     return default;
                 }
-            }
+
+            });
         }
 
         public async Task<List<T>> QueryList<T>(string table, string field, Dictionary<string, object> where)
         {
             if (where == null)
             {
-                await LogHelper.LogError($"[DataQuery]: {table}-{field} query has empty values!");
+                await LogHelper.LogError($"[Query]: {table}-{field} query has empty values!");
                 return default;
             }
 
@@ -200,20 +196,17 @@ namespace ThunderED.Providers
             }
 
             var query = $"SELECT {field} FROM {table} WHERE {whereText}";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand(query, con))
+            return await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
-
                 count = 1;
                 foreach (var pair in where)
                 {
-                    querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
+                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
                 }
                 var res = new List<T>();
                 try
                 {
-                    using (var r = await querySQL.ExecuteReaderAsync())
+                    using (var r = await command.ExecuteReaderAsync())
                     {
                         if (!r.HasRows) return res;
                         while (await r.ReadAsync())
@@ -237,10 +230,11 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[DataQuery]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[Query]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                     return res;
                 }
-            }
+
+            });
         }
 
         public async Task<T> Query<T>(string table, string field, string whereField, object whereData)
@@ -275,25 +269,22 @@ namespace ThunderED.Providers
             }
 
             var query = $"insert or replace into {table} ({fromText}) values({valuesText})";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand(query, con))
+            await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
-
                 count = 1;
                 foreach (var pair in values)
                 {
-                    querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value ?? DBNull.Value));
+                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value ?? DBNull.Value));
                 }
                 try
                 {
-                    querySQL.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
                 }
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx($"[{nameof(InsertOrUpdate)}]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                 }
-            }
+            });
         }
 
         public async Task Insert(string table, Dictionary<string, object> values)
@@ -314,25 +305,23 @@ namespace ThunderED.Providers
             }
 
             var query = $"insert into {table} ({fromText}) values({valuesText})";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand(query, con))
+            await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
-
                 count = 1;
                 foreach (var pair in values)
                 {
-                    querySQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value ?? DBNull.Value));
+                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value ?? DBNull.Value));
                 }
                 try
                 {
-                    querySQL.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
                 }
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx($"[{nameof(Insert)}]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                 }
-            }
+            });
+
         }
 
         public async Task Update(string table, string setField, object setData, string whereField, object whereData)
@@ -356,24 +345,23 @@ namespace ThunderED.Providers
             }
 
             var query = $"UPDATE {table} SET {setField} = @data WHERE {whereText}";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand(query, con))
+            await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
                 count = 1;
-                insertSQL.Parameters.Add(new SqliteParameter("@data", setData ?? DBNull.Value));
+                command.Parameters.Add(CreateParam("@data", setData ?? DBNull.Value));
                 foreach (var pair in where)
-                    insertSQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value ?? DBNull.Value));
+                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value ?? DBNull.Value));
                 try
                 {
-                    insertSQL.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
 
                 }
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx($"[{nameof(Update)}]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
                 }
-            }
+            });
+
         }
         #endregion
 
@@ -388,62 +376,56 @@ namespace ThunderED.Providers
                 whereText += $"{pair.Key}=@var{count++}{(pair.Key == last? null : " and ")}";
             }
 
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand($"DELETE FROM {table} WHERE {whereText}", con))
+            var query = $"DELETE FROM {table} WHERE {whereText}";
+            await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
                 count = 1;
                 foreach (var pair in where)
-                    insertSQL.Parameters.Add(new SqliteParameter($"@var{count++}", pair.Value));
-
+                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
                 try
                 {
-                    insertSQL.ExecuteNonQuery();
-
+                    command.ExecuteNonQuery();
                 }
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx(nameof(Delete), ex, LogCat.SQLite);
                 }
-            }
+            });
         }
 
         public async Task Delete(string table, string whereField = null, object whereValue = null)
         {
             var where = string.IsNullOrEmpty(whereField) || whereValue == null ? null : $" WHERE {whereField} = @name";
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand($"DELETE FROM {table}{where}", con))
+            var query = $"DELETE FROM {table}{where}";
+            await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
-                insertSQL.Parameters.Add(new SqliteParameter("@name", whereValue));
+                command.Parameters.Add(CreateParam("@name", whereValue));
                 try
                 {
-                    insertSQL.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
 
                 }
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx(nameof(Delete), ex, LogCat.SQLite);
                 }
-            }
+            });
         }
 
         public async Task DeleteWhereIn(string table, string field, List<long> list, bool not)
         {
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand($"DELETE FROM {table} where {field} {(not? "not": null)} in ({string.Join(",", list)})", con))
+            var query = $"DELETE FROM {table} where {field} {(not ? "not" : null)} in ({string.Join(",", list)})";
+            await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
                 try
                 {
-                    insertSQL.ExecuteNonQuery();
-
+                    command.ExecuteNonQuery();
                 }
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx(nameof(DeleteWhereIn), ex, LogCat.SQLite);
                 }
-            }
+            });
         }
         #endregion
 
@@ -452,14 +434,12 @@ namespace ThunderED.Providers
         public async Task<bool> RunScript(string file)
         {
             if (!File.Exists(file)) return false;
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand(File.ReadAllText(file), con))
+
+            return await SessionWrapper(File.ReadAllText(file), async command =>
             {
-                await con.OpenAsync();
                 try
                 {
-                    insertSQL.ExecuteNonQuery();
-
+                    command.ExecuteNonQuery();
                 }
                 catch (Exception ex)
                 {
@@ -468,19 +448,17 @@ namespace ThunderED.Providers
                 }
 
                 return true;
-            }
+            });
         }
       
         public async Task RunCommand(string query2, bool silent = false)
         {
             try
             {
-                using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-                using (var insertSQL = new SqliteCommand(query2, con))
+                await SessionWrapper(query2, command =>
                 {
-                    await con.OpenAsync();
-                    insertSQL.ExecuteNonQuery();
-                }
+                    command.ExecuteNonQuery();
+                });
             }
             catch (Exception ex)
             {
@@ -494,15 +472,14 @@ namespace ThunderED.Providers
 
         public async Task<T> SelectCache<T>(object whereValue, int maxDays)
         {
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var querySQL = new SqliteCommand("SELECT text, lastUpdate FROM cache WHERE id=@value and type=@tt", con))
+            var query = "SELECT text, lastUpdate FROM cache WHERE id=@value and type=@tt";
+            return await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
-                querySQL.Parameters.Add(new SqliteParameter("@value", whereValue));
-                querySQL.Parameters.Add(new SqliteParameter("@tt", typeof(T).Name));
+                command.Parameters.Add(CreateParam("@value", whereValue));
+                command.Parameters.Add(CreateParam("@tt", typeof(T).Name));
                 try
                 {
-                    using (var r = await querySQL.ExecuteReaderAsync())
+                    using (var r = await command.ExecuteReaderAsync())
                     {
                         if (!r.HasRows) return (T)(object)null;
 
@@ -519,7 +496,7 @@ namespace ThunderED.Providers
                     await LogHelper.LogEx(nameof(SelectCache), ex, LogCat.SQLite);
                     return (T)(object)null;
                 }
-            }
+            });
         }
 
         public async Task UpdateCache<T>(T data, object id, int days = 1)
@@ -529,78 +506,121 @@ namespace ThunderED.Providers
                 ? "INSERT OR REPLACE INTO cache (type, id, lastAccess, lastUpdate, text, days) VALUES(@type,@id,@access,@update,@text,@days)"
                 : "UPDATE cache set lastAccess=@access, lastUpdate=@update where type=@type and id=@id";
 
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-            using (var insertSQL = new SqliteCommand(q, con))
+            await SessionWrapper(q, async command =>
             {
-                await con.OpenAsync();
-                insertSQL.Parameters.Add(new SqliteParameter("@type", typeof(T).Name));
-                insertSQL.Parameters.Add(new SqliteParameter("@id", id ?? DBNull.Value));
-                insertSQL.Parameters.Add(new SqliteParameter("@access", DateTime.Now));
-                insertSQL.Parameters.Add(new SqliteParameter("@update", DateTime.Now));
-                insertSQL.Parameters.Add(new SqliteParameter("@days", days));
+                command.Parameters.Add(CreateParam("@type", typeof(T).Name));
+                command.Parameters.Add(CreateParam("@id", id ?? DBNull.Value));
+                command.Parameters.Add(CreateParam("@access", DateTime.Now));
+                command.Parameters.Add(CreateParam("@update", DateTime.Now));
+                command.Parameters.Add(CreateParam("@days", days));
                 if(entry == null)
-                    insertSQL.Parameters.Add(new SqliteParameter("@text", JsonConvert.SerializeObject(data)));
+                    command.Parameters.Add(CreateParam("@text", JsonConvert.SerializeObject(data)));
                 try
                 {
-                    insertSQL.ExecuteNonQuery();
-
+                    command.ExecuteNonQuery();
                 }
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx($"[{nameof(UpdateCache)}]: {q}", ex, LogCat.SQLite);
                 }
-            }
+            });        
         }
 
         public async Task PurgeCache()
         {
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+            var query = "delete from cache where lastAccess <= date('now','-1 day') and days=1";
+            await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
-                using (var q = new SqliteCommand("delete from cache where lastAccess <= date('now','-1 day') and days=1", con))
+                try
                 {
-                    try
-                    {
-                        q.ExecuteNonQuery();
-                    }
-                    catch (Exception ex)
-                    {
-                        await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.SQLite);
-                    }
+                    command.ExecuteNonQuery();
                 }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.SQLite);
+                }
+            });
 
-                using (var q = new SqliteCommand("delete from cache where lastAccess <= date('now','-30 day') and days=30", con))
+            query = "delete from cache where lastAccess <= date('now','-30 day') and days=30";
+            await SessionWrapper(query, async command =>
+            {
+                try
                 {
-                    try
-                    {
-                        q.ExecuteNonQuery();
-                    }
-                    catch (Exception ex)
-                    {
-                        await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.SQLite);
-                    }
+                    command.ExecuteNonQuery();
                 }
-            }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.SQLite);
+                }
+            });
         }
         #endregion
 
         public async Task CleanupNotificationsList()
         {
-            using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+            var query = "delete from notificationsList where `time` <= date('now','-30 day')";
+            await SessionWrapper(query, async command =>
             {
-                await con.OpenAsync();
-                using (var q = new SqliteCommand("delete from notificationsList where `time` <= date('now','-30 day')", con))
+                try
                 {
-                    try
-                    {
-                        q.ExecuteNonQuery();
-                    }
-                    catch (Exception ex)
-                    {
-                        await LogHelper.LogEx("CleanupNotificationsList", ex, LogCat.SQLite);
-                    }
+                    command.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx("CleanupNotificationsList", ex, LogCat.SQLite);
+                }
+            });
+        }
+
+        internal static async Task SessionWrapper(string query, Action<SqliteCommand> method)
+        {
+            using (var session = new SqliteConnection(CreateConnectString()))
+            {
+                using (var command = new SqliteCommand())
+                {
+                    command.CommandText = query;
+                    command.Connection = session;
+                    await session.OpenAsync();
+                    method(command);
                 }
             }
+        }
+
+        private static async Task<T> SessionWrapper<T>(string query, Func<SqliteCommand, Task<T>> method)
+        {
+            using (var session = new SqliteConnection(CreateConnectString()))
+            {
+                using (var command = new SqliteCommand(query, session))
+                {
+                    await session.OpenAsync();
+                    return await method(command);
+                }
+            }
+        }
+
+        private static string CreateConnectString()
+        {
+            if (!string.IsNullOrEmpty(SettingsManager.Settings.Database.CustomConnectionString))
+                return SettingsManager.Settings.Database.CustomConnectionString;
+
+            return $"Data Source = {SettingsManager.DatabaseFilePath};";
+        }
+
+        private static SqliteParameter CreateParam(string name, object value)
+        {
+            return new SqliteParameter(name, value);
+        }
+
+        public async Task<bool> EnsureDBExists()
+        {
+            if (!File.Exists(SettingsManager.DatabaseFilePath))
+            {
+                File.Copy(Path.Combine(SettingsManager.RootDirectory, "edb.def.db"), SettingsManager.DatabaseFilePath);
+                SettingsManager.IsNew = true;
+            }
+
+            await Task.Delay(1);
+            return true;
         }
     }
 }

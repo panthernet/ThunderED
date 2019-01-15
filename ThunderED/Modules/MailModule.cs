@@ -125,7 +125,7 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        var lastMailId = await SQLHelper.Query<long>("mail", "mailId", "id", charId.ToString());
+                        var lastMailId = await SQLHelper.Query<long>("mail", "mailId", "id", charId);
                         var prevMailId = lastMailId;
                         var includePrivate = group.IncludePrivateMail;
 
@@ -194,7 +194,7 @@ namespace ThunderED.Modules
                         }
 
                         if (prevMailId != lastMailId || lastMailId == 0)
-                            await SQLHelper.InsertOrUpdate("mail", new Dictionary<string, object> {{"id", charId.ToString()}, {"mailId", lastMailId}});
+                            await SQLHelper.InsertOrUpdate("mail", new Dictionary<string, object> {{"id", charId}, {"mailId", lastMailId}});
                     }
                 }
 

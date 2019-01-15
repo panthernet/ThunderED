@@ -45,8 +45,6 @@
     "memoryUsageLimitMb": 100,
     "logSeverity": "Info",	
     "logNewNotifications": true,
-    "databaseProvider":  "sqlite",
-    "databaseFile": "edb.db",
     "requestRetries": 3,
     "extendedESILogging":  false,
     "ESIAddress": "https://esi.evetech.net/",
@@ -55,6 +53,17 @@
     "DisableLogIntoFiles": false,
     "UseSocketsForZKillboard":  true,
     "ZKillboardWebSocketUrl":  "wss://zkillboard.com:2096" 
+  },
+
+  "Database": {
+    "databaseProvider":  "sqlite",
+    "databaseFile": "edb.db",
+    "ServerAddress": "",
+    "ServerPort":  0,
+    "DatabaseName": "",
+    "UserId":  "",
+    "Password": "",
+    "CustomConnectionString":  "" 
   },
 
   "ContractNotificationsModule": {

@@ -238,11 +238,14 @@ namespace ThunderED.Helpers
 
         public static string LoadProvider()
         {
-            var prov = SettingsManager.Settings.Config.DatabaseProvider;
+            var prov = SettingsManager.Settings.Database.DatabaseProvider;
             switch (prov)
             {
                 case "sqlite":
                     Provider = new SqliteDatabaseProvider();
+                    break;
+                case "mysql":
+                    Provider = new MysqlDatabaseProvider();
                     break;
                 default:
                     LogHelper.LogInfo("Using default sqlite provider!").GetAwaiter().GetResult();
@@ -251,8 +254,14 @@ namespace ThunderED.Helpers
                 //  return $"[CRITICAL] Unknown database provider {prov}!";
 
             }
+
+            if (!EnsureDBExists())
+            {
+                return "[CRITICAL] Failed to check DB integrity or create new instance!";
+            }
+
             //upgrade database
-            if (!SQLHelper.Upgrade().GetAwaiter().GetResult())
+            if (!Upgrade().GetAwaiter().GetResult())
             {
                 return "[CRITICAL] Failed to upgrade DB to latest version!";
             }
@@ -561,6 +570,11 @@ namespace ThunderED.Helpers
         public static async Task DeleteAuthStands(long id)
         {
             await Delete("standAuth", "characterID", id);
+        }
+
+        private static bool EnsureDBExists()
+        {
+            return Provider?.EnsureDBExists().GetAwaiter().GetResult() ?? false;
         }
     }
 }

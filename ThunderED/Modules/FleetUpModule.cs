@@ -98,7 +98,7 @@ namespace ThunderED.Modules
                     var appKey = SettingsManager.Settings.FleetupModule.AppKey;
                     var groupID = SettingsManager.Settings.FleetupModule.GroupID;
                     var channelid = SettingsManager.Settings.FleetupModule.Channel;
-                    var lastopid = await SQLHelper.Query<string>("cacheData", "data", "name", "fleetUpLastPostedOperation");
+                    var lastopid = Convert.ToInt64(await SQLHelper.Query<string>("cacheData", "data", "name", "fleetUpLastPostedOperation"));
                     var announcePost = SettingsManager.Settings.FleetupModule.Announce_Post;
                     var channel = channelid == 0 ? null : APIHelper.DiscordAPI.GetChannel(channelid);
 
@@ -118,9 +118,9 @@ namespace ThunderED.Modules
 
                     foreach (var operation in result.Data)
                     {
-                        var lastAnnounce = await SQLHelper.Query<long>("fleetup", "announce", "id", operation.Id.ToString());
+                        var lastAnnounce = await SQLHelper.Query<long>("fleetup", "announce", "id", operation.Id);
 
-                        if (operation.OperationId > Convert.ToInt64(lastopid) && announcePost)
+                        if (operation.OperationId > lastopid && announcePost)
                         {
                             await SendMessage(operation, channel, $"{Settings.FleetupModule.DefaultMention} FleetUp Op <http://fleet-up.com/Operation#{operation.OperationId}>", true);
                             await SQLHelper.Update("cacheData", "data", operation.OperationId.ToString(), "name", "fleetUpLastPostedOperation");
@@ -173,14 +173,14 @@ namespace ThunderED.Modules
         {
             try
             {
-                var Reason = LogCat.FleetUp.ToString();
+                var reason = LogCat.FleetUp.ToString();
                 int.TryParse(x, out var amount);
                 var userId = SettingsManager.Settings.FleetupModule.UserId;
                 var apiCode = SettingsManager.Settings.FleetupModule.APICode;
                 var groupID = SettingsManager.Settings.FleetupModule.GroupID;
                 var appKey = SettingsManager.Settings.FleetupModule.AppKey;
 
-                var result = await APIHelper.FleetUpAPI.GetOperations(Reason, userId, apiCode, appKey, groupID);
+                var result = await APIHelper.FleetUpAPI.GetOperations(reason, userId, apiCode, appKey, groupID);
 
                 if (!result.Data.Any())
                 {

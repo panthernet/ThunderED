@@ -1,6 +1,8 @@
 ### V1.2.14
 
 + Added AllowedCharacters param group to authentication block which allows individual chars auth the same way as corps and alliances
++ Added new settings section: Database
++ Added support for **mysql** DB provider
 + Improved and optimized internal database handling
 + Improved HR module char list loading time
 + Fixed !char command to display actual Last Seen data for character
@@ -11,7 +13,16 @@
 + This release features some internal DB upgrades. DB backup is created automatically but please do backup before the first launch to be able to rollback just in case.
 + Duplicated user Discord IDs will be purged from DB leaving only one user registration per Discord account (dupes were been possible before)
 + Added AllowedCharacters param group to authentication block
++ It is now possible to use MySQL database
+  - Set: "databaseProvider":  "mysql"
+  - Create database using SQL: create database thundered;
+  - Import MySQL dump file located in **content/sql/mysql.dump** into created database
+  - Specify "DatabaseName": "thundered" and other connection settings in Database config section
 
+### BREAKING CHANGES
+
++ Added new Database settings section for detailed DB setup for different providers
++ Moved **databaseProvider** and **databaseFile** params to new Database section
 
 ### V1.2.12
 

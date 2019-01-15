@@ -61,7 +61,7 @@ namespace ThunderED.Modules
                             return true;
                         }
                         var characterId = Convert.ToInt64(result[0]);
-                        await SQLHelper.InsertOrUpdate("timersAuth", new Dictionary<string, object> {{"id", result[0]}, {"time", DateTime.Now}});
+                        await SQLHelper.InsertOrUpdate("timersAuth", new Dictionary<string, object> {{"id", characterId}, {"time", DateTime.Now}});
                         //redirect to timers
                         var iid = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
                         iid = HttpUtility.UrlEncode(iid);
@@ -108,7 +108,7 @@ namespace ThunderED.Modules
                         var timeout = Settings.TimersModule.AuthTimeoutInMinutes;
                         if (timeout != 0)
                         {
-                            var result = await SQLHelper.Query<string>("timersAuth", "time", "id", characterId.ToString());
+                            var result = await SQLHelper.Query<string>("timersAuth", "time", "id", characterId);
                             if (result == null || (DateTime.Now - DateTime.Parse(result)).TotalMinutes > timeout)
                             {
                                 //redirect to auth

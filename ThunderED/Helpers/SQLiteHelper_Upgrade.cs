@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Async;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
+using MySql.Data.MySqlClient;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
+using ThunderED.Providers;
 
 namespace ThunderED.Helpers
 {
@@ -21,7 +24,9 @@ namespace ThunderED.Helpers
         {
             var version = await Query<string>("cacheData", "data", "name", "version");
             bool fullUpdate = string.IsNullOrEmpty(version);
-            var vDbVersion = fullUpdate ? (SettingsManager.IsNew ? new Version(Program.VERSION) : new Version(1,0,0)) : new Version(version);
+            //set full version for new mysql instance
+            bool skipIsNew = SettingsManager.Settings.Database.DatabaseProvider == "mysql";
+            var vDbVersion = fullUpdate ? (SettingsManager.IsNew || skipIsNew ? new Version(Program.VERSION) : new Version(1,0,0)) : new Version(version);
           //  var vAppVersion = new Version(Program.VERSION);
 
             try
@@ -226,6 +231,20 @@ namespace ThunderED.Helpers
                             }
 
                             await RunCommand("DROP TABLE `userTokens`;");
+                            await LogHelper.LogWarning("Step 1 finished...");
+
+                            //text fixes
+                            await RunCommand("DROP TABLE `hrmAuth`;");
+                            await RunCommand("CREATE TABLE `hrmAuth` ( `id` int UNIQUE PRIMARY KEY NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `code` TEXT NOT NULL);");
+                            await RunCommand("DROP TABLE `fleetup`;");
+                            await RunCommand("CREATE TABLE `fleetup` ( `id` int UNIQUE PRIMARY KEY NOT NULL, `announce` int NOT NULL DEFAULT 0);");
+                            await RunCommand("DROP TABLE `mail`;");
+                            await RunCommand("CREATE TABLE `mail` ( `id` int UNIQUE PRIMARY KEY NOT NULL, `mailId` int DEFAULT 0);");
+                            await RunCommand("DROP TABLE `timersAuth`;");
+                            await RunCommand("CREATE TABLE `timersAuth` ( `id` int UNIQUE PRIMARY KEY NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP);");
+                            await LogHelper.LogWarning("Step 2 finished...");
+
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:
                             continue;
@@ -233,21 +252,12 @@ namespace ThunderED.Helpers
                 }
 
                 //update version in DB
-                using (var con = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-                using (var insertSQL = new SqliteCommand("INSERT OR REPLACE INTO cacheData (name, data) VALUES(@id,@value)", con))
+                InsertOrUpdate("cacheData", new Dictionary<string, object>
                 {
-                    await con.OpenAsync();
-                    insertSQL.Parameters.Add(new SqliteParameter("@id", "version"));
-                    insertSQL.Parameters.Add(new SqliteParameter("@value", Program.VERSION));
-                    try
-                    {
-                        insertSQL.ExecuteNonQuery();
-                    }
-                    catch (Exception ex)
-                    {
-                        await LogHelper.LogEx("Upgrade", ex, LogCat.SQLite);
-                    }
-                }
+                    { "name", "version"},
+                    { "data", Program.VERSION}
+                }).GetAwaiter().GetResult();
+
 
                 return true;
             }
@@ -264,6 +274,7 @@ namespace ThunderED.Helpers
 
         private static async Task BackupDatabase()
         {
+            if(SettingsManager.Settings.Database.DatabaseProvider != "sqlite") return;
             try
             {
                 var bkFile = $"{SettingsManager.DatabaseFilePath}.bk";
@@ -286,6 +297,7 @@ namespace ThunderED.Helpers
 
         private static async Task RestoreDatabase()
         {
+            if(SettingsManager.Settings.Database.DatabaseProvider != "sqlite") return;
             try
             {
                 var bkFile = $"{SettingsManager.DatabaseFilePath}.bk";
@@ -303,30 +315,33 @@ namespace ThunderED.Helpers
         {
             try
             {
-                using (var source = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
+                if (SettingsManager.Settings.Database.DatabaseProvider == "sqlite")
                 {
-                    await source.OpenAsync();
-
-                    using (var attach = new SqliteCommand("ATTACH DATABASE 'edb.def.db' AS Y;", source))
+                    using (var source = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
                     {
-                        attach.ExecuteNonQuery();
-                    }
+                        await source.OpenAsync();
 
-                    foreach (var table in tables)
-                    {
-                        using (var command = new SqliteCommand($"DELETE FROM '{table}';", source))
-                            command.ExecuteNonQuery();
+                        using (var attach = new SqliteCommand("ATTACH DATABASE 'edb.def.db' AS Y;", source))
+                        {
+                            attach.ExecuteNonQuery();
+                        }
 
-                        using (var command = new SqliteCommand($"INSERT INTO '{table}' SELECT * FROM Y.'{table}';", source))
-                            command.ExecuteNonQuery();
-                    }
+                        foreach (var table in tables)
+                        {
+                            using (var command = new SqliteCommand($"DELETE FROM '{table}';", source))
+                                command.ExecuteNonQuery();
 
-                    using (var attach = new SqliteCommand("DETACH DATABASE Y;", source))
-                    {
-                        attach.ExecuteNonQuery();
+                            using (var command = new SqliteCommand($"INSERT INTO '{table}' SELECT * FROM Y.'{table}';", source))
+                                command.ExecuteNonQuery();
+                        }
+
+                        using (var attach = new SqliteCommand("DETACH DATABASE Y;", source))
+                        {
+                            attach.ExecuteNonQuery();
+                        }
                     }
                 }
-
+                //TODO MYSQL
                 return true;
             }
             catch (Exception ex)
@@ -335,7 +350,6 @@ namespace ThunderED.Helpers
                 return false;
             }
         }
-
 
     }
 }

@@ -63,7 +63,7 @@ namespace ThunderED.Modules.OnDemand
                         }
 
                         var authCode = WebAuthModule.GetUniqID();
-                        await SQLHelper.InsertOrUpdate("hrmAuth", new Dictionary<string, object> {{"id", result[0]}, {"time", DateTime.Now}, {"code", authCode}});
+                        await SQLHelper.InsertOrUpdate("hrmAuth", new Dictionary<string, object> {{"id", characterId}, {"time", DateTime.Now}, {"code", authCode}});
                         //redirect to timers
                         await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
 
@@ -102,9 +102,9 @@ namespace ThunderED.Modules.OnDemand
                             return true;
                         }
 
-                        var chId = await SQLHelper.Query<string>("hrmAuth", "id", "code", authCode);
+                        var characterId = await SQLHelper.Query<long>("hrmAuth", "id", "code", authCode);
 
-                        var rChar = string.IsNullOrEmpty(chId) ? null : await APIHelper.ESIAPI.GetCharacterData(Reason, chId, true);
+                        var rChar = characterId == 0 ? null : await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                         if (rChar == null)
                         {
                             if (IsNoRedirect(data))
@@ -113,15 +113,13 @@ namespace ThunderED.Modules.OnDemand
                             return true;
                         }
 
-                        var characterId = Convert.ToInt64(chId);
-
 
                         //have charId - had to check it
                         //check in db
                         var timeout = Settings.HRMModule.AuthTimeoutInMinutes;
                         if (timeout != 0)
                         {
-                            var result = await SQLHelper.Query<string>("hrmAuth", "time", "id", chId);
+                            var result = await SQLHelper.Query<string>("hrmAuth", "time", "id", characterId);
                             if (result == null || (DateTime.Now - DateTime.Parse(result)).TotalMinutes > timeout)
                             {
                                 if (IsNoRedirect(data))
