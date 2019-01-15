@@ -246,6 +246,9 @@ namespace ThunderED.Helpers
 
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
+
+                            //MYSQL HAS BEEN ADDED HERE
+
                         default:
                             continue;
                     }
@@ -341,7 +344,6 @@ namespace ThunderED.Helpers
                         }
                     }
                 }
-                //TODO MYSQL
                 return true;
             }
             catch (Exception ex)

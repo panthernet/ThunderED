@@ -14,6 +14,7 @@
 * Standalone build with no additional software or framework requirements (Docker compatible)
 * 100% ESI API
 * Multiple language support
+* Multiple DB support: sqlite, MySQL
 * The very own JackKnife inspection utility!
 * Web templates and rich settings
 * Effective caching logic for less network and memory load
