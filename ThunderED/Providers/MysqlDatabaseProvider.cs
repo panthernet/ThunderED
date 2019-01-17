@@ -547,7 +547,7 @@ namespace ThunderED.Providers
             sb.Append($"Uid={SettingsManager.Settings.Database.UserId};");
             if(!string.IsNullOrEmpty(SettingsManager.Settings.Database.Password))
                 sb.Append($"Pwd={SettingsManager.Settings.Database.Password};");
-            sb.Append("SslMode=Preferred;");
+            //sb.Append("SslMode=Preferred;");
             return sb.ToString();
         }
 

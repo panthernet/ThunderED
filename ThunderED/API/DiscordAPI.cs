@@ -299,7 +299,7 @@ namespace ThunderED.API
             var groupsToCheck = new List<WebAuthGroup>();
             var authData = await SQLHelper.GetAuthUserByCharacterId(characterID);
 
-            if (!string.IsNullOrEmpty(authData.GroupName))
+            if (!string.IsNullOrEmpty(authData?.GroupName))
             {
                 //check specified group for roles
                 var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authData.GroupName).Value;
@@ -348,7 +348,7 @@ namespace ThunderED.API
                 }
             }
 
-            if (authResult == null && (isManualAuth || !string.IsNullOrEmpty(authData.GroupName)))
+            if (authResult == null && (isManualAuth || !string.IsNullOrEmpty(authData?.GroupName)))
             {
                 var token = await SQLHelper.GetAuthUserByCharacterId(characterID);
                 if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
