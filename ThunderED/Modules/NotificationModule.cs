@@ -238,7 +238,7 @@ namespace ThunderED.Modules
                                             EmbedBuilder builder;
                                             string textAdd;
 
-                                            var mention = filter.DefaultMention;
+                                            var mention = filter.DefaultMention ?? " ";
                                             if (filter.CharMentions.Count > 0)
                                             {
                                                 var list = filter.CharMentions.Select(a =>

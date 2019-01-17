@@ -12,7 +12,6 @@ using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
-using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
