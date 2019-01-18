@@ -408,11 +408,11 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("maillist", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
-                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
+                                var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var mailHtml = await GenerateMailHtml(token, inspectCharId, authCode, page);
 
@@ -428,11 +428,11 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("transactlist", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
-                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
+                                var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var html = await GenerateTransactionsHtml(token, inspectCharId, page);
 
@@ -448,11 +448,11 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("journallist", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
-                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
+                                var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var html = await GenerateJournalHtml(token, inspectCharId, page);
 
@@ -468,11 +468,11 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("contracts", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
-                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
+                                var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var html = await GenerateContractsHtml(token, inspectCharId, page);
 
@@ -488,11 +488,11 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("contacts", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
-                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
+                                var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var html = await GenerateContactsHtml(token, inspectCharId, page, characterId);
 
@@ -508,11 +508,11 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("skills", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
-                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
+                                var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var html = await GenerateSkillsHtml(token, inspectCharId, page);
 
@@ -529,11 +529,11 @@ namespace ThunderED.Modules.OnDemand
                                 var values = data.Replace("lys", "");
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
-                                var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
-                                var hasToken = userTokenEntity != null && userTokenEntity.HasToken;
+                                var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var html = await GenerateLysHtml(token, inspectCharId, page);
 
@@ -552,8 +552,8 @@ namespace ThunderED.Modules.OnDemand
                                     if (!int.TryParse(values[0], out var mailBodyId))
                                         return true;
                                     var inspectCharacterId = Convert.ToInt64(values[1]);
-                                    var userTokenEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharacterId);
-                                    var token = await APIHelper.ESIAPI.RefreshToken(userTokenEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                    var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharacterId);
+                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var mail = await APIHelper.ESIAPI.GetMail(Reason, inspectCharacterId, token, mailBodyId);
                                     if (mail != null)

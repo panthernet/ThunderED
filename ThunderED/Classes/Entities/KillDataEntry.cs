@@ -33,7 +33,7 @@ namespace ThunderED.Classes.Entities
             public JsonClasses.CharacterData rVictimCharacter;
             public JsonClasses.CharacterData rAttackerCharacter;
             public string systemSecurityStatus;            
-            public new Dictionary<string, string> dic;
+            public Dictionary<string, string> dic;
             public bool isUnreachableSystem;
 
             public async Task<bool> RefreshRadius(string reason, JsonZKill.Killmail kill)

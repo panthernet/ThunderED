@@ -289,7 +289,7 @@ namespace ThunderED.Classes.IRC
             }
             else if (messageInfo.CheckCommand("PRIVMSG")) //:Jaex!Jaex@unaffiliated/jaex PRIVMSG #ShareX :test
             {
-                await CheckMessage(messageInfo);
+                CheckMessage(messageInfo);
             }
             else if (messageInfo.CheckCommand("JOIN")) //:Jaex!Jaex@unaffiliated/jaex JOIN #ShareX or :Jaex!Jaex@unaffiliated/jaex JOIN :#ShareX
             {
@@ -341,7 +341,7 @@ namespace ThunderED.Classes.IRC
             return true;
         }
 
-        private async Task CheckMessage(MessageInfo messageInfo)
+        private void CheckMessage(MessageInfo messageInfo)
         {
             var channel = messageInfo.Parameters[0];
 

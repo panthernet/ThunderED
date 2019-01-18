@@ -18,8 +18,11 @@ namespace ThunderED.Classes.Entities
         public AuthUserData Data = new AuthUserData();
 
         //for compatibility
+        [Obsolete("Maintained for upgrade possibility")]
         public string EveName;
+        [Obsolete("Maintained for upgrade possibility")]
         public string Group;
+        [Obsolete("Maintained for upgrade possibility")]
         public bool IsActive;
 
         [JsonIgnore]

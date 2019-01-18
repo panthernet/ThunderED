@@ -433,14 +433,14 @@ namespace ThunderED.Modules
                     
                     if (prms.Length == 0 || prms[0].Split('=').Length == 0 || string.IsNullOrEmpty(prms[0]))
                     {
-                        await WebServerModule.WriteResponce(await WebServerModule.Get404Page(), response);
+                        await WebServerModule.WriteResponce(WebServerModule.Get404Page(), response);
                         return true;
                     }
 
                     var groupName = HttpUtility.UrlDecode(prms[0].Split('=')[1]);//string.IsNullOrEmpty(Settings.WebAuthModule.DefaultAuthGroup) || !Settings.WebAuthModule.AuthGroups.ContainsKey(Settings.WebAuthModule.DefaultAuthGroup) ? Settings.WebAuthModule.AuthGroups.Keys.FirstOrDefault() : Settings.WebAuthModule.DefaultAuthGroup;
                     if (!Settings.WebAuthModule.AuthGroups.ContainsKey(groupName))
                     {
-                        await WebServerModule.WriteResponce(await WebServerModule.Get404Page(), response);
+                        await WebServerModule.WriteResponce(WebServerModule.Get404Page(), response);
                         return true;
                     }
 

@@ -223,7 +223,7 @@ namespace ThunderED.Modules.Sub
 
                         if (!result)
                         {
-                            await WriteResponce(await Get404Page(), response);
+                            await WriteResponce(Get404Page(), response);
                         }
                     }
                     catch (Exception ex)
@@ -246,7 +246,7 @@ namespace ThunderED.Modules.Sub
             }
         }
 
-        internal static async Task<string> Get404Page()
+        internal static string Get404Page()
         {
             return File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", "404 Not Found!")
                 .Replace("{header}", LM.Get("authTemplateHeader"))

@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
 namespace ThunderED.Classes.Entities
 {
+    [Obsolete("Maintained for upgrade possibility")]
     public class UserTokenEntity
     {
         public long CharacterId { get; set; }
