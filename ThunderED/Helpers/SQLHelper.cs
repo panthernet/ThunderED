@@ -84,14 +84,14 @@ namespace ThunderED.Helpers
                     return;
             }
 
-            var mail = string.IsNullOrEmpty(mailToken) ? await Provider.Query<string>("refreshTokens", "mail", "id", userId) : mailToken;
-            var token = string.IsNullOrEmpty(notifyToken) ? await Provider.Query<string>("refreshTokens", "token", "id", userId) : notifyToken;
-            var ctoken = string.IsNullOrEmpty(contractsToken) ? await Provider.Query<string>("refreshTokens", "ctoken", "id", userId) : contractsToken;
+            var mail = string.IsNullOrEmpty(mailToken) ? await Provider.Query<string>("refresh_tokens", "mail", "id", userId) : mailToken;
+            var token = string.IsNullOrEmpty(notifyToken) ? await Provider.Query<string>("refresh_tokens", "token", "id", userId) : notifyToken;
+            var ctoken = string.IsNullOrEmpty(contractsToken) ? await Provider.Query<string>("refresh_tokens", "ctoken", "id", userId) : contractsToken;
             token = token ?? "";
             mail = mail ?? "";
             ctoken = ctoken ?? "";
 
-            await Provider.InsertOrUpdate("refreshTokens", new Dictionary<string, object>
+            await Provider.InsertOrUpdate("refresh_tokens", new Dictionary<string, object>
             {
                 {"id", userId},
                 {"token", token},
@@ -102,7 +102,7 @@ namespace ThunderED.Helpers
 
         internal static async Task<List<AuthUserEntity>> GetAuthUsersEx()
         {
-            var res = await SelectData("authUsers", new[] {"*"});
+            var res = await SelectData("auth_users", new[] {"*"});
 
             return res?.Select(item => new AuthUserEntity
             {
@@ -117,21 +117,21 @@ namespace ThunderED.Helpers
 
         internal static async Task<List<AuthUserEntity>> GetAuthUsers(Dictionary<string,object> where = null)
         {
-            var res = await SelectData("authUsers", new[] {"*"}, where);
+            var res = await SelectData("auth_users", new[] {"*"}, where);
 
             return res?.Select(ParseAuthUser).ToList();
         }
 
         internal static async Task<List<AuthUserEntity>> GetAuthUsersWithPerms(Dictionary<string,object> where = null)
         {
-            var res = await SelectData("authUsers", new[] {"*"}, where);
+            var res = await SelectData("auth_users", new[] {"*"}, where);
 
             return res?.Select(ParseAuthUser).Where(a=> !string.IsNullOrEmpty(a.Data.Permissions)).ToList();
         }
 
         internal static async Task<List<AuthUserEntity>> GetAuthUsersWithPerms(int state)
         {
-            var res = await SelectData("authUsers", new[] {"*"}, new Dictionary<string, object>{{"authState", state}});
+            var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object>{{"authState", state}});
 
             return res?.Select(ParseAuthUser).Where(a=> !string.IsNullOrEmpty(a.Data.Permissions)).ToList();
         }
@@ -162,20 +162,20 @@ namespace ThunderED.Helpers
             dic.Add("authState", user.AuthState);
             dic.Add("data", JsonConvert.SerializeObject(user.Data));
             if (insertOnly)
-                await Insert("authUsers", dic);
-            else await InsertOrUpdate("authUsers", dic);
+                await Insert("auth_users", dic);
+            else await InsertOrUpdate("auth_users", dic);
         }
 
         internal static async Task<AuthUserEntity> GetAuthUserByDiscordId(ulong discordId, bool order = false)
         {
-            var res = await SelectData("authUsers", new[] {"*"}, new Dictionary<string, object> {{"discordID", discordId}});
+            var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object> {{"discordID", discordId}});
 
             return res?.Select(ParseAuthUser).FirstOrDefault();
         }
 
         internal static async Task<AuthUserEntity> GetAuthUserByCharacterId(long id, bool order = false)
         {
-            var res = await SelectData("authUsers", new[] {"*"}, new Dictionary<string, object> {{"characterID", id}});
+            var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object> {{"characterID", id}});
 
             return res?.Select(ParseAuthUser).FirstOrDefault();
         }
@@ -184,7 +184,7 @@ namespace ThunderED.Helpers
 
         internal static async Task<PendingUserEntity> GetPendingUser(string remainder)
         {
-            var res = await SelectData("pendingUsers", new[] {"*"}, new Dictionary<string, object> {{"authString", remainder}});
+            var res = await SelectData("pending_users", new[] {"*"}, new Dictionary<string, object> {{"authString", remainder}});
             return res.Select(item => new PendingUserEntity
             {
                 Id = Convert.ToInt64(item[0]),
@@ -206,7 +206,7 @@ namespace ThunderED.Helpers
 
         internal static async Task<List<PendingUserEntity>> GetPendingUsers()
         {
-            return (await SelectData("pendingUsers", new[] {"*"})).Select(item => new PendingUserEntity
+            return (await SelectData("pending_users", new[] {"*"})).Select(item => new PendingUserEntity
             {
                 Id = Convert.ToInt64(item[0]),
                 CharacterId = Convert.ToInt64(item[1]),
@@ -214,7 +214,7 @@ namespace ThunderED.Helpers
                 AllianceId = Convert.ToInt64(item[3]),
                 Groups = Convert.ToString(item[4]),
                 AuthString = Convert.ToString(item[5]),
-                Active = item[6] == "1",
+                Active = (string) item[6] == "1",
                 CreateDate = Convert.ToDateTime(item[7]),
                 DiscordId = Convert.ToInt64(item[8]),
             }).ToList();
@@ -344,7 +344,7 @@ namespace ThunderED.Helpers
 
         public static async Task<List<JsonClasses.NullCampaignItem>> GetNullCampaigns(string group)
         {
-            return (await SelectData("nullCampaigns", new[] {"data", "lastAnnounce" }, new Dictionary<string, object>{{"groupKey", group}}))
+            return (await SelectData("null_campaigns", new[] {"data", "lastAnnounce" }, new Dictionary<string, object>{{"groupKey", group}}))
                 .Select(item =>
                 {                    
                     var i = new JsonClasses.NullCampaignItem().FromJson((string) item[0]);
@@ -355,7 +355,7 @@ namespace ThunderED.Helpers
 
         public static async Task<JsonClasses.SystemName> GetSystemById(long id)
         {
-            return (await SelectData("mapSolarSystems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
+            return (await SelectData("map_solar_systems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
             {
                 {"solarSystemID", id}
             })).Select(item => new JsonClasses.SystemName
@@ -370,7 +370,7 @@ namespace ThunderED.Helpers
 
         internal static async Task<JsonClasses.RegionData> GetRegionById(long id)
         {
-            return (await SelectData("mapRegions", new[] {"regionID", "regionName"}, new Dictionary<string, object>
+            return (await SelectData("map_regions", new[] {"regionID", "regionName"}, new Dictionary<string, object>
             {
                 {"regionID", id}
             })).Select(item => new JsonClasses.RegionData
@@ -382,7 +382,7 @@ namespace ThunderED.Helpers
 
         internal static async Task<JsonClasses.ConstellationData> GetConstellationById(long id)
         {
-            return (await SelectData("mapConstellations", new[] {"regionID", "constellationID","constellationName"}, new Dictionary<string, object>
+            return (await SelectData("map_constellations", new[] {"regionID", "constellationID","constellationName"}, new Dictionary<string, object>
             {
                 {"constellationID", id}
             })).Select(item => new JsonClasses.ConstellationData
@@ -396,7 +396,7 @@ namespace ThunderED.Helpers
         
         internal static async Task<JsonClasses.Type_id> GetTypeId(long id)
         {
-            return (await SelectData("invTypes", new[] {"typeID", "groupID","typeName", "description", "mass", "volume"}, new Dictionary<string, object>
+            return (await SelectData("inv_types", new[] {"typeID", "groupID","typeName", "description", "mass", "volume"}, new Dictionary<string, object>
             {
                 {"typeID", id}
             })).Select(item => new JsonClasses.Type_id
@@ -413,7 +413,7 @@ namespace ThunderED.Helpers
         
         internal static async Task<JsonClasses.invGroup> GetInvGroup(long id)
         {
-            return (await SelectData("invGroups", new[] {"groupID", "categoryID","groupName"}, new Dictionary<string, object>
+            return (await SelectData("inv_groups", new[] {"groupID", "categoryID","groupName"}, new Dictionary<string, object>
             {
                 {"groupID", id}
             })).Select(item => new JsonClasses.invGroup
@@ -427,34 +427,34 @@ namespace ThunderED.Helpers
         #region pendingUsers table
         public static async Task<bool> PendingUsersIsEntryActive(long characterId)
         {
-            return !string.IsNullOrEmpty(await Query<string>("pendingUsers", "characterID", "characterID", characterId.ToString()));
+            return !string.IsNullOrEmpty(await Query<string>("pending_users", "characterID", "characterID", characterId.ToString()));
         }
 
         public static async Task<bool> PendingUsersIsEntryActive(string code)
         {
-            return !string.IsNullOrEmpty(await Query<string>("pendingUsers", "characterID", "authString", code)) && 
-                 await Query<string>("pendingUsers", "active", "authString", code) == "1";
+            return !string.IsNullOrEmpty(await Query<string>("pending_users", "characterID", "authString", code)) && 
+                 await Query<string>("pending_users", "active", "authString", code) == "1";
         }
 
         public static async Task<string> PendingUsersGetCode(long characterId)
         {
-            return await Query<string>("pendingUsers", "authString", "characterID", characterId.ToString());
+            return await Query<string>("pending_users", "authString", "characterID", characterId.ToString());
         }
 
         public static async Task PendingUsersSetCode(string code, ulong discordId)
         {
-            await Update("pendingUsers", "discordID", discordId, "authString", code);
+            await Update("pending_users", "discordID", discordId, "authString", code);
         }
 
         public static async Task<ulong> PendingUsersGetDiscordId(string code)
         {
-            return await Query<ulong>("pendingUsers", "discordID", "authString", code);
+            return await Query<ulong>("pending_users", "discordID", "authString", code);
         }
 
         
         public static async Task<long> PendingUsersGetCharacterId(string code)
         {
-            return await Query<long>("pendingUsers", "characterID", "authString", code);
+            return await Query<long>("pending_users", "characterID", "authString", code);
 
         }
         
@@ -464,19 +464,19 @@ namespace ThunderED.Helpers
 
         public static async Task<ulong> GetAuthUserDiscordId(long characterId)
         {
-            return await SQLHelper.Query<ulong>("authUsers", "discordID", "characterID", characterId);
+            return await SQLHelper.Query<ulong>("auth_users", "discordID", "characterID", characterId);
         }
 
         public static async Task<AuthUserEntity> GetAuthUserByCode(string code)
         {
-            var characterId = await Query<string>("pendingUsers", "characterID", "authString", code);
+            var characterId = await Query<string>("pending_users", "characterID", "authString", code);
             return await GetAuthUserByCharacterId(Convert.ToInt64(characterId));
         }
 
         public static async Task SetAuthUserState(string code, int value)
         {
-            var characterId = await Query<string>("pendingUsers", "characterID", "authString", code);
-            await Update("authUsers", "authState", value, "characterID", Convert.ToInt64(characterId));
+            var characterId = await Query<string>("pending_users", "characterID", "authString", code);
+            await Update("auth_users", "authState", value, "characterID", Convert.ToInt64(characterId));
         }
         
         public static async Task<List<UserTokenEntity>> UserTokensGetAllEntriesEx(Dictionary<string, object> where = null)
@@ -502,23 +502,23 @@ namespace ThunderED.Helpers
 
         public static async Task<string> GetRefreshTokenForContracts(long charId)
         {
-            return await SQLHelper.Query<string>("refreshTokens", "ctoken", "id", charId);
+            return await Query<string>("refresh_tokens", "ctoken", "id", charId);
         }
 
         public static async Task DeleteAuthUsers(ulong discordId)
         {
-            await Delete("authUsers", "discordID", discordId);
+            await Delete("auth_users", "discordID", discordId);
         }
 
         public static async Task InvalidatePendingUser(string remainder)
         {
-            await Update("pendingUsers", "active", "0", "authString", remainder);
+            await Update("pending_users", "active", "0", "authString", remainder);
         }
 
         public static async Task DeleteAuthDataByCharId(long characterID)
         {
-            await Delete("pendingUsers", "characterID", characterID.ToString());
-            await Delete("authUsers", "characterID", characterID);
+            await Delete("pending_users", "characterID", characterID.ToString());
+            await Delete("auth_users", "characterID", characterID);
         }
 
         public static async Task<List<JsonClasses.Contract>> LoadContracts(long characterID, bool isCorp)
@@ -543,7 +543,7 @@ namespace ThunderED.Helpers
 
         public static async Task SaveAuthStands(AuthStandsEntity data)
         {
-            await InsertOrUpdate("standAuth", new Dictionary<string, object>
+            await InsertOrUpdate("stand_auth", new Dictionary<string, object>
             {
                 {"characterID", data.CharacterID},
                 {"token", data.Token},
@@ -555,7 +555,7 @@ namespace ThunderED.Helpers
 
         public static async Task<AuthStandsEntity> LoadAuthStands(long id)
         {
-            var data = (await SelectData("standAuth", new [] {"token", "personalStands", "corpStands", "allianceStands"}, new Dictionary<string, object> {{"characterID", id}}))?.FirstOrDefault();
+            var data = (await SelectData("stand_auth", new [] {"token", "personalStands", "corpStands", "allianceStands"}, new Dictionary<string, object> {{"characterID", id}}))?.FirstOrDefault();
             if (data == null)
                 return null;
             return new AuthStandsEntity
@@ -570,7 +570,7 @@ namespace ThunderED.Helpers
 
         public static async Task DeleteAuthStands(long id)
         {
-            await Delete("standAuth", "characterID", id);
+            await Delete("stand_auth", "characterID", id);
         }
 
         private static bool EnsureDBExists()
@@ -585,7 +585,7 @@ namespace ThunderED.Helpers
 
         public static async Task<string> GetRefreshTokenMail(long charId)
         {
-            return await Query<string>("refreshTokens", "mail", "id", charId);
+            return await Query<string>("refresh_tokens", "mail", "id", charId);
         }
 
         public static async Task<long> GetLastMailId(long charId)
@@ -595,34 +595,34 @@ namespace ThunderED.Helpers
 
         public static async Task<string> GetRefreshTokenDefault(long charId)
         {
-            return await Query<string>("refreshTokens", "token", "id", charId);
+            return await Query<string>("refresh_tokens", "token", "id", charId);
         }
 
         public static async Task<long> GetHRAuthCharacterId(string authCode)
         {
-            return await Query<long>("hrmAuth", "id", "code", authCode);
+            return await Query<long>("hrm_auth", "id", "code", authCode);
         }
 
         public static async Task<string> GetHRAuthTime(long characterId)
         {
-            return await Query<string>("hrmAuth", "time", "id", characterId);
+            return await Query<string>("hrm_auth", "time", "id", characterId);
         }
         public static async Task SetHRAuthTime(string authCode)
         {
-            await SQLHelper.Update("hrmAuth", "time", DateTime.Now, "code", authCode);
+            await SQLHelper.Update("hrm_auth", "time", DateTime.Now, "code", authCode);
         }
         public static async Task<string> GetTimersAuthTime(long characterId)
         {
-            return await Query<string>("timersAuth", "time", "id", characterId);
+            return await Query<string>("timers_auth", "time", "id", characterId);
         }
 
         public static async Task<string> GetCacheDataNextNotificationCheck()
         {
-            return await Query<string>("cacheData", "data", "name", "nextNotificationCheck");
+            return await Query<string>("cache_data", "data", "name", "nextNotificationCheck");
         }
         public static async Task SetCacheDataNextNotificationCheck(int interval)
         {
-            await Update("cacheData", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
+            await Update("cache_data", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
         }
 
         public static async Task SetCacheLastUpdate(object id, string type)
@@ -637,21 +637,21 @@ namespace ThunderED.Helpers
 
         public static async Task<string> GetCacheDataFleetUpLastChecked()
         {
-            return await Query<string>("cacheData", "data", "name", "fleetUpLastChecked");
+            return await Query<string>("cache_data", "data", "name", "fleetUpLastChecked");
         }
         public static async Task SetCacheDataFleetUpLastChecked(DateTime? dt)
         {
-            await Update("cacheData", "data", dt.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
+            await Update("cache_data", "data", dt.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
         }
 
 
         public static async Task<string> GetCacheDataFleetUpLastPosted()
         {
-            return await Query<string>("cacheData", "data", "name", "fleetUpLastPostedOperation");
+            return await Query<string>("cache_data", "data", "name", "fleetUpLastPostedOperation");
         }
         public static async Task SetCacheDataFleetUpLastPosted(long id)
         {
-            await SQLHelper.Update("cacheData", "data", id.ToString(), "name", "fleetUpLastPostedOperation");
+            await SQLHelper.Update("cache_data", "data", id.ToString(), "name", "fleetUpLastPostedOperation");
         }
 
         public static async Task<long> GetFleetupAnnounce(long opId)
@@ -661,7 +661,7 @@ namespace ThunderED.Helpers
 
         public static async Task<long> GetLastNotification(string group, string filter)
         {
-            return await Query<long>("notificationsList", "id", new Dictionary<string, object>
+            return await Query<long>("notifications_list", "id", new Dictionary<string, object>
             {
                 {"groupName", group},
                 {"filterName", filter}
@@ -672,7 +672,7 @@ namespace ThunderED.Helpers
         {
             if (insert)
             {
-                await InsertOrUpdate("notificationsList", new Dictionary<string, object>
+                await InsertOrUpdate("notifications_list", new Dictionary<string, object>
                 {
                     {"id", id},
                     {"groupName", group},
@@ -714,11 +714,11 @@ namespace ThunderED.Helpers
         }
         public static async Task UpdateHrmAuth(long charId, string authCode)
         {
-            await InsertOrUpdate("hrmAuth", new Dictionary<string, object> {{"id", charId}, {"time", DateTime.Now}, {"code", authCode}});
+            await InsertOrUpdate("hrm_auth", new Dictionary<string, object> {{"id", charId}, {"time", DateTime.Now}, {"code", authCode}});
         }
         public static async Task UpdateTimersAuth(long charId)
         {
-            await InsertOrUpdate("timersAuth", new Dictionary<string, object> {{"id", charId}, {"time", DateTime.Now}});
+            await InsertOrUpdate("timers_auth", new Dictionary<string, object> {{"id", charId}, {"time", DateTime.Now}});
         }
 
         public static async Task UpdateTimer(TimerItem entry)
@@ -728,7 +728,7 @@ namespace ThunderED.Helpers
 
         public static async Task UpdateNullCampaignAnnounce(string group, long campaignId, int announce)
         {
-            await Update("nullCampaigns", "lastAnnounce", announce, new Dictionary<string, object>
+            await Update("null_campaigns", "lastAnnounce", announce, new Dictionary<string, object>
             {
                 {"groupKey", group},
                 {"campaignId", campaignId}
@@ -737,7 +737,7 @@ namespace ThunderED.Helpers
 
         public static async Task UpdatePendingUser(PendingUserEntity item)
         {
-            await InsertOrUpdate("pendingUsers", new Dictionary<string, object>
+            await InsertOrUpdate("pending_users", new Dictionary<string, object>
             {
                 {"characterID", item.CharacterId.ToString()},
                 {"corporationID", item.CorporationId.ToString()},
@@ -751,7 +751,7 @@ namespace ThunderED.Helpers
 
         public static async Task UpdateNullCampaign(string groupName, long id, DateTimeOffset startTime, string data)
         {
-            await InsertOrUpdate("nullCampaigns", new Dictionary<string, object>
+            await InsertOrUpdate("null_campaigns", new Dictionary<string, object>
             {
                 {"groupKey",groupName},
                 {"campaignId",id},
@@ -762,8 +762,19 @@ namespace ThunderED.Helpers
 
         public static async Task DeleteNullCampaign(string groupName, long id)
         {
-            await Delete("nullCampaigns", new Dictionary<string, object> {{"groupKey", groupName}, {"campaignId", id}});
+            await Delete("null_campaigns", new Dictionary<string, object> {{"groupKey", groupName}, {"campaignId", id}});
         }
+
+        public static async Task<List<long>> GetNullsecCampaignIdList(string groupName)
+        {
+            return (await SelectData("null_campaigns", new [] {"campaignId"}, new Dictionary<string, object> {{"groupKey", groupName}})).Select(a=> Convert.ToInt64(a[0])).ToList();
+        }
+
+        public static async Task<bool> IsNullsecCampaignExists(string groupName, long id)
+        {
+            return await IsEntryExists("null_campaigns", new Dictionary<string, object> {{"groupKey", groupName}, {"campaignId", id}});
+        }
+
 
         public static async Task DeleteCache(string type = null)
         {

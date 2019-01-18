@@ -603,10 +603,9 @@ namespace ThunderED.Providers
 
         #endregion
 
-        
         public async Task CleanupNotificationsList()
         {
-            var query = "delete from notificationsList where `time` <= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+            var query = "delete from notifications_list where `time` <= DATE_SUB(NOW(), INTERVAL 30 DAY)";
             await SessionWrapper(query, async command =>
             {
                 try

@@ -1,3 +1,10 @@
+### V1.2.15
+
++ Refactored database to use identical table name casing
+
+### PLEASE NOTE
+One SQL error for **cache_data** is normal during the update process as the vital table name has been changed.
+
 ### V1.2.14
 
 + Added AllowedCharacters param group to authentication block which allows individual chars auth the same way as corps and alliances

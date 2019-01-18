@@ -558,7 +558,7 @@ namespace ThunderED.Providers
 
         public async Task CleanupNotificationsList()
         {
-            var query = "delete from notificationsList where `time` <= date('now','-30 day')";
+            var query = "delete from notifications_list where `time` <= date('now','-30 day')";
             await SessionWrapper(query, async command =>
             {
                 try

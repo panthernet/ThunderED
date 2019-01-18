@@ -41,12 +41,12 @@ namespace ThunderED.Modules
 
                     var systemIds = systems.Select(a => a.system_id);
                     var campaigns = allCampaigns.Where(a => systemIds.Contains(a.solar_system_id));
-                    var existIds = (await SQLHelper.SelectData("nullCampaigns", new [] {"campaignId"}, new Dictionary<string, object> {{"groupKey", groupName}})).Select(a=> Convert.ToInt64(a[0])).ToList();
+                    var existIds = await SQLHelper.GetNullsecCampaignIdList(groupName);
                     campaigns = campaigns.Where(a => !existIds.Contains(a.campaign_id));
 
                     foreach (var campaign in campaigns)
                     {
-                        if(await SQLHelper.IsEntryExists("nullCampaigns", new Dictionary<string, object>{{"groupKey", groupName}, {"campaignId", campaign.campaign_id}}))
+                        if(await SQLHelper.IsNullsecCampaignExists(groupName, campaign.campaign_id))
                             continue;
 
                         var startTime = campaign.Time;
@@ -118,14 +118,6 @@ namespace ThunderED.Modules
                                 if (minutesLeft < announce)
                                 {
                                     await PrepareMessage(campaign, pair.Value, LM.Get("NC_LessThanMinsLeft", TimeSpan.FromMinutes(minutesLeft).ToFormattedString()), 0xFF0000);
-                                  /*  //delete entry if it is a last announce
-                                    if (announce == announceList.Min())
-                                    {
-                                        await SQLHelper.SQLiteDataDelete("nullCampaigns",
-                                            new Dictionary<string, object> {{"groupKey", pair.Key}, {"campaignId", campaign.campaign_id}});
-                                        break;
-                                    }*/
-
                                     //update last announce
                                     await SQLHelper.UpdateNullCampaignAnnounce(pair.Key, campaign.campaign_id, announce);
                                     break;

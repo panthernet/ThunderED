@@ -17,12 +17,12 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15"
         };
 
         public static async Task<bool> Upgrade()
         {
-            var version = await Query<string>("cacheData", "data", "name", "version");
+            var version = await Query<string>("cache_data", "data", "name", "version") ?? await Query<string>("cacheData", "data", "name", "version");
             bool fullUpdate = string.IsNullOrEmpty(version);
             //set full version for new mysql instance
             bool skipIsNew = SettingsManager.Settings.Database.DatabaseProvider == "mysql";
@@ -247,6 +247,52 @@ namespace ThunderED.Helpers
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
 
+                        case "1.2.15":
+                            if (SettingsManager.Settings.Database.DatabaseProvider == "sqlite")
+                            {
+                                await RunCommand("drop table killFeedCache;");
+
+                                await RunCommand("alter table authUsers rename to auth_users;");
+                                await RunCommand("alter table cacheData rename to cache_data;");
+                                await RunCommand("alter table hrmAuth rename to hrm_auth;");
+                                await RunCommand("alter table invGroups rename to inv_groups;");
+                                await RunCommand("alter table invTypes rename to inv_types;");
+                                await RunCommand("alter table mapConstellations rename to map_constellations;");
+                                await RunCommand("alter table mapRegions rename to map_regions;");
+                                await RunCommand("alter table mapSolarSystems rename to map_solar_systems;");
+                                await RunCommand("alter table notificationsList rename to notifications_list;");
+                                await RunCommand("alter table nullCampaigns rename to null_campaigns;");
+                                await RunCommand("alter table pendingUsers rename to pending_users;");
+                                await RunCommand("alter table refreshTokens rename to refresh_tokens;");
+                                await RunCommand("alter table standAuth rename to stand_auth;");
+                                await RunCommand("alter table timersAuth rename to timers_auth;");
+                            }
+                            if (SettingsManager.Settings.Database.DatabaseProvider == "mysql")
+                            {
+                                await RunCommand("drop table killfeedcache;");
+
+                                await RunCommand("alter table authusers rename to auth_users;");
+                                await RunCommand("alter table cachedata rename to cache_data;");
+                                await RunCommand("alter table hrmauth rename to hrm_auth;");
+                                await RunCommand("alter table invgroups rename to inv_groups;");
+                                await RunCommand("alter table invtypes rename to inv_types;");
+                                await RunCommand("alter table mapconstellations rename to map_constellations;");
+                                await RunCommand("alter table mapregions rename to map_regions;");
+                                await RunCommand("alter table mapsolarsystems rename to map_solar_systems;");
+                                await RunCommand("alter table notificationslist rename to notifications_list;");
+                                await RunCommand("alter table nullcampaigns rename to null_campaigns;");
+                                await RunCommand("alter table pendingusers rename to pending_users;");
+                                await RunCommand("alter table refreshtokens rename to refresh_tokens;");
+                                await RunCommand("alter table standauth rename to stand_auth;");
+                                await RunCommand("alter table timersauth rename to timers_auth;");
+
+                                if(!string.IsNullOrEmpty(SettingsManager.Settings.Database.DatabaseName))
+                                    await RunCommand($"ALTER DATABASE `{SettingsManager.Settings.Database.DatabaseName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+                            }
+
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
+
                             //MYSQL HAS BEEN ADDED HERE
 
                         default:
@@ -255,7 +301,7 @@ namespace ThunderED.Helpers
                 }
 
                 //update version in DB
-                InsertOrUpdate("cacheData", new Dictionary<string, object>
+                InsertOrUpdate("cache_data", new Dictionary<string, object>
                 {
                     { "name", "version"},
                     { "data", Program.VERSION}
