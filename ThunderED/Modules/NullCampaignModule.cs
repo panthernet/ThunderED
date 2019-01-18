@@ -155,11 +155,11 @@ namespace ThunderED.Modules
 
                 var embed = new EmbedBuilder()
                     .WithTitle(message)
-                    .AddInlineField(LM.Get("NC_StartTime"), LM.Get("NC_StartTimeText", $"{campaign.Time.ToString(Settings.Config.ShortTimeFormat)} ET", (campaign.Time - DateTimeOffset.UtcNow).ToFormattedString()) )
-                    .AddInlineField(LM.Get("NC_type"), campaign.event_type == "ihub_defense" ? "IHUB" : "TCU")
-                    .AddInlineField(LM.Get("NC_Score"), LM.Get("NC_ScoreText", campaign.attackers_score.ToPercent(), campaign.defender_score.ToPercent())) //"Attacker {0} vs Defender {1}" 
-                    .AddInlineField(LM.Get("NC_Location"), LM.Get("NC_LocationText", region, system)) // "{0} / {1}"
-                    .AddInlineField(LM.Get("NC_Defender"), defender)
+                    .AddField(LM.Get("NC_StartTime"), LM.Get("NC_StartTimeText", $"{campaign.Time.ToString(Settings.Config.ShortTimeFormat)} ET", (campaign.Time - DateTimeOffset.UtcNow).ToFormattedString()) , true)
+                    .AddField(LM.Get("NC_type"), campaign.event_type == "ihub_defense" ? "IHUB" : "TCU", true)
+                    .AddField(LM.Get("NC_Score"), LM.Get("NC_ScoreText", campaign.attackers_score.ToPercent(), campaign.defender_score.ToPercent()), true) //"Attacker {0} vs Defender {1}" 
+                    .AddField(LM.Get("NC_Location"), LM.Get("NC_LocationText", region, system), true) // "{0} / {1}"
+                    .AddField(LM.Get("NC_Defender"), defender, true)
                     .WithTimestamp(campaign.Time)
                     .WithColor(color);
                     

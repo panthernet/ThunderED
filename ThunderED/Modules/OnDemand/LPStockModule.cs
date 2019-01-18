@@ -79,8 +79,8 @@ namespace ThunderED.Modules.OnDemand
 
             var embed = new EmbedBuilder()
                 .WithTitle(LM.Get("lpStock_title", data.factionName))
-                .AddInlineField(LM.Get("lpStock_DataHeader"), LM.Get("lpStock_AverageLp", avgRatio))
-                .AddInlineField(LM.Get("lpStock_ItemsHeader"), topItems)
+                .AddField(LM.Get("lpStock_DataHeader"), LM.Get("lpStock_AverageLp", avgRatio), true)
+                .AddField(LM.Get("lpStock_ItemsHeader"), topItems, true)
                 .WithColor(0x00FF00);
 
             if (!string.IsNullOrEmpty(data.factionImage))

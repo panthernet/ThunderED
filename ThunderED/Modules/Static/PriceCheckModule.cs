@@ -165,17 +165,17 @@ namespace ThunderED.Modules.Static
                                         .WithUrl($"https://www.fuzzwork.co.uk/info/?typeid={itemNameResults.id}/");
                                 })
                                 .WithDescription($"{LM.Get("Prices")} {systemTextAddon}")
-                                .AddInlineField(LM.Get("Buy"), $"{LM.Get("marketLow")}: {marketReply.buy.min:N2}{Environment.NewLine}" +
+                                .AddField(LM.Get("Buy"), $"{LM.Get("marketLow")}: {marketReply.buy.min:N2}{Environment.NewLine}" +
                                                             $"{LM.Get("marketMid")}: {marketReply.buy.avg:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("marketHigh")}: {marketReply.buy.max:N2}")
-                                .AddInlineField(LM.Get("Sell"), $"{LM.Get("marketLow")}: {marketReply.sell.min:N2}{Environment.NewLine}" +
+                                                            $"{LM.Get("marketHigh")}: {marketReply.buy.max:N2}", true)
+                                .AddField(LM.Get("Sell"), $"{LM.Get("marketLow")}: {marketReply.sell.min:N2}{Environment.NewLine}" +
                                                             $"{LM.Get("marketMid")}: {marketReply.sell.avg:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("marketHigh")}: {marketReply.sell.max:N2}")
+                                                            $"{LM.Get("marketHigh")}: {marketReply.sell.max:N2}", true)
                                 .AddField(LM.Get("Extra"), "\u200b")
-                                .AddInlineField(LM.Get("Buy"), $"5%: {marketReply.buy.fivePercent:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("Volume")}: {marketReply.buy.volume}")
-                                .AddInlineField(LM.Get("Sell"), $"5%: {marketReply.sell.fivePercent:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("Volume")}: {marketReply.sell.volume:N0}");
+                                .AddField(LM.Get("Buy"), $"5%: {marketReply.buy.fivePercent:N2}{Environment.NewLine}" +
+                                                            $"{LM.Get("Volume")}: {marketReply.buy.volume}", true)
+                                .AddField(LM.Get("Sell"), $"5%: {marketReply.sell.fivePercent:N2}{Environment.NewLine}" +
+                                                            $"{LM.Get("Volume")}: {marketReply.sell.volume:N0}", true);
                             var embed = builder.Build();
                             await APIHelper.DiscordAPI.ReplyMessageAsync(context, "", embed).ConfigureAwait(false);
                             

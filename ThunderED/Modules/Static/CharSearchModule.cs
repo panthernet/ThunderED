@@ -108,16 +108,16 @@ namespace ThunderED.Modules.Static
                         .WithName($"{characterData.name}");
                 })
                 .AddField(LM.Get("Additionaly"), "\u200b")
-                .AddInlineField($"{LM.Get("Corporation")}:", $"{corporationData.name}[{corporationData.ticker}]")
-                .AddInlineField($"{LM.Get("Alliance")}:", $"{alliance}{allianceTicker} ")
-                .AddInlineField($"{LM.Get("HasBeenSeen")}:", $"{lastSeenSystem}")
-                .AddInlineField($"{LM.Get("OnShip")}:", $"{lastSeenShip}")
-                .AddInlineField($"{LM.Get("Seen")}:", $"{lastSeenTime}")
+                .AddField($"{LM.Get("Corporation")}:", $"{corporationData.name}[{corporationData.ticker}]", true)
+                .AddField($"{LM.Get("Alliance")}:", $"{alliance}{allianceTicker} ", true)
+                .AddField($"{LM.Get("HasBeenSeen")}:", $"{lastSeenSystem}", true)
+                .AddField($"{LM.Get("OnShip")}:", $"{lastSeenShip}", true)
+                .AddField($"{LM.Get("Seen")}:", $"{lastSeenTime}", true)
                 .AddField("\u200b", "\u200b")
-                .AddInlineField(LM.Get("CommonCyno"), $"{cynoCount}")
-                .AddInlineField(LM.Get("CovertCyno"), $"{covertCount}")
-                .AddInlineField(LM.Get("Dangerous"), $"{text1}{Environment.NewLine}{Environment.NewLine}**{dangerous} {characterStats.dangerRatio}%**")
-                .AddInlineField(LM.Get("FleetChance2"), $"{text2}{Environment.NewLine}{Environment.NewLine}**{characterStats.gangRatio}% {gang}**");
+                .AddField(LM.Get("CommonCyno"), $"{cynoCount}", true)
+                .AddField(LM.Get("CovertCyno"), $"{covertCount}", true)
+                .AddField(LM.Get("Dangerous"), $"{text1}{Environment.NewLine}{Environment.NewLine}**{dangerous} {characterStats.dangerRatio}%**", true)
+                .AddField(LM.Get("FleetChance2"), $"{text2}{Environment.NewLine}{Environment.NewLine}**{characterStats.gangRatio}% {gang}**", true);
 
             var embed = builder.Build();
 

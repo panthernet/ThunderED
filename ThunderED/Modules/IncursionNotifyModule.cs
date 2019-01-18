@@ -117,8 +117,8 @@ namespace ThunderED.Modules
                 .WithColor(isUpdate ? new Color(0x000045) : new Color(0xdd5353))
                 .WithThumbnailUrl(Settings.Resources.ImgIncursion)
                 .AddField(LM.Get("incursionInfestedSystems"), sb.ToString())
-                .AddInlineField(LM.Get("incursionInfluence"), (incursion.influence).ToString("P"))
-                .AddInlineField(LM.Get("incursionBoss"), incursion.has_boss ? LM.Get("Alive") : LM.Get("Defeated"))
+                .AddField(LM.Get("incursionInfluence"), (incursion.influence).ToString("P"), true)
+                .AddField(LM.Get("incursionBoss"), incursion.has_boss ? LM.Get("Alive") : LM.Get("Defeated"), true)
                 .WithCurrentTimestamp()
                 .Build();
             await APIHelper.DiscordAPI.SendMessageAsync(channel, Settings.IncursionNotificationModule.DefaultMention ?? "", x);

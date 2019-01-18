@@ -165,7 +165,7 @@ namespace ThunderED.API
         private async Task InstallCommands()
         {
             Client.MessageReceived += HandleCommand;
-            await Commands.AddModulesAsync(Assembly.GetEntryAssembly());
+            await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
         }
 
         private async Task HandleCommand(SocketMessage messageParam)
@@ -192,7 +192,7 @@ namespace ThunderED.API
 
             var context = new CommandContext(Client, message);
 
-            await Commands.ExecuteAsync(context, argPos);
+            await Commands.ExecuteAsync(context, argPos, null);
         }
 
         private async Task Event_Ready()
@@ -587,7 +587,7 @@ namespace ThunderED.API
                     if (km.isNPCKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
                 });
             if (!string.IsNullOrEmpty(radiusMessage))
-                builder.AddInlineField(LM.Get("radiusInfoHeader"), radiusMessage);
+                builder.AddField(LM.Get("radiusInfoHeader"), radiusMessage, true);
 
             var embed = builder.Build();
             var channel = GetGuild()?.GetTextChannel(channelId);

@@ -53,10 +53,10 @@ namespace ThunderED.Modules.Static
                     author
                         .WithName($"{corporationData.name}");
                 })
-                .AddInlineField(LM.Get("corpGeneralInfo"), textNames)
-                .AddInlineField("-", textValues)
-                .AddInlineField(LM.Get("corpPvpInfo"), textPvpNames)
-                .AddInlineField("-", textPvpValues)
+                .AddField(LM.Get("corpGeneralInfo"), textNames, true)
+                .AddField("-", textValues, true)
+                .AddField(LM.Get("corpPvpInfo"), textPvpNames, true)
+                .AddField("-", textPvpValues, true)
                 .AddField(LM.Get("corpDescription"), desc)
                 ;
 

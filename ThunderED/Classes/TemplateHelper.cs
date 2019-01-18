@@ -196,7 +196,7 @@ namespace ThunderED.Classes
                                 else if (text.StartsWith(".AddInlineField", StringComparison.OrdinalIgnoreCase))
                                 {
                                     var result = GetDoubleText(text);
-                                    embed.AddInlineField(result[0], result[1]);
+                                    embed.AddField(result[0], result[1], true);
                                 }
                                 else if (text.StartsWith(".WithFooter", StringComparison.OrdinalIgnoreCase))
                                     embed.WithFooter(GetText(text));

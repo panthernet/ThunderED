@@ -95,9 +95,9 @@ namespace ThunderED.Modules.OnDemand
 
                 var embed = new EmbedBuilder()
                     .WithTitle(LM.Get("fwstats_title", fwData.factionName))
-                    .AddInlineField(LM.Get("fwstats_systems"), $"{statOccupiedSystemsCount}/{statTotalSystemsCount}")
-                    .AddInlineField(LM.Get("fwstats_pilots"), LM.Get("fwstats_pilotsText", statPilots, statKillsYesterday))
-                    .AddInlineField(LM.Get("fwstats_tip"), prognose)
+                    .AddField(LM.Get("fwstats_systems"), $"{statOccupiedSystemsCount}/{statTotalSystemsCount}", true)
+                    .AddField(LM.Get("fwstats_pilots"), LM.Get("fwstats_pilotsText", statPilots, statKillsYesterday), true)
+                    .AddField(LM.Get("fwstats_tip"), prognose, true)
                     .WithColor(0x00FF00);
 
                 if (!string.IsNullOrEmpty(fwData.factionImage))
@@ -304,7 +304,7 @@ namespace ThunderED.Modules.OnDemand
 
                 var embed = new EmbedBuilder()
                     .WithTitle(LM.Get("badstandTitle", data.factionName))
-                    .AddInlineField(LM.Get("badstandTopTenTitle"), sb.ToString())
+                    .AddField(LM.Get("badstandTopTenTitle"), sb.ToString(), true)
                     .WithColor(0xFF0000);
                 if (!string.IsNullOrEmpty(data.factionImage))
                     embed.WithThumbnailUrl(data.factionImage);

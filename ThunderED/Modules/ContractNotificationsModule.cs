@@ -488,8 +488,8 @@ namespace ThunderED.Modules
             if (contract.type == "courier")
                 embed.AddField(LM.Get("contractMsgDestination"), endLocation);
 
-            embed.AddInlineField(LM.Get("contractMsgDetails"), sbNames.ToString())
-                .AddInlineField("-", sbValues.ToString())
+            embed.AddField(LM.Get("contractMsgDetails"), sbNames.ToString(), true)
+                .AddField("-", sbValues.ToString(), true)
                 .WithFooter(issuedText);
 
             if (sbItemsSubmitted.Length > 0)

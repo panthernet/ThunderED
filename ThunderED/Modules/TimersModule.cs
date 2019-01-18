@@ -469,10 +469,10 @@ namespace ThunderED.Modules
                 var mode = timer.GetModeName();
                 var embed = new EmbedBuilder()
                     .WithTitle(LM.Get("timerNotifyTitle", string.IsNullOrEmpty(timer.timerLocation) ? "-" : timer.timerLocation))
-                    .AddInlineField(LM.Get("timersType"), string.IsNullOrEmpty(mode) ? "-" : mode)
-                    .AddInlineField(LM.Get("timersStage"), string.IsNullOrEmpty(stage) ? "-" : stage)
-                    .AddInlineField(LM.Get("timersOwner"), string.IsNullOrEmpty(timer.timerOwner) ? "-" : timer.timerOwner)
-                    .AddInlineField(LM.Get("timersRemaining"), string.IsNullOrEmpty(remains) ? "-" : remains)
+                    .AddField(LM.Get("timersType"), string.IsNullOrEmpty(mode) ? "-" : mode, true)
+                    .AddField(LM.Get("timersStage"), string.IsNullOrEmpty(stage) ? "-" : stage, true)
+                    .AddField(LM.Get("timersOwner"), string.IsNullOrEmpty(timer.timerOwner) ? "-" : timer.timerOwner, true)
+                    .AddField(LM.Get("timersRemaining"), string.IsNullOrEmpty(remains) ? "-" : remains, true)
                     .AddField(LM.Get("timersNotes"), string.IsNullOrEmpty(timer.timerNotes) ? "-" : timer.timerNotes);
                 if (!string.IsNullOrEmpty(Settings.Resources.ImgTimerAlert))
                     embed.WithThumbnailUrl(Settings.Resources.ImgTimerAlert);

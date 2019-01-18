@@ -578,7 +578,7 @@ namespace ThunderED.Providers
 
                 if (!result)
                 {
-                    await LogHelper.LogError("Database not found in MySQL instance! Restore it manually using the dump file 'content/sql/mysql.dump'");
+                    await LogHelper.LogError("Database not found in MySQL instance! Restore it manually using the dump file 'mysql.dump'");
                     return false;
                     /* await LogHelper.LogWarning("Creating new database...");
                      await RunSystemCommand($"CREATE DATABASE IF NOT EXISTS {_schema}");

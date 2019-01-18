@@ -52,8 +52,8 @@ namespace ThunderED.Modules
                     author
                         .WithName(LM.Get("fuNotification"));
                 })
-                .AddInlineField(LM.Get("fuFormUpTime"), startTime.ToString(format))
-                .AddInlineField(LM.Get("fuFormUpSystem"), string.IsNullOrWhiteSpace(location) ? LM.Get("None") : locationText)
+                .AddField(LM.Get("fuFormUpTime"), startTime.ToString(format), true)
+                .AddField(LM.Get("fuFormUpSystem"), string.IsNullOrWhiteSpace(location) ? LM.Get("None") : locationText, true)
                 .AddField(LM.Get("Details"), string.IsNullOrWhiteSpace(details) ? LM.Get("None") : details)
                 .WithFooter($"EVE Time: {DateTime.UtcNow.ToString(format)}")
                 .WithTimestamp(DateTime.UtcNow);
