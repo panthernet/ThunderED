@@ -38,7 +38,7 @@ namespace ThunderED.API
             {
                 await LogHelper.Log(message.Message, message.Severity.ToSeverity(), LogCat.Discord);
                 if (message.Exception != null)
-                    await LogHelper.LogEx("Discord Internal Exception", message.Exception);
+                    await LogHelper.LogEx("Discord Internal Exception", message.Exception).ConfigureAwait(false);
             };
             Client.UserJoined += Event_UserJoined;
             Client.Ready += Event_Ready;
@@ -212,9 +212,9 @@ namespace ThunderED.API
                 var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0 ? arg.Guild.DefaultChannel : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
                 var authurl = WebServerModule.GetAuthPageUrl();
                 if (!string.IsNullOrWhiteSpace(authurl))
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeMessage",arg.Mention,authurl, SettingsManager.Settings.Config.BotDiscordCommandPrefix));
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeMessage",arg.Mention,authurl, SettingsManager.Settings.Config.BotDiscordCommandPrefix)).ConfigureAwait(false);
                 else
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention));
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention)).ConfigureAwait(false);
             }
         }
 
