@@ -1,5 +1,6 @@
 ### V1.2.15
 
++ Added admin command **rngroup** to be able to rename auth groups in DB after its name has been changed in config file
 + Refactored database to use identical table name casing
 
 ### PLEASE NOTE

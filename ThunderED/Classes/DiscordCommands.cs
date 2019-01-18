@@ -73,7 +73,7 @@ namespace ThunderED.Classes
             if (string.IsNullOrEmpty(await APIHelper.DiscordAPI.IsAdminAccess(Context)))
             {
                 sb.Append(LM.Get("helpTextAdminCommands"));
-                sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rehash | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}reauth **\n");
+                sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rehash | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}reauth | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rngroup **\n");
             }
             sb.Append(LM.Get("helpExpanded", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
 
@@ -157,6 +157,9 @@ namespace ThunderED.Classes
                     break;
                 case "badstand":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("badstandHelp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "badstand"), true);
+                    break;
+                case "rngroup":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpRnGroup", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "rngroup"), true);
                     break;
 
             }
@@ -359,6 +362,63 @@ namespace ThunderED.Classes
             else
             {
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
+            }
+        }
+
+        [Command("rngroup", RunMode = RunMode.Async), Summary("Rename auth group in DB")]
+        public async Task RnGroup()
+        {
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpRnGroup", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "rngroup"), true);
+        }
+
+        [Command("rngroup", RunMode = RunMode.Async), Summary("Rename auth group in DB")]
+        public async Task RnGroup([Remainder]string command)
+        {
+            var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
+            if (!string.IsNullOrEmpty(result))
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
+                return;
+            }
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(command))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpRnGroup", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "rngroup"), true);
+                    return;
+                }
+
+                var data = command.Split('"');
+                var from = data.Length > 0 ? data[1] : null;
+                var to = data.Length > 2 ? data[3] : null;
+
+                if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("rngroupSyntax"), true);
+                    return;
+                }
+
+                var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == to).Value;
+                if (group == null)
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("rngroupNotFound"), true);
+                    return;
+                }
+
+                if (!await SQLHelper.IsAuthUsersGroupNameInDB(from))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("rngroupInitialNotFound"), true);
+                    return;
+                }
+
+                await SQLHelper.RenameAuthGroup(from, to);
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("rngroupComplete"), true);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(RnGroup), ex);
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("rngroupSyntax"), true);
             }
         }
 

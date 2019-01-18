@@ -135,6 +135,12 @@ namespace ThunderED.Helpers
         #endregion
 
         #region AuthUsers
+
+        public static async Task RenameAuthGroup(string @from, string to)
+        {
+            await Update("auth_users", "groupName", to, "groupName", from);
+        }
+
         public static async Task UpdatePendingUser(PendingUserEntity item)
         {
             await InsertOrUpdate("pending_users", new Dictionary<string, object>
@@ -246,7 +252,11 @@ namespace ThunderED.Helpers
             return res?.Select(ParseAuthUser).FirstOrDefault();
         }
         
-       
+        public static async Task<bool> IsAuthUsersGroupNameInDB(string @from)
+        {
+            var result = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object> {{"groupName", from}});
+            return result != null && result.Count > 0;
+        }
 
         internal static async Task<PendingUserEntity> GetPendingUser(string remainder)
         {
@@ -821,5 +831,8 @@ namespace ThunderED.Helpers
             });
         }
         #endregion
+
+
+
     }
 }

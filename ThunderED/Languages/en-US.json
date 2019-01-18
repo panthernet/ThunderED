@@ -417,6 +417,10 @@
   "badstandNoUsers":  "No characters found", 
   "badstandHelp":  "This command displays top 10 members with lowest standing to specified NPC corp or faction. Usage: {0}{1} TEXT or {0}bs TEXT\nExample: {0}{1} c | {0}bs caldari | {0}{1} state protectorate",
   "badstandNoNegative":  "No characters with negative standings found",
-  "badstandBusy": "Unable to execute command. Please try again in a few seconds" 
-  
+  "badstandBusy": "Unable to execute command. Please try again in a few seconds",
+  "rngroupInitialNotFound":  "Source group not found in DB. Please check if the name is correct.",
+  "rngroupNotFound":  "Target group not found. Please check if the name is correct.",
+  "rngroupSyntax":  "Can't parse the command. Please check syntax.",
+  "helpRnGroup":  "Rename auth group for users in DB. Syntax: **{0}{1} \"FROM\" \"TO\"** - note the quotes! Example: {0}{1} \"MyGroup\" \"New Group\"",
+  "rngroupComplete":  ":white_check_mark: Operation completed!" 
 }
