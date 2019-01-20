@@ -227,7 +227,7 @@ namespace ThunderED.Helpers
                             foreach (var a in oUsers)
                             {
                                 a.Id = 0;
-                                await SaveAuthUser(a, true);
+                                await SaveAuthUserEx(a, true);
                             }
 
                             await RunCommand("DROP TABLE `userTokens`;");

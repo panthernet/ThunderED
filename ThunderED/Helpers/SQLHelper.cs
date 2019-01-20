@@ -238,6 +238,22 @@ namespace ThunderED.Helpers
             else await InsertOrUpdate("auth_users", dic);
         }
 
+        public static async Task SaveAuthUserEx(AuthUserEntity user, bool insertOnly = false)
+        {
+            var dic = new Dictionary<string, object>();
+            if(user.Id > 0)
+                dic.Add("Id", user.Id);
+            dic.Add("characterID", user.CharacterId);
+            dic.Add("discordID", user.DiscordId);
+            dic.Add("groupName", user.GroupName);
+            dic.Add("refreshToken", user.RefreshToken);
+            dic.Add("authState", user.AuthState);
+            dic.Add("data", JsonConvert.SerializeObject(user.Data));
+            if (insertOnly)
+                await Insert("authUsers", dic);
+            else await InsertOrUpdate("authUsers", dic);
+        }
+
         internal static async Task<AuthUserEntity> GetAuthUserByDiscordId(ulong discordId, bool order = false)
         {
             var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object> {{"discordID", discordId}});
