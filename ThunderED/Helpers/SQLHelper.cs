@@ -554,7 +554,7 @@ namespace ThunderED.Helpers
                     {"filterName", filter},
                 });
             }else 
-                await Update("notificationsList", "id", id, new Dictionary<string, object>
+                await Update("notifications_list", "id", id, new Dictionary<string, object>
                 {
                     {"groupName", group},
                     {"filterName", filter},
