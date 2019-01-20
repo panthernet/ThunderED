@@ -174,7 +174,7 @@ namespace ThunderED.Helpers
         [Obsolete("Maintained for upgrade possibility")]
         private static async Task<List<AuthUserEntity>> GetAuthUsersEx()
         {
-            var res = await SelectData("auth_users", new[] {"*"});
+            var res = await SelectData("authUsers", new[] {"*"});
 
             return res?.Select(item => new AuthUserEntity
             {
