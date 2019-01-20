@@ -36,7 +36,7 @@
         Continuous,
         HRM,
         SLF,
-        ContractNotification,
+        ContractNotif,
         AuthStandings
     }
 }

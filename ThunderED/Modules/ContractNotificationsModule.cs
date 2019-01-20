@@ -18,7 +18,7 @@ namespace ThunderED.Modules
 {
     public class ContractNotificationsModule : AppModuleBase
     {
-        public override LogCat Category => LogCat.ContractNotification;
+        public override LogCat Category => LogCat.ContractNotif;
         private readonly int _checkInterval;
         private DateTime _lastCheckTime = DateTime.MinValue;
 

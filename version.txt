@@ -2,6 +2,7 @@
 
 + Added admin command **rngroup** to be able to rename auth groups in DB after its name has been changed in config file
 + Fixed possible DiscordAPI deadlock
++ Improved console logs display
 + Refactored database to use identical table name casing
 + Updated DiscordAPI library to version 2.0.1
 

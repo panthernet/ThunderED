@@ -50,7 +50,8 @@ namespace ThunderED.Helpers
 
                 if (logConsole)
                 {
-                    var msg = $"{DateTime.Now,-19} [{severity,8}] [{cat}]: {message}";
+                    var time = DateTime.Now.ToString("HH:mm:ss");
+                    var msg = $"{time} [{severity,8}] [{cat,13}]: {message}";
                     await SystemLogFeeder.FeedMessage(msg, severity == LogSeverity.Critical || severity == LogSeverity.Error);
 
                     if (!SettingsManager.Settings.Config.RunAsServiceCompatibility)
@@ -110,7 +111,7 @@ namespace ThunderED.Helpers
                // if(!SettingsManager.Settings.Config.DisableLogIntoFiles)
                 await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}").ConfigureAwait(false);
                 
-                var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat}]: {message}";
+                var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat,13}]: {message}";
                 var logConsole = !SettingsManager.Settings.Config.RunAsServiceCompatibility;
 
                 if (logConsole)
