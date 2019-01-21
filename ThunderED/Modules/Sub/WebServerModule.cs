@@ -125,7 +125,7 @@ namespace ThunderED.Modules.Sub
                             if (Settings.Config.ModuleAuthWeb)
                             {
                                 if (SettingsManager.Settings.WebAuthModule.AuthGroups.Count > 0)
-                                    authText.Append($"<h4>{LM.Get("authWebDiscordHeader")}</h4>");
+                                    authText.Append($"<h2>{LM.Get("authWebDiscordHeader")}</h4>{LM.Get("authPageGeneralAuthHeader")}");
 
                                 foreach (var groupPair in Settings.WebAuthModule.AuthGroups.Where(a=> a.Value.StandingsAuth != null))
                                 {
@@ -198,9 +198,9 @@ namespace ThunderED.Modules.Sub
                             }
 
                             if (smth)
-                                authText.Insert(len, $"<h4>{LM.Get("authWebSystemHeader")}</h4>");
+                                authText.Insert(len, $"<h2>{LM.Get("authWebSystemHeader")}</h2>{LM.Get("authPageSystemAuthHeader")}");
 
-                            text = text.Replace("{authControls}", authText.ToString());
+                            text = text.Replace("{authControls}", authText.ToString()).Replace("{authHeaderText}", LM.Get("authPageHeaderText"));
                             await WriteResponce(text, response);
                             return;
                         }

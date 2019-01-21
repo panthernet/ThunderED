@@ -416,6 +416,9 @@
   "rngroupNotFound":  "Группа назначения не найдена. Проверьте правильность наименования.",
   "rngroupSyntax":  "Невозможно обработать команду, проверьте синтаксис",
   "helpRnGroup":  "Переименование группы для регистраций пользователей в БД. Синтаксис: **rngroup \"FROM\" \"TO\"** - внимание, кавычки! Пример: rngroup \"MyGroup\" \"New Group\"",
-  "rngroupComplete":  ":white_check_mark: Операция выполнена!" 
+  "rngroupComplete":  ":white_check_mark: Операция выполнена!",
+  "authPageHeaderText":  "<p style='text-align: center;font-size: 18px;margin-bottom:-20px;'>Это страница аутентификации, где каждая кнопка выполняет опредленное действие. Замените это описание в файле настроек.</p>",
+  "authPageGeneralAuthHeader":  "<p style='text-align: center;font-size: 18px;'>This section designated for common members authentication</p>", 
+  "authPageSystemAuthHeader":  "<p style='text-align: center;font-size: 18px;'>This section designated for special authentication</p>" 
 
 }

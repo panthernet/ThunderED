@@ -422,5 +422,8 @@
   "rngroupNotFound":  "Target group not found. Please check if the name is correct.",
   "rngroupSyntax":  "Can't parse the command. Please check syntax.",
   "helpRnGroup":  "Rename auth group for users in DB. Syntax: **{0}{1} \"FROM\" \"TO\"** - note the quotes! Example: {0}{1} \"MyGroup\" \"New Group\"",
-  "rngroupComplete":  ":white_check_mark: Operation completed!" 
+  "rngroupComplete":  ":white_check_mark: Operation completed!",
+  "authPageHeaderText":  "<p style='text-align: center;font-size: 18px;margin-bottom:-20px;'>This is authentication page where each button corresponds to some action. Please change this text in language file.</p>",
+  "authPageGeneralAuthHeader":  "<p style='text-align: center;font-size: 18px;'>This section designated for common members authentication</p>", 
+  "authPageSystemAuthHeader":  "<p style='text-align: center;font-size: 18px;'>This section designated for special authentication</p>" 
 }
