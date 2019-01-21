@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
+using ThunderED.Helpers;
 using ThunderED.Json;
 
 namespace ThunderED.Classes.Entities
@@ -16,6 +18,9 @@ namespace ThunderED.Classes.Entities
         public string RefreshToken;
         public int AuthState;
         public AuthUserData Data = new AuthUserData();
+        public DateTime CreateDate { get; set; }
+        public string RegCode { get; set; }
+
 
         //for compatibility
         [Obsolete("Maintained for upgrade possibility")]
@@ -63,6 +68,27 @@ namespace ThunderED.Classes.Entities
                 AllianceTicker = alliance.ticker;
                 AllianceId = corp?.alliance_id ?? 0;
             }
+        }
+
+        public async Task Update(long characterId, string permissions = null)
+        {
+            var ch = await APIHelper.ESIAPI.GetCharacterData("Auth", characterId);
+            if(ch == null) return;
+            CharacterName = ch.name;
+            var rCorp = await APIHelper.ESIAPI.GetCorporationData("AuthUser", ch.corporation_id, true);
+            CorporationId = ch.corporation_id;
+            CorporationName = rCorp.name;
+            CorporationTicker = rCorp.ticker;
+            AllianceId = ch.alliance_id ?? 0;
+            if (AllianceId > 0)
+            {
+                var rAlliance = await APIHelper.ESIAPI.GetAllianceData("AuthUser", ch.alliance_id, true);
+                AllianceName = rAlliance.name;
+                AllianceTicker = rAlliance.ticker;
+            }
+
+            if (permissions != null)
+                Permissions = permissions;
         }
     }
 }

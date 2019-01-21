@@ -485,9 +485,9 @@ namespace ThunderED.Classes
                         code = null;
                         characterId = Convert.ToInt64(data);
                     }
-                    code = code ?? await SQLHelper.PendingUsersGetCode(characterId);
 
-                    var authUser = await SQLHelper.GetAuthUserByCode(code);
+                    var authUser = await SQLHelper.GetAuthUserByCharacterId(characterId);
+                    code = code ?? authUser.RegCode;
 
                     //check if entry exists
                     if (!authUser.HasToken)
@@ -501,7 +501,7 @@ namespace ThunderED.Classes
                         case "accept":
                         {
                             //check if pending users have valid entry
-                            if (await SQLHelper.PendingUsersIsEntryActive(code) == false)
+                            if (await SQLHelper.IsAuthUserWaitingForAuth(code) == false)
                             {
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
                                 return;
@@ -529,23 +529,29 @@ namespace ThunderED.Classes
                             }
 
                             //authed for action!
-                           // code = code ?? await SQLHelper.PendingUsersGetCode(characterId);
-                            var discordUserId = await SQLHelper.PendingUsersGetDiscordId(code);
+                            var discordUserId = await SQLHelper.GetAuthUserDiscordId(characterId);
+                            if (discordUserId > 0)
+                            {
+                                await WebAuthModule.AuthUser(Context, code, discordUserId, true);
+                                await SQLHelper.SetAuthUserState(characterId, 2);
+                            }
+                            else
+                            {
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, "Discord ID is missing!");
+                            }
 
-                            await WebAuthModule.AuthUser(Context, code, discordUserId, true);
-                            await SQLHelper.SetAuthUserState(code, 2);
                             return;
                         }
                         case "decline":
                         {
                             //check if pending users have valid entry
-                            if (await SQLHelper.PendingUsersIsEntryActive(code) == false)
+                            if (await SQLHelper.IsAuthUserWaitingForAuth(code) == false)
                             {
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
                                 return;
                             }
 
-                            characterId = characterId == 0 ? await SQLHelper.PendingUsersGetCharacterId(code) : characterId;
+                            characterId = characterId == 0 ? (await SQLHelper.GetAuthUserByRegCode(code))?.CharacterId ?? 0 : characterId;
 
                             
                             await SQLHelper.DeleteAuthDataByCharId(characterId);
@@ -556,7 +562,7 @@ namespace ThunderED.Classes
                         case "confirm":
                             code = code ?? data;
 
-                            if (!authUser.HasToken || await SQLHelper.PendingUsersIsEntryActive(code) == false || authUser.DiscordId > 0)
+                            if (!authUser.HasToken || await SQLHelper.IsAuthUserWaitingForAuth(code) == false || authUser.DiscordId > 0)
                             {
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
                                 return;
@@ -564,7 +570,6 @@ namespace ThunderED.Classes
 
                             authUser.DiscordId = Context.Message.Author.Id;
                             authUser.AuthState = 1;
-                            await SQLHelper.PendingUsersSetCode(code, Context.Message.Author.Id);
                             await SQLHelper.SaveAuthUser(authUser);
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserConfirmed", authUser.Data.CharacterName));
 

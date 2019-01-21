@@ -1,3 +1,15 @@
+### V1.2.16
+
++ Added soft lock for a DB upgrade if DB version is below required minimum (for future cleanups)
++ Fixed standings auth taking initiative above other groups in some cases
++ Fixed timers login error for admins in some cases
++ Fixed standings auth error when standings were not yet loaded for feed character
++ Improved and refactored DB backend
+
+### NOTES
+
+Standings auth now use group names during auth process to avoid confusion with other groups when validation criteria overlaps between those groups
+
 ### V1.2.15
 
 + Added admin command **rngroup** to be able to rename auth groups in DB after its name has been changed in config file

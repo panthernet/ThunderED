@@ -2,6 +2,7 @@
 
 namespace ThunderED.Classes.Entities
 {
+    [Obsolete("Maintained for upgrade")]
     public class PendingUserEntity
     {
         public long Id { get; set; }

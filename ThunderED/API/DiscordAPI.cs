@@ -309,8 +309,9 @@ namespace ThunderED.API
 
             if(!groupsToCheck.Any())
             {
-                //check only non-ESI groups for roles
-                groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a=> !a.ESICustomAuthRoles.Any()));
+                //check only GENERAL auth groups for roles
+                //non-general group auth should have group name supplied
+                groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a=> !a.ESICustomAuthRoles.Any() && a.StandingsAuth == null));
             }
             #endregion
 

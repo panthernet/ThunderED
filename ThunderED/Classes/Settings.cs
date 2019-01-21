@@ -9,6 +9,8 @@ using ThunderED.Classes;
 namespace TED_ConfigEditor.Classes
 #else
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace ThunderED.Classes
 #endif
@@ -1547,6 +1549,9 @@ namespace ThunderED.Classes
         public ObservableCollection<string> ESICustomAuthRoles { get; set; } = new ObservableCollection<string>();
 #else
         public List<string> ESICustomAuthRoles { get; set; } = new List<string>();
+
+        [JsonIgnore]
+        public bool MustHaveGroupName => ESICustomAuthRoles.Any() || StandingsAuth != null;
 #endif
 #if EDITOR
         public override string this[string columnName]

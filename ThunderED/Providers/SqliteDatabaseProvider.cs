@@ -10,7 +10,7 @@ using ThunderED.Helpers;
 
 namespace ThunderED.Providers
 {
-    internal class SqliteDatabaseProvider : IDatabasePovider
+    internal class SqliteDatabaseProvider : DBProviderBase<SqliteConnection, SqliteCommand>, IDatabasePovider
     {
         #region Query
 
@@ -37,7 +37,7 @@ namespace ThunderED.Providers
                 {
                     count = 1;
                     foreach (var pair in where)
-                        command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
+                        command.Parameters.Add(CreateParam<SqliteParameter>($"@var{count++}", pair.Value));
                 }
 
                 try
@@ -79,7 +79,7 @@ namespace ThunderED.Providers
                 {
                     count = 1;
                     foreach (var pair in where)
-                        command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
+                        command.Parameters.Add(CreateParam<SqliteParameter>($"@var{count++}", pair.Value));
                 }
 
                 try
@@ -122,6 +122,41 @@ namespace ThunderED.Providers
 
             });
         }
+
+        public async Task<List<object[]>> SelectData(string query)
+        {
+            return await SessionWrapper(query, async command =>
+            {
+                try
+                {
+                    using (var r = await command.ExecuteReaderAsync())
+                    {
+                        var list = new List<object[]>();
+                        if (r.HasRows)
+                        {
+                            while (await r.ReadAsync())
+                            {
+                                var obj = new List<object>();
+
+                                for (int i = 0; i < r.VisibleFieldCount; i++)
+                                {
+                                    obj.Add(r.IsDBNull(i) ? null : r.GetValue(i));
+                                }
+
+                                list.Add(obj.ToArray());
+                            }
+                        }
+                        return list;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx($"[{nameof(SelectData)}]: {query}", ex, LogCat.SQLite);
+                    return default;
+                }
+
+            });
+        }
       
         public async Task<T> Query<T>(string table, string field, Dictionary<string, object> where)
         {
@@ -146,7 +181,7 @@ namespace ThunderED.Providers
                 count = 1;
                 foreach (var pair in where)
                 {
-                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
+                    command.Parameters.Add(CreateParam<SqliteParameter>($"@var{count++}", pair.Value));
                 }
                 try
                 {
@@ -179,74 +214,6 @@ namespace ThunderED.Providers
             });
         }
 
-        public async Task<List<T>> QueryList<T>(string table, string field, Dictionary<string, object> where)
-        {
-            if (where == null)
-            {
-                await LogHelper.LogError($"[Query]: {table}-{field} query has empty values!");
-                return default;
-            }
-
-            var whereText = string.Empty;
-            int count = 1;
-            var last = where.Keys.Last();
-            foreach (var pair in where)
-            {
-                whereText += $"{pair.Key}=@var{count++}{(pair.Key == last? null : " and ")}";
-            }
-
-            var query = $"SELECT {field} FROM {table} WHERE {whereText}";
-            return await SessionWrapper(query, async command =>
-            {
-                count = 1;
-                foreach (var pair in where)
-                {
-                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
-                }
-                var res = new List<T>();
-                try
-                {
-                    using (var r = await command.ExecuteReaderAsync())
-                    {
-                        if (!r.HasRows) return res;
-                        while (await r.ReadAsync())
-                        {
-                            if (r.IsDBNull(0))
-                                continue;
-                            var type = typeof(T);
-                            if (type == typeof(string))
-                                res.Add((T) (object) (r.IsDBNull(0) ? "" : r.GetString(0)));
-                            else if (type == typeof(int))
-                                res.Add((T) (object) (r.IsDBNull(0) ? 0 : r.GetInt32(0)));
-                            else if (type == typeof(ulong))
-                                res.Add((T) (object) (r.IsDBNull(0) ? 0 : (ulong)r.GetInt64(0)));
-                            else if (type == typeof(long))
-                                res.Add((T) (object) (r.IsDBNull(0) ? 0 : r.GetInt64(0)));
-
-                        }
-
-                        return res;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx($"[Query]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
-                    return res;
-                }
-
-            });
-        }
-
-        public async Task<T> Query<T>(string table, string field, string whereField, object whereData)
-        {
-            return await Query<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
-        }
-
-        public async Task<List<T>> QueryList<T>(string table, string field, string whereField, object whereData)
-        {
-            return await QueryList<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
-        }
-
         #endregion
         
         #region Update
@@ -274,7 +241,7 @@ namespace ThunderED.Providers
                 count = 1;
                 foreach (var pair in values)
                 {
-                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value ?? DBNull.Value));
+                    command.Parameters.Add(CreateParam<SqliteParameter>($"@var{count++}", pair.Value ?? DBNull.Value));
                 }
                 try
                 {
@@ -310,7 +277,7 @@ namespace ThunderED.Providers
                 count = 1;
                 foreach (var pair in values)
                 {
-                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value ?? DBNull.Value));
+                    command.Parameters.Add(CreateParam<SqliteParameter>($"@var{count++}", pair.Value ?? DBNull.Value));
                 }
                 try
                 {
@@ -322,11 +289,6 @@ namespace ThunderED.Providers
                 }
             });
 
-        }
-
-        public async Task Update(string table, string setField, object setData, string whereField, object whereData)
-        {
-            await Update(table, setField, setData, new Dictionary<string, object> {{whereField, whereData}});
         }
 
         public async Task Update(string table, string setField, object setData, Dictionary<string, object> where)
@@ -348,9 +310,9 @@ namespace ThunderED.Providers
             await SessionWrapper(query, async command =>
             {
                 count = 1;
-                command.Parameters.Add(CreateParam("@data", setData ?? DBNull.Value));
+                command.Parameters.Add(CreateParam<SqliteParameter>("@data", setData ?? DBNull.Value));
                 foreach (var pair in where)
-                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value ?? DBNull.Value));
+                    command.Parameters.Add(CreateParam<SqliteParameter>($"@var{count++}", pair.Value ?? DBNull.Value));
                 try
                 {
                     command.ExecuteNonQuery();
@@ -381,29 +343,10 @@ namespace ThunderED.Providers
             {
                 count = 1;
                 foreach (var pair in where)
-                    command.Parameters.Add(CreateParam($"@var{count++}", pair.Value));
+                    command.Parameters.Add(CreateParam<SqliteParameter>($"@var{count++}", pair.Value));
                 try
                 {
                     command.ExecuteNonQuery();
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx(nameof(Delete), ex, LogCat.SQLite);
-                }
-            });
-        }
-
-        public async Task Delete(string table, string whereField = null, object whereValue = null)
-        {
-            var where = string.IsNullOrEmpty(whereField) || whereValue == null ? null : $" WHERE {whereField} = @name";
-            var query = $"DELETE FROM {table}{where}";
-            await SessionWrapper(query, async command =>
-            {
-                command.Parameters.Add(CreateParam("@name", whereValue));
-                try
-                {
-                    command.ExecuteNonQuery();
-
                 }
                 catch (Exception ex)
                 {
@@ -429,44 +372,6 @@ namespace ThunderED.Providers
         }
         #endregion
 
-        #region Run
-
-        public async Task<bool> RunScript(string file)
-        {
-            if (!File.Exists(file)) return false;
-
-            return await SessionWrapper(File.ReadAllText(file), async command =>
-            {
-                try
-                {
-                    command.ExecuteNonQuery();
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx(nameof(RunScript), ex, LogCat.SQLite);
-                    return false;
-                }
-
-                return true;
-            });
-        }
-      
-        public async Task RunCommand(string query2, bool silent = false)
-        {
-            try
-            {
-                await SessionWrapper(query2, command =>
-                {
-                    command.ExecuteNonQuery();
-                });
-            }
-            catch (Exception ex)
-            {
-                if (!silent)
-                    await LogHelper.LogEx($"[{nameof(RunCommand)}]: {query2}", ex, LogCat.SQLite);
-            }
-        }
-        #endregion
 
         #region Cache
 
@@ -475,8 +380,8 @@ namespace ThunderED.Providers
             var query = "SELECT text, lastUpdate FROM cache WHERE id=@value and type=@tt";
             return await SessionWrapper(query, async command =>
             {
-                command.Parameters.Add(CreateParam("@value", whereValue));
-                command.Parameters.Add(CreateParam("@tt", typeof(T).Name));
+                command.Parameters.Add(CreateParam<SqliteParameter>("@value", whereValue));
+                command.Parameters.Add(CreateParam<SqliteParameter>("@tt", typeof(T).Name));
                 try
                 {
                     using (var r = await command.ExecuteReaderAsync())
@@ -508,13 +413,13 @@ namespace ThunderED.Providers
 
             await SessionWrapper(q, async command =>
             {
-                command.Parameters.Add(CreateParam("@type", typeof(T).Name));
-                command.Parameters.Add(CreateParam("@id", id ?? DBNull.Value));
-                command.Parameters.Add(CreateParam("@access", DateTime.Now));
-                command.Parameters.Add(CreateParam("@update", DateTime.Now));
-                command.Parameters.Add(CreateParam("@days", days));
+                command.Parameters.Add(CreateParam<SqliteParameter>("@type", typeof(T).Name));
+                command.Parameters.Add(CreateParam<SqliteParameter>("@id", id ?? DBNull.Value));
+                command.Parameters.Add(CreateParam<SqliteParameter>("@access", DateTime.Now));
+                command.Parameters.Add(CreateParam<SqliteParameter>("@update", DateTime.Now));
+                command.Parameters.Add(CreateParam<SqliteParameter>("@days", days));
                 if(entry == null)
-                    command.Parameters.Add(CreateParam("@text", JsonConvert.SerializeObject(data)));
+                    command.Parameters.Add(CreateParam<SqliteParameter>("@text", JsonConvert.SerializeObject(data)));
                 try
                 {
                     command.ExecuteNonQuery();
@@ -572,43 +477,12 @@ namespace ThunderED.Providers
             });
         }
 
-        internal static async Task SessionWrapper(string query, Action<SqliteCommand> method)
-        {
-            using (var session = new SqliteConnection(CreateConnectString()))
-            {
-                using (var command = new SqliteCommand())
-                {
-                    command.CommandText = query;
-                    command.Connection = session;
-                    await session.OpenAsync();
-                    method(command);
-                }
-            }
-        }
-
-        private static async Task<T> SessionWrapper<T>(string query, Func<SqliteCommand, Task<T>> method)
-        {
-            using (var session = new SqliteConnection(CreateConnectString()))
-            {
-                using (var command = new SqliteCommand(query, session))
-                {
-                    await session.OpenAsync();
-                    return await method(command);
-                }
-            }
-        }
-
-        private static string CreateConnectString()
+        protected override string CreateConnectString(bool skipDatabase = false)
         {
             if (!string.IsNullOrEmpty(SettingsManager.Settings.Database.CustomConnectionString))
                 return SettingsManager.Settings.Database.CustomConnectionString;
 
             return $"Data Source = {SettingsManager.DatabaseFilePath};";
-        }
-
-        private static SqliteParameter CreateParam(string name, object value)
-        {
-            return new SqliteParameter(name, value);
         }
 
         public async Task<bool> EnsureDBExists()

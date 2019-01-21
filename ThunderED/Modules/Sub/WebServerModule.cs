@@ -303,6 +303,7 @@ namespace ThunderED.Modules.Sub
                 "esi-corporations.read_contacts.v1"
             };
             var pString = string.Join('+', permissions);
+
             return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=authst";
         }
 

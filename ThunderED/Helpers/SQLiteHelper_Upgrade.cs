@@ -17,7 +17,8 @@ namespace ThunderED.Helpers
     {
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15"
+            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15",
+            "1.2.16"
         };
 
         public static async Task<bool> Upgrade()
@@ -31,6 +32,13 @@ namespace ThunderED.Helpers
 
             try
             {
+                var firstUpdate = new Version(MajorVersionUpdates[0]);
+                if (vDbVersion < firstUpdate)
+                {
+                    await LogHelper.LogError("Your database version is below the required minimum for an upgrade. You have to do clean install without the ability to migrate your data. Consult GitHub WIKI or reach @panthernet#1659 on Discord group for assistance.");
+                    return false;
+                }
+
                 foreach (var update in MajorVersionUpdates)
                 {
                     var v = new Version(update);
@@ -292,7 +300,42 @@ namespace ThunderED.Helpers
 
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
+                        case "1.2.16":
+                            await BackupDatabase();
 
+                            var pUsers = await GetPendingUsersEx();
+
+                            await RunCommand("drop table pending_users;");
+                            await RunCommand("ALTER TABLE `auth_users` ADD COLUMN `reg_code` TEXT;");
+                            await RunCommand("ALTER TABLE `auth_users` ADD COLUMN `reg_date` timestamp;");
+                            
+                            foreach (var user in pUsers.Where(a=> a.Active))
+                            {
+                                var dbentry = await GetAuthUserByCharacterId(user.CharacterId);
+                                if (dbentry != null)
+                                {
+                                    dbentry.RegCode = user.AuthString;
+                                    dbentry.CreateDate = user.CreateDate;
+                                    await SaveAuthUser(dbentry);
+                                }
+                                else
+                                {
+                                    var au = new AuthUserEntity
+                                    {
+                                        CharacterId = user.CharacterId,
+                                        DiscordId = 0,
+                                        RegCode = user.AuthString,
+                                        AuthState = 0,
+                                        CreateDate = user.CreateDate,
+                                        Data = new AuthUserData()
+                                    };
+                                    await au.Data.Update(user.CharacterId);
+                                    await SaveAuthUser(au);
+                                }
+                            }
+
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
                             //MYSQL HAS BEEN ADDED HERE
 
                         default:
