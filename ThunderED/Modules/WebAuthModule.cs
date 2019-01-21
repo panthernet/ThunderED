@@ -106,13 +106,6 @@ namespace ThunderED.Modules
             }
         }
 
-        public async Task ProcessPreliminaryApplicant(string remainder)
-        {
-            var data = await SQLHelper.GetAuthUserByRegCode(remainder);
-            if (data == null) return;
-            await ProcessPreliminaryApplicant(data);
-        }
-
         public static async Task<AuthRoleEntity> GetCorpEntityById(List<WebAuthGroup> groups,long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups.Values.ToList();
@@ -329,7 +322,7 @@ namespace ThunderED.Modules
             return null;
         }
 
-        public async Task ProcessPreliminaryApplicant(AuthUserEntity user)
+        public async Task ProcessPreliminaryApplicant(AuthUserEntity user, ICommandContext context = null)
         {
             try
             {
@@ -340,7 +333,7 @@ namespace ThunderED.Modules
                     return;
                 }
 
-                var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, user.GroupName, true);
+                var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, user.CharacterId, true);
                 if (rChar == null) return;
 
                 var longCorpId = rChar.corporation_id;
@@ -357,7 +350,7 @@ namespace ThunderED.Modules
                     }
 
                     //auth
-                    await AuthUser(null, user.RegCode, user.DiscordId, false);
+                    await AuthUser(context, user.RegCode, user.DiscordId, false);
                 }
             }
             catch (Exception ex)
@@ -773,12 +766,6 @@ namespace ThunderED.Modules
                                 .ConfigureAwait(false);
                     }
                     await LogHelper.LogInfo($"Granting roles to {characterData.name} {(group.PreliminaryAuthMode ? $"[AUTO-AUTH from {groupName}]" : $"[MANUAL-AUTH {groupName}]")}", LogCat.AuthCheck);
-
-                    //disable pending user
-                    await SQLHelper.SetAuthUsersRegCode(authUser.CharacterId, null);
-                   
-                    //insert new authUsers
-
 
                     //remove all prevoius users associated with discordID or charID
                     if (discordId > 0)

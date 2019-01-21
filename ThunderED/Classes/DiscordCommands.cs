@@ -557,7 +557,6 @@ namespace ThunderED.Classes
                             return;
                         }
                         case "confirm":
-                            code = code ?? data;
 
                             if (!authUser.HasToken || !authUser.HasRegCode || authUser.DiscordId > 0)
                             {
@@ -567,11 +566,9 @@ namespace ThunderED.Classes
 
                             authUser.DiscordId = Context.Message.Author.Id;
                             authUser.AuthState = 1;
-                            authUser.RegCode = null;
                             await SQLHelper.SaveAuthUser(authUser);
+                            await TickManager.GetModule<WebAuthModule>().ProcessPreliminaryApplicant(authUser, Context);
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserConfirmed", authUser.Data.CharacterName));
-
-                            await TickManager.GetModule<WebAuthModule>().ProcessPreliminaryApplicant(code);
                             return;
                         default:
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("invalidCommandSyntax"));

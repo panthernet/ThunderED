@@ -288,11 +288,6 @@ namespace ThunderED.Helpers
             return await GetAuthUserByCharacterId(characterId);
         }
 
-        public static async Task SetAuthUsersRegCode(long characterId, string value)
-        {
-            await Update("auth_users", "reg_code", value, "characterID", characterId);
-        }
-
         public static async Task<ulong> GetAuthUserDiscordId(long characterId)
         {
             return await Query<ulong>("auth_users", "discordID", "characterID", characterId);
