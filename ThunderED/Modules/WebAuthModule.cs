@@ -793,6 +793,7 @@ namespace ThunderED.Modules
                     authUser.DiscordId = discordId;
                     authUser.GroupName = groupName;
                     authUser.AuthState = 2;
+                    authUser.RegCode = null;
 
                     if (authUser.Data.CorporationId == 0)
                     {

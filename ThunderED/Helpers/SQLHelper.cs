@@ -288,16 +288,6 @@ namespace ThunderED.Helpers
             return await GetAuthUserByCharacterId(characterId);
         }
 
-        public static async Task<bool> IsAuthUserWaitingForAuth(string code)
-        {
-            return !string.IsNullOrEmpty(await Query<string>("auth_users", "characterID", "reg_code", code));
-        }
-
-        public static async Task SetAuthUserState(long characterId, int value)
-        {
-            await Update("auth_users", "authState", value, "characterID", characterId);
-        }
-
         public static async Task SetAuthUsersRegCode(long characterId, string value)
         {
             await Update("auth_users", "reg_code", value, "characterID", characterId);
@@ -305,7 +295,7 @@ namespace ThunderED.Helpers
 
         public static async Task<ulong> GetAuthUserDiscordId(long characterId)
         {
-            return await SQLHelper.Query<ulong>("auth_users", "discordID", "characterID", characterId);
+            return await Query<ulong>("auth_users", "discordID", "characterID", characterId);
         }
 
         [Obsolete("Maintained for upgrade possibility")]

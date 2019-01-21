@@ -37,6 +37,9 @@ namespace ThunderED.Classes.Entities
 
         [JsonIgnore]
         public bool HasToken => !string.IsNullOrEmpty(RefreshToken);
+
+        [JsonIgnore]
+        public bool HasRegCode => !string.IsNullOrEmpty(RegCode);
     }
 
     public class AuthUserData
