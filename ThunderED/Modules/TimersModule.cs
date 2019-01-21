@@ -293,18 +293,6 @@ namespace ThunderED.Modules
             var editChars = new List<long>();
             bool skip2 = false;
 
-            //check for Discord admins
-            if (Settings.TimersModule.GrantEditRolesToDiscordAdmins)
-            {
-                var discordId = SQLHelper.GetAuthUserDiscordId(characterId).GetAwaiter().GetResult();
-                var roles = string.Join(',', APIHelper.DiscordAPI.GetUserRoleNames(discordId));
-                if (!string.IsNullOrEmpty(roles))
-                {
-                    var exemptRoles = Settings.Config.DiscordAdminRoles;
-                    skip2 = roles.Replace("&br;", "\"").Split(',').Any(role => exemptRoles.Contains(role));
-                }
-            }
-
             if (authgroups.Count == 0 ||  authgroups.Values.All(a => !a.AllianceIDs.Any() && !a.CorporationIDs.Any() && !a.CharacterIDs.Any()))
             {
                 skip2 = true;
@@ -319,7 +307,20 @@ namespace ThunderED.Modules
                 }
             }
 
-
+            //check for Discord admins
+            if (!skip && !skip2 && Settings.TimersModule.GrantEditRolesToDiscordAdmins)
+            {
+                var discordId = SQLHelper.GetAuthUserDiscordId(characterId).GetAwaiter().GetResult();
+                if (discordId > 0)
+                {
+                    var roles = string.Join(',', APIHelper.DiscordAPI.GetUserRoleNames(discordId));
+                    if (!string.IsNullOrEmpty(roles))
+                    {
+                        var exemptRoles = Settings.Config.DiscordAdminRoles;
+                        skip2 = roles.Replace("&br;", "\"").Split(',').Any(role => exemptRoles.Contains(role));
+                    }
+                }
+            }
 
             if (!skip && !skip2 && !accessCorps.Contains(rChar.corporation_id) && !editCorps.Contains(rChar.corporation_id) &&
                 (!rChar.alliance_id.HasValue || !(rChar.alliance_id > 0) || (!accessAlliance.Contains(
