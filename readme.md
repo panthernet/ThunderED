@@ -43,7 +43,7 @@ With this bot you will have tools to:
 ## Supported Modules
 * Web Auth - authenticate EVE characters in Discord using built-in web server, use JackKnife utility to inspect them before you accept them into your community
 * Auth Check - check users access rights and strip permissions when char leaves your corp or ally
-* Live Kill Feed - feed live EVE killmails using ZKill RedisQ into multiple channels 
+* Live Kill Feed - feed live EVE killmails into multiple channels using ZKill WebSockets or RedisQ
 * Radius Kill Feed - feed live killmails in a radius around selected systems, constellations and regions into multiple channels
 * Notifications Feed - feed EVE notifications from different characters into multiple channels
 * Char & corp search - fetch information about characters and corps using special commands
@@ -70,10 +70,4 @@ With this bot you will have tools to:
 * .NET Core 2.1
 
 ## Pics
-![Timers](http://dl3.joxi.net/drive/2018/05/06/0014/0683/967339/39/fcb3e030f2.jpg)
-
-![Sample kill feed](http://dl3.joxi.net/drive/2018/05/04/0014/0683/967339/39/4605864a01.jpg)
-
-![Notifications](http://dl3.joxi.net/drive/2018/05/04/0014/0683/967339/39/39e91a5fde.jpg)
-
-![JackKnife - HRM](http://joxi.ru/gmv89dJsL6wnnA.jpg)
+[The bottom of the 1st post, under the cut](https://forums.eveonline.com/t/thundered-eve-online-discord-bot/74213)
