@@ -728,7 +728,7 @@ namespace ThunderED.Modules
                 discordId = discordId > 0 ? discordId : context.Message.Author.Id;
 
                 //check pending user validity
-                var authUser = isManualAuth ? await SQLHelper.GetAuthUserByRegCode(remainder) : await SQLHelper.GetAuthUserByDiscordId(discordId);
+                var authUser = !string.IsNullOrEmpty(remainder) ? await SQLHelper.GetAuthUserByRegCode(remainder) : await SQLHelper.GetAuthUserByDiscordId(discordId);
                 if (authUser == null)
                 {
                     if(context != null)
@@ -770,7 +770,7 @@ namespace ThunderED.Modules
                     //remove all prevoius users associated with discordID or charID
                     if (discordId > 0)
                     {
-                        await SQLHelper.DeleteAuthUsers(discordId);
+                        await SQLHelper.DeleteAuthDataByDiscordId(discordId);
                         await SQLHelper.DeleteAuthDataByCharId(authUser.CharacterId);
                     }
 

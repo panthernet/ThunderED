@@ -141,7 +141,7 @@ namespace ThunderED.Helpers
             await Update("auth_users", "groupName", to, "groupName", from);
         }
 
-        public static async Task DeleteAuthUsers(ulong discordId)
+        public static async Task DeleteAuthDataByDiscordId(ulong discordId)
         {
             await Delete("auth_users", "discordID", discordId);
         }
