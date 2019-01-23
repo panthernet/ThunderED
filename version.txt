@@ -5,6 +5,8 @@
 + Fixed standings auth taking initiative above other groups in some cases
 + Fixed timers login error for admins in some cases
 + Fixed standings auth error when standings were not yet loaded for feed character
++ Fixed structure names in some notifications
++ Fixed MoonminingExtractionFinished notification
 + Improved and refactored DB backend
 + Improved auth backend
 

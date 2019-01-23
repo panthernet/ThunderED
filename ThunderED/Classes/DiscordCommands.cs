@@ -579,6 +579,7 @@ namespace ThunderED.Classes
                 {
                     await LogHelper.LogEx($"!auth {command} {data}", ex, LogCat.AuthWeb);
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("WebRequestUnexpected"));
+                    return;
                 }
             }
 

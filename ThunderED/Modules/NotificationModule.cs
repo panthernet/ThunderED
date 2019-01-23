@@ -160,6 +160,21 @@ namespace ThunderED.Modules
 
 
                                 //check if there are new notifications to process
+                                fNotifications.Add(new JsonClasses.Notification
+                                {
+                                    text = @"autoTime: 131921874600000000
+moonID: 40422957
+oreVolumeByType:
+  45490: 719451.8239967824
+  46678: 2706818.8426698847
+solarSystemID: 31001382
+structureID: 1026884397766
+structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extractor Alpha</a>
+                                    structureName: J103731 - G-23 Extractor Alpha
+                                    structureTypeID: 35835",
+                                    notification_id = 999990000,
+                                    type = "MoonminingExtractionFinished"
+                                });
                                 if (fNotifications.Count > 0 && fNotifications.Last().notification_id != _lastNotification)
                                 {
                                     foreach (var notification in fNotifications)
@@ -210,6 +225,8 @@ namespace ThunderED.Modules
                                                     var keys = data.Keys.ToList();
                                                     var ltqIndex = keys.IndexOf("oreVolumeByType");
                                                     var endIndex = keys.IndexOf("solarSystemLink");
+                                                    if(endIndex == -1)
+                                                        endIndex = keys.IndexOf("solarSystemID");
                                                     var pass = endIndex - ltqIndex;
                                                     if (pass > 0)
                                                     {
@@ -491,10 +508,11 @@ namespace ThunderED.Modules
                                                     //"text": "autoTime: 131632776620000000\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 1003894.7944164276\n  46676: 3861704.652392864\n  46681: 1934338.7763798237\n  46687: 5183861.7768108845\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                     var compText = new StringBuilder();
-                                                    foreach (var pair in oreComposition)
-                                                    {
-                                                        compText.Append($"{pair.Key}: {pair.Value} | ");
-                                                    }
+                                                    if(oreComposition != null)
+                                                        foreach (var pair in oreComposition)
+                                                        {
+                                                            compText.Append($"{pair.Key}: {pair.Value} | ");
+                                                        }
 
                                                     if (compText.Length > 0)
                                                         compText.Remove(compText.Length - 3, 3);
