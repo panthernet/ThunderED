@@ -106,7 +106,14 @@ namespace ThunderED.API
 
         public async Task<IUserMessage> SendMessageAsync(ulong channel, string message, Embed embed = null)
         {
-            return await SendMessageAsync(GetChannel(channel), message, embed);
+            if (channel == 0) return null;
+            var ch = GetChannel(channel);
+            if (ch == null)
+            {
+                await LogHelper.LogWarning($"Discord channel {channel} not found!", LogCat.Discord);
+                return null;
+            }
+            return await SendMessageAsync(ch, message, embed);
         }
 
 
@@ -451,7 +458,9 @@ namespace ThunderED.API
                             if (SettingsManager.Settings.WebAuthModule.AuthReportChannel != 0)
                             {
                                 var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
-                                await SendMessageAsync(channel, $"{LM.Get("renewingRoles")} {characterData.name} ({u.Username}){stripped}{added}");
+                                if(SettingsManager.Settings.WebAuthModule.AuthReportChannel > 0 && channel == null)
+                                    await LogHelper.LogWarning($"Discord channel {SettingsManager.Settings.WebAuthModule.AuthReportChannel} not found!", LogCat.Discord);
+                                else await SendMessageAsync(channel, $"{LM.Get("renewingRoles")} {characterData.name} ({u.Username}){stripped}{added}");
                             }
 
                             await LogHelper.LogInfo($"Adjusting roles for {characterData.name} ({u.Username}) {stripped}{added}", LogCat.AuthCheck);

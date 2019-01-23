@@ -1,3 +1,8 @@
+### V1.2.17
+
++ Added log message to highlight inconsistency in auth group names between DB and config file
++ Added warning messages if discord channel is not found when sending some messages
+
 ### V1.2.16
 
 + Added soft lock for a DB upgrade if DB version is below required minimum (for future cleanups)
