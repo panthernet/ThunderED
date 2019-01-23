@@ -2,6 +2,7 @@
 
 + Added log message to highlight inconsistency in auth group names between DB and config file
 + Added warning messages if discord channel is not found when sending some messages
++ Fixed the case when bot tried to strip ignored roles
 
 ### V1.2.16
 

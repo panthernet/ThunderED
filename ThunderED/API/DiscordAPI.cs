@@ -539,7 +539,8 @@ namespace ThunderED.API
                             if(channel != null)
                                 await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{LM.Get("resettingRoles")} {u.Username}");
                             await LogHelper.LogInfo($"Resetting roles for {u.Username}", LogCat.AuthCheck);
-                            await u.RemoveRolesAsync(rroles);
+                            var trueRroles = rroles.Where(a => !exemptRoles.Contains(a.Name) && !authCheckIgnoreRoles.Contains(a.Name));
+                            await u.RemoveRolesAsync(trueRroles);
                         }
                         catch (Exception ex)
                         {
