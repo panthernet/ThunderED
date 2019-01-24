@@ -222,7 +222,7 @@ namespace ThunderED.Helpers
             dic.Add("refreshToken", user.RefreshToken);
             dic.Add("authState", user.AuthState);
             dic.Add("reg_code", user.RegCode);
-            dic.Add("reg_date", user.CreateDate.ToString("yyyy-MM-dd HH:mm:ss"));
+            dic.Add("reg_date", user.CreateDate);
             dic.Add("data", JsonConvert.SerializeObject(user.Data));
             if (insertOnly)
                 await Insert("auth_users", dic);

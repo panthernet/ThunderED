@@ -117,9 +117,7 @@
     "RolesAccessList": [],
     "AuthTimeoutInMinutes":  10,
     "TableEntriesPerPage":  10,
-    "TableSkillEntriesPerPage":  20, 
-    "ExcludeNotificationTypes": [ "NPCStandingsLost", "KillReportFinalBlow", "BountyClaimMsg", "SeasonalChallengeCompleted", "StoryLineMissionAvailableMsg", "KillReportVictim", "InsuranceIssuedMsg", "InsuranceFirstShipMsg" ]
-
+    "TableSkillEntriesPerPage":  20    
   },
 
   "mailModule": {
@@ -148,16 +146,6 @@
     }
   },
 
-  "webServerModule": {
-    "webListenIP": "IP",
-    "webListenPort": 80,
-    "webExternalIP": "IP",
-    "webExternalPort": 80,
-    "discordUrl": "https://discord.gg/xxxxxx",
-    "ccpAppClientId": "REQUIRED",
-    "ccpAppSecret": "REQUIRED"
-  },
-  
   "timersModule": {
     "authTimeoutInMinutes": 10,
     "autoAddTimerForReinforceNotifications": true,
@@ -181,6 +169,16 @@
         "CorporationIDs": [0]
       }
     }
+  },  
+  
+  "webServerModule": {
+    "webListenIP": "IP",
+    "webListenPort": 80,
+    "webExternalIP": "IP",
+    "webExternalPort": 80,
+    "discordUrl": "https://discord.gg/xxxxxx",
+    "ccpAppClientId": "REQUIRED",
+    "ccpAppSecret": "REQUIRED"
   },
 
   "radiusKillFeedModule": {
