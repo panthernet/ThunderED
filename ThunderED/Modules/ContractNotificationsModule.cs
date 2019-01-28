@@ -428,7 +428,7 @@ namespace ThunderED.Modules
             if (contract.acceptor_id > 0)
             {
                 ch = await APIHelper.ESIAPI.GetCharacterData(Reason, contract.acceptor_id);
-                sbValues.Append($"\n[{ch.name}](https://zkillboard.com/character/{contract.acceptor_id}/)");
+                sbValues.Append($"\n[{(ch?.name ?? LM.Get("Unknown"))}](https://zkillboard.com/character/{contract.acceptor_id}/)");
             }
             sbValues.Append($"\n{statusName}");
             if (contract.type == "courier")
