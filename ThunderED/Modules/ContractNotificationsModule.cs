@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,7 +13,6 @@ using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.Sub;
-using Color = System.Drawing.Color;
 
 namespace ThunderED.Modules
 {
@@ -21,6 +21,9 @@ namespace ThunderED.Modules
         public override LogCat Category => LogCat.ContractNotif;
         private readonly int _checkInterval;
         private DateTime _lastCheckTime = DateTime.MinValue;
+
+        private readonly ConcurrentDictionary<long, string> _etokens = new ConcurrentDictionary<long, string>();
+        private readonly ConcurrentDictionary<long, string> _corpEtokens = new ConcurrentDictionary<long, string>();
 
         public ContractNotificationsModule()
         {
@@ -87,8 +90,6 @@ namespace ThunderED.Modules
             return false;
         }
 
-        private readonly Dictionary<long, List<JsonClasses.Contract>> _lastContracts = new Dictionary<long, List<JsonClasses.Contract>>();
-        private readonly Dictionary<long, List<JsonClasses.Contract>> _lastCorpContracts = new Dictionary<long, List<JsonClasses.Contract>>();
         private readonly List<string> _completeStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed"};
         private readonly List<string> _finishedStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished"};
 
@@ -109,23 +110,27 @@ namespace ThunderED.Modules
                         try
                         {
                             var rtoken = await SQLHelper.GetRefreshTokenForContracts(characterID);
-                            if(rtoken == null)
+                            if (rtoken == null)
+                            {
+                                await SendOneTimeWarning(characterID, $"Contracts feed token for character {characterID} not found! User is not authenticated.");
                                 continue;
-                            var token = await APIHelper.ESIAPI.RefreshToken(rtoken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
-                            if(token == null)
-                                continue;
+                            }
 
-                            List<JsonClasses.Contract> personalList = null;
+                            var token = await APIHelper.ESIAPI.RefreshToken(rtoken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                            if (token == null)
+                            {
+                                await LogHelper.LogWarning(
+                                    $"Unable to get contracts token for character {characterID}. Refresh token might be outdated or no more valid.");
+                                continue;
+                            }
+
                             if (group.FeedPersonalContracts)
                             {
-                                personalList = await SQLHelper.LoadContracts(characterID, false);
-                                await ProcessContracts(false, personalList, group, characterID, 0, token);
+                                await ProcessContracts(false, group, characterID, token);
                             }
                             if (group.FeedCorporateContracts)
                             {
-                                var contracts = await SQLHelper.LoadContracts(characterID, true);
-                                var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID);
-                                await ProcessContracts(true, contracts, group, characterID, ch.corporation_id, token, personalList);
+                                await ProcessContracts(true, group, characterID, token);
                             }
 
                         }
@@ -150,17 +155,39 @@ namespace ThunderED.Modules
             }
         }
 
-        private async Task ProcessContracts(bool isCorp, List<JsonClasses.Contract> lst, ContractNotifyGroup group, long characterID, long corpID, string token, List<JsonClasses.Contract> otherList = null)
+        private async Task ProcessContracts(bool isCorp, ContractNotifyGroup group, long characterID, string token)
         {
             var maxContracts = Settings.ContractNotificationsModule.MaxTrackingCount > 0 ? Settings.ContractNotificationsModule.MaxTrackingCount : 150;
-            var contracts = isCorp ? 
-                (await APIHelper.ESIAPI.GetCorpContracts(Reason, corpID, token))?.OrderByDescending(a => a.contract_id).ToList() :
-                (await APIHelper.ESIAPI.GetCharacterContracts(Reason, characterID, token))?.OrderByDescending(a => a.contract_id).ToList();
-            if (contracts == null)
+            List<JsonClasses.Contract> contracts;
+
+            var corpID = isCorp ? (await APIHelper.ESIAPI.GetCharacterData(Reason, characterID))?.corporation_id ?? 0 : 0;
+            if (isCorp)
+            {
+                var etag = _corpEtokens.GetOrNull(characterID);
+                var result = await APIHelper.ESIAPI.GetCorpContracts(Reason, corpID, token, etag);
+                _corpEtokens.AddOrUpdateEx(characterID, result.Data.ETag);
+                if(result.Data.IsNotModified) return;
+                contracts = result.Result?.OrderByDescending(a => a.contract_id).ToList();
+            }
+            else
+            {
+                var etag = _etokens.GetOrNull(characterID);
+                var result = await APIHelper.ESIAPI.GetCharacterContracts(Reason, characterID, token, etag);
+                _etokens.AddOrUpdateEx(characterID, result.Data.ETag);
+                if(result.Data.IsNotModified) return;
+
+                contracts = result.Result?.OrderByDescending(a => a.contract_id).ToList();
+            }
+
+            if (contracts == null || !contracts.Any())
                 return;
 
             var lastContractId = contracts.FirstOrDefault()?.contract_id ?? 0;
             if (lastContractId == 0) return;
+
+            var lst = !isCorp ? await SQLHelper.LoadContracts(characterID, false) : await SQLHelper.LoadContracts(characterID, true);
+            var otherList = isCorp ? await SQLHelper.LoadContracts(characterID, false) : null;
+
 
             if (lst == null)
             {

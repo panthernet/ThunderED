@@ -19,8 +19,8 @@ namespace ThunderED.Modules.OnDemand
 
         private async Task<int> GetMailPagesCount(string token, long inspectCharId)
         {
-            var mailHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, inspectCharId.ToString(), token, 0);
-            return  (mailHeaders?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage;        
+            var mailHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, inspectCharId.ToString(), token, 0, null);
+            return  (mailHeaders?.Result?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage;        
         }
 
         private async Task<int> GetCharJournalPagesCount(string token, long inspectCharId)
@@ -36,8 +36,8 @@ namespace ThunderED.Modules.OnDemand
 
         private async Task<int> GetCharContractsPagesCount(string token, long inspectCharId)
         {
-            var entries = await APIHelper.ESIAPI.GetCharacterContracts(Reason, inspectCharId, token);
-            return  (entries?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage; 
+            var entries = await APIHelper.ESIAPI.GetCharacterContracts(Reason, inspectCharId, token, null);
+            return  (entries?.Result?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage; 
         }
         private async Task<int> GetCharContactsPagesCount(string token, long inspectCharId)
         {
@@ -64,7 +64,7 @@ namespace ThunderED.Modules.OnDemand
 
         private async Task<string> GenerateMailHtml(string token, long inspectCharId, string authCode, int page)
         {
-            var mailHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, inspectCharId.ToString(), token, 0);
+            var mailHeaders = (await APIHelper.ESIAPI.GetMailHeaders(Reason, inspectCharId.ToString(), token, 0, null))?.Result;
             //var totalCount = mailHeaders.Count;
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
             mailHeaders = mailHeaders.GetRange(startIndex, mailHeaders.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (mailHeaders.Count-startIndex));
@@ -240,7 +240,7 @@ namespace ThunderED.Modules.OnDemand
 
         private async Task<string> GenerateContractsHtml(string token, long inspectCharId, int page)
         {
-            var items = (await APIHelper.ESIAPI.GetCharacterContracts(Reason, inspectCharId, token)).OrderByDescending(a=> a.contract_id).ToList();
+            var items = (await APIHelper.ESIAPI.GetCharacterContracts(Reason, inspectCharId, token, null))?.Result.OrderByDescending(a=> a.contract_id).ToList();
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
             items = items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
             var sb = new StringBuilder();

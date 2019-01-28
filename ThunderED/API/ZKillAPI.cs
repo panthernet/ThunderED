@@ -100,7 +100,7 @@ namespace ThunderED.API
 			var request = string.IsNullOrEmpty(redisqID)
                     ? "https://redisq.zkillboard.com/listen.php?ttw=1"
                     : $"https://redisq.zkillboard.com/listen.php?ttw=1&queueID={redisqID}";
-			var data = await APIHelper.RequestWrapper<JsonZKill.ZKillboard>(request, _reason, null, true);
+			var data = await APIHelper.RequestWrapper<JsonZKill.ZKillboard>(request, _reason, null, null, true);
             if (data?.package == null)
             {
                 await Task.Delay(1500);

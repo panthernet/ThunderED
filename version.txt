@@ -1,3 +1,7 @@
+### V1.2.18
++ Added warinig messages for modules when feeder character is not authed or has outdated token
++ Improved bandwidth and CPU usage for contracts, mail, notifications and null campaigns modules using 304 http response
+
 ### V1.2.17
 
 + Added log message to highlight inconsistency in auth group names between DB and config file

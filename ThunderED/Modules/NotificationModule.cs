@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -11,12 +11,11 @@ using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
-using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
-    public class NotificationModule: AppModuleBase
+    public sealed class NotificationModule: AppModuleBase
     {
         private DateTime _nextNotificationCheck = DateTime.FromFileTime(0);
         private long _lastNotification;
@@ -74,7 +73,7 @@ namespace ThunderED.Modules
             }
         }
 
-        private Dictionary<string, bool> _warnings = new Dictionary<string, bool>();
+        private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
 
         #region Notifications
         private async Task NotificationFeed()
@@ -108,25 +107,30 @@ namespace ThunderED.Modules
                         foreach (var charId in group.CharacterID)
                         {
                             var rToken = await SQLHelper.GetRefreshTokenDefault(charId);
+                            if (string.IsNullOrEmpty(rToken))
+                            {
+                                await SendOneTimeWarning(charId+100, $"Failed to get notifications refresh token for character {charId}! User is not authenticated.");
+                                continue;
+                            }
                             var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                             if (!string.IsNullOrEmpty(token))
                                 await LogHelper.LogInfo($"Checking characterID:{charId}", Category, LogToConsole, false);
                             else
                             {
-                                if (!_warnings.ContainsKey(groupPair.Key))
-                                {
-                                    _warnings.Add(groupPair.Key, true);
-                                    await LogHelper.LogWarning($"Failed to get refresh token for {groupPair.Key} group!", Category, LogToConsole);
-                                }
-
+                                await SendOneTimeWarning(charId, $"Failed to get notifications token for character {charId}! Refresh token might be outdated or no more valid.");
                                 continue;
                             }
+
+                            var etag = _tags.GetOrNull(charId);
+                            var result = await APIHelper.ESIAPI.GetNotifications(Reason, charId, token, etag);
+                            _tags.AddOrUpdateEx(charId, result.Data.ETag);
+                            if(result.Data.IsNotModified || result.Result == null) continue;
+
+                            var notifications = result.Result;
 
                             var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId);
                             var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
 
-                            var notifications = (token == null ? null : await APIHelper.ESIAPI.GetNotifications(Reason, charId.ToString(), token)) ??
-                                                new List<JsonClasses.Notification>();
 
                             //process filters
                             foreach (var filterPair in group.Filters)
@@ -134,7 +138,7 @@ namespace ThunderED.Modules
                                 var filter = filterPair.Value;
                                 _lastNotification = await SQLHelper.GetLastNotification(groupPair.Key, filterPair.Key);
 
-                                List<JsonClasses.Notification> fNotifications;
+                                List<JsonClasses.Notification> fNotifications = new List<JsonClasses.Notification>();
                                 if (_lastNotification == 0)
                                 {
                                     var now = DateTime.UtcNow;
@@ -148,7 +152,6 @@ namespace ThunderED.Modules
                                     }
                                     else
                                     {
-                                        fNotifications = new List<JsonClasses.Notification>();
                                         _lastNotification = notifications.Max(a => a.notification_id);
                                         await UpdateNotificationList(groupPair.Key, filterPair.Key, true);
                                         continue;
@@ -187,7 +190,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
 
                                             var discordChannel = APIHelper.DiscordAPI.GetChannel(guildID, filter.ChannelID != 0 ? filter.ChannelID : group.DefaultDiscordChannelID);
                                             var data = HelpersAndExtensions.ParseNotificationText(notification.text);
-                                            var atCorpName = GetData("corpName", data) ?? LM.Get("Unknown");
+                                            //var atCorpName = GetData("corpName", data) ?? LM.Get("Unknown");
                                             var systemId = GetData("solarSystemID", data);
                                             var system = string.IsNullOrEmpty(systemId) ? null : await APIHelper.ESIAPI.GetSystemData(Reason, systemId);
                                             var systemName = system == null ? LM.Get("Unknown") : (system.name == system.system_id.ToString() ? "Abyss" : system.name);

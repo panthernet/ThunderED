@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,8 @@ namespace ThunderED.Modules
 
         private readonly int _checkInterval;
         private DateTime _lastCheckTime = DateTime.MinValue;
+
+        private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
 
         public MailModule()
         {
@@ -115,18 +118,18 @@ namespace ThunderED.Modules
                         var rToken = await SQLHelper.GetRefreshTokenMail(charId);
                         if (string.IsNullOrEmpty(rToken))
                         {
+                            await SendOneTimeWarning(charId, $"Mail feed token for character {charId} not found! User is not authenticated.");
                             continue;
                         }
 
                         var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                         if (string.IsNullOrEmpty(token))
                         {
-                            await LogHelper.LogWarning($"Unable to get correct token using refresh token! Refresh token might be expired! Character: {charId}", Category);
+                            await LogHelper.LogWarning($"Unable to get contracts token for character {charId}. Refresh token might be outdated or no more valid.", Category);
                             continue;
                         }
 
-                        var lastMailId = await SQLHelper.GetLastMailId(charId);
-                        var prevMailId = lastMailId;
+
                         var includePrivate = group.IncludePrivateMail;
 
                         if (group.Filters.Values.All(a => a.FilterSenders.Count == 0 && a.FilterLabels.Count == 0 && a.FilterMailList.Count == 0))
@@ -139,7 +142,16 @@ namespace ThunderED.Modules
                         var searchLabels = labelsData?.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received").ToList() ??
                                            new List<JsonClasses.MailLabel>();
                         var mailLists = await APIHelper.ESIAPI.GetMailLists(Reason, charId, token);
-                        var mailsHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, charId.ToString(), token, 0);
+
+                        var etag = _tags.GetOrNull(charId);
+                        var result = await APIHelper.ESIAPI.GetMailHeaders(Reason, charId.ToString(), token, 0, etag);
+                        _tags.AddOrUpdateEx(charId, result.Data.ETag);
+                        if(result.Data.IsNotModified) continue;
+
+                        var mailsHeaders = result.Result;
+
+                        var lastMailId = await SQLHelper.GetLastMailId(charId);
+                        var prevMailId = lastMailId;
 
                         if (lastMailId > 0)
                             mailsHeaders = mailsHeaders.Where(a => a.mail_id > lastMailId).OrderBy(a => a.mail_id).ToList();
@@ -445,7 +457,7 @@ namespace ThunderED.Modules
                 var token = await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
                     SettingsManager.Settings.WebServerModule.CcpAppSecret);
 
-                var mailHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, user.CharacterId.ToString(), token, 0);
+                var mailHeaders = (await APIHelper.ESIAPI.GetMailHeaders(Reason, user.CharacterId.ToString(), token, 0, null))?.Result;
 
                 //filter
                 switch (item.smSearchType)

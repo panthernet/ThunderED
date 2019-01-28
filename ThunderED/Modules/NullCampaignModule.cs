@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace ThunderED.Modules
     {
         public override LogCat Category => LogCat.NullCampaign;
         private DateTime _nextNotificationCheck = DateTime.FromFileTime(0);
+        private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
 
         public override async Task Run(object prm)
         {
@@ -27,7 +29,12 @@ namespace ThunderED.Modules
                 if (DateTime.Now <= _nextNotificationCheck) return;
                 _nextNotificationCheck = DateTime.Now.AddMinutes(Settings.NullCampaignModule.CheckIntervalInMinutes);
 
-                var allCampaigns = await APIHelper.ESIAPI.GetNullCampaigns(Reason);
+                var etag = _tags.GetOrNull(0);
+                var result = await APIHelper.ESIAPI.GetNullCampaigns(Reason, etag);
+                _tags.AddOrUpdateEx(0, result.Data.ETag);
+                if(result.Data.IsNotModified) return;
+
+                var allCampaigns = result.Result;
                 foreach (var pair in Settings.NullCampaignModule.Groups)
                 {
                     var groupName = pair.Key;

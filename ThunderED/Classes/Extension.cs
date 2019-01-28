@@ -23,6 +23,19 @@ namespace ThunderED.Classes
 
             return retVal;
         }
+
+        public static void AddOrUpdateEx<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
+        {
+            if (dic.ContainsKey(key))
+                dic[key] = value;
+            else dic.Add(key, value);
+        }
+
+        public static TValue GetOrNull<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key)
+            where TValue: class
+        {
+            return dic.ContainsKey(key) ? dic[key] : null;
+        }
     }
 
 }

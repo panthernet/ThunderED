@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
+using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
 
@@ -80,10 +81,10 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<string>($"{SettingsManager.Settings.Config.ESIAddress}latest/route/{firstId}/{secondId}/?datasource=tranquility&flag=shortest", reason);
         }
 
-        internal async Task<List<JsonClasses.Notification>> GetNotifications(string reason, string userId, string token)
+        internal async Task<ESIQueryResult<List<JsonClasses.Notification>>> GetNotifications(string reason, object userId, string token, string etag)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<List<JsonClasses.Notification>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{userId}/notifications/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.Notification>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{userId}/notifications/?datasource=tranquility&language={_language}", reason, authHeader, etag);
         }
 
         internal async Task<JsonClasses.Planet> GetPlanet(string reason, string planetId)
@@ -150,10 +151,10 @@ namespace ThunderED.API
                 $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance&datasource=tranquility&language={_language}&search={name}&strict=true", reason);
         }
 
-        internal async Task<List<JsonClasses.FWSystemStat>> GetFWSystemStats(string reason)
+        internal async Task<ESIQueryResult<List<JsonClasses.FWSystemStat>>> GetFWSystemStats(string reason, string etag)
         {
-            return await APIHelper.RequestWrapper<List<JsonClasses.FWSystemStat>>(
-                $"{SettingsManager.Settings.Config.ESIAddress}latest/fw/systems/?datasource=tranquility&language={_language}", reason);
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.FWSystemStat>>(
+                $"{SettingsManager.Settings.Config.ESIAddress}latest/fw/systems/?datasource=tranquility&language={_language}", reason, null, etag);
         }
 
         internal async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
@@ -261,15 +262,15 @@ namespace ThunderED.API
         }
         #endregion
 
-        public async Task<List<JsonClasses.MailHeader>> GetMailHeaders(string reason, string id, string token, long lastMailId)
+        public async Task<ESIQueryResult<List<JsonClasses.MailHeader>>> GetMailHeaders(string reason, string id, string token, long lastMailId, string etag)
         {
            // if (senders.Count == 0 && labels.Count == 0 && mailListsIds.Count == 0) return null;
             var authHeader = $"Bearer {token}";
             var lastIdText = lastMailId == 0 ? null : $"&last_mail_id={lastMailId}";
             //var mailLabels = labels == null || labels.Count == 0 ? null : $"&labels={string.Join("%2C", labels)}";
 
-            var data = await APIHelper.RequestWrapper<List<JsonClasses.MailHeader>>(
-                $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/mail/?datasource=tranquility{lastIdText}&language={_language}", reason, authHeader);
+            var data = await APIHelper.ESIRequestWrapper<List<JsonClasses.MailHeader>>(
+                $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/mail/?datasource=tranquility{lastIdText}&language={_language}", reason, authHeader, etag);
             return data;
         }
 
@@ -358,30 +359,30 @@ namespace ThunderED.API
 
         public async Task<JsonClasses.ServerStatus> GetServerStatus(string reason)
         {
-            return await APIHelper.RequestWrapper<JsonClasses.ServerStatus>($"{SettingsManager.Settings.Config.ESIAddress}latest/status/?datasource=tranquility&language={_language}", reason, null, false, true);
+            return await APIHelper.RequestWrapper<JsonClasses.ServerStatus>($"{SettingsManager.Settings.Config.ESIAddress}latest/status/?datasource=tranquility&language={_language}", reason, null, null, false, true);
         }
 
-        public async Task<List<JsonClasses.NullCampaignItem>> GetNullCampaigns(string reason)
+        public async Task<ESIQueryResult<List<JsonClasses.NullCampaignItem>>> GetNullCampaigns(string reason, string etag)
         {
-            return new List<JsonClasses.NullCampaignItem>(await APIHelper.RequestWrapper<JsonClasses.NullCampaignItem[]>($"{SettingsManager.Settings.Config.ESIAddress}latest/sovereignty/campaigns/?datasource=tranquility&language={_language}", reason));
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.NullCampaignItem>>($"{SettingsManager.Settings.Config.ESIAddress}latest/sovereignty/campaigns/?datasource=tranquility&language={_language}", reason, null, etag);
         }
 
-        public async Task<List<JsonClasses.FWStats>> GetFWStats(string reason)
+        public async Task<ESIQueryResult<List<JsonClasses.FWStats>>> GetFWStats(string reason, string etag)
         {
-            return await APIHelper.RequestWrapper<List<JsonClasses.FWStats>>($"{SettingsManager.Settings.Config.ESIAddress}latest/fw/stats/?datasource=tranquility&language={_language}", reason);
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.FWStats>>($"{SettingsManager.Settings.Config.ESIAddress}latest/fw/stats/?datasource=tranquility&language={_language}", reason, null, etag);
 
         }
 
-        public async Task<List<JsonClasses.Contract>> GetCharacterContracts(string reason, object id, string token)
-        {
-            var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<List<JsonClasses.Contract>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/contracts/?datasource=tranquility&language={_language}", reason, authHeader);
-        }
-
-        public async Task<List<JsonClasses.Contract>> GetCorpContracts(string reason, object id, string token)
+        public async Task<ESIQueryResult<List<JsonClasses.Contract>>>  GetCharacterContracts(string reason, object id, string token, string etag)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<List<JsonClasses.Contract>>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/contracts/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.Contract>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/contracts/?datasource=tranquility&language={_language}", reason, authHeader, etag);
+        }
+
+        public async Task<ESIQueryResult<List<JsonClasses.Contract>>> GetCorpContracts(string reason, object id, string token, string etag)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.Contract>>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/contracts/?datasource=tranquility&language={_language}", reason, authHeader, etag);
         }
 
         public async Task<List<JsonClasses.ContractItem>> GetCharacterContractItems(string reason, object charId, object id, string token)

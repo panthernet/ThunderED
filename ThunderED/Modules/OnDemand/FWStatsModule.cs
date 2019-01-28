@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Json;
 
 namespace ThunderED.Modules.OnDemand
 {
@@ -23,6 +24,11 @@ namespace ThunderED.Modules.OnDemand
             public string factionImage;
         }
 
+        private static string _statsEtag;
+        private static string _sysEtag;
+        private static List<JsonClasses.FWStats> _lastStats;
+        private static List<JsonClasses.FWSystemStat> _lastSysStats;
+
         public static async Task PostFWSTats(char faction, IMessageChannel channel)
         {
             if (_isPostRunning)
@@ -36,13 +42,20 @@ namespace ThunderED.Modules.OnDemand
             {
                 var fwData = GetFWData(faction);
 
-                var stats = (await APIHelper.ESIAPI.GetFWStats("General")).FirstOrDefault(a => a.faction_id == fwData.factionId);
+                var result = await APIHelper.ESIAPI.GetFWStats("General", _statsEtag);
+                _lastStats = result.Data.IsNotModified ? _lastStats : result.Result;
+                _statsEtag = result.Data.ETag;
+                var stats = (result.Data.IsNotModified ? _lastStats : result.Result).FirstOrDefault(a => a.faction_id == fwData.factionId);
 
                 var statOccupiedSystemsCount = stats.systems_controlled;
                 var statKillsYesterday = stats.kills.yesterday;
                 var statPilots = stats.pilots;
 
-                var sysList = await APIHelper.ESIAPI.GetFWSystemStats("General");
+                var result2 = await APIHelper.ESIAPI.GetFWSystemStats("General", _sysEtag);
+                _lastSysStats = result2.Data.IsNotModified ? _lastSysStats : result2.Result;
+                _sysEtag = result2.Data.ETag;
+                var sysList = _lastSysStats;
+
                 var statTotalSystemsCount = sysList.Count(a => a.owner_faction_id == fwData.factionId || a.owner_faction_id == fwData.oppFactionId);
                 var mTotalPoint = statTotalSystemsCount * 6;
                 var p = statOccupiedSystemsCount / (double) mTotalPoint * 100;
