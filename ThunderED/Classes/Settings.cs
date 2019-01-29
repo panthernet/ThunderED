@@ -1337,6 +1337,8 @@ namespace ThunderED.Classes
         public bool DisableLogIntoFiles { get; set; } = false;
         public bool UseSocketsForZKillboard { get; set; } = true;
         public string ZKillboardWebSocketUrl { get; set; } = "wss://zkillboard.com:2096";
+        [Comment("Optional path to language files folder. Empty by default and will use default folder")]
+        public string LanguageFilesFolder { get; set; }
 
 
 #if EDITOR

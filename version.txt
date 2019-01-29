@@ -1,6 +1,7 @@
 ### V1.2.18
 + Added warinig messages for modules when feeder character is not authed or has outdated token
 + Added ability to open posted contracts from Discord message right into the game client (read notes section below)
++ Added **LanguageFilesFolder** param to be able to store customized language files in a separate folder
 + Improved bandwidth and CPU usage for contracts, mail, notifications and null campaigns modules using 304 http response
 + Fixed excessive renaming attempts when character has very long name
 
@@ -10,6 +11,9 @@
   When clicked, user will be prompted to pass simple SSO auth to get one-time access to running game client of selected character. Auth data and permissions for this case will not be saved anywhere.
   Note that you will not be able to open contracts which are unavailable to you.
   CCP application should have **esi-ui.open_window.v1** scope allowed. 
+
++ Added new Config section param **LanguageFilesFolder**. Will be handy for bot owners who has customized language files.
+  Will search for language filed in the specified folder. Leave empty to search in default location.
 
 ### V1.2.17
 

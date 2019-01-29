@@ -21,7 +21,7 @@ namespace ThunderED
                 var tr = SettingsManager.Settings.Config.Language ?? "en-US";
                 Locale = tr.Split('-')[0].ToLower();
 
-                var folder = Path.Combine(SettingsManager.RootDirectory, "Languages");
+                var folder = string.IsNullOrEmpty(SettingsManager.Settings.Config.LanguageFilesFolder) ? Path.Combine(SettingsManager.RootDirectory, "Languages") : SettingsManager.Settings.Config.LanguageFilesFolder;
                 if (!Directory.Exists(folder))
                 {
                     await LogHelper.LogError("LM.Load - language dir not found!");

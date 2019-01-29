@@ -52,7 +52,8 @@
     "RunAsServiceCompatibility":  false,
     "DisableLogIntoFiles": false,
     "UseSocketsForZKillboard":  true,
-    "ZKillboardWebSocketUrl":  "wss://zkillboard.com:2096" 
+    "ZKillboardWebSocketUrl":  "wss://zkillboard.com:2096",
+    "LanguageFilesFolder":  "" 
   },
 
   "Database": {
