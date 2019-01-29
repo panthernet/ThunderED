@@ -485,14 +485,15 @@ namespace ThunderED.API
                         }
 
                         var nickname = $"{alliancePart}{corpPart}{(SettingsManager.Settings.WebAuthModule.EnforceCharName ? eveName : u.Username)}";
+                        nickname = nickname.Length > 31
+                            ? nickname.Substring(0, 31)
+                            : nickname;
+
                         if (nickname != u.Nickname && !string.IsNullOrWhiteSpace(u.Nickname) || string.IsNullOrWhiteSpace(u.Nickname) && u.Username != nickname)
                         {
                             await LogHelper.LogInfo($"Trying to change name of {u.Nickname} to {nickname}", LogCat.AuthCheck);
                             try
                             {
-                                nickname = nickname.Length > 31
-                                    ? nickname.Substring(0, 31)
-                                    : nickname;
                                 await u.ModifyAsync(x => x.Nickname = nickname);
                             }
                             catch
