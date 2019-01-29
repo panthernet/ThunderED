@@ -137,6 +137,18 @@ namespace ThunderED.API
                 $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=character&datasource=tranquility&language={_language}&search={name}&strict=true", reason);
         }
 
+        internal async Task<bool> OpenContractIngame(string reason, long contractId, string token)
+        {
+           // var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(characterId);
+
+           // var token = await RefreshToken(authUserEntity.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId, SettingsManager.Settings.WebServerModule.CcpAppSecret);
+            var authHeader = $"Bearer {token}";
+            var values = new Dictionary<string, string> {{"contract_id", $"{contractId}"}, {"datasource","tranquility"}};
+            var content = new FormUrlEncodedContent(values);
+
+            return await APIHelper.PostWrapper($"{SettingsManager.Settings.Config.ESIAddress}latest/ui/openwindow/contract/?contract_id={contractId}&datasource=tranquility", content, reason, authHeader);
+        }
+
         internal async Task<JsonClasses.CorpIDLookup> SearchCorporationId(string reason, string name)
         {
             name = HttpUtility.UrlEncode(name);

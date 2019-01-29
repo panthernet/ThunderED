@@ -316,6 +316,15 @@ namespace ThunderED.Modules.Sub
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=11";
         }
 
+        public static string GetOpenContractURL(long contractId)
+        {
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=opencontract{contractId}&scope=esi-ui.open_window.v1";
+        }
+
         public static string GetMailAuthURL()
         {
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;

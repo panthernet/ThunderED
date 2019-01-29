@@ -206,7 +206,8 @@ namespace ThunderED.Classes
         public ulong DiscordChannelId { get; set; }
         public bool FeedIssuedBy { get; set; } = true;
         public bool FeedIssuedTo { get; set; } = true;
-
+        [Comment("Show link to open contract ingame")]
+        public bool ShowIngameOpen { get; set; }
     }
 
     public class StatsModuleSettings

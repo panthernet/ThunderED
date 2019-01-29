@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -215,6 +216,66 @@ namespace ThunderED.Helpers
             }
 
             return null;
+        }
+
+        public static async Task<bool> PostWrapper(string request, FormUrlEncodedContent content, string reason, string auth, bool noRetries = false, bool silent = false)
+        {
+            string raw = null;
+            var retCount = SettingsManager.Settings.Config.RequestRetries;
+            retCount = retCount == 0 || noRetries ? 1 : retCount;
+            for (int i = 0; i < retCount; i++)
+            {
+                try
+                {
+                    var handler = new HttpClientHandler {AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate};
+                    using (var httpClient = new HttpClient(handler))
+                    {
+                        httpClient.DefaultRequestHeaders.Clear();
+                        httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+                        if (!string.IsNullOrEmpty(auth))
+                            httpClient.DefaultRequestHeaders.Add("Authorization", auth);
+
+
+                        using (var responceMessage = await httpClient.PostAsync(request, content))
+                        {
+                            raw = await responceMessage.Content.ReadAsStringAsync();
+                            if (!responceMessage.IsSuccessStatusCode)
+                            {
+                                if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                    (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
+                                    await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
+
+                                if (raw.StartsWith("{\"error\""))
+                                {
+                                    if(SettingsManager.Settings.Config.ExtendedESILogging)
+                                        await LogHelper.LogError($"[{reason}] Request failure: {request}\n{raw}", LogCat.ESI, false);
+                                    return false;
+                                }
+                                continue;
+                            }
+
+                            return true;
+                        }
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    //skip, probably due to timeout
+                }
+                catch (Exception ex)
+                {
+                    if (TickManager.IsNoConnection && request.StartsWith("https://esi.tech.ccp.is"))
+                        return false;
+
+                    if (!silent)
+                    {
+                        await LogHelper.LogEx(request, ex, LogCat.ESI);
+                        await LogHelper.LogInfo($"[try: {i}][{reason}]{Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONCE: {raw}", LogCat.ESI);
+                    }
+                }
+
+            }
+            return false;
         }
     }
 }

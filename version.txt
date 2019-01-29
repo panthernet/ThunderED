@@ -1,6 +1,13 @@
 ### V1.2.18
 + Added warinig messages for modules when feeder character is not authed or has outdated token
++ Added ability to open posted contracts from Discord message right into the game client (read notes section below)
 + Improved bandwidth and CPU usage for contracts, mail, notifications and null campaigns modules using 304 http response
+
+### NOTES
+
++ Added new parameter for contract filters **ShowIngameOpen** - display url in contract message body which will open contract in game client. 
+  When clicked, user will be prompted to pass simple SSO auth to get one-time access to running game client of selected character. Auth data and permissions for this case will not be saved anywhere. 
+  CCP application should have **esi-ui.open_window.v1** scope allowed. 
 
 ### V1.2.17
 

@@ -425,5 +425,8 @@
   "rngroupComplete":  ":white_check_mark: Operation completed!",
   "authPageHeaderText":  "<p style='text-align: center;font-size: 18px;margin-bottom:-20px;'>This is authentication page where each button corresponds to some action. Please change this text in language file.</p>",
   "authPageGeneralAuthHeader":  "<p style='text-align: center;font-size: 18px;'>This section designated for common members authentication</p>", 
-  "authPageSystemAuthHeader":  "<p style='text-align: center;font-size: 18px;'>This section designated for special authentication</p>" 
+  "authPageSystemAuthHeader":  "<p style='text-align: center;font-size: 18px;'>This section designated for special authentication</p>",
+  "contractFailedToOpen":  "There was an error while trying to open contract in your game client",
+  "contractOpenIngame":  "Open Contract Ingame",
+  "contractOpened":  "Request has been sent successfully. You can close this window." 
 }

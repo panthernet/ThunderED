@@ -54,7 +54,31 @@ namespace ThunderED.Modules
                         var prms = request.Url.Query.TrimStart('?').Split('&');
                         var code = prms[0].Split('=')[1];
                         var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
-                        if (string.IsNullOrEmpty(state) || !state.StartsWith("cauth")) return false;
+
+                        if (string.IsNullOrEmpty(state)) return false;
+                        if (state.StartsWith("opencontract"))
+                        {
+                            var contractId = Convert.ToInt64(state.Substring(12, state.Length - 12));
+                            var res = await APIHelper.ESIAPI.GetAuthToken(code, clientID, secret);
+                            if (string.IsNullOrEmpty(res[0]))
+                            {
+                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("contractFailedToOpen")), response);
+                                return true;
+                            }
+
+                            if (await APIHelper.ESIAPI.OpenContractIngame(Reason, contractId, res[0]))
+                            {
+                                await WebServerModule.WriteResponce(LM.Get("contractOpened"), response);
+                            }
+                            else
+                            {
+                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("contractFailedToOpen")), response);
+                            }
+
+                            return true;
+                        }
+                        
+                        if (!state.StartsWith("cauth")) return false;
                         var groupName = HttpUtility.UrlDecode(state.Replace("cauth", ""));
 
                         var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
@@ -213,7 +237,7 @@ namespace ThunderED.Modules
                     //check for completion
                     if (_completeStatuses.Contains(freshContract.status) && filter.Statuses.Contains(freshContract.status))
                     {
-                        await PrepareFinishedDiscordMessage(filter.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token);
+                        await PrepareFinishedDiscordMessage(filter.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token, filter.ShowIngameOpen);
                         await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is expired!", Category);
                         lst.Remove(contract);
                         continue;
@@ -221,7 +245,7 @@ namespace ThunderED.Modules
                     //check for accepted
                     if (contract.type == "courier" && contract.status == "outstanding" && freshContract.status == "in_progress" && filter.Statuses.Contains("in_progress"))
                     {
-                        await PrepareAcceptedDiscordMessage(filter.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token);
+                        await PrepareAcceptedDiscordMessage(filter.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token, filter.ShowIngameOpen);
                         var index = lst.IndexOf(contract);
                         lst.Remove(contract);
                         lst.Insert(index, freshContract);
@@ -265,7 +289,7 @@ namespace ThunderED.Modules
                     {
                         await LogHelper.LogModule($"--> New Contract {contract.contract_id} found!", Category);
                         if(crFilterChannel != 0)
-                            await PrepareDiscordMessage(crFilterChannel, contract, group.DefaultMention, isCorp, characterID, corpID, token);
+                            await PrepareDiscordMessage(crFilterChannel, contract, group.DefaultMention, isCorp, characterID, corpID, token, crFilter.ShowIngameOpen);
                     }
                     catch (Exception ex)
                     {
@@ -291,18 +315,21 @@ namespace ThunderED.Modules
         }
 
 
-        private async Task PrepareAcceptedDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, long corpId, string token)
+        private async Task PrepareAcceptedDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, long corpId, string token,
+            bool filterShowIngame)
         {
-            await PrepareDiscordMessage(channelId, contract, mention, isCorp, characterId, corpId, token);
+            await PrepareDiscordMessage(channelId, contract, mention, isCorp, characterId, corpId, token, filterShowIngame);
 
         }
 
-        private async Task PrepareFinishedDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, long corpId, string token)
+        private async Task PrepareFinishedDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, long corpId, string token,
+            bool filterShowIngame)
         {
-            await PrepareDiscordMessage(channelId, contract, mention, isCorp, characterId, corpId, token);
+            await PrepareDiscordMessage(channelId, contract, mention, isCorp, characterId, corpId, token, filterShowIngame);
         }
 
-        private async Task PrepareDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, long corpId, string token)
+        private async Task PrepareDiscordMessage(ulong channelId, JsonClasses.Contract contract, string mention, bool isCorp, long characterId, long corpId, string token,
+            bool filterShowIngame)
         {
             var image = string.Empty;
             var typeName = string.Empty;
@@ -512,6 +539,12 @@ namespace ThunderED.Modules
                 .AddField(subject, title)
                 .AddField(loc, startLocation);
 
+            if (filterShowIngame)
+            {
+
+                embed.WithDescription($"[{LM.Get("contractOpenIngame")}]({WebServerModule.GetOpenContractURL(contract.contract_id)})\n");
+            }
+
             if (contract.type == "courier")
                 embed.AddField(LM.Get("contractMsgDestination"), endLocation);
 
@@ -536,7 +569,7 @@ namespace ThunderED.Modules
                 embed.AddField(LM.Get("contractMsgAskingItems"), string.IsNullOrWhiteSpace(head) ? "---" : head);
                 foreach (var field in fields)
                     embed.AddField($"-", string.IsNullOrWhiteSpace(field) ? "---" : field);
-            }
+            }            
 
            // if(sbItemsAsking.Length == 0 && sbItemsSubmitted.Length == 0)
             //    embed.AddField($"Items", "This contract do not include items or it is impossible to fetch them due to CCP API restrictions");

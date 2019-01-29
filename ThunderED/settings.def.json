@@ -83,6 +83,7 @@
              "Statuses": ["finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed", "in_progress", "outstanding"],
              "Availability":  ["public", "personal", "corporation", "alliance"],
              "Types":  ["unknown", "item_exchange", "auction", "courier", "loan"], 
+             "ShowIngameOpen":  false,
              "DiscordChannelId": 0
            }   
         }
