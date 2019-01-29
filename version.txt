@@ -13,7 +13,7 @@
   CCP application should have **esi-ui.open_window.v1** scope allowed. 
 
 + Added new Config section param **LanguageFilesFolder**. Will be handy for bot owners who has customized language files.
-  Will search for language filed in the specified folder. Leave empty to search in default location.
+  Bot will search for language files in the specified folder. Leave empty to search in default location.
 
 ### V1.2.17
 
