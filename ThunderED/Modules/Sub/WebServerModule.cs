@@ -467,7 +467,7 @@ namespace ThunderED.Modules.Sub
 
         }
 
-        public static string GetHRM_DeleteCharAuthURL(int inspectCharId, string authCode)
+        public static string GetHRM_DeleteCharAuthURL(long inspectCharId, string authCode)
         {
             return $"hrm.php?data=deleteAuth{inspectCharId}&id={authCode}&state=matahari";
         }

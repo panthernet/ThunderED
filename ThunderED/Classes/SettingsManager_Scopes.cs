@@ -118,5 +118,15 @@ namespace ThunderED.Classes
             return permissions.Any(a => a.Equals("esi-characters.read_standings.v1", StringComparison.OrdinalIgnoreCase));
         }
 
+        public static bool HasCharLocationScope(List<string> permissions)
+        {
+            return permissions.Any(a => a.Equals("esi-location.read_location.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool HasCharShipTypeScope(List<string> permissions)
+        {
+            return permissions.Any(a => a.Equals("esi-location.read_ship_type.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
     }
 }

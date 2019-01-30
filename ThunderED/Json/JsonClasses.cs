@@ -526,5 +526,19 @@ namespace ThunderED.Json
             public string from_type; //agent, npc_corp, faction 
             public double standing;
         }
+
+        public class CharacterLocation
+        {
+            public long solar_system_id;
+            public long station_id;
+            public long structure_id;
+        }
+
+        public class CharacterShip
+        {
+            public long ship_item_id;
+            public string ship_name;
+            public long ship_type_id;
+        }
     }
 }

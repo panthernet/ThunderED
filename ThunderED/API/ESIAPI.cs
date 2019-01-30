@@ -472,13 +472,11 @@ namespace ThunderED.API
                 default:
                     return null;
             }
-
         }
 
         public async Task<List<long>> GetNpcCorps(string reason)
         {
             return await APIHelper.RequestWrapper<List<long>>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/npccorps/?datasource=tranquility&language={_language}", reason);
-
         }
 
         public async Task<List<JsonClasses.StandingData>> GetcharacterStandings(string reason, object id, string token)
@@ -486,5 +484,18 @@ namespace ThunderED.API
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<List<JsonClasses.StandingData>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/standings/?datasource=tranquility&language={_language}", reason, authHeader);
         }
+
+        public async Task<JsonClasses.CharacterLocation> GetCharacterLocation(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<JsonClasses.CharacterLocation>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/location/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
+        public async Task<JsonClasses.CharacterShip> GetCharacterShipType(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<JsonClasses.CharacterShip>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/ship/?datasource=tranquility&language={_language}", reason, authHeader);
+        }
+
     }
 }

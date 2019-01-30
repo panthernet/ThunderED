@@ -253,7 +253,7 @@ namespace ThunderED.Modules.OnDemand
                             {
                                 try
                                 {
-                                    if (!int.TryParse(data.Replace("inspect", ""), out var inspectCharId))
+                                    if (!long.TryParse(data.Replace("inspect", ""), out var inspectCharId))
                                     {
                                         await response.RedirectAsync(new Uri(WebServerModule.GetHRMAuthURL()));
                                         return true;
@@ -319,15 +319,18 @@ namespace ThunderED.Modules.OnDemand
                                             .Replace("{allowMailBool}", SettingsManager.HasReadMailScope(pList) ? "true" : "false")
                                             .Replace("{disableWallet}", SettingsManager.HasCharWalletScope(pList) ? null : "d-none")
                                             .Replace("{allowWalletBool}", SettingsManager.HasCharWalletScope(pList) ? "true" : "false")
-                                            .Replace("{disableCharStats}", SettingsManager.HasCharWalletScope(pList) ? null : "d-none")
-                                            .Replace("{allowCharStatsBool}", SettingsManager.HasCharWalletScope(pList) ? "true" : "false")
-                                            .Replace("{disableContracts}", SettingsManager.HasCharWalletScope(pList) ? null : "d-none")
-                                            .Replace("{allowContractsBool}", SettingsManager.HasCharWalletScope(pList) ? "true" : "false")
+                                            .Replace("{disableCharStats}", SettingsManager.HasCharStatsScope(pList) ? null : "d-none")
+                                            .Replace("{allowCharStatsBool}", SettingsManager.HasCharStatsScope(pList) ? "true" : "false")
+                                            .Replace("{disableContracts}", SettingsManager.HasCharContractsScope(pList) ? null : "d-none")
+                                            .Replace("{allowContractsBool}", SettingsManager.HasCharContractsScope(pList) ? "true" : "false")
                                             .Replace("{disableContacts}", SettingsManager.HasCharContactsScope(pList) ? null : "d-none")
                                             .Replace("{allowContactsBool}", SettingsManager.HasCharContactsScope(pList) ? "true" : "false")
                                             .Replace("{disableSP}", SettingsManager.HasCharSkillsScope(pList) ? null : "d-none")
                                             .Replace("{disableSkills}", SettingsManager.HasCharSkillsScope(pList) ? null : "d-none")
                                             .Replace("{allowSkillsBool}", SettingsManager.HasCharSkillsScope(pList) ? "true" : "false")
+                                            .Replace("{disableISK}", SettingsManager.HasCharWalletScope(pList) ? null : "d-none")
+                                            .Replace("{disableLocation}", SettingsManager.HasCharLocationScope(pList) ? null : "d-none")
+                                            .Replace("{disableShip}", SettingsManager.HasCharShipTypeScope(pList) ? null : "d-none")
                                         
                                             .Replace("{butSearchMail}", LM.Get("hrmButSearchMail"))
                                             .Replace("{butSearchMailUrl}", WebServerModule.GetHRM_SearchMailURL(inspectCharId, authCode))
@@ -360,6 +363,29 @@ namespace ThunderED.Modules.OnDemand
                                             text = text.Replace("totalTransactPages!!", total.ToString());
                                             total = await GetCharJournalPagesCount(token, inspectCharId);
                                             text = text.Replace("totalJournalPages!!", total.ToString());
+
+                                            var value = await APIHelper.ESIAPI.GetCharacterWalletBalance(Reason, inspectCharId, token);
+                                            text = text.Replace("{totalISK}", value.ToString("N"));
+                                        }
+
+                                        if (SettingsManager.HasCharLocationScope(pList))
+                                        {
+                                            var locationData = await APIHelper.ESIAPI.GetCharacterLocation(Reason, inspectCharId, token);
+                                            var system = await APIHelper.ESIAPI.GetSystemData(Reason, locationData.solar_system_id);
+                                            var station = locationData.station_id > 0 ? await APIHelper.ESIAPI.GetStationData(Reason, locationData.station_id, token) : null;
+                                            var citadel = locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetStructureData(Reason, locationData.structure_id, token) : null;
+                                            var loc = station != null ? station.name : citadel?.name;
+                                            
+                                            var value = $"{system.name} {loc}";
+                                            text = text.Replace("{locationData}", value).Replace("{hrmInspectLocation}", LM.Get("hrmInspectLocation"));
+                                        }
+
+                                        if (SettingsManager.HasCharLocationScope(pList))
+                                        {
+                                            var stData = await APIHelper.ESIAPI.GetCharacterShipType(Reason, inspectCharId, token);
+                                            var tType = await APIHelper.ESIAPI.GetTypeId(Reason, stData.ship_type_id);
+                                            
+                                            text = text.Replace("{shipData}", tType.name).Replace("{hrmInspectShip}", LM.Get("hrmInspectShip"));
                                         }
 
                                         if (SettingsManager.HasCharStatsScope(pList))
