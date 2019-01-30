@@ -4,6 +4,9 @@
 + Added **LanguageFilesFolder** param to be able to store customized language files in a separate folder
 + Added error message when trying to inspect user in HRM with invalid token
 + Added character location and ship info into HR module
++ Added new HR users group display named Dump for users who left but hasn;t been cleaned up yet
++ Improved auth cleanup (read notes section)
++ Improved HR mail readability
 + Improved bandwidth and CPU usage for contracts, mail, notifications and null campaigns modules using 304 http response
 + Fixed excessive renaming attempts when character has very long name
 + Fixed new installation upgrade issue

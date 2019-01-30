@@ -255,7 +255,7 @@ namespace ThunderED.Modules.Sub
         }
 
 
-        internal static string GetAccessDeniedPage(string header, string message, string description = null)
+        internal static string GetAccessDeniedPage(string header, string message, string backUrl, string description = null)
         {
             return File.ReadAllText(SettingsManager.FileTemplateAuth3)
                 .Replace("{message}", message)
@@ -263,7 +263,8 @@ namespace ThunderED.Modules.Sub
                 .Replace("{header2}", header)
                 .Replace("{description}", description)
                 .Replace("{body}", "")
-                .Replace("{backText}", LM.Get("backText"));
+                .Replace("{backText}", LM.Get("backText"))
+                .Replace("{backUrl}", backUrl);
         }
 
         public static async Task WriteResponce(string message, System.Net.Http.HttpListenerResponse response)

@@ -203,7 +203,7 @@ namespace ThunderED.API
                         {
                             if (raw.StartsWith("{\"error\""))
                             {
-                                await LogHelper.LogError($"[TOKEN] Request failure: {raw}", LogCat.ESI);
+                                await LogHelper.LogWarning($"[TOKEN] Request failure: {raw}", LogCat.ESI);
                             }
                             return null;
                         }

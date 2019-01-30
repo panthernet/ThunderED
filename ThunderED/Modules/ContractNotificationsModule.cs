@@ -62,7 +62,7 @@ namespace ThunderED.Modules
                             var res = await APIHelper.ESIAPI.GetAuthToken(code, clientID, secret);
                             if (string.IsNullOrEmpty(res[0]))
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("contractFailedToOpen")), response);
+                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("contractFailedToOpen"), WebServerModule.GetWebSiteUrl()), response);
                                 return true;
                             }
 
@@ -72,7 +72,7 @@ namespace ThunderED.Modules
                             }
                             else
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("contractFailedToOpen")), response);
+                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("contractFailedToOpen"), WebServerModule.GetWebSiteUrl()), response);
                             }
 
                             return true;
@@ -84,7 +84,7 @@ namespace ThunderED.Modules
                         var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
                         if (result == null)
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied")), response);
+                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
                             return true;
                         }
 
@@ -92,7 +92,7 @@ namespace ThunderED.Modules
                         var group = Settings.ContractNotificationsModule.Groups[groupName];
                         if (!group.CharacterIDs.Contains(lCharId))
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied")), response);
+                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
                             return true;
                         }
 

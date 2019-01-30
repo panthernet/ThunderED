@@ -63,7 +63,7 @@ namespace ThunderED.Modules
                         var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
                         if (result == null)
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Mail Module", LM.Get("accessDenied")), response);
+                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Mail Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
                             return true;
                         }
 
@@ -71,7 +71,7 @@ namespace ThunderED.Modules
 
                         if (Settings.MailModule.AuthGroups.Values.All(a => !a.Id.Contains(lCharId)))
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Mail Module", LM.Get("accessDenied")), response);
+                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Mail Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
                             return true;
                         }
 
@@ -245,15 +245,19 @@ namespace ThunderED.Modules
             await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {LM.Get("mailMsgTitle", from)}", embed.Build()).ConfigureAwait(false);
         }
 
-        public static async Task<string> PrepareBodyMessage(string input)
+        public static async Task<string> PrepareBodyMessage(string input, bool forWeb = false)
         {
             if (string.IsNullOrEmpty(input)) return " ";
 
-            var body = input.Replace("<br>", Environment.NewLine)
-                .Replace("<b>", "**").Replace("</b>", "**")
-                .Replace("<u>", "__").Replace("</u>", "__")
-                .Replace("</font>", null)
-                .Replace("<loc>", null).Replace("</loc>", null);
+            string body;
+            if (!forWeb)
+                body = input.Replace("<br>", Environment.NewLine)
+                    .Replace("<b>", "**").Replace("</b>", "**")
+                    .Replace("<u>", "__").Replace("</u>", "__")
+                    .Replace("</font>", null)
+                    .Replace("<loc>", null).Replace("</loc>", null);
+            else 
+                body = input.Replace("<loc>", null).Replace("</loc>", null).Replace("</font>", null);
 
             try
             {
@@ -266,9 +270,11 @@ namespace ThunderED.Modules
                     body = index != 0 ? $"{body.Substring(0, index)}{body.Substring(lst + 1, body.Length - lst - 1)}" : $"{body.Substring(lst + 1, body.Length - lst - 1)}";
                 }
 
+                var prevIndex = 0;
                 while (true)
                 {
-                    var index = body.IndexOf("<a");
+                    var index = body.IndexOf("<a", prevIndex+1);
+                    prevIndex = index;
                     if (index == -1) break;
                     var urlStart = body.IndexOf('\"', index) + 1;
                     var urlEnd = body.IndexOf('\"', urlStart) - 1;
@@ -290,17 +296,17 @@ namespace ThunderED.Modules
                     }
 
                     //parse data
-                    var data = $"{text}({url})";
+                    var data = forWeb ? $"<a href=\"{url}\">{text}</a>" : $"{text}({url})";
                     bool isEmpty = false;
                     try
                     {
                         if (url.StartsWith("http"))
                         {
-                            data = url;
+                            data = forWeb ? data : url;
                         }
                         else if (url.StartsWith("joinChannel"))
                         {
-                            data = $"[{text}](<url={url}>{text}</url>)";
+                            data = forWeb ? text : $"[{text}](<url={url}>{text}</url>)";
                         }
                         else if (url.StartsWith("fitting"))
                         {
@@ -309,7 +315,7 @@ namespace ThunderED.Modules
                         else if (url.StartsWith("killReport"))
                         {
                             var id = url.Substring(11, url.Length - 11);
-                            data = $"[{text}](https://zkillboard.com/kill/{id})";
+                            data = forWeb ? $"<a href=\"https://zkillboard.com/kill/{id}\">{text}</a>" : $"[{text}](https://zkillboard.com/kill/{id})";
                         }
                         else
                         {
@@ -355,7 +361,7 @@ namespace ThunderED.Modules
                             }
                             else if (!string.IsNullOrEmpty(newUrl))
                             {
-                                data = $"[{text}]({newUrl}) {addon}";
+                                data = forWeb ? $"<a href=\"{newUrl}\">{text}</a>" : $"[{text}]({newUrl}) {addon}";
                             }
                         }
                     }
@@ -369,7 +375,8 @@ namespace ThunderED.Modules
                         : $"{data}{body.Substring(endTagStart, body.Length - endTagStart)}";
                 }
 
-                body = body.Replace("</a>", null);
+                if(!forWeb)
+                    body = body.Replace("</a>", null);
 
                 //data parsing
 

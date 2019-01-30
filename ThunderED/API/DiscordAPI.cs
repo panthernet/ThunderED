@@ -8,12 +8,11 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
+using Matrix.Xmpp.XHtmlIM;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
-using ThunderED.Json.ZKill;
 using ThunderED.Modules;
-using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Sub;
 using LogSeverity = ThunderED.Classes.LogSeverity;
 
@@ -299,7 +298,8 @@ namespace ThunderED.API
             var u = discordGuild.GetUser(discordUserId);
             var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
             var result = new RoleSearchResult();
-            result.UpdatedRoles.Add(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
+            if(u != null)
+                result.UpdatedRoles.Add(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
 
             #region Get personalized foundList
 
@@ -398,12 +398,14 @@ namespace ThunderED.API
             var u = discordGuild.GetUser(discordUserId);
             try
             {
-                if (u.Id == Client.CurrentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name)))
+                if (u != null && (u.Id == Client.CurrentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name))))
+                    return null;
+                if(u == null && (discordUserId == Client.CurrentUser.Id))
                     return null;
 
                // await LogHelper.LogInfo($"Running Auth Check on {u.Username}", LogCat.AuthCheck, false);
 
-                var authUser = await SQLHelper.GetAuthUserByDiscordId(u.Id);
+                var authUser = await SQLHelper.GetAuthUserByDiscordId(discordUserId);
 
                 if (authUser != null)
                 {
@@ -412,13 +414,37 @@ namespace ThunderED.API
                     //skip bad requests
                     if(characterData == null) return null;
 
-                    var initialUserRoles = new List<SocketRole>(u.Roles);
                     var remroles = new List<SocketRole>();
                     var result = await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth);
+                    var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.AuthState == 2;
 
                     var changed = false;
                     var isAuthed = result.UpdatedRoles.Count > 1;
 
+
+                    if (isMovingToDump)
+                    {
+                        await LogHelper.LogInfo($"{authUser.Data.CharacterName}({authUser.CharacterId}) is being moved into dumpster...", LogCat.AuthCheck);
+                        authUser.AuthState = 3;
+
+                        var rCorp = await APIHelper.ESIAPI.GetCorporationData(LogCat.AuthCheck.ToString(), characterData.corporation_id, true);
+                        authUser.Data.CorporationId = characterData.corporation_id;
+                        authUser.Data.CorporationName = rCorp.name;
+                        authUser.Data.CorporationTicker = rCorp.ticker;
+                        authUser.Data.AllianceId = characterData.alliance_id ?? 0;
+                        if (authUser.Data.AllianceId > 0)
+                        {
+                            var rAlliance = await APIHelper.ESIAPI.GetAllianceData(LogCat.AuthCheck.ToString(), characterData.alliance_id, true);
+                            authUser.Data.AllianceName = rAlliance.name;
+                            authUser.Data.AllianceTicker = rAlliance.ticker;
+                        }
+
+                        await SQLHelper.SaveAuthUser(authUser);
+                    }
+                    if (u == null) return null;
+
+
+                    var initialUserRoles = new List<SocketRole>(u.Roles);
                     var invalidRoles = initialUserRoles.Where(a => result.UpdatedRoles.FirstOrDefault(b => b.Id == a.Id) == null);
                     foreach (var invalidRole in invalidRoles)
                     {
@@ -507,6 +533,7 @@ namespace ThunderED.API
                 }
                 else
                 {
+                    if (u == null) return null;
                     var rroles = new List<SocketRole>();
                     var rolesOrig = new List<SocketRole>(u.Roles);
                     foreach (var rrole in rolesOrig)
@@ -560,15 +587,27 @@ namespace ThunderED.API
             }
         }
 
-        public async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
+        internal async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
         {
             var discordGuild = GetGuild();
             var discordUsers = discordGuild.Users;
-
-            foreach (var u in discordUsers)
+            var dids = discordUsers.Select(a => a.Id).ToList();
+            
+            foreach (var id in dids)
             {
-                //await LogHelper.LogInfo($"AuthCheck =-> {u.Nickname} ({u.Username})", LogCat.AuthCheck, true, false);
-                await UpdateUserRoles(u.Id, exemptRoles, authCheckIgnoreRoles, false);
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false);
+            }
+
+            await UpdateDBUserRoles(exemptRoles, authCheckIgnoreRoles, dids);
+        }
+
+        private async Task UpdateDBUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles, IEnumerable<ulong> dids)
+        {
+            var ids = (await SQLHelper.GetAuthUsers(2)).Select(a=> a.DiscordId);
+
+            foreach (var id in ids.Where(a=> !dids.Contains(a)))
+            {
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false);
             }
         }
 

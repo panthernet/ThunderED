@@ -118,7 +118,7 @@ namespace ThunderED.Modules
 
                         if (!CheckAccess(characterId, rChar, out var isEditor))
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Timers Module", LM.Get("accessDenied")), response);
+                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Timers Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
                             return true;
                         }
 

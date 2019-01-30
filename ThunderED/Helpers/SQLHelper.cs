@@ -167,11 +167,24 @@ namespace ThunderED.Helpers
             }).ToList();
         }
 
-        internal static async Task<List<AuthUserEntity>> GetAuthUsers(Dictionary<string,object> where = null)
+        private static async Task<List<AuthUserEntity>> GetAuthUsers(Dictionary<string,object> where)
         {
             var res = await SelectData("auth_users", new[] {"*"}, where);
 
             return res?.Select(ParseAuthUser).ToList();
+        }
+
+        internal static async Task<List<AuthUserEntity>> GetAuthUsers()
+        {
+            return await GetAuthUsers(null);
+        }
+
+        internal static async Task<List<AuthUserEntity>> GetAuthUsers(int authState)
+        {
+            return await GetAuthUsers(new Dictionary<string, object>
+            {
+                {"authState", authState}
+            });
         }
 
         internal static async Task<List<AuthUserEntity>> GetOutdatedAuthUsers()

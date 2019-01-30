@@ -431,6 +431,7 @@
   "contractOpened":  "Request has been sent successfully. You can close this window.",
   "hrmInvalidUserToken": "Unable to get valid character token. Refresh token might be expired, deleted by user or belongs to another CCP app!",
   "hrmInspectLocation":  "Location",
-  "hrmInspectShip":  "Ship"
+  "hrmInspectShip":  "Ship",
+  "hrmDumpHeader":  "Dumped" 
 
 }

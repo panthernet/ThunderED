@@ -156,9 +156,6 @@ namespace ThunderED.Modules.OnDemand
             var sb = new StringBuilder();
             foreach (var item in list)
             {
-                //var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, item.CharacterId, true);
-               // var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
-                //var ally = corp.alliance_id.HasValue ?  await APIHelper.ESIAPI.GetAllianceData(Reason, corp.alliance_id) : null;
                 var charUrl = WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
                 sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
                 sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
@@ -175,7 +172,25 @@ namespace ThunderED.Modules.OnDemand
         {
             var list = await SQLHelper.GetAuthUsersWithPerms();
             var sb = new StringBuilder();
-            foreach (var item in list.Where(a=> a.AuthState != 2))
+            foreach (var item in list.Where(a=> a.AuthState == 0 || a.AuthState == 1))
+            {
+                var charUrl = WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
+                sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
+                sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
+                sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
+                sb.Append($@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
+                sb.Append(@"</a>");
+                sb.Append($"</div>");
+            }
+            
+            return sb.ToString();
+        }
+
+        private static async Task<string> GenerateDumpListHtml(string authCode)
+        {
+            var list = await SQLHelper.GetAuthUsersWithPerms();
+            var sb = new StringBuilder();
+            foreach (var item in list.Where(a=> a.AuthState == 3))
             {
                 var charUrl = WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
                 sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");

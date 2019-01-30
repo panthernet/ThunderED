@@ -58,7 +58,7 @@ namespace ThunderED.Modules.OnDemand
 
                         if (result == null || await CheckAccess(characterId) == false)
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied")), response);
+                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
                             return true;
                         }
 
@@ -138,7 +138,7 @@ namespace ThunderED.Modules.OnDemand
                         {
                             if (IsNoRedirect(data))
                                 await WebServerModule.WriteResponce(LM.Get("pleaseReauth"), response);
-                            else await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied")), response);
+                            else await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
                             return true;
                         }
 
@@ -232,6 +232,7 @@ namespace ThunderED.Modules.OnDemand
                             {
                                 var membersHtml = await GenerateMembersListHtml(authCode);
                                 var awaitingHtml = await GenerateAwaitingListHtml(authCode);
+                                var dumpHtml = await GenerateDumpListHtml(authCode);
 
                                 var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Main).Replace("{header}", LM.Get("hrmTemplateHeader"))
                                         .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
@@ -240,8 +241,10 @@ namespace ThunderED.Modules.OnDemand
                                         .Replace("{locale}", LM.Locale)
                                         .Replace("{membersContent}", membersHtml)
                                         .Replace("{awaitingContent}", awaitingHtml)
+                                        .Replace("{dumpContent}", dumpHtml)
                                         .Replace("{membersHeader}", LM.Get("hrmMembersHeader"))
                                         .Replace("{awaitingHeader}", LM.Get("hrmAwaitingHeader"))
+                                        .Replace("{dumpHeader}", LM.Get("hrmDumpHeader"))
                                         .Replace("{butSearchMail}", LM.Get("hrmButSearchMail"))
                                         .Replace("{butSearchMailUrl}", WebServerModule.GetHRM_SearchMailURL(0, authCode))
 
@@ -348,7 +351,7 @@ namespace ThunderED.Modules.OnDemand
 
                                         if (string.IsNullOrEmpty(token))
                                         {
-                                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("hrmInvalidUserToken")), response);
+                                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("hrmInvalidUserToken"), WebServerModule.GetHRMMainURL(authCode)), response);
                                             return true;
                                         }
                                         if (SettingsManager.HasReadMailScope(pList))
@@ -430,7 +433,7 @@ namespace ThunderED.Modules.OnDemand
                                 catch (Exception ex)
                                 {
                                     await LogHelper.LogEx("Inspection Error", ex, Category);
-                                    await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied")), response);
+                                    await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
                                     return true;
                                 }
                             }
@@ -597,7 +600,7 @@ namespace ThunderED.Modules.OnDemand
                                         var fromCorp = corp == null ? null : await APIHelper.ESIAPI.GetCorporationData(Reason, corp.corporation_id);
                                         var corpText = fromCorp == null ? null : $" - {fromCorp.name}[{fromCorp.ticker}]";
                                         //var msg = Regex.Replace(mail.body, @"<font size\s*=\s*"".+?""", @"<font ");
-                                        var msg = await MailModule.PrepareBodyMessage(mail.body);
+                                        var msg = await MailModule.PrepareBodyMessage(mail.body, true);
                                         var text = File.ReadAllText(SettingsManager.FileTemplateHRM_MailBody)
                                                 .Replace("{DateHeader}", LM.Get("mailDateHeader"))
                                                 .Replace("{SubjectHeader}", LM.Get("mailSubjectHeader"))
@@ -617,7 +620,7 @@ namespace ThunderED.Modules.OnDemand
                                     await LogHelper.LogEx("Inspection Mail Body Error", ex, Category);
                                     if (IsNoRedirect(data))
                                         await WebServerModule.WriteResponce(LM.Get("pleaseReauth"), response);
-                                    else await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied")), response);
+                                    else await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
                                     return true;
                                 }
                             }

@@ -559,7 +559,7 @@ namespace ThunderED.Modules
                             group = inputGroup;
                             if (string.IsNullOrEmpty(result[1]))
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Auth Module", LM.Get("authNoTokenReceived")), response);
+                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Auth Module", LM.Get("authNoTokenReceived"), WebServerModule.GetAuthPageUrl()), response);
                                 await LogHelper.LogWarning($"Invalid named group auth attempt (missing token) from charID: {characterID} grp: {inputGroupName}", Category);
                                 return true;
                             }
