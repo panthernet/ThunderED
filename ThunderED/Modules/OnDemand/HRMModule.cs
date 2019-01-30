@@ -342,6 +342,12 @@ namespace ThunderED.Modules.OnDemand
                                     {
                                         var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                             Settings.WebServerModule.CcpAppSecret);
+
+                                        if (string.IsNullOrEmpty(token))
+                                        {
+                                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("hrmInvalidUserToken")), response);
+                                            return true;
+                                        }
                                         if (SettingsManager.HasReadMailScope(pList))
                                         {
                                             var total = await GetMailPagesCount(token, inspectCharId);

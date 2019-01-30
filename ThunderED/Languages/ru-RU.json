@@ -422,6 +422,7 @@
   "authPageSystemAuthHeader":  "<p style='text-align: center;font-size: 18px;'>This section designated for special authentication</p>",
   "contractFailedToOpen":  "При открытии контракта в игровом клиенте возникла ошибка",
   "contractOpenIngame":  "Открыть в игре",
-  "contractOpened":  "Запрос успешно отправлен. Это окно можно закрыть." 
+  "contractOpened":  "Запрос успешно отправлен. Это окно можно закрыть.",
+  "hrmInvalidUserToken": "Не удалось получить валидный токен персонажа. Скорее всего токен истек, заблокирован пользователем или принадлежит другому приложению CCP!"  
 
 }

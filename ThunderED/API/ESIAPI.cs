@@ -196,9 +196,19 @@ namespace ThunderED.API
 
                     var values = new Dictionary<string, string> {{"grant_type", "refresh_token"}, {"refresh_token", $"{refreshToken}"}};
                     var content = new FormUrlEncodedContent(values);
-                    var tokenresponse = await ssoClient.PostAsync("https://login.eveonline.com/oauth/token", content);
-                    var responseString = await tokenresponse.Content.ReadAsStringAsync();
-                    return (string) JObject.Parse(responseString)["access_token"];
+                    using (var tokenresponse = await ssoClient.PostAsync("https://login.eveonline.com/oauth/token", content))
+                    {
+                        var raw = await tokenresponse.Content.ReadAsStringAsync();
+                        if (!tokenresponse.IsSuccessStatusCode)
+                        {
+                            if (raw.StartsWith("{\"error\""))
+                            {
+                                await LogHelper.LogError($"[TOKEN] Request failure: {raw}", LogCat.ESI);
+                            }
+                            return null;
+                        }
+                        return (string) JObject.Parse(raw)["access_token"];
+                    }
                 }
             }
             catch (Exception ex)
@@ -221,10 +231,11 @@ namespace ThunderED.API
                     ssoClient.DefaultRequestHeaders.Add("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes(clientID + ":" + secret))}");
                     var content = new FormUrlEncodedContent(values);
 
-                    var tokenresponse = await ssoClient.PostAsync("https://login.eveonline.com/oauth/token", content);
-                    var responseString = await tokenresponse.Content.ReadAsStringAsync();
-
-                    return new [] {(string) JObject.Parse(responseString)["access_token"], (string) JObject.Parse(responseString)["refresh_token"] };
+                    using (var tokenresponse = await ssoClient.PostAsync("https://login.eveonline.com/oauth/token", content))
+                    {
+                        var responseString = await tokenresponse.Content.ReadAsStringAsync();
+                        return new[] {(string) JObject.Parse(responseString)["access_token"], (string) JObject.Parse(responseString)["refresh_token"]};
+                    }
                 }
             }
             catch (Exception ex)
