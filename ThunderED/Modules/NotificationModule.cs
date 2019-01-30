@@ -162,7 +162,7 @@ namespace ThunderED.Modules
                                         .OrderBy(x => x.notification_id).ToList();
 
 
-                                //check if there are new notifications to process
+                               /* //check if there are new notifications to process
                                 fNotifications.Add(new JsonClasses.Notification
                                 {
                                     text = @"autoTime: 131921874600000000
@@ -177,7 +177,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                                     structureTypeID: 35835",
                                     notification_id = 999990000,
                                     type = "MoonminingExtractionFinished"
-                                });
+                                });*/
                                 if (fNotifications.Count > 0 && fNotifications.Last().notification_id != _lastNotification)
                                 {
                                     foreach (var notification in fNotifications)
