@@ -186,7 +186,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                                         {
                                             //log new notifications to get essential data
                                             if (Settings.Config.LogNewNotifications)
-                                                await LogHelper.LogNotification(notification.type, notification.text);
+                                                await LogHelper.LogNotification($"{notification.type} [{notification.notification_id}]", notification.text);
 
                                             var discordChannel = APIHelper.DiscordAPI.GetChannel(guildID, filter.ChannelID != 0 ? filter.ChannelID : group.DefaultDiscordChannelID);
                                             var data = HelpersAndExtensions.ParseNotificationText(notification.text);

@@ -24,11 +24,9 @@ namespace ThunderED.Helpers
         public static async Task<bool> Upgrade()
         {
             var version = await Query<string>("cache_data", "data", "name", "version") ?? await Query<string>("cacheData", "data", "name", "version");
-            bool fullUpdate = string.IsNullOrEmpty(version);
-            //set full version for new mysql instance
-            bool skipIsNew = SettingsManager.Settings.Database.DatabaseProvider == "mysql";
-            var vDbVersion = fullUpdate ? (SettingsManager.IsNew || skipIsNew ? new Version(Program.VERSION) : new Version(1,0,0)) : new Version(version);
-          //  var vAppVersion = new Version(Program.VERSION);
+            var isNew = string.IsNullOrEmpty(version) || SettingsManager.IsNew;
+
+            var vDbVersion = isNew ? new Version(Program.VERSION) : new Version(version);
 
             try
             {

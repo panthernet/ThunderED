@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -63,7 +62,8 @@ namespace ThunderED.Helpers
                     {
                         httpClient.DefaultRequestHeaders.Clear();
                         httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
-                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
+                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                        httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
                         if (!string.IsNullOrEmpty(auth))
                             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", auth);
                         if(!string.IsNullOrEmpty(etag))
@@ -144,7 +144,6 @@ namespace ThunderED.Helpers
             return result;
         }
 
-
         public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null, string etoken = null, bool noRetries = false, bool silent = false)
             where T : class
         {
@@ -160,7 +159,7 @@ namespace ThunderED.Helpers
                     {
                         httpClient.DefaultRequestHeaders.Clear();
                         httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
-                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
+                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
                         if (!string.IsNullOrEmpty(auth))
                             httpClient.DefaultRequestHeaders.Add("Authorization", auth);
                         if(!string.IsNullOrEmpty(etoken))
@@ -234,7 +233,8 @@ namespace ThunderED.Helpers
                         httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
                         if (!string.IsNullOrEmpty(auth))
                             httpClient.DefaultRequestHeaders.Add("Authorization", auth);
-
+                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                        httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
 
                         using (var responceMessage = await httpClient.PostAsync(request, content))
                         {
