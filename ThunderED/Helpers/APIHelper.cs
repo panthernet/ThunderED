@@ -78,7 +78,7 @@ namespace ThunderED.Helpers
                             {
                                 result.Data.ErrorCode = (int)responceMessage.StatusCode;
                                 result.Data.Message = raw;
-                                if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                if (responceMessage.StatusCode != HttpStatusCode.NotModified && responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
                                     (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
                                     await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
                                 if (responceMessage.StatusCode == HttpStatusCode.NotModified)
@@ -170,7 +170,7 @@ namespace ThunderED.Helpers
                             raw = await responceMessage.Content.ReadAsStringAsync();
                             if (!responceMessage.IsSuccessStatusCode)
                             {
-                                if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                if (responceMessage.StatusCode != HttpStatusCode.NotModified && responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
                                     (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
                                     await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
                                 if (responceMessage.StatusCode == HttpStatusCode.NotModified)

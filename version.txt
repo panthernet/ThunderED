@@ -21,6 +21,10 @@
 + Added new Config section param **LanguageFilesFolder**. Will be handy for bot owners who has customized language files.
   Bot will search for language files in the specified folder. Leave empty to search in default location.
 
++ Improved auth cleanup. Now bot checks not only Discord users but also all users in DB if they're still valid.
+  This leads to better members management. In addition all users which no longer passes auth will be moved in a temporary "Dump" group.
+  This group can be browsed in HR module if user has any ESI permissions and is a subject to cleanup according to **AppInvalidationInHours** param.
+
 ### V1.2.17
 
 + Added log message to highlight inconsistency in auth group names between DB and config file
