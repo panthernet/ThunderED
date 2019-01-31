@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using ThunderED.Helpers;
 
@@ -24,8 +25,11 @@ namespace ThunderED.Modules
 
                     await LogHelper.LogModule("Running AuthCheck module...", Category);
 
+                    var sw = Stopwatch.StartNew();
                     await APIHelper.DiscordAPI.UpdateAllUserRoles(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles);
                     // await LogHelper.LogInfo("Auth check complete!", Category);
+                    sw.Stop();
+                    Debug.WriteLine(sw.Elapsed.TotalSeconds);
                 }
             }
             finally

@@ -13,7 +13,7 @@ namespace ThunderED.Classes
     {
         Task<T> Query<T>(string table, string field, Dictionary<string, object> where);
         Task Update(string table, string setField, object setData, Dictionary<string, object> where);
-        Task Delete(string table, Dictionary<string, object> where);
+        Task<bool> Delete(string table, Dictionary<string, object> where);
         Task DeleteWhereIn(string table, string field, List<long> list, bool not);
         Task InsertOrUpdate(string table, Dictionary<string, object> values);
         Task<List<object[]>> SelectData(string query);

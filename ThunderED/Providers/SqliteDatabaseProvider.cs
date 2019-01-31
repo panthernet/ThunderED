@@ -328,7 +328,7 @@ namespace ThunderED.Providers
         #endregion
 
         #region Delete
-        public async Task Delete(string table, Dictionary<string, object> where)
+        public async Task<bool> Delete(string table, Dictionary<string, object> where)
         {
             var whereText = string.Empty;
             int count = 1;
@@ -339,7 +339,7 @@ namespace ThunderED.Providers
             }
 
             var query = $"DELETE FROM {table} WHERE {whereText}";
-            await SessionWrapper(query, async command =>
+            return await SessionWrapper(query, async command =>
             {
                 count = 1;
                 foreach (var pair in where)
@@ -347,10 +347,12 @@ namespace ThunderED.Providers
                 try
                 {
                     command.ExecuteNonQuery();
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     await LogHelper.LogEx(nameof(Delete), ex, LogCat.SQLite);
+                    return false;
                 }
             });
         }

@@ -1,3 +1,8 @@
+### V1.2.19
++ Added new !sys command for bot admins
++ Improved auth check module performance
++ Fixed notifications feed bug introduced in one of the prev releases
+
 ### V1.2.18
 + Added warning messages for modules when feeder character is not authed or has outdated token
 + Added ability to open posted contracts from Discord message right into the game client (read notes section below)
@@ -21,8 +26,8 @@
 + Added new Config section param **LanguageFilesFolder**. Will be handy for bot owners who has customized language files.
   Bot will search for language files in the specified folder. Leave empty to search in default location.
 
-+ Improved auth cleanup. Now bot checks not only Discord users but also all users in DB if they're still valid.
-  This leads to better members management. In addition all users which no longer passes auth will be moved in a temporary "Dump" group.
++ Improved auth cleanup. Now bot validates auth not only for present Discord users but also for all users in DB.
+  This approach provides faster and better membership management. In addition all users which no longer passes auth will be moved in a temporary "Dump" group.
   This group can be browsed in HR module if user has any ESI permissions and is a subject to cleanup according to **AppInvalidationInHours** param.
 
 ### V1.2.17

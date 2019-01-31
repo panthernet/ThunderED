@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Async;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -592,11 +593,11 @@ namespace ThunderED.API
             var discordGuild = GetGuild();
             var discordUsers = discordGuild.Users;
             var dids = discordUsers.Select(a => a.Id).ToList();
-            
-            foreach (var id in dids)
+
+            await dids.ParallelForEachAsync(async id =>
             {
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false);
-            }
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false); 
+            });
 
             await UpdateDBUserRoles(exemptRoles, authCheckIgnoreRoles, dids);
         }
@@ -605,10 +606,10 @@ namespace ThunderED.API
         {
             var ids = (await SQLHelper.GetAuthUsers(2)).Select(a=> a.DiscordId);
 
-            foreach (var id in ids.Where(a=> !dids.Contains(a)))
+            await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
             {
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false);
-            }
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false); 
+            });
         }
 
         internal async Task SendEmbedKillMessage(ulong channelId, Color color, KillDataEntry km, string radiusMessage, string msg = "")

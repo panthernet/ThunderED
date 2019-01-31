@@ -432,6 +432,10 @@
   "hrmInvalidUserToken": "Unable to get valid character token. Refresh token might be expired, deleted by user or belongs to another CCP app!",
   "hrmInspectLocation":  "Location",
   "hrmInspectShip":  "Ship",
-  "hrmDumpHeader":  "Dumped" 
+  "hrmDumpHeader":  "Dumped",
+  "helpSys": "System command available only to bot Admin. Contains following sub-commands: cleartable. Example: **!sys cleartable cache**", 
+  "helpSysClear": "Subcommand to clear specified DB table. Use it on your own risk. Example: **!sys cleartable cache**", 
+  "sysClearTableNotFound": "Specified DB table not found or there is a database error!",
+  "sysOperationComplete": ":white_check_mark: Operation completed!" 
 
 }

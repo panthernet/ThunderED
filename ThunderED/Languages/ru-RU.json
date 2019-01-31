@@ -426,5 +426,9 @@
   "hrmInvalidUserToken": "Не удалось получить валидный токен персонажа. Скорее всего токен истек, заблокирован пользователем или принадлежит другому приложению CCP!",
   "hrmInspectLocation":  "Локация",
   "hrmInspectShip":  "Корабль",
-  "hrmDumpHeader":  "Cброшенные" 
+  "hrmDumpHeader":  "Cброшенные",
+  "helpSys": "Системная команда, доступная только админам. Содержит следующие подкоманды: cleartable. Пример: **!sys cleartable cache**", 
+  "helpSysClear": "Подкоманда очистки указанной таблицы БД. Используйте на свой страх и риск. Пример: **!sys cleartable cache**", 
+  "sysClearTableNotFound": "Указанная таблица БД не найдена или возникла ошибка работы с БД!",
+  "sysOperationComplete": ":white_check_mark: Операция выполнена!" 
 }

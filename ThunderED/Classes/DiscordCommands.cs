@@ -374,12 +374,7 @@ namespace ThunderED.Classes
         [Command("rngroup", RunMode = RunMode.Async), Summary("Rename auth group in DB")]
         public async Task RnGroup([Remainder]string command)
         {
-            var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
-            if (!string.IsNullOrEmpty(result))
-            {
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
-                return;
-            }
+            if(!await IsExecByAdmin()) return;
 
             try
             {
@@ -642,15 +637,9 @@ namespace ThunderED.Classes
         }
 
         [Command("test", RunMode = RunMode.Async), Summary("Test command")]
-       // [CheckForRole]
         public async Task Test([Remainder] string x)
         {
-            var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
-            if (!string.IsNullOrEmpty(result))
-            {
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
-                return;
-            }
+            if(!await IsExecByAdmin()) return;
 
             var res = x.Split(' ');
             if (res[0] == "km")
@@ -659,6 +648,48 @@ namespace ThunderED.Classes
                 await TestModule.DebugKillmailMessage(Context, res[1], res.Length > 2 && Convert.ToBoolean(res[2]));
             }
         }
+
+        [Command("sys", RunMode = RunMode.Async), Summary("Test command")]
+        public async Task SysCommand()
+        {
+            if(!await IsExecByAdmin()) return;
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpSys"), true);
+
+        }
+
+        [Command("sys", RunMode = RunMode.Async), Summary("Test command")]
+        public async Task SysCommand([Remainder] string x)
+        {
+            if(!await IsExecByAdmin()) return;
+
+            try
+            {
+                var values = x.Split(' ');
+
+                switch (values[0])
+                {
+                    case "cleartable":
+                    {
+                        if (values.Length < 2)
+                        {
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpSysClear"), true);
+                            return;
+                        }
+
+                        if(!await SQLHelper.ClearTable(values[1]))
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysClearTableNotFound"), true);
+                        else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysOperationComplete"), true);
+                    }
+                        return;
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("reauth", ex);
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpSys"), true);
+            }
+        }
+
 
         /// <summary>
         /// 
@@ -729,22 +760,12 @@ namespace ThunderED.Classes
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         [Command("rehash", RunMode = RunMode.Async), Summary("Rehash settings file")]
-       // [CheckForRole]
         public async Task Reshash()
         {
             try
             {
-                var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
-                if (!string.IsNullOrEmpty(result))
-                {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
-                    return;
-                }
+                if(!await IsExecByAdmin()) return;
 
                 SettingsManager.UpdateSettings();
                 WebServerModule.ModuleConnectors.Clear();
@@ -756,40 +777,25 @@ namespace ThunderED.Classes
             {
                 await LogHelper.LogEx("Rehash command error", ex);
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ":no_entry_sign: REHASH FAILED :no_entry_sign: Check your config file for errors! (https://jsonformatter.org/)", true);
-
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         [Command("reauth", RunMode = RunMode.Async), Summary("Reauth all users")]
-        //[CheckForRole]
         public async Task Reauth()
         {
             try
             {
-                var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
-                if (!string.IsNullOrEmpty(result))
-                {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
-                    return;
-                }
+                if(!await IsExecByAdmin()) return;
+
                 await TickManager.RunModule(typeof(AuthCheckModule), Context, true);
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, "Reauth completed!", true);
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx("reauth", ex);
-                await Task.FromException(ex);
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         [Command("auth", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task Auth()
         {
@@ -1182,5 +1188,21 @@ namespace ThunderED.Classes
                 await LogHelper.LogEx("badstand", ex);
             }
         }
+
+        #region Internal
+
+        private async Task<bool> IsExecByAdmin()
+        {
+            var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
+            if (!string.IsNullOrEmpty(result))
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
     }
 }

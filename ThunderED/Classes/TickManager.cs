@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Async;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -149,11 +150,11 @@ namespace ThunderED.Classes
 
                 if(IsNoConnection) return;
 
-                foreach (var module in Modules)
+                await Modules.ParallelForEachAsync(async module =>
                 {
-                    await module.Run(null).ConfigureAwait(false);
-                }
-                //Parallel.ForEach(Modules, module => module.Run(null));
+                    await module.Run(null);
+                });
+                
             }
             catch (Exception ex)
             {

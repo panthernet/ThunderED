@@ -6,10 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
-using MySql.Data.MySqlClient;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
-using ThunderED.Providers;
 
 namespace ThunderED.Helpers
 {
@@ -18,7 +16,7 @@ namespace ThunderED.Helpers
         private static readonly string[] MajorVersionUpdates = new[]
         {
             "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15",
-            "1.2.16"
+            "1.2.16","1.2.19"
         };
 
         public static async Task<bool> Upgrade()
@@ -335,7 +333,9 @@ namespace ThunderED.Helpers
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                             //MYSQL HAS BEEN ADDED HERE
-
+                            case "1.2.19":
+                                await Delete("notifications_list", "id", 999990000);
+                                break;
                         default:
                             continue;
                     }

@@ -75,9 +75,9 @@ namespace ThunderED.Helpers
         #endregion
 
         #region Delete
-        private static async Task Delete(string table, string whereField = null, object whereData = null)
+        private static async Task<bool> Delete(string table, string whereField = null, object whereData = null)
         {
-            await Provider?.Delete(table, new Dictionary<string, object> {{whereField, whereData}});
+            return await Provider?.Delete(table, new Dictionary<string, object> {{whereField, whereData}});
         }
 
         private static async Task Delete(string table, Dictionary<string, object> where)
@@ -329,6 +329,12 @@ namespace ThunderED.Helpers
         #endregion
 
         #region System
+
+        public static async Task<bool> ClearTable(string table)
+        {
+            return await Delete(table);
+        }
+
         private static bool EnsureDBExists()
         {
             return Provider?.EnsureDBExists().GetAwaiter().GetResult() ?? false;
