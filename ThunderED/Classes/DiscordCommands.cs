@@ -669,7 +669,6 @@ namespace ThunderED.Classes
                 switch (values[0])
                 {
                     case "cleartable":
-                    {
                         if (values.Length < 2)
                         {
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpSysClear"), true);
@@ -679,7 +678,9 @@ namespace ThunderED.Classes
                         if(!await SQLHelper.ClearTable(values[1]))
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysClearTableNotFound"), true);
                         else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysOperationComplete"), true);
-                    }
+                        return;
+                    default:
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpSys"), true);
                         return;
                 }
             }

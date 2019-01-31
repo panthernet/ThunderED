@@ -77,6 +77,8 @@ namespace ThunderED.Helpers
         #region Delete
         private static async Task<bool> Delete(string table, string whereField = null, object whereData = null)
         {
+            if (whereField == null && whereData == null)
+                return await Provider?.Delete(table, null);
             return await Provider?.Delete(table, new Dictionary<string, object> {{whereField, whereData}});
         }
 

@@ -328,22 +328,25 @@ namespace ThunderED.Providers
         #endregion
 
         #region Delete
-        public async Task<bool> Delete(string table, Dictionary<string, object> where)
+        public async Task<bool> Delete(string table, Dictionary<string, object> where = null)
         {
             var whereText = string.Empty;
             int count = 1;
-            var last = where.Keys.Last();
-            foreach (var pair in where)
+            if (where != null)
             {
-                whereText += $"{pair.Key}=@var{count++}{(pair.Key == last? null : " and ")}";
+                var last = where.Keys.Last();
+                foreach (var pair in where)
+                    whereText += $"{pair.Key}=@var{count++}{(pair.Key == last ? null : " and ")}";
+                whereText = $" WHERE {whereText}";
             }
 
-            var query = $"DELETE FROM {table} WHERE {whereText}";
+            var query = $"DELETE FROM {table}{whereText}";
             return await SessionWrapper(query, async command =>
             {
                 count = 1;
-                foreach (var pair in where)
-                    command.Parameters.Add(CreateParam<SqliteParameter>($"@var{count++}", pair.Value));
+                if(where != null)
+                    foreach (var pair in where)
+                        command.Parameters.Add(CreateParam<SqliteParameter>($"@var{count++}", pair.Value));
                 try
                 {
                     command.ExecuteNonQuery();
