@@ -430,5 +430,6 @@
   "helpSys": "Системная команда, доступная только админам. Содержит следующие подкоманды: cleartable. Пример: **!sys cleartable cache**", 
   "helpSysClear": "Подкоманда очистки указанной таблицы БД. Используйте на свой страх и риск. Пример: **!sys cleartable cache**", 
   "sysClearTableNotFound": "Указанная таблица БД не найдена или возникла ошибка работы с БД!",
-  "sysOperationComplete": ":white_check_mark: Операция выполнена!" 
+  "sysOperationComplete": ":white_check_mark: Операция выполнена!",
+  "authTemplateHeaderShort":  "Аутентификация"
 }

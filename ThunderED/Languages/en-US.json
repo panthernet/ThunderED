@@ -436,6 +436,7 @@
   "helpSys": "System command available only to bot Admin. Contains following sub-commands: cleartable. Example: **!sys cleartable cache**", 
   "helpSysClear": "Subcommand to clear specified DB table. Use it on your own risk. Example: **!sys cleartable cache**", 
   "sysClearTableNotFound": "Specified DB table not found or there is a database error!",
-  "sysOperationComplete": ":white_check_mark: Operation completed!" 
+  "sysOperationComplete": ":white_check_mark: Operation completed!",
+  "authTemplateHeaderShort":  "Authentication"
 
 }

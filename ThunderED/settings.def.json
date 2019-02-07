@@ -339,6 +339,13 @@
             }
           }
         }
+      },
+      "Mode5_ESIWithoutAuth": {
+        "PreliminaryAuthMode": true,
+        "AppInvalidationInHours": 24,
+        "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
+        "CustomButtonText": "Alt Characters Auth",
+        "SkipDiscordAuthPage":  true 
       }
     }
   },

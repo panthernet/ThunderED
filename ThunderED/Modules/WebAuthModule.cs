@@ -659,16 +659,28 @@ namespace ThunderED.Modules
                             }
                             else
                             {
-                                await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
-                                        .Replace("{url}", Settings.WebServerModule.DiscordUrl)
-                                        .Replace("{image}", image)
-                                        .Replace("{uid}", $"!auth confirm {uid}")
-                                        .Replace("{header}", LM.Get("authTemplateHeader"))
-                                        .Replace("{body}", LM.Get("authTemplateManualAccept", rChar.name))
-                                        .Replace("{body3}", LM.Get("authTemplateManualAccept3"))
-                                        .Replace("{body2}", LM.Get("authTemplateManualAccept2"))
-                                        .Replace("{backText}", LM.Get("backText")),
-                                    response);
+                                if (!group.SkipDiscordAuthPage)
+                                    await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
+                                            .Replace("{url}", Settings.WebServerModule.DiscordUrl)
+                                            .Replace("{image}", image)
+                                            .Replace("{uid}", $"!auth confirm {uid}")
+                                            .Replace("{header}", LM.Get("authTemplateHeader"))
+                                            .Replace("{body}", LM.Get("authTemplateManualAccept", rChar.name))
+                                            .Replace("{body3}", LM.Get("authTemplateManualAccept3"))
+                                            .Replace("{body2}", LM.Get("authTemplateManualAccept2"))
+                                            .Replace("{backText}", LM.Get("backText")),
+                                        response);
+                                else 
+                                    await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
+                                            .Replace("{url}", Settings.WebServerModule.DiscordUrl)
+                                            .Replace("{image}", image)
+                                            .Replace("{uid}", null)
+                                            .Replace("{header}", LM.Get("authTemplateHeaderShort"))
+                                            .Replace("{body}", LM.Get("authTemplateManualAccept", rChar.name))
+                                            .Replace("{body3}", LM.Get("authTemplateManualAccept3"))
+                                            .Replace("{body2}", null)
+                                            .Replace("{backText}", LM.Get("backText")),
+                                        response);
 
                             }
                         }
