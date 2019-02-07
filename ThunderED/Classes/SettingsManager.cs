@@ -38,11 +38,11 @@ namespace ThunderED.Classes
 
         public static ThunderSettings Settings { get; private set; }
 
-        public static string Prepare()
+        public static string Prepare(string settingsPath = null)
         {
             try
             {
-                UpdateSettings();
+                UpdateSettings(settingsPath);
                 FileTemplateMain = Path.Combine(RootDirectory, "Templates", "main.html");
                 FileTemplateAuthPage = Path.Combine(RootDirectory, "Templates", "authPage.html");
                 FileTemplateAuth = Path.Combine(RootDirectory, "Templates", "auth.html");
@@ -73,9 +73,9 @@ namespace ThunderED.Classes
             FileSettingsPath = Path.Combine(RootDirectory, "settings.json");
         }
 
-        public static void UpdateSettings()
+        public static void UpdateSettings(string settingsPath = null)
         {
-            Settings = ThunderSettings.Load(FileSettingsPath);
+            Settings = ThunderSettings.Load(settingsPath ?? FileSettingsPath);
 
             if (Settings.Database.DatabaseProvider == "sqlite")
             {

@@ -1,4 +1,6 @@
-### V1.2.20
+### V1.3.0
++ Added optional **SkipDiscordAuthPage** param to auth groups to be able to store ESI token and skip Discord auth
++ Added unit tests project
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci
 

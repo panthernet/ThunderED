@@ -1547,6 +1547,9 @@ namespace ThunderED.Classes
         [Comment("Optional data for standings based auth")]
         public StandingsAuthGroupExtension StandingsAuth { get; set; } = null;
 
+        [Comment("Skip Discord auth page display after CCP auth (when you want to get ESI token without actual auth)")]
+        public bool SkipDiscordAuthPage { get; set; } = false;
+
 #if EDITOR
         [Comment("The list of ESI access role names to check on auth")]
         public ObservableCollection<string> ESICustomAuthRoles { get; set; } = new ObservableCollection<string>();

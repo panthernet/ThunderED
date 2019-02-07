@@ -1,15 +1,16 @@
 ﻿- Services offline page when TQ is offline for webserver
 - loading screen for ajax queries
+- https://everef.net/type/33153
 
 HRM
 - notifications
 - clones
 - assets
-- Location: where, last login, ship
+- last login
 - LP list
 - evewho links
 
-
 USER SERVICES
 1. Skill queue is finishing soon
+
 
