@@ -186,7 +186,7 @@
   "mailSubject":  "Тема:", 
   "mailLabels":  "Ярлыки:", 
   "mailDate":  "Дата:", 
-  "mailMsgTitle":  "@everyone Письмо от {0}!", 
+  "mailMsgTitle":  "Письмо от {0}!", 
   "NotifyHeader_OrbitalAttacked":  "Объект {0}, принадлежащий {1} атакован!", 
   "Location":  "Локация" ,
   "Aggressor":  "Агрессор" ,
