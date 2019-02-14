@@ -1340,6 +1340,9 @@ namespace ThunderED.Classes
         [Comment("Optional path to language files folder. Empty by default and will use default folder")]
         public string LanguageFilesFolder { get; set; }
 
+        [Comment("Optional data folder name for mounted volumes and separate data folders. If specified will use it to store settings, sqlite DB and log files")]
+        public string DataDirectoryName { get; set; }
+
 
 #if EDITOR
         public override string this[string columnName]

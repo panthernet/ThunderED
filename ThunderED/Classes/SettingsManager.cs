@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using ThunderED.Helpers;
+using System.Runtime.InteropServices;
 
 namespace ThunderED.Classes
 {
@@ -26,10 +25,11 @@ namespace ThunderED.Classes
         public static string FileTemplateMailAuthSuccess;
         public static string FileTemplateAccessDenied;
         public static string RootDirectory { get; }
+        public static string DataDirectory { get; }
         public static string DatabaseFilePath { get; private set; }
 
         public static DateTime NextNotificationCheck { get; set; }
-        public static string DefaultUserAgent = "ThunderED v2.0 "+ Guid.NewGuid().ToString("N");
+        public static string DefaultUserAgent = "ThunderED v" + Program.VERSION;
         public static string FileTemplateHRM_Main;
         public static string FileTemplateHRM_Inspect;
         public static string FileTemplateHRM_MailBody;
@@ -37,6 +37,9 @@ namespace ThunderED.Classes
         public static string FileTemplateHRM_SearchMailPage;
 
         public static ThunderSettings Settings { get; private set; }
+
+        public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
 
         public static string Prepare(string settingsPath = null)
         {
@@ -70,7 +73,10 @@ namespace ThunderED.Classes
         static SettingsManager()
         {
             RootDirectory = Path.GetDirectoryName(new Uri(Assembly.GetEntryAssembly().CodeBase).LocalPath);
-            FileSettingsPath = Path.Combine(RootDirectory, "settings.json");
+            DataDirectory = IsLinux ? Path.Combine(RootDirectory, Settings.Config.DataDirectoryName) : (string.IsNullOrEmpty(Settings.Config.DataDirectoryName) ? RootDirectory : Settings.Config.DataDirectoryName);
+            if(!Directory.Exists(DataDirectory))
+                throw new Exception($"Data directory '{DataDirectory}' do not exist!");
+            FileSettingsPath = Path.Combine(DataDirectory, "settings.json");
         }
 
         public static void UpdateSettings(string settingsPath = null)
@@ -78,9 +84,7 @@ namespace ThunderED.Classes
             Settings = ThunderSettings.Load(settingsPath ?? FileSettingsPath);
 
             if (Settings.Database.DatabaseProvider == "sqlite")
-            {
-                DatabaseFilePath = Settings.Database.DatabaseFile == "edb.db" ? Path.Combine(RootDirectory, "edb.db") : Settings.Database.DatabaseFile;
-            }
+                DatabaseFilePath = Path.Combine(DataDirectory, "edb.db");
         }
     }
 }

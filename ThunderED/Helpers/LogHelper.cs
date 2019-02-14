@@ -35,7 +35,7 @@ namespace ThunderED.Helpers
         {
             try
             {
-                _logPath = _logPath ?? Path.Combine(SettingsManager.RootDirectory, "logs");
+                _logPath = _logPath ?? Path.Combine(SettingsManager.DataDirectory, "logs");
                 _logSeverity = _logSeverity ?? SettingsManager.Settings.Config.LogSeverity.ToSeverity();
                 if ((int) _logSeverity > (int) severity) return;
 
@@ -102,7 +102,7 @@ namespace ThunderED.Helpers
         {
             try
             {
-                _logPath = _logPath ?? Path.Combine(SettingsManager.RootDirectory, "logs");
+                _logPath = _logPath ?? Path.Combine(SettingsManager.DataDirectory, "logs");
                 var file = Path.Combine(_logPath, $"{cat}.log");
 
                 if (!Directory.Exists(_logPath))
@@ -139,7 +139,7 @@ namespace ThunderED.Helpers
 
         public static async Task LogNotification(string notificationType, string notificationText)
         {
-            _logPath = _logPath ?? Path.Combine(SettingsManager.RootDirectory, "logs");
+            _logPath = _logPath ?? Path.Combine(SettingsManager.DataDirectory, "logs");
             var file = Path.Combine(_logPath, "notifications_lg.log");
 
             if (!Directory.Exists(_logPath))

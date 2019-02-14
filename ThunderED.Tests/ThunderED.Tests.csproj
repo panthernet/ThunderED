@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Fixtures\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ThunderED\ThunderED.csproj" />
   </ItemGroup>
 

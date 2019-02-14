@@ -1,8 +1,28 @@
 ### V1.3.0
 + Added optional **SkipDiscordAuthPage** param to auth groups to be able to store ESI token and skip Discord auth
 + Added unit tests project
++ Added new param **DataDirectoryName** to counter Linux data location problems (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci
+
+### NOTES
+- To counter multiple problems with config and logs location under Linux we introduce **DataDirectoryName** config param. It is empty
+  by default meaning that bot will operate in a root directory. When specified, this param will redirect config file, db file and log file 
+  requests from the bot to the specified directory **relative** to the application root path. Linux users now can use Docker **mount** and
+  Linux **link** to mount any folder into the app folder. This folder can be located anywhere you want and will contain settings.json, edb.db 
+  and Logs folder.
+
+  In the following example we mount **/opt/thunder** directory to **Data** folder.
+  EXAMPLE:
+  In settings.json: **"DataDirectoryName": "Data" **
+
+ ** mkdir /opt/thunder**
+ ** docker run -p 8080:8080 -v /opt/thunder:/app/ThunderED/Data thundered:latest**
+
+  **Windows** users also can use **DataDirectoryName** param but they have to specify **FULL** directory path and will not use any mounts.
+  For example: **"DataDirectoryName": "C:\Data"** 
+
+  **WARNING!!! Database.DatabaseFile** param should now contain only DB filename without a path to avoid errors
 
 ### V1.2.19
 + Added new !sys command for bot admins
