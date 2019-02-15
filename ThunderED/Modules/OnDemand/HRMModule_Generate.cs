@@ -150,17 +150,23 @@ namespace ThunderED.Modules.OnDemand
             return sb.ToString();
         }
 
-        private async Task<string> GenerateMembersListHtml(string authCode)
+        private async Task<string> GenerateMembersListHtml(string authCode, HRMAccessFilter accessFilter)
         {
-            var list = await SQLHelper.GetAuthUsersWithPerms(2);
+            var list = (await SQLHelper.GetAuthUsersWithPerms(2)).Where(a=> IsValidUserForIntraction(accessFilter, a));
+
             var sb = new StringBuilder();
             foreach (var item in list)
             {
-                var charUrl = WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
+                var charUrl = !accessFilter.CanInspectAuthedUsers ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
                 sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
                 sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
                 sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
                 sb.Append($@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
+                sb.Append(@"</a>");
+                sb.Append($@"<a class=""btn btn-outline-danger{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 40px;"" data-toggle=""confirmation"" data-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"">");
+                sb.Append(@"  <div class=""parent_content"">");
+                sb.Append(@"    <div class=""child_content"">X</div>");
+                sb.Append(@"  </div>");
                 sb.Append(@"</a>");
                 sb.Append($"</div>");
             }
@@ -168,17 +174,22 @@ namespace ThunderED.Modules.OnDemand
             return sb.ToString();
         }
 
-        private static async Task<string> GenerateAwaitingListHtml(string authCode)
+        private static async Task<string> GenerateAwaitingListHtml(string authCode, HRMAccessFilter accessFilter)
         {
-            var list = await SQLHelper.GetAuthUsersWithPerms();
+            var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> IsValidUserForIntraction(accessFilter, a));
             var sb = new StringBuilder();
             foreach (var item in list.Where(a=> a.AuthState == 0 || a.AuthState == 1))
             {
-                var charUrl = WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
+                var charUrl = !accessFilter.CanInspectOtherUsers ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
                 sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
                 sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
                 sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
                 sb.Append($@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
+                sb.Append(@"</a>");
+                sb.Append($@"<a class=""btn btn-outline-danger{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 40px;"" data-toggle=""confirmation"" data-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"">");
+                sb.Append(@"  <div class=""parent_content"">");
+                sb.Append(@"    <div class=""child_content"">X</div>");
+                sb.Append(@"  </div>");
                 sb.Append(@"</a>");
                 sb.Append($"</div>");
             }
@@ -186,17 +197,22 @@ namespace ThunderED.Modules.OnDemand
             return sb.ToString();
         }
 
-        private static async Task<string> GenerateDumpListHtml(string authCode)
+        private static async Task<string> GenerateDumpListHtml(string authCode, HRMAccessFilter accessFilter)
         {
-            var list = await SQLHelper.GetAuthUsersWithPerms();
+            var list = (await SQLHelper.GetAuthUsersWithPerms(3)).Where(a=> IsValidUserForIntraction(accessFilter, a));
             var sb = new StringBuilder();
-            foreach (var item in list.Where(a=> a.AuthState == 3))
+            foreach (var item in list)
             {
-                var charUrl = WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
+                var charUrl = !accessFilter.CanInspectOtherUsers ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
                 sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
                 sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
                 sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
                 sb.Append($@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
+                sb.Append(@"</a>");
+                sb.Append($@"<a class=""btn btn-outline-danger{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 40px;"" data-toggle=""confirmation"" data-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"">");
+                sb.Append(@"  <div class=""parent_content"">");
+                sb.Append(@"    <div class=""child_content"">X</div>");
+                sb.Append(@"  </div>");
                 sb.Append(@"</a>");
                 sb.Append($"</div>");
             }

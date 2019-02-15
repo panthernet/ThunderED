@@ -53,8 +53,7 @@
     "DisableLogIntoFiles": false,
     "UseSocketsForZKillboard":  true,
     "ZKillboardWebSocketUrl":  "wss://zkillboard.com:2096",
-    "LanguageFilesFolder":  "",
-    "DataDirectoryName": "" 
+    "LanguageFilesFolder":  ""
   },
 
   "Database": {
@@ -116,9 +115,24 @@
   },
 
   "HRMModule": {
-    "UsersAccessList": [],
-    "RolesAccessList": [],
-    "AuthTimeoutInMinutes":  10,
+    "AccessList": {
+      "accessList1": {
+        "UsersAccessList": [],
+        "RolesAccessList": [],
+        "AuthGroupNamesFilter": [],
+        "AuthAllianceIdFilter": [],
+        "AuthCorporationIdFilter": [],
+        "ApplyGroupFilterToAwaitingUsers":  false,
+        "IsAwaitingUsersVisible": true,
+        "IsDumpedUsersVisible": true,
+        "IsAuthedUsersVisible":  true,
+        "CanSearchMail":  true,
+        "CanKickUsers":  true,
+        "CanInspectAuthedUsers":  true,
+        "CanInspectOtherUsers":  true
+      } 
+    },
+    "AuthTimeoutInMinutes":  30,
     "TableEntriesPerPage":  10,
     "TableSkillEntriesPerPage":  20    
   },

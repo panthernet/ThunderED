@@ -73,9 +73,12 @@ namespace ThunderED.Classes
         static SettingsManager()
         {
             RootDirectory = Path.GetDirectoryName(new Uri(Assembly.GetEntryAssembly().CodeBase).LocalPath);
-            DataDirectory = IsLinux ? Path.Combine(RootDirectory, Settings.Config.DataDirectoryName) : (string.IsNullOrEmpty(Settings.Config.DataDirectoryName) ? RootDirectory : Settings.Config.DataDirectoryName);
-            if(!Directory.Exists(DataDirectory))
-                throw new Exception($"Data directory '{DataDirectory}' do not exist!");
+            DataDirectory = IsLinux ? Path.Combine(RootDirectory, "Data") : RootDirectory;
+            if (!Directory.Exists(DataDirectory))
+            {
+                throw new Exception($"Data directory '{DataDirectory}' do not exist! Make sure you've mounted static volume as described in FAQ!");
+            }
+
             FileSettingsPath = Path.Combine(DataDirectory, "settings.json");
         }
 

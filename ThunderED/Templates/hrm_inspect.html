@@ -173,8 +173,8 @@
         <input type="hidden" id="timerCharId" value="{charId}">
         <div>
             <a class="btn btn-primary" href="{backUrl}" role="button" style="margin: 10px; min-width: 100px;">{Back}</a>
-            <a class="btn btn-primary" href="{butSearchMailUrl}" role="button" style="margin: 10px; min-width: 200px;">{butSearchMail}</a>
-            <a class="btn btn-danger" href="{butDeleteUserUrl}" role="button" style="margin: 10px; min-width: 200px;" data-toggle="confirmation" data-title="{ConfirmUserDelete}">{butDeleteUser}</a>
+            <a class="btn btn-primary{canSearchMail}" href="{butSearchMailUrl}" role="button" style="margin: 10px; min-width: 200px;">{butSearchMail}</a>
+            <a class="btn btn-danger{canKickUsers}" href="{butDeleteUserUrl}" role="button" style="margin: 10px; min-width: 200px;" data-toggle="confirmation" data-title="{ConfirmUserDelete}">{butDeleteUser}</a>
         </div>
         <ul class="nav nav-pills float-right">{loggedInAs}<a href="{LogOutUrl}" style="margin-left:10px; margin-right: 30px;">{LogOut}</a></ul>
 

@@ -252,11 +252,13 @@ namespace ThunderED.Classes
     public class HRMModuleSettings: ValidatableSettings
     {
 #if EDITOR
-        public ObservableCollection<long> UsersAccessList { get; set; } = new ObservableCollection<long>();
-        public ObservableCollection<string> RolesAccessList { get; set; } = new ObservableCollection<string>();
+        //public ObservableCollection<long> UsersAccessList { get; set; } = new ObservableCollection<long>();
+       // public ObservableCollection<string> RolesAccessList { get; set; } = new ObservableCollection<string>();
+        public ObservableDictionary<string, HRMAccessFilter> AccessList { get; set; } = new  ObservableDictionary<string, HRMAccessFilter>();
 #else
-        public List<long> UsersAccessList { get; set; } = new List<long>();
-        public List<string> RolesAccessList { get; set; } = new List<string>();
+       // public List<long> UsersAccessList { get; set; } = new List<long>();
+       // public List<string> RolesAccessList { get; set; } = new List<string>();
+        public Dictionary<string, HRMAccessFilter> AccessList { get; set; } = new  Dictionary<string, HRMAccessFilter>();
 #endif
         [Comment("Authentication timeout in minutes")]
         public int AuthTimeoutInMinutes { get; set; } = 10;
@@ -284,6 +286,31 @@ namespace ThunderED.Classes
             }
         }
 #endif
+    }
+
+    public class HRMAccessFilter
+    {
+#if EDITOR
+        public ObservableCollection<long> UsersAccessList { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<string> RolesAccessList { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> AuthGroupNamesFilter { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<long> AuthAllianceIdFilter { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<long> AuthCorporationIdFilter { get; set; } = new ObservableCollection<long>();
+#else
+        public List<long> UsersAccessList { get; set; } = new List<long>();
+        public List<string> RolesAccessList { get; set; } = new List<string>();
+        public List<string> AuthGroupNamesFilter { get; set; } = new List<string>();
+        public List<long> AuthAllianceIdFilter { get; set; } = new List<long>();
+        public List<long> AuthCorporationIdFilter { get; set; } = new List<long>();
+#endif
+        public bool ApplyGroupFilterToAwaitingUsers { get; set; } = false;
+        public bool IsAwaitingUsersVisible { get; set; } = true;
+        public bool IsDumpedUsersVisible { get; set; } = true;
+        public bool IsAuthedUsersVisible { get; set; } = true;
+        public bool CanSearchMail { get; set; } = true;
+        public bool CanKickUsers { get; set; } = true;
+        public bool CanInspectAuthedUsers { get; set; } = true;
+        public bool CanInspectOtherUsers { get; set; } = true;
     }
 
     public class ContinousCheckModuleSettings: ValidatableSettings
@@ -1339,10 +1366,6 @@ namespace ThunderED.Classes
         public string ZKillboardWebSocketUrl { get; set; } = "wss://zkillboard.com:2096";
         [Comment("Optional path to language files folder. Empty by default and will use default folder")]
         public string LanguageFilesFolder { get; set; }
-
-        [Comment("Optional data folder name for mounted volumes and separate data folders. If specified will use it to store settings, sqlite DB and log files")]
-        public string DataDirectoryName { get; set; }
-
 
 #if EDITOR
         public override string this[string columnName]

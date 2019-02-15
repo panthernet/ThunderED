@@ -31,6 +31,9 @@ namespace ThunderED.Classes.Entities
         public bool IsActive;
 
         [JsonIgnore]
+        public bool IsLeft => AuthState == 3;
+
+        [JsonIgnore]
         public bool IsAuthed => AuthState == 2;
         [JsonIgnore]
         public bool IsPending => AuthState == 1;

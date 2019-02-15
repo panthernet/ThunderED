@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Newtonsoft.Json;
 using ThunderED.Classes;
+using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json.Internal;
 using ThunderED.Modules.Sub;
@@ -56,7 +57,7 @@ namespace ThunderED.Modules.OnDemand
                         var characterId = result == null ? 0 : Convert.ToInt64(result[0]);
 
 
-                        if (result == null || await CheckAccess(characterId) == false)
+                        if (result == null || await CheckAccess(characterId) == null)
                         {
                             await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
                             return true;
@@ -134,7 +135,8 @@ namespace ThunderED.Modules.OnDemand
                                 await SQLHelper.SetHRAuthTime(authCode);
                         }
 
-                        if (await CheckAccess(characterId) == false)
+                        var accessFilter = await CheckAccess(characterId);
+                        if (accessFilter == null)
                         {
                             if (IsNoRedirect(data))
                                 await WebServerModule.WriteResponce(LM.Get("pleaseReauth"), response);
@@ -150,7 +152,11 @@ namespace ThunderED.Modules.OnDemand
                                 {
                                     var searchCharId = Convert.ToInt64(s.Replace("deleteAuth", ""));
                                     if (searchCharId == 0) return true;
-
+                                    if (!await IsValidUserForIntraction(accessFilter, searchCharId) || !accessFilter.CanKickUsers)
+                                    {
+                                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
+                                        return true;
+                                    }
                                     await SQLHelper.DeleteAuthDataByCharId(searchCharId);
                                     await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
                                 }
@@ -166,6 +172,12 @@ namespace ThunderED.Modules.OnDemand
                                 try
                                 {
                                     var searchCharId = Convert.ToInt64(s.Replace("searchMail", ""));
+                                    if (!await IsValidUserForIntraction(accessFilter, searchCharId) || !accessFilter.CanSearchMail)
+                                    {
+                                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
+                                        return true;
+                                    }
+
                                     if (string.IsNullOrEmpty(query))
                                     {
                                         //search page load
@@ -230,9 +242,9 @@ namespace ThunderED.Modules.OnDemand
                             //main page
                             case "0":
                             {
-                                var membersHtml = await GenerateMembersListHtml(authCode);
-                                var awaitingHtml = await GenerateAwaitingListHtml(authCode);
-                                var dumpHtml = await GenerateDumpListHtml(authCode);
+                                var membersHtml = await GenerateMembersListHtml(authCode, accessFilter);
+                                var awaitingHtml = await GenerateAwaitingListHtml(authCode, accessFilter);
+                                var dumpHtml = await GenerateDumpListHtml(authCode, accessFilter);
 
                                 var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Main).Replace("{header}", LM.Get("hrmTemplateHeader"))
                                         .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
@@ -247,6 +259,10 @@ namespace ThunderED.Modules.OnDemand
                                         .Replace("{dumpHeader}", LM.Get("hrmDumpHeader"))
                                         .Replace("{butSearchMail}", LM.Get("hrmButSearchMail"))
                                         .Replace("{butSearchMailUrl}", WebServerModule.GetHRM_SearchMailURL(0, authCode))
+                                        .Replace("{disableAuthed}", !accessFilter.IsAuthedUsersVisible ? " d-none" : null)
+                                        .Replace("{disableAwaiting}", !accessFilter.IsAwaitingUsersVisible ? " d-none" : null)
+                                        .Replace("{disableDumped}", !accessFilter.IsDumpedUsersVisible ? " d-none" : null)
+                                        .Replace("{canSearchMail}", !accessFilter.CanSearchMail ? " d-none" : null)
 
                                     ;
                                 await WebServerModule.WriteResponce(text, response);
@@ -262,10 +278,21 @@ namespace ThunderED.Modules.OnDemand
                                         return true;
                                     }
 
+                                    if (!await IsValidUserForIntraction(accessFilter, inspectCharId))
+                                    {
+                                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
+                                        return true;
+                                    }
+
                                     var iChar = await APIHelper.ESIAPI.GetCharacterData(Reason, inspectCharId, true);
                                     var iCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, iChar.corporation_id, true);
                                     var iAlly = iCorp.alliance_id.HasValue ? await APIHelper.ESIAPI.GetAllianceData(Reason, iCorp.alliance_id.Value, true) : null;
                                     var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                    if((!accessFilter.CanInspectAuthedUsers && authUserEntity.IsAuthed) || (!accessFilter.CanInspectOtherUsers && !authUserEntity.IsAuthed))
+                                    {
+                                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
+                                        return true;
+                                    }
                                     var hasToken = authUserEntity != null && authUserEntity.HasToken;
 
                                     var corpHistoryHtml = await GenerateCorpHistory(inspectCharId);
@@ -299,6 +326,9 @@ namespace ThunderED.Modules.OnDemand
                                             .Replace("{hrmInspectAlly}", LM.Get("hrmInspectAlly"))
                                             .Replace("{hrmInspectSS}", LM.Get("hrmInspectSS"))
                                             .Replace("{hrmInspectBirth}", LM.Get("hrmInspectBirth"))
+
+                                            .Replace("{canSearchMail}", !accessFilter.CanSearchMail ? " d-none" : null)
+                                            .Replace("{canKickUsers}", !accessFilter.CanKickUsers ? " d-none" : null)
 
 
                                             .Replace("{tabLastYearStats}", LM.Get("hrmTabLastYearStats"))
@@ -444,6 +474,11 @@ namespace ThunderED.Modules.OnDemand
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
                                 var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                if (!IsValidUserForIntraction(accessFilter, authUserEntity))
+                                {
+                                    await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
+                                    return true;
+                                }
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
@@ -464,6 +499,11 @@ namespace ThunderED.Modules.OnDemand
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
                                 var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                if (!IsValidUserForIntraction(accessFilter, authUserEntity))
+                                {
+                                    await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
+                                    return true;
+                                }
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
@@ -484,6 +524,11 @@ namespace ThunderED.Modules.OnDemand
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
                                 var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                if (!IsValidUserForIntraction(accessFilter, authUserEntity))
+                                {
+                                    await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
+                                    return true;
+                                }
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
@@ -504,6 +549,11 @@ namespace ThunderED.Modules.OnDemand
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
                                 var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                if (!IsValidUserForIntraction(accessFilter, authUserEntity))
+                                {
+                                    await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                                    return true;
+                                }
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
@@ -524,6 +574,11 @@ namespace ThunderED.Modules.OnDemand
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
                                 var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                if (!IsValidUserForIntraction(accessFilter, authUserEntity))
+                                {
+                                    await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                                    return true;
+                                }
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
@@ -544,6 +599,11 @@ namespace ThunderED.Modules.OnDemand
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
                                 var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                if (!IsValidUserForIntraction(accessFilter, authUserEntity))
+                                {
+                                    await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                                    return true;
+                                }
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
@@ -565,6 +625,11 @@ namespace ThunderED.Modules.OnDemand
                                 if (!int.TryParse(values, out var inspectCharId))
                                     return true;
                                 var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
+                                if (!IsValidUserForIntraction(accessFilter, authUserEntity))
+                                {
+                                    await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                                    return true;
+                                }
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
@@ -588,6 +653,11 @@ namespace ThunderED.Modules.OnDemand
                                         return true;
                                     var inspectCharacterId = Convert.ToInt64(values[1]);
                                     var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharacterId);
+                                    if (!IsValidUserForIntraction(accessFilter, authUserEntity))
+                                    {
+                                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                                        return true;
+                                    }
                                     var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                         Settings.WebServerModule.CcpAppSecret);
                                     var mail = await APIHelper.ESIAPI.GetMail(Reason, inspectCharacterId, token, mailBodyId);
@@ -644,6 +714,36 @@ namespace ThunderED.Modules.OnDemand
             return false;
         }
 
+        private async Task<bool> IsValidUserForIntraction(HRMAccessFilter filter, long characterId)
+        {
+            var user = await SQLHelper.GetAuthUserByCharacterId(characterId);
+            return IsValidUserForIntraction(filter, user);
+
+        }
+        private static bool IsValidUserForIntraction(HRMAccessFilter filter, AuthUserEntity user)
+        {
+            if (user == null) return false;
+
+            var isNotAuthed = user.AuthState < 2;
+            //is not authed and filter option ? DENY
+            if (!filter.IsAwaitingUsersVisible && isNotAuthed)
+                return false;
+
+            if (!filter.IsDumpedUsersVisible && user.IsLeft)
+                return false;
+
+            //invalid group ? DENY
+            if (!user.IsLeft && (!isNotAuthed || filter.ApplyGroupFilterToAwaitingUsers) && filter.AuthGroupNamesFilter.Any() && !filter.AuthGroupNamesFilter.Contains(user.GroupName))
+                return false;
+
+            //authed and have invalid ally or corp? DENY
+            if(!isNotAuthed && !user.IsLeft && ((filter.AuthAllianceIdFilter.Any() && user.Data.AllianceId > 0 && !filter.AuthAllianceIdFilter.Contains(user.Data.AllianceId)) ||
+               (filter.AuthCorporationIdFilter.Any() && !filter.AuthCorporationIdFilter.Contains(user.Data.CorporationId))))
+                return false;
+
+            return true;
+        }
+
         public class SearchMailItem
         {
             public int smAuthType;
@@ -651,20 +751,21 @@ namespace ThunderED.Modules.OnDemand
             public string smText;
         }
 
-        private async Task<bool> CheckAccess(long characterId)
+        private async Task<HRMAccessFilter> CheckAccess(long characterId)
         {
-            var firstCheck = !Settings.HRMModule.UsersAccessList.Contains(characterId);
+            var result = Settings.HRMModule.AccessList.Values.FirstOrDefault(a=> a.UsersAccessList.Contains(characterId));
 
-            if (firstCheck)
+            if (result != null) return result;
+            var discordId = await SQLHelper.GetAuthUserDiscordId(characterId);
+            if (discordId <= 0) return null;
+            var discordRoles = APIHelper.DiscordAPI.GetUserRoleNames(discordId);
+            foreach (var list in Settings.HRMModule.AccessList.Values)
             {
-                var discordId = await SQLHelper.GetAuthUserDiscordId(characterId);
-                if (discordId > 0)
-                {
-                    firstCheck = !APIHelper.DiscordAPI.GetUserRoleNames(discordId).Intersect(Settings.HRMModule.RolesAccessList).Any();
-                }
+                if (discordRoles.Intersect(list.RolesAccessList).Any())
+                    return list;
             }
 
-            return !firstCheck;
+            return null;
         }
 
     }

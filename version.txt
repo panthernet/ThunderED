@@ -1,28 +1,72 @@
 ### V1.3.0
 + Added optional **SkipDiscordAuthPage** param to auth groups to be able to store ESI token and skip Discord auth
 + Added unit tests project
-+ Added new param **DataDirectoryName** to counter Linux data location problems (explanation below)
++ Added means to counter Linux data location problems (explanation below)
++ Added delete member buttons to HRM main page
++ Enhanced HRM module access options and security (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci
 
-### NOTES
-- To counter multiple problems with config and logs location under Linux we introduce **DataDirectoryName** config param. It is empty
-  by default meaning that bot will operate in a root directory. When specified, this param will redirect config file, db file and log file 
-  requests from the bot to the specified directory **relative** to the application root path. Linux users now can use Docker **mount** and
-  Linux **link** to mount any folder into the app folder. This folder can be located anywhere you want and will contain settings.json, edb.db 
-  and Logs folder.
+### BREAKING CHANGES
+- To counter multiple problems with config and logs location under Linux we now search all sensitive data under folder named **Data** in bot root directory.
+  Sensitive data is represented by config file, db file and log files. Linux users now **should** use Docker **mount** and Linux **link** commands to mount 
+  **Data** folder into the app directory.
 
   In the following example we mount **/opt/thunder** directory to **Data** folder.
   EXAMPLE:
-  In settings.json: **"DataDirectoryName": "Data" **
-
  ** mkdir /opt/thunder**
+ copy settings.json into newly created folder
  ** docker run -p 8080:8080 -v /opt/thunder:/app/ThunderED/Data thundered:latest**
 
-  **Windows** users also can use **DataDirectoryName** param but they have to specify **FULL** directory path and will not use any mounts.
-  For example: **"DataDirectoryName": "C:\Data"** 
+  **WARNING!!!** Param named **Database.DatabaseFile** should now contain only DB filename without a path to avoid errors
 
-  **WARNING!!! Database.DatabaseFile** param should now contain only DB filename without a path to avoid errors
+- Introduced **AccessLists** param for HRMModule which now allows advanced access distribution. 
+  Now you can:
+  - Limit access and display of authed, awaiting and dumped users for certain roles and characters
+  - Limit access for certain roles and characters to members authed under specific group 
+  - Limit access for certain roles and characters to members of specific corps and alliances
+  - Limit features access
+
+  EXAMPLE:
+    "AccessList": {
+      "accessList1": {
+        "UsersAccessList": [],
+        "RolesAccessList": [],
+        "AuthGroupNamesFilter": [],
+        "AuthAllianceIdFilter": [],
+        "AuthCorporationIdFilter": [],
+        "ApplyGroupFilterToAwaitingUsers":  false,
+        "IsAwaitingUsersVisible": true,
+        "IsDumpedUsersVisible": true,
+		"IsAuthedUsersVisible": true,
+        "CanSearchMail":  true, 
+        "CanKickUsers":  true,
+        "CanInspectAuthedUsers":  true,
+        "CanInspectOtherUsers":  true
+      } 
+    },
+
+	**NOTE**: For fast migration to new layout just copy **UsersAccessList** and **RolesAccessList** content to corresponding params
+
+	The simplified check proceeds as following:
+	1. If **IsAwaitingUsersVisible** is **false** and member is not authenticated - **DENY** or remove from visible lists
+	2. If **IsDumpedUsersVisible** is **false** and member is marked as dumped - **DENY** or remove from visible lists
+	3. If member is not dumped and  **AuthGroupNamesFilter** is not empty and do not contain member auth group name - **DENY** or remove from visible lists
+	4. If member is authed, is in alliance and **AuthAllianceIdFilter** is not empty and do not contain member alliance ID - **DENY** or remove from visible lists
+	5. If member is authed and **AuthCorporationIdFilter** is not empty and do not contain member corporation ID - **DENY** or remove from visible lists
+	6. **PASS** or include into visible lists
+
+	**UsersAccessList** and **RolesAccessList** acts as before limiting authentication access.
+	**AuthGroupNamesFilter**, **AuthAllianceIdFilter** and **AuthCorporationIdFilter** filters are additive. They are used to limit HR user access
+	  to view distinct members. Members are identified by their auth group name, alliance ID or corp ID according to mentioned params.
+	**ApplyGroupFilterToAwaitingUsers** will apply group name filtering to members awaiting auth (which is off by default)
+	**IsAwaitingUsersVisible** gain access to members awaiting auth
+	**IsDumpedUsersVisible** gain access to dumped members
+	**IsAuthedUsersVisible** gain access to authed users
+	**CanSearchMail** gain access to mail search functions
+	**CanKickUsers** gain access to ban hammer
+	**CanInspectAuthedUsers** gain access to detailed info about authenticated members
+	**CanInspectOtherUsers** gain access to detailed info about awaiting and dumped members
 
 ### V1.2.19
 + Added new !sys command for bot admins
