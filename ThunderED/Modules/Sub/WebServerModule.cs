@@ -472,5 +472,11 @@ namespace ThunderED.Modules.Sub
         {
             return $"hrm.php?data=deleteAuth{inspectCharId}&id={authCode}&state=matahari";
         }
+
+        public static string GetHRM_AjaxMembersURL(long value, string authCode)
+        {
+            return $"hrm.php?data=loadMembers&id={authCode}&state=matahari&memberType={value}&filter=";
+
+        }
     }
 }

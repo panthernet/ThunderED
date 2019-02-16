@@ -239,21 +239,79 @@ namespace ThunderED.Modules.OnDemand
                                 }
                             }
                                 break;
+                            case var s when s.StartsWith("loadMembers"):
+                            {
+                                var typeValue = Convert.ToInt64(prms.FirstOrDefault(a=> a.StartsWith("memberType")).Split('=')[1]);
+                                if(typeValue == 2 && !accessFilter.IsAuthedUsersVisible)
+                                {
+                                    await WebServerModule.WriteResponce(LM.Get("accessDenied"), response);
+                                    return true;
+                                }
+                                if(typeValue == 3 && !accessFilter.IsDumpedUsersVisible)
+                                {
+                                    await WebServerModule.WriteResponce(LM.Get("accessDenied"), response);
+                                    return true;
+                                }
+                                if(typeValue < 2 && !accessFilter.IsAwaitingUsersVisible)
+                                {
+                                    await WebServerModule.WriteResponce(LM.Get("accessDenied"), response);
+                                    return true;
+                                }
+
+                                var filterValue = Convert.ToInt64(prms.FirstOrDefault(a=> a.StartsWith("filter")).Split('=')[1]);
+
+                                switch (typeValue)
+                                {
+                                    case 2:
+                                        await WebServerModule.WriteResponce((await GenerateMembersListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        return true;
+                                    case 3:
+                                        await WebServerModule.WriteResponce((await GenerateDumpListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        return true;
+                                    default:
+                                        await WebServerModule.WriteResponce((await GenerateAwaitingListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        return true;
+                                }
+                            }
+                                break;
                             //main page
                             case "0":
                             {
-                                var membersHtml = await GenerateMembersListHtml(authCode, accessFilter);
-                                var awaitingHtml = await GenerateAwaitingListHtml(authCode, accessFilter);
-                                var dumpHtml = await GenerateDumpListHtml(authCode, accessFilter);
+                                var res = !accessFilter.IsAuthedUsersVisible ? new string[] {null, null} : await GenerateMembersListHtml(authCode, accessFilter, 0, GenMemType.Filter);
+                                var membersHtml = res[0];
+                                var membersFilterContent = res[1];
+                                var membersAllowed = accessFilter.IsAuthedUsersVisible ? "true" : "false";
+                                var membersUrl = WebServerModule.GetHRM_AjaxMembersURL(2, authCode);
+                                res = !accessFilter.IsAwaitingUsersVisible ? new string[] {null, null} :  await GenerateAwaitingListHtml(authCode, accessFilter, 0, GenMemType.Filter);
+                                var awaitingHtml = res[0];
+                                var awaitingFilterContent = res[1];
+                                var awaitingAllowed = accessFilter.IsAwaitingUsersVisible ? "true" : "false";
+                                var awaitingUrl = WebServerModule.GetHRM_AjaxMembersURL(1, authCode);
+                                res = !accessFilter.IsDumpedUsersVisible ? new string[] {null, null} :  await GenerateDumpListHtml(authCode, accessFilter, 0, GenMemType.Filter);
+                                var dumpHtml = res[0];
+                                var dumpFilterContent = res[1];
+                                var dumpedAllowed = accessFilter.IsDumpedUsersVisible ? "true" : "false";
+                                var dumpedUrl = WebServerModule.GetHRM_AjaxMembersURL(3, authCode);
 
                                 var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Main).Replace("{header}", LM.Get("hrmTemplateHeader"))
                                         .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
                                         .Replace("{LogOutUrl}", WebServerModule.GetWebSiteUrl())
                                         .Replace("{LogOut}", LM.Get("LogOut"))
                                         .Replace("{locale}", LM.Locale)
-                                        .Replace("{membersContent}", membersHtml)
-                                        .Replace("{awaitingContent}", awaitingHtml)
-                                        .Replace("{dumpContent}", dumpHtml)
+                                       // .Replace("{membersContent}", membersHtml)
+                                       // .Replace("{awaitingContent}", awaitingHtml)
+                                      //  .Replace("{dumpContent}", dumpHtml)
+                                        .Replace("{authedFilterContent}", membersFilterContent)
+                                        .Replace("{awaitingFilterContent}", awaitingFilterContent)
+                                        .Replace("{dumpedFilterContent}", dumpFilterContent)
+
+                                        .Replace("{allowAuthedScript}", membersAllowed)
+                                        .Replace("{allowAwaitingScript}", awaitingAllowed)
+                                        .Replace("{allowDumpedScript}", dumpedAllowed)
+                                        .Replace("{authedListUrl}", membersUrl)
+                                        .Replace("{awaitingListUrl}", awaitingUrl)
+                                        .Replace("{dumpedListUrl}", dumpedUrl)
+
                                         .Replace("{membersHeader}", LM.Get("hrmMembersHeader"))
                                         .Replace("{awaitingHeader}", LM.Get("hrmAwaitingHeader"))
                                         .Replace("{dumpHeader}", LM.Get("hrmDumpHeader"))
@@ -768,5 +826,12 @@ namespace ThunderED.Modules.OnDemand
             return null;
         }
 
+    }
+
+    internal enum GenMemType
+    {
+        Members,
+        Filter,
+        All
     }
 }

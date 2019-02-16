@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThunderED.Classes;
+using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.Sub;
@@ -150,34 +151,86 @@ namespace ThunderED.Modules.OnDemand
             return sb.ToString();
         }
 
-        private async Task<string> GenerateMembersListHtml(string authCode, HRMAccessFilter accessFilter)
+        private static string[] GenerateActualMemberEntries(IEnumerable<AuthUserEntity> list, string authCode, HRMAccessFilter accessFilter, int authState, long filterId,
+            GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms(2)).Where(a=> IsValidUserForIntraction(accessFilter, a));
-
+            var corpFilters = new Dictionary<string, string>();
+            var allyFilters = new Dictionary<string, string>();
+            var tmpFilters = new List<long>();
             var sb = new StringBuilder();
+            var inspectCondi = authState == 2 ? accessFilter.CanInspectAuthedUsers : accessFilter.CanInspectOtherUsers;
+            list = filterId == 0 ? list : list.Where(a => a.Data.CorporationId == filterId || a.Data.AllianceId == filterId);
             foreach (var item in list)
             {
-                var charUrl = !accessFilter.CanInspectAuthedUsers ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
-                sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
-                sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
-                sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
-                sb.Append($@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
-                sb.Append(@"</a>");
-                sb.Append($@"<a class=""btn btn-outline-danger{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 40px;"" data-toggle=""confirmation"" data-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"">");
-                sb.Append(@"  <div class=""parent_content"">");
-                sb.Append(@"    <div class=""child_content"">X</div>");
-                sb.Append(@"  </div>");
-                sb.Append(@"</a>");
-                sb.Append($"</div>");
+                if (genType == GenMemType.All || genType == GenMemType.Members)
+                {
+                    var charUrl = !inspectCondi ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
+                    sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
+                    sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
+                    sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
+                    sb.Append(
+                        $@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
+                    sb.Append(@"</a>");
+                    sb.Append(
+                        $@"<a class=""btn btn-outline-danger{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" data-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"" data-singleton=""true""  data-popout=""true"">");
+                    //
+                    sb.Append(@"  <div class=""parent_content"">");
+                    sb.Append(@"    <div class=""child_content"">X</div>");
+                    sb.Append(@"  </div>");
+                    sb.Append(@"</a>");
+                    sb.Append($"</div>");
+                }
+
+                if (genType == GenMemType.All || genType == GenMemType.Filter)
+                {
+                    if (!tmpFilters.Contains(item.Data.CorporationId))
+                    {
+                        tmpFilters.Add(item.Data.CorporationId);
+                        var name = $"{item.Data.CorporationName}[{item.Data.CorporationTicker}]";
+                        var value = $@"<option value=""{item.Data.CorporationId}"">{name}</option>";
+                        corpFilters.Add(name, value);
+                    }
+
+                    if (item.Data.AllianceId > 0 && !tmpFilters.Contains(item.Data.AllianceId))
+                    {
+                        tmpFilters.Add(item.Data.AllianceId);
+                        var name = $"{item.Data.AllianceName}[{item.Data.AllianceTicker}]";
+                        var value = $@"<option value=""{item.Data.CorporationId}"">{name}</option>";
+                        allyFilters.Add(name, value);
+                    }
+                }
             }
-            
-            return sb.ToString();
+
+            var filterSb = new StringBuilder();
+            if (genType == GenMemType.All || genType == GenMemType.Filter)
+            {
+                filterSb.Append($@"<option value=""0"" selected>{LM.Get("hrmEverything")}</option>");
+                foreach (var filter in allyFilters.OrderBy(a => a.Key).Select(a => a.Value))
+                {
+                    filterSb.Append(filter);
+                    filterSb.Append(Environment.NewLine);
+                }
+
+                foreach (var filter in corpFilters.OrderBy(a => a.Key).Select(a => a.Value))
+                {
+                    filterSb.Append(filter);
+                    filterSb.Append(Environment.NewLine);
+                }
+            }
+
+            return new[] {sb.ToString(), filterSb.ToString()};
         }
 
-        private static async Task<string> GenerateAwaitingListHtml(string authCode, HRMAccessFilter accessFilter)
+        private static async Task<string[]> GenerateMembersListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> IsValidUserForIntraction(accessFilter, a));
-            var sb = new StringBuilder();
+            var list = (await SQLHelper.GetAuthUsersWithPerms(2)).Where(a=> IsValidUserForIntraction(accessFilter, a));
+            return GenerateActualMemberEntries(list, authCode, accessFilter, 2, filterId, genType);
+        }
+
+        private static async Task<string[]> GenerateAwaitingListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
+        {
+            var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> (a.AuthState == 0 || a.AuthState == 1) && IsValidUserForIntraction(accessFilter, a));
+           /* var sb = new StringBuilder();
             foreach (var item in list.Where(a=> a.AuthState == 0 || a.AuthState == 1))
             {
                 var charUrl = !accessFilter.CanInspectOtherUsers ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
@@ -194,13 +247,15 @@ namespace ThunderED.Modules.OnDemand
                 sb.Append($"</div>");
             }
             
-            return sb.ToString();
+            return sb.ToString();*/
+            return GenerateActualMemberEntries(list, authCode, accessFilter, 1, filterId, genType);
+
         }
 
-        private static async Task<string> GenerateDumpListHtml(string authCode, HRMAccessFilter accessFilter)
+        private static async Task<string[]> GenerateDumpListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
             var list = (await SQLHelper.GetAuthUsersWithPerms(3)).Where(a=> IsValidUserForIntraction(accessFilter, a));
-            var sb = new StringBuilder();
+           /* var sb = new StringBuilder();
             foreach (var item in list)
             {
                 var charUrl = !accessFilter.CanInspectOtherUsers ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
@@ -217,7 +272,8 @@ namespace ThunderED.Modules.OnDemand
                 sb.Append($"</div>");
             }
             
-            return sb.ToString();
+            return sb.ToString();*/
+            return GenerateActualMemberEntries(list, authCode, accessFilter, 3, filterId, genType);
         }
 
         private async Task<string> GenerateTransactionsHtml(string token, long inspectCharId, int page)

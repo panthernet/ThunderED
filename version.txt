@@ -3,6 +3,7 @@
 + Added unit tests project
 + Added means to counter Linux data location problems (explanation below)
 + Added delete member buttons to HRM main page
++ Added filters for member lists on main HRM page
 + Enhanced HRM module access options and security (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci
