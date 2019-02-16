@@ -401,10 +401,10 @@ namespace ThunderED.Modules
                 switch (item.smAuthType)
                 {
                     case 1:
-                        users = users.Where(a => a.AuthState == 2).ToList();
+                        users = users.Where(a => a.IsAuthed).ToList();
                         break;
                     case 2:
-                        users = users.Where(a => a.AuthState < 2).ToList();
+                        users = users.Where(a => a.IsPending).ToList();
                         break;
                     default:
                         return null;

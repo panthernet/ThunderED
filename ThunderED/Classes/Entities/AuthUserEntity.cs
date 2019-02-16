@@ -19,6 +19,7 @@ namespace ThunderED.Classes.Entities
         public int AuthState;
         public AuthUserData Data = new AuthUserData();
         public DateTime CreateDate { get; set; }
+        public DateTime? DumpDate { get; set; }
         public string RegCode { get; set; }
 
 
@@ -36,14 +37,65 @@ namespace ThunderED.Classes.Entities
         [JsonIgnore]
         public bool IsAuthed => AuthState == 2;
         [JsonIgnore]
-        public bool IsPending => AuthState == 1;
+        public bool IsPending => AuthState < 2;
+        [JsonIgnore]
+        public bool IsSpying => AuthState == 4;
 
         [JsonIgnore]
         public bool HasToken => !string.IsNullOrEmpty(RefreshToken);
 
         [JsonIgnore]
         public bool HasRegCode => !string.IsNullOrEmpty(RegCode);
+
+        public void SetStateDumpster()
+        {
+            AuthState = 3;
+            DumpDate = DateTime.Now;
+        }
+
+        public void SetStateSpying()
+        {
+            AuthState = 4;
+            DumpDate = null;
+        }
+
+        public void SetStateAwaiting()
+        {
+            AuthState = 1;
+        }
+
+        public void SetStateAuthed()
+        {
+            AuthState = 2;
+        }
+
+        public async void UpdateData(JsonClasses.CharacterData characterData, JsonClasses.CorporationData rCorp = null)
+        {
+            rCorp = rCorp ?? await APIHelper.ESIAPI.GetCorporationData(LogCat.AuthCheck.ToString(), characterData.corporation_id, true);
+            Data.CorporationId = characterData.corporation_id;
+            Data.CorporationName = rCorp.name;
+            Data.CorporationTicker = rCorp.ticker;
+            Data.AllianceId = characterData.alliance_id ?? 0;
+            if (Data.AllianceId > 0)
+            {
+                var rAlliance = await APIHelper.ESIAPI.GetAllianceData(LogCat.AuthCheck.ToString(), characterData.alliance_id, true);
+                Data.AllianceName = rAlliance.name;
+                Data.AllianceTicker = rAlliance.ticker;
+            }
+        }
+
+
     }
+
+    public enum UserStatusEnum
+    {
+        Initial = 0,
+        Awaiting = 1,
+        Authed = 2,
+        Dumped = 3,
+        Spying = 4
+    }
+
 
     public class AuthUserData
     {

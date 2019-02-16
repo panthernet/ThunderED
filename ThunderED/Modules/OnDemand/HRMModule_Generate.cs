@@ -223,13 +223,13 @@ namespace ThunderED.Modules.OnDemand
 
         private static async Task<string[]> GenerateMembersListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms(2)).Where(a=> IsValidUserForIntraction(accessFilter, a));
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).Where(a=> IsValidUserForIntraction(accessFilter, a));
             return GenerateActualMemberEntries(list, authCode, accessFilter, 2, filterId, genType);
         }
 
         private static async Task<string[]> GenerateAwaitingListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> (a.AuthState == 0 || a.AuthState == 1) && IsValidUserForIntraction(accessFilter, a));
+            var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> a.IsPending && IsValidUserForIntraction(accessFilter, a));
            /* var sb = new StringBuilder();
             foreach (var item in list.Where(a=> a.AuthState == 0 || a.AuthState == 1))
             {
@@ -254,7 +254,7 @@ namespace ThunderED.Modules.OnDemand
 
         private static async Task<string[]> GenerateDumpListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms(3)).Where(a=> IsValidUserForIntraction(accessFilter, a));
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Dumped)).Where(a=> IsValidUserForIntraction(accessFilter, a));
            /* var sb = new StringBuilder();
             foreach (var item in list)
             {

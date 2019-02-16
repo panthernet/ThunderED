@@ -417,7 +417,7 @@ namespace ThunderED.API
 
                     var remroles = new List<SocketRole>();
                     var result = await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth);
-                    var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.AuthState == 2;
+                    var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.IsAuthed;
 
                     var changed = false;
                     var isAuthed = result.UpdatedRoles.Count > 1;
@@ -425,22 +425,17 @@ namespace ThunderED.API
 
                     if (isMovingToDump)
                     {
-                        await LogHelper.LogInfo($"{authUser.Data.CharacterName}({authUser.CharacterId}) is being moved into dumpster...", LogCat.AuthCheck);
-                        authUser.AuthState = 3;
-
-                        var rCorp = await APIHelper.ESIAPI.GetCorporationData(LogCat.AuthCheck.ToString(), characterData.corporation_id, true);
-                        authUser.Data.CorporationId = characterData.corporation_id;
-                        authUser.Data.CorporationName = rCorp.name;
-                        authUser.Data.CorporationTicker = rCorp.ticker;
-                        authUser.Data.AllianceId = characterData.alliance_id ?? 0;
-                        if (authUser.Data.AllianceId > 0)
+                        if (SettingsManager.Settings.Config.ModuleHRM && SettingsManager.Settings.HRMModule.UseDumpForMembers)
                         {
-                            var rAlliance = await APIHelper.ESIAPI.GetAllianceData(LogCat.AuthCheck.ToString(), characterData.alliance_id, true);
-                            authUser.Data.AllianceName = rAlliance.name;
-                            authUser.Data.AllianceTicker = rAlliance.ticker;
+                            await LogHelper.LogInfo($"{authUser.Data.CharacterName}({authUser.CharacterId}) is being moved into dumpster...", LogCat.AuthCheck);
+                            authUser.SetStateDumpster();
+                            authUser.UpdateData(characterData);
+                            await SQLHelper.SaveAuthUser(authUser);
                         }
-
-                        await SQLHelper.SaveAuthUser(authUser);
+                        else
+                        {
+                            await SQLHelper.DeleteAuthDataByCharId(authUser.CharacterId);
+                        }
                     }
                     if (u == null) return null;
 

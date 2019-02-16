@@ -560,7 +560,7 @@ namespace ThunderED.Classes
                             }
 
                             authUser.DiscordId = Context.Message.Author.Id;
-                            authUser.AuthState = 1;
+                            authUser.SetStateAwaiting();
                             await SQLHelper.SaveAuthUser(authUser);
                             await TickManager.GetModule<WebAuthModule>().ProcessPreliminaryApplicant(authUser, Context);
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserConfirmed", authUser.Data.CharacterName));

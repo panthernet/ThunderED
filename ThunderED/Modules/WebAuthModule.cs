@@ -89,7 +89,7 @@ namespace ThunderED.Modules
 
         private async Task ClearOutdatedApplicants()
         {
-            var list = await SQLHelper.GetOutdatedAuthUsers();
+            var list = await SQLHelper.GetOutdatedAwaitingAuthUsers();
             foreach (var user in list)
             {
                 var group = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == user.GroupName).Value;
@@ -101,7 +101,12 @@ namespace ThunderED.Modules
 
                 if (group.AppInvalidationInHours > 0 && (DateTime.Now - user.CreateDate).TotalHours >= group.AppInvalidationInHours)
                 {
-                    await SQLHelper.DeleteAuthDataByCharId(user.CharacterId);
+                    if (Settings.Config.ModuleHRM && Settings.HRMModule.UseDumpForMembers)
+                    {
+                        user.SetStateDumpster();
+                        await SQLHelper.SaveAuthUser(user);
+                    }
+                    else await SQLHelper.DeleteAuthDataByCharId(user.CharacterId);
                 }
             }
         }
@@ -365,7 +370,7 @@ namespace ThunderED.Modules
             try
             {
                 await LogHelper.LogModule("Running preliminary auth check...", Category);
-                var list = await SQLHelper.GetAuthUsersWithPerms(1);
+                var list = await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Awaiting);
                 foreach (var data in list.Where(a => a.DiscordId != 0))
                 {
                     await ProcessPreliminaryApplicant(data);
@@ -633,16 +638,7 @@ namespace ThunderED.Modules
                                 RegCode = uid,
                                 CreateDate = DateTime.Now
                             };
-                            authUser.Data.CorporationId = rChar.corporation_id;
-                            authUser.Data.CorporationName = rCorp.name;
-                            authUser.Data.CorporationTicker = rCorp.ticker;
-                            authUser.Data.AllianceId = rChar.alliance_id ?? 0;
-                            if (authUser.Data.AllianceId > 0)
-                            {
-                                var rAlliance = await APIHelper.ESIAPI.GetAllianceData(Reason, rChar.alliance_id, true);
-                                authUser.Data.AllianceName = rAlliance.name;
-                                authUser.Data.AllianceTicker = rAlliance.ticker;
-                            }
+                            authUser.UpdateData(rChar, rCorp);
                             await SQLHelper.SaveAuthUser(authUser);
 
                             if (!group.PreliminaryAuthMode)
@@ -791,22 +787,12 @@ namespace ThunderED.Modules
                     authUser.Data.Permissions = group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null;
                     authUser.DiscordId = discordId;
                     authUser.GroupName = groupName;
-                    authUser.AuthState = 2;
+                    authUser.SetStateAuthed();
                     authUser.RegCode = null;
 
                     if (authUser.Data.CorporationId == 0)
                     {
-                        var rCorp = await APIHelper.ESIAPI.GetCorporationData("AuthUser", characterData.corporation_id, true);
-                        authUser.Data.CorporationId = characterData.corporation_id;
-                        authUser.Data.CorporationName = rCorp.name;
-                        authUser.Data.CorporationTicker = rCorp.ticker;
-                        authUser.Data.AllianceId = characterData.alliance_id ?? 0;
-                        if (authUser.Data.AllianceId > 0)
-                        {
-                            var rAlliance = await APIHelper.ESIAPI.GetAllianceData("AuthUser", characterData.alliance_id, true);
-                            authUser.Data.AllianceName = rAlliance.name;
-                            authUser.Data.AllianceTicker = rAlliance.ticker;
-                        }
+                        authUser.UpdateData(characterData);
                     }
 
                     await SQLHelper.SaveAuthUser(authUser);

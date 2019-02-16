@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using ThunderED.Classes;
+using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
 
@@ -279,7 +280,7 @@ namespace ThunderED.Modules.OnDemand
                         break;
                 }
 
-                var users = await SQLHelper.GetAuthUsersWithPerms(2);
+                var users = await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed);
                 if (!users.Any())
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("badstandNoUsers"));

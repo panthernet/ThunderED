@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
-using ThunderED.Json.Internal;
 using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules.OnDemand
@@ -23,6 +20,41 @@ namespace ThunderED.Modules.OnDemand
         {
             LogHelper.LogModule("Inititalizing HRM module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, OnRequestReceived);
+        }
+
+        private static DateTime _lastUpdateDate = DateTime.MinValue;
+
+        public override async Task Run(object prm)
+        {
+            if (!Settings.Config.ModuleHRM) return;
+
+            if(IsRunning) return;
+            IsRunning = true;
+            try
+            {
+                if ((DateTime.Now - _lastUpdateDate).TotalMinutes >= 25)
+                {
+                    _lastUpdateDate = DateTime.Now;
+                    var list = await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Dumped);
+                    foreach (var user in list)
+                    {
+                        if (Settings.HRMModule.DumpInvalidationInHours > 0 && user.DumpDate.HasValue && (DateTime.Now - user.DumpDate.Value).TotalHours >= Settings.HRMModule.DumpInvalidationInHours)
+                        {
+                            await LogHelper.LogInfo($"Disposing dumped member {user.Data.CharacterName}({user.CharacterId})...");
+                            await SQLHelper.DeleteAuthDataByCharId(user.CharacterId);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+            finally
+            {
+                IsRunning = false;
+            }
+
         }
 
         private async Task<bool> OnRequestReceived(HttpListenerRequestEventArgs context)
@@ -157,7 +189,20 @@ namespace ThunderED.Modules.OnDemand
                                         await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
                                         return true;
                                     }
-                                    await SQLHelper.DeleteAuthDataByCharId(searchCharId);
+
+                                    var sUser = await SQLHelper.GetAuthUserByCharacterId(searchCharId);
+
+                                    if (sUser == null) return true;
+                                    if (Settings.HRMModule.UseDumpForMembers && (sUser.IsAuthed || sUser.IsPending))
+                                    {
+                                        sUser.SetStateDumpster();
+                                        await SQLHelper.SaveAuthUser(sUser);
+                                    }
+                                    else
+                                    {
+                                        await SQLHelper.DeleteAuthDataByCharId(searchCharId);
+                                    }
+
                                     await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
                                 }
                                 catch (Exception ex)
@@ -782,7 +827,7 @@ namespace ThunderED.Modules.OnDemand
         {
             if (user == null) return false;
 
-            var isNotAuthed = user.AuthState < 2;
+            var isNotAuthed = user.IsPending;
             //is not authed and filter option ? DENY
             if (!filter.IsAwaitingUsersVisible && isNotAuthed)
                 return false;

@@ -134,7 +134,9 @@
     },
     "AuthTimeoutInMinutes":  30,
     "TableEntriesPerPage":  10,
-    "TableSkillEntriesPerPage":  20    
+    "TableSkillEntriesPerPage":  20,
+    "UseDumpForMembers": true,
+    "DumpInvalidationInHours":  240
   },
 
   "mailModule": {

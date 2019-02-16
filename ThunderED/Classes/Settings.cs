@@ -267,6 +267,12 @@ namespace ThunderED.Classes
 
         [Comment("Number of skill entries to display in tables")]
         public int TableSkillEntriesPerPage { get; set; } = 20;
+
+        [Comment("Mark users as dumped when they leaving your group or manually kicked. Display dumped users in a separate list.")]
+        public bool UseDumpForMembers { get; set; } = true;
+
+        [Comment("After this period in hours dumped member will be deleted entirely. Set 0 to disable.")]
+        public int DumpInvalidationInHours { get; set; } = 240;
 #if EDITOR
         public override string this[string columnName]
         {

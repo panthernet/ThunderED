@@ -189,11 +189,11 @@ namespace ThunderED.Helpers
             });
         }
 
-        internal static async Task<List<AuthUserEntity>> GetOutdatedAuthUsers()
+        internal static async Task<List<AuthUserEntity>> GetOutdatedAwaitingAuthUsers()
         {
             var res = await SelectData("auth_users", new[] {"*"});
 
-            return res?.Select(ParseAuthUser).Where(a=> a.AuthState != 2 || string.IsNullOrEmpty(a.GroupName)).ToList();
+            return res?.Select(ParseAuthUser).Where(a=> a.IsPending || string.IsNullOrEmpty(a.GroupName)).ToList();
         }
 
         internal static async Task<List<AuthUserEntity>> GetAuthUsersWithPerms(Dictionary<string,object> where = null)
@@ -222,7 +222,8 @@ namespace ThunderED.Helpers
                 AuthState = Convert.ToInt32(item[5]),
                 Data = JsonConvert.DeserializeObject<AuthUserData>((string) item[6]),
                 RegCode = (string) item[7],
-                CreateDate = Convert.ToDateTime(item[8])
+                CreateDate = Convert.ToDateTime(item[8]),
+                DumpDate = item[9] == null ? null : (DateTime?)Convert.ToDateTime(item[9])
             };
         }
 
@@ -238,12 +239,14 @@ namespace ThunderED.Helpers
             dic.Add("authState", user.AuthState);
             dic.Add("reg_code", user.RegCode);
             dic.Add("reg_date", user.CreateDate);
+            dic.Add("dump_date", user.DumpDate);
             dic.Add("data", JsonConvert.SerializeObject(user.Data));
             if (insertOnly)
                 await Insert("auth_users", dic);
             else await InsertOrUpdate("auth_users", dic);
         }
 
+        [Obsolete("Maintained for upgrade possibility")]
         public static async Task SaveAuthUserEx(AuthUserEntity user, bool insertOnly = false)
         {
             var dic = new Dictionary<string, object>();
