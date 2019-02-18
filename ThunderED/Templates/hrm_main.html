@@ -39,6 +39,14 @@
             display: flex;
         }
 
+        .flex-content {
+            display: flex;
+            -ms-align-items: center;
+            -o-align-items: center;
+            -webkit-align-items: center;
+            align-items: center;
+        }
+
         h2 {
             margin-top: 0;
         }
@@ -47,7 +55,16 @@
     <script>
         function updateConfirmation() {
             $('[data-toggle=confirmation]').confirmation({
-                rootSelector: '[data-toggle=confirmation]'
+                rootSelector: '[data-toggle=confirmation]',
+                title: function() {
+                    return $(this).attr("confirm-title");
+                }
+            });
+            $('[data-toggle=confirmation]').tooltip({
+                title: function() {
+                    return $(this).attr("tooltip-title");
+                },
+                placement: 'bottom'
             });
         }
 
@@ -61,6 +78,9 @@
             }
             if ({allowDumpedScript}) {
                 $("#dumped-content").load('{dumpedListUrl}0', function () { updateConfirmation(); });
+            }
+            if ({allowSpyingScript}) {
+                $("#spying-content").load('{spyingListUrl}0', function () { updateConfirmation(); });
             }
         });
 
@@ -77,6 +97,11 @@
         function filterOnChangeDumped() {
             var value = $('#selectDumped').val();
             $("#dumped-content").load('{dumpedListUrl}' + value, function () { updateConfirmation(); });
+        }
+
+        function filterOnChangeSpying() {
+            var value = $('#selectSpying').val();
+            $("#spying-content").load('{spyingListUrl}' + value, function () { updateConfirmation(); });
         }
 
     </script>
@@ -163,6 +188,31 @@
                 </div>
             </div>
         </div>
+        <div class="card">
+            <div class="card-header{disableSpying}" id="heading4">
+                <h4 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse4" aria-expanded="true" aria-controls="collapse4">
+                        {spyingHeader}
+                    </button>
+                </h4>
+            </div>
+            <div id="collapse4" class="collapse" aria-labelledby="heading4" data-parent="#accordionExample">
+                <div class="card-body">
+                    <div class="row-fluid">
+                        <span class="fas fa-filter justify-content-center align-self-center" style="margin-right: 25px;"></span>
+                        <select id="selectSpying" class="form-control" style="width: 300px;" onchange="filterOnChangeSpying()">
+                            {spyingFilterContent}
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div id="spying-content" class="container">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>

@@ -125,7 +125,7 @@
   "welcomeAuth": "Добро пожаловать, {0}!",
   "grantRolesMessage": "Выдаем роли для {0}",
   "grantRolesPrelMessage": "Выдаем роли для {0} [AUTO-AUTH от группы {1}]",
-    "msgAuthSuccess": "{0},:white_check_mark: **Успех**: {1} успешно аутентифицирован.",
+  "msgAuthSuccess": "{0},:white_check_mark: **Успех**: {1} успешно аутентифицирован.",
   "authTemplateHeader": "Аутентификация Discord",
   "authTemplateInv":
     "Нажмите на кнопку ниже, чтобы залогиниться в свой аккаунт EVE Online через официальный сайт. Эта операция позволит получить идентификатор вашего персонажа для связи с Discord. Личную информацию этим способом получить невозможно.",
@@ -235,7 +235,7 @@
   "autopost_tq":  "Сервер Tranqulity ",
   "authTemplateManualAccept": "Спасибо за заявку {0}, Ваша заявка должна быть одобрена ответственными лицами",
   "authTemplateManualAccept2": "Пожалуйста, введите указанную ниже команду в наш чат Discord для связи вашего персонажа и записи Discord:",
-    "authTemplateManualAccept3": "Заходите в нашу группу Discord, используя ссылку ниже",
+  "authTemplateManualAccept3": "Заходите в нашу группу Discord, используя ссылку ниже",
   "authManualAcceptMessage":  "{0}(ID: {1}) подал заявку в рамках группы {2}, требующей ручного утверждения заявок",
   "invalidCommandSyntax":  "Неверный синтаксис команды",
   "entryNotFound":  "Запись не найдена",
@@ -432,5 +432,10 @@
   "sysClearTableNotFound": "Указанная таблица БД не найдена или возникла ошибка работы с БД!",
   "sysOperationComplete": ":white_check_mark: Операция выполнена!",
   "authTemplateHeaderShort":  "Аутентификация",
-  "hrmEverything":  "Все" 
-}
+  "hrmEverything":  "Все", 
+  "hrmMoveToSpiesConfirm":  "Переместить выбранного участника в раздел Шпионы?",
+  "hrmSpiesHeader":  "Шпионы",
+  "hrmSpyButtonTooltip":  "Переместить участника в раздел Шпионы", 
+  "hrmDeleteAuthButtonTooltip":  "Удалить аутентификацию участника",
+  "hrmDumpAuthButtonTooltip":  "Переместить участника в раздел Сброшенные" 
+ }

@@ -108,6 +108,9 @@
     <Compile Include="..\ThunderED\Classes\CommentAttribute.cs">
       <Link>Classes\CommentAttribute.cs</Link>
     </Compile>
+    <Compile Include="..\ThunderED\Classes\Enums\UserStatusEnum.cs">
+      <Link>Classes\Shared\UserStatusEnum.cs</Link>
+    </Compile>
     <Compile Include="..\ThunderED\Classes\Settings.cs">
       <Link>Classes\Settings.cs</Link>
     </Compile>
@@ -190,9 +193,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Classes\Shared\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>

@@ -126,10 +126,14 @@
         "IsAwaitingUsersVisible": true,
         "IsDumpedUsersVisible": true,
         "IsAuthedUsersVisible":  true,
+        "IsSpyUsersVisible":  true,
         "CanSearchMail":  true,
         "CanKickUsers":  true,
+        "CanMoveToSpies":  true,
         "CanInspectAuthedUsers":  true,
-        "CanInspectOtherUsers":  true
+        "CanInspectAwaitingUsers":  true,
+        "CanInspectDumpedUsers":  true,
+        "CanInspectSpyUsers":  true
       } 
     },
     "AuthTimeoutInMinutes":  30,

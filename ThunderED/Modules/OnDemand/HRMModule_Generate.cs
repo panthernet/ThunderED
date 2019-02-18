@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
+using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.Sub;
@@ -158,8 +159,11 @@ namespace ThunderED.Modules.OnDemand
             var allyFilters = new Dictionary<string, string>();
             var tmpFilters = new List<long>();
             var sb = new StringBuilder();
-            var inspectCondi = authState == 2 ? accessFilter.CanInspectAuthedUsers : accessFilter.CanInspectOtherUsers;
+            var inspectCondi = accessFilter.CanAccessUser(authState);
+            var isDumpedList = authState == (int) UserStatusEnum.Dumped;
+            var canSpy = accessFilter.CanInspectSpyUsers;
             list = filterId == 0 ? list : list.Where(a => a.Data.CorporationId == filterId || a.Data.AllianceId == filterId);
+            var deleteTooltip = isDumpedList || !SettingsManager.Settings.HRMModule.UseDumpForMembers ? LM.Get("hrmDeleteAuthButtonTooltip") : LM.Get("hrmDumpAuthButtonTooltip");
             foreach (var item in list)
             {
                 if (genType == GenMemType.All || genType == GenMemType.Members)
@@ -171,12 +175,16 @@ namespace ThunderED.Modules.OnDemand
                     sb.Append(
                         $@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
                     sb.Append(@"</a>");
+                    if (isDumpedList && canSpy)
+                    {
+                        sb.Append(
+                            $@"<a class=""btn btn-outline-primary flex-content{(accessFilter.CanMoveToSpies ? null : " d-none")}"" href=""{WebServerModule.GetHRM_MoveToSpiesURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" tooltip-title=""{LM.Get("hrmSpyButtonTooltip")}"" confirm-title=""{LM.Get("hrmMoveToSpiesConfirm")}"" data-singleton=""true""  data-popout=""true"" data-placement=""top"">");
+                        sb.Append(@"  <span class=""fas fa-user-secret fa-2x""></span>");
+                        sb.Append(@"</a>");
+                    }
                     sb.Append(
-                        $@"<a class=""btn btn-outline-danger{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" data-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"" data-singleton=""true""  data-popout=""true"">");
-                    //
-                    sb.Append(@"  <div class=""parent_content"">");
-                    sb.Append(@"    <div class=""child_content"">X</div>");
-                    sb.Append(@"  </div>");
+                        $@"<a class=""btn btn-outline-danger flex-content{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" tooltip-title=""{deleteTooltip}"" confirm-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"" data-singleton=""true""  data-popout=""true"">");
+                    sb.Append(@"  <span class=""fas fa-times-circle fa-2x""></span>");
                     sb.Append(@"</a>");
                     sb.Append($"</div>");
                 }
@@ -223,13 +231,20 @@ namespace ThunderED.Modules.OnDemand
 
         private static async Task<string[]> GenerateMembersListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).Where(a=> IsValidUserForIntraction(accessFilter, a));
-            return GenerateActualMemberEntries(list, authCode, accessFilter, 2, filterId, genType);
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).Where(a=> IsValidUserForInteraction(accessFilter, a));
+            return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Authed, filterId, genType);
         }
+
+        private static async Task<string[]> GenerateSpiesListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
+        {
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Spying)).Where(a=> IsValidUserForInteraction(accessFilter, a));
+            return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Spying, filterId, genType);
+        }
+
 
         private static async Task<string[]> GenerateAwaitingListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> a.IsPending && IsValidUserForIntraction(accessFilter, a));
+            var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> a.IsPending && IsValidUserForInteraction(accessFilter, a));
            /* var sb = new StringBuilder();
             foreach (var item in list.Where(a=> a.AuthState == 0 || a.AuthState == 1))
             {
@@ -248,13 +263,13 @@ namespace ThunderED.Modules.OnDemand
             }
             
             return sb.ToString();*/
-            return GenerateActualMemberEntries(list, authCode, accessFilter, 1, filterId, genType);
+            return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Awaiting, filterId, genType);
 
         }
 
         private static async Task<string[]> GenerateDumpListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Dumped)).Where(a=> IsValidUserForIntraction(accessFilter, a));
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Dumped)).Where(a=> IsValidUserForInteraction(accessFilter, a));
            /* var sb = new StringBuilder();
             foreach (var item in list)
             {
@@ -273,7 +288,7 @@ namespace ThunderED.Modules.OnDemand
             }
             
             return sb.ToString();*/
-            return GenerateActualMemberEntries(list, authCode, accessFilter, 3, filterId, genType);
+            return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Dumped, filterId, genType);
         }
 
         private async Task<string> GenerateTransactionsHtml(string token, long inspectCharId, int page)

@@ -11,6 +11,7 @@ using Discord.Commands;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
+using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.Sub;

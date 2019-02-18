@@ -478,5 +478,10 @@ namespace ThunderED.Modules.Sub
             return $"hrm.php?data=loadMembers&id={authCode}&state=matahari&memberType={value}&filter=";
 
         }
+
+        public static string GetHRM_MoveToSpiesURL(long itemCharacterId, string authCode)
+        {
+            return $"hrm.php?data=moveToSpies{itemCharacterId}&id={authCode}&state=matahari";
+        }
     }
 }

@@ -32,7 +32,7 @@ namespace ThunderED.Classes.Entities
         public bool IsActive;
 
         [JsonIgnore]
-        public bool IsLeft => AuthState == 3;
+        public bool IsDumped => AuthState == 3;
 
         [JsonIgnore]
         public bool IsAuthed => AuthState == 2;
@@ -85,15 +85,6 @@ namespace ThunderED.Classes.Entities
         }
 
 
-    }
-
-    public enum UserStatusEnum
-    {
-        Initial = 0,
-        Awaiting = 1,
-        Authed = 2,
-        Dumped = 3,
-        Spying = 4
     }
 
 

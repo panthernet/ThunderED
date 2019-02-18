@@ -5,12 +5,14 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using ThunderED.Classes;
+using ThunderED.Classes.Enums;
 
 namespace TED_ConfigEditor.Classes
 #else
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using ThunderED.Classes.Enums;
 
 namespace ThunderED.Classes
 #endif
@@ -280,8 +282,8 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    case nameof(UsersAccessList):
-                        return UsersAccessList.Count == 0 && RolesAccessList.Count == 0? Compose(nameof(UsersAccessList), "Either UsersAccessList or RolesAccessList must be specified to protect sensitive data!") : null;
+                    case nameof(AccessList):
+                        return AccessList.Count == 0 || !AccessList.Any(a=> a.Value.RolesAccessList.Any() || a.Value.UsersAccessList.Any())? Compose(nameof(AccessList), "Either UsersAccessList or RolesAccessList must be specified for at least one access list entry!") : null;
                     case nameof(AuthTimeoutInMinutes):
                         return AuthTimeoutInMinutes <= 0 ? Compose(nameof(AuthTimeoutInMinutes), "It is security unwise to set unlimited HR session") : null;
                     case nameof(TableEntriesPerPage):
@@ -313,10 +315,22 @@ namespace ThunderED.Classes
         public bool IsAwaitingUsersVisible { get; set; } = true;
         public bool IsDumpedUsersVisible { get; set; } = true;
         public bool IsAuthedUsersVisible { get; set; } = true;
+        public bool IsSpyUsersVisible { get; set; } = true;
         public bool CanSearchMail { get; set; } = true;
         public bool CanKickUsers { get; set; } = true;
+        public bool CanMoveToSpies { get; set; } = true;
         public bool CanInspectAuthedUsers { get; set; } = true;
-        public bool CanInspectOtherUsers { get; set; } = true;
+        public bool CanInspectAwaitingUsers { get; set; } = true;
+        public bool CanInspectDumpedUsers { get; set; } = true;
+        public bool CanInspectSpyUsers { get; set; } = true;
+
+        public bool CanAccessUser(int authState)
+        {
+            var state = (UserStatusEnum) authState;
+            return (CanInspectAuthedUsers || state != UserStatusEnum.Authed) &&
+                   (CanInspectAwaitingUsers || (state != UserStatusEnum.Awaiting && state != UserStatusEnum.Initial)) &&
+                   (CanInspectDumpedUsers || state != UserStatusEnum.Dumped) && (CanInspectSpyUsers || state != UserStatusEnum.Spying);
+        }
     }
 
     public class ContinousCheckModuleSettings: ValidatableSettings

@@ -5,6 +5,7 @@
 + Added delete member buttons to HRM main page
 + Added filters for member lists on main HRM page
 + Added **UseDumpForMembers** and **DumpInvalidationInHours** params to HRM
++ Added new Spies list for HR members. Dumped members can be marked as Spies to avoid being recycled.
 + Enhanced HRM module access options and security (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci
@@ -24,7 +25,7 @@
 
 - Introduced **AccessLists** param for HRMModule which now allows advanced access distribution. 
   Now you can:
-  - Limit access and display of authed, awaiting and dumped users for certain roles and characters
+  - Limit access and display of specific user groups for certain roles and characters
   - Limit access for certain roles and characters to members authed under specific group 
   - Limit access for certain roles and characters to members of specific corps and alliances
   - Limit features access
@@ -41,34 +42,29 @@
         "IsAwaitingUsersVisible": true,
         "IsDumpedUsersVisible": true,
 		"IsAuthedUsersVisible": true,
+        "IsSpyUsersVisible":  true,
         "CanSearchMail":  true, 
         "CanKickUsers":  true,
+        "CanMoveToSpies":  true,
         "CanInspectAuthedUsers":  true,
-        "CanInspectOtherUsers":  true
+        "CanInspectAwaitingUsers":  true,
+        "CanInspectDumpedUsers":  true,
+        "CanInspectSpyUsers":  true
+
       } 
     },
 
 	**NOTE**: For fast migration to new layout just copy **UsersAccessList** and **RolesAccessList** content to corresponding params
 
-	The simplified check proceeds as following:
-	1. If **IsAwaitingUsersVisible** is **false** and member is not authenticated - **DENY** or remove from visible lists
-	2. If **IsDumpedUsersVisible** is **false** and member is marked as dumped - **DENY** or remove from visible lists
-	3. If member is not dumped and  **AuthGroupNamesFilter** is not empty and do not contain member auth group name - **DENY** or remove from visible lists
-	4. If member is authed, is in alliance and **AuthAllianceIdFilter** is not empty and do not contain member alliance ID - **DENY** or remove from visible lists
-	5. If member is authed and **AuthCorporationIdFilter** is not empty and do not contain member corporation ID - **DENY** or remove from visible lists
-	6. **PASS** or include into visible lists
-
 	**UsersAccessList** and **RolesAccessList** acts as before limiting authentication access.
 	**AuthGroupNamesFilter**, **AuthAllianceIdFilter** and **AuthCorporationIdFilter** filters are additive. They are used to limit HR user access
 	  to view distinct members. Members are identified by their auth group name, alliance ID or corp ID according to mentioned params.
 	**ApplyGroupFilterToAwaitingUsers** will apply group name filtering to members awaiting auth (which is off by default)
-	**IsAwaitingUsersVisible** gain access to members awaiting auth
-	**IsDumpedUsersVisible** gain access to dumped members
-	**IsAuthedUsersVisible** gain access to authed users
+	**Is_____UsersVisible** gain access to members list of the specific section
 	**CanSearchMail** gain access to mail search functions
 	**CanKickUsers** gain access to ban hammer
-	**CanInspectAuthedUsers** gain access to detailed info about authenticated members
-	**CanInspectOtherUsers** gain access to detailed info about awaiting and dumped members
+	**CanMoveToSpies** gain access to make-a-spy button for dumped users
+	**CanInspect____Users** gain access to detailed info about members of the specific section
 
 ### V1.2.19
 + Added new !sys command for bot admins

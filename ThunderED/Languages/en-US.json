@@ -438,6 +438,10 @@
   "sysClearTableNotFound": "Specified DB table not found or there is a database error!",
   "sysOperationComplete": ":white_check_mark: Operation completed!",
   "authTemplateHeaderShort":  "Authentication",
-  "hrmEverything":  "Everything" 
-
+  "hrmEverything":  "Everything",
+  "hrmMoveToSpiesConfirm":  "Move selected member to Spies section?",
+  "hrmSpiesHeader":  "Spies",
+  "hrmSpyButtonTooltip":  "Move member to Spies section", 
+  "hrmDeleteAuthButtonTooltip":  "Delete member authentication",
+  "hrmDumpAuthButtonTooltip":  "Move member to Dumped section" 
 }

@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
+using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 
