@@ -6,9 +6,22 @@
 + Added filters for member lists on main HRM page
 + Added **UseDumpForMembers** and **DumpInvalidationInHours** params to HRM
 + Added new Spies list for HR members. Dumped members can be marked as Spies to avoid being recycled.
++ Added new SovTrackerModule (read highlight section below)
 + Enhanced HRM module access options and security (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci
+
+### HIGHLIGHTS
+
+- Added new SovTrackerModule which now allows to track sov space holder changes and ADM index falls beyond the threshold in the filtered sets of solar systems.
+  Systems can be filtered by ID, holder alliance, region ID and constellation ID. All filters are ADDITIVE.
+  !!!WARNING - this module can be very resourse consuming so please read folowing recommendations.
+  1. Specifying **HolderAlliances** param will search through 5k+ entries for holder changes on each check (up to 8-10 sec processing on good PC if not prefiltered by **Systems**).
+  2. Specifying **Regions** or **Constellations** will force bot to fetch system data for each entry which
+  3. Recommended **CheckIntervalInMinutes** is 30+ minutes to avoid exscessive stress
+  4. Additive filter hierarchy: **Systems -> HolderAlliances -> Regions -> Constellations**. The most efficient way to setup this module is to specify Systems only.
+
+
 
 ### BREAKING CHANGES
 - To counter multiple problems with config and logs location under Linux we now search all sensitive data under folder named **Data** in bot root directory.

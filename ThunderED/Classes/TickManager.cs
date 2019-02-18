@@ -79,6 +79,9 @@ namespace ThunderED.Classes
             if(SettingsManager.Settings.Config.ModuleContractNotifications)
                 Modules.Add(new ContractNotificationsModule());
 
+            if(SettingsManager.Settings.Config.ModuleSovTracker)
+                Modules.Add(new SovTrackerModule());
+
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
                 OnDemandModules.Add(new LiveKillFeedModule());

@@ -822,7 +822,24 @@ namespace ThunderED.Helpers
         }
         #endregion
 
+        #region Sov Index Tracker
+        public static async Task<List<JsonClasses.SovStructureData>> GetSovIndexTrackerData(string name)
+        {
+            var res = await SelectData("sovIndexTracker", new[] {"data"}, new Dictionary<string, object> {{"groupName", name}});
+            if(res == null || !res.Any()) return  new List<JsonClasses.SovStructureData>();
+            return JsonConvert.DeserializeObject<List<JsonClasses.SovStructureData>>((string)res[0][0]);
+        }
 
+        public static async Task SaveSovIndexTrackerData(string name, List<JsonClasses.SovStructureData> data)
+        {
+            await InsertOrUpdate("sovIndexTracker", new Dictionary<string, object>
+            {
+                {"groupName", name},
+                {"data", JsonConvert.SerializeObject(data)}
+            });
+        }
+
+        #endregion
 
     }
 }

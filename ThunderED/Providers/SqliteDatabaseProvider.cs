@@ -49,7 +49,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[IsEntryExists]: {query} - {string.Join("|", where?.Select(a=> $"{a.Key}:{a.Value} ") ?? new List<string>())}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[IsEntryExists]: {query} - {string.Join("|", where?.Select(a=> $"{a.Key}:{a.Value} ") ?? new List<string>())}", ex, LogCat.Database);
                     return false;
                 }
             });  
@@ -116,7 +116,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[SelectData]: {query} - {string.Join("|", where?.Select(a=> $"{a.Key}:{a.Value} ") ?? new List<string>())}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[SelectData]: {query} - {string.Join("|", where?.Select(a=> $"{a.Key}:{a.Value} ") ?? new List<string>())}", ex, LogCat.Database);
                     return default;
                 }
 
@@ -151,7 +151,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[{nameof(SelectData)}]: {query}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(SelectData)}]: {query}", ex, LogCat.Database);
                     return default;
                 }
 
@@ -207,7 +207,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[Query]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[Query]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.Database);
                     return default;
                 }
 
@@ -249,7 +249,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[{nameof(InsertOrUpdate)}]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(InsertOrUpdate)}]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.Database);
                 }
             });
         }
@@ -285,7 +285,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[{nameof(Insert)}]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(Insert)}]: {query} - {string.Join("|", values.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.Database);
                 }
             });
 
@@ -320,7 +320,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[{nameof(Update)}]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(Update)}]: {query} - {string.Join("|", where.Select(a=> $"{a.Key}:{a.Value} "))}", ex, LogCat.Database);
                 }
             });
 
@@ -354,7 +354,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx(nameof(Delete), ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(Delete), ex, LogCat.Database);
                     return false;
                 }
             });
@@ -371,7 +371,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx(nameof(DeleteWhereIn), ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(DeleteWhereIn), ex, LogCat.Database);
                 }
             });
         }
@@ -403,7 +403,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx(nameof(SelectCache), ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(SelectCache), ex, LogCat.Database);
                     return (T)(object)null;
                 }
             });
@@ -431,7 +431,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx($"[{nameof(UpdateCache)}]: {q}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(UpdateCache)}]: {q}", ex, LogCat.Database);
                 }
             });        
         }
@@ -447,7 +447,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.Database);
                 }
             });
 
@@ -460,7 +460,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(PurgeCache), ex, LogCat.Database);
                 }
             });
         }
@@ -477,7 +477,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx("CleanupNotificationsList", ex, LogCat.SQLite);
+                    await LogHelper.LogEx("CleanupNotificationsList", ex, LogCat.Database);
                 }
             });
         }

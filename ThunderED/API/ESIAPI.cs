@@ -497,5 +497,10 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<JsonClasses.CharacterShip>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/ship/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
+        public async Task<List<JsonClasses.SovStructureData>> GetSovStructuresData(string reason)
+        {
+            return await APIHelper.RequestWrapper<List<JsonClasses.SovStructureData>>($"{SettingsManager.Settings.Config.ESIAddress}latest/sovereignty/structures/?datasource=tranquility&language={_language}", reason);
+
+        }
     }
 }

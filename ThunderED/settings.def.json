@@ -35,6 +35,7 @@
     "ModuleSystemLogFeeder":  false, 
     "ModuleStats":  true, 
     "ModuleContractNotifications":  false, 
+    "ModuleSovTracker":  false, 
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -582,5 +583,22 @@
         "DiscordChannelId": 0
       }
     }
+  },
+  "SovTrackerModule": {
+    "CheckIntervalInMinutes": 60,
+    "Groups": {
+      "groupName1": {
+        "HolderAlliances": [],
+        "Systems": [],
+        "Regions": [],
+        "Constellations": [],
+        "DiscordMentions": [],
+        "WarningThresholdValue": 1,
+        "TrackTCUHolderChanges": true,
+        "TrackIHUBHolderChanges": true,
+        "DiscordChannelId": 0
+      }
+    }
   }
+
 }

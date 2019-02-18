@@ -96,7 +96,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx(nameof(RunScript), ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(RunScript), ex, LogCat.Database);
                     return false;
                 }
 
@@ -115,7 +115,7 @@ namespace ThunderED.Providers
                 catch (Exception ex)
                 {
                     if (!silent)
-                        await LogHelper.LogEx($"[{nameof(RunCommand)}]: {query2}", ex, LogCat.SQLite);
+                        await LogHelper.LogEx($"[{nameof(RunCommand)}]: {query2}", ex, LogCat.Database);
                 }
             });
         }
@@ -130,7 +130,7 @@ namespace ThunderED.Providers
                 }
                 catch (Exception ex)
                 {
-                    await LogHelper.LogEx(nameof(RunScriptText), ex, LogCat.SQLite);
+                    await LogHelper.LogEx(nameof(RunScriptText), ex, LogCat.Database);
                     return false;
                 }
 
@@ -158,7 +158,7 @@ namespace ThunderED.Providers
             catch (Exception ex)
             {
                 if (!silent)
-                    await LogHelper.LogEx($"[{nameof(RunSystemCommand)}]: {query2}", ex, LogCat.SQLite);
+                    await LogHelper.LogEx($"[{nameof(RunSystemCommand)}]: {query2}", ex, LogCat.Database);
             }
         }
 

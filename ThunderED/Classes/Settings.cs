@@ -70,6 +70,9 @@ namespace ThunderED.Classes
         [ConfigEntryName("ModuleContractNotifications")]
         public ContractNotificationsModuleSettings ContractNotificationsModule { get; set; } = new ContractNotificationsModuleSettings();
 
+        [ConfigEntryName("ModuleSovIndexTracker")]
+        public SovTrackerModuleSettings SovTrackerModule { get; set; } = new SovTrackerModuleSettings();
+
 #if EDITOR
         public string Validate(List<string> usedModules)
         {
@@ -98,6 +101,58 @@ namespace ThunderED.Classes
             return sb.ToString();
         }
 #endif
+    }
+
+    public class SovTrackerModuleSettings: ValidatableSettings
+    {
+        [Required]
+        [Comment("Check interval in minutes")]
+        public int CheckIntervalInMinutes { get; set; } = 1;
+
+#if EDITOR
+        public ObservableDictionary<string,  SovTrackerGroup> Groups { get; set; } = new ObservableDictionary<string, SovTrackerGroup>();
+#else
+        public Dictionary<string, SovTrackerGroup> Groups { get; set; } = new Dictionary<string, SovTrackerGroup>();        
+#endif
+#if EDITOR
+        public override string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(CheckIntervalInMinutes):
+                        return CheckIntervalInMinutes == 0? Compose(nameof(CheckIntervalInMinutes), "CheckIntervalInMinutes must be greater than 0!") : null;
+                    case nameof(Groups):
+                        return !Groups.Any() ? Compose(nameof(Groups), "There must be some groups!") : null;
+                }
+
+                return null;
+            }
+        }
+#endif
+    }
+
+    public class SovTrackerGroup
+    {
+#if EDITOR
+        public ObservableCollection<long> Regions { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<long> Constellations { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<long> Systems { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<long> HolderAlliances { get; set; } = new ObservableCollection<long>();
+        [Comment("The list of Discord mentions to use for this notifications, like @everyone")]
+        public ObservableCollection<string> DiscordMentions { get; set; } = new ObservableCollection<string>();
+#else
+        public List<long> Regions { get; set; } = new List<long>();
+        public List<long> Constellations { get; set; } = new List<long>();
+        public List<long> Systems { get; set; } = new List<long>();
+        public List<long> HolderAlliances { get; set; } = new List<long>();
+        public List<string> DiscordMentions { get; set; } = new List<string>();
+#endif
+        public double WarningThresholdValue { get; set; } = 1;
+        public ulong DiscordChannelId { get; set; }
+        public bool TrackTCUHolderChanges { get; set; } = true;
+        public bool TrackIHUBHolderChanges { get; set; } = true;
     }
 
     public class StandingGroup: ValidatableSettings
@@ -1344,7 +1399,6 @@ namespace ThunderED.Classes
         public bool ModuleJabber { get; set; } = false;
         public bool ModuleMOTD { get; set; } = false;
         public bool ModuleNotificationFeed { get; set; } = false;
-        public bool ModuleStats { get; set; } = false;
         public bool ModuleTimers { get; set; } = false;
         public bool ModuleMail { get; set; } = false;
         public bool ModuleIRC { get; set; } = false;
@@ -1356,7 +1410,9 @@ namespace ThunderED.Classes
         public bool ModuleLPStock { get; set; } = true;
         public bool ModuleHRM { get; set; } = false;
         public bool ModuleSystemLogFeeder { get; set; } = false;
+        public bool ModuleStats { get; set; } = true;
         public bool ModuleContractNotifications { get; set; } = false;
+        public bool ModuleSovTracker { get; set; } = false;
 
         [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
         public string ZkillLiveFeedRedisqID { get; set; }

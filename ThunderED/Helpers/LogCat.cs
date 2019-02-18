@@ -3,7 +3,7 @@
     public enum LogCat
     {
         Default,
-        SQLite,
+        Database,
         Discord,
         Tick,
         AuthWeb,
@@ -37,6 +37,7 @@
         HRM,
         SLF,
         ContractNotif,
-        AuthStandings
+        AuthStandings,
+        SovIndexTracker
     }
 }
