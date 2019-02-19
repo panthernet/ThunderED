@@ -9,6 +9,7 @@
 + Added new SovTrackerModule (read highlight section below)
 + Added new **clist** command to list contracts for specified group
 + Added new simplified auth management file (read highlight section below)
++ Added new auth param to use only one button for authentication **UseOneAuthButton**
 + Enhanced HRM module access options and security (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci

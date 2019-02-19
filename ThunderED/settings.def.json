@@ -254,6 +254,7 @@
     "enforceCorpTickers": true,
     "enforceAllianceTickers": true,
     "enforceCharName": true,
+    "UseOneAuthButton":  false, 
     "authGroups": {
       "Mode1_GeneralAuth": {
         "AllowedCharacters":  {} ,

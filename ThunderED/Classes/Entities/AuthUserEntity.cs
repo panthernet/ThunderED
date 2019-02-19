@@ -72,6 +72,7 @@ namespace ThunderED.Classes.Entities
         public async void UpdateData(JsonClasses.CharacterData characterData, JsonClasses.CorporationData rCorp = null)
         {
             rCorp = rCorp ?? await APIHelper.ESIAPI.GetCorporationData(LogCat.AuthCheck.ToString(), characterData.corporation_id, true);
+            Data.CharacterName = characterData.name;
             Data.CorporationId = characterData.corporation_id;
             Data.CorporationName = rCorp.name;
             Data.CorporationTicker = rCorp.ticker;

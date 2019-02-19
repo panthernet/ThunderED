@@ -1568,6 +1568,8 @@ namespace ThunderED.Classes
         public bool EnforceCharName { get; set; }
         [Comment("Default group to use for auth url display")]
         public string DefaultAuthGroup { get; set; }
+        [Comment("By default each auth group have own auth button. With this option on there wll be only one button and auth will search for first group with matching condition automatically.")]
+        public bool UseOneAuthButton { get; set; } = false;
 
 #if EDITOR
         [Comment("The list of Discord role names which will not be checked for authentication (admins etc.)")]

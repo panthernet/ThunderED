@@ -434,19 +434,30 @@ namespace ThunderED.Modules
                     }
 
                     var groupName = HttpUtility.UrlDecode(prms[0].Split('=')[1]);//string.IsNullOrEmpty(Settings.WebAuthModule.DefaultAuthGroup) || !Settings.WebAuthModule.AuthGroups.ContainsKey(Settings.WebAuthModule.DefaultAuthGroup) ? Settings.WebAuthModule.AuthGroups.Keys.FirstOrDefault() : Settings.WebAuthModule.DefaultAuthGroup;
-                    if (!Settings.WebAuthModule.AuthGroups.ContainsKey(groupName))
+                    if (!Settings.WebAuthModule.AuthGroups.ContainsKey(groupName) && !DEF_NOGROUP_NAME.Equals(groupName))
                     {
                         await WebServerModule.WriteResponce(WebServerModule.Get404Page(), response);
                         return true;
                     }
 
-                    var grp = Settings.WebAuthModule.AuthGroups[groupName];
-                    var url = grp.MustHaveGroupName ? WebServerModule.GetCustomAuthUrl(grp.ESICustomAuthRoles, groupName) : WebServerModule.GetAuthUrl();
+                    if (!Settings.WebAuthModule.AuthGroups.ContainsKey(groupName) && DEF_NOGROUP_NAME.Equals(groupName))
+                    {
+                        var url = WebServerModule.GetAuthUrlOneButton();
+                        await response.RedirectAsync(new Uri(url));
+                    }
+                    else
+                    {
+                        var grp = Settings.WebAuthModule.AuthGroups[groupName];
+                        var url = grp.MustHaveGroupName
+                            ? WebServerModule.GetCustomAuthUrl(grp.ESICustomAuthRoles, groupName)
+                            : WebServerModule.GetAuthUrl();
 
-                    var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{authUrl}", url)
-                        .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                        .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{body}", LM.Get("authTemplateInv")).Replace("{backText}", LM.Get("backText"));
-                    await WebServerModule.WriteResponce(text, response);
+                        var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{authUrl}", url)
+                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
+                            .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{body}", LM.Get("authTemplateInv")).Replace("{backText}", LM.Get("backText"));
+                        await WebServerModule.WriteResponce(text, response);
+                    }
+
                     return true;
                 }
 
@@ -511,7 +522,7 @@ namespace ThunderED.Modules
                 }
                 
                 if ((request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php")
-                    && (!request.Url.Query.Contains("&state=") || request.Url.Query.Contains("&state=x")))
+                    && (!request.Url.Query.Contains("&state=") || request.Url.Query.Contains("&state=x") || request.Url.Query.Contains("&state=oneButton") ))
                 {
                     var assembly = Assembly.GetEntryAssembly();
                     // var temp = assembly.GetManifestResourceNames();
@@ -530,6 +541,7 @@ namespace ThunderED.Modules
                         var x = prms.Last().Split('=');
                         var inputGroupName = x.Length > 1 ? HttpUtility.UrlDecode(x[1].Substring(1, x[1].Length - 1)) : null;
                         var inputGroup = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key.Equals(inputGroupName, StringComparison.OrdinalIgnoreCase)).Value;
+                        var autoSearchGroup = inputGroup == null && "neButton".Equals(inputGroupName);
 
                         var result = await GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                         if (result == null)
@@ -550,6 +562,8 @@ namespace ThunderED.Modules
                                 .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
                             return true;
                         }
+
+                        var longCharacterId = Convert.ToInt64(characterID);
 
                         var corpID = rChar?.corporation_id ?? 0;
                         var rCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar?.corporation_id, true);
@@ -590,7 +604,7 @@ namespace ThunderED.Modules
                             if (inputGroup != null)
                             {
                                 group = inputGroup;
-                                if (await GetCorpEntityById(group, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(group, longAllyId) != null))
+                                if (await GetCorpEntityById(group, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(group, longAllyId) != null) || await GetCharEntityById(group, longCharacterId) != null)
                                 {
                                     groupName = inputGroupName;
                                     add = true;
@@ -599,10 +613,13 @@ namespace ThunderED.Modules
                             }
                             else
                             {
+                                var searchFor = autoSearchGroup
+                                    ? Settings.WebAuthModule.AuthGroups
+                                    : Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode);
                                 //general auth
-                                foreach (var grp in Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode))
+                                foreach (var grp in searchFor)
                                 {
-                                    if (await GetCorpEntityById(grp.Value, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(grp.Value, longAllyId) != null))
+                                    if (await GetCorpEntityById(grp.Value, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(grp.Value, longAllyId) != null) || await GetCharEntityById(grp.Value, longCharacterId) != null)
                                     {
                                         cFoundList.Add(rChar.corporation_id);
                                         groupName = grp.Key;
@@ -631,6 +648,12 @@ namespace ThunderED.Modules
 
                         if (add)
                         {
+                            if (autoSearchGroup && group.ESICustomAuthRoles.Any()) //for one button with ESI - had to auth twice
+                            {
+                                await response.RedirectAsync(new Uri(WebServerModule.GetCustomAuthUrl(group.ESICustomAuthRoles, groupName)));
+                                return true;
+                            }
+
                             //cleanup prev auth
                             await SQLHelper.DeleteAuthDataByCharId(Convert.ToInt64(characterID));
                             var refreshToken = result[1];
@@ -639,7 +662,7 @@ namespace ThunderED.Modules
                             var authUser = new AuthUserEntity
                             {
                                 CharacterId = Convert.ToInt64(characterID),
-                                Data = {CharacterName = rChar.name, Permissions = group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null },
+                                Data = { Permissions = group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null },
                                 DiscordId = 0,
                                 RefreshToken = refreshToken,
                                 GroupName = groupName,
@@ -713,6 +736,8 @@ namespace ThunderED.Modules
 
             return false;
         }
+
+        public const string DEF_NOGROUP_NAME = "-0-";
 
         private async Task RefreshStandings(AuthStandsEntity data, string token)
         {
