@@ -443,5 +443,14 @@
   "clistCorpTitle":  "Корпоративные Контракты",
   "clistExpired":  "истек",
   "clistGroupNotFound":  "Группа контрактов '{0}' не найдена!",
-  "clistNoContracts": "Контракты отсутствуют" 
+  "clistNoContracts": "Контракты отсутствуют",
+  "sovSystem":  "Система",
+  "sovMessage":  "Сообщение",
+  "sovHolder":  "Владелец",
+  "sovSystemUncontested":  "Ранее не принадлежала ни одному альянсу.",
+  "sovSystemWasOwnedBy":  "Ранее принадлежала альянсу {0}[{1}].",
+  "sovNextVulnerability":  "\n\nСледующее окно уязвимости с {0} по {1}",
+  "sovNewHolder":  "Альянс {0}[{1}] теперь является новым владельцем системы.",
+  "sovLostStructure":  "Система потеряла {0}!",
+  "sovLowIndexMessage":  "Индекс ADM снизился до значения {0}. За работу, ребятки!" 
  }

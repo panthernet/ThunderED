@@ -148,19 +148,19 @@ namespace ThunderED.Modules
 
             string msg;
             if (owner == null)
-                msg = $"System has lost its {(isTcu? "TCU": "IHUB")}!";
+                msg = LM.Get("sovLostStructure", isTcu? "TCU": "IHUB");
             else
             {
-                var oldHolder = old == null ? "It was previously uncontested." : $"It was previously owned by {oldOwner.name}[{oldOwner.ticker}].";
+                var oldHolder = old == null ? LM.Get("sovSystemUncontested") : LM.Get("sovSystemWasOwnedBy", oldOwner.name, oldOwner.ticker);
                 var timers = data == null
                     ? null
-                    : $"\n\nNext vulnerabilty window is from {data.vulnerable_start_time.ToString(Settings.Config.ShortTimeFormat)} to {data.vulnerable_end_time.ToString(Settings.Config.ShortTimeFormat)}";
-                msg = $"{owner.name}[{owner.ticker}] is the new sov holder in this system. {oldHolder}{timers}";
+                    : LM.Get("sovNextVulnerability", data.vulnerable_start_time.ToString(Settings.Config.ShortTimeFormat), data.vulnerable_end_time.ToString(Settings.Config.ShortTimeFormat));
+                msg =  $"{LM.Get("sovNewHolder", owner.name, owner.ticker)} {oldHolder}{timers}";
             }
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(Settings.Resources.ImgLowFWStand)
-                .AddField("System", system?.name ?? LM.Get("Unknown"), true)
-                .AddField("Message", msg);
+                .AddField(LM.Get("sovSystem"), system?.name ?? LM.Get("Unknown"), true)
+                .AddField(LM.Get("sovMessage"), msg);
             var ch = APIHelper.DiscordAPI.GetChannel(group.DiscordChannelId);
             var mention = string.Join(' ', group.DiscordMentions);
             if (string.IsNullOrEmpty(mention))
@@ -173,12 +173,12 @@ namespace ThunderED.Modules
         {
             var system = await APIHelper.ESIAPI.GetSystemData(Reason, data.solar_system_id);
             var alliance = await APIHelper.ESIAPI.GetAllianceData(Reason, data.alliance_id);
-            var msg = $"ADM index has dropped to very low value of {data.vulnerability_occupancy_level}. Get to work buddies!";
+            var msg = LM.Get("sovLowIndexMessage", data.vulnerability_occupancy_level);
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(Settings.Resources.ImgLowFWStand)
-                .AddField("System", system?.name ?? LM.Get("Unknown"), true)
-                .AddField("Holder", alliance?.name ?? LM.Get("Unknown"), true)
-                .AddField("Message", msg);
+                .AddField(LM.Get("sovSystem"), system?.name ?? LM.Get("Unknown"), true)
+                .AddField(LM.Get("sovHolder"), alliance?.name ?? LM.Get("Unknown"), true)
+                .AddField(LM.Get("sovMessage"), msg);
             var ch = APIHelper.DiscordAPI.GetChannel(group.DiscordChannelId);
             var mention = string.Join(' ', group.DiscordMentions);
             if (string.IsNullOrEmpty(mention))

@@ -449,6 +449,15 @@
   "clistCorpTitle":  "Corporation Contracts",
   "clistExpired":  "expired",
   "clistGroupNotFound":  "Contract group '{0}' not found!",
-  "clistNoContracts": "No contracts" 
+  "clistNoContracts": "No contracts",
+  "sovSystem":  "System",
+  "sovMessage":  "Message",
+  "sovHolder":  "Holder",
+  "sovSystemUncontested":  "It was previously uncontested.",
+  "sovSystemWasOwnedBy":  "It was previously owned by {0}[{1}].",
+  "sovNextVulnerability":  "\n\nNext vulnerabilty window is from {0} to {1}",
+  "sovNewHolder":  "{0}[{1}] is the new sov holder in this system.",
+  "sovLostStructure":  "System has lost its {0}!",
+  "sovLowIndexMessage":  "ADM index has dropped to {0}. Get to work buddies!" 
 
 }

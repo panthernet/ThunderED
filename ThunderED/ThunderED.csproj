@@ -151,6 +151,9 @@
     <None Update="Templates\Messages\default\def.Template.killMailRadius.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="_simplifiedAuth.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

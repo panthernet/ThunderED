@@ -8,6 +8,7 @@
 + Added new Spies list for HR members. Dumped members can be marked as Spies to avoid being recycled.
 + Added new SovTrackerModule (read highlight section below)
 + Added new **clist** command to list contracts for specified group
++ Added new simplified auth management file (read highlight section below)
 + Enhanced HRM module access options and security (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci
@@ -22,7 +23,16 @@
   3. Recommended **CheckIntervalInMinutes** is 30+ minutes to avoid exscessive stress
   4. Additive filter hierarchy: **Systems -> HolderAlliances -> Regions -> Constellations**. The most efficient way to setup this module is to specify Systems only.
 
+- Added an ability to read and inject authentication data from standalone file named **_simplifiedAuth.txt**.
+  This file holds auth data in a compact CSV-like manner which can be helpful for less IT skilled admins or people who manage access right quite often.
+  In this file all entities are identified by names instead of numeric IDs which are then looked up on ESI during the bot startup.
+  Specified auth data will be injected into auth groups during runtime. You can even end up with empty predefined auth groups in settings.json file.
+  All fields are | delimeted, Discord roles are comma delimited.
+  Format: Exact Alliance or Corp or Character name|exact auth group name from config file|Discord role1,Discord role2
+  Example1: Starlane Limited|PrelimAlly|Members,[UF]
+  Example2: Goonswarm Federation|GuestAuthGroup|GuestRole,TempRole
 
+  You can edit this file and use !rehash command to apply changes right away
 
 ### BREAKING CHANGES
 - To counter multiple problems with config and logs location under Linux we now search all sensitive data under folder named **Data** in bot root directory.

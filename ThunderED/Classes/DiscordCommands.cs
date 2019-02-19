@@ -810,7 +810,8 @@ namespace ThunderED.Classes
             {
                 if(!await IsExecByAdmin()) return;
 
-                SettingsManager.UpdateSettings();
+                await SettingsManager.UpdateSettings();
+                await SettingsManager.UpdateInjectedSettings();
                 WebServerModule.ModuleConnectors.Clear();
                 ZKillLiveFeedModule.Queryables.Clear();
                 TickManager.LoadModules();

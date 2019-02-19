@@ -78,6 +78,8 @@ namespace ThunderED
 
             //load language
             LM.Load().GetAwaiter().GetResult();
+            //load injected settings
+            SettingsManager.UpdateInjectedSettings().GetAwaiter().GetResult();
             //load APIs
             APIHelper.StartDiscord().GetAwaiter().GetResult();
 

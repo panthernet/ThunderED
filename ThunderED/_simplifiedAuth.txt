@@ -1,0 +1,5 @@
+﻿//This file holds auth data for simplified authentication management which is helpful for less IT skilled admins
+//Auth data below will be injected into auth groups during runtime. Fields are | delimeted, roles are comma delimited.
+//Format: Exact Alliance or Corp or Character name|exact auth group name from config file|Discord role1,Discord role2
+//Example: Starlane Limited|PrelimAlly|Members,[UF]
+//Example: Goonswarm Federation|GuestAuthGroup|GuestRole,TempRole

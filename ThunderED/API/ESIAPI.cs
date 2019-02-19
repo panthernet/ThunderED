@@ -281,7 +281,8 @@ namespace ThunderED.API
         internal override async void ResetCache(string type = null)
         {
             await SQLHelper.DeleteCache(type);
-            SettingsManager.UpdateSettings();
+            await SettingsManager.UpdateSettings();
+            await SettingsManager.UpdateInjectedSettings();
         }
         #endregion
 

@@ -38,6 +38,7 @@
         SLF,
         ContractNotif,
         AuthStandings,
-        SovTracker
+        SovTracker,
+        SimplAuth
     }
 }

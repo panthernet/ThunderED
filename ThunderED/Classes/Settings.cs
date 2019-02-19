@@ -10,6 +10,7 @@ using ThunderED.Classes.Enums;
 namespace TED_ConfigEditor.Classes
 #else
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using ThunderED.Classes.Enums;
