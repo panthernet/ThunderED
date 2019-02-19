@@ -486,7 +486,6 @@ namespace ThunderED.Providers
         {
             if (!string.IsNullOrEmpty(SettingsManager.Settings.Database.CustomConnectionString))
                 return SettingsManager.Settings.Database.CustomConnectionString;
-
             return $"Data Source = {SettingsManager.DatabaseFilePath};";
         }
 
@@ -497,6 +496,8 @@ namespace ThunderED.Providers
                 File.Copy(Path.Combine(SettingsManager.RootDirectory, "edb.def.db"), SettingsManager.DatabaseFilePath);
                 SettingsManager.IsNew = true;
             }
+
+            await RunCommand("PRAGMA journal_mode=WAL;");
 
             await Task.Delay(1);
             return true;

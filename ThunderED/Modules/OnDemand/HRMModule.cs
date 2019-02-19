@@ -237,6 +237,7 @@ namespace ThunderED.Modules.OnDemand
                                     {
                                         //search page load
                                         var pageBody = File.ReadAllText(SettingsManager.FileTemplateHRM_SearchMailPage)
+                                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(true))
                                                 .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
                                                 .Replace("{LogOutUrl}", WebServerModule.GetWebSiteUrl())
                                                 .Replace("{LogOut}", LM.Get("LogOut"))
@@ -362,6 +363,7 @@ namespace ThunderED.Modules.OnDemand
                                 var spiesUrl = WebServerModule.GetHRM_AjaxMembersURL((int)UserStatusEnum.Spying, authCode);
 
                                 var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Main).Replace("{header}", LM.Get("hrmTemplateHeader"))
+                                        .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(true)+WebServerModule.GetHtmlResourceConfirmation())
                                         .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
                                         .Replace("{LogOutUrl}", WebServerModule.GetWebSiteUrl())
                                         .Replace("{LogOut}", LM.Get("LogOut"))
@@ -420,7 +422,7 @@ namespace ThunderED.Modules.OnDemand
                                     var iAlly = iCorp.alliance_id.HasValue ? await APIHelper.ESIAPI.GetAllianceData(Reason, iCorp.alliance_id.Value, true) : null;
                                     var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(inspectCharId);
                                     
-                                    if(accessFilter.CanAccessUser(authUserEntity.AuthState))
+                                    if(!accessFilter.CanAccessUser(authUserEntity.AuthState))
                                     {
                                         await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
                                         return true;
@@ -430,6 +432,7 @@ namespace ThunderED.Modules.OnDemand
                                     var corpHistoryHtml = await GenerateCorpHistory(inspectCharId);
                                     var pList = authUserEntity?.Data.PermissionsList;
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Inspect).Replace("{header}", LM.Get("hrmInspectingHeader", iChar.name))
+                                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(true) + WebServerModule.GetHtmlResourceConfirmation()+ WebServerModule.GetHtmlResourceBootpage())
                                             .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
                                             .Replace("{charId}", characterId.ToString())
                                             .Replace("{LogOutUrl}", WebServerModule.GetWebSiteUrl())

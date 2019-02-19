@@ -384,9 +384,9 @@ namespace ThunderED.Classes
         public bool CanAccessUser(int authState)
         {
             var state = (UserStatusEnum) authState;
-            return (CanInspectAuthedUsers || state != UserStatusEnum.Authed) &&
-                   (CanInspectAwaitingUsers || (state != UserStatusEnum.Awaiting && state != UserStatusEnum.Initial)) &&
-                   (CanInspectDumpedUsers || state != UserStatusEnum.Dumped) && (CanInspectSpyUsers || state != UserStatusEnum.Spying);
+            return (CanInspectAuthedUsers && state == UserStatusEnum.Authed) ||
+                   (CanInspectAwaitingUsers && (state == UserStatusEnum.Awaiting || state == UserStatusEnum.Initial)) ||
+                   (CanInspectDumpedUsers && state == UserStatusEnum.Dumped) || (CanInspectSpyUsers && state == UserStatusEnum.Spying);
         }
     }
 

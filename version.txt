@@ -12,6 +12,8 @@
 + Enhanced HRM module access options and security (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci
++ Improved HTML templating and unified CSS+JS includes
++ Updated SQLite to work in WAL mode
 
 ### HIGHLIGHTS
 

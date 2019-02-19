@@ -1,0 +1,1 @@
+﻿    <script type="text/javascript" src="/scripts/confirmation.js"></script>

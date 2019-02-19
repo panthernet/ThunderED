@@ -22,6 +22,7 @@ namespace ThunderED.Providers
         {
             using (var session = new TConnection())
             {
+                
                 session.ConnectionString = CreateConnectString();
                 using (var command = new TCommand())
                 {

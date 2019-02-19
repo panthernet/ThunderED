@@ -4,45 +4,21 @@
     <title>{header}</title>
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/popper.js@1.14.3/dist/umd/popper.min.js"></script>
-    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
-    <script type="text/javascript" src="/scripts/moments/{locale}.js"></script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="=/scripts/dt.css">
-    <script type="text/javascript" src="/scripts/bootstrap-datetimepicker.js"></script>
-    <script type="text/javascript" src="/scripts/confirmation.js"></script>
-
+    {headerContent}
     <style type="text/css">
-        .row {
-            background: #f8f9fa;
-            margin-top: 20px;
-        }
-
-        .col {
-            border: solid 1px #6c757d;
-            padding: 10px;
-        }
-
-        .btn {
-            width: 150px;
-        }
-
         .btn-danger {
             width: 30px;
             height: 30px;
             padding: 0px;
         }
-
-        .input-group-text {
-            width: 110px;
+        .col {
+            border: solid 1px #6c757d;
+            padding: 10px;
         }
 
-        .fixed150 {
-            width: 150px;
+        .row {
+            background: #f8f9fa;
+            margin-top: 20px;
         }
     </style>
     <script type="text/javascript">
@@ -87,7 +63,7 @@
                 "timerStage": $("#timerStage").val(),
                 "timerLocation": $("#timerLocation").val(),
                 "timerOwner": $("#timerOwner").val(),
-                "timerET":result,
+                "timerET": result,
                 "timerNotes": $("#timerNotes").val(),
                 "timerCharId": $("#timerCharId").val()
 

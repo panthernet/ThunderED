@@ -444,6 +444,7 @@ namespace ThunderED.Modules
                     var url = grp.MustHaveGroupName ? WebServerModule.GetCustomAuthUrl(grp.ESICustomAuthRoles, groupName) : WebServerModule.GetAuthUrl();
 
                     var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{authUrl}", url)
+                        .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                         .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{body}", LM.Get("authTemplateInv")).Replace("{backText}", LM.Get("backText"));
                     await WebServerModule.WriteResponce(text, response);
                     return true;
@@ -462,6 +463,7 @@ namespace ThunderED.Modules
                     {
                         var message = LM.Get("ESIFailure");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
+                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
                         return true;
                     }
@@ -473,6 +475,7 @@ namespace ThunderED.Modules
                     {
                         await LogHelper.LogWarning("Bad or outdated stand auth request!");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{message}", LM.Get("authTokenBadRequest"))
                             .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
                         return true;
@@ -482,6 +485,7 @@ namespace ThunderED.Modules
                     {
                         await LogHelper.LogWarning($"Unathorized auth stands feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{message}", LM.Get("authTokenInvalid"))
                             .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
                         return true;
@@ -500,6 +504,7 @@ namespace ThunderED.Modules
                     await LogHelper.LogInfo($"Auth stands feed added for character: {characterID}({rChar.name})", LogCat.AuthWeb);
                     //TODO better screen?
                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
+                        .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                         .Replace("{body2}", LM.Get("authStandsTokenRcv", rChar.name))
                         .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authStandsTokenHeader")).Replace("{backText}", LM.Get("backText")), response);
                     return true;
@@ -530,6 +535,7 @@ namespace ThunderED.Modules
                         if (result == null)
                         {
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", LM.Get("ESIFailure"))
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
                             return true;
                         }
@@ -540,6 +546,7 @@ namespace ThunderED.Modules
                         if (rChar == null)
                         {
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", LM.Get("ESIFailure"))
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
                             return true;
                         }
@@ -549,6 +556,7 @@ namespace ThunderED.Modules
                         if (rCorp == null)
                         {
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", LM.Get("ESIFailure"))
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
                             return true;
                         }
@@ -645,6 +653,7 @@ namespace ThunderED.Modules
                             if (!group.PreliminaryAuthMode)
                             {
                                 await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2).Replace("{url}", Settings.WebServerModule.DiscordUrl)
+                                        .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                         .Replace("{image}", image)
                                         .Replace("{uid}",  $"!auth {uid}").Replace("{header}", LM.Get("authTemplateHeader"))
                                         .Replace("{body}", LM.Get("authTemplateSucc1", rChar.name))
@@ -658,6 +667,7 @@ namespace ThunderED.Modules
                             {
                                 if (!group.SkipDiscordAuthPage)
                                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
+                                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                             .Replace("{url}", Settings.WebServerModule.DiscordUrl)
                                             .Replace("{image}", image)
                                             .Replace("{uid}", $"!auth confirm {uid}")
@@ -669,6 +679,7 @@ namespace ThunderED.Modules
                                         response);
                                 else 
                                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
+                                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                             .Replace("{url}", Settings.WebServerModule.DiscordUrl)
                                             .Replace("{image}", image)
                                             .Replace("{uid}", null)
@@ -685,6 +696,7 @@ namespace ThunderED.Modules
                         {
                             var message = LM.Get("authNonAlly");
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")).Replace("{body}", ""), response);
                         }
 

@@ -99,6 +99,7 @@ namespace ThunderED.Modules
 
                         await SQLHelper.InsertOrUpdateTokens("", result[0], "", result[1]);
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", "authTemplateHeader")
                                 .Replace("{body}", LM.Get("contractAuthSuccessHeader"))
                                 .Replace("{body2}", LM.Get("contractAuthSuccessBody"))

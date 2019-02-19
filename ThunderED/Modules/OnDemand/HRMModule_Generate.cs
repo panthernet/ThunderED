@@ -231,63 +231,27 @@ namespace ThunderED.Modules.OnDemand
 
         private static async Task<string[]> GenerateMembersListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).Where(a=> IsValidUserForInteraction(accessFilter, a));
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).Where(a=> IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
             return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Authed, filterId, genType);
         }
 
         private static async Task<string[]> GenerateSpiesListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Spying)).Where(a=> IsValidUserForInteraction(accessFilter, a));
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Spying)).Where(a=> IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
             return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Spying, filterId, genType);
         }
 
 
         private static async Task<string[]> GenerateAwaitingListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> a.IsPending && IsValidUserForInteraction(accessFilter, a));
-           /* var sb = new StringBuilder();
-            foreach (var item in list.Where(a=> a.AuthState == 0 || a.AuthState == 1))
-            {
-                var charUrl = !accessFilter.CanInspectOtherUsers ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
-                sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
-                sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
-                sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
-                sb.Append($@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
-                sb.Append(@"</a>");
-                sb.Append($@"<a class=""btn btn-outline-danger{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 40px;"" data-toggle=""confirmation"" data-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"">");
-                sb.Append(@"  <div class=""parent_content"">");
-                sb.Append(@"    <div class=""child_content"">X</div>");
-                sb.Append(@"  </div>");
-                sb.Append(@"</a>");
-                sb.Append($"</div>");
-            }
-            
-            return sb.ToString();*/
+            var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> a.IsPending && IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
             return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Awaiting, filterId, genType);
 
         }
 
         private static async Task<string[]> GenerateDumpListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Dumped)).Where(a=> IsValidUserForInteraction(accessFilter, a));
-           /* var sb = new StringBuilder();
-            foreach (var item in list)
-            {
-                var charUrl = !accessFilter.CanInspectOtherUsers ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
-                sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
-                sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
-                sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
-                sb.Append($@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
-                sb.Append(@"</a>");
-                sb.Append($@"<a class=""btn btn-outline-danger{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 40px;"" data-toggle=""confirmation"" data-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"">");
-                sb.Append(@"  <div class=""parent_content"">");
-                sb.Append(@"    <div class=""child_content"">X</div>");
-                sb.Append(@"  </div>");
-                sb.Append(@"</a>");
-                sb.Append($"</div>");
-            }
-            
-            return sb.ToString();*/
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Dumped)).Where(a=> IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
             return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Dumped, filterId, genType);
         }
 

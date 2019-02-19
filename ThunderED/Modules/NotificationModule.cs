@@ -924,6 +924,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                     {
                         var message = LM.Get("ESIFailure");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
+                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
                         return true;
                     }
@@ -935,6 +936,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                     {
                         await LogHelper.LogWarning("Bad or outdated notify feed request!");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{message}", LM.Get("authTokenBadRequest"))
                             .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
                         return true;
@@ -944,6 +946,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                     {
                         await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{message}", LM.Get("authTokenInvalid"))
                             .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
                         return true;
@@ -954,6 +957,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                     await SQLHelper.InsertOrUpdateTokens(result[1] ?? "", characterID, null, "");
                     await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
+                        .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                         .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
                         .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")), response);
                     return true;

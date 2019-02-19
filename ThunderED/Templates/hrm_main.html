@@ -2,51 +2,9 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/scripts/confirmation.js"></script>
-    
+    {headerContent}
+
     <style type="text/css">
-
-        .parent_content {
-            display: table;
-            line-height: 50px;
-        }
-        .child_content {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .newline {
-            display:flex;
-            -moz-flex-wrap: wrap;
-            -ms-flex-wrap: wrap;
-            -o-flex-wrap: wrap;
-            -webkit-flex-wrap: wrap;
-            flex-wrap: wrap;
-            justify-content: left; /* for horizontal aligning of child divs */
-            align-items : left; /* for vertical aligning */
-        }
-
-        .row-fluid {
-            display: flex;
-        }
-
-        .flex-content {
-            display: flex;
-            -ms-align-items: center;
-            -o-align-items: center;
-            -webkit-align-items: center;
-            align-items: center;
-        }
-
         h2 {
             margin-top: 0;
         }
@@ -56,22 +14,22 @@
         function updateConfirmation() {
             $('[data-toggle=confirmation]').confirmation({
                 rootSelector: '[data-toggle=confirmation]',
-                title: function() {
+                title: function () {
                     return $(this).attr("confirm-title");
                 }
             });
             $('[data-toggle=confirmation]').tooltip({
-                title: function() {
+                title: function () {
                     return $(this).attr("tooltip-title");
                 },
                 placement: 'bottom'
             });
         }
 
-        $(function() {
+        $(function () {
 
             if ({allowAuthedScript}) {
-                $("#authed-content").load('{authedListUrl}0', function() { updateConfirmation(); });
+                $("#authed-content").load('{authedListUrl}0', function () { updateConfirmation(); });
             }
             if ({allowAwaitingScript}) {
                 $("#awaiting-content").load('{awaitingListUrl}0', function () { updateConfirmation(); });
@@ -86,7 +44,7 @@
 
         function filterOnChangeAuthed() {
             var value = $('#selectAuthed').val();
-            $("#authed-content").load('{authedListUrl}' + value, function() { updateConfirmation(); });
+            $("#authed-content").load('{authedListUrl}' + value, function () { updateConfirmation(); });
         }
 
         function filterOnChangeAwaiting() {

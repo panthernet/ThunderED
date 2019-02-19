@@ -7,14 +7,12 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Helpers;
-using ThunderED.Modules.OnDemand;
 
 namespace ThunderED.Modules.Sub
 {
-    public class WebServerModule: AppModuleBase, IDisposable
+    public sealed partial class WebServerModule: AppModuleBase, IDisposable
     {
         private static System.Net.Http.HttpListener _listener;
         public override LogCat Category => LogCat.WebServer;
@@ -22,6 +20,7 @@ namespace ThunderED.Modules.Sub
         public static string HttpPrefix => SettingsManager.Settings.Config.UseHTTPS ? "https" : "http";
 
         public static Dictionary<string, Func<HttpListenerRequestEventArgs, Task<bool>>> ModuleConnectors { get; } = new Dictionary<string, Func<HttpListenerRequestEventArgs, Task<bool>>>();
+
 
         public WebServerModule()
         {
@@ -84,9 +83,10 @@ namespace ThunderED.Modules.Sub
                            // var extIp = Settings.WebServerModule.WebExternalIP;
 
                             var text = File.ReadAllText(SettingsManager.FileTemplateMain)
-                                    .Replace("{header}", LM.Get("authTemplateHeader"))                                    
-                                    .Replace("{webWelcomeHeader}", LM.Get("webWelcomeHeader"))
-                                    .Replace("{authButtonText}", LM.Get("butGeneralAuthPage"));
+                                .Replace("{headerContent}", GetHtmlResourceDefault(false))
+                                .Replace("{header}", LM.Get("authTemplateHeader"))
+                                .Replace("{webWelcomeHeader}", LM.Get("webWelcomeHeader"))
+                                .Replace("{authButtonText}", LM.Get("butGeneralAuthPage"));
 
                             //managecontrols
                             var manageText = new StringBuilder();
@@ -115,6 +115,7 @@ namespace ThunderED.Modules.Sub
                             var authUrl = $"{HttpPrefix}://{extIp}:{extPort}/auth.php";
 
                             var text = File.ReadAllText(SettingsManager.FileTemplateAuthPage)
+                                .Replace("{headerContent}", GetHtmlResourceDefault(false))
                                 .Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{backText}", LM.Get("backText"));
 
@@ -249,6 +250,7 @@ namespace ThunderED.Modules.Sub
         internal static string Get404Page()
         {
             return File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", "404 Not Found!")
+                .Replace("{headerContent}", GetHtmlResourceDefault(false))
                 .Replace("{header}", LM.Get("authTemplateHeader"))
                 .Replace("{body}", LM.Get("WebRequestUnexpected"))
                 .Replace("{backText}", LM.Get("backText"));
@@ -258,6 +260,7 @@ namespace ThunderED.Modules.Sub
         internal static string GetAccessDeniedPage(string header, string message, string backUrl, string description = null)
         {
             return File.ReadAllText(SettingsManager.FileTemplateAuth3)
+                .Replace("{headerContent}", GetHtmlResourceDefault(false))
                 .Replace("{message}", message)
                 .Replace("{header}", header)
                 .Replace("{header2}", header)
