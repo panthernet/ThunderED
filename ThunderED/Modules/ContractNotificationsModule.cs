@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Discord;
+using Discord.Commands;
 using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -114,8 +115,10 @@ namespace ThunderED.Modules
             return false;
         }
 
-        private readonly List<string> _completeStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed"};
-        private readonly List<string> _finishedStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished"};
+        private static readonly List<string> _completeStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed"};
+        private static readonly List<string> _finishedStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished"};
+        private static readonly List<string> _rejectedStatuses = new List<string> { "cancelled", "rejected", "failed", "deleted", "reversed"};
+        private static readonly List<string> _activeStatuses = new List<string> {"in_progress", "outstanding"};
 
         public override async Task Run(object prm)
         {
@@ -599,6 +602,112 @@ namespace ThunderED.Modules
             }
 
             return new[] {sbItemsSubmitted.ToString(), sbItemsAsking.ToString()};
+        }
+
+        public static async Task ProcessClistCommand(ICommandContext context, KeyValuePair<string, ContractNotifyGroup> groupPair, string mod)
+        {
+            try
+            {
+                var group = groupPair.Value;
+                var personalContracts = new List<JsonClasses.Contract>();
+                var corpContracts = new List<JsonClasses.Contract>();
+                
+                foreach (var characterID in @group.CharacterIDs)
+                {       
+                    if(group.FeedPersonalContracts)
+                        personalContracts.AddRange(await SQLHelper.LoadContracts(characterID, false));
+                    if(group.FeedCorporateContracts)
+                        corpContracts.AddRange(await SQLHelper.LoadContracts(characterID, true));
+                }
+
+                switch (mod)
+                {
+                    case "opened":
+                    case "o":
+                        personalContracts = personalContracts.Where(a => _activeStatuses.Contains(a.status)).ToList();
+                        corpContracts = corpContracts.Where(a => _activeStatuses.Contains(a.status)).ToList();
+                        break;
+                    case "closed":
+                    case "c":
+                        personalContracts = personalContracts.Where(a => _completeStatuses.Contains(a.status)).ToList();
+                        corpContracts = corpContracts.Where(a => _completeStatuses.Contains(a.status)).ToList();
+                        break;
+                    case "finished":
+                    case "f":
+                        personalContracts = personalContracts.Where(a => _finishedStatuses.Contains(a.status)).ToList();
+                        corpContracts = corpContracts.Where(a => _finishedStatuses.Contains(a.status)).ToList();
+                        break;
+                    case "rejected":
+                    case "r":
+                        personalContracts = personalContracts.Where(a => _rejectedStatuses.Contains(a.status)).ToList();
+                        corpContracts = corpContracts.Where(a => _rejectedStatuses.Contains(a.status)).ToList();
+                        break;
+                    case "all":
+                    case "a":
+                        break;
+                    default:
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("helpClist"), true);
+                        return;
+                }
+
+                var sb = new StringBuilder();
+                if (personalContracts.Any())
+                {
+                    sb.AppendLine(LM.Get("clistPersonalTitle"));
+                    sb.AppendLine("```");
+                    foreach (var contract in personalContracts)
+                    {
+                        sb.Append((string.IsNullOrEmpty(contract.title) ? "-" : contract.title).FixedLength(20));
+                        sb.Append("  ");
+                        sb.Append(contract.type.FixedLength(13));
+                        sb.Append("  ");
+                        sb.Append(contract.status.FixedLength(11));
+                        sb.Append("  ");
+                        if (_activeStatuses.Contains(contract.status))
+                        {
+                            var value = (contract.DateExpired - DateTime.UtcNow).Value;
+                            sb.Append($"{value.Days}d {value.Hours}h {value.Minutes}m");
+                        }
+                        else
+                            sb.Append(LM.Get("clistExpired"));
+                        sb.Append(Environment.NewLine);
+                    }
+                    sb.AppendLine("```");
+                }
+                if (corpContracts.Any())
+                {
+                    sb.AppendLine(LM.Get("clistCorpTitle"));
+                    sb.AppendLine("```");
+                    foreach (var contract in corpContracts)
+                    {
+                        sb.Append((string.IsNullOrEmpty(contract.title) ? "-" : contract.title).FixedLength(20));
+                        sb.Append("  ");
+                        sb.Append(contract.type.FixedLength(13));
+                        sb.Append("  ");
+                        sb.Append(contract.status.FixedLength(11));
+                        sb.Append("  ");
+                        if (_activeStatuses.Contains(contract.status))
+                        {
+                            var value = (contract.DateExpired - DateTime.UtcNow).Value;
+                            sb.Append($"{value.Days}d {value.Hours}h {value.Minutes}m");
+                        }
+                        else
+                            sb.Append(LM.Get("clistExpired"));
+                        sb.Append(Environment.NewLine);
+                    }
+                    sb.AppendLine("```");
+                }
+
+                if (!personalContracts.Any() && !corpContracts.Any())
+                    sb.Append(LM.Get("clistNoContracts"));
+
+                await APIHelper.DiscordAPI.ReplyMessageAsync(context, sb.ToString(), true);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(ProcessClistCommand), ex, LogCat.ContractNotif);
+                await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("WebRequestUnexpected"));
+            }
         }
     }
 }

@@ -581,6 +581,48 @@ namespace ThunderED.Classes
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
         }
 
+        [Command("clist", RunMode = RunMode.Async), Summary("")]
+        public async Task ClistDummy()
+        {
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if (forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+            {
+                await ReplyAsync(LM.Get("commandToPrivate"));
+                return;
+            }
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpClist"), true);
+        }
+
+        [Command("clist", RunMode = RunMode.Async), Summary("")]
+        public async Task Clist([Remainder] string x)
+        {
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if (forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+            {
+                await ReplyAsync(LM.Get("commandToPrivate"));
+                return;
+            }
+
+            if (SettingsManager.Settings.Config.ModuleContractNotifications)
+            {
+                var mod = x?.Split(' ').FirstOrDefault();
+                if (string.IsNullOrEmpty(x))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpClist"), true);
+                    return;
+                }
+                var groupName = x.Substring(mod.Length, x.Length - mod.Length).Trim();
+                var group = SettingsManager.Settings.ContractNotificationsModule.Groups.FirstOrDefault(a => a.Key == groupName);
+                if (group.Value == null)
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("clistGroupNotFound", groupName), true);
+                    return;
+                }
+
+                await ContractNotificationsModule.ProcessClistCommand(Context, group, mod);
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>

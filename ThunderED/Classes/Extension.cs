@@ -36,6 +36,21 @@ namespace ThunderED.Classes
         {
             return dic.ContainsKey(key) ? dic[key] : null;
         }
+
+        public static string FixedLength(this string value, int length)
+        {
+            return length < value.Length ? value.Substring(0, length) : (value.Length < length ? FillSpaces(value, length) : value);
+        }
+
+        private static string FillSpaces(this string value, int length)
+        {
+            if (value.Length >= length) return value;
+            var sb = new StringBuilder();
+            sb.Append(value);
+            for (int i = value.Length; i < length; i++)
+                sb.Append(" ");
+            return sb.ToString();
+        }
     }
 
 }

@@ -38,6 +38,6 @@
         SLF,
         ContractNotif,
         AuthStandings,
-        SovIndexTracker
+        SovTracker
     }
 }

@@ -1,4 +1,4 @@
-### V1.3.1
+### V1.3.2
 + Added optional **SkipDiscordAuthPage** param to auth groups to be able to store ESI token and skip Discord auth
 + Added unit tests project
 + Added means to counter Linux data location problems (explanation below)
@@ -7,6 +7,7 @@
 + Added **UseDumpForMembers** and **DumpInvalidationInHours** params to HRM
 + Added new Spies list for HR members. Dumped members can be marked as Spies to avoid being recycled.
 + Added new SovTrackerModule (read highlight section below)
++ Added new **clist** command to list contracts for specified group
 + Enhanced HRM module access options and security (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci

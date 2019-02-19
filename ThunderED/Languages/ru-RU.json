@@ -437,5 +437,11 @@
   "hrmSpiesHeader":  "Шпионы",
   "hrmSpyButtonTooltip":  "Переместить участника в раздел Шпионы", 
   "hrmDeleteAuthButtonTooltip":  "Удалить аутентификацию участника",
-  "hrmDumpAuthButtonTooltip":  "Переместить участника в раздел Сброшенные" 
+  "hrmDumpAuthButtonTooltip":  "Переместить участника в раздел Сброшенные",
+  "helpClist": "Вывести список контрактов для указанной группы. Синтаксис: clist MOD GROUP_NAME. Доступные фильтры: all(a), opened(o), closed(c), finished(f), rejected(r). Примеры: !clist all my_group  !clist o group 4",  
+  "clistPersonalTitle":  "Личные Контракты",
+  "clistCorpTitle":  "Корпоративные Контракты",
+  "clistExpired":  "истек",
+  "clistGroupNotFound":  "Группа контрактов '{0}' не найдена!",
+  "clistNoContracts": "Контракты отсутствуют" 
  }

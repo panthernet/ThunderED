@@ -13,7 +13,7 @@ namespace ThunderED.Modules
 {
     public class SovTrackerModule : AppModuleBase
     {
-        public override LogCat Category => LogCat.SovIndexTracker;
+        public override LogCat Category => LogCat.SovTracker;
         private readonly int _checkInterval;
         private DateTime _lastCheckTime = DateTime.MinValue;
 
@@ -39,7 +39,7 @@ namespace ThunderED.Modules
                 var data = await APIHelper.ESIAPI.GetSovStructuresData(Reason);
                 foreach (var pair in Settings.SovTrackerModule.Groups)
                 {
-                    var t = Stopwatch.StartNew();
+                   // var t = Stopwatch.StartNew();
                     var group = pair.Value;
                     var groupName = pair.Key;
 
@@ -55,7 +55,7 @@ namespace ThunderED.Modules
                     {
                         var list = GetUpdatedList(data, group);
                         if (!list.Any())
-                            await SendOneTimeWarning(groupName, $"No systems found for Sov Index Tracker group {group}!");
+                            await SendOneTimeWarning(groupName, $"No systems found for Sov Tracker group {group}!");
                         else
                             await SQLHelper.SaveSovIndexTrackerData(groupName, list);
                         return;
@@ -66,32 +66,35 @@ namespace ThunderED.Modules
                     var workingSet = !group.HolderAlliances.Any() ? data.Where(a => idList.Contains(a.solar_system_id)).ToList() : GetUpdatedList(data, group);
 
                     //check ADM
-                    foreach (var d in workingSet.Where(a=> a.structure_type_id == TCU_TYPEID))
-                    {
-                        if (group.WarningThresholdValue > 0 && d.vulnerability_occupancy_level < group.WarningThresholdValue)
-                            await SendIndexWarningMessage(d, group);
-                    }
+                    if(group.TrackADMIndexChanges)
+                        foreach (var d in workingSet.Where(a => a.structure_type_id == TCU_TYPEID))
+                        {
+                            if (group.WarningThresholdValue > 0 && d.vulnerability_occupancy_level < group.WarningThresholdValue)
+                                await SendIndexWarningMessage(d, group);
+                        }
 
                     //check sov
-                    foreach (var d in workingSet)
-                    {
-                        if (group.TrackIHUBHolderChanges && d.structure_type_id == IHUB_TYPEID)
+                    if(group.TrackIHUBHolderChanges || group.TrackTCUHolderChanges)
+                        foreach (var d in workingSet)
                         {
-                            var old = trackerData.FirstOrDefault(a => a.solar_system_id == d.solar_system_id && a.structure_type_id == IHUB_TYPEID);
-                            if ((old?.alliance_id ?? 0) != (d?.alliance_id ?? 0))
-                                await SendHolderChangedMessage(d, old, group, false);
+                            if (group.TrackIHUBHolderChanges && d.structure_type_id == IHUB_TYPEID)
+                            {
+                                var old = trackerData.FirstOrDefault(a => a.solar_system_id == d.solar_system_id && a.structure_type_id == IHUB_TYPEID);
+                                if ((old?.alliance_id ?? 0) != (d?.alliance_id ?? 0))
+                                    await SendHolderChangedMessage(d, old, group, false);
+                            }
+
+                            if (group.TrackTCUHolderChanges && d.structure_type_id == TCU_TYPEID)
+                            {
+                                var old = trackerData.FirstOrDefault(a => a.solar_system_id == d.solar_system_id && a.structure_type_id == TCU_TYPEID);
+                                if ((old?.alliance_id ?? 0) != (d?.alliance_id ?? 0))
+                                    await SendHolderChangedMessage(d, old, group, true);
+                            }
                         }
-                        if (group.TrackTCUHolderChanges && d.structure_type_id == TCU_TYPEID)
-                        {
-                            var old = trackerData.FirstOrDefault(a => a.solar_system_id == d.solar_system_id && a.structure_type_id == TCU_TYPEID);
-                            if ((old?.alliance_id ?? 0) != (d?.alliance_id ?? 0))
-                                await SendHolderChangedMessage(d, old, group, true);
-                        }
-                    }
 
                     await SQLHelper.SaveSovIndexTrackerData(groupName, workingSet);
-                    t.Stop();
-                    Debug.WriteLine($"Sov check: {t.Elapsed.TotalSeconds}sec");
+                   // t.Stop();
+                   // Debug.WriteLine($"Sov check: {t.Elapsed.TotalSeconds}sec");
                 }
             }
             catch (Exception ex)

@@ -443,5 +443,12 @@
   "hrmSpiesHeader":  "Spies",
   "hrmSpyButtonTooltip":  "Move member to Spies section", 
   "hrmDeleteAuthButtonTooltip":  "Delete member authentication",
-  "hrmDumpAuthButtonTooltip":  "Move member to Dumped section" 
+  "hrmDumpAuthButtonTooltip":  "Move member to Dumped section",
+  "helpClist": "Lists all contracts for specified group. Syntax: clist FILTER GROUP_NAME. Filters are: all(a), opened(o), closed(c), finished(f), rejected(r). Example: !clist all my_group  !clist o group 4",  
+  "clistPersonalTitle":  "Personal Contracts",
+  "clistCorpTitle":  "Corporation Contracts",
+  "clistExpired":  "expired",
+  "clistGroupNotFound":  "Contract group '{0}' not found!",
+  "clistNoContracts": "No contracts" 
+
 }

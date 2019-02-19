@@ -593,7 +593,8 @@
         "Regions": [],
         "Constellations": [],
         "DiscordMentions": [],
-        "WarningThresholdValue": 1,
+        "WarningThresholdValue": 1.0,
+        "TrackADMIndexChanges": true,
         "TrackTCUHolderChanges": true,
         "TrackIHUBHolderChanges": true,
         "DiscordChannelId": 0

@@ -151,6 +151,7 @@ namespace ThunderED.Classes
 #endif
         public double WarningThresholdValue { get; set; } = 1;
         public ulong DiscordChannelId { get; set; }
+        public bool TrackADMIndexChanges { get; set; } = true;
         public bool TrackTCUHolderChanges { get; set; } = true;
         public bool TrackIHUBHolderChanges { get; set; } = true;
     }
