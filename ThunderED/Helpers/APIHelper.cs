@@ -1,7 +1,10 @@
 ﻿using System;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ThunderED.API;
@@ -144,7 +147,7 @@ namespace ThunderED.Helpers
             return result;
         }
 
-        public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null, string etoken = null, bool noRetries = false, bool silent = false)
+        public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null, string etoken = null, bool noRetries = false, bool silent = false, string encoding = null)
             where T : class
         {
             string raw = null;
@@ -159,15 +162,26 @@ namespace ThunderED.Helpers
                     {
                         httpClient.DefaultRequestHeaders.Clear();
                         httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
-                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                        if(encoding == null)
+                            httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");                        
+                        else if(!string.IsNullOrEmpty(encoding))
+                            httpClient.DefaultRequestHeaders.Add("Accept-Encoding", encoding);
                         if (!string.IsNullOrEmpty(auth))
                             httpClient.DefaultRequestHeaders.Add("Authorization", auth);
                         if(!string.IsNullOrEmpty(etoken))
-                            httpClient.DefaultRequestHeaders.Add("Etoken", etoken);
+                            httpClient.DefaultRequestHeaders.Add("Etoken", etoken);                        
 
                         using (var responceMessage = await httpClient.GetAsync(request))
                         {
                             raw = await responceMessage.Content.ReadAsStringAsync();
+                            if (responceMessage.Content.Headers.ContentEncoding.Any(a=> "br".Equals(a, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                using (var b = new BrotliStream(await responceMessage.Content.ReadAsStreamAsync(), CompressionMode.Decompress, true))
+                                {
+                                    using (var s = new StreamReader(b))
+                                        raw = await s.ReadToEndAsync();
+                                }
+                            }
                             if (!responceMessage.IsSuccessStatusCode)
                             {
                                 if (responceMessage.StatusCode != HttpStatusCode.NotModified && responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&

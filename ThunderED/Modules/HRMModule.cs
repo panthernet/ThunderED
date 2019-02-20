@@ -11,7 +11,7 @@ using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Modules.Sub;
 
-namespace ThunderED.Modules.OnDemand
+namespace ThunderED.Modules
 {
     public partial class HRMModule: AppModuleBase
     {
@@ -24,6 +24,7 @@ namespace ThunderED.Modules.OnDemand
         }
 
         private static DateTime _lastUpdateDate = DateTime.MinValue;
+        private static DateTime _lastSpyMailUpdateDate = DateTime.MinValue;
 
         public override async Task Run(object prm)
         {
@@ -45,6 +46,13 @@ namespace ThunderED.Modules.OnDemand
                             await SQLHelper.DeleteAuthDataByCharId(user.CharacterId);
                         }
                     }
+                }
+
+                if (Settings.HRMModule.SpiesMailFeedChannelId > 0 && (DateTime.Now - _lastSpyMailUpdateDate).TotalMinutes >= 10)
+                {
+                    _lastSpyMailUpdateDate = DateTime.Now;
+                    var spies = await SQLHelper.GetAuthUsers((int) UserStatusEnum.Spying);
+                    await MailModule.FeedSpyMail(spies, Settings.HRMModule.SpiesMailFeedChannelId);
                 }
             }
             catch (Exception ex)
@@ -129,7 +137,7 @@ namespace ThunderED.Modules.OnDemand
 
                         if (state != "matahari")
                         {
-                            if (IsNoRedirect(data))
+                            if (HRMModule.IsNoRedirect(data))
                                 await WebServerModule.WriteResponce(LM.Get("pleaseReauth"), response);
                             else
                                 await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
@@ -141,7 +149,7 @@ namespace ThunderED.Modules.OnDemand
                         var rChar = characterId == 0 ? null : await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                         if (rChar == null)
                         {
-                            if (IsNoRedirect(data))
+                            if (HRMModule.IsNoRedirect(data))
                                 await WebServerModule.WriteResponce(LM.Get("pleaseReauth"), response);
                             else await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                             return true;
@@ -156,7 +164,7 @@ namespace ThunderED.Modules.OnDemand
                             var result = await SQLHelper.GetHRAuthTime(characterId);
                             if (result == null || (DateTime.Now - DateTime.Parse(result)).TotalMinutes > timeout)
                             {
-                                if (IsNoRedirect(data))
+                                if (HRMModule.IsNoRedirect(data))
                                     await WebServerModule.WriteResponce(LM.Get("pleaseReauth"), response);
                                 //redirect to auth
                                 else await response.RedirectAsync(new Uri(WebServerModule.GetHRMAuthURL()));
@@ -171,7 +179,7 @@ namespace ThunderED.Modules.OnDemand
                         var accessFilter = await CheckAccess(characterId);
                         if (accessFilter == null)
                         {
-                            if (IsNoRedirect(data))
+                            if (HRMModule.IsNoRedirect(data))
                                 await WebServerModule.WriteResponce(LM.Get("pleaseReauth"), response);
                             else await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
                             return true;
@@ -325,38 +333,38 @@ namespace ThunderED.Modules.OnDemand
                                 switch (authState)
                                 {
                                     case UserStatusEnum.Authed:
-                                        await WebServerModule.WriteResponce((await GenerateMembersListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        await WebServerModule.WriteResponce((await HRMModule.GenerateMembersListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
                                         return true;
                                     case UserStatusEnum.Dumped:
-                                        await WebServerModule.WriteResponce((await GenerateDumpListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        await WebServerModule.WriteResponce((await HRMModule.GenerateDumpListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
                                         return true;
                                     case UserStatusEnum.Spying:
-                                        await WebServerModule.WriteResponce((await GenerateSpiesListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        await WebServerModule.WriteResponce((await HRMModule.GenerateSpiesListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
                                         return true;
                                     default:
-                                        await WebServerModule.WriteResponce((await GenerateAwaitingListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        await WebServerModule.WriteResponce((await HRMModule.GenerateAwaitingListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
                                         return true;
                                 }
                             }
                             //main page
                             case "0":
                             {
-                                var res = !accessFilter.IsAuthedUsersVisible ? new string[] {null, null} : await GenerateMembersListHtml(authCode, accessFilter, 0, GenMemType.Filter);
+                                var res = !accessFilter.IsAuthedUsersVisible ? new string[] {null, null} : await HRMModule.GenerateMembersListHtml(authCode, accessFilter, 0, GenMemType.Filter);
                                 var membersHtml = res[0];
                                 var membersFilterContent = res[1];
                                 var membersAllowed = accessFilter.IsAuthedUsersVisible ? "true" : "false";
                                 var membersUrl = WebServerModule.GetHRM_AjaxMembersURL((int)UserStatusEnum.Authed, authCode);
-                                res = !accessFilter.IsAwaitingUsersVisible ? new string[] {null, null} :  await GenerateAwaitingListHtml(authCode, accessFilter, 0, GenMemType.Filter);
+                                res = !accessFilter.IsAwaitingUsersVisible ? new string[] {null, null} :  await HRMModule.GenerateAwaitingListHtml(authCode, accessFilter, 0, GenMemType.Filter);
                                 var awaitingHtml = res[0];
                                 var awaitingFilterContent = res[1];
                                 var awaitingAllowed = accessFilter.IsAwaitingUsersVisible ? "true" : "false";
                                 var awaitingUrl = WebServerModule.GetHRM_AjaxMembersURL((int)UserStatusEnum.Awaiting, authCode);
-                                res = !accessFilter.IsDumpedUsersVisible ? new string[] {null, null} :  await GenerateDumpListHtml(authCode, accessFilter, 0, GenMemType.Filter);
+                                res = !accessFilter.IsDumpedUsersVisible ? new string[] {null, null} :  await HRMModule.GenerateDumpListHtml(authCode, accessFilter, 0, GenMemType.Filter);
                                 var dumpHtml = res[0];
                                 var dumpFilterContent = res[1];
                                 var dumpedAllowed = accessFilter.IsDumpedUsersVisible ? "true" : "false";
                                 var dumpedUrl = WebServerModule.GetHRM_AjaxMembersURL((int)UserStatusEnum.Dumped, authCode);
-                                res = !accessFilter.IsSpyUsersVisible ? new string[] {null, null} :  await GenerateSpiesListHtml(authCode, accessFilter, 0, GenMemType.Filter);
+                                res = !accessFilter.IsSpyUsersVisible ? new string[] {null, null} :  await HRMModule.GenerateSpiesListHtml(authCode, accessFilter, 0, GenMemType.Filter);
                                 var spiesHtml = res[0];
                                 var spiesFilterContent = res[1];
                                 var spiesAllowed = accessFilter.IsSpyUsersVisible ? "true" : "false";
@@ -823,7 +831,7 @@ namespace ThunderED.Modules.OnDemand
                                 catch (Exception ex)
                                 {
                                     await LogHelper.LogEx("Inspection Mail Body Error", ex, Category);
-                                    if (IsNoRedirect(data))
+                                    if (HRMModule.IsNoRedirect(data))
                                         await WebServerModule.WriteResponce(LM.Get("pleaseReauth"), response);
                                     else await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetHRMMainURL(authCode)), response);
                                     return true;

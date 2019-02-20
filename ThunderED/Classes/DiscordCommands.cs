@@ -68,6 +68,10 @@ namespace ThunderED.Classes
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}ops ");
             }
+            if (SettingsManager.Settings.Config.ModuleContractNotifications)
+            {
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}clist ");
+            }
 
             sb.Append("**\n");
             if (string.IsNullOrEmpty(await APIHelper.DiscordAPI.IsAdminAccess(Context)))
@@ -161,7 +165,9 @@ namespace ThunderED.Classes
                 case "rngroup":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpRnGroup", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "rngroup"), true);
                     break;
-
+                case "clist":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpClist", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "clist"), true);
+                    break;
             }
         }
 
@@ -590,7 +596,7 @@ namespace ThunderED.Classes
                 await ReplyAsync(LM.Get("commandToPrivate"));
                 return;
             }
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpClist"), true);
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context,LM.Get("helpClist", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "clist"), true);
         }
 
         [Command("clist", RunMode = RunMode.Async), Summary("")]
@@ -608,7 +614,7 @@ namespace ThunderED.Classes
                 var mod = x?.Split(' ').FirstOrDefault();
                 if (string.IsNullOrEmpty(x))
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpClist"), true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpClist", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "clist"), true);
                     return;
                 }
                 var groupName = x.Substring(mod.Length, x.Length - mod.Length).Trim();

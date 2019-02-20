@@ -79,7 +79,7 @@ namespace ThunderED.API
 
             try
             {
-                await channel.SendMessageAsync($"{message}");
+                await channel.SendMessageAsync(message.FixedLength(MAX_MSG_LENGTH));
             }
             catch (HttpException ex)
             {
@@ -94,7 +94,7 @@ namespace ThunderED.API
             if (context?.Message == null) return;
             try
             {
-                await context.Message.Channel.SendMessageAsync($"{message}", false, embed).ConfigureAwait(false);
+                await context.Message.Channel.SendMessageAsync(message.FixedLength(MAX_MSG_LENGTH), false, embed).ConfigureAwait(false);
             }
             catch (HttpException ex)
             {
@@ -113,7 +113,7 @@ namespace ThunderED.API
                 await LogHelper.LogWarning($"Discord channel {channel} not found!", LogCat.Discord);
                 return null;
             }
-            return await SendMessageAsync(ch, message, embed);
+            return await SendMessageAsync(ch, message.FixedLength(MAX_MSG_LENGTH), embed);
         }
 
 
@@ -121,7 +121,7 @@ namespace ThunderED.API
         {
             try
             {
-                return await channel.SendMessageAsync(message, false, embed);
+                return await channel.SendMessageAsync(message.FixedLength(MAX_MSG_LENGTH), false, embed);
             }
             catch (HttpException ex)
             {
@@ -130,6 +130,8 @@ namespace ThunderED.API
                 throw;
             }
         }
+
+        public const int MAX_MSG_LENGTH = 1999;
 
         public async Task<string> GetMentionedUserString(ICommandContext context)
         {
@@ -463,14 +465,29 @@ namespace ThunderED.API
                         var actuallyDone = false;
                         if (result.UpdatedRoles.Count > 0)
                         {
-                            await u.AddRolesAsync(result.UpdatedRoles);
-                            actuallyDone = true;
+                            try
+                            {
+                                await u.AddRolesAsync(result.UpdatedRoles);
+                                actuallyDone = true;
+                            }
+                            catch
+                            {
+                                await LogHelper.LogWarning($"Failed to add {string.Join(',', result.UpdatedRoles.Select(a=> a.Name))} roles to {characterData.name} ({u.Username})!", LogCat.AuthCheck);
+                            }
+
                         }
 
                         if (remroles.Count > 0)
                         {
-                            await u.RemoveRolesAsync(remroles);
-                            actuallyDone = true;
+                            try
+                            {
+                                await u.RemoveRolesAsync(remroles);
+                                actuallyDone = true;
+                            }
+                            catch
+                            {
+                                await LogHelper.LogWarning($"Failed to remove {string.Join(',', remroles.Select(a=> a.Name))} roles from {characterData.name} ({u.Username})!", LogCat.AuthCheck);
+                            }
                         }
 
                         if (actuallyDone)

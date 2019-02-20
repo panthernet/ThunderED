@@ -332,6 +332,9 @@ namespace ThunderED.Classes
 
         [Comment("After this period in hours dumped member will be deleted entirely. Set 0 to disable.")]
         public int DumpInvalidationInHours { get; set; } = 240;
+
+        [Comment("Optional Discord channel ID to feed new mail from users marked as spies")]
+        public ulong SpiesMailFeedChannelId { get; set; }
 #if EDITOR
         public override string this[string columnName]
         {

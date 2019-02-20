@@ -39,6 +39,7 @@ namespace ThunderED.Classes
 
         public static string FixedLength(this string value, int length)
         {
+            if (string.IsNullOrEmpty(value)) return FillSpaces("", length);
             return length < value.Length ? value.Substring(0, length) : (value.Length < length ? FillSpaces(value, length) : value);
         }
 

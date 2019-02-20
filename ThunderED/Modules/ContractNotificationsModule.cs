@@ -654,8 +654,19 @@ namespace ThunderED.Modules
                 var sb = new StringBuilder();
                 if (personalContracts.Any())
                 {
+                    sb.AppendLine("");
                     sb.AppendLine(LM.Get("clistPersonalTitle"));
                     sb.AppendLine("```");
+                    //header
+                    sb.Append(LM.Get("clistHeaderName").FixedLength(20));
+                    sb.Append("  ");
+                    sb.Append(LM.Get("clistHeaderType").FixedLength(13));
+                    sb.Append("  ");
+                    sb.Append(LM.Get("clistHeaderStatus").FixedLength(11));
+                    sb.Append("  ");
+                    sb.Append(LM.Get("clistHeaderExp").FixedLength(12));
+                    sb.Append(Environment.NewLine);
+
                     foreach (var contract in personalContracts)
                     {
                         sb.Append((string.IsNullOrEmpty(contract.title) ? "-" : contract.title).FixedLength(20));
@@ -677,8 +688,19 @@ namespace ThunderED.Modules
                 }
                 if (corpContracts.Any())
                 {
+                    sb.AppendLine("");
                     sb.AppendLine(LM.Get("clistCorpTitle"));
                     sb.AppendLine("```");
+                    //header
+                    sb.Append(LM.Get("clistHeaderName").FixedLength(20));
+                    sb.Append("  ");
+                    sb.Append(LM.Get("clistHeaderType").FixedLength(13));
+                    sb.Append("  ");
+                    sb.Append(LM.Get("clistHeaderStatus").FixedLength(11));
+                    sb.Append("  ");
+                    sb.Append(LM.Get("clistHeaderExp").FixedLength(12));
+                    sb.Append(Environment.NewLine);
+
                     foreach (var contract in corpContracts)
                     {
                         sb.Append((string.IsNullOrEmpty(contract.title) ? "-" : contract.title).FixedLength(20));

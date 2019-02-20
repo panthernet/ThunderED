@@ -99,6 +99,7 @@ namespace ThunderED.Classes.Entities
         public long AllianceId;
         public string CorporationTicker;
         public string AllianceTicker;
+        public long LastSpyMailId;
 
         [JsonIgnore]
         public List<string> PermissionsList => string.IsNullOrEmpty(Permissions) ? new List<string>() : Permissions.Split(',').ToList();

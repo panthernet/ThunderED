@@ -444,12 +444,16 @@
   "hrmSpyButtonTooltip":  "Move member to Spies section", 
   "hrmDeleteAuthButtonTooltip":  "Delete member authentication",
   "hrmDumpAuthButtonTooltip":  "Move member to Dumped section",
-  "helpClist": "Lists all contracts for specified group. Syntax: clist FILTER GROUP_NAME. Filters are: all(a), opened(o), closed(c), finished(f), rejected(r). Example: !clist all my_group  !clist o group 4",  
+  "helpClist": "Lists all contracts for specified group. Syntax: clist FILTER GROUP_NAME. Filters are: all(a), opened(o), closed(c), finished(f), rejected(r). Example: {0}{1} all my_group  {0}{1} a group 4",  
   "clistPersonalTitle":  "Personal Contracts",
   "clistCorpTitle":  "Corporation Contracts",
   "clistExpired":  "expired",
   "clistGroupNotFound":  "Contract group '{0}' not found!",
   "clistNoContracts": "No contracts",
+  "clistHeaderName": "Name", 
+  "clistHeaderType": "Type", 
+  "clistHeaderStatus": "Status", 
+  "clistHeaderExp": "Expiration", 
   "sovSystem":  "System",
   "sovMessage":  "Message",
   "sovHolder":  "Holder",
@@ -458,6 +462,8 @@
   "sovNextVulnerability":  "\n\nNext vulnerabilty window is from {0} to {1}",
   "sovNewHolder":  "{0}[{1}] is the new sov holder in this system.",
   "sovLostStructure":  "System has lost its {0}!",
-  "sovLowIndexMessage":  "ADM index has dropped to {0}. Get to work buddies!" 
+  "sovLowIndexMessage":  "ADM index has dropped to {0}. Get to work buddies!",
+  "hrmSpyFeedFrom":  "Feed from",
+  "hrmSpyMsgFrom":  "Message from {0} to {1}"
 
 }

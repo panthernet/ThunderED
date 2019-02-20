@@ -10,7 +10,7 @@ using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.Sub;
 
-namespace ThunderED.Modules.OnDemand
+namespace ThunderED.Modules
 {
     public partial class HRMModule
     {

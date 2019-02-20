@@ -10,6 +10,8 @@
 + Added new **clist** command to list contracts for specified group
 + Added new simplified auth management file (read highlight section below)
 + Added new auth param to use only one button for authentication **UseOneAuthButton**
++ Added support for BR web compression
++ Added **SpiesMailFeedChannelId** to be able to feed new mail for characters marked as spies
 + Enhanced HRM module access options and security (explanation below)
 + Removed Discord mention from language file entry **mailMsgTitle**
 + Changed default MySQL collation to utf8mb4_general_ci
@@ -17,6 +19,10 @@
 + Updated SQLite to work in WAL mode
 
 ### HIGHLIGHTS
+
+- One auth button mode can be enabled by setting **UseOneAuthButton** param to true. In this case the bot will search for first group which satisfies member corp/alliance condition.
+  There is also a change in auth process wotkflow which force users to authenticate twice if found auth group contains ESI permissions.
+  In this case automatic redrects are used so user logs in once and select character twice.
 
 - Added new SovTrackerModule which now allows to track sov space holder changes and ADM index falls beyond the threshold in the filtered sets of solar systems.
   Systems can be filtered by ID, holder alliance, region ID and constellation ID. All filters are ADDITIVE.

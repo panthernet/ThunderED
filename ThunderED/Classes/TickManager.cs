@@ -8,6 +8,7 @@ using ThunderED.Helpers;
 using ThunderED.Modules;
 using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Sub;
+using HRMModule = ThunderED.Modules.HRMModule;
 
 namespace ThunderED.Classes
 {
@@ -82,6 +83,9 @@ namespace ThunderED.Classes
             if(SettingsManager.Settings.Config.ModuleSovTracker)
                 Modules.Add(new SovTrackerModule());
 
+            if (SettingsManager.Settings.Config.ModuleHRM)
+                Modules.Add(new HRMModule());
+
             //on demand modules - only could be pinged by other modules
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
                 OnDemandModules.Add(new LiveKillFeedModule());
@@ -91,9 +95,6 @@ namespace ThunderED.Classes
 
             if (SettingsManager.Settings.Config.ModuleChatRelay)
                 OnDemandModules.Add(new ChatRelayModule());
-
-            if (SettingsManager.Settings.Config.ModuleHRM)
-                OnDemandModules.Add(new HRMModule());
 
             
             

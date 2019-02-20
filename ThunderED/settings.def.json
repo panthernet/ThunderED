@@ -141,7 +141,8 @@
     "TableEntriesPerPage":  10,
     "TableSkillEntriesPerPage":  20,
     "UseDumpForMembers": true,
-    "DumpInvalidationInHours":  240
+    "DumpInvalidationInHours":  240,
+    "SpiesMailFeedChannelId":  0 
   },
 
   "mailModule": {

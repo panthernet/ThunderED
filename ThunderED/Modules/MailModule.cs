@@ -196,7 +196,7 @@ namespace ThunderED.Modules
                                     if (ml != null)
                                         from = $"{sender?.name}[{mailLists.First(a => a.mailing_list_id == ml.recipient_id).name}]";
                                     var channel = filter.FeedChannel > 0 ? filter.FeedChannel : defaultChannel;
-                                    await SendMailNotification(channel, mail, from, group.DefaultMention);
+                                    await SendMailNotification(channel, mail, LM.Get("mailMsgTitle", from), group.DefaultMention);
                                     break;
                                 }
                             }
@@ -224,14 +224,14 @@ namespace ThunderED.Modules
             }
         }
 
-        private async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string from, string mention)
+        private static async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string from, string mention)
         {
-            var stamp = DateTime.Parse(mail.timestamp).ToString(Settings.Config.ShortTimeFormat);
+            var stamp = DateTime.Parse(mail.timestamp).ToString(SettingsManager.Settings.Config.ShortTimeFormat);
             var body = await PrepareBodyMessage(mail.body);
             var fields = body.Split(1023);
 
             var embed = new EmbedBuilder()
-                .WithThumbnailUrl(Settings.Resources.ImgMail);
+                .WithThumbnailUrl(SettingsManager.Settings.Resources.ImgMail);
             var cnt = 0;
             foreach (var field in fields)
             {
@@ -243,7 +243,7 @@ namespace ThunderED.Modules
             }
             embed.WithFooter($"{LM.Get("mailDate")} {stamp}");
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
-            await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {LM.Get("mailMsgTitle", from)}", embed.Build()).ConfigureAwait(false);
+            await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {from}", embed.Build()).ConfigureAwait(false);
         }
 
         public static async Task<string> PrepareBodyMessage(string input, bool forWeb = false)
@@ -391,6 +391,48 @@ namespace ThunderED.Modules
             return body;
         }
 
+
+        public static async Task FeedSpyMail(IEnumerable<AuthUserEntity> users, ulong feedChannel)
+        {
+            if(feedChannel == 0) return;
+            var reason = LogCat.HRM.ToString();
+            foreach (var user in users)
+            {
+                try
+                {
+                    if (!SettingsManager.HasReadMailScope(user.Data.PermissionsList))
+                        continue;
+
+                    var token = await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret);
+
+                    if (string.IsNullOrEmpty(token))
+                        continue;
+                    var mailHeaders = (await APIHelper.ESIAPI.GetMailHeaders(reason, user.CharacterId.ToString(), token, 0, null))?.Result;
+
+                    if (mailHeaders == null || !mailHeaders.Any()) continue;
+
+                    if (user.Data.LastSpyMailId > 0)
+                    {
+                        foreach (var mailHeader in mailHeaders.Where(a => a.mail_id > user.Data.LastSpyMailId))
+                        {
+                            var mail = await APIHelper.ESIAPI.GetMail(reason, user.CharacterId, token, mailHeader.mail_id);
+                            var sender = await APIHelper.ESIAPI.GetCharacterData(reason, mail.from);
+                            mailHeader.ToName = await GetRecepientNames(reason, mailHeader.recipients, user.CharacterId, token);
+                            var from = $"{user.Data.CharacterName}[{user.Data.AllianceTicker ?? user.Data.CorporationTicker}]";
+                            await SendMailNotification(feedChannel, mail, $"{LM.Get("hrmSpyFeedFrom")} {from}\n{LM.Get("hrmSpyMsgFrom",sender?.name, mailHeader.ToName)}", " ");
+                        }
+                    }
+
+                    user.Data.LastSpyMailId = mailHeaders.Max(a => a.mail_id);
+                    await SQLHelper.SaveAuthUser(user);
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx(ex.Message, ex, LogCat.HRM);
+                }
+            }
+        }
 
         public static async Task<string> SearchRelated(long searchCharId, HRMModule.SearchMailItem item, string authCode)
         {

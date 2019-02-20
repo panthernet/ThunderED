@@ -438,12 +438,16 @@
   "hrmSpyButtonTooltip":  "Переместить участника в раздел Шпионы", 
   "hrmDeleteAuthButtonTooltip":  "Удалить аутентификацию участника",
   "hrmDumpAuthButtonTooltip":  "Переместить участника в раздел Сброшенные",
-  "helpClist": "Вывести список контрактов для указанной группы. Синтаксис: clist MOD GROUP_NAME. Доступные фильтры: all(a), opened(o), closed(c), finished(f), rejected(r). Примеры: !clist all my_group  !clist o group 4",  
+  "helpClist": "Вывести список контрактов для указанной группы. Синтаксис: clist MOD GROUP_NAME. Доступные фильтры: all(a), opened(o), closed(c), finished(f), rejected(r). Примеры: {0}{1} all my_group  {0}{1} a group 4",  
   "clistPersonalTitle":  "Личные Контракты",
   "clistCorpTitle":  "Корпоративные Контракты",
   "clistExpired":  "истек",
   "clistGroupNotFound":  "Группа контрактов '{0}' не найдена!",
   "clistNoContracts": "Контракты отсутствуют",
+  "clistHeaderName": "Название", 
+  "clistHeaderType": "Тип", 
+  "clistHeaderStatus": "Статус", 
+  "clistHeaderExp": "Истекает", 
   "sovSystem":  "Система",
   "sovMessage":  "Сообщение",
   "sovHolder":  "Владелец",
@@ -452,5 +456,7 @@
   "sovNextVulnerability":  "\n\nСледующее окно уязвимости с {0} по {1}",
   "sovNewHolder":  "Альянс {0}[{1}] теперь является новым владельцем системы.",
   "sovLostStructure":  "Система потеряла {0}!",
-  "sovLowIndexMessage":  "Индекс ADM снизился до значения {0}. За работу, ребятки!" 
+  "sovLowIndexMessage":  "Индекс ADM снизился до значения {0}. За работу, ребятки!",
+  "hrmSpyFeedFrom":  "Почта",
+  "hrmSpyMsgFrom":  "Сообщение от {0} к {1}"
  }
