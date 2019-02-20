@@ -169,7 +169,7 @@ namespace ThunderED.Providers
             if (type == typeof(int))
                 return (T) (object) Convert.ToInt32(value);
             if (type == typeof(ulong))
-                return (T) (object) Convert.ToUInt32(value);
+                return (T) (object) Convert.ToUInt64(value);
             if (type == typeof(long))
                 return (T) (object) Convert.ToInt64(value);
             return (T)value;
