@@ -164,8 +164,11 @@ namespace ThunderED.Providers
             var type = typeof(T);
             if (value == null)
                 return default;
-            if(type == typeof(string))
-                return (T)value;
+            if (type == typeof(string))
+            {               
+                return (T)(object)value.ToString();
+            }
+
             if (type == typeof(int))
                 return (T) (object) Convert.ToInt32(value);
             if (type == typeof(ulong))
