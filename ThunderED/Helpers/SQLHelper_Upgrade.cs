@@ -344,7 +344,7 @@ namespace ThunderED.Helpers
                             if(SettingsManager.Settings.Database.DatabaseProvider == "sqlite")
                                 await RunCommand("CREATE TABLE `sovIndexTracker` ( `groupName` TEXT UNIQUE NOT NULL, `data` TEXT NOT NULL);");
                             else
-                                await RunCommand("CREATE TABLE `sovIndexTracker` ( `groupName` VARCHAR(255) UNIQUE NOT NULL, `data` TEXT NOT NULL);");
+                                await RunCommand("CREATE TABLE `sovIndexTracker` ( `groupName` VARCHAR(100) UNIQUE NOT NULL, `data` TEXT NOT NULL);");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:

@@ -4,7 +4,7 @@
 + Added means to counter Linux data location problems (explanation below)
 + Added delete member buttons to HRM main page
 + Added filters for member lists on main HRM page
-+ Added **UseDumpForMembers** and **DumpInvalidationInHours** params to HRM
++ Added **UseDumpForMembers** and **DumpInvalidationInHours** params to HRM module config
 + Added new Spies list for HR members. Dumped members can be marked as Spies to avoid being recycled.
 + Added new SovTrackerModule (read highlight section below)
 + Added new **clist** command to list contracts for specified group
