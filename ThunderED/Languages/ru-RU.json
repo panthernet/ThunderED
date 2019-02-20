@@ -417,7 +417,7 @@
   "rngroupSyntax":  "Невозможно обработать команду, проверьте синтаксис",
   "helpRnGroup":  "Переименование группы для регистраций пользователей в БД. Синтаксис: **rngroup \"FROM\" \"TO\"** - внимание, кавычки! Пример: rngroup \"MyGroup\" \"New Group\"",
   "rngroupComplete":  ":white_check_mark: Операция выполнена!",
-  "authPageHeaderText":  "<p style='text-align: center;font-size: 18px;margin-bottom:-20px;'>Это страница аутентификации, где каждая кнопка выполняет опредленное действие. Замените это описание в файле настроек.</p>",
+  "authPageHeaderText":  "",
   "authPageGeneralAuthHeader":  "<p style='text-align: center;font-size: 18px;'>Эта секция предназначена для аутентификации мемберов</p>", 
   "authPageSystemAuthHeader":  "<p style='text-align: center;font-size: 18px;'>Эта секция предназначена для специальной аутентификации</p>",
   "contractFailedToOpen":  "При открытии контракта в игровом клиенте возникла ошибка",
