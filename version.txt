@@ -18,6 +18,7 @@
 + Changed default MySQL collation to utf8mb4_general_ci
 + Improved HTML templating and unified CSS+JS includes
 + Updated SQLite to work in WAL mode
++ Fixed incorrect solar systems table name in some queries
 
 ### HIGHLIGHTS
 

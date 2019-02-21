@@ -2,6 +2,12 @@
 - loading screen for ajax queries
 - https://everef.net/type/33153
 
+//TODO
+remove awaiting entry on token error
+move message templates to Data folder
+add means to revive char from dumpster
+auth file support empty string
+
 HRM
 - notifications
 - clones

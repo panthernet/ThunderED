@@ -546,7 +546,7 @@ namespace ThunderED.Helpers
 
         public static async Task<List<JsonClasses.SystemName>> GetSystemsByConstellation(long constellationId)
         {
-            return (await SelectData("mapSolarSystems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
+            return (await SelectData("map_solar_systems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
             {
                 {"constellationID", constellationId}
             })).Select(item => new JsonClasses.SystemName
@@ -561,7 +561,7 @@ namespace ThunderED.Helpers
 
         public static async Task<List<JsonClasses.SystemName>> GetSystemsByRegion(long regionId)
         {
-            return (await SelectData("mapSolarSystems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
+            return (await SelectData("map_solar_systems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
             {
                 {"regionID", regionId}
             })).Select(item => new JsonClasses.SystemName
