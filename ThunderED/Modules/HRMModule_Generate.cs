@@ -152,107 +152,119 @@ namespace ThunderED.Modules
             return sb.ToString();
         }
 
-        private static string[] GenerateActualMemberEntries(IEnumerable<AuthUserEntity> list, string authCode, HRMAccessFilter accessFilter, int authState, long filterId,
+        private static async Task<string[]> GenerateActualMemberEntries(IEnumerable<AuthUserEntity> list, string authCode, HRMAccessFilter accessFilter, int authState, long filterId,
             GenMemType genType)
         {
-            var corpFilters = new Dictionary<string, string>();
-            var allyFilters = new Dictionary<string, string>();
-            var tmpFilters = new List<long>();
-            var sb = new StringBuilder();
-            var inspectCondi = accessFilter.CanAccessUser(authState);
-            var isDumpedList = authState == (int) UserStatusEnum.Dumped;
-            var canSpy = accessFilter.CanInspectSpyUsers;
-            list = filterId == 0 ? list : list.Where(a => a.Data.CorporationId == filterId || a.Data.AllianceId == filterId);
-            var deleteTooltip = isDumpedList || !SettingsManager.Settings.HRMModule.UseDumpForMembers ? LM.Get("hrmDeleteAuthButtonTooltip") : LM.Get("hrmDumpAuthButtonTooltip");
-            foreach (var item in list)
+            try
             {
-                if (genType == GenMemType.All || genType == GenMemType.Members)
+                var corpFilters = new Dictionary<string, string>();
+                var allyFilters = new Dictionary<string, string>();
+                var tmpFilters = new List<long>();
+                var sb = new StringBuilder();
+                var inspectCondi = accessFilter.CanAccessUser(authState);
+                var isDumpedList = authState == (int) UserStatusEnum.Dumped;
+                var canSpy = accessFilter.CanInspectSpyUsers;
+                list = filterId == 0 ? list : list.Where(a => a.Data.CorporationId == filterId || a.Data.AllianceId == filterId);
+                var deleteTooltip = isDumpedList || !SettingsManager.Settings.HRMModule.UseDumpForMembers
+                    ? LM.Get("hrmDeleteAuthButtonTooltip")
+                    : LM.Get("hrmDumpAuthButtonTooltip");
+                foreach (var item in list)
                 {
-                    var charUrl = !inspectCondi ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
-                    sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
-                    sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
-                    sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
-                    sb.Append(
-                        $@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
-                    sb.Append(@"</a>");
-                    if (isDumpedList && canSpy)
+                    if (genType == GenMemType.All || genType == GenMemType.Members)
                     {
+                        var charUrl = !inspectCondi ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
+                        sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;\">");
+                        sb.Append($"<img src=\"https://imageserver.eveonline.com/Character/{item.CharacterId}_64.jpg\" style=\"width:64;height:64;\"/>");
+                        sb.Append($@"<a class=""btn btn-outline-info btn-block"" href=""{charUrl}"">");
                         sb.Append(
-                            $@"<a class=""btn btn-outline-primary flex-content{(accessFilter.CanMoveToSpies ? null : " d-none")}"" href=""{WebServerModule.GetHRM_MoveToSpiesURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" tooltip-title=""{LM.Get("hrmSpyButtonTooltip")}"" confirm-title=""{LM.Get("hrmMoveToSpiesConfirm")}"" data-singleton=""true""  data-popout=""true"" data-placement=""top"">");
-                        sb.Append(@"  <span class=""fas fa-user-secret fa-2x""></span>");
+                            $@"<div class=""container""><div class=""row""><b>{item.Data.CharacterName}</b></div><div class=""row"">{item.Data.CorporationName} [{item.Data.CorporationTicker}]{(item.Data.AllianceId > 0 ? $" - {item.Data.AllianceName}[{item.Data.AllianceTicker}]" : null)}</div></div>");
                         sb.Append(@"</a>");
+                        if (isDumpedList && canSpy)
+                        {
+                            sb.Append(
+                                $@"<a class=""btn btn-outline-primary flex-content{(accessFilter.CanMoveToSpies ? null : " d-none")}"" href=""{WebServerModule.GetHRM_MoveToSpiesURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" tooltip-title=""{LM.Get("hrmSpyButtonTooltip")}"" confirm-title=""{LM.Get("hrmMoveToSpiesConfirm")}"" data-singleton=""true""  data-popout=""true"" data-placement=""top"">");
+                            sb.Append(@"  <span class=""fas fa-user-secret fa-2x""></span>");
+                            sb.Append(@"</a>");
+                        }
+
+                        sb.Append(
+                            $@"<a class=""btn btn-outline-danger flex-content{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" tooltip-title=""{deleteTooltip}"" confirm-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"" data-singleton=""true""  data-popout=""true"">");
+                        sb.Append(@"  <span class=""fas fa-times-circle fa-2x""></span>");
+                        sb.Append(@"</a>");
+                        sb.Append($"</div>");
                     }
-                    sb.Append(
-                        $@"<a class=""btn btn-outline-danger flex-content{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" tooltip-title=""{deleteTooltip}"" confirm-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"" data-singleton=""true""  data-popout=""true"">");
-                    sb.Append(@"  <span class=""fas fa-times-circle fa-2x""></span>");
-                    sb.Append(@"</a>");
-                    sb.Append($"</div>");
+
+                    if (genType == GenMemType.All || genType == GenMemType.Filter)
+                    {
+                        if (!tmpFilters.Contains(item.Data.CorporationId))
+                        {
+                            tmpFilters.Add(item.Data.CorporationId);
+                            var name = $"{item.Data.CorporationName}[{item.Data.CorporationTicker}]";
+                            var value = $@"<option value=""{item.Data.CorporationId}"">{name}</option>";
+                            corpFilters.AddOnlyNew(name, value);
+                        }
+
+                        if (item.Data.AllianceId > 0 && !tmpFilters.Contains(item.Data.AllianceId))
+                        {
+                            tmpFilters.Add(item.Data.AllianceId);
+                            var name = $"{item.Data.AllianceName}[{item.Data.AllianceTicker}]";
+                            var value = $@"<option value=""{item.Data.CorporationId}"">{name}</option>";
+                            allyFilters.AddOnlyNew(name, value);
+                        }
+                    }
                 }
 
+                var filterSb = new StringBuilder();
                 if (genType == GenMemType.All || genType == GenMemType.Filter)
                 {
-                    if (!tmpFilters.Contains(item.Data.CorporationId))
+                    filterSb.Append($@"<option value=""0"" selected>{LM.Get("hrmEverything")}</option>");
+                    foreach (var filter in allyFilters.OrderBy(a => a.Key).Select(a => a.Value))
                     {
-                        tmpFilters.Add(item.Data.CorporationId);
-                        var name = $"{item.Data.CorporationName}[{item.Data.CorporationTicker}]";
-                        var value = $@"<option value=""{item.Data.CorporationId}"">{name}</option>";
-                        corpFilters.AddOnlyNew(name, value);
+                        filterSb.Append(filter);
+                        filterSb.Append(Environment.NewLine);
                     }
 
-                    if (item.Data.AllianceId > 0 && !tmpFilters.Contains(item.Data.AllianceId))
+                    foreach (var filter in corpFilters.OrderBy(a => a.Key).Select(a => a.Value))
                     {
-                        tmpFilters.Add(item.Data.AllianceId);
-                        var name = $"{item.Data.AllianceName}[{item.Data.AllianceTicker}]";
-                        var value = $@"<option value=""{item.Data.CorporationId}"">{name}</option>";
-                        allyFilters.AddOnlyNew(name, value);
+                        filterSb.Append(filter);
+                        filterSb.Append(Environment.NewLine);
                     }
                 }
-            }
 
-            var filterSb = new StringBuilder();
-            if (genType == GenMemType.All || genType == GenMemType.Filter)
+                return new[] {sb.ToString(), filterSb.ToString()};
+            }
+            catch (Exception ex)
             {
-                filterSb.Append($@"<option value=""0"" selected>{LM.Get("hrmEverything")}</option>");
-                foreach (var filter in allyFilters.OrderBy(a => a.Key).Select(a => a.Value))
-                {
-                    filterSb.Append(filter);
-                    filterSb.Append(Environment.NewLine);
-                }
-
-                foreach (var filter in corpFilters.OrderBy(a => a.Key).Select(a => a.Value))
-                {
-                    filterSb.Append(filter);
-                    filterSb.Append(Environment.NewLine);
-                }
+                await LogHelper.LogEx(nameof(GenerateActualMemberEntries), ex, LogCat.HRM);
+                await LogHelper.LogError("There was problem generating users list!", LogCat.HRM);
+                return new string[] {null, null};
             }
-
-            return new[] {sb.ToString(), filterSb.ToString()};
         }
 
         private static async Task<string[]> GenerateMembersListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
             var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).Where(a=> IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
-            return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Authed, filterId, genType);
+            return await GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Authed, filterId, genType);
         }
 
         private static async Task<string[]> GenerateSpiesListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
             var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Spying)).Where(a=> IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
-            return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Spying, filterId, genType);
+            return await GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Spying, filterId, genType);
         }
 
 
         private static async Task<string[]> GenerateAwaitingListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
             var list = (await SQLHelper.GetAuthUsersWithPerms()).Where(a=> a.IsPending && IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
-            return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Awaiting, filterId, genType);
+            return await GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Awaiting, filterId, genType);
 
         }
 
         private static async Task<string[]> GenerateDumpListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
             var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Dumped)).Where(a=> IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
-            return GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Dumped, filterId, genType);
+            return await GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Dumped, filterId, genType);
         }
 
         private async Task<string> GenerateTransactionsHtml(string token, long inspectCharId, int page)
