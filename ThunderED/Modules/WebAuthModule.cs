@@ -670,7 +670,7 @@ namespace ThunderED.Modules
                                 RegCode = uid,
                                 CreateDate = DateTime.Now
                             };
-                            authUser.UpdateData(rChar, rCorp);
+                            await authUser.UpdateData();
                             await SQLHelper.SaveAuthUser(authUser);
 
                             if (!group.PreliminaryAuthMode)
@@ -821,17 +821,12 @@ namespace ThunderED.Modules
                     }
 
                     authUser.CharacterId = authUser.CharacterId;
-                    authUser.Data.CharacterName = characterData.name;
-                    authUser.Data.Permissions = group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null;
                     authUser.DiscordId = discordId;
                     authUser.GroupName = groupName;
                     authUser.SetStateAuthed();
                     authUser.RegCode = null;
 
-                    if (authUser.Data.CorporationId == 0)
-                    {
-                        authUser.UpdateData(characterData);
-                    }
+                    await authUser.UpdateData(group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null);
 
                     await SQLHelper.SaveAuthUser(authUser);
 

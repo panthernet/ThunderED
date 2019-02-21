@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -7,6 +6,12 @@ namespace ThunderED.Classes
 {
     public static class Extension
     {
+        public static void AddOnlyNew<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
+        {
+            if (!dic.ContainsKey(key))
+                dic.Add(key, value);
+        }
+
         public static IEnumerable<T> TakeSmart<T>(this IEnumerable<T> list, int count)
         {
             if (list == null) return null;

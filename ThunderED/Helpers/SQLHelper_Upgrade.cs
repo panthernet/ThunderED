@@ -325,7 +325,7 @@ namespace ThunderED.Helpers
                                         CreateDate = user.CreateDate,
                                         Data = new AuthUserData()
                                     };
-                                    await au.Data.Update(user.CharacterId);
+                                    await au.UpdateData();
                                     await SaveAuthUser(au);
                                 }
                             }

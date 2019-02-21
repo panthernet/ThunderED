@@ -196,7 +196,7 @@ namespace ThunderED.Modules
                         tmpFilters.Add(item.Data.CorporationId);
                         var name = $"{item.Data.CorporationName}[{item.Data.CorporationTicker}]";
                         var value = $@"<option value=""{item.Data.CorporationId}"">{name}</option>";
-                        corpFilters.Add(name, value);
+                        corpFilters.AddOnlyNew(name, value);
                     }
 
                     if (item.Data.AllianceId > 0 && !tmpFilters.Contains(item.Data.AllianceId))
@@ -204,7 +204,7 @@ namespace ThunderED.Modules
                         tmpFilters.Add(item.Data.AllianceId);
                         var name = $"{item.Data.AllianceName}[{item.Data.AllianceTicker}]";
                         var value = $@"<option value=""{item.Data.CorporationId}"">{name}</option>";
-                        allyFilters.Add(name, value);
+                        allyFilters.AddOnlyNew(name, value);
                     }
                 }
             }

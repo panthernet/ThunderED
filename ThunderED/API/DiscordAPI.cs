@@ -431,7 +431,7 @@ namespace ThunderED.API
                         {
                             await LogHelper.LogInfo($"{authUser.Data.CharacterName}({authUser.CharacterId}) is being moved into dumpster...", LogCat.AuthCheck);
                             authUser.SetStateDumpster();
-                            authUser.UpdateData(characterData);
+                            await authUser.UpdateData();
                             await SQLHelper.SaveAuthUser(authUser);
                         }
                         else
