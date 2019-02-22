@@ -1,8 +1,11 @@
 ### V1.3.3
 + Added new **UseStrictAuthenticationMode** param to auth group (read explanation below)
-+ Added new **week(w), lastweek(lw), lastday(ld)** command paprameters fpr !stats command
++ Added new **week(w), lastweek(lw), lastday(ld)** command parameters for !stats command
 + Improved auth process checks to go in the following order: char -> corp -> alliance
 + Improved auth process checks to search criterias through several filters within one group (read explanation below)
+
+### NOTES
+- **helpStat** language entry has been updated
 
 ### BREAKING CHANGES
 - Auth process checks will now search criterias through several filters within one group by default. This means that the process will now gather all roles that match characters ID, corp ID and alliance ID in **AllowedCharacters, AllowedCorporations** and **AllowedAlliances** filters.

@@ -15,7 +15,7 @@
     "Команда *authnotify* отображает ссылку для аутентификации по персонажу EVE с целью регистрации в качестве поставщика оповещений. Отправьте команду *{0}authnotify* боту для дополнительной информации.",
   "helpTime": "Команда *evetime* отображает текущее время EVE Online",
   "helpStat":
-    "Команда *stat* или *stats* отображает статистику корпорации или альянса за промежуток времени\nПримеры: {0}stat m United Fleet | {0}stat d Goonswarm Federation | {0}stat y Perkone | {0}stat 2018 Nebula Alba| {0}stat 2018/03 Nebula Alba",
+    "Команда *stat* или *stats* отображает статистику корпорации или альянса за промежуток времени\nМоды: d, w, m, ld, lw, y.\nПримеры: {0}stat m United Fleet | {0}stat d Goonswarm Federation | {0}stat y Perkone | {0}stat 2018 Nebula Alba| {0}stat 2018/03 Nebula Alba",
   "helpAbout": "Команда *about* отображает информацию о боте",
   "helpChar": "Команда *char* отображает информацию о персонаже по нику\nПример: *{0}char Don Chack*",
   "helpCorp": "Команда *corp* отображает информацию о корпорации по названию\nПример: *{0}corp Nebula Alba*",
