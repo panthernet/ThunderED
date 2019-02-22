@@ -162,6 +162,7 @@ namespace ThunderED.API
             public int ShipsDestroyed;
             public int ShipsLost;
             public int SoloKills;
+            public string MostSystems;
         }
 
         public async Task<ZkillEntityStats> GetKillsLossesStats(long id, bool isAlliance, DateTime? from = null, DateTime? to = null, int lastSeconds = 0)
