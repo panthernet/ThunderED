@@ -787,6 +787,18 @@ namespace ThunderED.Modules
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);
                     return;
                 }
+
+                if (authUser.Data.PermissionsList.Any())
+                {
+                    var token = await APIHelper.ESIAPI.RefreshToken(authUser.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret);
+                    //delete char if token is invalid
+                    if (string.IsNullOrEmpty(token))
+                    {
+                        await SQLHelper.DeleteAuthDataByCharId(authUser.CharacterId);
+                        return;
+                    }
+                }
                
 
                 //check if we fit some group
