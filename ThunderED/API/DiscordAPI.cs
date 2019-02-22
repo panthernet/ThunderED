@@ -324,23 +324,45 @@ namespace ThunderED.API
                 groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a=> !a.ESICustomAuthRoles.Any() && a.StandingsAuth == null));
             }
             #endregion
-
+            
             string groupName = null;
-            //Check for Corp roles
-            //Find first available corp
-            var corpId = characterData.corporation_id;
-            var authResult = await WebAuthModule.GetAuthGroupByCorpId(groupsToCheck, corpId) ?? await WebAuthModule.GetAuthGroupByCharacterId(groupsToCheck, characterID) ??
-                             await WebAuthModule.GetAuthGroupByAllyId(groupsToCheck, characterData.alliance_id ?? 0);
-            if (authResult != null)
+
+            // Check for Character Roles
+            WebAuthResult authResultCharacter = await WebAuthModule.GetAuthGroupByCharacterId(groupsToCheck, characterID);
+            if (authResultCharacter != null) 
             {
-                //var cinfo = au await WebAuthModule.GetCorpEntityById(groupsToCheck, corpId);
-                var aRoles = discordGuild.Roles.Where(a=> authResult.RoleEntity.DiscordRoles.Contains(a.Name)).ToList();
+                var aRoles = discordGuild.Roles.Where(a => authResultCharacter.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
                 if (aRoles.Count > 0)
                     result.UpdatedRoles.AddRange(aRoles);
-                result.ValidManualAssignmentRoles.AddRange(authResult.Group.ManualAssignmentRoles);
-                groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResult.Group).Key;
+                result.ValidManualAssignmentRoles.AddRange( authResultCharacter.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
+                groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCharacter.Group).Key;
             }
-            else
+
+            // Check for Corporation Roles
+            WebAuthResult authResultCorporation = await WebAuthModule.GetAuthGroupByCorpId(groupsToCheck, characterData.corporation_id);
+            if (authResultCorporation != null) 
+            {
+                var aRoles = discordGuild.Roles.Where(a => authResultCorporation.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
+                if (aRoles.Count > 0)
+                    result.UpdatedRoles.AddRange(aRoles);
+                result.ValidManualAssignmentRoles.AddRange( authResultCorporation.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
+                groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCorporation.Group).Key;
+            }
+
+            // Check for Alliance Roles
+            WebAuthResult authResultAlliance = await WebAuthModule.GetAuthGroupByAllyId( groupsToCheck, characterData.alliance_id ?? 0);
+            if (authResultAlliance != null) 
+            {
+                var aRoles = discordGuild.Roles.Where( a => authResultAlliance.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a) ).ToList();
+                if (aRoles.Count > 0)
+                    result.UpdatedRoles.AddRange(aRoles);
+                result.ValidManualAssignmentRoles.AddRange( authResultAlliance.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
+                groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultAlliance.Group).Key;
+            }
+
+            bool hasauth = authResultCharacter != null || authResultCorporation != null || authResultAlliance != null;
+
+            if (!hasauth) 
             {
                 //search for personal stands
                 var grList = groupsToCheck.Where(a => a.StandingsAuth != null).ToList();
@@ -359,7 +381,7 @@ namespace ThunderED.API
                 }
             }
 
-            if (authResult == null && (isManualAuth || !string.IsNullOrEmpty(authData?.GroupName)))
+            if (!hasauth && (isManualAuth || !string.IsNullOrEmpty(authData?.GroupName)))
             {
                 var token = await SQLHelper.GetAuthUserByCharacterId(characterID);
                 if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
