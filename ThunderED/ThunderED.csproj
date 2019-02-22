@@ -85,6 +85,9 @@
     <None Update="Content\sql\mysql_invTypes.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="disclaimer.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="edb.def.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -9,7 +9,6 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
-using Matrix.Xmpp.XHtmlIM;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;

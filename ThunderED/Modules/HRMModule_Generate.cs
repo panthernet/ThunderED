@@ -69,7 +69,7 @@ namespace ThunderED.Modules
             var mailHeaders = (await APIHelper.ESIAPI.GetMailHeaders(Reason, inspectCharId.ToString(), token, 0, null))?.Result;
             //var totalCount = mailHeaders.Count;
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
-            mailHeaders = mailHeaders.GetRange(startIndex, mailHeaders.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (mailHeaders.Count-startIndex));
+            mailHeaders = mailHeaders.Count == 0 ? mailHeaders : mailHeaders.GetRange(startIndex, mailHeaders.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (mailHeaders.Count-startIndex));
 
             var sb = new StringBuilder();
             sb.AppendLine("<thead>");
@@ -272,7 +272,7 @@ namespace ThunderED.Modules
             var items = await APIHelper.ESIAPI.GetCharacterWalletTransactions(Reason, inspectCharId, token);
             //var totalCount = mailHeaders.Count;
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
-            items = items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
+            items = items.Count == 0 ? items : items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
 
             var sb = new StringBuilder();
             sb.AppendLine("<thead>");
@@ -320,7 +320,7 @@ namespace ThunderED.Modules
         {
             var items = (await APIHelper.ESIAPI.GetCharacterContracts(Reason, inspectCharId, token, null))?.Result.OrderByDescending(a=> a.contract_id).ToList();
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
-            items = items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
+            items = items.Count == 0 ? items : items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
             var sb = new StringBuilder();
             sb.AppendLine("<thead>");
             sb.AppendLine("<tr>");
@@ -499,7 +499,7 @@ namespace ThunderED.Modules
         {
             var items = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, inspectCharId, token)).OrderByDescending(a=> a.standing).ToList();
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
-            items = items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
+            items = items.Count == 0 ? items : items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
 
             List<JsonClasses.Contact> hrContacts = null;
             if (hrId > 0)
@@ -608,7 +608,7 @@ namespace ThunderED.Modules
             var items = await APIHelper.ESIAPI.GetCharacterJournalTransactions(Reason, inspectCharId, token);
             //var totalCount = mailHeaders.Count;
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
-            items = items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
+            items = items.Count == 0 ? items : items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
 
             var sb = new StringBuilder();
             sb.AppendLine("<thead>");
