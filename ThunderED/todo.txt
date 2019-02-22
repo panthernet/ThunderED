@@ -8,6 +8,7 @@ move message templates to Data folder
 add means to revive char from dumpster
 auth file support empty string
 add stats to stats command
+check if stats count NPC kills
 
 HRM
 - notifications

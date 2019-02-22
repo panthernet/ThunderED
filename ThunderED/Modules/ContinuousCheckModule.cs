@@ -244,8 +244,7 @@ namespace ThunderED.Modules
 
             if (command == "d" || command == "t" || command== "today" || command== "newday")
             {
-                //TODO update with GetKillsLossesStats
-                var channel = grp?.DailyStatsChannel ?? 0;
+               /* var channel = grp?.DailyStatsChannel ?? 0;
                 if(isNewDay && channel == 0) return;
                 var to = now.Add(TimeSpan.FromHours(1));
                 to = to.Subtract(TimeSpan.FromMinutes(to.Minute));
@@ -270,20 +269,29 @@ namespace ThunderED.Modules
                             new List<ZkbResponse.ZkbKill>();
                 var shipsDestroyed = kills.Count;
                 var shipsLost = losses.Count;
-                var iskDestroyed = kills.Sum(a => a.Stats.TotalValue);
-                var iskLost = losses.Sum(a => a.Stats.TotalValue);
+                var iskDestroyed = kills.Where(a=> a).Sum(a => a.Stats.TotalValue);
+                var iskLost = losses.Sum(a => a.Stats.TotalValue);*/
+                var channel = grp?.DailyStatsChannel ?? 0;
+                if(isNewDay && channel == 0) return;
+
+                var to = (now.Add(TimeSpan.FromHours(1)));
+                to = to.Subtract(TimeSpan.FromMinutes(to.Minute));
+                var startTime = isNewDay ? today.Subtract(TimeSpan.FromDays(1)) : today;
+                var endTime = isNewDay ? startTime.AddHours(24) : to;
+                var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance,startTime, endTime);
+
                 var date = today;
                 if (isNewDay)
                 {
                     date = today.Subtract(TimeSpan.FromDays(1));
                     var msg =
-                        $"**{LM.Get("dailyStats", date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
+                        $"**{LM.Get("dailyStats", date, entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)";
                     await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), msg).ConfigureAwait(false);
                 }
                 else
                 {
                     var msg =
-                        $"**{LM.Get("dailyStats", date, entity)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)";
+                        $"**{LM.Get("dailyStats", date, entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)";
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg, true).ConfigureAwait(false);
                 }
             }
@@ -313,7 +321,7 @@ namespace ThunderED.Modules
 
 
                 var t = isAlliance ? "allianceID" : "corporationID";
-                var relPath = $"/api/stats/{t}/{id}/";
+                var relPath = $"/api/stats/{t}/{id}";
                 var result = await RequestAsync<ZkbStatResponse>(requestHandler, new Uri(new Uri("https://zkillboard.com"), relPath));
 
                 if (command == "month" || command == "m")
