@@ -458,5 +458,8 @@
   "sovLostStructure":  "Система потеряла {0}!",
   "sovLowIndexMessage":  "Индекс ADM снизился до значения {0}. За работу, ребятки!",
   "hrmSpyFeedFrom":  "Почта",
-  "hrmSpyMsgFrom":  "Сообщение от {0} к {1}"
+  "hrmSpyMsgFrom":  "Сообщение от {0} к {1}",
+  "statsCalendarWeekly":  "Статы {0} за календарную неделю", 
+  "statsLastWeek":  "Статы {0} за последнюю",
+  "statsLastDay":  "Статы {0} за последние сутки" 
  }

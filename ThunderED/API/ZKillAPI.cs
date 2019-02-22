@@ -153,6 +153,108 @@ namespace ThunderED.API
 		
         }
 
+        public class ZkillEntityStats
+        {
+            public long IskDestroyed;
+            public long IskLost;
+            public long PointsDestroyed;
+            public long PointsLost;
+            public int ShipsDestroyed;
+            public int ShipsLost;
+            public int SoloKills;
+        }
+
+        public async Task<ZkillEntityStats> GetKillsLossesStats(long id, bool isAlliance, DateTime? from = null, DateTime? to = null, int lastSeconds = 0)
+        {
+            try
+            {
+                var txt = isAlliance ? "allianceID" : "corporationID";
+                int maxPerPage = 200;
+                var page = 1;
+                var killsList = new List<JsonZKill.ZkillOnly>();
+                var query = $"https://zkillboard.com/api/kills/{txt}/{id}/npc/0/page/{{0}}";
+                var sysList = new List<long>();
+                if (lastSeconds > 0)
+                    query += $"/pastSeconds/{lastSeconds}/";
+                else if (from.HasValue)
+                {
+                    from = from.Value.Subtract(TimeSpan.FromMinutes(from.Value.Minute));
+                    query += $"/startTime/{from.Value:yyyyMMddHHmm}/";
+                    to = to ?? DateTime.UtcNow;
+                    to = to.Value.Subtract(TimeSpan.FromMinutes(to.Value.Minute));
+                    query += $"endTime/{to.Value:yyyyMMddHHmm}/";
+                }
+
+                if (query.Last() != '/')
+                    query += "/";
+
+                while (true)
+                {
+                    var res = await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>(string.Format(query, page), _reason);
+
+                    if (res != null)
+                        killsList.AddRange(res);
+                    if (res == null || res.Count == 0 || res.Count < maxPerPage) break;
+                    page++;
+                }
+
+                var lossList = new List<JsonZKill.ZkillOnly>();
+                query = $"https://zkillboard.com/api/losses/{txt}/{id}/npc/0/page/{{0}}";
+                if (lastSeconds > 0)
+                    query += $"/pastSeconds/{lastSeconds}/";
+                else if (from.HasValue)
+                {
+                    from = from.Value.Subtract(TimeSpan.FromMinutes(from.Value.Minute));
+                    query += $"/startTime/{from.Value:yyyyMMddHHmm}/";
+                    to = to ?? DateTime.UtcNow;
+                    to = to.Value.Subtract(TimeSpan.FromMinutes(to.Value.Minute));
+                    query += $"endTime/{to.Value:yyyyMMddHHmm}/";
+                }
+
+                if (query.Last() != '/')
+                    query += "/";
+                page = 1;
+                while (true)
+                {
+
+                    var res = await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>(string.Format(query, page), _reason);
+
+                    if (res != null)
+                        lossList.AddRange(res);
+                    if (res == null || res.Count == 0 || res.Count < maxPerPage) break;
+                    page++;
+                }
+
+                var idList = killsList.Select(a => a.zkb.locationID).ToList();
+                idList.AddRange(lossList.Select(a=> a.zkb.locationID));
+                var most = idList.GroupBy(i=>i).OrderByDescending(grp=>grp.Count())
+                    .Select(grp=>grp.Key).First();
+
+                var system = await APIHelper.ESIAPI.GetSystemData(LogCat.Stats.ToString(), most);
+
+                var r = new ZkillEntityStats
+                {
+                    IskDestroyed = (long) killsList.Sum(a => a.zkb.totalValue),
+                    PointsDestroyed = killsList.Sum(a => a.zkb.points),
+                    IskLost = (long) lossList.Sum(a => a.zkb.totalValue),
+                    PointsLost = lossList.Sum(a => a.zkb.points),
+                    ShipsDestroyed = killsList.Count,
+                    ShipsLost = lossList.Count,
+                    SoloKills = killsList.Count(a=> a.zkb.solo),
+                    MostSystems = system?.name
+
+                };
+
+                return r;
+
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(GetKillsLossesStats), ex, LogCat.Stats);
+                return new ZkillEntityStats();
+            }
+        }
+
         public async Task<JsonZKill.CorpStats> GetCorporationData(long id, bool nosupers)
         {
             if (nosupers)

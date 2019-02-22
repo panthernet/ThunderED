@@ -203,7 +203,8 @@ namespace ThunderED.Modules
                 }
                 else
                 {
-                    if (command != "d" && command != "t" && command != "today" && command != "y" && command != "year" && command != "m" && command != "month" && !command.All(char.IsDigit) && !command.Contains('/'))
+                    if (command != "d" && command != "t" && command != "today" && command != "y" && command != "year" && command != "m" && command != "month" && 
+                        command != "w"  && command != "week" && command != "lastweek" && command != "lw" && command != "lastday" && command != "ld" && !command.All(char.IsDigit) && !command.Contains('/'))
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statUnknownCommandSyntax", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
                         return;
@@ -243,6 +244,7 @@ namespace ThunderED.Modules
 
             if (command == "d" || command == "t" || command== "today" || command== "newday")
             {
+                //TODO update with GetKillsLossesStats
                 var channel = grp?.DailyStatsChannel ?? 0;
                 if(isNewDay && channel == 0) return;
                 var to = now.Add(TimeSpan.FromHours(1));
@@ -287,9 +289,33 @@ namespace ThunderED.Modules
             }
             else
             {
+                if (command == "week" || command == "w")
+                {
+                    var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, DateTime.UtcNow.StartOfWeek(DayOfWeek.Monday), DateTime.UtcNow);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
+                        $"\n**{LM.Get("statsCalendarWeekly", entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                    return;
+                }
+                if (command == "lastweek" || command == "lw")
+                {
+                    var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, null, null, 604800);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
+                        $"\n**{LM.Get("statsLastWeek", entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                    return;
+                }
+                if (command == "lastday" || command == "ld")
+                {
+                    var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, null, null, 86400);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
+                        $"\n**{LM.Get("statsLastDay", entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                    return;
+                }
+
+
                 var t = isAlliance ? "allianceID" : "corporationID";
                 var relPath = $"/api/stats/{t}/{id}/";
                 var result = await RequestAsync<ZkbStatResponse>(requestHandler, new Uri(new Uri("https://zkillboard.com"), relPath));
+
                 if (command == "month" || command == "m")
                 {
                     var data = result.Months.FirstOrDefault(a => a.Value.Year == now.Year && a.Value.Month == now.Month).Value;

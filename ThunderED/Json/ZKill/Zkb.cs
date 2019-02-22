@@ -4,7 +4,7 @@
     {
         public class Zkb
         {
-            public int locationID { get; set; }
+            public long locationID { get; set; }
             public string hash { get; set; }
             public float fittedValue { get; set; }
             public float totalValue { get; set; }
