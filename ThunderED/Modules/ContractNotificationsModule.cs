@@ -238,7 +238,7 @@ namespace ThunderED.Modules
 
                 foreach (var filter in group.Filters.Values)
                 {
-                    if(!filter.Types.Contains(contract.type))
+                    if(filter.Types.Any() && !filter.Types.Contains(contract.type))
                         continue;
 
                     //check for completion
