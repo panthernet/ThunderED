@@ -393,7 +393,7 @@ namespace ThunderED.API
                 }
             }
 
-            if (!hasauth && (isManualAuth || !string.IsNullOrEmpty(authData?.GroupName)))
+            if (!hasAuth && (isManualAuth || !string.IsNullOrEmpty(authData?.GroupName)))
             {
                 var token = await SQLHelper.GetAuthUserByCharacterId(characterID);
                 if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
