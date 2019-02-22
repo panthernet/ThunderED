@@ -238,6 +238,9 @@ namespace ThunderED.Modules
 
                 foreach (var filter in group.Filters.Values)
                 {
+                    if(!filter.Types.Contains(contract.type))
+                        continue;
+
                     //check for completion
                     if (_completeStatuses.Contains(freshContract.status) && filter.Statuses.Contains(freshContract.status))
                     {
