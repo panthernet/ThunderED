@@ -1,3 +1,13 @@
+### V1.3.3
++ Added new **UseStrictAuthenticationMode** param to auth group (read explanation below)
++ Improved auth process checks to go in the following order: char -> corp -> alliance
++ Improved auth process checks to search criterias through several filters within one group (read explanation below)
+
+### BREAKING CHANGES
+- Auth process checks will now search criterias through several filters within one group by default. This means that the process will now gather all roles that match characters ID, corp ID and alliance ID in **AllowedCharacters, AllowedCorporations** and **AllowedAlliances** filters.
+  New **UseStrictAuthenticationMode** param has been introduced which is false by default. When enabled it will force auth process to act as before and stop after the first matching criteria is found.
+
+
 ### V1.3.2
 + Added optional **SkipDiscordAuthPage** param to auth groups to be able to store ESI token and skip Discord auth
 + Added unit tests project

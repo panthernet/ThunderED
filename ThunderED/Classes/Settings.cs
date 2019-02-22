@@ -1642,6 +1642,9 @@ namespace ThunderED.Classes
         public Dictionary<string, AuthRoleEntity> AllowedAlliances { get; set; } = new Dictionary<string, AuthRoleEntity>();
         public List<string> ManualAssignmentRoles { get; set; } = new List<string>();
 #endif
+        [Comment("Enable auth mode that will only search roles until first criterial match. Otherwise it wil search and add roles from all matching filters within this group")]
+        public bool UseStrictAuthenticationMode { get; set; }
+
         [Comment("Enable auth to require manual acceptance from authorized members")]
         public bool PreliminaryAuthMode { get; set; }
 

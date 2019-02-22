@@ -258,6 +258,7 @@
     "UseOneAuthButton":  false, 
     "authGroups": {
       "Mode1_GeneralAuth": {
+        "UseStrictAuthenticationMode": "false", 
         "AllowedCharacters":  {} ,
         "AllowedCorporations": {
           "corp1": {
