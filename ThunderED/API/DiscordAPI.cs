@@ -337,6 +337,8 @@ namespace ThunderED.API
                 result.ValidManualAssignmentRoles.AddRange( authResultCharacter.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                 groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCharacter.Group).Key;
                 hasAuth = true;
+                groupsToCheck.Clear();
+                groupsToCheck.Add(authResultCharacter.Group);
             }
 
             if (authResultCharacter == null || (authResultCharacter.Group != null && !authResultCharacter.Group.UseStrictAuthenticationMode))
@@ -351,6 +353,8 @@ namespace ThunderED.API
                     result.ValidManualAssignmentRoles.AddRange(authResultCorporation.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                     groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCorporation.Group).Key;
                     hasAuth = true;
+                    groupsToCheck.Clear();
+                    groupsToCheck.Add(authResultCorporation.Group);
                 }
 
                 var group = authResultCharacter?.Group ?? authResultCorporation?.Group;
@@ -361,10 +365,10 @@ namespace ThunderED.API
                     var authResultAlliance = await WebAuthModule.GetAuthGroupByAllyId( groupsToCheck, characterData.alliance_id ?? 0);
                     if (authResultAlliance != null) 
                     {
-                        var aRoles = discordGuild.Roles.Where( a => authResultAlliance.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a) ).ToList();
+                        var aRoles = discordGuild.Roles.Where(a => authResultAlliance.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
                         if (aRoles.Count > 0)
                             result.UpdatedRoles.AddRange(aRoles);
-                        result.ValidManualAssignmentRoles.AddRange( authResultAlliance.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
+                        result.ValidManualAssignmentRoles.AddRange(authResultAlliance.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                         groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultAlliance.Group).Key;
                         hasAuth = true;
                     }
