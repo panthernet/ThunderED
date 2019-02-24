@@ -30,13 +30,13 @@ namespace ThunderED.Classes
             switch (type)
             {
                 case MessageTemplateType.KillMailBig:
-                    typeFile = Path.Combine(SettingsManager.RootDirectory, "Templates", "Messages", "Template.killMailBig.txt");
+                    typeFile = Path.Combine(SettingsManager.DataDirectory, "Templates", "Messages", "Template.killMailBig.txt");
                     break;
                 case MessageTemplateType.KillMailGeneral:
-                    typeFile = Path.Combine(SettingsManager.RootDirectory, "Templates", "Messages", "Template.killMailGeneral.txt");
+                    typeFile = Path.Combine(SettingsManager.DataDirectory, "Templates", "Messages", "Template.killMailGeneral.txt");
                     break;
                 case MessageTemplateType.KillMailRadius:
-                    typeFile = Path.Combine(SettingsManager.RootDirectory, "Templates", "Messages", "Template.killMailRadius.txt");
+                    typeFile = Path.Combine(SettingsManager.DataDirectory, "Templates", "Messages", "Template.killMailRadius.txt");
                     break;
                 default:
                     return null;
