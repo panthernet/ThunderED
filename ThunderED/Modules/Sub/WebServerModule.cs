@@ -36,10 +36,10 @@ namespace ThunderED.Modules.Sub
             {
                 await LogHelper.LogInfo("Starting Web Server", Category);
                 _listener?.Dispose();
-                var port = Settings.WebServerModule.WebListenPort;
+                //TODO cleanup all occurences in modules in some of the following releases
+                var port = Settings.WebServerModule.WebExternalPort;
                 var extPort = Settings.WebServerModule.WebExternalPort;
-                var ip = Settings.WebServerModule.WebListenIP;
-
+                var ip = "0.0.0.0";
 
                 _listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), port);
                 _listener.Request += async (sender, context) =>

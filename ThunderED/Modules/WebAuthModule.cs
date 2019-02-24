@@ -416,7 +416,7 @@ namespace ThunderED.Modules
 
             var extIp = Settings.WebServerModule.WebExternalIP;
             var extPort = Settings.WebServerModule.WebExternalPort;
-            var port = Settings.WebServerModule.WebListenPort;
+            var port = Settings.WebServerModule.WebExternalPort;
 
 
             if (request.HttpMethod != HttpMethod.Get.ToString())

@@ -907,7 +907,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
             var request = context.Request;
             var response = context.Response;
             var extPort = Settings.WebServerModule.WebExternalPort;
-            var port = Settings.WebServerModule.WebListenPort;
+            var port = Settings.WebServerModule.WebExternalPort;
             try
             {
                 if (request.HttpMethod != HttpMethod.Get.ToString())

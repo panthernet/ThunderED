@@ -1504,14 +1504,14 @@ namespace ThunderED.Classes
 
     public class WebServerModuleSettings: ValidatableSettings
     {
-        [Comment("Text IP address or domain name which the bot will use to listen for connections. \nIf the machine the bot running on have direct access to the internet then it should be equal\n to **webExternalIP** overwise it is the intrAnet address of your machine")]
+      /*  [Comment("Text IP address or domain name which the bot will use to listen for connections. \nIf the machine the bot running on have direct access to the internet then it should be equal\n to **webExternalIP** overwise it is the intrAnet address of your machine")]
         [Required]
         public string WebListenIP { get; set; }
         [Comment("Numeric port value")]
         [Required]
         public int WebListenPort { get; set; }
         [Comment("Text IP address or domain name which is used to receive connections from the internet")]
-        [Required]
+        [Required]*/
         public string WebExternalIP { get; set; }
         [Comment("Numeric port value")]
         [Required]
@@ -1532,11 +1532,11 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    case nameof(WebListenIP):
+                   /* case nameof(WebListenIP):
                         return string.IsNullOrEmpty(WebListenIP) ? Compose(nameof(WebListenIP), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(WebListenPort):
                         return WebListenPort == 0 ? Compose(nameof(WebListenPort), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                    case nameof(WebExternalIP):
+                  */  case nameof(WebExternalIP):
                         return string.IsNullOrEmpty(WebExternalIP) ? Compose(nameof(WebExternalIP), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(WebExternalPort):
                         return WebExternalPort == 0 ? Compose(nameof(WebExternalPort), Extensions.ERR_MSG_VALUEEMPTY) : null;

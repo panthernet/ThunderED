@@ -197,8 +197,6 @@
   },  
   
   "webServerModule": {
-    "webListenIP": "IP",
-    "webListenPort": 80,
     "webExternalIP": "IP",
     "webExternalPort": 80,
     "discordUrl": "https://discord.gg/xxxxxx",
