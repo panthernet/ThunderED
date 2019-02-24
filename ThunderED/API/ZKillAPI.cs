@@ -23,35 +23,25 @@ namespace ThunderED.API
     public partial class ZKillAPI: CacheBase, IDisposable
     {
         private readonly string _reason = LogCat.ZKill.ToString();
-        //private readonly HttpClient _zKillhttpClient = new HttpClient();
-
-        /*public ZKillAPI()
-        {
-            _zKillhttpClient.Timeout = new TimeSpan(0, 0, 10);
-            _zKillhttpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
-        }*/
-
         private PureWebSocket _webSocket;
-
         private readonly ConcurrentQueue<JsonZKill.Killmail> _webMailsQueue = new ConcurrentQueue<JsonZKill.Killmail>();
 
         internal async Task<JsonZKill.Killmail> GetSocketResponce()
         {
             try
             {
-
-
                 if (_webSocket == null || _webSocket.State != WebSocketState.Open)
                 {
                     if (_webSocket?.State == WebSocketState.Connecting) return null;
                     var o = new PureWebSocketOptions();
+                    _webSocket?.Dispose();
                     _webSocket = new PureWebSocket(SettingsManager.Settings.Config.ZKillboardWebSocketUrl, o);
                     _webSocket.OnMessage += _webSocket_OnMessage;
                     _webSocket.OnError += async exception => { await LogHelper.LogEx("_webSocket.OnError", exception, LogCat.ZKill); };
 
                     if (!_webSocket.Connect())
                     {
-                        _webSocket.Dispose();
+                        _webSocket?.Dispose();
                         _webSocket = null;
                         return null;
                     }
@@ -75,7 +65,8 @@ namespace ThunderED.API
             catch (Exception ex)
             {
                 await LogHelper.LogEx("GetSocketResponce", ex, LogCat.ZKill);
-
+                _webSocket?.Dispose();
+                _webSocket = null;
             }
 
             return null;
