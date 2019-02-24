@@ -7,6 +7,7 @@
 + Improved ZKB sockets cleanup and restart
 + Fixed !stats d command to not include losses to npc
 + Fixed type filtering for contracts feeder
++ Fixed simplified auth empty line handling
 + Simplified web server settings (read breaking changes below)
 + Moved **Templates/Messages** templates to **Data** directory under Linux (read breaking changed below)
 

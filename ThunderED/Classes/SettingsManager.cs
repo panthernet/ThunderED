@@ -115,7 +115,7 @@ namespace ThunderED.Classes
             {
                 try
                 {
-                    if(entry.StartsWith("//")) continue;
+                    if(entry.StartsWith("//") || string.IsNullOrEmpty(entry)) continue;
                     var data = entry.Split('|', StringSplitOptions.RemoveEmptyEntries);
                     if (data.Length != 3)
                     {
