@@ -281,6 +281,7 @@
         "authRoles": ["Admins"],
         "ManualAssignmentRoles":  [ ], 
         "CustomButtonText": "General Auth",
+        "ExcludeFromOneButtonMode":  false, 
         "DefaultMention":  ""
       },
       "Mode2_GeneralWithESIFetch": {

@@ -614,7 +614,7 @@ namespace ThunderED.Modules
                             else
                             {
                                 var searchFor = autoSearchGroup
-                                    ? Settings.WebAuthModule.AuthGroups
+                                    ? Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.ExcludeFromOneButtonMode)
                                     : Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode);
                                 //general auth
                                 foreach (var grp in searchFor)

@@ -125,6 +125,10 @@ namespace ThunderED.Modules.Sub
                             if (Settings.Config.ModuleAuthWeb && SettingsManager.Settings.WebAuthModule.AuthGroups.Count > 0)
                                 authText.Append($"<h2>{LM.Get("authWebDiscordHeader")}</h4>{LM.Get("authPageGeneralAuthHeader")}");
 
+                            var groupsForCycle = Settings.WebAuthModule.UseOneAuthButton
+                                ? Settings.WebAuthModule.AuthGroups.Where(a => a.Value.ExcludeFromOneButtonMode)
+                                : Settings.WebAuthModule.AuthGroups;
+
                             if (Settings.WebAuthModule.UseOneAuthButton)
                             {
                                 if (Settings.Config.ModuleAuthWeb)
@@ -133,40 +137,39 @@ namespace ThunderED.Modules.Sub
                                     authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonDiscordText")}</a>");
                                 }
                             }
-                            else
-                            {
-                                //stands auth
-                                if (Settings.Config.ModuleAuthWeb)
-                                {
-                                    foreach (var groupPair in Settings.WebAuthModule.AuthGroups.Where(a => a.Value.StandingsAuth != null))
-                                    {
-                                        var group = groupPair.Value;
-                                        var url = $"{authUrl}?group={HttpUtility.UrlEncode(groupPair.Key)}";
-                                        authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.CustomButtonText}</a>");
-                                    }
-                                }
 
-                                //auth
-                                if (Settings.Config.ModuleAuthWeb)
+                            //stands auth
+                            if (Settings.Config.ModuleAuthWeb)
+                            {
+                                foreach (var groupPair in groupsForCycle.Where(a => a.Value.StandingsAuth != null))
                                 {
-                                    foreach (var @group in SettingsManager.Settings.WebAuthModule.AuthGroups.Where(a => a.Value.StandingsAuth == null))
+                                    var group = groupPair.Value;
+                                    var url = $"{authUrl}?group={HttpUtility.UrlEncode(groupPair.Key)}";
+                                    authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.CustomButtonText}</a>");
+                                }
+                            }
+
+                            //auth
+                            if (Settings.Config.ModuleAuthWeb)
+                            {
+                                foreach (var @group in groupsForCycle.Where(a => a.Value.StandingsAuth == null))
+                                {
+                                    if (group.Value.ESICustomAuthRoles.Any())
                                     {
-                                        if (group.Value.ESICustomAuthRoles.Any())
-                                        {
-                                            //var customAuthString = GetCustomAuthUrl(group.Value.ESICustomAuthRoles, group.Key);
-                                            var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Key)}";
-                                            var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
-                                            authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>");
-                                        }
-                                        else
-                                        {
-                                            var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Key)}";
-                                            var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
-                                            authText.Append($"<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>");
-                                        }
+                                        //var customAuthString = GetCustomAuthUrl(group.Value.ESICustomAuthRoles, group.Key);
+                                        var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Key)}";
+                                        var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
+                                        authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>");
+                                    }
+                                    else
+                                    {
+                                        var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Key)}";
+                                        var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
+                                        authText.Append($"<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>");
                                     }
                                 }
                             }
+                            
 
                             var len = authText.Length;
                             bool smth = false;
