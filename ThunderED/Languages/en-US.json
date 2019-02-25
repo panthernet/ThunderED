@@ -15,7 +15,7 @@
     "*authnotify* command provides you with a link to auth you by EVE Online character as notifications feeder. Send *{0}authnotify* command to the bot for additional details.",
   "helpTime": "*evetime* command displays current EVE Online time",
   "helpStat":
-    "*stat* or *stats* command displays corp or alliance stats by time interval\nAvailable mods: d, w, m, ld, lw, y.\nExamples: {0}stat m United Fleet | {0}stat d Goonswarm Federation | {0}stat y Perkone | {0}stat 2018 Nebula Alba| {0}stat 2018/03 Nebula Alba",
+    "*stat* or *stats* command displays corp or alliance stats by time interval\nAvailable mods: d, w, m, ld, lw, y, r. The **r** modifier displays stats rating table.\nExamples: {0}stat m United Fleet | {0}stat d Goonswarm Federation | {0}stat y Perkone | {0}stat 2018 Nebula Alba| {0}stat 2018/03 Nebula Alba",
   "helpAbout": "*about* command displays information about the bot",
   "helpChar": "*char* command displays information about in game character by name\nExample: *{0}char Don Chack*",
   "helpCorp": "*corp* command displays information about corporation by name\nExample: *{0}corp Nebula Alba*",
