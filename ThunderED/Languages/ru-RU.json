@@ -461,5 +461,16 @@
   "hrmSpyMsgFrom":  "Сообщение от {0} к {1}",
   "statsCalendarWeekly":  "Статы {0} за календарную неделю", 
   "statsLastWeek":  "Статы {0} за последнюю",
-  "statsLastDay":  "Статы {0} за последние сутки" 
+  "statsLastDay":  "Статы {0} за последние сутки",
+  "dailyStatsRating":  "Ежедневный рейтинг за {0}",
+  "dailyStatsWait":  "Подождите, выполнение запроса может занять некоторое время...",
+  "dailyRatingColShips":  "Корабли" ,
+  "dailyRatingColPoints":  "Очки" ,
+  "dailyRatingColSystem":  "Топ Система" ,
+  "dailyRatingKilled":  "Убито" ,
+  "dailyRatingLost":  "Потеряно",
+  "dailyRatingTopKill":  "Топ Убийцы",
+  "dailyRatingTopIsk":  "Топ ISK",
+  "dailyRatingTopPts":  "Топ Охотники",
+  "dailyRatingTopEff":  "Топ Эффективность"
  }

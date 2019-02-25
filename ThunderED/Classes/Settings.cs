@@ -272,6 +272,9 @@ namespace ThunderED.Classes
     public class StatsModuleSettings
     {
         public bool EnableStatsCommand { get; set; } = true;
+
+        [Comment("Enable daily rating mode if specified. Daily rating will display all entries in a summary message.")]
+        public ulong RatingModeChannelId { get; set; }
 #if EDITOR
         public ObservableDictionary<string, DailyStatsGroup> DailyStatsGroups { get; set; } = new  ObservableDictionary<string, DailyStatsGroup>();
 #else
@@ -288,6 +291,8 @@ namespace ThunderED.Classes
         public long DailyStatsCorp { get; set; }
         [Comment("Default numeric alliance ID to display stats for. Mutually exclusive with DailyStatsCorp")]
         public long DailyStatsAlliance { get; set; }
+        [Comment("Include this stats in rating summary if enabled")]
+        public bool IncludeInRating { get; set; } = false;
 #if EDITOR
         public override string this[string columnName]
         {
@@ -1423,6 +1428,7 @@ namespace ThunderED.Classes
         public string ZkillLiveFeedRedisqID { get; set; }
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";
+        public string DateFormat { get; set; } = "dd.MM.yyyy";
         [Comment("Display welcome message with authentication offer to all new users joining your Discord group hallway")]
         public bool WelcomeMessage { get; set; } = true;
         [Comment("Welcome message Discord channel ID")]

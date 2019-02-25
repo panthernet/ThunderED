@@ -87,7 +87,7 @@ namespace ThunderED.API
             return await APIHelper.ESIRequestWrapper<List<JsonClasses.Notification>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{userId}/notifications/?datasource=tranquility&language={_language}", reason, authHeader, etag);
         }
 
-        internal async Task<JsonClasses.Planet> GetPlanet(string reason, string planetId)
+        internal async Task<JsonClasses.Planet> GetPlanet(string reason, object planetId)
         {
             return await APIHelper.RequestWrapper<JsonClasses.Planet>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/planets/{planetId}/?datasource=tranquility&language={_language}", reason);
         }

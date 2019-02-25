@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using ByteSizeLib;
 using Discord;
 using Discord.Commands;
+using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Zkb;
@@ -196,15 +198,20 @@ namespace ThunderED.Modules
 
                 if (isNewDay)
                 {
-                    foreach (var group in SettingsManager.Settings.StatsModule.DailyStatsGroups.Values)
+                    foreach (var group in SettingsManager.Settings.StatsModule.DailyStatsGroups.Where(a=> !a.Value.IncludeInRating))
                     {
-                        await ProcessStats(context, command, entity, group);
+                        await ProcessStats(context, command, entity, group.Value);
                     }
+
+                    var groups = SettingsManager.Settings.StatsModule.DailyStatsGroups.Values.Where(a => a.IncludeInRating);
+                    if (groups.Any())
+                        await ProcessStats(context, command, entity, null);
                 }
                 else
                 {
                     if (command != "d" && command != "t" && command != "today" && command != "y" && command != "year" && command != "m" && command != "month" && 
-                        command != "w"  && command != "week" && command != "lastweek" && command != "lw" && command != "lastday" && command != "ld" && !command.All(char.IsDigit) && !command.Contains('/'))
+                        command != "w"  && command != "week" && command != "lastweek" && command != "lw" && command != "lastday" && command != "ld" && !command.All(char.IsDigit) && !command.Contains('/') &&
+                        command != "r" && command != "rating")
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statUnknownCommandSyntax", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
                         return;
@@ -228,7 +235,119 @@ namespace ThunderED.Modules
             var today = DateTime.Today;
 
             var isNewDay = command == "newday";
+            var isRatingCommand = command == "r" || command == "rating";
             var requestHandler = new ZkbRequestHandler(new JsonSerializer("yyyy-MM-dd HH:mm:ss"));
+
+            //daily rating
+            if (isRatingCommand || (isNewDay && grp == null && SettingsManager.Settings.StatsModule.RatingModeChannelId > 0))
+            {
+                if (context != null)
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("dailyStatsWait"), false).ConfigureAwait(false);
+
+                var groups = SettingsManager.Settings.StatsModule.DailyStatsGroups.Values.Where(a => a.IncludeInRating);
+                var channel = isRatingCommand ? context.Channel.Id : SettingsManager.Settings.StatsModule.RatingModeChannelId;
+                var to = (now.Add(TimeSpan.FromHours(1)));
+                to = to.Subtract(TimeSpan.FromMinutes(to.Minute));
+                var startTime = isNewDay ? today.Subtract(TimeSpan.FromDays(1)) : today;
+                var endTime = isNewDay ? startTime.AddHours(24) : to;
+
+                var list = new List<ZKillAPI.ZkillEntityStats>();
+
+                foreach (var @group in groups)
+                {
+                    var data = await APIHelper.ZKillAPI.GetKillsLossesStats(@group.DailyStatsAlliance > 0 ? group.DailyStatsAlliance : group.DailyStatsCorp, group.DailyStatsAlliance > 0, startTime, endTime);
+                    if (group.DailyStatsAlliance > 0)
+                    {
+                        var alliance = await APIHelper.ESIAPI.GetAllianceData(LogCat.Stats.ToString(), group.DailyStatsAlliance);
+                        data.EntityName = $"{alliance?.name}[{alliance?.ticker}]";
+                    }
+                    else
+                    {
+                        if (group.DailyStatsCorp > 0)
+                        {
+                            var corp = await APIHelper.ESIAPI.GetCorporationData(LogCat.Stats.ToString(), group.DailyStatsCorp);
+                            data.EntityName = $"{corp?.name}[{corp?.ticker}]";
+                        }
+                    }
+                    list.Add(data);
+                }
+                list = list.OrderByDescending(item =>
+                {
+                   /* var iskDiff = item.IskDestroyed - item.IskLost;
+                    var isk = iskDiff / 1000000d;
+                    var pts = (item.PointsDestroyed - item.PointsLost) / 10d;
+                    var ships = item.ShipsDestroyed - item.ShipsLost;
+                    isk = isk < 0 ? 0 : isk;
+                    pts = pts < 0 ? 0 : pts;
+                    ships = ships < 0 ? 0 : ships;
+                    var avg = (3 * isk + 2*pts + 1 * ships + 1) / (isk + pts + ships + 1);*/
+                    
+                    var isk = item.IskDestroyed / (double)item.IskLost.ReturnMinimum(1);
+                    var pts = item.PointsDestroyed / (double)item.PointsLost.ReturnMinimum(1);
+                    var ships = item.ShipsDestroyed / (double)item.ShipsLost.ReturnMinimum(1);
+
+                    var avg = (3 * isk + 2*ships + 1*pts + 1) / (isk + pts + ships + 1);
+
+                  /*  isk = item.IskLost / 1000000d;
+                    pts = item.PointsLost / 10d;
+                    var avg2 = (2*pts + 1 * item.ShipsLost + 1) / (pts + item.ShipsLost + 1);
+
+                    if (avg == 0 && avg2 == 0) return -1000;
+                    
+                    var result = avg - avg2;*/
+                    return avg;
+
+                }).ToList();
+
+                var date = today.Subtract(TimeSpan.FromDays(1));
+                var sb = new StringBuilder();
+                sb.AppendLine("```css");
+                sb.Append($"{"#".FixedLength(15)} {"ISK  ".FillSpacesBefore(8)} {LM.Get("dailyRatingColShips").FillSpacesBefore(5)} {LM.Get("dailyRatingColPoints").FillSpacesBefore(10)} {LM.Get("dailyRatingColSystem").FillSpacesBefore(15)}{Environment.NewLine}");
+                sb.AppendLine("```");
+                int count = 1;
+                var topIskIndex = list.IndexOf(list.OrderByDescending(a => a.IskDestroyed).FirstOrDefault()) + 1;
+                var topKillsIndex = list.IndexOf(list.OrderByDescending(a => a.ShipsDestroyed).FirstOrDefault()) + 1;
+                var topPtsIndex = list.IndexOf(list.OrderByDescending(a => a.PointsDestroyed).FirstOrDefault()) + 1;
+                foreach (var item in list)
+                {
+                    var addon = string.Empty;
+                    if(count == 1)
+                        addon += $"{LM.Get("dailyRatingTopEff")} / ";
+                    if (count == topKillsIndex)
+                        addon += $"{LM.Get("dailyRatingTopKill")} / ";
+                    if (count == topIskIndex)
+                        addon += $"{LM.Get("dailyRatingTopIsk")} / ";
+                    if (count == topPtsIndex)
+                        addon += $"{LM.Get("dailyRatingTopPts")} / ";
+                    if (addon.EndsWith(" / "))
+                        addon = addon.Substring(0, addon.Length - 3);
+
+                    sb.Append(count.ToString().FixedLength(3));
+                    sb.Append($"**{item.EntityName}** ");
+                    if (!string.IsNullOrEmpty(addon))
+                        sb.Append($"***{addon}***");
+                    sb.Append(Environment.NewLine);
+                    sb.AppendLine("```C");
+                    sb.Append($"   {LM.Get("dailyRatingKilled")}:".FixedLength(15));
+                    sb.Append(item.IskDestroyed.ToKMB().FillSpacesBefore(8));
+                    sb.Append(item.ShipsDestroyed.ToString("N0").FillSpacesBefore(5));
+                    sb.Append(item.PointsDestroyed.ToKMB().FillSpacesBefore(10));
+                    sb.Append(item.MostSystems?.FillSpacesBefore(15));
+                    sb.Append(Environment.NewLine);
+                    sb.Append($"   {LM.Get("dailyRatingLost")}:".FixedLength(15));
+                    sb.Append(item.IskLost.ToKMB().FillSpacesBefore(8));
+                    sb.Append(item.ShipsLost.ToString("N0").FillSpacesBefore(5));
+                    sb.Append(item.PointsLost.ToKMB().FillSpacesBefore(10));
+                    sb.AppendLine("```");
+
+                    count++;
+                }
+                var msg = $"**{LM.Get("dailyStatsRating", date.ToString(SettingsManager.Settings.Config.DateFormat))}**\n{sb}\n";
+                  //  $"**{LM.Get("dailyStats", date, entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)";
+                await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), msg).ConfigureAwait(false);
+                
+                return;
+            }
 
             var allyId = grp?.DailyStatsAlliance ?? ((await APIHelper.ESIAPI.SearchAllianceId("Stats", entity))?.alliance?.FirstOrDefault() ?? 0);
             var corpId = grp?.DailyStatsCorp ?? (await APIHelper.ESIAPI.SearchCorporationId("Stats", entity))?.corporation?.FirstOrDefault() ?? 0;

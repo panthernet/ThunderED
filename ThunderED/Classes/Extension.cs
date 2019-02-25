@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -7,6 +8,34 @@ namespace ThunderED.Classes
 {
     public static class Extension
     {
+        public static T ReturnMinimum<T>(this T obj, T minimum)
+        {
+            return Convert.ToInt64(obj) == 0 ? minimum : obj;
+        }
+
+
+        public static string ToKMB(this long num)
+        {
+            if (num > 999999999 || num < -999999999 )
+            {
+                return num.ToString("0,,,.###B", CultureInfo.InvariantCulture);
+            }
+            else
+            if (num > 999999 || num < -999999 )
+            {
+                return num.ToString("0,,.##M", CultureInfo.InvariantCulture);
+            }
+            else
+            if (num > 999 || num < -999)
+            {
+                return num.ToString("0,.#K", CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                return num.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
         public static DateTime StartOfWeek(this DateTime dt, DayOfWeek startOfWeek)
         {
             int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
@@ -62,6 +91,16 @@ namespace ThunderED.Classes
             sb.Append(value);
             for (int i = value.Length; i < length; i++)
                 sb.Append(" ");
+            return sb.ToString();
+        }
+
+        public static string FillSpacesBefore(this string value, int length)
+        {
+            if (value.Length >= length) return value;
+            var sb = new StringBuilder();
+            for (int i = 0; i < length - value.Length; i++)
+                sb.Append(" ");
+            sb.Append(value);
             return sb.ToString();
         }
     }

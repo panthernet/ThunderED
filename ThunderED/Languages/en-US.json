@@ -467,5 +467,16 @@
   "hrmSpyMsgFrom":  "Message from {0} to {1}",
   "statsCalendarWeekly":  "{0} calendar week stats", 
   "statsLastWeek":  "{0} last week stats",
-  "statsLastDay":  "{0} last day stats" 
+  "statsLastDay":  "{0} last day stats",
+  "dailyStatsRating":  "Daily rating stats for {0}",
+  "dailyStatsWait":  "Please wait, your request might take some time to complete...",
+  "dailyRatingColShips":  "Ships" ,
+  "dailyRatingColPoints":  "Points" ,
+  "dailyRatingColSystem":  "Top System" ,
+  "dailyRatingKilled":  "Killed" ,
+  "dailyRatingLost":  "Lost",
+  "dailyRatingTopKill":  "Top Killers",
+  "dailyRatingTopIsk":  "Top ISK Sinkers",
+  "dailyRatingTopPts":  "Top Pts Hunters",
+  "dailyRatingTopEff":  "Top Efficiency"
 }

@@ -1,7 +1,8 @@
 ### V1.3.3
 + Added new **UseStrictAuthenticationMode** param to auth group (read explanation below)
-+ Added new **week(w), lastweek(lw), lastday(ld)** command parameters for !stats command
++ Added new **week(w), lastweek(lw), lastday(ld), rating(r)** command parameters for !stats command
 + Added new **ExcludeFromOneButtonMode** param to auth group to avoid being search when **UseOneAuthButton** is enabled
++ Added new **dateFormat** param to Config section
 + Improved auth process checks to go in the following order: char -> corp -> alliance
 + Improved auth process checks to search criterias through several filters within one group (read explanation below)
 + Improved auth checks to delete applying members with invalidated tokens

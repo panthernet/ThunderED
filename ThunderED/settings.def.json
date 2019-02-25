@@ -40,7 +40,8 @@
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
-    "welcomeMessage": true,
+    "dateFormat": "dd.MM.yyyy",
+     "welcomeMessage": true,
     "WelcomeMessageChannelId":  0, 
     "cachePurgeInterval": 30,
     "memoryUsageLimitMb": 100,
@@ -106,11 +107,13 @@
 
   "StatsModule": {
     "EnableStatsCommand":  true, 
+    "RatingModeChannelId":  0, 
     "DailyStatsGroups": {
       "group1": {
         "DailyStatsChannel": 0,
         "DailyStatsCorp": 0,
-        "DailyStatsAlliance": 0
+        "DailyStatsAlliance": 0,
+        "IncludeInRating":  false 
       } 
     } 
   },

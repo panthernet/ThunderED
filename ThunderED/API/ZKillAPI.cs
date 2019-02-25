@@ -154,6 +154,7 @@ namespace ThunderED.API
             public int ShipsLost;
             public int SoloKills;
             public string MostSystems;
+            public string EntityName;
         }
 
         public async Task<ZkillEntityStats> GetKillsLossesStats(long id, bool isAlliance, DateTime? from = null, DateTime? to = null, int lastSeconds = 0)
@@ -219,10 +220,18 @@ namespace ThunderED.API
 
                 var idList = killsList.Select(a => a.zkb.locationID).ToList();
                 idList.AddRange(lossList.Select(a=> a.zkb.locationID));
-                var most = idList.GroupBy(i=>i).OrderByDescending(grp=>grp.Count())
-                    .Select(grp=>grp.Key).First();
+                var most = idList.Count > 0 ? idList.GroupBy(i=>i).OrderByDescending(grp=>grp.Count())
+                    .Select(grp=>grp.Key).First() : 0;
 
-                var system = await APIHelper.ESIAPI.GetSystemData(LogCat.Stats.ToString(), most);
+                var system = most > 0 ? await APIHelper.ESIAPI.GetSystemData(LogCat.Stats.ToString(), most) : null;
+                var pl = await APIHelper.ESIAPI.GetPlanet("", most);
+                var name = system?.name ?? pl?.name;
+                if (!string.IsNullOrEmpty(name))
+                {
+                    if (name.StartsWith("Stargate"))
+                        name = name.Replace("Stargate", "").Replace("(", "").Replace(")", "").Trim();
+                    else name = name.Split(' ').FirstOrDefault();
+                }
 
                 var r = new ZkillEntityStats
                 {
@@ -233,7 +242,7 @@ namespace ThunderED.API
                     ShipsDestroyed = killsList.Count,
                     ShipsLost = lossList.Count,
                     SoloKills = killsList.Count(a=> a.zkb.solo),
-                    MostSystems = system?.name
+                    MostSystems = name
 
                 };
 
