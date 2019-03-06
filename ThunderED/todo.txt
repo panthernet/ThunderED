@@ -4,7 +4,6 @@
 
 //TODO
 add means to revive char from dumpster
-add stats to stats command
 
 HRM
 - notifications

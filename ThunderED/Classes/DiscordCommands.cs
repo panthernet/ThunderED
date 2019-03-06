@@ -1050,6 +1050,45 @@ namespace ThunderED.Classes
             }
         }
 
+        [Command("caps", RunMode = RunMode.Async), Summary("")]
+        public async Task Caps()
+        {
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
+            if (!SettingsManager.Settings.CommandsConfig.EnableCapsCommand) 
+                return;
+            if(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Any() && !SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Contains(Context.Channel.Id))
+                return;
+            if (SettingsManager.Settings.CommandsConfig.CapsCommandDiscordRoles.Any() && !await IsAllowedByRoles(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordRoles, Context.User.Id))
+                return;
+
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpCaps", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "caps"));
+        }
+
+        [Command("caps", RunMode = RunMode.Async), Summary("")]
+        public async Task Caps([Remainder] string x)
+        {
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+                return;
+            if (!SettingsManager.Settings.CommandsConfig.EnableCapsCommand) 
+                return;
+            if(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Any() && !SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Contains(Context.Channel.Id))
+                return;
+            if (SettingsManager.Settings.CommandsConfig.CapsCommandDiscordRoles.Any() && !await IsAllowedByRoles(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordRoles, Context.User.Id))
+                return;
+
+            try
+            {
+                await TickManager.GetModule<CapsModule>().ProcessWhoCommand(Context, x);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("caps", ex);
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -1247,6 +1286,18 @@ namespace ThunderED.Classes
             if (!string.IsNullOrEmpty(result))
             {
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, result, true);
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<bool> IsAllowedByRoles(List<string> roles, ulong userId)
+        {
+            var result = APIHelper.DiscordAPI.GetUserRoleNames(userId);
+            if (!result.Any(roles.Contains))
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("comRequireRole"), true);
                 return false;
             }
 

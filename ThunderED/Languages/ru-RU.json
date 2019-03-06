@@ -472,5 +472,13 @@
   "dailyRatingTopKill":  "Топ Убийцы",
   "dailyRatingTopIsk":  "Топ ISK",
   "dailyRatingTopPts":  "Топ Охотники",
-  "dailyRatingTopEff":  "Топ Эффективность"
- }
+  "dailyRatingTopEff":  "Топ Эффективность",
+  "capsNoUsersFound":  "Доступных мемберов не найдено!",
+  "helpCaps":  "Команда caps отображает данные о капиталоводах в канале/на сервере. Примеры: {0}{1} who , {0}{1} who online, {0}{1} all",
+  "capsCommandRunning":  "Команда уже выполняется, попробуйте позже",
+  "of":  "из",
+  "capsCalibr5":  "Макс. Калибровка",
+  "comRequireRole": "У вас должна быть особая роль Discord, чтобы выполнить эту команду",
+  "errFileNotFound": "Файл {0} не найден!",
+  "errFileContainsInvalidData": "Файл {0} содержит неверные данные!" 
+}

@@ -478,5 +478,13 @@
   "dailyRatingTopKill":  "Top Killers",
   "dailyRatingTopIsk":  "Top ISK Sinkers",
   "dailyRatingTopPts":  "Top Pts Hunters",
-  "dailyRatingTopEff":  "Top Efficiency"
+  "dailyRatingTopEff":  "Top Efficiency",
+  "capsNoUsersFound":  "No eligible users found!",
+  "helpCaps":  "Caps command displays information about capital ship drivers on channel/server. Examples: {0}{1} who , {0}{1} who online, {0}{1} all",
+  "capsCommandRunning":  "Command is already running, try again later",
+  "of":  "of",
+  "capsCalibr5":  "Max Calibration",
+  "comRequireRole": "You must have special Discord role to run this command",
+  "errFileNotFound": "File {0} not found!",
+  "errFileContainsInvalidData": "File {0} contains invalid data!" 
 }

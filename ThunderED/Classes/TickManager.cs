@@ -86,7 +86,7 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleHRM)
                 Modules.Add(new HRMModule());
 
-            //on demand modules - only could be pinged by other modules
+            //on demand modules - only could be pinged by other modules or commands
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
                 OnDemandModules.Add(new LiveKillFeedModule());
 
@@ -95,6 +95,9 @@ namespace ThunderED.Classes
 
             if (SettingsManager.Settings.Config.ModuleChatRelay)
                 OnDemandModules.Add(new ChatRelayModule());
+
+            if (SettingsManager.Settings.CommandsConfig.EnableCapsCommand)
+                OnDemandModules.Add(new CapsModule());
 
             
             

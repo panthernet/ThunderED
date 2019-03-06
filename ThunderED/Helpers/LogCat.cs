@@ -39,6 +39,7 @@
         ContractNotif,
         AuthStandings,
         SovTracker,
-        SimplAuth
+        SimplAuth,
+        Caps
     }
 }

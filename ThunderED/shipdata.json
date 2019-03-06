@@ -1,0 +1,312 @@
+{
+	"Groups": {
+		"Dreads": {
+			"CommonSkills": [
+				{
+					"SkillName": "Jump Drive Calibration",
+					"Id": 21611,
+					"Minumim": 4,
+					"T2": 0,
+					"SkillType": 0
+				},
+				{
+					"SkillName": "Jump Drive Operation",
+					"Id": 3456,
+					"Minumim": 1,
+					"T2": 0,
+					"SkillType": 0
+				},
+				{
+					"SkillName": "Tactical Weapon Reconfiguration",
+					"Id": 22043,
+					"Minumim": 3,
+					"T2": 5,
+					"SkillType": 1
+				}
+			],
+			"SpecialCounters": {
+				"Calibration": {
+					"Id": 21611,
+          "Rank":  5 
+				}
+			},
+			"ShipSkills": {
+				"Moros": [
+					{
+						"SkillName": "Gallente Dreadnought",
+						"Id": 20531,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					},
+					{
+						"SkillName": "Capital Hybrid Turret",
+						"Id": 21666,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					},
+					{
+						"SkillName": "Capital Blaster Specialization",
+						"Id": 41405,
+						"Minumim": 1,
+						"T2": 1,
+						"SkillType": 2
+					},
+					{
+						"SkillName": "Capital Railgun Specialization",
+						"Id": 41406,
+						"Minumim": 1,
+						"T2": 1,
+						"SkillType": 2
+					}
+				],
+				"Revelation": [
+					{
+						"SkillName": "Amarr Dreadnought",
+						"Id": 20525,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					},
+					{
+						"SkillName": "Capital Energy Turret",
+						"Id": 20327,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					},
+					{
+						"SkillName": "Capital Pulse Laser Specialization",
+						"Id": 41405,
+						"Minumim": 1,
+						"T2": 1,
+						"SkillType": 2
+					},
+					{
+						"SkillName": "Capital Beam Laser Specialization",
+						"Id": 41408,
+						"Minumim": 1,
+						"T2": 1,
+						"SkillType": 2
+					}
+				],
+				"Naglfar": [
+					{
+						"SkillName": "Minmatar Dreadnought",
+						"Id": 20532,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					},
+					{
+						"SkillName": "Capital Projectile Turret",
+						"Id": 21667,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					},
+					{
+						"SkillName": "Capital Autocannon Specialization",
+						"Id": 41403,
+						"Minumim": 1,
+						"T2": 1,
+						"SkillType": 2
+					},
+					{
+						"SkillName": "Capital Artillery Specialization",
+						"Id": 41404,
+						"Minumim": 1,
+						"T2": 1,
+						"SkillType": 2
+					}
+				],
+				"Phoenix": [
+					{
+						"SkillName": "Caldari Dreadnought",
+						"Id": 20530,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					},
+					{
+						"SkillName": "XL Torpedoes",
+						"Id": 21668,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					},
+					{
+						"SkillName": "XL Torpedo Specialization",
+						"Id": 41409,
+						"Minumim": 1,
+						"T2": 1,
+						"SkillType": 2
+					},
+					{
+						"SkillName": "XL Cruise Missile Specialization",
+						"Id": 41410,
+						"Minumim": 1,
+						"T2": 1,
+						"SkillType": 2
+					}
+				]
+			}
+		},
+		"Carriers": {
+			"CommonSkills": [
+				{
+					"SkillName": "Jump Drive Calibration",
+					"Id": 21611,
+					"Minumim": 4,
+					"T2": 0,
+					"SkillType": 0
+				},
+				{
+					"SkillName": "Jump Drive Operation",
+					"Id": 3456,
+					"Minumim": 1,
+					"T2": 0,
+					"SkillType": 0
+				},
+				{
+					"SkillName": "Fighter Hangar Management",
+					"Id": 24613,
+					"Minumim": 1,
+					"T2": 0,
+					"SkillType": 0
+				},
+				{
+					"SkillName": "Light Fighters",
+					"Id": 40572,
+					"Minumim": 3,
+					"T2": 4,
+					"SkillType": 2
+				},
+				{
+					"SkillName": "Support Fighters",
+					"Id": 40573,
+					"Minumim": 1,
+					"T2": 0,
+					"SkillType": 0
+				},
+				{
+					"SkillName": "Fighters",
+					"Id": 23069,
+					"Minumim": 3,
+					"T2": 5,
+					"SkillType": 2
+				}
+			],
+			"ShipSkills": {
+				"Thanatos": [
+					{
+						"ShipName": "Thanatos",
+						"SkillName": "Gallente Carrier",
+						"Id": 24313,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					}
+				],
+				"Archon": [
+					{
+						"ShipName": "Archon",
+						"SkillName": "Amarr Carrier",
+						"Id": 24311,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					}
+				],
+				"Nidhoggur": [
+					{
+						"ShipName": "Nidhoggur",
+						"SkillName": "Minmatar Carrier",
+						"Id": 24314,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					}
+				],
+				"Chimera": [
+					{
+						"ShipName": "Chimera",
+						"SkillName": "Caldari Carrier",
+						"Id": 24312,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					}
+				]
+			}
+		},
+		"Faxes": {
+			"CommonSkills": [
+				{
+					"SkillName": "Jump Drive Calibration",
+					"Id": 21611,
+					"Minumim": 4,
+					"T2": 0,
+					"SkillType": 0
+				},
+				{
+					"SkillName": "Jump Drive Operation",
+					"Id": 3456,
+					"Minumim": 1,
+					"T2": 0,
+					"SkillType": 0
+				},
+				{
+					"SkillName": "Tactical Logistics Reconfiguration",
+					"Id": 27906,
+					"Minumim": 3,
+					"T2": 5,
+					"SkillType": 1
+				}				
+			],
+			"ShipSkills": {				
+				"Apostle": [
+					{
+						"ShipName": "Apostle",
+						"SkillName": "Amarr Carrier",
+						"Id": 24311,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					}
+				],
+				"Lif": [
+					{
+						"ShipName": "Lif",
+						"SkillName": "Minmatar Carrier",
+						"Id": 24314,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					}
+				],
+				"Ninazu": [
+					{
+						"ShipName": "Ninazu",
+						"SkillName": "Gallente Carrier",
+						"Id": 24313,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					}
+				],
+				"Minokawa": [
+					{
+						"ShipName": "Minokawa",
+						"SkillName": "Caldari Carrier",
+						"Id": 24312,
+						"Minumim": 3,
+						"T2": 0,
+						"SkillType": 0
+					}
+				]
+			}
+		}
+	}
+}

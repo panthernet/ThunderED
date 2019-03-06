@@ -226,11 +226,11 @@ namespace ThunderED.Modules
 
         private static async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string from, string mention)
         {
-            var stamp = DateTime.Parse(mail.timestamp).ToString(SettingsManager.Settings.Config.ShortTimeFormat);
+           // var stamp = DateTime.Parse(mail.timestamp).ToString(SettingsManager.Settings.Config.ShortTimeFormat);
             var body = await PrepareBodyMessage(mail.body);
             var fields = body.Split(1023);
 
-            var embed = new EmbedBuilder()
+           /* var embed = new EmbedBuilder()
                 .WithThumbnailUrl(SettingsManager.Settings.Resources.ImgMail);
             var cnt = 0;
             foreach (var field in fields)
@@ -241,9 +241,11 @@ namespace ThunderED.Modules
                     embed.AddField($"-", string.IsNullOrWhiteSpace(field) ? "---" : field);
                 cnt++;
             }
-            embed.WithFooter($"{LM.Get("mailDate")} {stamp}");
+            embed.WithFooter($"{LM.Get("mailDate")} {stamp}");*/
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
-            await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {from}", embed.Build()).ConfigureAwait(false);
+            await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {from}");
+            foreach (var field in fields)
+                await APIHelper.DiscordAPI.SendMessageAsync(ch, field);
         }
 
         public static async Task<string> PrepareBodyMessage(string input, bool forWeb = false)

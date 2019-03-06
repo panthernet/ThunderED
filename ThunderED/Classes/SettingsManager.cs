@@ -43,6 +43,7 @@ namespace ThunderED.Classes
         public static ThunderSettings Settings { get; private set; }
 
         public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        public static string FileShipsData { get; set; }
 
 
         public static string Prepare(string settingsPath = null)
@@ -65,6 +66,7 @@ namespace ThunderED.Classes
                 FileTemplateHRM_MailBody = Path.Combine(RootDirectory, "Templates", "hrm_inspect_mail.html");
                 FileTemplateHRM_Table = Path.Combine(RootDirectory, "Templates", "hrm_inspect_table.html");
                 FileTemplateHRM_SearchMailPage = Path.Combine(RootDirectory, "Templates", "hrmMailSearch.html");
+                FileShipsData = Path.Combine(DataDirectory, "shipdata.json");
                 return null;
             }
             catch (Exception ex)

@@ -10,6 +10,7 @@ using ThunderED.Classes.Enums;
 namespace TED_ConfigEditor.Classes
 #else
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -22,6 +23,10 @@ namespace ThunderED.Classes
     {
         [ConfigEntryName("")]
         public ConfigSettings Config { get; set; } = new ConfigSettings();
+        [ConfigEntryName("")]
+        [StaticConfigEntry]
+        public CommandsConfigSettings CommandsConfig { get; set; } = new CommandsConfigSettings();
+
         [ConfigEntryName("moduleWebServer")]
         public WebServerModuleSettings WebServerModule { get; set; } = new WebServerModuleSettings();
         [ConfigEntryName("moduleAuthWeb")]
@@ -102,6 +107,20 @@ namespace ThunderED.Classes
             return sb.ToString();
         }
 #endif
+    }
+
+    public class CommandsConfigSettings
+    {
+#if EDITOR
+        public ObservableCollection<string> CapsCommandDiscordRoles { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<ulong> CapsCommandDiscordChannels { get; set; } = new ObservableCollection<ulong>();
+#else
+        public List<string> CapsCommandDiscordRoles { get; set; } = new List<string>();
+        public List<ulong> CapsCommandDiscordChannels { get; set; } = new List<ulong>();
+#endif
+
+        [Comment("Enable !caps command")]
+        public bool EnableCapsCommand { get; set; } = false;
     }
 
     public class SovTrackerModuleSettings: ValidatableSettings
@@ -1453,6 +1472,7 @@ namespace ThunderED.Classes
         public string ZKillboardWebSocketUrl { get; set; } = "wss://zkillboard.com:2096";
         [Comment("Optional path to language files folder. Empty by default and will use default folder")]
         public string LanguageFilesFolder { get; set; }
+
 
 #if EDITOR
         public override string this[string columnName]

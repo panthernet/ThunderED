@@ -768,5 +768,11 @@ namespace ThunderED.API
         {
             return GetUser(id).Roles.Select(a => a.Name).ToList();
         }
+
+        public List<SocketGuildUser> GetUsers(ulong channelId, bool onlineOnly)
+        {
+            var users = channelId == 0 ? GetGuild().Users.ToList() : GetGuild().GetChannel(channelId).Users.ToList();
+            return onlineOnly ? users.Where(a => a.Status != UserStatus.Offline).ToList() : users;
+        }
     }
 }

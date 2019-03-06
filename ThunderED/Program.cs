@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Json.ZKill;
 
 namespace ThunderED
 {
@@ -16,6 +19,8 @@ namespace ThunderED
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+           // var ssss = new List<JsonZKill.ZkillOnly>().Count(a => a.killmail_id == 0);
 
             if (!File.Exists(SettingsManager.FileSettingsPath))
             {
@@ -103,12 +108,6 @@ namespace ThunderED
                 return;
             }
 
-           /* var list = APIHelper.ESIAPI.GetFWSystemStats("1").GetAwaiter().GetResult();
-            var caldari = list.Where(a => a.occupier_faction_id == 500001).Sum(a => a.victory_points);
-            var gallente = list.Where(a => a.occupier_faction_id == 500004).Sum(a => a.victory_points);
-            var cSysCount = list.Count(a => a.occupier_faction_id == 500001);
-            var gSysCount = list.Count(a => a.occupier_faction_id == 500004);*/
-
             //Load modules
             TickManager.LoadModules();
             //initiate core timer
@@ -117,7 +116,7 @@ namespace ThunderED
             Console.CancelKeyPress += (sender, e) =>
             {
                 e.Cancel = false; 
-                _timer.Dispose();
+                _timer?.Dispose();
                 APIHelper.DiscordAPI.Stop();
             };
 
