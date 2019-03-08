@@ -38,13 +38,16 @@ namespace ThunderED.Modules
                 if ((DateTime.Now - _lastUpdateDate).TotalMinutes >= 25)
                 {
                     _lastUpdateDate = DateTime.Now;
-                    var list = await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Dumped);
-                    foreach (var user in list)
+                    if (Settings.HRMModule.DumpInvalidationInHours > 0)
                     {
-                        if (Settings.HRMModule.DumpInvalidationInHours > 0 && user.DumpDate.HasValue && (DateTime.Now - user.DumpDate.Value).TotalHours >= Settings.HRMModule.DumpInvalidationInHours)
+                        var list = await SQLHelper.GetAuthUsersWithPerms((int) UserStatusEnum.Dumped);
+                        foreach (var user in list)
                         {
-                            await LogHelper.LogInfo($"Disposing dumped member {user.Data.CharacterName}({user.CharacterId})...");
-                            await SQLHelper.DeleteAuthDataByCharId(user.CharacterId);
+                            if (user.DumpDate.HasValue && (DateTime.Now - user.DumpDate.Value).TotalHours >= Settings.HRMModule.DumpInvalidationInHours)
+                            {
+                                await LogHelper.LogInfo($"Disposing dumped member {user.Data.CharacterName}({user.CharacterId})...");
+                                await SQLHelper.DeleteAuthDataByCharId(user.CharacterId, true);
+                            }
                         }
                     }
                 }
@@ -231,7 +234,7 @@ namespace ThunderED.Modules
                                     }
                                     else
                                     {
-                                        await SQLHelper.DeleteAuthDataByCharId(searchCharId);
+                                        await SQLHelper.DeleteAuthDataByCharId(searchCharId, true);
                                     }
 
                                     await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
@@ -325,6 +328,12 @@ namespace ThunderED.Modules
                                     await WebServerModule.WriteResponce(LM.Get("accessDenied"), response);
                                     return true;
                                 }
+                                if(authState == UserStatusEnum.Alts && !accessFilter.IsAltUsersVisible)
+                                {
+                                    await WebServerModule.WriteResponce(LM.Get("accessDenied"), response);
+                                    return true;
+                                }
+
                                 if(authState == UserStatusEnum.Dumped && !accessFilter.IsDumpedUsersVisible)
                                 {
                                     await WebServerModule.WriteResponce(LM.Get("accessDenied"), response);
@@ -348,6 +357,9 @@ namespace ThunderED.Modules
                                     case UserStatusEnum.Authed:
                                         await WebServerModule.WriteResponce((await GenerateMembersListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
                                         return true;
+                                    case UserStatusEnum.Alts:
+                                        await WebServerModule.WriteResponce((await GenerateAltsListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        return true;
                                     case UserStatusEnum.Dumped:
                                         await WebServerModule.WriteResponce((await GenerateDumpListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
                                         return true;
@@ -367,6 +379,13 @@ namespace ThunderED.Modules
                                 var membersFilterContent = res[1];
                                 var membersAllowed = accessFilter.IsAuthedUsersVisible ? "true" : "false";
                                 var membersUrl = WebServerModule.GetHRM_AjaxMembersURL((int)UserStatusEnum.Authed, authCode);
+
+                                res = !accessFilter.IsAltUsersVisible ? new string[] {null, null} :  await GenerateAltsListHtml(authCode, accessFilter, 0, GenMemType.Filter);
+                                //var awaitingHtml = res[0];
+                                var altFilterContent = res[1];
+                                var altAllowed = accessFilter.IsAltUsersVisible ? "true" : "false";
+                                var altUrl = WebServerModule.GetHRM_AjaxMembersURL((int)UserStatusEnum.Alts, authCode);
+
                                 res = !accessFilter.IsAwaitingUsersVisible ? new string[] {null, null} :  await GenerateAwaitingListHtml(authCode, accessFilter, 0, GenMemType.Filter);
                                 //var awaitingHtml = res[0];
                                 var awaitingFilterContent = res[1];
@@ -393,26 +412,31 @@ namespace ThunderED.Modules
                                        // .Replace("{awaitingContent}", awaitingHtml)
                                       //  .Replace("{dumpContent}", dumpHtml)
                                         .Replace("{authedFilterContent}", membersFilterContent)
+                                        .Replace("{altFilterContent}", altFilterContent)
                                         .Replace("{awaitingFilterContent}", awaitingFilterContent)
                                         .Replace("{dumpedFilterContent}", dumpFilterContent)
                                         .Replace("{spyingFilterContent}", spiesFilterContent)
 
                                         .Replace("{allowAuthedScript}", membersAllowed)
+                                        .Replace("{allowAltScript}", altAllowed)
                                         .Replace("{allowAwaitingScript}", awaitingAllowed)
                                         .Replace("{allowDumpedScript}", dumpedAllowed)
                                         .Replace("{allowSpyingScript}", spiesAllowed)
                                         .Replace("{authedListUrl}", membersUrl)
+                                        .Replace("{altListUrl}", altUrl)
                                         .Replace("{awaitingListUrl}", awaitingUrl)
                                         .Replace("{dumpedListUrl}", dumpedUrl)
                                         .Replace("{spyingListUrl}", spiesUrl)
 
                                         .Replace("{membersHeader}", LM.Get("hrmMembersHeader"))
+                                        .Replace("{altHeader}", LM.Get("hrmAltsHeader"))
                                         .Replace("{awaitingHeader}", LM.Get("hrmAwaitingHeader"))
                                         .Replace("{dumpHeader}", LM.Get("hrmDumpHeader"))
                                         .Replace("{spyingHeader}", LM.Get("hrmSpiesHeader"))
                                         .Replace("{butSearchMail}", LM.Get("hrmButSearchMail"))
                                         .Replace("{butSearchMailUrl}", WebServerModule.GetHRM_SearchMailURL(0, authCode))
                                         .Replace("{disableAuthed}", !accessFilter.IsAuthedUsersVisible ? " d-none" : null)
+                                        .Replace("{disableAlt}", !accessFilter.IsAltUsersVisible ? " d-none" : null)
                                         .Replace("{disableAwaiting}", !accessFilter.IsAwaitingUsersVisible ? " d-none" : null)
                                         .Replace("{disableDumped}", !accessFilter.IsDumpedUsersVisible ? " d-none" : null)
                                         .Replace("{disableSpying}", !accessFilter.IsSpyUsersVisible ? " d-none" : null)
@@ -449,6 +473,8 @@ namespace ThunderED.Modules
                                         return true;
                                     }
                                     var hasToken = authUserEntity != null && authUserEntity.HasToken;
+
+                                    var relatedCharsContent = await GenerateRelatedCharsContent(inspectCharId, authUserEntity.MainCharacterId ?? 0, authCode);
 
                                     var corpHistoryHtml = await GenerateCorpHistory(inspectCharId);
                                     var pList = authUserEntity?.Data.PermissionsList;
@@ -495,6 +521,7 @@ namespace ThunderED.Modules
                                             .Replace("{tabCorpHistory}", LM.Get("hrmTabCorpHistory"))
                                             .Replace("{tabContacts}", LM.Get("hrmTabContacts"))
                                             .Replace("{tabSkills}", LM.Get("hrmTabSkills"))
+                                            .Replace("{tabRelChars}", LM.Get("hrmTabRelatedChars"))
 
                                             .Replace("{mailListUrl}", WebServerModule.GetHRM_AjaxMailListURL(inspectCharId, authCode))
                                             .Replace("{transactListUrl}", WebServerModule.GetHRM_AjaxTransactListURL(inspectCharId, authCode))
@@ -520,6 +547,7 @@ namespace ThunderED.Modules
                                             .Replace("{disableISK}", SettingsManager.HasCharWalletScope(pList) ? null : "d-none")
                                             .Replace("{disableLocation}", SettingsManager.HasCharLocationScope(pList) ? null : "d-none")
                                             .Replace("{disableShip}", SettingsManager.HasCharShipTypeScope(pList) ? null : "d-none")
+                                            .Replace("{disableRelatedChars}", !string.IsNullOrEmpty(relatedCharsContent) ? null : "d-none")
                                         
                                             .Replace("{butSearchMail}", LM.Get("hrmButSearchMail"))
                                             .Replace("{butSearchMailUrl}", WebServerModule.GetHRM_SearchMailURL(inspectCharId, authCode))
@@ -527,6 +555,7 @@ namespace ThunderED.Modules
                                             .Replace("{ConfirmUserDelete}", LM.Get("hrmButDeleteUserAuthConfirm"))
                                             .Replace("{butDeleteUserUrl}", WebServerModule.GetHRM_DeleteCharAuthURL(inspectCharId, authCode))
                                             .Replace("{butDeleteUser}", LM.Get("hrmButDeleteUserAuth"))
+                                            .Replace("{relatedCharsBody}", relatedCharsContent)
                                         ;
 
                                     //private info

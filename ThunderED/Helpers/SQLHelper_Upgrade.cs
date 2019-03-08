@@ -16,7 +16,7 @@ namespace ThunderED.Helpers
         private static readonly string[] MajorVersionUpdates = new[]
         {
             "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15",
-            "1.2.16","1.2.19", "1.3.1", "1.3.2"
+            "1.2.16","1.2.19", "1.3.1", "1.3.2", "1.3.4"
         };
 
         public static async Task<bool> Upgrade()
@@ -345,6 +345,10 @@ namespace ThunderED.Helpers
                                 await RunCommand("CREATE TABLE `sovIndexTracker` ( `groupName` TEXT UNIQUE NOT NULL, `data` TEXT NOT NULL);");
                             else
                                 await RunCommand("CREATE TABLE `sovIndexTracker` ( `groupName` VARCHAR(100) UNIQUE NOT NULL, `data` TEXT NOT NULL);");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
+                        case "1.3.4":
+                            await RunCommand("ALTER TABLE `auth_users` ADD COLUMN `main_character_id` bigint NULL;");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
+using ThunderED.Classes.Enums;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
 using ThunderED.Providers;
@@ -143,14 +144,30 @@ namespace ThunderED.Helpers
             await Update("auth_users", "groupName", to, "groupName", from);
         }
 
-        public static async Task DeleteAuthDataByDiscordId(ulong discordId)
+        public static async Task<List<long>> DeleteAuthDataByDiscordId(ulong discordId)
         {
+            var user = await GetAuthUserByDiscordId(discordId);
             await Delete("auth_users", "discordID", discordId);
+            if (user != null && user.CharacterId > 0)
+            {
+                var data = await SelectData("auth_users", new[] {"characterID"}, new Dictionary<string, object> {{"main_character_id", user.CharacterId}});
+                return data?.Select(a=> Convert.ToInt64(a[0])).ToList();
+            }
+
+            return null;
         }
 
-        public static async Task DeleteAuthDataByCharId(long characterID)
+        
+        public static async Task UpdateMainCharacter(long altId, long mainId)
+        {
+            await Update("auth_users", "main_character_id", mainId, "characterID", altId);
+        }
+
+        public static async Task DeleteAuthDataByCharId(long characterID, bool deleteAlts = false)
         {
             await Delete("auth_users", "characterID", characterID);
+            if(deleteAlts)
+                await Delete("auth_users", "main_character_id", characterID);
         }
 
         [Obsolete("Maintained for upgrade possibility")]
@@ -223,7 +240,8 @@ namespace ThunderED.Helpers
                 Data = JsonConvert.DeserializeObject<AuthUserData>((string) item[6]),
                 RegCode = (string) item[7],
                 CreateDate = Convert.ToDateTime(item[8]),
-                DumpDate = item[9] == null ? null : (DateTime?)Convert.ToDateTime(item[9])
+                DumpDate = item[9] == null ? null : (DateTime?)Convert.ToDateTime(item[9]),
+                MainCharacterId = item[10] == null ? null : (long?)Convert.ToInt64(item[10])
             };
         }
 
@@ -241,6 +259,7 @@ namespace ThunderED.Helpers
             dic.Add("reg_date", user.CreateDate);
             dic.Add("dump_date", user.DumpDate);
             dic.Add("data", JsonConvert.SerializeObject(user.Data));
+            dic.Add("main_character_id", user.MainCharacterId);
             if (insertOnly)
                 await Insert("auth_users", dic);
             else await InsertOrUpdate("auth_users", dic);
@@ -309,6 +328,13 @@ namespace ThunderED.Helpers
         public static async Task<ulong> GetAuthUserDiscordId(long characterId)
         {
             return await Query<ulong>("auth_users", "discordID", "characterID", characterId);
+        }
+
+        public static async Task<List<AuthUserEntity>> GetAuthUserAlts(long mainCharacterId)
+        {
+            var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object>{{"authState", (int)UserStatusEnum.Authed}, {"main_character_id", mainCharacterId}});
+
+            return res?.Select(ParseAuthUser).ToList();
         }
 
         [Obsolete("Maintained for upgrade possibility")]
@@ -840,6 +866,7 @@ namespace ThunderED.Helpers
         }
 
         #endregion
+
 
     }
 }

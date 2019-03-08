@@ -58,6 +58,12 @@
     "LanguageFilesFolder":  ""
   },
 
+  "CommandsConfig": {
+    "EnableCapsCommand":  "false", 
+    "CapsCommandDiscordRoles":  [],
+    "CapsCommandDiscordChannels":  [] 
+  },
+
   "Database": {
     "databaseProvider":  "sqlite",
     "databaseFile": "edb.db",
@@ -130,6 +136,7 @@
         "IsAwaitingUsersVisible": true,
         "IsDumpedUsersVisible": true,
         "IsAuthedUsersVisible":  true,
+        "IsAltUsersVisible":  true,
         "IsSpyUsersVisible":  true,
         "CanSearchMail":  true,
         "CanKickUsers":  true,
@@ -137,7 +144,8 @@
         "CanInspectAuthedUsers":  true,
         "CanInspectAwaitingUsers":  true,
         "CanInspectDumpedUsers":  true,
-        "CanInspectSpyUsers":  true
+        "CanInspectSpyUsers":  true,
+        "CanInspectAltUsers":  true
       } 
     },
     "AuthTimeoutInMinutes":  30,
@@ -367,12 +375,17 @@
           }
         }
       },
-      "Mode5_ESIWithoutAuth": {
+      "Mode5_ESIWithoutDiscord": {
         "PreliminaryAuthMode": true,
         "AppInvalidationInHours": 24,
         "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
+        "CustomButtonText": "ESI without Discord Auth",
+        "SkipDiscordAuthPage":  true
+      },
+      "Mode6_AltCharactersAuth": {
+        "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
         "CustomButtonText": "Alt Characters Auth",
-        "SkipDiscordAuthPage":  true 
+        "BindToMainCharacter":  true 
       }
     }
   },

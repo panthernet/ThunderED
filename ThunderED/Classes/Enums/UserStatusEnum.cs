@@ -6,6 +6,7 @@
         Awaiting = 1,
         Authed = 2,
         Dumped = 3,
-        Spying = 4
+        Spying = 4,
+        Alts = 99
     }
 }

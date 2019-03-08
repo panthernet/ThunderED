@@ -31,6 +31,9 @@
             if ({allowAuthedScript}) {
                 $("#authed-content").load('{authedListUrl}0', function () { updateConfirmation(); });
             }
+            if ({allowAltScript}) {
+                $("#alt-content").load('{altListUrl}0', function () { updateConfirmation(); });
+            }
             if ({allowAwaitingScript}) {
                 $("#awaiting-content").load('{awaitingListUrl}0', function () { updateConfirmation(); });
             }
@@ -46,6 +49,12 @@
             var value = $('#selectAuthed').val();
             $("#authed-content").load('{authedListUrl}' + value, function () { updateConfirmation(); });
         }
+
+        function filterOnChangeAlt() {
+            var value = $('#selectAlt').val();
+            $("#alt-content").load('{altListUrl}' + value, function () { updateConfirmation(); });
+        }
+
 
         function filterOnChangeAwaiting() {
             var value = $('#selectAwaiting').val();
@@ -98,6 +107,30 @@
                 </div>
             </div>
         </div>
+        
+        <div class="card{disableAlt}">
+            <div class="card-header" id="headingOne">
+                <h4 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseAlt" aria-expanded="true" aria-controls="collapseAlt">
+                        {altHeader}
+                    </button>
+                </h4>
+            </div>
+            <div id="collapseAlt" class="collapse show" aria-labelledby="headingAlt" data-parent="#accordionExample">
+                <div class="card-body">
+                    <div class="row-fluid">
+                        <span class="fas fa-filter justify-content-center align-self-center" style="margin-right: 25px;"></span>
+                        <select id="selectAlt" class="form-control" style="width: 300px;" onchange="filterOnChangeAlt()">
+                            {altFilterContent}
+                        </select>
+                    </div>
+                    <div id="alt-content" class="container">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card{disableAwaiting}">
             <div class="card-header" id="headingTwo">
                 <h4 class="mb-0">

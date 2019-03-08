@@ -17,9 +17,10 @@ namespace ThunderED.Classes.Entities
         public string RefreshToken;
         public int AuthState;
         public AuthUserData Data = new AuthUserData();
-        public DateTime CreateDate { get; set; }
-        public DateTime? DumpDate { get; set; }
-        public string RegCode { get; set; }
+        public DateTime CreateDate;
+        public DateTime? DumpDate;
+        public string RegCode;
+        public long? MainCharacterId;
 
 
         //for compatibility
@@ -41,10 +42,14 @@ namespace ThunderED.Classes.Entities
         public bool IsSpying => AuthState == 4;
 
         [JsonIgnore]
+        public bool IsAltChar => MainCharacterId > 0;
+
+        [JsonIgnore]
         public bool HasToken => !string.IsNullOrEmpty(RefreshToken);
 
         [JsonIgnore]
         public bool HasRegCode => !string.IsNullOrEmpty(RegCode);
+
 
         public void SetStateDumpster()
         {
@@ -91,6 +96,22 @@ namespace ThunderED.Classes.Entities
             }
             if (permissions != null)
                 Data.Permissions = permissions;
+        }
+
+        public static async Task<AuthUserEntity> CreateAlt(long characterId, string refreshToken, WebAuthGroup @group, string groupName, long mainCharId)
+        {
+            var authUser = new AuthUserEntity
+            {
+                CharacterId = characterId,
+                DiscordId = 0,
+                RefreshToken = refreshToken,
+                GroupName = groupName,
+                AuthState = 2,
+                CreateDate = DateTime.Now,
+                MainCharacterId = mainCharId
+            };
+            await authUser.UpdateData(group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null);
+            return authUser;
         }
     }
 

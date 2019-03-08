@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -243,9 +244,16 @@ namespace ThunderED.Modules
 
         private static async Task<string[]> GenerateMembersListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
-            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).Where(a=> IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).Where(a=> !a.IsAltChar && IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
             return await GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Authed, filterId, genType);
         }
+
+        private static async Task<string[]> GenerateAltsListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
+        {
+            var list = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).Where(a=> a.IsAltChar && IsValidUserForInteraction(accessFilter, a)).OrderBy(a=> a.Data.CharacterName);
+            return await GenerateActualMemberEntries(list, authCode, accessFilter, (int)UserStatusEnum.Authed, filterId, genType);
+        }
+
 
         private static async Task<string[]> GenerateSpiesListHtml(string authCode, HRMAccessFilter accessFilter, long filterId, GenMemType genType)
         {
@@ -606,6 +614,7 @@ namespace ThunderED.Modules
         private async Task<string> GenerateJournalHtml(string token, int inspectCharId, int page)
         {
             var items = await APIHelper.ESIAPI.GetCharacterJournalTransactions(Reason, inspectCharId, token);
+            items = items ?? new List<JsonClasses.WalletJournalEntry>();
             //var totalCount = mailHeaders.Count;
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
             items = items.Count == 0 ? items : items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
@@ -730,5 +739,36 @@ namespace ThunderED.Modules
             return sb.ToString();
         }
 
+        private async Task<string> GenerateRelatedCharsContent(long charId, long mainCharId, string code)
+        {
+            var file = File.ReadAllText(SettingsManager.FileTemplateHRM_Table);
+            var users = mainCharId == 0 ? await SQLHelper.GetAuthUserAlts(charId) : new List<AuthUserEntity> {await SQLHelper.GetAuthUserByCharacterId(mainCharId)};
+            if (!users.Any()) return file.Replace("{table}", null);
+            var type = mainCharId == 0 ? LM.Get("hrmAltsAlt") : LM.Get("hrmAltsMain");
+            var sb = new StringBuilder();
+            sb.AppendLine("<thead>");
+            sb.AppendLine("<tr>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">#</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmAltsType")}</th>");
+            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("hrmAltsName")}</th>");
+            sb.AppendLine("</tr>");
+            sb.AppendLine("</thead>");
+            sb.AppendLine("<tbody>");
+            int counter = 1;
+            foreach (var user in users)
+            {
+                var url = WebServerModule.GetHRMInspectURL(user.CharacterId, code);
+                var name = $"{user.Data.CharacterName}[{user.Data.CorporationTicker}]{(user.Data.AllianceId > 0 ? $"[{user.Data.AllianceTicker}]" : null)}";
+                sb.AppendLine($"<tr>");
+                sb.AppendLine($"  <th scope=\"row\">{counter++}</th>");
+                sb.AppendLine($"  <td>{type}</td>");
+                sb.AppendLine($"  <td><b><a href=\"{url}\">{name}</a></b></td>");
+                sb.AppendLine("</tr>");
+            }
+
+            sb.AppendLine("</tbody>");
+
+            return file.Replace("{table}", sb.ToString());
+        }
     }
 }

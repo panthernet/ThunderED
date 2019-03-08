@@ -1,3 +1,14 @@
+### V1.3.4
++ Added new **BindToMainCharacter** param to AuthGroups (read explanation below)
++ Added new **IsAltUsersVisible** and **CanInspectAltUsers** params to HR module access list
++ Refactored authentication code to be more consistent with the modules
++ Updated HR module to include Alt Characters information into general lists and char inspection page
+
+### NOTES
+- Added new mode for the authentication process called: Alt Characters Authentication! In this mode you can bind alt characters with custom ESI permissions to the already authed main characters. Alt characters are dependant from the main character i.e. will be deleted if main character auth is deleted. They can be inspected in HR module and will be a subject for a subset of some new Discord commands.
+  When this mode is enabled it will always be treated as if **ExcludeFromOneButtonMode** and **SkipDiscordAuthPage** params are set to true
+  Set **BindToMainCharacter** to enable this mode. Please take a look at the auth group named **Mode6_AltCharactersAuth** in **settings.def.json** file for more info.
+
 ### V1.3.3
 + Added new **UseStrictAuthenticationMode** param to auth group (read explanation below)
 + Added new **week(w), lastweek(lw), lastday(ld), rating(r)** command parameters for !stats command

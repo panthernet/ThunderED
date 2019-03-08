@@ -399,6 +399,7 @@ namespace ThunderED.Classes
         public bool IsAwaitingUsersVisible { get; set; } = true;
         public bool IsDumpedUsersVisible { get; set; } = true;
         public bool IsAuthedUsersVisible { get; set; } = true;
+        public bool IsAltUsersVisible { get; set; } = true;
         public bool IsSpyUsersVisible { get; set; } = true;
         public bool CanSearchMail { get; set; } = true;
         public bool CanKickUsers { get; set; } = true;
@@ -407,6 +408,7 @@ namespace ThunderED.Classes
         public bool CanInspectAwaitingUsers { get; set; } = true;
         public bool CanInspectDumpedUsers { get; set; } = true;
         public bool CanInspectSpyUsers { get; set; } = true;
+        public bool CanInspectAltUsers { get; set; } = true;
 
         public bool CanAccessUser(int authState)
         {
@@ -1687,6 +1689,10 @@ namespace ThunderED.Classes
 
         [Comment("Skip Discord auth page display after CCP auth (when you want to get ESI token without actual auth)")]
         public bool SkipDiscordAuthPage { get; set; } = false;
+
+        [Comment("Bind authenticating character to main character which is already exist")]
+        public bool BindToMainCharacter { get; set; } = false;
+
 
         [Comment("Optional switch to exclude this group from OneButtonMode if corresponding option is enabled on a section level")]
         public bool ExcludeFromOneButtonMode { get; set; } = false;

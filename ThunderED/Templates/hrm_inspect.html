@@ -196,6 +196,7 @@
                         <a class="nav-item nav-link {disableCharStats}" id="nav-lys-tab" data-toggle="tab" href="#nav-lys" role="tab" aria-controls="nav-lys" aria-selected="false">{tabLastYearStats}</a>
                         <a class="nav-item nav-link {disableContacts}" id="nav-contacts-tab" data-toggle="tab" href="#nav-contacts" role="tab" aria-controls="nav-contacts" aria-selected="false">{tabContacts}</a>
                         <a class="nav-item nav-link {disableSkills}" id="nav-skills-tab" data-toggle="tab" href="#nav-skills" role="tab" aria-controls="nav-skills" aria-selected="false">{tabSkills}</a>
+                        <a class="nav-item nav-link {disableRelatedChars}" id="nav-relchars-tab" data-toggle="tab" href="#nav-relchars" role="tab" aria-controls="nav-relchars" aria-selected="false">{tabRelChars}</a>
                     </div>
                 </nav>
             </div>
@@ -234,6 +235,12 @@
                         <div id="skills-content">Loading...</div>
                         <div id="skills-page-selection"></div>
                     </div>
+                    <div class="tab-pane fade" id="nav-relchars" role="tabpanel" aria-labelledby="nav-relchars-tab">
+                        <div id="relchars-content">
+                            {relatedCharsBody}
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
