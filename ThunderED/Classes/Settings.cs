@@ -409,6 +409,7 @@ namespace ThunderED.Classes
         public bool CanInspectDumpedUsers { get; set; } = true;
         public bool CanInspectSpyUsers { get; set; } = true;
         public bool CanInspectAltUsers { get; set; } = true;
+        public bool CanRestoreDumped { get; set; } = true;
 
         public bool CanAccessUser(int authState)
         {

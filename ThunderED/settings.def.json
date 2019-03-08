@@ -145,7 +145,8 @@
         "CanInspectAwaitingUsers":  true,
         "CanInspectDumpedUsers":  true,
         "CanInspectSpyUsers":  true,
-        "CanInspectAltUsers":  true
+        "CanInspectAltUsers":  true,
+        "CanRestoreDumped":  true 
       } 
     },
     "AuthTimeoutInMinutes":  30,

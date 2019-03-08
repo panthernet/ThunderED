@@ -496,5 +496,7 @@
   "hrmAltsType":  "Type", 
   "hrmAltsName":  "Name",
   "hrmAltsAlt":  "Alt",
-  "hrmAltsMain":  "Main"
+  "hrmAltsMain":  "Main",
+  "hrmRestoreButtonTooltip":  "Try to restore characters auth",
+  "hrmRestoreConfirm":  "Restore characters auth?" 
 }

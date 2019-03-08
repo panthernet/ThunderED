@@ -1,6 +1,7 @@
 ### V1.3.4
 + Added new **BindToMainCharacter** param to AuthGroups (read explanation below)
-+ Added new **IsAltUsersVisible** and **CanInspectAltUsers** params to HR module access list
++ Added new **IsAltUsersVisible**, **CanInspectAltUsers** and **CanRestoreDumped** params to HR module access list
++ Added ability to restore members from dump in HR module
 + Added new experimental !caps command to display capital skills stats throughout the members database
 + Fixed corp and alliance data update in HR lists when users changes them
 + Refactored authentication code to be more consistent with the modules

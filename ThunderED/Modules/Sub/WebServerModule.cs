@@ -516,5 +516,10 @@ namespace ThunderED.Modules.Sub
         {
             return $"hrm.php?data=moveToSpies{itemCharacterId}&id={authCode}&state=matahari";
         }
+
+        public static string GetHRM_RestoreDumpedURL(long itemCharacterId, string authCode)
+        {
+            return $"hrm.php?data=restoreAuth{itemCharacterId}&id={authCode}&state=matahari";
+        }
     }
 }

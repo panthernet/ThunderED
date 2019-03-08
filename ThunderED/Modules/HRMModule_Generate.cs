@@ -188,6 +188,14 @@ namespace ThunderED.Modules
                             sb.Append(@"</a>");
                         }
 
+                        if (isDumpedList)
+                        {
+                            sb.Append(
+                                $@"<a class=""btn btn-outline-primary flex-content{(accessFilter.CanRestoreDumped ? null : " d-none")}"" href=""{WebServerModule.GetHRM_RestoreDumpedURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" tooltip-title=""{LM.Get("hrmRestoreButtonTooltip")}"" confirm-title=""{LM.Get("hrmRestoreConfirm")}"" data-singleton=""true""  data-popout=""true"" data-placement=""top"">");
+                            sb.Append(@"  <span class=""fas fa-trash-restore fa-2x""></span>");
+                            sb.Append(@"</a>");
+                        }
+
                         sb.Append(
                             $@"<a class=""btn btn-outline-danger flex-content{(accessFilter.CanKickUsers ? null : " d-none")}"" href=""{WebServerModule.GetHRM_DeleteCharAuthURL(item.CharacterId, authCode)}"" style=""width: 60px;"" data-toggle=""confirmation"" tooltip-title=""{deleteTooltip}"" confirm-title=""{LM.Get("hrmButDeleteUserAuthConfirm")}"" data-singleton=""true""  data-popout=""true"">");
                         sb.Append(@"  <span class=""fas fa-times-circle fa-2x""></span>");

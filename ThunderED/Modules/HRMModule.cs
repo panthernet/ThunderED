@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
+using Matrix.Xmpp.Auth;
 using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
@@ -213,6 +214,43 @@ namespace ThunderED.Modules
                                 user.SetStateSpying();
                                 await SQLHelper.SaveAuthUser(user);
                                 await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
+                                return true;
+                            }
+                            case var s when s.StartsWith("restoreAuth"):
+                            {
+                                try
+                                {
+                                    var searchCharId = Convert.ToInt64(s.Replace("restoreAuth", ""));
+                                    if (searchCharId == 0) return true;
+                                    if (!await IsValidUserForInteraction(accessFilter, searchCharId) || !accessFilter.CanRestoreDumped)
+                                        return true;
+
+                                    var sUser = await SQLHelper.GetAuthUserByCharacterId(searchCharId);
+
+                                    if (sUser == null) return true;
+
+                                    //restore alt
+                                    if (sUser.MainCharacterId > 0)
+                                    {
+                                        sUser.AuthState = (int) UserStatusEnum.Authed;
+                                        await SQLHelper.SaveAuthUser(sUser);
+                                        await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
+                                        return true;
+                                    }
+
+                                    sUser.AuthState = (int) UserStatusEnum.Awaiting;
+                                    sUser.RegCode = Guid.NewGuid().ToString("N");
+                                    await SQLHelper.SaveAuthUser(sUser);
+                                    if (sUser.DiscordId > 0)
+                                        await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId, false);
+
+                                    await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
+                                }
+                                catch (Exception ex)
+                                {
+                                    await LogHelper.LogEx(s, ex, Category);
+                                }
+
                                 return true;
                             }
                             case var s when s.StartsWith("deleteAuth"):
