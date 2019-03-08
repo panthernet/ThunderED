@@ -72,6 +72,11 @@ namespace ThunderED.Classes
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}clist ");
             }
+            if (SettingsManager.Settings.CommandsConfig.EnableCapsCommand)
+            {
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}caps ");
+            }
+
 
             sb.Append("**\n");
             if (string.IsNullOrEmpty(await APIHelper.DiscordAPI.IsAdminAccess(Context)))
@@ -167,6 +172,9 @@ namespace ThunderED.Classes
                     break;
                 case "clist":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpClist", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "clist"), true);
+                    break;
+                case "caps":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpCaps", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "caps"), true);
                     break;
             }
         }

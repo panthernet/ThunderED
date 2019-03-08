@@ -274,10 +274,16 @@ namespace ThunderED.Modules.Sub
                 .Replace("{backUrl}", backUrl);
         }
 
-        public static async Task WriteResponce(string message, System.Net.Http.HttpListenerResponse response)
+        public static async Task WriteResponce(string message, System.Net.Http.HttpListenerResponse response, bool noCache = false)
         {
             response.Headers.ContentEncoding.Add("utf-8");
             response.Headers.ContentType.Add("text/html;charset=utf-8");
+            if (noCache)
+            {
+                response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate");
+                response.Headers.Add("Pragma", "no-cache"); // HTTP 1.0.
+                response.Headers.Add("Expires", "0"); // Proxies.
+            }
             await response.WriteContentAsync(message);
         }
 

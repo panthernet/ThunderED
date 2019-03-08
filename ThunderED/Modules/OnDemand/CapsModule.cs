@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Async;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,72 +13,13 @@ using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
+using ThunderED.Json;
 
 namespace ThunderED.Modules.OnDemand
 {
     public class CapsModule: AppModuleBase
     {
         public override LogCat Category => LogCat.Caps;
-
-        private const long SKILL_CALIBR = 21611;
-
-       /* private readonly List<SkillRequirement> DreadCommonSkills = new List<SkillRequirement>
-        {
-            new SkillRequirement(21611, "Jump Drive Calibration", 4), 
-            new SkillRequirement(3456, "Jump Drive Operation"), 
-            new SkillRequirement(22043, "Tactical Weapon Reconfiguration", 3, SkillType.Siege, 5), 
-        };
-
-        private readonly List<SkillRequirement> CarrierCommonSkills = new List<SkillRequirement>
-        {
-            new SkillRequirement(21611, "Jump Drive Calibration", 4), 
-            new SkillRequirement(3456, "Jump Drive Operation"), 
-            new SkillRequirement(24613, "Fighter Hangar Management"), 
-            new SkillRequirement(40572, "Light Fighters", 3, SkillType.Weapon, 4), 
-            new SkillRequirement(40573, "Support Fighters"), 
-            new SkillRequirement(23069, "Fighters", 3, SkillType.Weapon, 5), 
-        };
-
-        private readonly List<SkillRequirement> LogiCommonSkills = new List<SkillRequirement>
-        {
-            new SkillRequirement(21611, "Jump Drive Calibration"), 
-            new SkillRequirement(3456, "Jump Drive Operation"), 
-            new SkillRequirement(27906, "Tactical Logistics Reconfiguration", 3, SkillType.Siege, 5), 
-        };
-
-        private readonly List<SkillRequirement> CapitalSkills = new List<SkillRequirement>
-        {
-            new SkillRequirement(20531, "Gallente Dreadnought", 3), 
-            new SkillRequirement(21666, "Capital Hybrid Turret", 3), 
-            new SkillRequirement(41405, "Capital Blaster Specialization", 1, SkillType.Weapon, 1), 
-            new SkillRequirement(41406, "Capital Railgun Specialization", 1, SkillType.Weapon, 1), 
-            new SkillRequirement(20525, "Amarr Dreadnought", 3), 
-            new SkillRequirement(20327, "Capital Energy Turret", 3), 
-            new SkillRequirement(41405, "Capital Pulse Laser Specialization", 1, SkillType.Weapon, 1), 
-            new SkillRequirement(41408, "Capital Beam Laser Specialization", 1, SkillType.Weapon, 1), 
-            new SkillRequirement(20532, "Minmatar Dreadnought", 3), 
-            new SkillRequirement(21667, "Capital Projectile Turret", 3), 
-            new SkillRequirement(41403, "Capital Autocannon Specialization", 1, SkillType.Weapon, 1), 
-            new SkillRequirement(41404, "Capital Artillery Specialization", 1, SkillType.Weapon, 1), 
-            new SkillRequirement(20530, "Caldari Dreadnought", 3), 
-            new SkillRequirement(21668, "XL Torpedoes", 3), 
-            new SkillRequirement(41409, "XL Torpedo Specialization", 1, SkillType.Weapon, 1), 
-            new SkillRequirement(41410, "XL Cruise Missile Specialization", 1, SkillType.Weapon, 1), 
-
-            new SkillRequirement(24313, "Gallente Carrier", 3), 
-
-            new SkillRequirement(24311, "Amarr Carrier", 3), 
-
-            new SkillRequirement(24314, "Minmatar Carrier", 3), 
-            
-            new SkillRequirement(24312, "Caldari Carrier", 3), 
-
-            new SkillRequirement(24311, "Amarr Carrier", 3), 
-            new SkillRequirement(24314, "Minmatar Carrier", 3), 
-            new SkillRequirement(24313, "Gallente Carrier", 3), 
-            new SkillRequirement(24312, "Caldari Carrier", 3), 
-
-        };*/
 
         private bool _isWhoRunning;
 
@@ -87,6 +30,8 @@ namespace ThunderED.Modules.OnDemand
 
         public class ShipDataGroup
         {
+            public string FormatDescription;
+            public string FormatTemplate;
             public List<SkillRequirement> CommonSkills  = new List<SkillRequirement>();
             public Dictionary<string, List<SkillRequirement>> ShipSkills  = new Dictionary<string, List<SkillRequirement>>();
             public Dictionary<string, ShipSpecialCounter> SpecialCounters = new Dictionary<string, ShipSpecialCounter>();
@@ -96,6 +41,11 @@ namespace ThunderED.Modules.OnDemand
         {
             public long Id;
             public int Rank;
+            public bool IsVisible;
+            [JsonIgnore]
+            public string Name;
+            [JsonIgnore]
+            public int Count;
         }
 
         public class ShipResult
@@ -114,9 +64,13 @@ namespace ThunderED.Modules.OnDemand
             }
 
             if (!File.Exists(SettingsManager.FileShipsData))
-            {                
-                await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("errFileNotFound"));
-                return;
+            {
+                if(!File.Exists(SettingsManager.FileShipsDataDefault))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("errFileNotFound", SettingsManager.FileShipsData));
+                    return;
+                }
+                File.Copy(SettingsManager.FileShipsDataDefault, SettingsManager.FileShipsData);
             }
 
             if(context.User.IsBot || string.IsNullOrEmpty(commandText))
@@ -177,116 +131,162 @@ namespace ThunderED.Modules.OnDemand
                     return;
                 }
 
-               /* var dredsDic = Enum.GetNames(typeof(DreadShipType)).ToDictionary(name => name, name => "");
-                dredsDic.Remove(DreadShipType.None.ToString());
-                var carrierDic = Enum.GetNames(typeof(CarrierShipType)).ToDictionary(name => name, name => "");
-                carrierDic.Remove(CarrierShipType.None.ToString());
-                var logiDic = Enum.GetNames(typeof(LogiShipType)).ToDictionary(name => name, name => "");
-                logiDic.Remove(LogiShipType.None.ToString());
-                var dreadCount = 0;
-                var carrierCount = 0;
-                var logiCount = 0;*/
-                var totalUsers = usersToCheck.Count;
-                var c5count = 0;
-
-                var specialDic = new Dictionary<string, ShipSpecialCounter>();
                 var dataDic = new Dictionary<string, List<ShipResult>>();
                 var counts = new Dictionary<string, int>();
 
-                foreach (var userEntity in usersToCheck)
+                var usersData = new ConcurrentBag<ShipUserData>();
+                await usersToCheck.ParallelForEachAsync(async userEntity =>
                 {
                     var token = await APIHelper.ESIAPI.RefreshToken(userEntity.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
                         SettingsManager.Settings.WebServerModule.CcpAppSecret);
                     if (token == null)
                     {
                         await LogHelper.LogWarning($"Character {userEntity.Data.CharacterName}({userEntity.CharacterId}) has invalid token!");
-                        continue;
+                        return;
                     }
-
                     var skills = await APIHelper.ESIAPI.GetCharSkills(Reason, userEntity.CharacterId, token);
-                    if (skills?.skills == null || skills.skills.Count == 0) continue;
-                    var calibr = skills.skills.FirstOrDefault(a => a.skill_id == SKILL_CALIBR)?.trained_skill_level ?? 0;
-                    if (calibr >= 5)
-                        c5count++;
-
-                    foreach (var pair in data.Groups)
+                    if (skills?.skills == null || skills.skills.Count == 0) return;
+                    usersData.Add(new ShipUserData
                     {
-                        var groupName = pair.Key;
-                        var group = pair.Value;
+                        User = userEntity,
+                        Skills = skills
+                    });
+                }, 8);
 
-                        counts.Add(groupName, 0);
+                foreach (var pair in data.Groups)
+                {
+                    var groupName = pair.Key;
+                    var group = pair.Value;
+                    counts.Add(groupName, 0);
+                    dataDic.Add(groupName, new List<ShipResult>());
+                    
+                    var shCountDic = new Dictionary<string, int>();
+                    foreach (var skill in @group.ShipSkills)
+                        shCountDic.Add(skill.Key, 0);
 
-                        foreach (var valuePair in @group.SpecialCounters)
+                    var useSiege = group.FormatTemplate.Contains("{ST1}");
+                    var useWeapon = group.FormatTemplate.Contains("{ST2}");
+
+
+                    foreach (var user in usersData.Where(user => group.CommonSkills.All(skill =>
+                    {
+                        var s = user.Skills.skills.FirstOrDefault(a => a.skill_id == skill.Id);
+                        if (s == null) return false;
+                        return s.trained_skill_level >= skill.Minumim;
+                    })))
+                    {
+                        var st1 = !useSiege ? null : (group.CommonSkills.Where(a => a.SkillType == SkillType.Siege).All(skill =>
                         {
-                            var counterName = valuePair.Key;
-                            var counter = valuePair.Value;
-                            //TODO
-                        }
-
-                        var isCommonSkills = group.CommonSkills.All(skill =>
-                        {
-                            var s = skills.skills.FirstOrDefault(a => a.skill_id == skill.Id);
+                            var s = user.Skills.skills.FirstOrDefault(a => a.skill_id == skill.Id);
                             if (s == null) return false;
-                            return s.trained_skill_level >= skill.Minumim;
-                        });
+                            return s.trained_skill_level >= skill.T2;
+                        })
+                            ? "T2"
+                            : "T1");
 
-                        if (isCommonSkills)
+                        var userCounted = false;
+                        foreach (var valuePair in @group.ShipSkills)
                         {
-                            var siegeValue = group.CommonSkills.Where(a => a.SkillType == SkillType.Siege).All(skill =>
+                            var shipName = valuePair.Key;
+                            var shipSkills = valuePair.Value;
+
+                            var canDrive = shipSkills.All(skill =>
                             {
-                                var s = skills.skills.FirstOrDefault(a => a.skill_id == skill.Id);
+                                var s = user.Skills.skills.FirstOrDefault(a => a.skill_id == skill.Id);
+                                if (s == null) return false;
+                                if (skill.SkillType == SkillType.Weapon && skill.T2 > 0) return true;
+                                return s.trained_skill_level >= skill.Minumim;
+                            });
+                            if (!canDrive) continue;
+
+                            var st2 = !useWeapon ? null : (shipSkills.Where(a => a.SkillType == SkillType.Weapon).Any(skill =>
+                            {
+                                var s = user.Skills.skills.FirstOrDefault(a => a.skill_id == skill.Id);
                                 if (s == null) return false;
                                 return s.trained_skill_level >= skill.T2;
                             })
-                                ? 2
-                                : 1;
-
-                            var groupCount = 0;
-                            foreach (var valuePair in @group.ShipSkills)
+                                ? "T2"
+                                : "T1");
+                            if (!userCounted)
                             {
-                                var shipName = valuePair.Key;
-                                var shipSkills = valuePair.Value;
-
-                                var canDrive = shipSkills.All(skill =>
-                                {
-                                    var s = skills.skills.FirstOrDefault(a => a.skill_id == skill.Id);
-                                    if (s == null) return false;
-                                    if (skill.SkillType == SkillType.Weapon && skill.T2 > 0) return true;
-                                    return s.trained_skill_level >= skill.Minumim;
-                                });
-                                if (!canDrive) continue;
-
-                                var weapon = shipSkills.Where(a => a.SkillType == SkillType.Weapon).Any(skill =>
-                                {
-                                    var s = skills.skills.FirstOrDefault(a => a.skill_id == skill.Id);
-                                    if (s == null) return false;
-                                    return s.trained_skill_level >= skill.T2;
-                                })
-                                    ? 2
-                                    : 1;
-
-                                counts[groupName] += counts[groupName] + 1;
-                                var result = new ShipResult
-                                {
-                                    Name = shipName,
-                                    Text = $"{userEntity.Data.CharacterName}({calibr})[T{siegeValue},T{weapon}], "
-                                };
-                                if (!dataDic.ContainsKey(groupName))
-                                    dataDic.Add(groupName, new List<ShipResult> {result});
-                                else
-                                {
-                                    var sd = dataDic[groupName].FirstOrDefault(a => a.Name == result.Name);
-                                    if (sd != null)
-                                        sd.Text += result.Text;
-                                    else dataDic[groupName].Add(result);
-                                }
+                                counts[groupName] = counts[groupName] + 1;
+                                userCounted = true;
                             }
-                        }
 
+                            var tmplt = group.FormatTemplate.Replace("{NAME}", user.User.Data.CharacterName)
+                                .Replace("{ST1}", st1)
+                                .Replace("{ST2}", st2);
+                            for (int i = 1; i < 99; i++)
+                            {
+                                if(!tmplt.Contains($"{{SP{i}}}"))
+                                    break;
+                                var spId = group.SpecialCounters.Values.ToList()[i-1].Id;
+                                var value = user.Skills.skills.FirstOrDefault(a => a.skill_id == spId)?.trained_skill_level ?? 0;
+                                tmplt = tmplt.Replace($"{{SP{i}}}", value.ToString());
+                            }
+                            var result = new ShipResult
+                            {
+                                Name = shipName,
+                                Text = tmplt
+                            };
+                            var sd = dataDic[groupName].FirstOrDefault(a => a.Name == result.Name);
+                            if (sd != null)
+                                sd.Text += $", {result.Text}";
+                            else dataDic[groupName].Add(result);
+                            shCountDic[shipName] = shCountDic[shipName] + 1;
+                        }
+                    }
+
+                    foreach (var counter in @group.SpecialCounters.Where(a=> a.Value.IsVisible))
+                    {
+                        counter.Value.Count = usersData.Count(user =>
+                            user.Skills.skills.FirstOrDefault(a => a.skill_id == counter.Value.Id && a.trained_skill_level >= counter.Value.Rank) != null);
+                    }
+
+                    //add empty ships
+                    foreach (var valuePair in shCountDic.Where(a=> a.Value == 0))
+                    {
+                        dataDic[groupName].Add(new ShipResult
+                        {
+                            Name = valuePair.Key,
+                            Text = LM.Get("None")
+                        });
                     }
                 }
 
-                var split = dataDic.Sum(a => a.Value.Sum(b => b.Text.Length));
+                var sb = new StringBuilder();
+                foreach (var pair in dataDic)
+                {
+                    sb.AppendLine($"**{pair.Key}** ({counts[pair.Key]} {LM.Get("of")} {usersData.Count})");
+                    sb.AppendLine($"*Format: {data.Groups[pair.Key].FormatDescription}*");
+                    sb.AppendLine($"```");
+                    var maxNameLen = pair.Value.GroupBy(a=> a.Name).Max(a => a.Key.Length);
+
+                    foreach (var group in pair.Value.GroupBy(a=> a.Name))
+                    {
+                        var text = string.Join(", ", group.Select(a=>a.Text));
+                        sb.AppendLine($"{group.Key.FixedLength(maxNameLen)} - {(string.IsNullOrEmpty(text) ? LM.Get("None") : text)}");
+                    }
+
+                    if (data.Groups[pair.Key].SpecialCounters.Any(a => a.Value.IsVisible))
+                    {
+                        sb.AppendLine($"");
+                        sb.AppendLine($"Specials");
+                    }
+
+                    foreach (var counter in data.Groups[pair.Key].SpecialCounters.Where(a=> a.Value.IsVisible))
+                    {
+                        sb.AppendLine($"{counter.Key}: {counter.Value.Count} {LM.Get("of")} {usersData.Count}");
+                    }
+                    sb.AppendLine($"```");
+                }
+
+
+                foreach (var str in sb.ToString().SplitBy(5990))
+                {                  
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, $".\n{str}");
+                }
+
                /* var sb = new StringBuilder();
                 sb.AppendLine(".");
                 sb.AppendLine($"**Dreads** ({dreadCount} {LM.Get("of")} {totalUsers})");
@@ -348,6 +348,11 @@ namespace ThunderED.Modules.OnDemand
         }
     }
 
+    public class ShipUserData
+    {
+        public AuthUserEntity User;
+        public JsonClasses.SkillsData Skills;
+    }
 
 
     public class SkillRequirement

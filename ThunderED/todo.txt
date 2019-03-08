@@ -4,6 +4,9 @@
 
 //TODO
 add means to revive char from dumpster
+fix corp name changes in HR
+fix delete char from dump
+add option to delete on ESI fails
 
 HRM
 - notifications

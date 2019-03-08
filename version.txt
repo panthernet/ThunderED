@@ -1,6 +1,8 @@
 ### V1.3.4
 + Added new **BindToMainCharacter** param to AuthGroups (read explanation below)
 + Added new **IsAltUsersVisible** and **CanInspectAltUsers** params to HR module access list
++ Added new experimental !caps command to display capital skills stats throughout the members database
++ Fixed corp and alliance data update in HR lists when users changes them
 + Refactored authentication code to be more consistent with the modules
 + Updated HR module to include Alt Characters information into general lists and char inspection page
 
@@ -8,6 +10,16 @@
 - Added new mode for the authentication process called: Alt Characters Authentication! In this mode you can bind alt characters with custom ESI permissions to the already authed main characters. Alt characters are dependant from the main character i.e. will be deleted if main character auth is deleted. They can be inspected in HR module and will be a subject for a subset of some new Discord commands.
   When this mode is enabled it will always be treated as if **ExcludeFromOneButtonMode** and **SkipDiscordAuthPage** params are set to true
   Set **BindToMainCharacter** to enable this mode. Please take a look at the auth group named **Mode6_AltCharactersAuth** in **settings.def.json** file for more info.
+- Added new experimental **!caps** command to display information about capital ship drivers on channel/server.
+  This command uses new settings section: **CommandsConfig** and new config file **shipdata.def.json** which will be automaticaly unfold into **shipdata.json**.
+  **CapsCommandDiscordRoles** - list of Discord roles who has access to this command (empty = all)
+  **CapsCommandDiscordChannels** - list of Discord channels where this command is allowed (empty = everywhere)
+
+### ADDITIONS
+- New config section **CommandsConfig**
+- Many new language entries
+- New **IsAltUsersVisible** and **CanInspectAltUsers** params to HR module access list
+- New **BindToMainCharacter** param for AuthGroups
 
 ### V1.3.3
 + Added new **UseStrictAuthenticationMode** param to auth group (read explanation below)

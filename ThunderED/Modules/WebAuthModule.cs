@@ -343,6 +343,12 @@ namespace ThunderED.Modules
                 var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, user.CharacterId, true);
                 if (rChar == null) return;
 
+                if (user.Data.CorporationId != rChar.corporation_id || user.Data.AllianceId != rChar.alliance_id)
+                {
+                    await user.UpdateData(rChar);
+                    await SQLHelper.SaveAuthUser(user);
+                }
+
                 var longCorpId = rChar.corporation_id;
                 var longAllyId = rChar.alliance_id ?? 0;
                 if (await GetCharEntityById(group.Value, user.CharacterId) != null || await GetCorpEntityById(group.Value, longCorpId) != null || (rChar.alliance_id > 0 && await GetAllyEntityById(group.Value, longAllyId) != null))

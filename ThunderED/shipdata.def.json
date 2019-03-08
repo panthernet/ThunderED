@@ -1,6 +1,8 @@
 {
 	"Groups": {
 		"Dreads": {
+		  "FormatDescription": "NAME (CALIBRATION) [SIEGE,WEAPON]",
+		  "FormatTemplate": "{NAME} ({SP1})[{ST1},{ST2}]",
 			"CommonSkills": [
 				{
 					"SkillName": "Jump Drive Calibration",
@@ -27,7 +29,8 @@
 			"SpecialCounters": {
 				"Calibration": {
 					"Id": 21611,
-          "Rank":  5 
+					"Rank":  5,
+					"IsVisible": true
 				}
 			},
 			"ShipSkills": {
@@ -154,6 +157,15 @@
 			}
 		},
 		"Carriers": {
+		  "FormatDescription": "NAME (CALIBRATION) [WEAPON]",
+		  "FormatTemplate": "{NAME} ({SP1})[{ST2}]",
+		  "SpecialCounters": {
+		    "Calibration": {
+		      "Id": 21611,
+		      "Rank":  5,
+		      "IsVisible": false
+		    }
+		  },
 			"CommonSkills": [
 				{
 					"SkillName": "Jump Drive Calibration",
@@ -242,6 +254,15 @@
 			}
 		},
 		"Faxes": {
+		  "FormatDescription": "NAME (CALIBRATION) [SIEGE]",
+		  "FormatTemplate": "{NAME} ({SP1})[{ST1}]",
+		  "SpecialCounters": {
+		    "Calibration": {
+		      "Id": 21611,
+		      "Rank":  5,
+		      "IsVisible": false
+		    }
+		  },
 			"CommonSkills": [
 				{
 					"SkillName": "Jump Drive Calibration",

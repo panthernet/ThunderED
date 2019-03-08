@@ -66,6 +66,12 @@ namespace ThunderED.Modules
                     //skip bad requests
                     if(characterData == null) return null;
 
+                    if (authUser.Data.CorporationId != characterData.corporation_id || authUser.Data.AllianceId != characterData.alliance_id)
+                    {
+                        await authUser.UpdateData(characterData);
+                        await SQLHelper.SaveAuthUser(authUser);
+                    }
+
                     var remroles = new List<SocketRole>();
                     var result = await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth);
                     var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.IsAuthed;

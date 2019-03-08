@@ -480,7 +480,7 @@
   "dailyRatingTopPts":  "Top Pts Hunters",
   "dailyRatingTopEff":  "Top Efficiency",
   "capsNoUsersFound":  "No eligible users found!",
-  "helpCaps":  "Caps command displays information about capital ship drivers on channel/server. Examples: {0}{1} who , {0}{1} who online, {0}{1} all",
+  "helpCaps":  "Caps command displays information about capital ship drivers on channel/server.\nModifiers: who - check members in current channel, who online - online members in current channel, all - all registered members, all online - all registered members who are online.\nExamples: {0}{1} who , {0}{1} who online, {0}{1} all",
   "capsCommandRunning":  "Command is already running, try again later",
   "of":  "of",
   "comRequireRole": "You must have special Discord role to run this command",

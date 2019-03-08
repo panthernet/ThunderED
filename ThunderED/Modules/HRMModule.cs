@@ -355,19 +355,19 @@ namespace ThunderED.Modules
                                 switch (authState)
                                 {
                                     case UserStatusEnum.Authed:
-                                        await WebServerModule.WriteResponce((await GenerateMembersListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        await WebServerModule.WriteResponce((await GenerateMembersListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response, true);
                                         return true;
                                     case UserStatusEnum.Alts:
-                                        await WebServerModule.WriteResponce((await GenerateAltsListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        await WebServerModule.WriteResponce((await GenerateAltsListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response, true);
                                         return true;
                                     case UserStatusEnum.Dumped:
-                                        await WebServerModule.WriteResponce((await GenerateDumpListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        await WebServerModule.WriteResponce((await GenerateDumpListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response, true);
                                         return true;
                                     case UserStatusEnum.Spying:
-                                        await WebServerModule.WriteResponce((await GenerateSpiesListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        await WebServerModule.WriteResponce((await GenerateSpiesListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response, true);
                                         return true;
                                     default:
-                                        await WebServerModule.WriteResponce((await GenerateAwaitingListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response);
+                                        await WebServerModule.WriteResponce((await GenerateAwaitingListHtml(authCode, accessFilter, filterValue, GenMemType.Members))[0], response, true);
                                         return true;
                                 }
                             }
@@ -443,7 +443,7 @@ namespace ThunderED.Modules
                                         .Replace("{canSearchMail}", !accessFilter.CanSearchMail ? " d-none" : null)
 
                                     ;
-                                await WebServerModule.WriteResponce(text, response);
+                                await WebServerModule.WriteResponce(text, response, true);
                             }
                                 break;
                             case var s when s.StartsWith("inspect"):

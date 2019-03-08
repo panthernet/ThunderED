@@ -13,6 +13,14 @@ namespace ThunderED.Classes
             return Convert.ToInt64(obj) == 0 ? minimum : obj;
         }
 
+        public static IEnumerable<string> SplitBy(this string str, int chunkSize, bool remainingInFront = false)
+        {
+            var count = (int) Math.Ceiling(str.Length/(double) chunkSize);
+            int Start(int index) => remainingInFront ? str.Length - (count - index) * chunkSize : index * chunkSize;
+            int End(int index) => Math.Min(str.Length - Math.Max(Start(index), 0), Math.Min(Start(index) + chunkSize - Math.Max(Start(index), 0), chunkSize));
+            return Enumerable.Range(0, count).Select(i => str.Substring(Math.Max(Start(i), 0),End(i)));
+        }
+
 
         public static string ToKMB(this long num)
         {
