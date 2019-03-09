@@ -4,6 +4,7 @@
 + Added ability to restore members from dump in HR module
 + Added new experimental !caps command to display capital skills stats throughout the members database
 + Fixed corp and alliance data update in HR lists when users changes them
++ Fixed contracts type filter
 + Refactored authentication code to be more consistent with the modules
 + Updated HR module to include Alt Characters information into general lists and char inspection page
 

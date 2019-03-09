@@ -290,6 +290,9 @@ namespace ThunderED.Modules
                 if (!crFilter?.FeedIssuedTo ?? false)
                     list = list.Where(a => a.assignee_id != characterID && a.assignee_id != corpID).ToList();
 
+                if (crFilter != null && crFilter.Types.Any())
+                    list = list.Where(a => crFilter.Types.Contains(a.type)).ToList();
+
                 foreach (var contract in list)
                 {
                     try
