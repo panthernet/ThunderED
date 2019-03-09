@@ -714,8 +714,8 @@ namespace ThunderED.Modules
                             else
                             {
                                 var searchFor = autoSearchGroup
-                                    ? Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.ExcludeFromOneButtonMode)
-                                    : Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode);
+                                    ? Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.ExcludeFromOneButtonMode && !a.Value.BindToMainCharacter)
+                                    : Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode && !a.Value.BindToMainCharacter);
                                 //general auth
                                 foreach (var grp in searchFor)
                                 {
@@ -732,7 +732,7 @@ namespace ThunderED.Modules
                                 //for guest mode during general auth
                                 if (!add)
                                 {
-                                    var grp = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a =>
+                                    var grp = Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.BindToMainCharacter).FirstOrDefault(a =>
                                         a.Value.AllowedAlliances.Values.All(b => b.Id.All(c=> c== 0)) && a.Value.AllowedCorporations.Values.All(b => b.Id.All(c=> c == 0)));
                                     if (grp.Value != null)
                                     {
