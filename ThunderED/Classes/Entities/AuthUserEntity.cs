@@ -85,14 +85,14 @@ namespace ThunderED.Classes.Entities
             rCorp = rCorp ?? await APIHelper.ESIAPI.GetCorporationData(LogCat.AuthCheck.ToString(), characterData.corporation_id, true);
             Data.CharacterName = characterData.name;
             Data.CorporationId = characterData.corporation_id;
-            Data.CorporationName = rCorp.name;
-            Data.CorporationTicker = rCorp.ticker;
+            Data.CorporationName = rCorp?.name;
+            Data.CorporationTicker = rCorp?.ticker;
             Data.AllianceId = characterData.alliance_id ?? 0;
             if (Data.AllianceId > 0)
             {
                 rAlliance = rAlliance ?? await APIHelper.ESIAPI.GetAllianceData(LogCat.AuthCheck.ToString(), characterData.alliance_id, true);
-                Data.AllianceName = rAlliance.name;
-                Data.AllianceTicker = rAlliance.ticker;
+                Data.AllianceName = rAlliance?.name;
+                Data.AllianceTicker = rAlliance?.ticker;
             }
             if (permissions != null)
                 Data.Permissions = permissions;

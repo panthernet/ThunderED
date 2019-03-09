@@ -449,7 +449,7 @@ namespace ThunderED.Modules
 
                     if (!Settings.WebAuthModule.AuthGroups.ContainsKey(groupName) && DEF_NOGROUP_NAME.Equals(groupName))
                     {
-                        var url = WebServerModule.GetAuthUrlAltRegButton();
+                        var url = WebServerModule.GetAuthUrlOneButton();
                         await response.RedirectAsync(new Uri(url));
                     }
                     else if (!Settings.WebAuthModule.AuthGroups.ContainsKey(groupName) && DEF_ALTREGGROUP_NAME.Equals(groupName))
