@@ -1,12 +1,13 @@
 #V1.3.5
 + Added spy mail feed filters by corp/alliance name and feed channel
 + Added **DisplayDetailsSummary** param to display EVE urls in mail summary
++ Fixed auth cleanup bug when where was an auth group in a list with empty Allowed* fields (literally group allowed all users to auth)
 + Improved and cleaned up Discord mail feeds, introduced new mail summaries with EVE fit & channel links into separate blocks to reduce clutter
 + Improved text breaking logic to respect words and urls
 + Removed duplicate mails from spy feeds
 
 ### NOTES
-- New **SpyFilters** config param in **HRMModule** section
+- New **SpyFilters** config param in **HRMModule** section allows you to filter your spies output
 - New **DisplayDetailsSummary** param for MailModule filter
 - New **DisplayMailDetailsSummary** param for HRMModule filter
 - Several notes about Spies HR improvements.

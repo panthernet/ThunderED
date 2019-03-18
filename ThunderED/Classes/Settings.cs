@@ -1722,6 +1722,10 @@ namespace ThunderED.Classes
         [Comment("Optional switch to exclude this group from OneButtonMode if corresponding option is enabled on a section level")]
         public bool ExcludeFromOneButtonMode { get; set; } = false;
 
+        public bool IsEmpty()
+        {
+            return !AllowedCharacters.Any() && !AllowedAlliances.Any() && !AllowedCorporations.Any() && StandingsAuth == null;
+        }
 #if EDITOR
         [Comment("The list of ESI access role names to check on auth")]
         public ObservableCollection<string> ESICustomAuthRoles { get; set; } = new ObservableCollection<string>();

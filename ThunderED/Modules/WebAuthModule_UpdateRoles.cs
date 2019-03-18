@@ -36,7 +36,7 @@ namespace ThunderED.Modules
         private static async Task UpdateDBUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles, IEnumerable<ulong> dids)
         {
             var ids = (await SQLHelper.GetAuthUsers(2)).Where(a=> !a.MainCharacterId.HasValue).Select(a=> a.DiscordId);
-
+            var x = ids.FirstOrDefault(a => a == 268473315843112960);
             await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false); 
@@ -75,6 +75,13 @@ namespace ThunderED.Modules
                     var remroles = new List<SocketRole>();
                     var result = await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth);
                     var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.IsAuthed;
+                    //skip dumped
+                    if (authUser.IsDumped || authUser.IsSpying) return null;
+                    if (!isMovingToDump)
+                    {
+                        var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == result.GroupName);
+                        isMovingToDump = group.Value == null || (group.Value.IsEmpty() && authUser.GroupName != group.Key);
+                    }
 
                     var changed = false;
                     var isAuthed = result.UpdatedRoles.Count > 1;
