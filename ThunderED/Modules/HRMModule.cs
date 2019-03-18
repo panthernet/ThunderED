@@ -22,6 +22,24 @@ namespace ThunderED.Modules
         {
             LogHelper.LogModule("Inititalizing HRM module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, OnRequestReceived);
+
+            foreach (var pair in Settings.HRMModule.SpyFilters)
+            {
+                var filterName = pair.Key;
+                var filter = pair.Value;
+                filter.CorporationNames.ForEach(async name =>
+                {
+                    var corp = await APIHelper.ESIAPI.SearchCorporationId(Reason, name);
+                    if(corp?.corporation != null && corp.corporation.Any())
+                        filter.CorpIds.Add(name, corp.corporation.First());
+                } );
+                filter.AllianceNames.ForEach(async name =>
+                {
+                    var alliance = await APIHelper.ESIAPI.SearchAllianceId(Reason, name);
+                    if(alliance?.alliance != null && alliance.alliance.Any())
+                        filter.AllianceIds.Add(name, alliance.alliance.First());
+                } );
+            }
         }
 
         private static DateTime _lastUpdateDate = DateTime.MinValue;
@@ -53,11 +71,11 @@ namespace ThunderED.Modules
                     }
                 }
 
-                if (Settings.HRMModule.SpiesMailFeedChannelId > 0 && (DateTime.Now - _lastSpyMailUpdateDate).TotalMinutes >= 10)
+                if ((DateTime.Now - _lastSpyMailUpdateDate).TotalMinutes >= 10)
                 {
                     _lastSpyMailUpdateDate = DateTime.Now;
                     var spies = await SQLHelper.GetAuthUsers((int) UserStatusEnum.Spying);
-                    await MailModule.FeedSpyMail(spies, Settings.HRMModule.SpiesMailFeedChannelId);
+                    await MailModule.FeedSpyMail(spies, Settings.HRMModule.DefaultSpiesMailFeedChannelId);
                 }
 
                 if ((DateTime.Now - _lastSpyNameUpdateDate).TotalHours >= 12)
@@ -893,7 +911,8 @@ namespace ThunderED.Modules
                                         var fromCorp = corp == null ? null : await APIHelper.ESIAPI.GetCorporationData(Reason, corp.corporation_id);
                                         var corpText = fromCorp == null ? null : $" - {fromCorp.name}[{fromCorp.ticker}]";
                                         //var msg = Regex.Replace(mail.body, @"<font size\s*=\s*"".+?""", @"<font ");
-                                        var msg = await MailModule.PrepareBodyMessage(mail.body, true);
+                                        var sList = await MailModule.PrepareBodyMessage(mail.body, true);
+                                        var msg = sList[0];
                                         var text = File.ReadAllText(SettingsManager.FileTemplateHRM_MailBody)
                                                 .Replace("{DateHeader}", LM.Get("mailDateHeader"))
                                                 .Replace("{SubjectHeader}", LM.Get("mailSubjectHeader"))

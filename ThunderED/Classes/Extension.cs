@@ -13,6 +13,43 @@ namespace ThunderED.Classes
             return Convert.ToInt64(obj) == 0 ? minimum : obj;
         }
 
+        public static IEnumerable<string> SplitToLines(this string stringToSplit, int maxLineLength, string delimiter = " ", bool preserveDelimiter = false)
+        {
+            var words = stringToSplit.Split(delimiter);
+            var line = new StringBuilder();
+            var lastOne = words.LastOrDefault();
+            foreach (var word in words)
+            {
+                if (word.Length + line.Length <= maxLineLength)
+                {
+                    line.Append(word + delimiter);
+                }
+                else
+                {
+                    if (line.Length > 0)
+                    {
+                        var res2 = line.ToString();
+                        if ((!preserveDelimiter || lastOne == word) && res2.EndsWith(delimiter))
+                            res2 = res2.Substring(0, res2.Length - delimiter.Length);
+                        yield return res2;
+                        line.Clear();
+                    }
+                    var overflow = word;
+                    while (overflow.Length > maxLineLength)
+                    {
+                        yield return overflow.Substring(0, maxLineLength);
+                        overflow = overflow.Substring(maxLineLength);
+                    }
+                    line.Append(overflow + delimiter);
+                }
+            }
+
+            var res = line.ToString();
+            if (res.EndsWith(delimiter))
+                res = res.Substring(0, res.Length - delimiter.Length);
+            yield return res;
+        }
+
         public static IEnumerable<string> SplitBy(this string str, int chunkSize, bool remainingInFront = false)
         {
             var count = (int) Math.Ceiling(str.Length/(double) chunkSize);

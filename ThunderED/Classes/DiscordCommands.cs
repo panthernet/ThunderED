@@ -82,7 +82,7 @@ namespace ThunderED.Classes
             if (string.IsNullOrEmpty(await APIHelper.DiscordAPI.IsAdminAccess(Context)))
             {
                 sb.Append(LM.Get("helpTextAdminCommands"));
-                sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rehash | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}reauth | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rngroup **\n");
+                sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rehash | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}reauth | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rngroup | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}sys **\n");
             }
             sb.Append(LM.Get("helpExpanded", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
 

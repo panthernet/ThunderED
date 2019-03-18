@@ -39,7 +39,8 @@ namespace ThunderED.Modules.Static
             var textPvpValues = $"{zkillContent.dangerRatio}%\n{zkillContent.gangRatio}%\n{zkillContent.soloKills}\n{zkillContent.shipsDestroyed}\n{supersCount}/{titansCount}\n{system}";
 
 
-            var desc = await MailModule.PrepareBodyMessage(corporationData.description);
+            var sList = await MailModule.PrepareBodyMessage(corporationData.description);
+            var desc = sList[0];
             if (desc.Length > 1024)
                 desc = desc.Substring(0, 1023);
             desc = string.IsNullOrEmpty(desc) ? "-" : desc;

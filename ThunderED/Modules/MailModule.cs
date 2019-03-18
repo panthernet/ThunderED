@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -196,7 +197,7 @@ namespace ThunderED.Modules
                                     if (ml != null)
                                         from = $"{sender?.name}[{mailLists.First(a => a.mailing_list_id == ml.recipient_id).name}]";
                                     var channel = filter.FeedChannel > 0 ? filter.FeedChannel : defaultChannel;
-                                    await SendMailNotification(channel, mail, LM.Get("mailMsgTitle", from), group.DefaultMention);
+                                    await SendMailNotification(channel, mail, LM.Get("mailMsgTitle", from), group.DefaultMention, filter.DisplayDetailsSummary);
                                     break;
                                 }
                             }
@@ -224,11 +225,14 @@ namespace ThunderED.Modules
             }
         }
 
-        private static async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string from, string mention)
+        private static async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string from, string mention, bool displaySummary)
         {
            // var stamp = DateTime.Parse(mail.timestamp).ToString(SettingsManager.Settings.Config.ShortTimeFormat);
-            var body = await PrepareBodyMessage(mail.body);
-            var fields = body.Split(1023);
+            var sList = await PrepareBodyMessage(mail.body);
+            var body = sList[0];
+            var fits = sList[1];
+            var urls = sList[2];
+            var fields = body.SplitToLines(1923);
 
            /* var embed = new EmbedBuilder()
                 .WithThumbnailUrl(SettingsManager.Settings.Resources.ImgMail);
@@ -245,12 +249,32 @@ namespace ThunderED.Modules
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
             await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {from}");
             foreach (var field in fields)
-                await APIHelper.DiscordAPI.SendMessageAsync(ch, field);
+                await APIHelper.DiscordAPI.SendMessageAsync(ch, $".\r\n{field}");
+            if (displaySummary && !string.IsNullOrEmpty(fits))
+            {
+                var list = fits.SplitToLines(1950, "</a>", true).ToList();
+                for (var i=0; i< list.Count; i++)
+                {
+                    var res = list[i];
+                    if (i != list.Count-1 && !res.EndsWith("```"))
+                        res += "```";
+                    if (!res.StartsWith("```"))
+                        res = res.Insert(0, "```");
+                    await APIHelper.DiscordAPI.SendMessageAsync(ch, $".\r\n{res}");
+                }
+            }
+
+            if (displaySummary && !string.IsNullOrEmpty(urls))
+            {
+                var list = urls.SplitToLines(1950);
+                foreach (var s in list)
+                    await APIHelper.DiscordAPI.SendMessageAsync(ch, $".\r\n{s}");
+            }
         }
 
-        public static async Task<string> PrepareBodyMessage(string input, bool forWeb = false)
+        public static async Task<string[]> PrepareBodyMessage(string input, bool forWeb = false)
         {
-            if (string.IsNullOrEmpty(input)) return " ";
+            if (string.IsNullOrEmpty(input)) return new [] {" ", null, null, null};
 
             string body;
             if (!forWeb)
@@ -262,6 +286,9 @@ namespace ThunderED.Modules
             else 
                 body = input.Replace("<loc>", null).Replace("</loc>", null).Replace("</font>", null);
 
+            var fitList = new List<string>();
+            var urlsList = new List<string>();
+            var channelList = new List<string>();
             try
             {
                 while (true)
@@ -273,7 +300,8 @@ namespace ThunderED.Modules
                     body = index != 0 ? $"{body.Substring(0, index)}{body.Substring(lst + 1, body.Length - lst - 1)}" : $"{body.Substring(lst + 1, body.Length - lst - 1)}";
                 }
 
-                var prevIndex = 0;
+
+                var prevIndex = -1;
                 while (true)
                 {
                     var index = body.IndexOf("<a", prevIndex+1);
@@ -300,6 +328,7 @@ namespace ThunderED.Modules
 
                     //parse data
                     var data = forWeb ? $"<a href=\"{url}\">{text}</a>" : $"{text}({url})";
+                    var furl = $"<a href=\"{url}\">{text}</a>";
                     bool isEmpty = false;
                     try
                     {
@@ -309,16 +338,19 @@ namespace ThunderED.Modules
                         }
                         else if (url.StartsWith("joinChannel"))
                         {
-                            data = forWeb ? text : $"[{text}](<url={url}>{text}</url>)";
+                            data = forWeb ? text : $"__{text}__";//$"[{text}](<url={url}>{text}</url>)";
+                            channelList.Add(furl);
                         }
                         else if (url.StartsWith("fitting"))
                         {
-                            data = text;
+                            data = forWeb ? text : $"***{text}***";
+                            fitList.Add(furl);
                         }
                         else if (url.StartsWith("killReport"))
                         {
                             var id = url.Substring(11, url.Length - 11);
-                            data = forWeb ? $"<a href=\"https://zkillboard.com/kill/{id}\">{text}</a>" : $"[{text}](https://zkillboard.com/kill/{id})";
+                            data = forWeb ? $"<a href=\"https://zkillboard.com/kill/{id}\">{text}</a>" : text; //$"[{text}](https://zkillboard.com/kill/{id})";
+                            urlsList.Add($"{text}: https://zkillboard.com/kill/{id}");
                         }
                         else
                         {
@@ -364,7 +396,8 @@ namespace ThunderED.Modules
                             }
                             else if (!string.IsNullOrEmpty(newUrl))
                             {
-                                data = forWeb ? $"<a href=\"{newUrl}\">{text}</a>" : $"[{text}]({newUrl}) {addon}";
+                                data = forWeb ? $"<a href=\"{newUrl}\">{text}</a>" : text;//$"[{text}]({newUrl}) {addon}";
+                               urlsList.Add($"{text}: {newUrl}");
                             }
                         }
                     }
@@ -387,19 +420,60 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, LogCat.Mail);
-                return " ";
+                return new [] {input, forWeb ? null : GenerateSpyDetails(fitList, true), forWeb ? null : GenerateSpyDetails(channelList, true), forWeb ? null : GenerateSpyDetails(urlsList, false)};
             }
 
-            return body;
+            //prepare
+
+
+            return new[] {body, forWeb ? null : GenerateSpyDetails(fitList, true), forWeb ? null : GenerateSpyDetails(channelList, true), forWeb ? null : GenerateSpyDetails(urlsList, false)};
+        }
+
+        private static string GenerateSpyDetails(List<string> list, bool wrap)
+        {
+            var sb = new StringBuilder();
+            if (list.Any())
+            {
+                if(wrap) sb.AppendLine("```");
+                list.ForEach(a => sb.AppendLine(a));
+                if(wrap) sb.AppendLine("```");
+            }
+            return sb.ToString();
         }
 
 
+        private static readonly List<long> LastSpyMailIds = new List<long>();
+
         public static async Task FeedSpyMail(IEnumerable<AuthUserEntity> users, ulong feedChannel)
         {
-            if(feedChannel == 0) return;
             var reason = LogCat.HRM.ToString();
+            //preload initial mail IDs to suppress possible dupes on start
+            foreach (var user in users.Where(a=> a.Data.LastSpyMailId > 0))
+            {
+                if(!LastSpyMailIds.Contains(user.Data.LastSpyMailId))
+                    LastSpyMailIds.Add(user.Data.LastSpyMailId);
+            }
+            //processing
             foreach (var user in users)
             {
+                var corp = user.Data.CorporationId;
+                var ally= user.Data.AllianceId;
+                var filter = SettingsManager.Settings.HRMModule.SpyFilters.FirstOrDefault(a => a.Value.CorpIds.ContainsValue(corp)).Value;
+                if (filter != null)
+                    feedChannel = filter.MailFeedChannelId;
+                else
+                {
+                    if (ally > 0)
+                    {
+                        filter = SettingsManager.Settings.HRMModule.SpyFilters.FirstOrDefault(a => a.Value.AllianceIds.ContainsValue(ally)).Value;
+                        if (filter != null)
+                            feedChannel = filter.MailFeedChannelId;
+                    }
+                }
+                if(feedChannel == 0) continue;
+
+                var displaySummary = filter?.DisplayMailDetailsSummary ?? true;
+
                 try
                 {
                     if (!SettingsManager.HasReadMailScope(user.Data.PermissionsList))
@@ -418,11 +492,15 @@ namespace ThunderED.Modules
                     {
                         foreach (var mailHeader in mailHeaders.Where(a => a.mail_id > user.Data.LastSpyMailId))
                         {
+                            if(LastSpyMailIds.Contains(mailHeader.mail_id)) continue;
+                            LastSpyMailIds.Add(mailHeader.mail_id);
+                            if(LastSpyMailIds.Count > 100)
+                                LastSpyMailIds.RemoveRange(0, 20);
                             var mail = await APIHelper.ESIAPI.GetMail(reason, user.CharacterId, token, mailHeader.mail_id);
                             var sender = await APIHelper.ESIAPI.GetCharacterData(reason, mail.from);
                             mailHeader.ToName = await GetRecepientNames(reason, mailHeader.recipients, user.CharacterId, token);
                             var from = $"{user.Data.CharacterName}[{user.Data.AllianceTicker ?? user.Data.CorporationTicker}]";
-                            await SendMailNotification(feedChannel, mail, $"{LM.Get("hrmSpyFeedFrom")} {from}\n{LM.Get("hrmSpyMsgFrom",sender?.name, mailHeader.ToName)}", " ");
+                            await SendMailNotification(feedChannel, mail, $"**{LM.Get("hrmSpyFeedFrom")} {from}**\n__{LM.Get("hrmSpyMsgFrom",sender?.name, mailHeader.ToName)}__", " ", displaySummary);
                         }
                     }
 

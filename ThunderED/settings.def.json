@@ -154,7 +154,15 @@
     "TableSkillEntriesPerPage":  20,
     "UseDumpForMembers": true,
     "DumpInvalidationInHours":  240,
-    "SpiesMailFeedChannelId":  0 
+    "DefaultSpiesMailFeedChannelId":  0,
+    "SpyFilters": {
+      "filter1": {
+        "CorporationNames": ["Corp Name1", "Corp Name 2"],
+        "AllianceNames": [],
+        "MailFeedChannelId":  0,
+        "DisplayMailDetailsSummary": true
+      } 
+    } 
   },
 
   "mailModule": {
@@ -170,13 +178,15 @@
             "FilterLabels": ["[Corp]", "[Alliance]"],
             "FilterSenders": [],
             "FilterMailList": ["TestList"],
-            "FeedChannel": 0	
+            "FeedChannel": 0,
+            "DisplayDetailsSummary": true 
           },
           "MailListFilter": {
             "FilterLabels": [],
             "FilterSenders": [],
             "FilterMailList": ["TestList"],
-            "FeedChannel": 0	
+            "FeedChannel": 0,
+            "DisplayDetailsSummary": false
           }
         }
       }

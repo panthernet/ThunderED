@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 
@@ -338,10 +339,12 @@ namespace ThunderED.Classes
         //public ObservableCollection<long> UsersAccessList { get; set; } = new ObservableCollection<long>();
        // public ObservableCollection<string> RolesAccessList { get; set; } = new ObservableCollection<string>();
         public ObservableDictionary<string, HRMAccessFilter> AccessList { get; set; } = new  ObservableDictionary<string, HRMAccessFilter>();
+        public ObservableDictionary<string, SpyFilter> SpyFilters { get; set; } = new  ObservableDictionary<string, SpyFilter>();
 #else
        // public List<long> UsersAccessList { get; set; } = new List<long>();
        // public List<string> RolesAccessList { get; set; } = new List<string>();
         public Dictionary<string, HRMAccessFilter> AccessList { get; set; } = new  Dictionary<string, HRMAccessFilter>();
+        public Dictionary<string, SpyFilter> SpyFilters { get; set; } = new  Dictionary<string, SpyFilter>();
 #endif
         [Comment("Authentication timeout in minutes")]
         public int AuthTimeoutInMinutes { get; set; } = 10;
@@ -358,7 +361,7 @@ namespace ThunderED.Classes
         public int DumpInvalidationInHours { get; set; } = 240;
 
         [Comment("Optional Discord channel ID to feed new mail from users marked as spies")]
-        public ulong SpiesMailFeedChannelId { get; set; }
+        public ulong DefaultSpiesMailFeedChannelId { get; set; }
 #if EDITOR
         public override string this[string columnName]
         {
@@ -378,6 +381,25 @@ namespace ThunderED.Classes
             }
         }
 #endif
+    }
+
+    public class SpyFilter
+    {
+#if EDITOR
+        public ObservableCollection<string> CorporationNames { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> AllianceNames { get; set; } = new ObservableCollection<string>();
+#else
+        public List<string> CorporationNames { get; set; } = new List<string>();
+        public List<string> AllianceNames { get; set; } = new List<string>();
+#endif
+        public ulong MailFeedChannelId { get; set; }
+        [Comment("Display links to ship fits, etc. in EVE format after the mail message")]
+        public bool DisplayMailDetailsSummary { get; set; } = true;
+
+        [JsonIgnore]
+        public Dictionary<string, long> CorpIds = new Dictionary<string, long>();
+        [JsonIgnore]
+        public Dictionary<string, long> AllianceIds = new Dictionary<string, long>();
     }
 
     public class HRMAccessFilter
@@ -886,7 +908,9 @@ namespace ThunderED.Classes
 #endif
         [Comment("Optional numeric Discord channel ID to post filtered mail feed")]
         public ulong FeedChannel { get; set; }
-        
+        [Comment("Display links to ship fits, etc. in EVE format after the mail message")]
+        public bool DisplayDetailsSummary { get; set; } = true;
+
 #if EDITOR
         public override string this[string columnName]
         {

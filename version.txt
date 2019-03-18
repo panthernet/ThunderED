@@ -1,3 +1,24 @@
+#V1.3.5
++ Added spy mail feed filters by corp/alliance name and feed channel
++ Added **DisplayDetailsSummary** param to display EVE urls in mail summary
++ Improved and cleaned up Discord mail feeds, introduced new mail summaries with EVE fit & channel links into separate blocks to reduce clutter
++ Improved text breaking logic to respect words and urls
++ Removed duplicate mails from spy feeds
+
+### NOTES
+- New **SpyFilters** config param in **HRMModule** section
+- New **DisplayDetailsSummary** param for MailModule filter
+- New **DisplayMailDetailsSummary** param for HRMModule filter
+- Several notes about Spies HR improvements.
+  - You can now disable default mail feed by setting **DefaultSpiesMailFeedChannelId** to 0.
+  - You can selectively enable and redirect mail feed by adding filters to **SpyFilters** collection
+  - New filters use EVE names instead of IDs which improves config readability while not impacting general performance
+  - Mail now can display summary blocks after the message which include EVE urls for fits and channels. You can paste these urls into **EVE MAIL** body to become readable inside the game.
+
+### BREAKING CHANGES
+- Renamed **SpiesMailFeedChannelId** config param to **DefaultSpiesMailFeedChannelId**
+
+
 ### V1.3.4
 + Added new **BindToMainCharacter** param to AuthGroups (read explanation below)
 + Added new **IsAltUsersVisible**, **CanInspectAltUsers** and **CanRestoreDumped** params to HR module access list
