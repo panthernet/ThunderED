@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -26,6 +27,7 @@ namespace ThunderED.Modules.Sub
         {
             LogHelper.LogModule("Inititalizing WebServer module...", Category).GetAwaiter().GetResult();
             ModuleConnectors.Clear();
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
 
         public override async Task Run(object prm)
@@ -35,11 +37,21 @@ namespace ThunderED.Modules.Sub
             if (_listener == null || !_listener.IsListening)
             {
                 await LogHelper.LogInfo("Starting Web Server", Category);
-                _listener?.Dispose();
+                try
+                {
+                    _listener?.Dispose();
+                }
+                catch (Exception ex)
+                {
+
+                }
+
                 //TODO cleanup all occurences in modules in some of the following releases
                 var port = Settings.WebServerModule.WebExternalPort;
                 var extPort = Settings.WebServerModule.WebExternalPort;
                 var ip = "0.0.0.0";
+
+                
 
                 _listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), port);
                 _listener.Request += async (sender, context) =>

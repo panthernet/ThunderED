@@ -22,6 +22,8 @@ namespace ThunderED.Classes
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
         public async Task Help()
         {
+            if(IsForbidden()) return;
+
             var sb = new StringBuilder();
             sb.Append(LM.Get("helpTextPrivateCommands"));
             sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}about | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}tq ");
@@ -86,20 +88,14 @@ namespace ThunderED.Classes
             }
             sb.Append(LM.Get("helpExpanded", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
 
-            //  "helpText":
-//            "Private commands: * !tq | !fwstats **\nAdmin commands: !rehash | !reauth\nEnter !help COMMAND in the bot private message for additional info",
-
-
-
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, sb.ToString());
         }
 
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
         public async Task Help([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
+            if(IsForbidden()) return;
+
             switch (x)
             {
                 case "help":
@@ -183,6 +179,7 @@ namespace ThunderED.Classes
         [Command(CMD_TQ, RunMode = RunMode.Async), Summary("Reports TQ status")]
         public async Task TQStatus()
         {
+            if(IsForbidden()) return;
             var tq = await APIHelper.ESIAPI.GetServerStatus("ESIAPI");
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("tqStatusText", tq.players > 20 ? LM.Get("online") : LM.Get("offline"), tq.players), true);
         }
@@ -210,7 +207,6 @@ namespace ThunderED.Classes
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"```\n{timers}\n```", true);
                 return;
             }
-
 
             var allys = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.AllianceIDs.Where(b=> b > 0)).Distinct().ToList();
             var corps = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CorporationIDs.Where(b=> b > 0)).Distinct().ToList();
@@ -260,6 +256,8 @@ namespace ThunderED.Classes
                 return;
             }
 
+            if(IsForbidden()) return;
+
             var allys = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.AllianceIDs.Where(b=> b > 0)).Distinct().ToList();
             var corps = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CorporationIDs.Where(b=> b > 0)).Distinct().ToList();
             var chars = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CharacterIDs.Where(b=> b > 0)).Distinct().ToList();
@@ -287,9 +285,7 @@ namespace ThunderED.Classes
         [Command(CMD_TURL, RunMode = RunMode.Async), Summary("Display timers url")]
         public async Task TimersUrl()
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
+            if(IsForbidden()) return;
 
             if(SettingsManager.Settings.Config.ModuleTimers)
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersUrlText", string.IsNullOrEmpty(SettingsManager.Settings.TimersModule.TinyUrl) ? WebServerModule.GetTimersAuthURL() : SettingsManager.Settings.TimersModule.TinyUrl), true);
@@ -300,9 +296,8 @@ namespace ThunderED.Classes
         public async Task FWStats()
         {
             if (!SettingsManager.Settings.Config.ModuleFWStats) return;
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
+            if(IsForbidden()) return;
+
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpFwstats", CMD_FWSTATS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
         }
 
@@ -310,9 +305,8 @@ namespace ThunderED.Classes
         public async Task LpCommand()
         {
             if (!SettingsManager.Settings.Config.ModuleLPStock) return;
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
+            if(IsForbidden()) return;
+
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpLp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "lp"), true);
         }
 
@@ -320,9 +314,8 @@ namespace ThunderED.Classes
         public async Task LpCommand([Remainder]string command)
         {
             if (!SettingsManager.Settings.Config.ModuleLPStock) return;
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
+            if(IsForbidden()) return;
+
             var result = await LPStockModule.SendTopLP(Context, command);
             if (!result)
             {
@@ -335,10 +328,7 @@ namespace ThunderED.Classes
         public async Task FWStats(string faction)
         {
             if (!SettingsManager.Settings.Config.ModuleFWStats) return;
-
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
+            if(IsForbidden()) return;
 
             switch (faction.ToLower())
             {
@@ -369,6 +359,7 @@ namespace ThunderED.Classes
         [Command("web", RunMode = RunMode.Async), Summary("Displays web site address")]
         public async Task Web()
         {
+            if(IsForbidden()) return;
             if (SettingsManager.Settings.Config.ModuleWebServer)
             {
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
@@ -382,6 +373,7 @@ namespace ThunderED.Classes
         [Command("rngroup", RunMode = RunMode.Async), Summary("Rename auth group in DB")]
         public async Task RnGroup()
         {
+            if(!await IsExecByAdmin()) return;
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpRnGroup", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "rngroup"), true);
         }
 
@@ -434,6 +426,8 @@ namespace ThunderED.Classes
         [Command("authurl", RunMode = RunMode.Async), Summary("Displays web auth URL address")]
         public async Task AuthUrl()
         {
+            if(IsForbidden()) return;
+
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
                 if(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Any(a=> a.PreliminaryAuthMode == false))
@@ -460,7 +454,7 @@ namespace ThunderED.Classes
         [Command("authurl", RunMode = RunMode.Async), Summary("Displays web auth URL address")]
         public async Task AuthUrl2(string group)
         {
-            if (SettingsManager.Settings.Config.ModuleAuthWeb)
+            if (SettingsManager.Settings.Config.ModuleAuthWeb && IsAuthAllowed())
             {
 
                 var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a=> a.Key == group);
@@ -478,7 +472,7 @@ namespace ThunderED.Classes
         [Command("auth", RunMode = RunMode.Async), Summary("Displays web auth URL address")]
         public async Task Auth3(string command, string data)
         {
-            if (SettingsManager.Settings.Config.ModuleAuthWeb)
+            if (SettingsManager.Settings.Config.ModuleAuthWeb && IsAuthAllowed())
             {
                 try
                 {
@@ -598,8 +592,7 @@ namespace ThunderED.Classes
         [Command("clist", RunMode = RunMode.Async), Summary("")]
         public async Task ClistDummy()
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if (forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+            if(IsForbidden())
             {
                 await ReplyAsync(LM.Get("commandToPrivate"));
                 return;
@@ -610,8 +603,7 @@ namespace ThunderED.Classes
         [Command("clist", RunMode = RunMode.Async), Summary("")]
         public async Task Clist([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if (forbidden.Any() && forbidden.Contains(Context.Channel.Id))
+            if(IsForbidden())
             {
                 await ReplyAsync(LM.Get("commandToPrivate"));
                 return;
@@ -644,10 +636,7 @@ namespace ThunderED.Classes
         [Command("pc", RunMode = RunMode.Async), Summary("Performs Prices Checks Example: !pc Tritanium")]
         public async Task Pc([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
+            if(IsForbidden()) return;
 
             if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
@@ -674,10 +663,7 @@ namespace ThunderED.Classes
         [Command("jita", RunMode = RunMode.Async), Summary("Performs Prices Checks Example: !jita Tritanium")]
         public async Task Jita([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
+            if(IsForbidden()) return;
 
             if (SettingsManager.Settings.Config.ModulePriceCheck)
             { 
@@ -755,10 +741,7 @@ namespace ThunderED.Classes
         [Command("amarr", RunMode = RunMode.Async), Summary("Performs Prices Checks Example: !pc Tritanium")]
         public async Task Amarr([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
+            if(IsForbidden()) return;
 
             if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
@@ -779,10 +762,7 @@ namespace ThunderED.Classes
         [Command("rens", RunMode = RunMode.Async), Summary("Performs Prices Checks Example: !pc Tritanium")]
         public async Task Rens([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
+            if(IsForbidden()) return;
 
             if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
@@ -803,10 +783,7 @@ namespace ThunderED.Classes
         [Command("dodixie", RunMode = RunMode.Async), Summary("Performs Prices Checks Example: !pc Tritanium")]
         public async Task Dodixe([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
+            if(IsForbidden()) return;
 
             if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
@@ -818,7 +795,7 @@ namespace ThunderED.Classes
         }
 
         [Command("rehash", RunMode = RunMode.Async), Summary("Rehash settings file")]
-        public async Task Reshash()
+        public async Task Rehash()
         {
             try
             {
@@ -857,8 +834,7 @@ namespace ThunderED.Classes
         [Command("auth", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task Auth()
         {
-            var channels = APIHelper.DiscordAPI.GetAuthAllowedChannels();
-            if(channels.Length != 0 && !channels.Contains(Context.Channel.Id)) return;
+            if(!IsAuthAllowed()) return;
 
             if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
             {
@@ -887,8 +863,7 @@ namespace ThunderED.Classes
         [Command("authnotify", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task AuthNotify()
         {
-            var channels = APIHelper.DiscordAPI.GetAuthAllowedChannels();
-            if(channels.Length != 0 && !channels.Contains(Context.Channel.Id)) return;
+            if(!IsAuthAllowed()) return;
 
             if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleNotificationFeed)
             {
@@ -918,7 +893,7 @@ namespace ThunderED.Classes
         [Command("auth", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task Auth([Remainder] string x)
         {
-            if (SettingsManager.Settings.Config.ModuleWebServer  && SettingsManager.Settings.Config.ModuleAuthWeb)
+            if (IsAuthAllowed() && SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
             {
                 try
                 {
@@ -957,10 +932,7 @@ namespace ThunderED.Classes
         [Command("evetime", RunMode = RunMode.Async), Summary("EVE TQ Time")]
         public async Task EveTime()
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
+            if(IsForbidden()) return;
 
             if (SettingsManager.Settings.Config.ModuleTime)
             {
@@ -979,11 +951,7 @@ namespace ThunderED.Classes
         [Command("stat", RunMode = RunMode.Async), Summary("Ally status")]
         public async Task Stats([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
-
+            if(IsForbidden()) return;
             try
             {
                 if(x == "newday") return; //only auto check allowed for this
@@ -999,11 +967,7 @@ namespace ThunderED.Classes
         [Command("stats", RunMode = RunMode.Async), Summary("Ally status")]
         public async Task Stats2([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
-
+            if(IsForbidden()) return;
             try
             {
                 if(x == "newday") return; //only auto check allowed for this
@@ -1019,17 +983,11 @@ namespace ThunderED.Classes
         [Command("stat", RunMode = RunMode.Async), Summary("Ally status")]
         public async Task Stats()
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
-
+            if(IsForbidden()) return;
             try
             {
                 if(SettingsManager.Settings.Config.ModuleStats && SettingsManager.Settings.StatsModule.EnableStatsCommand)
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpStat", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
-
-               // await ContinuousCheckModule.Stats(Context, "m");
             }
             catch (Exception ex)
             {
@@ -1040,10 +998,7 @@ namespace ThunderED.Classes
         [Command("stats", RunMode = RunMode.Async), Summary("Ally status")]
         public async Task Stats2()
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
+            if(IsForbidden()) return;
 
             try
             {
@@ -1061,9 +1016,7 @@ namespace ThunderED.Classes
         [Command("caps", RunMode = RunMode.Async), Summary("")]
         public async Task Caps()
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
+            if(IsForbidden()) return;
             if (!SettingsManager.Settings.CommandsConfig.EnableCapsCommand) 
                 return;
             if(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Any() && !SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Contains(Context.Channel.Id))
@@ -1077,9 +1030,8 @@ namespace ThunderED.Classes
         [Command("caps", RunMode = RunMode.Async), Summary("")]
         public async Task Caps([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
+            if(IsForbidden()) return;
+
             if (!SettingsManager.Settings.CommandsConfig.EnableCapsCommand) 
                 return;
             if(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Any() && !SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Contains(Context.Channel.Id))
@@ -1104,10 +1056,7 @@ namespace ThunderED.Classes
         [Command("motd", RunMode = RunMode.Async), Summary("Shows MOTD")]
         public async Task Motd()
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
+            if(IsForbidden()) return;
 
             if (SettingsManager.Settings.Config.ModuleMOTD)
             {
@@ -1128,21 +1077,15 @@ namespace ThunderED.Classes
         [Command("ops", RunMode = RunMode.Async), Summary("Shows current Fleetup Operations")]
         public async Task Ops()
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
-
-            if (SettingsManager.Settings.Config.ModuleFleetup)
+            if(IsForbidden()) return;
+            if (SettingsManager.Settings.Config.ModuleFleetup) return;
+            try
             {
-                try
-                {
-                    await FleetUpModule.Ops(Context, null);
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("ops", ex);
-                }
+                await FleetUpModule.Ops(Context, null);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("ops", ex);
             }
         }
         /// <summary>
@@ -1152,21 +1095,15 @@ namespace ThunderED.Classes
         [Command("ops", RunMode = RunMode.Async), Summary("Shows current Fleetup Operations")]
         public async Task Ops([Remainder] string x)
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
-
-            if (SettingsManager.Settings.Config.ModuleFleetup)
+            if(IsForbidden()) return;
+            if (SettingsManager.Settings.Config.ModuleFleetup) return;
+            try
             {
-                try
-                {
-                    await FleetUpModule.Ops(Context, x);
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("ops", ex);
-                }
+                await FleetUpModule.Ops(Context, x);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("ops", ex);
             }
         }
 
@@ -1177,15 +1114,10 @@ namespace ThunderED.Classes
         [Command("about", RunMode = RunMode.Async), Summary("About the bot")]
         public async Task About()
         {
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
-
+            if(IsForbidden()) return;
 
             try
             {
-                var forbiddenChannels = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-                if(forbiddenChannels.Contains(Context.Channel.Id)) return;
                 await AboutModule.About(Context);
             }
             catch (Exception ex)
@@ -1203,11 +1135,7 @@ namespace ThunderED.Classes
         {
             try
             {
-                var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-                if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                    return;
-
-
+                if(IsForbidden()) return;
                 if (SettingsManager.Settings.Config.ModuleCharCorp)
                    await CharSearchModule.SearchCharacter(Context, x);
             }
@@ -1221,6 +1149,7 @@ namespace ThunderED.Classes
         public async Task Corp()
         {
             if (!SettingsManager.Settings.Config.ModuleFWStats) return;
+            if(IsForbidden()) return;
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("badstandHelp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "badstand"));
         }
 
@@ -1233,11 +1162,7 @@ namespace ThunderED.Classes
         {
             try
             {
-                var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-                if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                    return;
-
-
+                if(IsForbidden()) return;
                 if (SettingsManager.Settings.Config.ModuleCharCorp)
                   await CorpSearchModule.CorpSearch(Context, x);
             }
@@ -1251,9 +1176,8 @@ namespace ThunderED.Classes
         public async Task BadStandCommand()
         {
             if (!SettingsManager.Settings.Config.ModuleFWStats) return;
-            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-            if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                return;
+            if(IsForbidden()) return;
+
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("badstandHelp", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "badstand"));
         }
 
@@ -1275,9 +1199,7 @@ namespace ThunderED.Classes
             try
             {
                 if (!SettingsManager.Settings.Config.ModuleFWStats) return;
-                var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
-                if(forbidden.Any() && forbidden.Contains(Context.Channel.Id))
-                    return;
+                if(IsForbidden()) return;
                 await FWStatsModule.DisplayBadStandings(Context, x);
             }
             catch (Exception ex)
@@ -1310,6 +1232,18 @@ namespace ThunderED.Classes
             }
 
             return true;
+        }
+
+        private bool IsForbidden()
+        {
+            var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
+            return forbidden.Any() && forbidden.Contains(Context.Channel.Id);
+        }
+
+        private bool IsAuthAllowed()
+        {
+            var channels = APIHelper.DiscordAPI.GetAuthAllowedChannels();
+            return channels.Length == 0 || channels.Contains(Context.Channel.Id);
         }
 
         #endregion

@@ -76,7 +76,7 @@ namespace ThunderED.Modules
                     var result = await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth);
                     var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.IsAuthed;
                     //skip dumped
-                    if (authUser.IsDumped || authUser.IsSpying) return null;
+                    //if (authUser.IsSpying) return null;
                     if (!isMovingToDump)
                     {
                         var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == result.GroupName);
@@ -87,7 +87,7 @@ namespace ThunderED.Modules
                     var isAuthed = result.UpdatedRoles.Count > 1;
 
 
-                    if (isMovingToDump)
+                    if (isMovingToDump && !authUser.IsDumped)
                     {
                         if (SettingsManager.Settings.Config.ModuleHRM && SettingsManager.Settings.HRMModule.UseDumpForMembers)
                         {
