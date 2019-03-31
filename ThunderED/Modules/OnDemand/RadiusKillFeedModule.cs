@@ -85,28 +85,36 @@ namespace ThunderED.Modules.OnDemand
                     }
                     else
                     {
-                        if (km.isUnreachableSystem) //Thera WH Abyss
+                        if (km.isUnreachableSystem && km.systemId != radiusSystemId) //Thera WH Abyss
                             continue;
 
                         switch (mode)
                         {
                             case RadiusMode.Range:
-                                var route = await APIHelper.ESIAPI.GetRawRoute(Reason, radiusSystemId, km.systemId);
-                                if(string.IsNullOrEmpty(route)) continue;
-                                JArray data;
-                                try
+                                if (km.systemId != radiusSystemId)
                                 {
-                                    data = JArray.Parse(route);
+                                    var route = await APIHelper.ESIAPI.GetRawRoute(Reason, radiusSystemId, km.systemId);
+                                    if (string.IsNullOrEmpty(route)) continue;
+                                    JArray data;
+                                    try
+                                    {
+                                        data = JArray.Parse(route);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        await LogHelper.LogEx("Route parse: " + ex.Message, ex, Category);
+                                        continue;
+                                    }
+
+                                    routeLength = data.Count - 1;
+                                    //not in range
+                                    if (routeLength > radius) continue;
                                 }
-                                catch (Exception ex)
+                                else
                                 {
-                                    await LogHelper.LogEx("Route parse: " + ex.Message, ex, Category);
-                                    continue;
+                                    routeLength = 0;
                                 }
 
-                                routeLength = data.Count - 1;
-                                //not in range
-                                if (routeLength > radius) continue;
                                 rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
                                 rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
                                 break;

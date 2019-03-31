@@ -3,6 +3,7 @@
 + Added **DisplayDetailsSummary** param to display EVE urls in mail summary
 + Fixed auth cleanup bug when where was an auth group in a list with empty Allowed* fields (literally group allowed all users to auth)
 + Fixed forbidden channels handling for commands
++ Fixed radius kill feed with 0 system range paramater
 + Improved and cleaned up Discord mail feeds, introduced new mail summaries with EVE fit & channel links into separate blocks to reduce clutter
 + Improved text breaking logic to respect words and urls
 + Removed duplicate mails from spy feeds
