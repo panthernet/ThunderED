@@ -18,6 +18,12 @@ namespace ThunderED.Json
 
             [JsonIgnore]
             public long? DB_RegionId;
+
+            public bool IsUnreachable()
+            {
+                if (string.IsNullOrEmpty(name)) return false;
+                return system_id == 31000005 || name.StartsWith("AD") || name[0] == 'J';
+            }
         }
     }
 }

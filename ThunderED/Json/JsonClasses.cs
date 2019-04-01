@@ -551,5 +551,17 @@ namespace ThunderED.Json
             public DateTime vulnerable_end_time;
             public DateTime vulnerable_start_time;
         }
+
+        public class SearchResult
+        {
+            public List<long> solar_system = new List<long>();
+            public List<long> region = new List<long>();
+            public List<long> constellation = new List<long>();
+            public List<long> alliance = new List<long>();
+            public List<long> character = new List<long>();
+            public List<long> corporation = new List<long>();
+            public List<long> faction = new List<long>();
+            public List<long> station = new List<long>();
+        }
     }
 }

@@ -80,6 +80,9 @@ namespace ThunderED.Classes
         [ConfigEntryName("ModuleSovIndexTracker")]
         public SovTrackerModuleSettings SovTrackerModule { get; set; } = new SovTrackerModuleSettings();
 
+        [ConfigEntryName("ModuleWebConfigEditor")]
+        public WebConfigEditorModuleSettings WebConfigEditorModule { get; set; } = new WebConfigEditorModuleSettings();
+
 #if EDITOR
         public string Validate(List<string> usedModules)
         {
@@ -108,6 +111,32 @@ namespace ThunderED.Classes
             return sb.ToString();
         }
 #endif
+    }
+
+    public class WebConfigEditorModuleSettings
+    {
+#if EDITOR
+        public ObservableDictionary<string, WCEAccessFilter> AccessList { get; set; } = new  ObservableDictionary<string, WCEAccessFilter>();
+#else
+        public Dictionary<string, WCEAccessFilter> AccessList { get; set; } = new  Dictionary<string, WCEAccessFilter>();
+#endif
+
+    }
+
+    public class WCEAccessFilter
+    {
+#if EDITOR
+        public ObservableCollection<string> AllowedCharacterNames { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> AllowedDiscordRoleNames { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> AllowedAllianceNames { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> AllowedCorporationNames { get; set; } = new ObservableCollection<string>();
+#else
+        public List<string> AllowedCharacterNames { get; set; } = new List<string>();
+        public List<string> AllowedDiscordRoleNames { get; set; } = new List<string>();
+        public List<string> AllowedAllianceNames { get; set; } = new List<string>();
+        public List<string> AllowedCorporationNames { get; set; } = new List<string>();
+#endif
+        public bool CanEditSimplifiedAuth { get; set; } = true;
     }
 
     public class CommandsConfigSettings
@@ -336,13 +365,9 @@ namespace ThunderED.Classes
     public class HRMModuleSettings: ValidatableSettings
     {
 #if EDITOR
-        //public ObservableCollection<long> UsersAccessList { get; set; } = new ObservableCollection<long>();
-       // public ObservableCollection<string> RolesAccessList { get; set; } = new ObservableCollection<string>();
         public ObservableDictionary<string, HRMAccessFilter> AccessList { get; set; } = new  ObservableDictionary<string, HRMAccessFilter>();
         public ObservableDictionary<string, SpyFilter> SpyFilters { get; set; } = new  ObservableDictionary<string, SpyFilter>();
 #else
-       // public List<long> UsersAccessList { get; set; } = new List<long>();
-       // public List<string> RolesAccessList { get; set; } = new List<string>();
         public Dictionary<string, HRMAccessFilter> AccessList { get; set; } = new  Dictionary<string, HRMAccessFilter>();
         public Dictionary<string, SpyFilter> SpyFilters { get; set; } = new  Dictionary<string, SpyFilter>();
 #endif
@@ -698,14 +723,17 @@ namespace ThunderED.Classes
 
     public class RadiusGroup: ValidatableSettings
     {
+#if EDITOR
+        [Comment("List of Discord channel IDs to feed killmails")]
+        public ObservableCollection<ulong> RadiusChannels { get; set; } = new ObservableCollection<ulong> ();
+        [Comment("Mixed list of system, constellation and region IDs or names")]
+        public ObservableCollection<object> RadiusEntities { get; set; } = new ObservableCollection<object> ();
+#else
+        public List<ulong> RadiusChannels { get; set; } = new List<ulong> ();
+        public List<object> RadiusEntities { get; set; } = new List<object> ();
+#endif
         [Comment("Numeric value of number of jump around specified system. Leave 0 and specify radiusSystemId to limit feed by only one system")]
         public int Radius { get; set; }
-        [Comment("Discord channel ID to post messages")]
-        public ulong RadiusChannel { get; set; }
-        [Comment("Numeric radius central system ID (even wormhole J system can be specified). \nYou should specify only one of the following IDs: system, constellation or region")]
-        public long RadiusSystemId { get; set; }
-        public long RadiusConstellationId { get; set; }
-        public long RadiusRegionId { get; set; }
         [Comment("Minimum ISK value to filter killmails")]
         public long MinimumValue { get; set; }
         [Comment("Post group name into notification message")]

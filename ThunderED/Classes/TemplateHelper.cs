@@ -24,6 +24,13 @@ namespace ThunderED.Classes
             return true;
         }
 
+        public static async Task<Embed> GetTemplatedMessage(MessageTemplateType type, Dictionary<string, string> dic)
+        {
+            var templateFile = GetTemplate(type);
+            if (string.IsNullOrEmpty(templateFile)) return null;
+            return await CompileTemplate(type, templateFile, dic);
+        }
+
         public static string GetTemplate(MessageTemplateType type)
         {
             string typeFile;

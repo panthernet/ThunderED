@@ -6,6 +6,7 @@
 + Fixed radius kill feed with 0 system range paramater
 + Improved and cleaned up Discord mail feeds, introduced new mail summaries with EVE fit & channel links into separate blocks to reduce clutter
 + Improved text breaking logic to respect words and urls
++ Improved **radiusKillFeedModule** to accept all IDs and names in a single mixed list
 + Removed duplicate mails from spy feeds
 
 ### NOTES
@@ -20,7 +21,8 @@
 
 ### BREAKING CHANGES
 - Renamed **SpiesMailFeedChannelId** config param to **DefaultSpiesMailFeedChannelId**
-
+- Removed **RadiusSystemId**,**RadiusConstellationId**,**RadiusRegionId**,**RadiusChannel** from **radiusKillFeedModule**
+- Added **radiusChannels** and **radiusEntities** to **radiusKillFeedModule**
 
 ### V1.3.4
 + Added new **BindToMainCharacter** param to AuthGroups (read explanation below)

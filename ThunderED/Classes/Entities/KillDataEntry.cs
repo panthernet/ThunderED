@@ -48,8 +48,8 @@ namespace ThunderED.Classes.Entities
                     isUnreachableSystem = systemId == 31000005;
                     if (rSystem != null)
                     {
-                        sysName = rSystem.name == rSystem.system_id.ToString() ? "Abyss" : (rSystem.name ?? "J");               
-                        isUnreachableSystem = isUnreachableSystem || systemId.ToString() == rSystem.name || sysName[0] == 'J';
+                        sysName = rSystem.name == rSystem.system_id.ToString() ? "Abyss" : (rSystem.name ?? "J");
+                        isUnreachableSystem = rSystem.IsUnreachable();
                     }
                     else sysName = "?";
 

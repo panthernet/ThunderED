@@ -86,6 +86,7 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleHRM)
                 Modules.Add(new HRMModule());
 
+
             //on demand modules - only could be pinged by other modules or commands
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
                 OnDemandModules.Add(new LiveKillFeedModule());
@@ -99,12 +100,14 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.CommandsConfig.EnableCapsCommand)
                 OnDemandModules.Add(new CapsModule());
 
-            
+
             
             //IMPORTANT - web auth is the last module - to be the last for 404 handling
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
                 Modules.Add(new WebAuthModule());
 
+            Modules.ParallelForEachAsync(async a => await a.Initialize()).GetAwaiter().GetResult();
+            OnDemandModules.ParallelForEachAsync(async a => await a.Initialize()).GetAwaiter().GetResult();
 
             //subscriptions
             if (SettingsManager.Settings.Config.ModuleIRC)

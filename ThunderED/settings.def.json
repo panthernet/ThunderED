@@ -36,6 +36,7 @@
     "ModuleStats":  true, 
     "ModuleContractNotifications":  false, 
     "ModuleSovTracker":  false, 
+    "ModuleWebConfigEditor":  false, 
 
     "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
@@ -56,6 +57,18 @@
     "UseSocketsForZKillboard":  true,
     "ZKillboardWebSocketUrl":  "wss://zkillboard.com:2096",
     "LanguageFilesFolder":  ""
+  },
+
+  "WebConfigEditorModule": {
+    "AccessList": {
+      "accessList1": {
+        "AllowedCharacterNames": [],
+        "AllowedDiscordRoleNames": [],
+        "AllowedAllianceNames": [],
+        "AllowedCorporationNames": [],
+        "CanEditSimplifiedAuth":  true 
+      } 
+    }
   },
 
   "CommandsConfig": {
@@ -230,8 +243,8 @@
     "groupsConfig": {
       "group1": {
         "radius": 0,
-        "radiusChannel": 0,
-        "radiusSystemId": 0,
+        "radiusChannels": [],
+        "radiusEntities": ["Asakai", 30045314],
         "showGroupName":  false, 
         "minimumValue": 0,
         "FeedPvpKills":  true, 

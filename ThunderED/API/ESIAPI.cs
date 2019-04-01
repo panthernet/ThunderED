@@ -503,5 +503,11 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<List<JsonClasses.SovStructureData>>($"{SettingsManager.Settings.Config.ESIAddress}latest/sovereignty/structures/?datasource=tranquility&language={_language}", reason);
 
         }
+
+        public async Task<JsonClasses.SearchResult> SearchLocationEntity(string reason, string value)
+        {
+            var searchValue = HttpUtility.UrlEncode(value);
+            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=constellation,region,solar_system&datasource=tranquility&language={_language}&search={searchValue}&strict=true", reason);
+        }
     }
 }

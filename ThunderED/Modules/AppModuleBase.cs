@@ -32,6 +32,11 @@ namespace ThunderED.Modules
             _oneTimeWarnings.Add(id);
         }
 
+        public virtual async Task Initialize()
+        {
+
+        }
+
         public ThunderSettings Settings => SettingsManager.Settings;
     }
 }
