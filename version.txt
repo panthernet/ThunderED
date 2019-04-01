@@ -7,6 +7,7 @@
 + Improved and cleaned up Discord mail feeds, introduced new mail summaries with EVE fit & channel links into separate blocks to reduce clutter
 + Improved text breaking logic to respect words and urls
 + Improved **radiusKillFeedModule** to accept all IDs and names in a single mixed list
++ Improved **TED_ConfigEditor** to correctly work with mixed lists
 + Removed duplicate mails from spy feeds
 
 ### NOTES

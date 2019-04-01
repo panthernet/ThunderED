@@ -111,6 +111,9 @@
     <Compile Include="..\ThunderED\Classes\Enums\UserStatusEnum.cs">
       <Link>Classes\Shared\UserStatusEnum.cs</Link>
     </Compile>
+    <Compile Include="..\ThunderED\Classes\MixedListAttribute.cs">
+      <Link>Classes\MixedListAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\ThunderED\Classes\Settings.cs">
       <Link>Classes\Settings.cs</Link>
     </Compile>

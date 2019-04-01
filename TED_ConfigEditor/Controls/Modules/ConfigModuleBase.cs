@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using MahApps.Metro.Controls;
 using TED_ConfigEditor.Classes;
+using ThunderED.Classes;
 using Brushes = System.Windows.Media.Brushes;
 using Extensions = TED_ConfigEditor.Classes.Extensions;
 using Size = System.Windows.Size;
@@ -197,9 +198,10 @@ namespace TED_ConfigEditor.Controls.Modules
         {
             if (Activator.CreateInstance(typeof(ListBoxControlBase)) is ListBoxControlBase el)
             {
-                el.IsDictionary = typeof(IDictionary).IsAssignableFrom(property.PropertyType);
+                el.IsDictionary = typeof(IDictionary).IsAssignableFrom(property.PropertyType);                
                 el.IsValidatableCollection = typeof(IList).IsAssignableFrom(property.PropertyType) && typeof(IValidatable).IsAssignableFrom(property.PropertyType.GenericTypeArguments.Last());
                 el.ItemType = el.IsDictionary ? property.PropertyType.GenericTypeArguments.LastOrDefault() : property.PropertyType.GenericTypeArguments.FirstOrDefault();
+                el.IsMixedList = el.ItemType == typeof(object);
                 var dp = el.GetType()
                     .GetFields(BindingFlags.Static | BindingFlags.Public).FirstOrDefault(p => p.FieldType == typeof(DependencyProperty) && p.Name=="ItemsListProperty");
                         

@@ -13,68 +13,6 @@ using TED_ConfigEditor.Classes;
 
 namespace TED_ConfigEditor.Controls
 {
-   /* public static class ListBoxHelper
-    {
-        public static async void AddValueMethod<T>(Action<T> action)
-        {
-            var res = await MainWindow.Instance.ShowInputAsync("Enter new value", "Value:");
-            res = res?.Replace("\"", "");
-            if(string.IsNullOrEmpty(res)) return;
-            var type = typeof(T);
-            if(type == typeof(string))
-                action((T)(object)res);
-            else if (type == typeof(int))
-            {
-                if (!int.TryParse(res, out var iValue))
-                {
-                    await MainWindow.Instance.ShowMessageAsync("Error", "Value can't be converted to int type!");
-                    return;
-                }
-                action((T) (object) iValue);
-            }
-            else if (type == typeof(long))
-            {
-                if (!long.TryParse(res, out var iValue))
-                {
-                    await MainWindow.Instance.ShowMessageAsync("Error", "Value can't be converted to long type!");
-                    return;
-                }
-                action((T) (object) iValue);
-            }
-            else if (type == typeof(short))
-            {
-                if (!short.TryParse(res, out var iValue))
-                {
-                    await MainWindow.Instance.ShowMessageAsync("Error", "Value can't be converted to short type!");
-                    return;
-                }
-                action((T) (object) iValue);
-            }
-            else if (type == typeof(ulong))
-            {
-                if (!ulong.TryParse(res, out var iValue))
-                {
-                    await MainWindow.Instance.ShowMessageAsync("Error", "Value can't be converted to ulong type!");
-                    return;
-                }
-                action((T) (object) iValue);
-            }
-            else if (type == typeof(uint))
-            {
-                if (!uint.TryParse(res, out var iValue))
-                {
-                    await MainWindow.Instance.ShowMessageAsync("Error", "Value can't be converted to uint type!");
-                    return;
-                }
-                action((T) (object) iValue);
-            }
-            else
-            {
-                await MainWindow.Instance.ShowMessageAsync("Error", "Unknown type!");
-            }
-        }
-    }*/
-
     [TemplatePart(Name = "PART_ListBox", Type = typeof(ListBox))]
     public class ListBoxControlBase: UserControl, INotifyPropertyChanged
     {
@@ -125,8 +63,18 @@ namespace TED_ConfigEditor.Controls
                         ((IDictionary) ItemsList).Add(res, Convert.ChangeType(res2, ItemType));
                     }
                     else ((IDictionary) ItemsList).Add(res, Activator.CreateInstance(ItemType));
-                }else
-                    ((IList) ItemsList).Add(Convert.ChangeType(res, ItemType));
+                }
+                else
+                {
+                    if (IsMixedList)
+                    {
+                        if(long.TryParse(res, out var parsedResult))
+                            ((IList) ItemsList).Add(parsedResult);
+                        else ((IList) ItemsList).Add(res);
+                    }
+                    else ((IList) ItemsList).Add(Convert.ChangeType(res, ItemType));
+                }
+
                 OnPropertyChanged2("ItemsList");
             }
             catch
@@ -189,6 +137,7 @@ namespace TED_ConfigEditor.Controls
         }
 
         public bool IsDictionary { get; set; }
+        public bool IsMixedList { get; set; }
         public bool IsValidatableCollection { get; set; }
     }
 }

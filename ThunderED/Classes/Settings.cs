@@ -750,12 +750,10 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    case nameof(Radius):
-                        return Radius > 0 && RadiusSystemId == 0 ? Compose(nameof(Radius), "Radius is greater than 0 but RadiusSystemId = 0 so it won't affect anything!") : null;
-                    case nameof(RadiusConstellationId):
-                        return RadiusConstellationId == 0 && RadiusSystemId == 0 && RadiusRegionId == 0 ? Compose(nameof(RadiusConstellationId), "You must specify either RadiusSystemId, RadiusConstellationId or RadiusRegionId!") : null;
-                    case nameof(RadiusChannel):
-                        return RadiusChannel == 0 ? Compose(nameof(RadiusChannel), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(RadiusEntities):
+                        return !RadiusEntities.Any() ? Compose(nameof(RadiusEntities), "Radius is greater than 0 but entities are not set!") : null;
+                    case nameof(RadiusChannels):
+                        return !RadiusChannels.Any()? Compose(nameof(RadiusChannels), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }
 
                 return null;
