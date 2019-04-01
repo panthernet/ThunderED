@@ -15,12 +15,6 @@ namespace ThunderED.Modules.OnDemand
 {
     public class RadiusKillFeedModule: AppModuleBase
     {
-        private class RasiusGroupParsed
-        {
-            public readonly List<long> SystemIds  = new List<long>();
-            public readonly List<long> ConstellationIds  = new List<long>();
-            public readonly List<long> RegionIds  = new List<long>();
-        }
 
         private readonly Dictionary<string, long> _lastPosted = new Dictionary<string, long>();
         public sealed override LogCat Category => LogCat.RadiusKill;
@@ -31,61 +25,11 @@ namespace ThunderED.Modules.OnDemand
             ZKillLiveFeedModule.Queryables.Add(ProcessKill);            
         }
 
-        private readonly Dictionary<string, RasiusGroupParsed> _groups = new Dictionary<string, RasiusGroupParsed>();
 
         public override async Task Initialize()
         {
-            _groups.Clear();
-            foreach (var groupPair in Settings.RadiusKillFeedModule.GroupsConfig)
-            {
-                try
-                {
-                    if (!groupPair.Value.RadiusEntities.Any()) continue;
-                    var group = new RasiusGroupParsed();
-                    foreach (var entity in groupPair.Value.RadiusEntities)
-                    {
-                        if(entity == null) continue;
-                        if (long.TryParse(entity.ToString(), out var longNumber))
-                        {
-                            //got ID
-                            var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, entity);
-                            if(rSystem != null)
-                                group.SystemIds.Add(longNumber);
-                            else
-                            {
-                                var rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, entity);
-                                if(rConst != null)
-                                    group.ConstellationIds.Add(longNumber);
-                                else
-                                {
-                                    var rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, entity);
-                                    if(rRegion != null)
-                                        group.RegionIds.Add(longNumber);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            var result = await APIHelper.ESIAPI.SearchLocationEntity(Reason, entity.ToString());
-                            if (result != null)
-                            {
-                                if (result.solar_system.Any())
-                                    group.SystemIds.Add(result.solar_system.First());
-                                if (result.region.Any())
-                                    group.RegionIds.Add(result.region.First());
-                                if (result.constellation.Any())
-                                    group.ConstellationIds.Add(result.constellation.First());
-                            }
-                        }
-                    }
-
-                    _groups.Add(groupPair.Key, group);
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx(nameof(Initialize), ex, Category);
-                }
-            }
+            var data = Settings.RadiusKillFeedModule.GroupsConfig.ToDictionary(pair => pair.Key, pair => pair.Value.RadiusEntities);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Location);
         }
 
         private enum RadiusMode
@@ -111,8 +55,7 @@ namespace ThunderED.Modules.OnDemand
 
                     var isNPCKill = kill.zkb.npc;
                     if((!group.FeedPveKills && isNPCKill) || (!group.FeedPvpKills && !isNPCKill)) continue;
-                    var groupData = _groups.ContainsKey(groupName) ? _groups[groupName] : null;
-                    if(groupData == null) continue;
+                    if(!ParsedGroups.ContainsKey(groupName)) continue;
 
                     if (!group.RadiusChannels.Any())
                     {
@@ -120,9 +63,17 @@ namespace ThunderED.Modules.OnDemand
                         continue;
                     }
 
-                    foreach (var radiusSystemId in groupData.SystemIds)
+                    foreach (var radiusSystemId in GetParsedSolarSystems(groupName))
                     {
                         await ProcessLocation(radiusSystemId, RadiusMode.Range, kill, group, groupName);
+                    }
+                    foreach (var radiusSystemId in GetParsedConstellations(groupName))
+                    {
+                        await ProcessLocation(radiusSystemId, RadiusMode.Constellation, kill, group, groupName);
+                    }
+                    foreach (var radiusSystemId in GetParsedRegions(groupName))
+                    {
+                        await ProcessLocation(radiusSystemId, RadiusMode.Region, kill, group, groupName);
                     }
                 }
             }

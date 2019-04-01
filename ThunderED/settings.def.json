@@ -217,16 +217,14 @@
     "DefaultMention":  "@everyone", 
     "accessList": {
       "UnitedFleet":{
-        "AllianceIDs": [0],
-        "CharacterIDs": [0],
-        "CorporationIDs": [0]
+        "FilterEntities": ["Character Name", "a:Alliance Name", "c:Corporation Name", 795045209],
+        "FilterDiscordRoles": ["role1", "role2"]
       }
     },
     "editList": {
       "UnitedFleet":{
-        "AllianceIDs": [0],
-        "CharacterIDs": [0],
-        "CorporationIDs": [0]
+        "FilterEntities": [],
+        "FilterDiscordRoles": []
       }
     }
   },  

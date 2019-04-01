@@ -509,5 +509,11 @@ namespace ThunderED.API
             var searchValue = HttpUtility.UrlEncode(value);
             return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=constellation,region,solar_system&datasource=tranquility&language={_language}&search={searchValue}&strict=true", reason);
         }
+
+        public async Task<JsonClasses.SearchResult> SearchMemberEntity(string reason, string value)
+        {
+            var searchValue = HttpUtility.UrlEncode(value);
+            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance,character,corporation&datasource=tranquility&language={_language}&search={searchValue}&strict=true", reason);
+        }
     }
 }

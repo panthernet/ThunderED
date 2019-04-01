@@ -1,14 +1,37 @@
 #V1.3.5
 + Added spy mail feed filters by corp/alliance name and feed channel
 + Added **DisplayDetailsSummary** param to display EVE urls in mail summary
++ Added ability to auth timers module by Discord roles
 + Fixed auth cleanup bug when where was an auth group in a list with empty Allowed* fields (literally group allowed all users to auth)
 + Fixed forbidden channels handling for commands
 + Fixed radius kill feed with 0 system range paramater
 + Improved and cleaned up Discord mail feeds, introduced new mail summaries with EVE fit & channel links into separate blocks to reduce clutter
 + Improved text breaking logic to respect words and urls
 + Improved **radiusKillFeedModule** to accept all IDs and names in a single mixed list
++ Improved **timersModule** to accept all IDs and names in a single mixed list
 + Improved **TED_ConfigEditor** to correctly work with mixed lists
 + Removed duplicate mails from spy feeds
+
+### HIGHLIGHTS
+- Introducing global quality of life improvement - parameters which accept mixed arrays of IDs and names. Previously there was only strong typed arrays with faceless ID values.
+Now I will gradually update modules to accept both names and IDs in a condensed number af params. This will reduce clutter, improve usability and readability of config files.
+Before: 
+    "accessList": {
+      "UnitedFleet":{
+        "AllianceIDs": [123],
+        "CharacterIDs": [456],
+        "CorporationIDs": [789,911]
+      }
+    },
+After:
+    "accessList": {
+      "UnitedFleet":{
+        "FilterEntities": [123, "John Snow", "a:Goonswarm Federation", "c:Corporation"],
+      }
+    },
+Note the **a:* and **c:** prefixes, they are needed to search for alliance or corporation. If no prefix is specified then system will search for character.
+Also not that system can search for corporations and alliances by TICKER!
+System, constellation and region names do not require prefixes as they're unique by default.
 
 ### NOTES
 - New **SpyFilters** config param in **HRMModule** section allows you to filter your spies output
@@ -24,6 +47,7 @@
 - Renamed **SpiesMailFeedChannelId** config param to **DefaultSpiesMailFeedChannelId**
 - Removed **RadiusSystemId**,**RadiusConstellationId**,**RadiusRegionId**,**RadiusChannel** from **radiusKillFeedModule**
 - Added **radiusChannels** and **radiusEntities** to **radiusKillFeedModule**
+- Added **FilterEntities**,**FilterDiscordRoles** to **timersModule** access lists. Removed old parameters.
 
 ### V1.3.4
 + Added new **BindToMainCharacter** param to AuthGroups (read explanation below)

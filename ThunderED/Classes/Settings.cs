@@ -822,16 +822,12 @@ namespace ThunderED.Classes
     public class TimersAccessGroup: ValidatableSettings
     {
 #if EDITOR
-        [Comment("Alliance ID list")]
-        public ObservableCollection<long> AllianceIDs { get; set; } = new ObservableCollection<long>();
-        [Comment("Character IDs list")]
-        public ObservableCollection<long> CharacterIDs { get; set; } = new ObservableCollection<long>();
-        [Comment("Corporation ID list")]
-        public ObservableCollection<long> CorporationIDs { get; set; } = new ObservableCollection<long>();
+        [Comment("Mixed list of character, corporation, alliance IDs or names for filtering")]
+        public ObservableCollection<object> FilterEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<string> FilterDiscordRoles { get; set; } = new ObservableCollection<string>();
 #else
-        public List<long> AllianceIDs { get; set; } = new List<long>();
-        public List<long> CharacterIDs { get; set; } = new List<long>();
-        public List<long> CorporationIDs { get; set; } = new List<long>();
+        public List<object> FilterEntities { get; set; } = new List<object>();
+        public List<string> FilterDiscordRoles { get; set; } = new List<string>();
 #endif
 
 

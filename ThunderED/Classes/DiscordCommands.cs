@@ -208,9 +208,9 @@ namespace ThunderED.Classes
                 return;
             }
 
-            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.AllianceIDs.Where(b=> b > 0)).Distinct().ToList();
-            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CorporationIDs.Where(b=> b > 0)).Distinct().ToList();
-            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CharacterIDs.Where(b=> b > 0)).Distinct().ToList();
+            var allys = TickManager.GetModule<TimersModule>().GetAllAlianceIds();
+            var corps = TickManager.GetModule<TimersModule>().GetAllCorporationIds();
+            var chars = TickManager.GetModule<TimersModule>().GetAllCharacterIds();
 
             var skip = !allys.Any() && !corps.Any() && !chars.Any();
 
@@ -258,9 +258,9 @@ namespace ThunderED.Classes
 
             if(IsForbidden()) return;
 
-            var allys = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.AllianceIDs.Where(b=> b > 0)).Distinct().ToList();
-            var corps = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CorporationIDs.Where(b=> b > 0)).Distinct().ToList();
-            var chars = SettingsManager.Settings.TimersModule.AccessList.Values.SelectMany(a => a.CharacterIDs.Where(b=> b > 0)).Distinct().ToList();
+            var allys = TickManager.GetModule<TimersModule>().GetAllAlianceIds();
+            var corps = TickManager.GetModule<TimersModule>().GetAllCorporationIds();
+            var chars = TickManager.GetModule<TimersModule>().GetAllCharacterIds();
 
             var authUser = await SQLHelper.GetAuthUserByDiscordId(Context.User.Id);
             if (authUser != null)

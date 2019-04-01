@@ -25,6 +25,30 @@ namespace ThunderED.Modules
             LogHelper.LogModule("Initializing Timers module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, OnDisplayTimers);
         }
+        protected readonly Dictionary<string, Dictionary<string, List<long>>> ParsedAccessLists = new Dictionary<string, Dictionary<string, List<long>>>();
+        protected readonly Dictionary<string, Dictionary<string, List<long>>> ParsedEditLists = new Dictionary<string, Dictionary<string, List<long>>>();
+
+        public List<long> GetAllCharacterIds()
+        {
+            return ParsedAccessLists.Where(a => a.Value.ContainsKey("character")).SelectMany(a => a.Value["character"]).Distinct().Where(a => a > 0).ToList();
+        }
+        public List<long> GetAllCorporationIds()
+        {
+            return ParsedAccessLists.Where(a => a.Value.ContainsKey("corporation")).SelectMany(a => a.Value["corporation"]).Distinct().Where(a => a > 0).ToList();
+        }
+
+        public List<long> GetAllAlianceIds()
+        {
+            return ParsedAccessLists.Where(a => a.Value.ContainsKey("alliance")).SelectMany(a => a.Value["alliance"]).Distinct().Where(a => a > 0).ToList();
+        }
+
+        public override async Task Initialize()
+        {
+            var data = Settings.TimersModule.AccessList.ToDictionary(pair => pair.Key, pair => pair.Value.FilterEntities);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Member, ParsedAccessLists);
+            data = Settings.TimersModule.EditList.ToDictionary(pair => pair.Key, pair => pair.Value.FilterEntities);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Member, ParsedEditLists);
+        }
 
         private async Task<bool> OnDisplayTimers(HttpListenerRequestEventArgs context)
         {
@@ -60,6 +84,7 @@ namespace ThunderED.Modules
                             return true;
                         }
                         var characterId = Convert.ToInt64(result[0]);
+
                         await SQLHelper.UpdateTimersAuth(characterId);
                         //redirect to timers
                         var iid = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
@@ -116,13 +141,14 @@ namespace ThunderED.Modules
                             }
                         }
 
-                        if (!CheckAccess(characterId, rChar, out var isEditor))
+                        var checkResult = await CheckAccess(characterId, rChar);
+                        if (!checkResult[0])
                         {
                             await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Timers Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
                             return true;
                         }
 
-                        if (isEditor && data.StartsWith("delete"))
+                        if (checkResult[1] && data.StartsWith("delete"))
                         {
                             data = data.Substring(6, data.Length - 6);
                             await SQLHelper.DeleteTimer(Convert.ToInt64(data));
@@ -132,7 +158,7 @@ namespace ThunderED.Modules
                             return true;
                         }
 
-                        await WriteCorrectResponce(response, isEditor, characterId);
+                        await WriteCorrectResponce(response, checkResult[1], characterId);
                         return true;
                     }
                 }
@@ -161,12 +187,13 @@ namespace ThunderED.Modules
                         return false;
                     }
 
-                    if(!CheckAccess(characterId, rChar, out var isEditor))
+                    var checkResult = await CheckAccess(characterId, rChar);
+                    if(!checkResult[0])
                         return true;
 
                     var data = await request.ReadContentAsStringAsync();
 
-                    if (isEditor && data != null)
+                    if (checkResult[1] && data != null)
                     {
                         if (data.StartsWith("delete"))
                         {
@@ -266,27 +293,35 @@ namespace ThunderED.Modules
             await WebServerModule.WriteResponce(text, response);
         }
 
-        private bool CheckAccess(long characterId, JsonClasses.CharacterData rChar, out bool isEditor)
+        private async Task<bool[]> CheckAccess(long characterId, JsonClasses.CharacterData rChar)
         {
             var authgroups = Settings.TimersModule.AccessList;
             var accessCorps = new List<long>();
             var accessAlliance = new List<long>();
             var accessChars = new List<long>();
-            isEditor = false;
+           // isEditor = false;
             bool skip = false;
 
-            if (authgroups.Count == 0 || authgroups.Values.All(a => !a.AllianceIDs.Any() && !a.CorporationIDs.Any() && !a.CharacterIDs.Any()))
+            if (authgroups.Count == 0 || authgroups.Values.All(a => !a.FilterEntities.Any()))
             {
                 skip = true;
             }
             else
             {
-                foreach (var config in authgroups)
+                var discordRoles = authgroups.Values.SelectMany(a => a.FilterDiscordRoles).Distinct().ToList();
+                if (discordRoles.Any())
                 {
-                    accessChars.AddRange(config.Value.CharacterIDs.Where(a=> a > 0));
-                    accessAlliance.AddRange(config.Value.AllianceIDs.Where(a=> a > 0));
-                    accessCorps.AddRange(config.Value.CorporationIDs.Where(a=> a > 0));
+                    var authUser = await SQLHelper.GetAuthUserByCharacterId(characterId);
+                    if (authUser != null && authUser.DiscordId > 0)
+                    {
+                        if (APIHelper.DiscordAPI.GetUserRoleNames(authUser.DiscordId).Intersect(discordRoles).Any())
+                            skip = true;
+                    }
                 }
+
+                accessChars = ParsedAccessLists.Where(a => a.Value.ContainsKey("character")).SelectMany(a => a.Value["character"]).Distinct().Where(a => a > 0).ToList();
+                accessCorps = ParsedAccessLists.Where(a => a.Value.ContainsKey("corporation")).SelectMany(a => a.Value["corporation"]).Distinct().Where(a => a > 0).ToList();
+                accessAlliance = ParsedAccessLists.Where(a => a.Value.ContainsKey("alliance")).SelectMany(a => a.Value["alliance"]).Distinct().Where(a => a > 0).ToList();
             }
 
             authgroups = Settings.TimersModule.EditList;
@@ -295,18 +330,25 @@ namespace ThunderED.Modules
             var editChars = new List<long>();
             bool skip2 = false;
 
-            if (authgroups.Count == 0 ||  authgroups.Values.All(a => !a.AllianceIDs.Any() && !a.CorporationIDs.Any() && !a.CharacterIDs.Any()))
+            if (authgroups.Count == 0 ||  authgroups.Values.All(a => !a.FilterEntities.Any()))
             {
                 skip2 = true;
             }
             else
-            {
-                foreach (var config in authgroups)
+            {        
+                var discordRoles = authgroups.Values.SelectMany(a => a.FilterDiscordRoles).Distinct().ToList();
+                if (discordRoles.Any())
                 {
-                    editChars.AddRange(config.Value.CharacterIDs.Where(a=> a > 0));
-                    editAlliance.AddRange(config.Value.AllianceIDs.Where(a=> a > 0));
-                    editCorps.AddRange(config.Value.CorporationIDs.Where(a=> a > 0));
+                    var authUser = await SQLHelper.GetAuthUserByCharacterId(characterId);
+                    if (authUser != null && authUser.DiscordId > 0)
+                    {
+                        if (APIHelper.DiscordAPI.GetUserRoleNames(authUser.DiscordId).Intersect(discordRoles).Any())
+                            skip2 = true;
+                    }
                 }
+                editChars = ParsedEditLists.Where(a => a.Value.ContainsKey("character")).SelectMany(a => a.Value["character"]).Distinct().Where(a => a > 0).ToList();
+                editCorps = ParsedEditLists.Where(a => a.Value.ContainsKey("corporation")).SelectMany(a => a.Value["corporation"]).Distinct().Where(a => a > 0).ToList();
+                editAlliance = ParsedEditLists.Where(a => a.Value.ContainsKey("alliance")).SelectMany(a => a.Value["alliance"]).Distinct().Where(a => a > 0).ToList();
             }
 
             //check for Discord admins
@@ -332,14 +374,14 @@ namespace ThunderED.Modules
             {
                 if (!editChars.Contains(characterId) && !accessChars.Contains(characterId))
                 {
-                    return false;
+                    return new[] {false, false};
                 }
             }
 
-            isEditor = skip2 || editCorps.Contains(rChar.corporation_id) || (rChar.alliance_id.HasValue && rChar.alliance_id.Value > 0 && editAlliance.Contains(rChar.alliance_id.Value))
+            var isEditor = skip2 || editCorps.Contains(rChar.corporation_id) || (rChar.alliance_id.HasValue && rChar.alliance_id.Value > 0 && editAlliance.Contains(rChar.alliance_id.Value))
                 || editChars.Contains(characterId);
 
-            return true;
+            return new [] {true, isEditor};
         }
 
         public async Task<string> GenerateTimersHtml(bool isEditor, string baseCharId)
