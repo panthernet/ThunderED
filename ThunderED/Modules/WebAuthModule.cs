@@ -73,7 +73,7 @@ namespace ThunderED.Modules
                     }
                 }
 
-                if ((DateTime.Now - _lastTimersCheck).TotalMinutes < 1 ) return;
+                if ((DateTime.Now - _lastTimersCheck).TotalMinutes < 5 ) return;
                 _lastTimersCheck = DateTime.Now;
 
                 await ProcessPreliminaryAppilicants();

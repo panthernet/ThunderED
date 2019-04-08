@@ -1,4 +1,8 @@
-#V1.3.5
+### V1.3.6
++ Fixed **radiusKillFeedModule** constellation and region handling
++ Automatic preliminary auth check now has 5 min delay timer
+
+### V1.3.5
 + Added spy mail feed filters by corp/alliance name and feed channel
 + Added **DisplayDetailsSummary** param to display EVE urls in mail summary
 + Added ability to auth timers module by Discord roles

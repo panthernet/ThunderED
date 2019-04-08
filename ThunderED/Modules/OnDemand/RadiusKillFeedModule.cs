@@ -115,12 +115,12 @@ namespace ThunderED.Modules.OnDemand
             }
             else
             {
-                if (radius == 0 || km.isUnreachableSystem || (srcSystem?.IsUnreachable() ?? false)) //Thera WH Abyss
-                    return;
-
                 switch (mode)
                 {
                     case RadiusMode.Range:
+
+                        if (radius == 0 || km.isUnreachableSystem || (srcSystem?.IsUnreachable() ?? true)) //Thera WH Abyss
+                            return;
 
                         var route = await APIHelper.ESIAPI.GetRawRoute(Reason, radiusId, km.systemId);
                         if (string.IsNullOrEmpty(route)) return;
@@ -148,8 +148,16 @@ namespace ThunderED.Modules.OnDemand
                         if (km.rSystem.constellation_id != radiusId) return;
                         break;
                     case RadiusMode.Region:
-                        rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
-                        if (rConst == null || rConst.region_id != radiusId) return;
+                        if (km.rSystem.DB_RegionId > 0)
+                        {
+                            if (km.rSystem.DB_RegionId != radiusId) return;
+                        }
+                        else
+                        {
+                            rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
+                            if (rConst == null || rConst.region_id != radiusId) return;
+                        }
+
                         break;
                 }
                 rConst = rConst ?? await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
