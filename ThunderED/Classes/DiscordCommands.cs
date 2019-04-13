@@ -472,10 +472,13 @@ namespace ThunderED.Classes
         [Command("auth", RunMode = RunMode.Async), Summary("Displays web auth URL address")]
         public async Task Auth3(string command, string data)
         {
-            if (SettingsManager.Settings.Config.ModuleAuthWeb && IsAuthAllowed())
+            if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
                 try
                 {
+                    if (!IsAuthAllowed())
+                        return;
+
                     string code;
                     long characterId;
                     if (!data.All(char.IsDigit))
@@ -585,8 +588,11 @@ namespace ThunderED.Classes
                     return;
                 }
             }
+            else
+            {
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
+            }
 
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("webServerOffline")}");
         }
 
         [Command("clist", RunMode = RunMode.Async), Summary("")]
