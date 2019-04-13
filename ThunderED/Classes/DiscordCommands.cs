@@ -454,8 +454,10 @@ namespace ThunderED.Classes
         [Command("authurl", RunMode = RunMode.Async), Summary("Displays web auth URL address")]
         public async Task AuthUrl2(string group)
         {
-            if (SettingsManager.Settings.Config.ModuleAuthWeb && IsAuthAllowed())
+            if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
+                if(!IsAuthAllowed())
+                    return;
 
                 var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a=> a.Key == group);
                 if (grp.Value != null)
@@ -899,7 +901,10 @@ namespace ThunderED.Classes
         [Command("auth", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task Auth([Remainder] string x)
         {
-            if (IsAuthAllowed() && SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
+            if(!IsAuthAllowed())
+                return;
+
+            if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
             {
                 try
                 {
