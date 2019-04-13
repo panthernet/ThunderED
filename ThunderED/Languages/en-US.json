@@ -139,7 +139,7 @@
   "killFeedBy": " killed by {0}<{1}{2}> ({3})",
   "radiusInfoHeader": "Radius Info",
   "fuNeedSetup":
-    "FlettUp module setup is incomplete! Please check your settings.json file and make sure bot have access to specified Discord channel!",
+    "FleetUp module setup is incomplete! Please check your settings.json file and make sure bot have access to specified Discord channel!",
   "fuNotification": "FleetUp Notification",
   "fuFormUpTime": "Form Up Time",
   "fuFormUpSystem": "Form Up System",

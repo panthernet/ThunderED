@@ -1,3 +1,6 @@
+### V1.3.7
++ Added **showinfo** links processing in mail messages
+
 ### V1.3.6
 + Fixed **radiusKillFeedModule** constellation and region handling
 + Automatic preliminary auth check now has 5 min delay timer

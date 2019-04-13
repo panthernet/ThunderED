@@ -346,6 +346,16 @@ namespace ThunderED.Modules
                             data = forWeb ? text : $"***{text}***";
                             fitList.Add(furl);
                         }
+                        else if (url.StartsWith("showinfo"))
+                        {
+                            if (!url.Contains("//"))
+                            {
+                                var value = url.Split(":")[1];
+                                data = forWeb ? $"<a href=\"{APIHelper.GetItemTypeUrl(value)}\">{text}</a>" : $"***{text}***";
+                                fitList.Add(furl);
+                            }
+                        }
+
                         else if (url.StartsWith("killReport"))
                         {
                             var id = url.Substring(11, url.Length - 11);
