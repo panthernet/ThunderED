@@ -1,6 +1,8 @@
 ### V1.3.7
 + Added **showinfo** links processing in mail messages
 + Added contract filter Discord channel validation
++ Added **AllAnchoringMsg** notification processing for POS deployment
++ Fixed some notification parsing
 
 ### V1.3.6
 + Fixed **radiusKillFeedModule** constellation and region handling

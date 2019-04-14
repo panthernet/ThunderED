@@ -37,12 +37,14 @@ namespace ThunderED.API
 
         internal async Task<JsonClasses.CorporationData> GetCorporationData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
+            if (id == null) return null;
             return await GetEntry<JsonClasses.CorporationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
                 forceUpdate, noCache);
         }
 
         internal async Task<JsonClasses.AllianceData> GetAllianceData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
+            if (id == null) return null;
             return await GetEntry<JsonClasses.AllianceData>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
                 forceUpdate, noCache);
         }
@@ -514,6 +516,12 @@ namespace ThunderED.API
         {
             var searchValue = HttpUtility.UrlEncode(value);
             return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance,character,corporation&datasource=tranquility&language={_language}&search={searchValue}&strict=true", reason);
+        }
+
+        public async Task<JsonClasses.MoonData> GetMoon(string reason, object id)
+        {
+            return await APIHelper.RequestWrapper<JsonClasses.MoonData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/moons/{id}/?datasource=tranquility&language={_language}", reason);
+
         }
     }
 }

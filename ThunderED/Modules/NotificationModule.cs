@@ -469,6 +469,29 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                                                     await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
                                                 }
                                                     break;
+                                                case "AllAnchoringMsg":
+                                                {
+                                                    await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
+                                                    var corpName = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data) ?? null))?.name  ?? LM.Get("Unknown");
+                                                    var allianceName = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allianceID", data) ?? null))?.name;
+                                                    var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data)))?.name ?? LM.Get("Unknown");
+                                                    var moonName = (await APIHelper.ESIAPI.GetMoon(Reason, GetData("moonID", data)))?.name ?? LM.Get("Unknown");
+                                                    var text = LM.Get("PosAnchoring", string.IsNullOrEmpty(allianceName) ? corpName : $"{allianceName} - {corpName}");
+                                                    builder = new EmbedBuilder()
+                                                        .WithColor(new Color(0xff0000))
+                                                        .WithThumbnailUrl(Settings.Resources.ImgCitAnchoring)
+                                                        .WithAuthor(author =>
+                                                            author.WithName(text))
+                                                        .AddField(LM.Get("System"),  $"{systemName} {LM.Get("AtSmall")} {moonName}", true)
+                                                        .AddField(LM.Get("Structure"), typeName, true)
+                                                        .AddField(LM.Get("TimeLeft"), timeleft ?? LM.Get("Unknown"), true)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                        .WithTimestamp(timestamp);
+                                                    embed = builder.Build();
+
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                }
+                                                    break;
                                                 case "StructureUnanchoring":
                                                 {
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);

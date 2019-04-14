@@ -563,5 +563,12 @@ namespace ThunderED.Json
             public List<long> faction = new List<long>();
             public List<long> station = new List<long>();
         }
+
+        public class MoonData
+        {
+            public long moon_id;
+            public string name;
+            public long system_id;
+        }
     }
 }

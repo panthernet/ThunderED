@@ -116,8 +116,9 @@ namespace ThunderED.Helpers
                     var value = res[1].Trim();
                     value = value.StartsWith("&id") ? value.Split(' ')[1] : value;
                     value = value?.Trim();
-                    if(!dic.ContainsKey(value))
-                        dic.Add(res[0]?.Trim(), value == "null" ? null : value);
+                    var key = res[0]?.Trim();
+                    if(!dic.ContainsKey(key))
+                        dic.Add(key, value == "null" ? null : value);
                 }
             });
             return dic;
