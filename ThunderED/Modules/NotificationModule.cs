@@ -879,7 +879,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                                         }
                                         catch (Exception ex)
                                         {
-                                            await LogHelper.LogEx("Error Notification", ex, Category);
+                                            await LogHelper.LogEx($"Error Notification: {notification?.type} - {notification?.text}\n", ex, Category);
                                         }
                                     }
                                 }
