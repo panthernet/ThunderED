@@ -1,5 +1,6 @@
 ### V1.3.7
 + Added **showinfo** links processing in mail messages
++ Added contract filter Discord channel validation
 
 ### V1.3.6
 + Fixed **radiusKillFeedModule** constellation and region handling
