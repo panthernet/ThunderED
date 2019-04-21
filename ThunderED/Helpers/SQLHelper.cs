@@ -425,6 +425,17 @@ namespace ThunderED.Helpers
         #endregion
 
         #region Cache
+
+        
+        public static async Task DeleteCache(object type, object value)
+        {
+            await Delete("cache", new Dictionary<string, object>
+            {
+                {"type", type},
+                {"id", value}
+            });
+        }
+
         public static async Task DeleteCache(string type = null)
         {
             if (string.IsNullOrEmpty(type))
@@ -441,7 +452,7 @@ namespace ThunderED.Helpers
             await Update("cache_data", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
         }
 
-        public static async Task SetCacheLastUpdate(object id, string type)
+        public static async Task SetCacheLastAccess(object id, string type)
         {
             await Update("cache", "lastAccess", DateTime.Now, new Dictionary<string, object>
             {

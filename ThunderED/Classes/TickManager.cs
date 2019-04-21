@@ -32,7 +32,7 @@ namespace ThunderED.Classes
             return (T)(object)o;
         }
 
-        public static void LoadModules()
+        private static async Task LoadModules()
         {          
             Modules.Clear();
             OnDemandModules.Clear();
@@ -63,7 +63,11 @@ namespace ThunderED.Classes
                 Modules.Add(new TimersModule());
 
             if (SettingsManager.Settings.Config.ModuleMail)
+            {
                 Modules.Add(new MailModule());
+                foreach (var id in SettingsManager.Settings.MailModule.AuthGroups.Values.SelectMany(a => a.Id).Distinct())
+                    await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
+            }
 
             if(SettingsManager.Settings.Config.ModuleIRC)
                 Modules.Add(new IRCModule());
@@ -77,15 +81,22 @@ namespace ThunderED.Classes
             if(SettingsManager.Settings.Config.ModuleNullsecCampaign)
                 Modules.Add(new NullCampaignModule());
 
-            if(SettingsManager.Settings.Config.ModuleContractNotifications)
+            if (SettingsManager.Settings.Config.ModuleContractNotifications)
+            {
                 Modules.Add(new ContractNotificationsModule());
+                foreach (var id in SettingsManager.Settings.ContractNotificationsModule.Groups.SelectMany(a => a.Value.CharacterIDs).Distinct())
+                    await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
+            }
 
             if(SettingsManager.Settings.Config.ModuleSovTracker)
                 Modules.Add(new SovTrackerModule());
 
             if (SettingsManager.Settings.Config.ModuleHRM)
+            {
                 Modules.Add(new HRMModule());
-
+                foreach (var id in SettingsManager.Settings.HRMModule.AccessList.SelectMany(a => a.Value.UsersAccessList).Distinct())
+                    await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
+            }
 
             //on demand modules - only could be pinged by other modules or commands
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
@@ -99,15 +110,13 @@ namespace ThunderED.Classes
 
             if (SettingsManager.Settings.CommandsConfig.EnableCapsCommand)
                 OnDemandModules.Add(new CapsModule());
-
-
-            
+         
             //IMPORTANT - web auth is the last module - to be the last for 404 handling
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
                 Modules.Add(new WebAuthModule());
 
-            Modules.ParallelForEachAsync(async a => await a.Initialize()).GetAwaiter().GetResult();
-            OnDemandModules.ParallelForEachAsync(async a => await a.Initialize()).GetAwaiter().GetResult();
+            await Modules.ParallelForEachAsync(async a => await a.Initialize());
+            await OnDemandModules.ParallelForEachAsync(async a => await a.Initialize());
 
             //subscriptions
             if (SettingsManager.Settings.Config.ModuleIRC)
@@ -116,6 +125,8 @@ namespace ThunderED.Classes
                 APIHelper.DiscordAPI.SubscribeRelay(GetModule<TelegramModule>());
 
         }
+
+        private static bool _isModulesLoaded;
 
         public static async void Tick(object stateInfo)
         {
@@ -126,6 +137,12 @@ namespace ThunderED.Classes
 
             try
             {
+                if (!_isModulesLoaded)
+                {
+                    await LoadModules();
+                    _isModulesLoaded = true;
+                }
+
                 #region ONLINE CHECK
                 if ((_asyncNow - _lastOnlineCheck).TotalSeconds > 5)
                 {
@@ -189,6 +206,13 @@ namespace ThunderED.Classes
             var module = Modules.FirstOrDefault(a => a.GetType() == type);
             module?.Run( prm ?? context);
             return Task.CompletedTask;
+        }
+
+        public static void InvalidateModules()
+        {
+            WebServerModule.ModuleConnectors.Clear();
+            ZKillLiveFeedModule.Queryables.Clear();
+            _isModulesLoaded = false;
         }
     }
 }

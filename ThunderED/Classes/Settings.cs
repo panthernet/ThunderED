@@ -83,6 +83,11 @@ namespace ThunderED.Classes
         [ConfigEntryName("ModuleWebConfigEditor")]
         public WebConfigEditorModuleSettings WebConfigEditorModule { get; set; } = new WebConfigEditorModuleSettings();
 
+        [ConfigEntryName("")]
+        [StaticConfigEntry]
+        public ZKBSettingsModuleSettings ZKBSettingsModule { get; set; } = new ZKBSettingsModuleSettings();
+
+
 #if EDITOR
         public string Validate(List<string> usedModules)
         {
@@ -111,6 +116,16 @@ namespace ThunderED.Classes
             return sb.ToString();
         }
 #endif
+    }
+
+    public class ZKBSettingsModuleSettings
+    {
+        [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
+        public string ZkillLiveFeedRedisqID { get; set; }
+        public bool UseSocketsForZKillboard { get; set; } = true;
+        public string ZKillboardWebSocketUrl { get; set; } = "wss://zkillboard.com:2096";
+        [Comment("Try avoid duplicate killmails across all radius and live kill feeds")]
+        public bool AvoidDupesAcrossAllFeeds { get; set; } = false;
     }
 
     public class WebConfigEditorModuleSettings
@@ -1498,8 +1513,6 @@ namespace ThunderED.Classes
         public bool ModuleContractNotifications { get; set; } = false;
         public bool ModuleSovTracker { get; set; } = false;
 
-        [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
-        public string ZkillLiveFeedRedisqID { get; set; }
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";
         public string DateFormat { get; set; } = "dd.MM.yyyy";
@@ -1523,8 +1536,6 @@ namespace ThunderED.Classes
         public bool UseHTTPS { get; set; } = false;
         public bool RunAsServiceCompatibility { get; set; } = false;
         public bool DisableLogIntoFiles { get; set; } = false;
-        public bool UseSocketsForZKillboard { get; set; } = true;
-        public string ZKillboardWebSocketUrl { get; set; } = "wss://zkillboard.com:2096";
         [Comment("Optional path to language files folder. Empty by default and will use default folder")]
         public string LanguageFilesFolder { get; set; }
 

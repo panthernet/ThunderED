@@ -37,7 +37,7 @@ namespace ThunderED.Modules
             return ParsedAccessLists.Where(a => a.Value.ContainsKey("corporation")).SelectMany(a => a.Value["corporation"]).Distinct().Where(a => a > 0).ToList();
         }
 
-        public List<long> GetAllAlianceIds()
+        public List<long> GetAllAllianceIds()
         {
             return ParsedAccessLists.Where(a => a.Value.ContainsKey("alliance")).SelectMany(a => a.Value["alliance"]).Distinct().Where(a => a > 0).ToList();
         }
@@ -48,6 +48,9 @@ namespace ThunderED.Modules
             await ParseMixedDataArray(data, MixedParseModeEnum.Member, ParsedAccessLists);
             data = Settings.TimersModule.EditList.ToDictionary(pair => pair.Key, pair => pair.Value.FilterEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member, ParsedEditLists);
+
+            foreach (var id in GetAllCharacterIds())
+                await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
         }
 
         private async Task<bool> OnDisplayTimers(HttpListenerRequestEventArgs context)

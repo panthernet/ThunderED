@@ -108,8 +108,6 @@ namespace ThunderED
                 return;
             }
 
-            //Load modules
-            TickManager.LoadModules();
             //initiate core timer
             _timer = new Timer(TickManager.Tick, new AutoResetEvent(true), 100, 100);
 

@@ -24,7 +24,7 @@ namespace ThunderED.Modules.Sub
                 if(TickManager.IsNoConnection || !Queryables.Any()) return;
                 JsonZKill.Killmail entry = null;
 
-                if (Settings.Config.UseSocketsForZKillboard)
+                if (Settings.ZKBSettingsModule.UseSocketsForZKillboard)
                 {
                     var currentEntry = await APIHelper.ZKillAPI.GetSocketResponce();
                     if (currentEntry == null) return;

@@ -14,6 +14,13 @@ namespace ThunderED.Modules
         public bool LogToConsole = true;
         public abstract LogCat Category { get; }
 
+        protected bool IsFirstPass { get; private set; } = true;
+
+        protected void InvalidateFirstPass()
+        {
+            IsFirstPass = false;
+        }
+
         /// <summary>
         /// List of IDs to control one-time warnings during the single bot session
         /// </summary>

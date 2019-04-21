@@ -29,6 +29,31 @@ namespace ThunderED.API
             _language = SettingsManager.Settings.Config.UseEnglishESIOnly ? "en-us" : SettingsManager.Settings.Config.Language?.ToLower() ?? "en-us";
         }
 
+        internal async Task RemoveAllCharacterDataFromCache(object id)
+        {
+            var user = await GetCharacterData("ESIAPI", id);
+            await RemoveDbCache("CharacterData", id);
+            await RemoveCorporationFromCache(user.corporation_id);
+            if (user.alliance_id.HasValue)
+                await RemoveAllianceFromCache(user.alliance_id.Value);
+        }
+
+
+        internal async Task RemoveCharacterFromCache(object id)
+        {
+            await RemoveDbCache("CharacterData", id);
+        }
+
+        internal async Task RemoveCorporationFromCache(object id)
+        {
+            await RemoveDbCache("CorporationData", id);
+        }
+
+        internal async Task RemoveAllianceFromCache(object id)
+        {
+            await RemoveDbCache("AllianceData", id);
+        }
+
         internal async Task<JsonClasses.CharacterData> GetCharacterData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
             return await GetEntry<JsonClasses.CharacterData>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/?datasource=tranquility&language={_language}", reason, id, 1,

@@ -26,6 +26,10 @@ namespace ThunderED.Modules.OnDemand
             try
             {
                 if (_lastPosted == kill.killmail_id) return;
+
+                if(Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds && RadiusKillFeedModule.UpdateDistinctEntriesExternal(kill.killmail_id))
+                    return;
+
                 var postedGlobalBigKill = false;
                 var bigKillGlobalValue = SettingsManager.Settings.LiveKillFeedModule.BigKill;
                 var bigKillGlobalChan = SettingsManager.Settings.LiveKillFeedModule.BigKillChannel;

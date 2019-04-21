@@ -208,7 +208,7 @@ namespace ThunderED.Classes
                 return;
             }
 
-            var allys = TickManager.GetModule<TimersModule>().GetAllAlianceIds();
+            var allys = TickManager.GetModule<TimersModule>().GetAllAllianceIds();
             var corps = TickManager.GetModule<TimersModule>().GetAllCorporationIds();
             var chars = TickManager.GetModule<TimersModule>().GetAllCharacterIds();
 
@@ -258,7 +258,7 @@ namespace ThunderED.Classes
 
             if(IsForbidden()) return;
 
-            var allys = TickManager.GetModule<TimersModule>().GetAllAlianceIds();
+            var allys = TickManager.GetModule<TimersModule>().GetAllAllianceIds();
             var corps = TickManager.GetModule<TimersModule>().GetAllCorporationIds();
             var chars = TickManager.GetModule<TimersModule>().GetAllCharacterIds();
 
@@ -811,9 +811,7 @@ namespace ThunderED.Classes
 
                 await SettingsManager.UpdateSettings();
                 await SettingsManager.UpdateInjectedSettings();
-                WebServerModule.ModuleConnectors.Clear();
-                ZKillLiveFeedModule.Queryables.Clear();
-                TickManager.LoadModules();
+                TickManager.InvalidateModules();
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ":white_check_mark: REHASH COMPLETED", true);
             }
             catch (Exception ex)

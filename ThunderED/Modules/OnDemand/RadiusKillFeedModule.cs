@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,15 +17,25 @@ namespace ThunderED.Modules.OnDemand
     public class RadiusKillFeedModule: AppModuleBase
     {
 
-        private readonly Dictionary<string, long> _lastPosted = new Dictionary<string, long>();
+        private static readonly ConcurrentDictionary<string, long> LastPostedDictionary = new ConcurrentDictionary<string, long>();
         public sealed override LogCat Category => LogCat.RadiusKill;
-
+        private static readonly ConcurrentQueue<long> SharedIdPool = new ConcurrentQueue<long>();
         public RadiusKillFeedModule()
         {
             LogHelper.LogModule("Inititalizing RadiusKillFeed module...", Category).GetAwaiter().GetResult();
-            ZKillLiveFeedModule.Queryables.Add(ProcessKill);            
+            ZKillLiveFeedModule.Queryables.Add(ProcessKill);
+            LastPostedDictionary.Clear();
         }
 
+        public static bool UpdateDistinctEntriesExternal(long id)
+        {
+            if (SharedIdPool.Contains(id))
+                return true;
+            SharedIdPool.Enqueue(id);
+            if (SharedIdPool.Count > 30)
+                SharedIdPool.TryDequeue(out _);
+            return false;
+        }
 
         public override async Task Initialize()
         {
@@ -43,15 +54,18 @@ namespace ThunderED.Modules.OnDemand
         {
             try
             {
+                if(Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds && UpdateDistinctEntriesExternal(kill.killmail_id))
+                    return;
+
                 foreach (var groupPair in Settings.RadiusKillFeedModule.GroupsConfig)
                 {
                     var groupName = groupPair.Key;
                     var group = groupPair.Value;
-                    if(!_lastPosted.ContainsKey(groupName))
-                        _lastPosted.Add(groupName, 0);
+                    if(!LastPostedDictionary.ContainsKey(groupName))
+                        LastPostedDictionary.AddOrUpdateEx(groupName, 0);
 
-                    if (_lastPosted[groupName] == kill.killmail_id) continue;
-                    _lastPosted[groupName] = kill.killmail_id;
+                    if (LastPostedDictionary[groupName] == kill.killmail_id) continue;
+                    LastPostedDictionary[groupName] = kill.killmail_id;
 
                     var isNPCKill = kill.zkb.npc;
                     if((!group.FeedPveKills && isNPCKill) || (!group.FeedPvpKills && !isNPCKill)) continue;

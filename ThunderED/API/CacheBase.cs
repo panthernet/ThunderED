@@ -80,7 +80,7 @@ namespace ThunderED.API
         {
             var data = await SQLHelper.SelectCache<T>(id, days);
             if (data == null) return null;
-            await SQLHelper.SetCacheLastUpdate(id, typeof(T).Name);
+            await SQLHelper.SetCacheLastAccess(id, typeof(T).Name);
             return data;
         }
 
@@ -88,6 +88,11 @@ namespace ThunderED.API
             where T : class
         {
             await SQLHelper.UpdateCache(data, id, days);
+        }
+
+        protected async Task RemoveDbCache(object id, object value) 
+        {
+            await SQLHelper.DeleteCache(id, value);
         }
 
         #endregion

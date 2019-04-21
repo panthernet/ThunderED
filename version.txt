@@ -2,10 +2,15 @@
 + Added new **ShowOnlyBasicDetails** param for contracts filter - display only condensed basic info
 + Added new **RedirectByIdInDescription** and **PostToChannelIfRedirected** params for contracts filter - read WiKi on GitHub for details
 + Added notifications: **MoonminingExtractionStarted, MoonminingExtractionCancelled, MoonminingAutomaticFracture**
++ Added **AvoidDupesAcrossAllFeeds** param to ZKB settings to avoid dupe kills from all radius and live feeds
++ Added vital characters cache update on bot startup/reload
 + Fixed Back urls in web interface
 + Fixed auth roles assignment with one button mode and standalone buttons enabled
 
 !!!Read updated Contracts FAQ for detailed description (https://github.com/panthernet/ThunderED/wiki/Contracts-Feed-Setup)
+
+### Breaking Changes
+- Added new static **ZKBSettingsModule** settings section. Related ZKB parameters moved here: **zkillLiveFeedRedisqID, UseSocketsForZKillboard, ZKillboardWebSocketUrl**
 
 ### V1.3.7
 + Added **showinfo** links processing in mail messages

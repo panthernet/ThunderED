@@ -35,7 +35,7 @@ namespace ThunderED.API
                     if (_webSocket?.State == WebSocketState.Connecting) return null;
                     var o = new PureWebSocketOptions();
                     _webSocket?.Dispose();
-                    _webSocket = new PureWebSocket(SettingsManager.Settings.Config.ZKillboardWebSocketUrl, o);
+                    _webSocket = new PureWebSocket(SettingsManager.Settings.ZKBSettingsModule.ZKillboardWebSocketUrl, o);
                     _webSocket.OnMessage += _webSocket_OnMessage;
                     _webSocket.OnError += async exception => { await LogHelper.LogEx("_webSocket.OnError", exception, LogCat.ZKill); };
 
@@ -87,7 +87,7 @@ namespace ThunderED.API
 
         internal async Task<JsonZKill.ZKillboard> GetRedisqResponce()
         {
-            var redisqID = SettingsManager.Settings.Config.ZkillLiveFeedRedisqID;
+            var redisqID = SettingsManager.Settings.ZKBSettingsModule.ZkillLiveFeedRedisqID;
 			var request = string.IsNullOrEmpty(redisqID)
                     ? "https://redisq.zkillboard.com/listen.php?ttw=1"
                     : $"https://redisq.zkillboard.com/listen.php?ttw=1&queueID={redisqID}";

@@ -38,7 +38,6 @@
     "ModuleSovTracker":  false, 
     "ModuleWebConfigEditor":  false, 
 
-    "zkillLiveFeedRedisqID": "",
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
     "dateFormat": "dd.MM.yyyy",
@@ -54,9 +53,14 @@
     "UseHTTPS":  false,
     "RunAsServiceCompatibility":  false,
     "DisableLogIntoFiles": false,
-    "UseSocketsForZKillboard":  true,
-    "ZKillboardWebSocketUrl":  "wss://zkillboard.com:2096",
     "LanguageFilesFolder":  ""
+  },
+
+  "ZKBSettingsModule": {
+    "zkillLiveFeedRedisqID": "",
+    "UseSocketsForZKillboard": true,
+    "ZKillboardWebSocketUrl": "wss://zkillboard.com:2096",
+    "AvoidDupesAcrossAllFeeds":  false 
   },
 
   "WebConfigEditorModule": {
