@@ -452,7 +452,8 @@ namespace ThunderED.Modules.Sub
                 list.Add("esi-contracts.read_character_contracts.v1");
             if(readCorp)
                 list.Add("esi-contracts.read_corporation_contracts.v1");
-            var pString = string.Join('+', list);
+            list.Add("esi-universe.read_structures.v1");
+                var pString = string.Join('+', list);
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=cauth{HttpUtility.UrlEncode(groupName)}";
         }
 

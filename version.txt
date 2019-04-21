@@ -4,6 +4,7 @@
 + Added notifications: **MoonminingExtractionStarted, MoonminingExtractionCancelled, MoonminingAutomaticFracture**
 + Added **AvoidDupesAcrossAllFeeds** param to ZKB settings to avoid dupe kills from all radius and live feeds
 + Added vital characters cache update on bot startup/reload
++ Fixed contracts citadel qeries
 + Fixed Back urls in web interface
 + Fixed auth roles assignment with one button mode and standalone buttons enabled
 
