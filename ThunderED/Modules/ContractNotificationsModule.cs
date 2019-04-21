@@ -258,7 +258,7 @@ namespace ThunderED.Modules
                         await PrepareAcceptedDiscordMessage(filter.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token, filter);
                         var index = lst.IndexOf(contract);
                         lst.Remove(contract);
-                        lst.Insert(index, freshContract);
+                        lst.Insert(index < 0 ? 0 : index, freshContract);
                         await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is accepted!", Category);
                         continue;
                     }
