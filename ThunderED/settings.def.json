@@ -106,7 +106,8 @@
              "Availability":  ["public", "personal", "corporation", "alliance"],
              "Types":  ["unknown", "item_exchange", "auction", "courier", "loan"], 
              "ShowIngameOpen":  false,
-             "DiscordChannelId": 0
+             "DiscordChannelId": 0,
+             "ShowOnlyBasicDetails":  false 
            }   
         }
       } 

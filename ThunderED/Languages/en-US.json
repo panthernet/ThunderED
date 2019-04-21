@@ -495,5 +495,8 @@
   "hrmRestoreConfirm": "Restore characters auth?",
   "PosAnchoring": "{0} has started to anchor POS!",
   "PosUnanchoring": "{0} has started to unanchor POS!",
-  "AtSmall": "at"
+  "AtSmall": "at",
+  "simpleTo": "to",
+  "simpleFrom": "from"
+
 }

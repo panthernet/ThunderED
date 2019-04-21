@@ -316,6 +316,8 @@ namespace ThunderED.Classes
         public bool FeedIssuedTo { get; set; } = true;
         [Comment("Show link to open contract ingame")]
         public bool ShowIngameOpen { get; set; }
+        [Comment("Display only issuer/status details for contracts")]
+        public bool ShowOnlyBasicDetails { get; set; }
     }
 
     public class StatsModuleSettings

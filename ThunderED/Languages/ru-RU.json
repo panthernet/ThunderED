@@ -488,5 +488,7 @@
   "hrmRestoreConfirm": "Восстановить аутентификацию персонажа?",
   "PosAnchoring": "{0} начали установку на якорь ПОС!",
   "PosUnanchoring": "{0} начали снятие с якоря ПОС!",
-  "AtSmall":  "у" 
+  "AtSmall": "у",
+  "simpleTo": "к",
+  "simpleFrom": "от"
 }
