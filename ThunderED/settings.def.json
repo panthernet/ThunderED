@@ -99,17 +99,18 @@
         "FeedPersonalContracts":  true,
         "FeedCorporateContracts":  true,
         "Filters":  {
-           "defaultFilter": {
-             "FeedIssuedBy":  true,
-             "FeedIssuedTo":  true,
-             "Statuses": ["finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed", "in_progress", "outstanding"],
-             "Availability":  ["public", "personal", "corporation", "alliance"],
-             "Types":  ["unknown", "item_exchange", "auction", "courier", "loan"], 
-             "ShowIngameOpen":  false,
-             "DiscordChannelId": 0,
-             "ShowOnlyBasicDetails": false,
-             "RedirectByIdInDescription":  false 
-           }   
+          "defaultFilter": {
+            "FeedIssuedBy": true,
+            "FeedIssuedTo": true,
+            "Statuses": [ "finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed", "in_progress", "outstanding" ],
+            "Availability": [ "public", "personal", "corporation", "alliance" ],
+            "Types": [ "unknown", "item_exchange", "auction", "courier", "loan" ],
+            "ShowIngameOpen": false,
+            "DiscordChannelId": 0,
+            "ShowOnlyBasicDetails": false,
+            "RedirectByIdInDescription": false,
+            "PostToChannelIfRedirected":  false 
+          }   
         }
       } 
     } 

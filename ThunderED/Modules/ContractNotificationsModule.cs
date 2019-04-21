@@ -621,7 +621,8 @@ namespace ThunderED.Modules
                     if (user != null)
                     {
                         await user.SendMessageAsync(">>>\n", false, embed.Build());
-                        return;
+                        if(!filter.PostToChannelIfRedirected)
+                            return;
                     }
                 }
             }

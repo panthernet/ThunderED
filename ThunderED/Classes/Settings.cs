@@ -320,6 +320,8 @@ namespace ThunderED.Classes
         public bool ShowOnlyBasicDetails { get; set; }
         [Comment("Look for Discord ID in contract description and report to this user in PM instead of dedicated channel")]
         public bool RedirectByIdInDescription { get; set; }
+        [Comment("Post message to Discord channel if it has been redirected by RedirectByIdInDescription param")]
+        public bool PostToChannelIfRedirected { get; set; }
     }
 
     public class StatsModuleSettings
