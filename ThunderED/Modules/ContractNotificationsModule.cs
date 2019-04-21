@@ -605,10 +605,31 @@ namespace ThunderED.Modules
 
             }
 
+            if (filter.RedirectByIdInDescription && !string.IsNullOrEmpty(contract.title))
+            {
+                var result = ulong.TryParse(contract.title.Trim(), out var feedId);
+                if (!result)
+                {
+                    var arr = contract.title.Split(' ');
+                    if(arr.Length > 1)
+                        result = ulong.TryParse(arr[arr.Length-1].Trim(), out feedId);
+                }
+
+                if (result)
+                {
+                    var user = APIHelper.DiscordAPI.GetUser(feedId);
+                    if (user != null)
+                    {
+                        await user.SendMessageAsync(">>>\n", false, embed.Build());
+                        return;
+                    }
+                }
+            }
+
             await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channelId), $"{mention} >>>\n", embed.Build()).ConfigureAwait(false);
         }
 
-        public static async Task<string[]> GetContarctItemsString(string reason, bool isCorp, long corpId, long charId, long contractId, string token)
+        public static async Task<string[]> GetContractItemsString(string reason, bool isCorp, long corpId, long charId, long contractId, string token)
         {
             var sbItemsSubmitted = new StringBuilder();
             var sbItemsAsking = new StringBuilder();

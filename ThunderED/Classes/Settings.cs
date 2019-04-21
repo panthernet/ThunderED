@@ -318,6 +318,8 @@ namespace ThunderED.Classes
         public bool ShowIngameOpen { get; set; }
         [Comment("Display only issuer/status details for contracts")]
         public bool ShowOnlyBasicDetails { get; set; }
+        [Comment("Look for Discord ID in contract description and report to this user in PM instead of dedicated channel")]
+        public bool RedirectByIdInDescription { get; set; }
     }
 
     public class StatsModuleSettings

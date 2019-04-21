@@ -107,7 +107,8 @@
              "Types":  ["unknown", "item_exchange", "auction", "courier", "loan"], 
              "ShowIngameOpen":  false,
              "DiscordChannelId": 0,
-             "ShowOnlyBasicDetails":  false 
+             "ShowOnlyBasicDetails": false,
+             "RedirectByIdInDescription":  false 
            }   
         }
       } 

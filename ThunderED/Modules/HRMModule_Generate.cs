@@ -369,7 +369,7 @@ namespace ThunderED.Modules
                         : (await APIHelper.ESIAPI.GetCharacterData(Reason, entry.acceptor_id))?.name;
 
                     var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, inspectCharId);
-                    var itemList = await ContractNotificationsModule.GetContarctItemsString(Reason, entry.for_corporation, ch.corporation_id ,inspectCharId , entry.contract_id, token);
+                    var itemList = await ContractNotificationsModule.GetContractItemsString(Reason, entry.for_corporation, ch.corporation_id ,inspectCharId , entry.contract_id, token);
 
                     sb.AppendLine($"<tr>");
                     sb.AppendLine($"  <th scope=\"row\">{counter++}</th>");
