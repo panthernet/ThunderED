@@ -530,7 +530,10 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
 
                                                     await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
                                                     break;
+                                                case "MoonminingExtractionCancelled":
+                                                case "MoonminingExtractionStarted":
                                                 case "MoonminingExtractionFinished":
+
                                                     //"text": "autoTime: 131632776620000000\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 1003894.7944164276\n  46676: 3861704.652392864\n  46681: 1934338.7763798237\n  46687: 5183861.7768108845\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                     var compText = new StringBuilder();
@@ -548,16 +551,25 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                                                         .WithColor(new Color(0xb386f7))
                                                         .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
                                                         .WithAuthor(author =>
-                                                            author.WithName(LM.Get("MoonminingExtractionFinished",
-                                                                structureType == null ? LM.Get("Structure") : structureType.name)))
+                                                            author.WithName(LM.Get(notification.type, structureType == null ? LM.Get("Structure") : structureType.name)))
                                                         .AddField(LM.Get("Structure"), structureNameDirect ?? LM.Get("Unknown"), true)
                                                         .AddField(LM.Get("Composition"), compText.ToString(), true)
                                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
+
+                                                    if (notification.type == "MoonminingExtractionStarted")
+                                                    {
+                                                        var startedBy = data.ContainsKey("startedBy")
+                                                            ? ((await APIHelper.ESIAPI.GetCharacterData(Reason, data["startedBy"]))?.name ?? LM.Get("Auto"))
+                                                            : null;
+                                                        builder.AddField(LM.Get("moonminingStartedBy"), startedBy ?? LM.Get("Unknown"));
+                                                    }
+
                                                     embed = builder.Build();
 
                                                     await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
                                                     break;
+                                                case "MoonminingAutomaticFracture":
                                                 case "MoonminingLaserFired":
                                                     //"text": "firedBy: 91684736\nfiredByLink: <a href=\"showinfo:1386\/\/91684736\">Mike Myzukov<\/a>\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 241789.6056930224\n  46676: 930097.5066294272\n  46681: 465888.4702051679\n  46687: 1248541.084139049\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
@@ -566,11 +578,14 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                                                         .WithColor(new Color(0xb386f7))
                                                         .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
                                                         .WithAuthor(author =>
-                                                            author.WithName(LM.Get("MoonminingLaserFired",
-                                                                structureType == null ? LM.Get("Structure") : structureType.name)))
-                                                        .AddField(LM.Get("Structure"), structureNameDirect ?? LM.Get("Unknown"), true)
-                                                        .AddField(LM.Get("FiredBy"), moonFiredBy, true)
-                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                            author.WithName(LM.Get(notification.type, structureType == null ? LM.Get("Structure") : structureType.name)))
+                                                        .AddField(LM.Get("Structure"), structureNameDirect ?? LM.Get("Unknown"), true);
+                                                    if (notification.type == "MoonminingLaserFired")
+                                                    {
+                                                        builder.AddField(LM.Get("FiredBy"), moonFiredBy, true);
+                                                    }
+
+                                                    builder.WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
 

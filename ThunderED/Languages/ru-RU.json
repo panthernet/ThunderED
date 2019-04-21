@@ -490,5 +490,9 @@
   "PosUnanchoring": "{0} начали снятие с якоря ПОС!",
   "AtSmall": "у",
   "simpleTo": "к",
-  "simpleFrom": "от"
+  "simpleFrom": "от",
+  "MoonminingExtractionStarted": "Цитадель {0} начала вытягивание руды с луны!",
+  "MoonminingExtractionCancelled": "Цитадель {0} отменила вытягивание руды!",
+  "MoonminingAutomaticFracture": "Цитадель {0} запустила автоматический подрыв куска руды!",
+  "moonminingStartedBy": "Запущен"
 }

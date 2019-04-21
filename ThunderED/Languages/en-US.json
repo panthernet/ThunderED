@@ -497,6 +497,10 @@
   "PosUnanchoring": "{0} has started to unanchor POS!",
   "AtSmall": "at",
   "simpleTo": "to",
-  "simpleFrom": "from"
+  "simpleFrom": "from",
+  "MoonminingExtractionStarted": "Allied {0} has started an extraction!",
+  "MoonminingExtractionCancelled": "Allied {0} has cancelled an extraction!",
+  "MoonminingAutomaticFracture": "Allied {0} has initiated automatic fracture!",
+  "moonminingStartedBy": "Started By"
 
 }

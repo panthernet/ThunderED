@@ -1,5 +1,6 @@
 ### V1.3.8
 + Added new **ShowOnlyBasicDetails** param for contracts filter - display only condensed basic info
++ Added notifications: **MoonminingExtractionStarted, MoonminingExtractionCancelled, MoonminingAutomaticFracture**
 + Fixed Back urls in web interface
 + Fixed auth roles assignment with one button mode and standalone buttons enabled
 
