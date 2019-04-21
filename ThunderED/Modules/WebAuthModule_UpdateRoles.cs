@@ -370,10 +370,20 @@ namespace ThunderED.Modules
                 if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
                 {
                     var group = SettingsManager.Settings.WebAuthModule.AuthGroups[token.GroupName];
-                    if ((!group.AllowedAlliances.Any() || group.AllowedAlliances.Values.All(a => a.Id.All(b=> b == 0))) &&
-                        (!group.AllowedCorporations.Any() || group.AllowedCorporations.Values.All(a => a.Id.All(b=> b == 0))) && (!group.AllowedCharacters.Any() || group.AllowedCharacters.Values.Any(a=> a.Id.All(b=> b == 0))) 
+                    if ((!group.AllowedAlliances.Any() || group.AllowedAlliances.Values.All(a => a.Id.All(b => b == 0))) &&
+                        (!group.AllowedCorporations.Any() || group.AllowedCorporations.Values.All(a => a.Id.All(b => b == 0))) &&
+                        (!group.AllowedCharacters.Any() || group.AllowedCharacters.Values.Any(a => a.Id.All(b => b == 0)))
                         && group.StandingsAuth == null)
+                    {
                         groupName = token.GroupName;
+                        var l = group.AllowedCorporations.SelectMany(a => a.Value.DiscordRoles);
+                        var aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
+                        result.UpdatedRoles.AddRange(aRoles);
+                        
+                        l = group.AllowedAlliances.SelectMany(a => a.Value.DiscordRoles);
+                        aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
+                        result.UpdatedRoles.AddRange(aRoles);
+                    }
                 }
 
                 //ordinary guest

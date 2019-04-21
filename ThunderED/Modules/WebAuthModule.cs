@@ -467,7 +467,7 @@ namespace ThunderED.Modules
                     else
                     {
                         var grp = Settings.WebAuthModule.AuthGroups[groupName];
-                        var url = grp.MustHaveGroupName
+                        var url = grp.MustHaveGroupName || (Settings.WebAuthModule.UseOneAuthButton && grp.ExcludeFromOneButtonMode)
                             ? WebServerModule.GetCustomAuthUrl(grp.ESICustomAuthRoles, groupName)
                             : WebServerModule.GetAuthUrl();
 
@@ -495,7 +495,9 @@ namespace ThunderED.Modules
                         var message = LM.Get("ESIFailure");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                            .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
+                            .Replace("{header}", LM.Get("authTemplateHeader"))
+                            .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
+                            .Replace("{backText}", LM.Get("backText")), response);
                         return true;
                     }
 
@@ -576,7 +578,9 @@ namespace ThunderED.Modules
                         {
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", LM.Get("ESIFailure"))
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
+                                .Replace("{header}", LM.Get("authTemplateHeader"))
+                                .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
+                                .Replace("{backText}", LM.Get("backText")), response);
                             return true;
                         }
 
@@ -587,7 +591,9 @@ namespace ThunderED.Modules
                         {
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", LM.Get("ESIFailure"))
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
+                                .Replace("{header}", LM.Get("authTemplateHeader"))
+                                .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
+                                .Replace("{backText}", LM.Get("backText")), response);
                             return true;
                         }
 
@@ -599,7 +605,9 @@ namespace ThunderED.Modules
                         {
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", LM.Get("ESIFailure"))
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
+                                .Replace("{header}", LM.Get("authTemplateHeader"))
+                                .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
+                                .Replace("{backText}", LM.Get("backText")), response);
                             return true;
                         }
 
@@ -700,15 +708,28 @@ namespace ThunderED.Modules
                             var longCorpId = rChar.corporation_id;
                             var longAllyId = allianceID;
 
-                            //has custom ESI roles
+                            //has custom ESI roles or name specified
                             if (inputGroup != null)
                             {
                                 group = inputGroup;
-                                if (await GetCorpEntityById(group, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(group, longAllyId) != null) || await GetCharEntityById(group, longCharacterId) != null)
+
+                                //guest check
+                                if (group.AllowedAlliances.Values.All(b => !b.Id.Any() || b.Id.All(c => c == 0)) &&
+                                    group.AllowedCorporations.Values.All(b => !b.Id.Any() || b.Id.All(c => c == 0)) && !group.AllowedCharacters.Values.Any())
                                 {
-                                    groupName = inputGroupName;
                                     add = true;
+                                    groupName = inputGroupName;
                                     cFoundList.Add(rChar.corporation_id);
+                                }
+                                else
+                                {
+                                    if (await GetCorpEntityById(group, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(group, longAllyId) != null) ||
+                                        await GetCharEntityById(group, longCharacterId) != null)
+                                    {
+                                        groupName = inputGroupName;
+                                        add = true;
+                                        cFoundList.Add(rChar.corporation_id);
+                                    }
                                 }
                             }
                             else
@@ -780,7 +801,8 @@ namespace ThunderED.Modules
                                         .Replace("{image}", image)
                                         .Replace("{uid}",  $"!auth {uid}").Replace("{header}", LM.Get("authTemplateHeader"))
                                         .Replace("{body}", LM.Get("authTemplateSucc1", rChar.name))
-                                        .Replace("{body2}", LM.Get("authTemplateSucc2")).Replace("{body3}", LM.Get("authTemplateSucc3")).Replace("{backText}", LM.Get("backText")),
+                                        .Replace("{body2}", LM.Get("authTemplateSucc2")).Replace("{body3}", LM.Get("authTemplateSucc3"))
+                                        .Replace("{backText}", LM.Get("backText")),
                                     response);
                                 if (SettingsManager.Settings.WebAuthModule.AuthReportChannel != 0)
                                     await APIHelper.DiscordAPI.SendMessageAsync(SettingsManager.Settings.WebAuthModule.AuthReportChannel, $"{group.DefaultMention} {LM.Get("authManualAcceptMessage", rChar.name, characterID, groupName)}").ConfigureAwait(false);
@@ -798,6 +820,7 @@ namespace ThunderED.Modules
                                             .Replace("{body}", LM.Get("authTemplateManualAccept", rChar.name))
                                             .Replace("{body3}", LM.Get("authTemplateManualAccept3"))
                                             .Replace("{body2}", LM.Get("authTemplateManualAccept2"))
+                                            .Replace("{backUrl}", WebServerModule.GetWebSiteUrl())
                                             .Replace("{backText}", LM.Get("backText")),
                                         response);
                                 else 
@@ -810,7 +833,8 @@ namespace ThunderED.Modules
                                             .Replace("{body}", LM.Get("authTemplateManualAccept", rChar.name))
                                             .Replace("{body3}", LM.Get("authTemplateManualAccept3"))
                                             .Replace("{body2}", null)
-                                            .Replace("{backText}", LM.Get("backText")),
+                                            .Replace("{backText}", LM.Get("backText")
+                                            .Replace("{backUrl}", WebServerModule.GetWebSiteUrl())),
                                         response);
 
                             }
@@ -820,7 +844,10 @@ namespace ThunderED.Modules
                             var message = LM.Get("authNonAlly");
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")).Replace("{body}", ""), response);
+                                .Replace("{header}", LM.Get("authTemplateHeader"))
+                                .Replace("{backText}", LM.Get("backText"))
+                                .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
+                                .Replace("{body}", ""), response);
                         }
 
 

@@ -269,6 +269,7 @@ namespace ThunderED.Modules.Sub
                 .Replace("{headerContent}", GetHtmlResourceDefault(false))
                 .Replace("{header}", LM.Get("authTemplateHeader"))
                 .Replace("{body}", LM.Get("WebRequestUnexpected"))
+                .Replace("{backUrl}", GetWebSiteUrl())
                 .Replace("{backText}", LM.Get("backText"));
         }
 
@@ -369,6 +370,14 @@ namespace ThunderED.Modules.Sub
                 : null;
             return $"{HttpPrefix}://{extIp}:{extPort}/{text}";
         }
+
+        internal static string GetAuthLobbyUrl()
+        {
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            return $"{HttpPrefix}://{extIp}:{extPort}/authPage.html";
+        }
+
 
         internal static string GetAuthUrl(string groupName = null, long mainCharacterId = 0)
         {

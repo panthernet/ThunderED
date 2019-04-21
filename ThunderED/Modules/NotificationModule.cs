@@ -948,7 +948,9 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                         var message = LM.Get("ESIFailure");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                            .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{backText}", LM.Get("backText")), response);
+                            .Replace("{header}", LM.Get("authTemplateHeader"))
+                            .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
+                            .Replace("{backText}", LM.Get("backText")), response);
                         return true;
                     }
 
