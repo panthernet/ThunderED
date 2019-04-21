@@ -5,6 +5,8 @@
 + Fixed Back urls in web interface
 + Fixed auth roles assignment with one button mode and standalone buttons enabled
 
+!!!Read updated Contracts FAQ for detailed description (https://github.com/panthernet/ThunderED/wiki/Contracts-Feed-Setup)
+
 ### V1.3.7
 + Added **showinfo** links processing in mail messages
 + Added contract filter Discord channel validation
