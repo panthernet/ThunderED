@@ -102,8 +102,8 @@ namespace ThunderED.Classes.Entities
                         {"{attackerAllyOrCorpTicker}", rAttackerAlliance?.ticker ?? rAttackerCorp?.ticker},                        
                         {"{attackersCount}", attackers?.Length.ToString()},
                         {"{kmId}", killmailID.ToString()},
-                        {"{isNpcKill}", isNPCKill.ToString()},
                         {"{timestamp}", killTime},
+                        {"{isNpcKill}", isNPCKill.ToString() ?? "false"},
                         {"{isSoloKill}", kill?.zkb?.solo.ToString() ?? "false"},
                         {"{isAwoxKill}", kill?.zkb?.awox.ToString() ?? "false"},
                     };
@@ -187,9 +187,9 @@ namespace ThunderED.Classes.Entities
                         {"{attackerAllyOrCorpTicker}", rAttackerAlliance?.ticker ?? rAttackerCorp?.ticker},                        
                         {"{attackersCount}", attackers.Length.ToString()},
                         {"{kmId}", killmailID.ToString()},
-                        {"{isNpcKill}", isNPCKill.ToString()},
                         {"{timestamp}", killTime},
                         {"{isLoss}", "false"},
+                        {"{isNpcKill}", isNPCKill.ToString() ?? "false"},
                         {"{isSoloKill}", kill?.zkb?.solo.ToString() ?? "false"},
                         {"{isAwoxKill}", kill?.zkb?.awox.ToString() ?? "false"},
                     };
