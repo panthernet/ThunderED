@@ -467,7 +467,6 @@
   "dailyRatingTopPts": "Топ Охотники",
   "dailyRatingTopEff": "Топ Эффективность",
   "capsNoUsersFound": "Доступных мемберов не найдено!",
-  "helpCaps": "Команда caps отображает данные о капиталоводах в канале/на сервере. Примеры: {0}{1} who , {0}{1} who online, {0}{1} all",
   "capsCommandRunning": "Команда уже выполняется, попробуйте позже",
   "of": "из",
   "comRequireRole": "У вас должна быть особая роль Discord, чтобы выполнить эту команду",
@@ -494,5 +493,16 @@
   "MoonminingExtractionStarted": "Цитадель {0} начала вытягивание руды с луны!",
   "MoonminingExtractionCancelled": "Цитадель {0} отменила вытягивание руды!",
   "MoonminingAutomaticFracture": "Цитадель {0} запустила автоматический подрыв куска руды!",
-  "moonminingStartedBy": "Запущен"
+  "moonminingStartedBy": "Запущен",
+  "buttonSettingsText": "Настройки",
+  "webSettingsHeader": "Веб Редактор Настроек",
+  "webSettingsAvailableGroupsText": "Доступные группы аутентификации",
+  "webSettingsAddEntryButton": "Добавить",
+  "webSettingsDeleteEntryButton": "Удалить",
+  "webSettingsSaveEntryButton": "Сохранить",
+  "webSettingsSaColumnName": "Наименование",
+  "webSettingsSaColumnGroup": "Группа",
+  "webSettingsSaColumnRoles": "Роли",
+  "helpShips": "Команда ships отображает данные о пилотах умеющих водить указанные фиты. Примеры: {0}{1} who , {0}{1} who online, {0}{1} all\nТакже можно добавить имя группы или корабля в качестве последнего параметра: {0}{1} all dreads  {0}{1} who online moros",
+  "errShipsNameNotFound": "Наименование группы или корабля '{0}' не найдено!"
 }

@@ -40,6 +40,7 @@
         AuthStandings,
         SovTracker,
         SimplAuth,
-        Caps
+        Caps,
+        WebSettings
     }
 }

@@ -1,3 +1,17 @@
+### V1.3.10
++ Added new module - Web Config Editor with basic functionality
++ Added new tags to KM templates: **{victimAllyOrCorpName}, {victimAllyOrCorpTicker}, {attackerAllyOrCorpName}, {attackerAllyOrCorpTicker}, {constName}, {regionName}, {isSoloKill}, {isAwoxKill}, {iskFittedValue}**
++ Improved !ships command to accept group or ship name as the last param. Examples: !ships who online dreads  !ships all moros 
++ Fixed minor deployment and package errors
+
+### FEATURES HIGHLIGHT
+New WebConfigEditor module allows you to edit and save Simplified Auth file from the web page. This file is used to manage authentication.
+More features will be added in the future releases.
+
+### BREAKING CHANGES
+- Renamed !caps command into !ships command
+- Renamed **EnableCapsCommand, CapsCommandDiscordChannels, CapsCommandDiscordRoles** to their **Ships** counterpart
+
 ### V1.3.9
 + Fixed accepted courier contracts handling
 

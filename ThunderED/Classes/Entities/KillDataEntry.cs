@@ -52,6 +52,7 @@ namespace ThunderED.Classes.Entities
                         isUnreachableSystem = rSystem.IsUnreachable();
                     }
                     else sysName = "?";
+                    var rRegion = rSystem != null ? await APIHelper.ESIAPI.GetRegionData(reason, rSystem.DB_RegionId) : null;
 
                     victimCharacterID = kill.victim.character_id;
                     victimCorpID = kill.victim.corporation_id;
@@ -81,22 +82,30 @@ namespace ThunderED.Classes.Entities
                         {"{shipID}", shipID.ToString()},
                         {"{shipType}", rShipType?.name},
                         {"{iskValue}", value.ToString("n0")},
+                        {"{iskFittedValue}", kill?.zkb?.fittedValue.ToString("n0") ?? "0"},
                         {"{systemName}", sysName},
+                        {"{systemRegion}", rRegion?.name},                        
                         {"{systemSec}", systemSecurityStatus},
                         {"{victimName}", rVictimCharacter?.name},
                         {"{victimCorpName}", rVictimCorp?.name},
                         {"{victimCorpTicker}", rVictimCorp?.ticker},
                         {"{victimAllyName}", rVictimAlliance?.name},
                         {"{victimAllyTicker}", rVictimAlliance == null ? null : $"<{rVictimAlliance.ticker}>"},
+                        {"{victimAllyOrCorpName}", rVictimAlliance?.name ?? rVictimCorp?.name},                        
+                        {"{victimAllyOrCorpTicker}", rVictimAlliance?.ticker ?? rVictimCorp?.ticker},                        
                         {"{attackerName}", rAttackerCharacter?.name},
                         {"{attackerCorpName}", rAttackerCorp?.name},
                         {"{attackerCorpTicker}", rAttackerCorp?.ticker},
                         {"{attackerAllyTicker}", rAttackerAlliance == null ? null : $"<{rAttackerAlliance.ticker}>"},
                         {"{attackerAllyName}", rAttackerAlliance?.name},
+                        {"{attackerAllyOrCorpName}", rAttackerAlliance?.name ?? rAttackerCorp?.name},                        
+                        {"{attackerAllyOrCorpTicker}", rAttackerAlliance?.ticker ?? rAttackerCorp?.ticker},                        
                         {"{attackersCount}", attackers?.Length.ToString()},
                         {"{kmId}", killmailID.ToString()},
                         {"{isNpcKill}", isNPCKill.ToString()},
-                        {"{timestamp}", killTime}
+                        {"{timestamp}", killTime},
+                        {"{isSoloKill}", kill?.zkb?.solo.ToString() ?? "false"},
+                        {"{isAwoxKill}", kill?.zkb?.awox.ToString() ?? "false"},
                     };
 
 
@@ -145,6 +154,8 @@ namespace ThunderED.Classes.Entities
                         ? await APIHelper.ESIAPI.GetAllianceData(reason, finalBlowAttackerAllyId)
                         : null;
                     sysName = rSystem.name == rSystem.system_id.ToString() ? "Abyss" : rSystem.name;
+                    var rConst= rSystem != null ? await APIHelper.ESIAPI.GetConstellationData(reason, rSystem.constellation_id) : null;
+                    var rRegion = rConst != null ? await APIHelper.ESIAPI.GetRegionData(reason, rConst.region_id) : null;
                     rShipType = await APIHelper.ESIAPI.GetTypeId(reason, shipID);
                     rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(reason, victimCharacterID);
                     rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(reason, finalBlowAttacker?.character_id);
@@ -155,23 +166,32 @@ namespace ThunderED.Classes.Entities
                         {"{shipID}", shipID.ToString()},
                         {"{shipType}", rShipType?.name},
                         {"{iskValue}", value.ToString("n0")},
+                        {"{iskFittedValue}", kill?.zkb?.fittedValue.ToString("n0") ?? "0"},
                         {"{systemName}", sysName},
+                        {"{constName}", rConst?.name},                        
+                        {"{regionName}", rRegion?.name},                        
                         {"{systemSec}", systemSecurityStatus},
                         {"{victimName}", rVictimCharacter?.name},
                         {"{victimCorpName}", rVictimCorp?.name},
                         {"{victimCorpTicker}", rVictimCorp?.ticker},
                         {"{victimAllyName}", rVictimAlliance?.name},
                         {"{victimAllyTicker}", rVictimAlliance == null ? null : $"<{rVictimAlliance.ticker}>"},
+                        {"{victimAllyOrCorpName}", rVictimAlliance?.name ?? rVictimCorp?.name},                        
+                        {"{victimAllyOrCorpTicker}", rVictimAlliance?.ticker ?? rVictimCorp?.ticker},                        
                         {"{attackerName}", rAttackerCharacter?.name},
                         {"{attackerCorpName}", rAttackerCorp?.name},
                         {"{attackerCorpTicker}", rAttackerCorp?.ticker},
                         {"{attackerAllyTicker}", rAttackerAlliance == null ? null : $"<{rAttackerAlliance.ticker}>"},
                         {"{attackerAllyName}", rAttackerAlliance?.name},
+                        {"{attackerAllyOrCorpName}", rAttackerAlliance?.name ?? rAttackerCorp?.name},                        
+                        {"{attackerAllyOrCorpTicker}", rAttackerAlliance?.ticker ?? rAttackerCorp?.ticker},                        
                         {"{attackersCount}", attackers.Length.ToString()},
                         {"{kmId}", killmailID.ToString()},
                         {"{isNpcKill}", isNPCKill.ToString()},
                         {"{timestamp}", killTime},
-                        {"{isLoss}", "false"}
+                        {"{isLoss}", "false"},
+                        {"{isSoloKill}", kill?.zkb?.solo.ToString() ?? "false"},
+                        {"{isAwoxKill}", kill?.zkb?.awox.ToString() ?? "false"},
                     };
 
                     return true;

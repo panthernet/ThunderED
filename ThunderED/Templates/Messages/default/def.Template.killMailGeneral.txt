@@ -3,22 +3,31 @@
 //{shipID} - destroyed ship type ID
 //{shipType} - destroyed ship type name
 //{iskValue} - km isk value
-//{systemName} - km system name
+//{iskFittedValue} - km isk fitted value
+//{systemName} - KM system name
+//{constName} - KM constellation name
+//{regionName} - KM region name
 //{systemSec} - km system security status
 //{victimName} - victim name
 //{victimCorpName} - victim corp name
 //{victimCorpTicker} - victim corp ticker
 //{victimAllyTicker} - victim ally ticker
+//{victimAllyOrCorpName} - victim alliance name or corp name if no alliance
+//{victimAllyOrCorpTicker} - victim alliance ticker or corp ticker if no alliance
 //{isNpcKill} - (BOOL) is this an npc kill
 //{isLoss} - (BOOL) this is loss KM
+//{isSoloKill} - (BOOL) this is solo kill KM
+//{isAwoxKill} - (BOOL) this is awox KM
 //{attackerName} - attacker name
 //{attackerCorpName} - attacker corp name
 //{attackerCorpTicker} - attacker corp ticker
 //{attackerAllyName} - attacker ally name
 //{attackerAllyTicker} - attacker ally ticker
+//{attackerAllyOrCorpName} - attacker alliance name or corp name if no alliance
+//{attackerAllyOrCorpTicker} - attacker alliance ticker or corp ticker if no alliance
 //{attackersCount} - number of attackers in km
 //{kmId} - zkillboard killmail ID
-//{timestamp} - text timestamp
+//{timestamp} - text timestamp  
 EmbedBuilder
 #if {isLoss} .WithColor(0xff0000)
 #if !{isLoss} .WithColor(0x00ff00)

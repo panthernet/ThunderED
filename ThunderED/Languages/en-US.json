@@ -474,7 +474,6 @@
   "dailyRatingTopPts": "Top Pts Hunters",
   "dailyRatingTopEff": "Top Efficiency",
   "capsNoUsersFound": "No eligible users found!",
-  "helpCaps": "Caps command displays information about capital ship drivers on channel/server.\nModifiers: who - check members in current channel, who online - online members in current channel, all - all registered members, all online - all registered members who are online.\nExamples: {0}{1} who , {0}{1} who online, {0}{1} all",
   "capsCommandRunning": "Command is already running, try again later",
   "of": "of",
   "comRequireRole": "You must have special Discord role to run this command",
@@ -501,6 +500,17 @@
   "MoonminingExtractionStarted": "Allied {0} has started an extraction!",
   "MoonminingExtractionCancelled": "Allied {0} has cancelled an extraction!",
   "MoonminingAutomaticFracture": "Allied {0} has initiated automatic fracture!",
-  "moonminingStartedBy": "Started By"
+  "moonminingStartedBy": "Started By",
+  "buttonSettingsText": "Settings",
+  "webSettingsHeader": "Web Settings Editor",
+  "webSettingsAvailableGroupsText": "Available auth groups",
+  "webSettingsAddEntryButton": "Add Entry",
+  "webSettingsDeleteEntryButton": "Delete Entry",
+  "webSettingsSaveEntryButton": "Save Edits",
+  "webSettingsSaColumnName": "Name",
+  "webSettingsSaColumnGroup": "Group",
+  "webSettingsSaColumnRoles": "Roles",
+  "helpShips": "Ships command displays information about members who can pilot ship fits.\nModifiers: who - check members in current channel, who online - online members in current channel, all - all registered members, all online - all registered members who are online.\nExamples: {0}{1} who , {0}{1} who online, {0}{1} all\nYou can also add group or ship name as the last param: {0}{1} all dreads  {0}{1} who online moros",
+  "errShipsNameNotFound":  "Ship or group name '{0}' not found!"
 
 }

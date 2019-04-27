@@ -22,6 +22,11 @@ namespace ThunderED.Modules.Sub
             return GetHtmlResource("datetime_package.txt");
         }
 
+        public static string GetHtmlResourceTables()
+        {
+            return GetHtmlResource("table_package.txt");
+        }
+
         public static string GetHtmlResourceBootpage()
         {
             return GetHtmlResource("bootpage_package.txt");

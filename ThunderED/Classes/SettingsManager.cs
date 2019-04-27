@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 
 namespace ThunderED.Classes
@@ -29,6 +30,9 @@ namespace ThunderED.Classes
         public static string FileShipsDataDefault;
 
         public static string FileTemplateTimersPage;
+        public static string FileTemplateSettingsPage;
+        public static string FileTemplateSettingsPage_SimpleAuth;
+        public static string FileTemplateSettingsPage_SimpleAuth_Scripts;
         public static string FileTemplateMailAuthSuccess;
         public static string FileTemplateAccessDenied;
         public static string RootDirectory { get; }
@@ -55,6 +59,9 @@ namespace ThunderED.Classes
             {
                 UpdateSettings(settingsPath).GetAwaiter().GetResult();
                 FileTemplateMain = Path.Combine(RootDirectory, "Templates", "main.html");
+                FileTemplateSettingsPage = Path.Combine(RootDirectory, "Templates", "settingsMain.html");
+                FileTemplateSettingsPage_SimpleAuth = Path.Combine(RootDirectory, "Templates", "settingsMain_SimpleAuth.html");
+                FileTemplateSettingsPage_SimpleAuth_Scripts = Path.Combine(RootDirectory, "Templates", "settingsMain_SimpleAuth_Scripts.js");
                 FileTemplateAuthPage = Path.Combine(RootDirectory, "Templates", "authPage.html");
                 FileTemplateAuth = Path.Combine(RootDirectory, "Templates", "auth.html");
                 FileTemplateAuth2 = Path.Combine(RootDirectory, "Templates", "auth2.html");
@@ -105,23 +112,35 @@ namespace ThunderED.Classes
             await LoadSimplifiedAuth(Path.Combine(DataDirectory, "_simplifiedAuth.txt"));
         }
 
-        private static async Task LoadSimplifiedAuth(string path)
+        public static async Task SaveSimplifiedAuthData(List<string> list, string path = null)
         {
-            if(!File.Exists(path) || !Settings.Config.ModuleAuthWeb) return;
+            path = path ?? Path.Combine(DataDirectory, "_simplifiedAuth.txt");
+            if (list == null || list.Count == 0)
+            {
+                await File.WriteAllTextAsync(path, "");
+            }
+            else
+            {
+                await File.WriteAllLinesAsync(path, list);
+            }
+        }
 
-            await LogHelper.LogInfo("Injecting Simplified Auth information...", LogCat.SimplAuth);
-
-
+        public static async Task<List<SimplifiedAuthEntity>> GetSimplifiedAuthData(string path = null)
+        {
+            path = path ?? Path.Combine(DataDirectory, "_simplifiedAuth.txt");
+            var list = new List<SimplifiedAuthEntity>();
+            if(!File.Exists(path)) return list;
             var lines = File.ReadAllLines(path);
-            if(lines.Length == 0) return;
-            if(lines.All(a=> a.StartsWith("//"))) return;
+            if(lines.Length == 0) return list;
+            if(lines.All(a=> a.StartsWith("//"))) return list;
 
             //each line is a new entry
+            var count = 1;
             foreach (var entry in lines)
             {
                 try
                 {
-                    if(entry.StartsWith("//") || string.IsNullOrEmpty(entry)) continue;
+                    if (entry.StartsWith("//") || string.IsNullOrEmpty(entry)) continue;
                     var data = entry.Split('|', StringSplitOptions.RemoveEmptyEntries);
                     if (data.Length != 3)
                     {
@@ -133,53 +152,84 @@ namespace ThunderED.Classes
                     var groupName = data[1];
                     var roles = data[2];
                     var discordRoles = roles?.Split(',', StringSplitOptions.RemoveEmptyEntries)?.ToList();
-                    if (string.IsNullOrEmpty(roles) || discordRoles == null || discordRoles.Count == 0)
+                    list.Add(new SimplifiedAuthEntity
                     {
-                        await LogHelper.LogWarning($"No Discord roles specified: {roles}!", LogCat.SimplAuth);
+                        Id = count++,
+                        Name = name,
+                        Group = groupName,
+                        RolesList = discordRoles,
+                        Roles = roles
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogWarning($"Error processing entry: {entry}!", LogCat.SimplAuth);
+                    await LogHelper.LogEx(nameof(GetSimplifiedAuthData), ex, LogCat.SimplAuth);
+
+                }
+            }
+
+            return list;
+        }
+
+        private static async Task LoadSimplifiedAuth(string path)
+        {
+            if(!File.Exists(path) || !Settings.Config.ModuleAuthWeb) return;
+            await LogHelper.LogInfo("Injecting Simplified Auth information...", LogCat.SimplAuth);
+           
+            var lines = await GetSimplifiedAuthData(path);
+            //each line is a new entry
+            foreach (var entry in lines)
+            {
+                try
+                {
+                    if (entry.RolesList == null || entry.RolesList.Count == 0)
+                    {
+                        await LogHelper.LogWarning($"No Discord roles specified!", LogCat.SimplAuth);
                         continue;
                     }
 
-                    var group = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key.Equals(groupName, StringComparison.OrdinalIgnoreCase)).Value;
+                    var group = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key.Equals(entry.Group, StringComparison.OrdinalIgnoreCase)).Value;
                     if (group == null)
                     {
-                        await LogHelper.LogWarning($"Group name not found: {groupName}!", LogCat.SimplAuth);
+                        await LogHelper.LogWarning($"Group name not found: {entry.Group}!", LogCat.SimplAuth);
                         continue;
                     }
 
-                    var result = (await APIHelper.ESIAPI.SearchAllianceId("SimplAuth", name))?.alliance?[0] ?? 0;
+                    var result = (await APIHelper.ESIAPI.SearchAllianceId("SimplAuth", entry.Name))?.alliance?[0] ?? 0;
                     if (result > 0) //alliance
                     {
-                        group.AllowedAlliances.Add(name, new AuthRoleEntity
+                        group.AllowedAlliances.Add(entry.Name, new AuthRoleEntity
                         {
                             Id = new List<long> {result},
-                            DiscordRoles = discordRoles
+                            DiscordRoles = entry.RolesList
                         });
                     }
                     else
                     {
-                        result = (await APIHelper.ESIAPI.SearchCorporationId("SimplAuth", name))?.corporation?[0] ?? 0;
+                        result = (await APIHelper.ESIAPI.SearchCorporationId("SimplAuth", entry.Name))?.corporation?[0] ?? 0;
                         if (result > 0) //corp
                         {
-                            group.AllowedCorporations.Add(name, new AuthRoleEntity
+                            group.AllowedCorporations.Add(entry.Name, new AuthRoleEntity
                             {
                                 Id = new List<long> {result},
-                                DiscordRoles = discordRoles
+                                DiscordRoles = entry.RolesList
                             });
                         }
                         else
                         {
-                            result = (await APIHelper.ESIAPI.SearchCharacterId("SimplAuth", name))?.character?[0] ?? 0;
+                            result = (await APIHelper.ESIAPI.SearchCharacterId("SimplAuth", entry.Name))?.character?[0] ?? 0;
                             if (result > 0) //char
                             {
-                                group.AllowedCharacters.Add(name, new AuthRoleEntity
+                                group.AllowedCharacters.Add(entry.Name, new AuthRoleEntity
                                 {
                                     Id = new List<long> {result},
-                                    DiscordRoles = discordRoles
+                                    DiscordRoles = entry.RolesList
                                 });
                             }
                             else
                             {
-                                await LogHelper.LogWarning($"Entity not found: {name}!", LogCat.SimplAuth);
+                                await LogHelper.LogWarning($"Entity not found: {entry.Name}!", LogCat.SimplAuth);
                                 continue;
                             }
                         }
@@ -193,5 +243,7 @@ namespace ThunderED.Classes
             await LogHelper.LogInfo("Simplified Auth processing complete!", LogCat.SimplAuth);
 
         }
+
+
     }
 }

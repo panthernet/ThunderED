@@ -73,16 +73,35 @@ namespace ThunderED.Modules
             return !storage.ContainsKey(groupName) ? null : (!storage[groupName].ContainsKey("character") ? null : storage[groupName]["character"]);
         }
 
+        protected virtual List<long> GetAllParsedCharacters(Dictionary<string, Dictionary<string, List<long>>>  storage = null)
+        {
+            storage = storage ?? ParsedGroups;
+            return storage.Where(a=> a.Value.ContainsKey("character")).SelectMany(a=> a.Value["character"]).Distinct().ToList();
+        }
+
+
         protected virtual List<long> GetParsedCorporations(string groupName, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
             storage = storage ?? ParsedGroups;
             return !storage.ContainsKey(groupName) ? null : (!storage[groupName].ContainsKey("corporation") ? null : storage[groupName]["corporation"]);
         }
 
+        protected virtual List<long> GetAllParsedCorporations(Dictionary<string, Dictionary<string, List<long>>>  storage = null)
+        {
+            storage = storage ?? ParsedGroups;
+            return storage.Where(a=> a.Value.ContainsKey("corporation")).SelectMany(a=> a.Value["corporation"]).Distinct().ToList();
+        }
+
         protected virtual List<long> GetParsedAlliances(string groupName, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
             storage = storage ?? ParsedGroups;
             return !storage.ContainsKey(groupName) ? null : (!storage[groupName].ContainsKey("alliance") ? null : storage[groupName]["alliance"]);
+        }
+
+        protected virtual List<long> GetAllParsedAlliances(Dictionary<string, Dictionary<string, List<long>>>  storage = null)
+        {
+            storage = storage ?? ParsedGroups;
+            return storage.Where(a=> a.Value.ContainsKey("alliance")).SelectMany(a=> a.Value["alliance"]).Distinct().ToList();
         }
 
         protected virtual async Task ParseMixedDataArray(Dictionary<string, List<object>> data, MixedParseModeEnum mode, Dictionary<string, Dictionary<string, List<long>>>  storage = null)

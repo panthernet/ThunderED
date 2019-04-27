@@ -28,7 +28,7 @@ namespace ThunderED.Modules
 
         public WebAuthModule()
         {
-            LogHelper.LogModule("Inititalizing WebAuth module...", Category).GetAwaiter().GetResult();
+            LogHelper.LogModule("Initializing WebAuth module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, Auth);
         }
 

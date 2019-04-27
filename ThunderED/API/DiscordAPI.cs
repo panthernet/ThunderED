@@ -286,15 +286,6 @@ namespace ThunderED.API
 
         internal async Task SendEmbedKillMessage(ulong channelId, Color color, KillDataEntry km, string radiusMessage, string msg = "")
         {
-
-            //long shipID, long kmId, string shipName, long value, string sysName, string secstatus, string killTime, string cName, string corpName
-            //, string aTicker, bool isNpcKill, string atName, string atCorp, string atTicker, int atCount
-
-           // shipID, killmailID, rShipType.name, (long) value,
-           // sysName, systemSecurityStatus, killTime, rVictimCharacter == null ? rShipType.name : rVictimCharacter.name, rVictimCorp.name,
-          //  rVictimAlliance == null ? "" : $"[{rVictimAlliance.ticker}]", isNPCKill, rAttackerCharacter.name, rAttackerCorp.name,
-          //  rAttackerAlliance == null ? null : $"[{rAttackerAlliance.ticker}]", attackers.Length
-
             msg = msg ?? "";
             var aTicker = km.rVictimAlliance == null ? "" : $"[{km.rVictimAlliance.ticker}]";
             var atTicker = km.rAttackerAlliance == null ? null : $"[{km.rAttackerAlliance.ticker}]";

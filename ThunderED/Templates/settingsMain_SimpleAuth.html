@@ -1,0 +1,42 @@
+﻿<div style="margin: 10px;">
+    <!--<div class="newline" style="font-weight: bold">
+        {availableGroups}
+    </div> -->
+    <div id="smError" class="newline d-none" style="color: red; font-weight: bold; font-size: medium;">
+    </div>
+</div>
+<div id="toolbar">
+    <button id="addButton" type="button" class="btn btn-primary">{saAddEntry}</button>
+    <button id="delButton" type="button" class="btn btn-danger" disabled>{saDeleteEntry}</button>
+    <button id="saveButton" type="button" class="btn btn-primary" style="margin-left: 10px;">{saSave}</button>
+</div>
+<div style="margin: 10px;">
+    <table id="table"
+           data-toggle="table"
+           data-toolbar="#toolbar"
+           data-search="true"
+           data-show-refresh="true"
+           data-show-toggle="false"
+           data-show-columns="true"
+           data-id-field="Id"
+           data-unique-id="Id"
+           data-show-footer="false"
+           data-url="http://77.37.238.216:30001/settings.php?code={code}&state=settings_sa"
+           data-response-handler="responseHandler"
+           data-filter-control="true"
+           data-show-export="false"
+           data-height="600"
+           data-pagination="true"
+           data-locale='{locale}'>
+        <thead>
+            <tr>
+                <th data-field="state" data-checkbox="true"></th>
+                <th data-field="Id" data-required="true" style="display:none;"></th>
+                <th data-field="Name" data-required="true" data-filter-control="input" data-sortable="true" data-editable="true">{saTableColumnName}</th>
+                <th data-field="Group" data-filter-control="select" data-sortable="true" data-formatter="groupFormatter">{saTableColumnGroup}</th>
+                <th data-field="Roles" data-filter-control="select" data-sortable="true" data-editable="true">{saTableColumnRoles}</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>

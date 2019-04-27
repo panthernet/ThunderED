@@ -135,21 +135,18 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, WCEAccessFilter> AccessList { get; set; } = new  Dictionary<string, WCEAccessFilter>();
 #endif
+        public int SessionTimeoutInMinutes { get; set; } = 10;
 
     }
 
     public class WCEAccessFilter
     {
 #if EDITOR
-        public ObservableCollection<string> AllowedCharacterNames { get; set; } = new ObservableCollection<string>();
-        public ObservableCollection<string> AllowedDiscordRoleNames { get; set; } = new ObservableCollection<string>();
-        public ObservableCollection<string> AllowedAllianceNames { get; set; } = new ObservableCollection<string>();
-        public ObservableCollection<string> AllowedCorporationNames { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<object> AllowedEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<string> AllowedDiscordRoles { get; set; } = new ObservableCollection<string>();
 #else
-        public List<string> AllowedCharacterNames { get; set; } = new List<string>();
-        public List<string> AllowedDiscordRoleNames { get; set; } = new List<string>();
-        public List<string> AllowedAllianceNames { get; set; } = new List<string>();
-        public List<string> AllowedCorporationNames { get; set; } = new List<string>();
+        public List<object> AllowedEntities { get; set; } = new List<object>();
+        public List<string> AllowedDiscordRoles { get; set; } = new List<string>();
 #endif
         public bool CanEditSimplifiedAuth { get; set; } = true;
     }
@@ -160,12 +157,12 @@ namespace ThunderED.Classes
         public ObservableCollection<string> CapsCommandDiscordRoles { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<ulong> CapsCommandDiscordChannels { get; set; } = new ObservableCollection<ulong>();
 #else
-        public List<string> CapsCommandDiscordRoles { get; set; } = new List<string>();
-        public List<ulong> CapsCommandDiscordChannels { get; set; } = new List<ulong>();
+        public List<string> ShipsCommandDiscordRoles { get; set; } = new List<string>();
+        public List<ulong> ShipsCommandDiscordChannels { get; set; } = new List<ulong>();
 #endif
 
         [Comment("Enable !caps command")]
-        public bool EnableCapsCommand { get; set; } = false;
+        public bool EnableShipsCommand { get; set; } = false;
     }
 
     public class SovTrackerModuleSettings: ValidatableSettings
@@ -1512,6 +1509,7 @@ namespace ThunderED.Classes
         public bool ModuleStats { get; set; } = true;
         public bool ModuleContractNotifications { get; set; } = false;
         public bool ModuleSovTracker { get; set; } = false;
+        public bool ModuleWebConfigEditor { get; set; } = false;
 
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";

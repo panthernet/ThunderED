@@ -74,9 +74,9 @@ namespace ThunderED.Classes
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}clist ");
             }
-            if (SettingsManager.Settings.CommandsConfig.EnableCapsCommand)
+            if (SettingsManager.Settings.CommandsConfig.EnableShipsCommand)
             {
-                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}caps ");
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}ships ");
             }
 
 
@@ -169,8 +169,8 @@ namespace ThunderED.Classes
                 case "clist":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpClist", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "clist"), true);
                     break;
-                case "caps":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpCaps", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "caps"), true);
+                case "ships":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpShips", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "ships"), true);
                     break;
             }
         }
@@ -1022,30 +1022,30 @@ namespace ThunderED.Classes
             }
         }
 
-        [Command("caps", RunMode = RunMode.Async), Summary("")]
-        public async Task Caps()
+        [Command("ships", RunMode = RunMode.Async), Summary("")]
+        public async Task Ships()
         {
             if(IsForbidden()) return;
-            if (!SettingsManager.Settings.CommandsConfig.EnableCapsCommand) 
+            if (!SettingsManager.Settings.CommandsConfig.EnableShipsCommand) 
                 return;
-            if(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Any() && !SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Contains(Context.Channel.Id))
+            if(SettingsManager.Settings.CommandsConfig.ShipsCommandDiscordChannels.Any() && !SettingsManager.Settings.CommandsConfig.ShipsCommandDiscordChannels.Contains(Context.Channel.Id))
                 return;
-            if (SettingsManager.Settings.CommandsConfig.CapsCommandDiscordRoles.Any() && !await IsAllowedByRoles(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordRoles, Context.User.Id))
+            if (SettingsManager.Settings.CommandsConfig.ShipsCommandDiscordRoles.Any() && !await IsAllowedByRoles(SettingsManager.Settings.CommandsConfig.ShipsCommandDiscordRoles, Context.User.Id))
                 return;
 
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpCaps", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "caps"));
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpShips", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "ships"));
         }
 
-        [Command("caps", RunMode = RunMode.Async), Summary("")]
-        public async Task Caps([Remainder] string x)
+        [Command("ships", RunMode = RunMode.Async), Summary("")]
+        public async Task Ships([Remainder] string x)
         {
             if(IsForbidden()) return;
 
-            if (!SettingsManager.Settings.CommandsConfig.EnableCapsCommand) 
+            if (!SettingsManager.Settings.CommandsConfig.EnableShipsCommand) 
                 return;
-            if(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Any() && !SettingsManager.Settings.CommandsConfig.CapsCommandDiscordChannels.Contains(Context.Channel.Id))
+            if(SettingsManager.Settings.CommandsConfig.ShipsCommandDiscordChannels.Any() && !SettingsManager.Settings.CommandsConfig.ShipsCommandDiscordChannels.Contains(Context.Channel.Id))
                 return;
-            if (SettingsManager.Settings.CommandsConfig.CapsCommandDiscordRoles.Any() && !await IsAllowedByRoles(SettingsManager.Settings.CommandsConfig.CapsCommandDiscordRoles, Context.User.Id))
+            if (SettingsManager.Settings.CommandsConfig.ShipsCommandDiscordRoles.Any() && !await IsAllowedByRoles(SettingsManager.Settings.CommandsConfig.ShipsCommandDiscordRoles, Context.User.Id))
                 return;
 
             try
@@ -1054,7 +1054,7 @@ namespace ThunderED.Classes
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx("caps", ex);
+                await LogHelper.LogEx("ships", ex);
             }
         }
 

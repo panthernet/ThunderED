@@ -208,7 +208,11 @@ namespace ThunderED.Classes
                                 else if (text.StartsWith(".WithFooter", StringComparison.OrdinalIgnoreCase))
                                     embed.WithFooter(GetText(text));
                                 else if (text.StartsWith(".WithTimestamp", StringComparison.OrdinalIgnoreCase))
-                                    embed.WithTimestamp(DateTimeOffset.Now);
+                                {
+                                    if (DateTimeOffset.TryParse(dic["timestamp"], out var time))
+                                        embed.WithTimestamp(time);
+                                    else embed.WithCurrentTimestamp();
+                                }
                             }
                         });
                         return embed.Build();

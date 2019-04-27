@@ -4,16 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using Discord;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
@@ -346,14 +343,11 @@ namespace ThunderED.Modules
                             data = forWeb ? text : $"***{text}***";
                             fitList.Add(furl);
                         }
-                        else if (url.StartsWith("showinfo"))
+                        else if (url.StartsWith("showinfo") && !url.Contains("//"))
                         {
-                            if (!url.Contains("//"))
-                            {
-                                var value = url.Split(":")[1];
-                                data = forWeb ? $"<a href=\"{APIHelper.GetItemTypeUrl(value)}\">{text}</a>" : $"***{text}***";
-                                fitList.Add(furl);
-                            }
+                            var value = url.Split(":")[1];
+                            data = forWeb ? $"<a href=\"{APIHelper.GetItemTypeUrl(value)}\">{text}</a>" : $"***{text}***";
+                            fitList.Add(furl);
                         }
 
                         else if (url.StartsWith("killReport"))

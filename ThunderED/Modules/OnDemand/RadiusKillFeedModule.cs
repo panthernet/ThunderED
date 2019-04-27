@@ -176,7 +176,6 @@ namespace ThunderED.Modules.OnDemand
                 }
                 rConst = rConst ?? await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
                 rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
-
             }
 
             //var rSystemName = rSystem?.name ?? LM.Get("Unknown");
@@ -184,8 +183,8 @@ namespace ThunderED.Modules.OnDemand
             km.dic.Add("{isRangeMode}", (mode == RadiusMode.Range).ToString());
             km.dic.Add("{isConstMode}", (mode == RadiusMode.Constellation).ToString());
             km.dic.Add("{isRegionMode}", (mode == RadiusMode.Region).ToString());
-            km.dic.Add("{constName}", rConst?.name);
-            km.dic.Add("{regionName}", rRegion?.name);
+            km.dic.AddOrUpdateEx("{constName}", rConst?.name);
+            km.dic.AddOrUpdateEx("{regionName}", rRegion?.name);
 
             var template = isUrlOnly ? null : await TemplateHelper.GetTemplatedMessage(MessageTemplateType.KillMailRadius, km.dic);
             foreach (var channel in group.RadiusChannels)

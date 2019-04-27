@@ -1,0 +1,47 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>{header}</title>
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    {headerContent} 
+</head>
+
+
+<body>
+
+<div>
+    <div class="container">
+        <div>
+            <a class="btn btn-primary" href="{backUrl}" role="button" style="margin: 10px; min-width: 100px;">{Back}</a>
+            <ul class="nav nav-pills float-right">{loggedInAs}<a href="{LogOutUrl}" style="margin-left:10px; margin-right: 30px;">{LogOut}</a></ul>
+        </div>
+
+        <!-- Nav tabs -->
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link {saPageVisible} {saPageActive}" id="nav-sa-tab" data-toggle="tab" href="#nav-sa" role="tab" aria-controls="nav-sa" aria-selected="true">Simple Auth</a>
+                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Profile</a>
+            </div>
+        </nav>
+
+        <!-- Tab panes -->
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show {saPageActive} {saPageVisible}" id="nav-sa" role="tabpanel" aria-labelledby="nav-sa-tab">
+                {simpleAuthContent}
+            </div>
+            <div role="tabpanel" class="tab-pane" id="profile">
+                Under Construction...
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    {simpleAuthScripts}
+</script>
+
+</body>
+</html>

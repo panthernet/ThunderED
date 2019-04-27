@@ -64,21 +64,20 @@
   },
 
   "WebConfigEditorModule": {
+    "SessionTimeoutInMinutes": 10,
     "AccessList": {
       "accessList1": {
-        "AllowedCharacterNames": [],
-        "AllowedDiscordRoleNames": [],
-        "AllowedAllianceNames": [],
-        "AllowedCorporationNames": [],
-        "CanEditSimplifiedAuth":  true 
-      } 
+        "AllowedEntities": ["Character Name", "Corporation Name", 1234567890],
+        "AllowedDiscordRoles": [],
+        "CanEditSimplifiedAuth": true
+      }
     }
   },
 
   "CommandsConfig": {
-    "EnableCapsCommand":  "false", 
-    "CapsCommandDiscordRoles":  [],
-    "CapsCommandDiscordChannels":  [] 
+    "EnableShipsCommand": "false",
+    "ShipsCommandDiscordChannels": [],
+    "ShipsCommandDiscordRoles": []
   },
 
   "Database": {

@@ -733,6 +733,43 @@ namespace ThunderED.Helpers
         }
         #endregion
 
+        #region WebEditor
+
+        public static async Task<WebEditorAuthEntry> GetWebEditorAuthEntry(long characterId)
+        {    
+            return (await SelectData("web_editor_auth", new [] {"*"}, new Dictionary<string, object> {{"id", characterId}}))?.Select(a => new WebEditorAuthEntry
+                {
+                    Id = Convert.ToInt64(a[0]),
+                    Code = (string)a[1],
+                    Time = Convert.ToDateTime(a[2])
+                }
+            ).FirstOrDefault();
+        }
+
+        public static async Task<WebEditorAuthEntry> GetWebEditorAuthEntry(string code)
+        {    
+            return (await SelectData("web_editor_auth", new [] {"*"}, new Dictionary<string, object> {{"code", code}}))?.Select(a => new WebEditorAuthEntry
+                {
+                    Id = Convert.ToInt64(a[0]),
+                    Code = (string)a[1],
+                    Time = Convert.ToDateTime(a[2])
+                }
+            ).FirstOrDefault();
+        }
+
+        public static async Task SaveWebEditorAuthEntry(WebEditorAuthEntry entry)
+        {
+            var dic = new Dictionary<string, object> {{"id", entry.Id}, {"code", entry.Code}, {"time", entry.Time}};
+            await InsertOrUpdate("web_editor_auth", dic);
+        }
+
+        public static async Task DeleteWebEditorEntry(long weId)
+        {
+            await Delete("web_editor_auth", "id", weId);
+        }
+
+        #endregion
+
         #region Contracts
         public static async Task<List<JsonClasses.Contract>> LoadContracts(long characterID, bool isCorp)
         {
@@ -877,7 +914,6 @@ namespace ThunderED.Helpers
         }
 
         #endregion
-
 
     }
 }

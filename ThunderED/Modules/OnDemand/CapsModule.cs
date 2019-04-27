@@ -55,6 +55,16 @@ namespace ThunderED.Modules.OnDemand
             public string Name;
         }
 
+        private bool IsMod(string value, string mod)
+        {
+            return value.Equals(mod, StringComparison.OrdinalIgnoreCase) || value.ToLower() == char.ToLower(mod[0]).ToString();
+        }
+
+        private bool IsCommand(string value, string command)
+        {
+            return value.Equals(command, StringComparison.OrdinalIgnoreCase);
+        }
+
         public async Task ProcessWhoCommand(ICommandContext context, string commandText)
         {
             if (_isWhoRunning)
@@ -80,17 +90,52 @@ namespace ThunderED.Modules.OnDemand
                 _isWhoRunning = true;
                 var parts = commandText.Split(' ');
                 var command = parts[0];
-                var mod = parts.Length > 1 ? parts[1] : null;
+                var mod = parts.Length > 1 && IsMod(parts[1], "online") ? parts[1] : null;
+                var inputName = parts.Length > 2 ? parts[2] : (parts.Length > 1 && !IsMod(parts[1], "online") ? parts[1] : null);
+                //who | who online | who online name | who name
+                //all | all online
 
-                if ((!command.Equals("who", StringComparison.OrdinalIgnoreCase) && !command.Equals("all", StringComparison.OrdinalIgnoreCase) || (mod != null && !mod.Equals("online", StringComparison.OrdinalIgnoreCase)
-                                                                                                                                                  && !mod.Equals("o", StringComparison.OrdinalIgnoreCase))))
+                if ((!IsCommand(command, "who") && !IsCommand(command, "all")) || (mod != null && !IsMod(mod, "online")))
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("helpCaps", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "caps"));
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("helpShips", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "ships"));
                     return;
                 }
 
-                var isAll = command.Equals("all", StringComparison.OrdinalIgnoreCase);
-                var isOnlineOnly = mod != null && (mod.Equals("online", StringComparison.OrdinalIgnoreCase) || mod.Equals("o", StringComparison.OrdinalIgnoreCase));
+                var isAll = IsCommand(command, "all");
+                var isOnlineOnly = mod != null && IsMod(mod, "online");
+
+                //load data
+                var data = JsonConvert.DeserializeObject<ShipsData>(File.ReadAllText(SettingsManager.FileShipsData));
+                if (data == null)
+                {                
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("errFileContainsInvalidData"));
+                    return;
+                }
+
+                KeyValuePair<string, ShipDataGroup> singleGroup = new KeyValuePair<string, ShipDataGroup>();
+                string singleShip = null;
+                if (!string.IsNullOrEmpty(inputName))
+                {
+                    singleGroup = data.Groups.FirstOrDefault(a => a.Key.Equals(inputName, StringComparison.OrdinalIgnoreCase));
+                    if (singleGroup.Value == null)
+                    {
+                        foreach (var group in data.Groups)
+                        {
+                            singleShip = group.Value.ShipSkills.FirstOrDefault(a => a.Key.Equals(inputName, StringComparison.OrdinalIgnoreCase)).Key;
+                            if (singleShip != null)
+                            {
+                                singleGroup = group;
+                                break;
+                            }
+                        }                        
+                    }
+
+                    if (singleGroup.Value == null)
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("errShipsNameNotFound"));
+                        return;
+                    }
+                }
 
 
                 var usersToCheck = new List<AuthUserEntity>();
@@ -124,12 +169,7 @@ namespace ThunderED.Modules.OnDemand
                     return;
                 }
 
-                var data = JsonConvert.DeserializeObject<ShipsData>(File.ReadAllText(SettingsManager.FileShipsData));
-                if (data == null)
-                {                
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("errFileContainsInvalidData"));
-                    return;
-                }
+
 
                 var dataDic = new Dictionary<string, List<ShipResult>>();
                 var counts = new Dictionary<string, int>();
@@ -153,7 +193,9 @@ namespace ThunderED.Modules.OnDemand
                     });
                 }, 8);
 
-                foreach (var pair in data.Groups)
+                var groupsToCheck = singleGroup.Value != null ? new Dictionary<string, ShipDataGroup> { {singleGroup.Key, singleGroup.Value}} : data.Groups; 
+
+                foreach (var pair in groupsToCheck)
                 {
                     var groupName = pair.Key;
                     var group = pair.Value;
@@ -185,7 +227,13 @@ namespace ThunderED.Modules.OnDemand
                             : "T1");
 
                         var userCounted = false;
-                        foreach (var valuePair in @group.ShipSkills)
+
+                        var k = group.ShipSkills.FirstOrDefault(a => a.Key.Equals(singleShip, StringComparison.OrdinalIgnoreCase));
+                        var shipsToCheck = string.IsNullOrEmpty(singleShip)
+                            ? group.ShipSkills
+                            : new Dictionary<string, List<SkillRequirement>> {{k.Key, k.Value}};
+
+                        foreach (var valuePair in shipsToCheck)
                         {
                             var shipName = valuePair.Key;
                             var shipSkills = valuePair.Value;
@@ -244,13 +292,16 @@ namespace ThunderED.Modules.OnDemand
                     }
 
                     //add empty ships
-                    foreach (var valuePair in shCountDic.Where(a=> a.Value == 0))
+                    if (string.IsNullOrEmpty(singleShip))
                     {
-                        dataDic[groupName].Add(new ShipResult
+                        foreach (var valuePair in shCountDic.Where(a => a.Value == 0))
                         {
-                            Name = valuePair.Key,
-                            Text = LM.Get("None")
-                        });
+                            dataDic[groupName].Add(new ShipResult
+                            {
+                                Name = valuePair.Key,
+                                Text = LM.Get("None")
+                            });
+                        }
                     }
                 }
 
@@ -286,60 +337,6 @@ namespace ThunderED.Modules.OnDemand
                 {                  
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, $".\n{str}");
                 }
-
-               /* var sb = new StringBuilder();
-                sb.AppendLine(".");
-                sb.AppendLine($"**Dreads** ({dreadCount} {LM.Get("of")} {totalUsers})");
-                sb.AppendLine($"*Format: NAME (CALIBRATION) [SIEGE,WEAPON]*");
-                sb.AppendLine($"```");
-                foreach (var pair in dredsDic)
-                {
-                    sb.AppendLine($"{pair.Key} - {(string.IsNullOrEmpty(pair.Value) ? LM.Get("None") : pair.Value.Substring(0, pair.Value.Length - 2))}");
-                }
-                sb.AppendLine($"```");
-
-                if (split)
-                {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, sb.ToString());
-                    sb = new StringBuilder();
-                    sb.AppendLine(".");
-                }
-
-                sb.AppendLine($"**Carriers** ({carrierCount} {LM.Get("of")} {totalUsers})");
-                sb.AppendLine($"*Format: NAME (CALIBRATION) [FIGHTERS]*");
-                sb.AppendLine($"```");
-                foreach (var pair in carrierDic)
-                {
-                    sb.AppendLine($"{pair.Key} - {(string.IsNullOrEmpty(pair.Value) ? LM.Get("None") : pair.Value.Substring(0, pair.Value.Length - 2))}");
-                }
-                sb.AppendLine($"```");
-
-                if (split)
-                {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, sb.ToString());
-                    sb = new StringBuilder();
-                    sb.AppendLine(".");
-                }
-
-                sb.AppendLine($"**Logi** ({logiCount} {LM.Get("of")} {totalUsers})");
-                sb.AppendLine($"*Format: NAME (CALIBRATION) [SIEGE]*");
-                sb.AppendLine($"```");
-                foreach (var pair in logiDic)
-                {
-                    sb.AppendLine($"{pair.Key} - {(string.IsNullOrEmpty(pair.Value) ? LM.Get("None") : pair.Value.Substring(0, pair.Value.Length - 2))}");
-                }
-                sb.AppendLine($"```");
-
-                if (split)
-                {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, sb.ToString());
-                    sb = new StringBuilder();
-                    sb.AppendLine(".");
-                }
-
-                sb.AppendLine($"**{LM.Get("capsCalibr5")}**: {c5count} {LM.Get("of")} {totalUsers}");
-                await APIHelper.DiscordAPI.ReplyMessageAsync(context, sb.ToString());
-                */
             }
             finally
             {

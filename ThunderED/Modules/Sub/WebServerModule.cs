@@ -51,8 +51,7 @@ namespace ThunderED.Modules.Sub
                 var extPort = Settings.WebServerModule.WebExternalPort;
                 var ip = "0.0.0.0";
 
-                
-
+               
                 _listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), port);
                 _listener.Request += async (sender, context) =>
                 {
@@ -113,6 +112,12 @@ namespace ThunderED.Modules.Sub
                             {
                                 var authNurl = GetHRMAuthURL();
                                 manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonHRMText")}</a>");
+                            }
+
+                            if (Settings.Config.ModuleWebConfigEditor)
+                            {
+                                var authNurl = GetWebConfigAuthURL();
+                                manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("buttonSettingsText")}</a>");
                             }
 
                             text = text.Replace("{manageControls}", manageText.ToString());
@@ -300,11 +305,33 @@ namespace ThunderED.Modules.Sub
             await response.WriteContentAsync(message);
         }
 
+        public static async Task WriteJsonResponse(string message, System.Net.Http.HttpListenerResponse response, bool noCache = false)
+        {
+            response.Headers.ContentEncoding.Add("utf-8");
+            response.Headers.ContentType.Add("application/json");
+            if (noCache)
+            {
+                response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate");
+                response.Headers.Add("Pragma", "no-cache"); // HTTP 1.0.
+                response.Headers.Add("Expires", "0"); // Proxies.
+            }
+            await response.WriteContentAsync(message);
+        }
+
         public static string GetWebSiteUrl()
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             return  $"{HttpPrefix}://{extIp}:{extPort}";
+        }
+
+        internal static string GetWebConfigAuthURL()
+        {
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=settings";
         }
 
         
@@ -542,6 +569,20 @@ namespace ThunderED.Modules.Sub
         public static string GetHRM_RestoreDumpedURL(long itemCharacterId, string authCode)
         {
             return $"hrm.php?data=restoreAuth{itemCharacterId}&id={authCode}&state=matahari";
+        }
+
+        public static string GetWebEditorUrl(string code)
+        {
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            return $"{HttpPrefix}://{extIp}:{extPort}/settings.php?code={code}&state=settings";
+        }
+
+        public static string GetWebEditorSimplifiedAuthUrl(string code)
+        {
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            return $"{HttpPrefix}://{extIp}:{extPort}/settings.php?code={code}&state=settings_sa&data=";
         }
     }
 }

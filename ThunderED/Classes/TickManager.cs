@@ -108,8 +108,11 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleChatRelay)
                 OnDemandModules.Add(new ChatRelayModule());
 
-            if (SettingsManager.Settings.CommandsConfig.EnableCapsCommand)
+            if (SettingsManager.Settings.CommandsConfig.EnableShipsCommand)
                 OnDemandModules.Add(new CapsModule());
+
+            if (SettingsManager.Settings.Config.ModuleWebConfigEditor)
+                OnDemandModules.Add(new WebSettingsModule());
          
             //IMPORTANT - web auth is the last module - to be the last for 404 handling
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
