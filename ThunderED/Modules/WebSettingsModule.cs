@@ -22,7 +22,7 @@ namespace ThunderED.Modules
 
         public WebSettingsModule()
         {
-            LogHelper.LogModule("Initializing WebAuth module...", Category).GetAwaiter().GetResult();
+            LogHelper.LogModule("Initializing Web Settings Editor module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, OnAuthRequest);
 
         }

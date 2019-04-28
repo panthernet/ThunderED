@@ -132,7 +132,7 @@ namespace ThunderED.Modules.OnDemand
 
                     if (singleGroup.Value == null)
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("errShipsNameNotFound"));
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("errShipsNameNotFound", inputName));
                         return;
                     }
                 }
@@ -311,7 +311,7 @@ namespace ThunderED.Modules.OnDemand
                     sb.AppendLine($"**{pair.Key}** ({counts[pair.Key]} {LM.Get("of")} {usersData.Count})");
                     sb.AppendLine($"*Format: {data.Groups[pair.Key].FormatDescription}*");
                     sb.AppendLine($"```");
-                    var maxNameLen = pair.Value.GroupBy(a=> a.Name).Max(a => a.Key.Length);
+                    var maxNameLen = pair.Value.Any() ? pair.Value.GroupBy(a=> a.Name).Max(a => a.Key.Length) : 1;
 
                     foreach (var group in pair.Value.GroupBy(a=> a.Name))
                     {
