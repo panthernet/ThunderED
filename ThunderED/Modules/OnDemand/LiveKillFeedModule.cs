@@ -70,7 +70,7 @@ namespace ThunderED.Modules.OnDemand
                             await APIHelper.DiscordAPI.SendMessageAsync(bigKillGlobalChan, kill.zkb.url);
                         else
                         {                            
-                            if (await km.Refresh(Reason, kill) && !await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, bigKillGlobalChan, discordGroupName))
+                            if (await km.Refresh(Reason, kill) && !await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, bigKillGlobalChan, groupPair.Value.ShowGroupName ? discordGroupName : " "))
                             {
                                 await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillGlobalChan, new Color(0xFA2FF4), km, null);
                             }
@@ -85,7 +85,7 @@ namespace ThunderED.Modules.OnDemand
                         {
                             if (isUrlOnly)
                                 await APIHelper.DiscordAPI.SendMessageAsync(c, kill.zkb.url);
-                            else if (await km.Refresh(Reason, kill) && !await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, km.dic, c, discordGroupName))
+                            else if (await km.Refresh(Reason, kill) && !await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, km.dic, c, groupPair.Value.ShowGroupName ? discordGroupName : " "))
                             {
                                 await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), km, null);
                             }
@@ -114,12 +114,14 @@ namespace ThunderED.Modules.OnDemand
                                     km.dic["{isLoss}"] = "true";
                                     try
                                     {
-                                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, bigKillChannel, discordGroupName))
+                                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, bigKillChannel, 
+                                            groupPair.Value.ShowGroupName ? discordGroupName : " "))
                                         {
                                             await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0xD00000), km, null,
                                                 groupPair.Value.ShowGroupName ? discordGroupName : " ");
                                             if (sendBigToGeneral && c != bigKillChannel)
-                                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, c, discordGroupName))
+                                                if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, c, 
+                                                    groupPair.Value.ShowGroupName ? discordGroupName : " "))
                                                     await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xD00000), km, null,
                                                         groupPair.Value.ShowGroupName ? discordGroupName : " ");
                                         }
@@ -147,7 +149,8 @@ namespace ThunderED.Modules.OnDemand
                                     km.dic["{isLoss}"] = "true";
                                     try
                                     {
-                                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, km.dic, c, discordGroupName))
+                                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, km.dic, c, 
+                                            groupPair.Value.ShowGroupName ? discordGroupName : " "))
                                         {
                                             await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xFF0000), km, null,
                                                 groupPair.Value.ShowGroupName ? discordGroupName : " ");
@@ -184,13 +187,15 @@ namespace ThunderED.Modules.OnDemand
                                         km.dic["{isLoss}"] = "false";
                                         try
                                         {
-                                            if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, bigKillChannel, discordGroupName))
+                                            if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, bigKillChannel, 
+                                                groupPair.Value.ShowGroupName ? discordGroupName : " "))
                                             {
                                                 await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0x00D000), km, null,
                                                     groupPair.Value.ShowGroupName ? discordGroupName : " ");
                                                 if (sendBigToGeneral && c != bigKillChannel)
                                                 {
-                                                    if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, c, discordGroupName))
+                                                    if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, c, 
+                                                        groupPair.Value.ShowGroupName ? discordGroupName : " "))
                                                         await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00D000), km, null,
                                                             groupPair.Value.ShowGroupName ? discordGroupName : " ");
                                                 }
@@ -217,7 +222,8 @@ namespace ThunderED.Modules.OnDemand
                                     km.dic["{isLoss}"] = "false";
                                     try
                                     {
-                                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, km.dic, c, discordGroupName))
+                                        if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, km.dic, c, 
+                                            groupPair.Value.ShowGroupName ? discordGroupName : " "))
                                         {
                                             await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), km, null,
                                                 groupPair.Value.ShowGroupName ? discordGroupName : " ");

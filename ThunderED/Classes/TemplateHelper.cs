@@ -60,11 +60,17 @@ namespace ThunderED.Classes
             {
                 var isNpcKill = dic.ContainsKey("{isNpcKill}") && Convert.ToBoolean(dic["{isNpcKill}"]);
                 var isLoss = dic.ContainsKey("{isLoss}") && Convert.ToBoolean(dic["{isLoss}"]);
+                var isAwox = dic.ContainsKey( "{isAwoxKill}" ) && Convert.ToBoolean( dic["{isAwoxKill}"] );
+                var isSolo = dic.ContainsKey( "{isSoloKill}" ) && Convert.ToBoolean( dic["{isSoloKill}"] );
                 if (dic.ContainsKey("{isNpcKill}"))
                     dic.Remove("{isNpcKill}");
                 if (dic.ContainsKey("{isLoss}"))
                     dic.Remove("{isLoss}");
-                             
+                if (dic.ContainsKey( "{isAwoxKill}" ))
+                    dic.Remove( "{isAwoxKill}" );
+                if (dic.ContainsKey( "{isSoloKill}" ))
+                    dic.Remove( "{isSoloKill}" );
+
                 var isRadiusRange = dic.ContainsKey("{isRangeMode}") && Convert.ToBoolean(dic["{isRangeMode}"]);
                 if (dic.ContainsKey("{isRangeMode}"))
                     dic.Remove("{isRangeMode}");
@@ -158,7 +164,25 @@ namespace ThunderED.Classes
                                 if (isLoss) return;
                                 text = text.Substring(13, text.Length - 13).Trim();
                             }
-
+                            
+                            if (text.StartsWith("#if {isAwoxKill}", StringComparison.OrdinalIgnoreCase)) {
+                                if (!isAwox) return;
+                                text = text.Substring(16, text.Length - 16).Trim();
+                            }
+                            if (text.StartsWith( "#if !{isAwoxKill}", StringComparison.OrdinalIgnoreCase )) {
+                                if (isAwox) return;
+                                text = text.Substring(17, text.Length - 17).Trim();
+                            }
+                            
+                            if (text.StartsWith( "#if {isSoloKill}", StringComparison.OrdinalIgnoreCase )) {
+                                if (!isSolo) return;
+                                text = text.Substring(16, text.Length - 16).Trim();
+                            }
+                            if (text.StartsWith( "#if !{isSoloKill}", StringComparison.OrdinalIgnoreCase )) {
+                                if (isSolo) return;
+                                text = text.Substring(17, text.Length - 17).Trim();
+                            }
+                            
                             if (!isAuthor && text.StartsWith(".WithAuthor", StringComparison.OrdinalIgnoreCase))
                             {
                                 isAuthor = true;
@@ -184,7 +208,6 @@ namespace ThunderED.Classes
                             }
                             else
                             {
-
                                 if (text.StartsWith(".WithColor", StringComparison.OrdinalIgnoreCase))
                                     embed.WithColor(GetColor(text));
                                 else if (text.StartsWith(".WithDescription(", StringComparison.OrdinalIgnoreCase))
@@ -209,8 +232,8 @@ namespace ThunderED.Classes
                                     embed.WithFooter(GetText(text));
                                 else if (text.StartsWith(".WithTimestamp", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    if (DateTimeOffset.TryParse(dic["timestamp"], out var time))
-                                        embed.WithTimestamp(time);
+                                    if (DateTimeOffset.TryParse(dic["{timestamp}"], out var time))
+                                         embed.WithTimestamp(time);
                                     else embed.WithCurrentTimestamp();
                                 }
                             }
