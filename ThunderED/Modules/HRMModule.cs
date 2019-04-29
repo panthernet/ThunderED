@@ -59,7 +59,7 @@ namespace ThunderED.Modules
                     _lastUpdateDate = DateTime.Now;
                     if (Settings.HRMModule.DumpInvalidationInHours > 0)
                     {
-                        var list = await SQLHelper.GetAuthUsersWithPerms((int) UserStatusEnum.Dumped);
+                        var list = await SQLHelper.GetAuthUsers((int) UserStatusEnum.Dumped);
                         foreach (var user in list)
                         {
                             if (user.DumpDate.HasValue && (DateTime.Now - user.DumpDate.Value).TotalHours >= Settings.HRMModule.DumpInvalidationInHours)

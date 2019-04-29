@@ -1,3 +1,9 @@
+### V1.3.12
++ Added new HR module param **ValidateTokensWhileLoading**
++ Added icons to HR users list when user don't have or have invalid ESI token
++ Fixed Preliminary auth without ESI permissions
++ Fixed HR module not displaying characters whithout ESI
+
 ### V1.3.11
 + Fixed HR module confirmation popups to work with Bootstrap 4.3
 + Fixed possible exception during cache cleanup

@@ -67,7 +67,7 @@
     "SessionTimeoutInMinutes": 10,
     "AccessList": {
       "accessList1": {
-        "AllowedEntities": ["Character Name", "Corporation Name", 1234567890],
+        "AllowedEntities": [ "Character Name", "c:Corporation Name", "a:Alliance Name", 1234567890 ],
         "AllowedDiscordRoles": [],
         "CanEditSimplifiedAuth": true
       }
@@ -151,37 +151,38 @@
         "AuthGroupNamesFilter": [],
         "AuthAllianceIdFilter": [],
         "AuthCorporationIdFilter": [],
-        "ApplyGroupFilterToAwaitingUsers":  false,
+        "ApplyGroupFilterToAwaitingUsers": false,
         "IsAwaitingUsersVisible": true,
         "IsDumpedUsersVisible": true,
-        "IsAuthedUsersVisible":  true,
-        "IsAltUsersVisible":  true,
-        "IsSpyUsersVisible":  true,
-        "CanSearchMail":  true,
-        "CanKickUsers":  true,
-        "CanMoveToSpies":  true,
-        "CanInspectAuthedUsers":  true,
-        "CanInspectAwaitingUsers":  true,
-        "CanInspectDumpedUsers":  true,
-        "CanInspectSpyUsers":  true,
-        "CanInspectAltUsers":  true,
-        "CanRestoreDumped":  true 
-      } 
+        "IsAuthedUsersVisible": true,
+        "IsAltUsersVisible": true,
+        "IsSpyUsersVisible": true,
+        "CanSearchMail": true,
+        "CanKickUsers": true,
+        "CanMoveToSpies": true,
+        "CanInspectAuthedUsers": true,
+        "CanInspectAwaitingUsers": true,
+        "CanInspectDumpedUsers": true,
+        "CanInspectSpyUsers": true,
+        "CanInspectAltUsers": true,
+        "CanRestoreDumped": true
+      }
     },
-    "AuthTimeoutInMinutes":  30,
-    "TableEntriesPerPage":  10,
-    "TableSkillEntriesPerPage":  20,
+    "AuthTimeoutInMinutes": 30,
+    "TableEntriesPerPage": 10,
+    "TableSkillEntriesPerPage": 20,
     "UseDumpForMembers": true,
-    "DumpInvalidationInHours":  240,
-    "DefaultSpiesMailFeedChannelId":  0,
+    "DumpInvalidationInHours": 240,
+    "DefaultSpiesMailFeedChannelId": 0,
+    "ValidateTokensWhileLoading": true,
     "SpyFilters": {
       "filter1": {
-        "CorporationNames": ["Corp Name1", "Corp Name 2"],
+        "CorporationNames": [ "Corp Name1", "Corp Name 2" ],
         "AllianceNames": [],
-        "MailFeedChannelId":  0,
+        "MailFeedChannelId": 0,
         "DisplayMailDetailsSummary": true
-      } 
-    } 
+      }
+    }
   },
 
   "mailModule": {
@@ -220,15 +221,15 @@
     "announces": [60, 10],
     "announceChannel": 0,
     "TimeInputFormat":  "DD.MM.YYYY HH:mm", 
-    "DefaultMention":  "@everyone", 
+    "DefaultMention":  "@everyone",
     "accessList": {
-      "UnitedFleet":{
-        "FilterEntities": ["Character Name", "a:Alliance Name", "c:Corporation Name", 795045209],
-        "FilterDiscordRoles": ["role1", "role2"]
+      "group1": {
+        "FilterEntities": [ "Character Name", "a:Alliance Name", "c:Corporation Name", 795045209 ],
+        "FilterDiscordRoles": [ "role1", "role2" ]
       }
     },
     "editList": {
-      "UnitedFleet":{
+      "group1": {
         "FilterEntities": [],
         "FilterDiscordRoles": []
       }

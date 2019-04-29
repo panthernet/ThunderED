@@ -405,6 +405,9 @@ namespace ThunderED.Classes
 
         [Comment("Optional Discord channel ID to feed new mail from users marked as spies")]
         public ulong DefaultSpiesMailFeedChannelId { get; set; }
+
+        [Comment("Validate ESI tokens while loading character lists. Can significantly increase loading times for huge character lists.")]
+        public bool ValidateTokensWhileLoading { get; set; } = true;
 #if EDITOR
         public override string this[string columnName]
         {

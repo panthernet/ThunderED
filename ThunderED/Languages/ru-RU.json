@@ -504,5 +504,7 @@
   "webSettingsSaColumnGroup": "Группа",
   "webSettingsSaColumnRoles": "Роли",
   "helpShips": "Команда ships отображает данные о пилотах умеющих водить указанные фиты. Примеры: {0}{1} who , {0}{1} who online, {0}{1} all\nТакже можно добавить имя группы или корабля в качестве последнего параметра: {0}{1} all dreads  {0}{1} who online moros",
-  "errShipsNameNotFound": "Наименование группы или корабля '{0}' не найдено!"
+  "errShipsNameNotFound": "Наименование группы или корабля '{0}' не найдено!",
+  "hrmTooltipNoESI": "У персонажа нет разрешений ESI",
+  "hrmTooltipInvalidESIToken": "У персонажа истек ESI токен"
 }

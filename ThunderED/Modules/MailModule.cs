@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
+using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.Sub;
@@ -524,14 +525,14 @@ namespace ThunderED.Modules
             var users = new List<AuthUserEntity>();
             if (isGlobal)
             {
-                users = await SQLHelper.GetAuthUsersWithPerms();
+                //users = await SQLHelper.GetAuthUsersWithPerms();
                 switch (item.smAuthType)
                 {
                     case 1:
-                        users = users.Where(a => a.IsAuthed).ToList();
+                        users = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed)).ToList();
                         break;
                     case 2:
-                        users = users.Where(a => a.IsPending).ToList();
+                        users = (await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Awaiting)).ToList();
                         break;
                     default:
                         return null;

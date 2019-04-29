@@ -29,49 +29,59 @@
             });
         }
 
+        function updateTooltips() {
+            $('.solo_tooltip').tooltip({
+                title: function () {
+                    return $(this).attr("tooltip-title");
+                },
+                placement: 'bottom'
+            });
+        }
+
         $(function () {
 
             if ({allowAuthedScript}) {
-                $("#authed-content").load('{authedListUrl}0', function () { updateConfirmation(); });
+                $("#authed-content").load('{authedListUrl}0', function () { updateConfirmation(); updateTooltips(); });
             }
             if ({allowAltScript}) {
-                $("#alt-content").load('{altListUrl}0', function () { updateConfirmation(); });
+                $("#alt-content").load('{altListUrl}0', function () { updateConfirmation(); updateTooltips();});
             }
             if ({allowAwaitingScript}) {
-                $("#awaiting-content").load('{awaitingListUrl}0', function () { updateConfirmation(); });
+                $("#awaiting-content").load('{awaitingListUrl}0', function () { updateConfirmation(); updateTooltips();});
             }
             if ({allowDumpedScript}) {
-                $("#dumped-content").load('{dumpedListUrl}0', function () { updateConfirmation(); });
+                $("#dumped-content").load('{dumpedListUrl}0', function () { updateConfirmation(); updateTooltips();});
             }
             if ({allowSpyingScript}) {
-                $("#spying-content").load('{spyingListUrl}0', function () { updateConfirmation(); });
+                $("#spying-content").load('{spyingListUrl}0', function () { updateConfirmation(); updateTooltips();});
             }
+
         });
 
         function filterOnChangeAuthed() {
             var value = $('#selectAuthed').val();
-            $("#authed-content").load('{authedListUrl}' + value, function () { updateConfirmation(); });
+            $("#authed-content").load('{authedListUrl}' + value, function () { updateConfirmation(); updateTooltips();});
         }
 
         function filterOnChangeAlt() {
             var value = $('#selectAlt').val();
-            $("#alt-content").load('{altListUrl}' + value, function () { updateConfirmation(); });
+            $("#alt-content").load('{altListUrl}' + value, function () { updateConfirmation(); updateTooltips();});
         }
 
 
         function filterOnChangeAwaiting() {
             var value = $('#selectAwaiting').val();
-            $("#awaiting-content").load('{awaitingListUrl}' + value, function () { updateConfirmation(); });
+            $("#awaiting-content").load('{awaitingListUrl}' + value, function () { updateConfirmation(); updateTooltips();});
         }
 
         function filterOnChangeDumped() {
             var value = $('#selectDumped').val();
-            $("#dumped-content").load('{dumpedListUrl}' + value, function () { updateConfirmation(); });
+            $("#dumped-content").load('{dumpedListUrl}' + value, function () { updateConfirmation(); updateTooltips();});
         }
 
         function filterOnChangeSpying() {
             var value = $('#selectSpying').val();
-            $("#spying-content").load('{spyingListUrl}' + value, function () { updateConfirmation(); });
+            $("#spying-content").load('{spyingListUrl}' + value, function () { updateConfirmation(); updateTooltips();});
         }
 
     </script>

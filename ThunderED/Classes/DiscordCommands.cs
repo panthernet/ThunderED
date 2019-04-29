@@ -496,7 +496,7 @@ namespace ThunderED.Classes
 
                     var authUser = code == null ? await SQLHelper.GetAuthUserByCharacterId(characterId) : await SQLHelper.GetAuthUserByRegCode(code);
                     //check if entry exists
-                    if (authUser == null || !authUser.HasToken)
+                    if (authUser == null)// || !authUser.HasToken)
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
                         return;
@@ -566,7 +566,7 @@ namespace ThunderED.Classes
                         }
                         case "confirm":
 
-                            if (!authUser.HasToken || !authUser.HasRegCode || authUser.DiscordId > 0)
+                            if (!authUser.HasRegCode || authUser.DiscordId > 0)
                             {
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
                                 return;
