@@ -1,5 +1,6 @@
 ### V1.3.11
 + Fixed HR module confirmation popups to work with Bootstrap 4.3
++ Fixed possible exception during cache cleanup
 
 ### V1.3.10
 + Added new module - Web Config Editor with basic functionality
