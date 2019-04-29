@@ -57,6 +57,9 @@
     <None Update="Content\Icons\imgContractDelete.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+    <None Update="Content\scripts\bootstrap-confirmation.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Content\scripts\bootstrap-datetimepicker.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
