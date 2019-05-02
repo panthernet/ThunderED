@@ -20,8 +20,8 @@
         <!-- Nav tabs -->
         <nav>
             <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                <a class="nav-item nav-link {saPageVisible} {saPageActive}" id="nav-sa-tab" data-toggle="tab" href="#nav-sa" role="tab" aria-controls="nav-sa" aria-selected="true">Simple Auth</a>
-                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Profile</a>
+                <a class="nav-item nav-link {saPageVisible} {saPageActive}" id="nav-sa-tab" data-toggle="tab" href="#nav-sa" role="tab" aria-controls="nav-sa" aria-selected="true">{simpleAuthTabName}</a>
+                <a class="nav-item nav-link" id="nav-timers-tab" data-toggle="tab" href="#nav-timers" role="tab" aria-controls="nav-timers" aria-selected="false">{timersTabName}</a>
             </div>
         </nav>
 
@@ -30,8 +30,8 @@
             <div class="tab-pane fade show {saPageActive} {saPageVisible}" id="nav-sa" role="tabpanel" aria-labelledby="nav-sa-tab">
                 {simpleAuthContent}
             </div>
-            <divc lass="tab-pane fade show" id="nav-profile" role="tabpanel"  aria-labelledby="nav-profile-tab">
-                Under Construction...
+            <div class="tab-pane fade show {tiPageActive} {tiPageVisible}" id="nav-timers" role="tabpanel" aria-labelledby="nav-timers-tab">
+                {timersContent}
             </div>
         </div>
     </div>
@@ -41,6 +41,7 @@
 
 <script>
     {simpleAuthScripts}
+    {timersScripts}
 </script>
 
 </body>

@@ -584,5 +584,13 @@ namespace ThunderED.Modules.Sub
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             return $"{HttpPrefix}://{extIp}:{extPort}/settings.php?code={code}&state=settings_sa&data=";
         }
+
+        
+        public static string GetWebEditorTimersUrl(string code)
+        {
+            var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
+            var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
+            return $"{HttpPrefix}://{extIp}:{extPort}/settings.php?code={code}&state=settings_ti&data=";
+        }
     }
 }

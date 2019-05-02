@@ -1,3 +1,7 @@
+### V1.3.13
++ Added Timers auth to Web Config Editor
++ Fixed contract duplicate when using multiple filters
+
 ### V1.3.12
 + Added new HR module param **ValidateTokensWhileLoading**
 + Added icons to HR users list when user don't have or have invalid ESI token

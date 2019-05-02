@@ -426,7 +426,7 @@ Editableform is linked with one of input types, e.g. 'text', 'select' etc.
         @type string
         @default 'text'
         **/
-        type: 'text',
+        type: 'textarea',
         /**
         Url for submit, e.g. <code>'/post'</code>  
         If function - it will be called instead of ajax. Function should return deferred object to run fail/done callbacks.
@@ -2161,7 +2161,7 @@ Makes editable any HTML element on the page. Applied as jQuery method.
         @type string
         @default 'text'
         **/
-        type: 'text',        
+        type: 'textarea',        
         /**
         Sets disabled state of editable
 

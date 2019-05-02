@@ -149,6 +149,7 @@ namespace ThunderED.Classes
         public List<string> AllowedDiscordRoles { get; set; } = new List<string>();
 #endif
         public bool CanEditSimplifiedAuth { get; set; } = true;
+        public bool CanEditTimers { get; set; } = true;
     }
 
     public class CommandsConfigSettings

@@ -249,7 +249,8 @@ namespace ThunderED.Modules
                         else
                             await LogHelper.LogWarning($"Specified filter channel ID: {filter.DiscordChannelId} is not accessible!", Category);
                         await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is expired!", Category);
-                        lst.Remove(contract);
+                        if(lst.Contains(contract))
+                            lst.Remove(contract);
                         continue;
                     }
                     //check for accepted
@@ -263,6 +264,8 @@ namespace ThunderED.Modules
                         continue;
                     }
                 }
+
+
 
                 //silently remove filtered out expired contracts
                 var lefties = lst.Where(a => _completeStatuses.Contains(a.status)).ToList();
@@ -321,6 +324,17 @@ namespace ThunderED.Modules
                         lst.RemoveRange(lst.Count - count, count);
                     }
                 }
+
+ 
+            }
+
+            //kill dupes
+            var rr = lst.GroupBy(a => a.contract_id).Where(a => a.Count() > 1).Select(a=> a.Key).Distinct();
+            foreach (var item in rr)
+            {
+                var o = lst.FirstOrDefault(a => a.contract_id == item);
+                if (o != null)
+                    lst.Remove(o);
             }
 
             await SQLHelper.SaveContracts(characterID, lst, isCorp);

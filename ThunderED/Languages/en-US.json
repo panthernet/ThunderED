@@ -513,6 +513,8 @@
   "helpShips": "Ships command displays information about members who can pilot ship fits.\nModifiers: who - check members in current channel, who online - online members in current channel, all - all registered members, all online - all registered members who are online.\nExamples: {0}{1} who , {0}{1} who online, {0}{1} all\nYou can also add group or ship name as the last param: {0}{1} all dreads  {0}{1} who online moros",
   "errShipsNameNotFound": "Ship or group name '{0}' not found!",
   "hrmTooltipNoESI": "Character has no ESI permissions",
-  "hrmTooltipInvalidESIToken": "Character has invalid ESI token"
-
+  "hrmTooltipInvalidESIToken": "Character has invalid ESI token",
+  "webSettingsSimpleAuthTabName": "Simple Auth",
+  "webSettingsTimersTabName": "Timers",
+  "webSettingsTiColumnEntities":  "Entities" 
 }

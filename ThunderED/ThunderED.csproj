@@ -168,10 +168,16 @@
     <None Update="Templates\Resources\default_package.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Templates\settingsMain_SimpleAuth_Scripts.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\settingsMain_Timers.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\settingsMain_SimpleAuth.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Templates\settingsMain_SimpleAuth_Scripts.js">
+    <None Update="Templates\settingsMain_Timers_Scripts.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Templates\timersMain.html">

@@ -69,7 +69,8 @@
       "accessList1": {
         "AllowedEntities": [ "Character Name", "c:Corporation Name", "a:Alliance Name", 1234567890 ],
         "AllowedDiscordRoles": [],
-        "CanEditSimplifiedAuth": true
+        "CanEditSimplifiedAuth": true,
+        "CanEditTimers":  true 
       }
     }
   },

@@ -92,7 +92,8 @@ namespace ThunderED.Modules
                     await response.RedirectAsync(new Uri(url));
                     return true;
                 }
-                else if (request.Url.LocalPath == "/settings.php" || request.Url.LocalPath == $"{extPort}/settings.php")
+
+                if (request.Url.LocalPath == "/settings.php" || request.Url.LocalPath == $"{extPort}/settings.php")
                 {
                     var prms = request.Url.Query.TrimStart('?').Split('&');
                     if (prms.Length == 0 || prms[0].Split('=').Length == 0 || string.IsNullOrEmpty(prms[0]))
@@ -100,7 +101,7 @@ namespace ThunderED.Modules
                     var code = prms.FirstOrDefault(a => a.StartsWith("code"))?.Split('=')[1];
                     var state = prms.FirstOrDefault(a => a.StartsWith("state"))?.Split('=')[1];
 
-                    if (state != "settings" && state != "settings_sa") return false;
+                    if (state != "settings" && state != "settings_sa" && state != "settings_ti") return false;
                     if (code == null)
                     {
                         await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
@@ -155,6 +156,39 @@ namespace ThunderED.Modules
                         return true;
                     }
 
+                    if (state == "settings_ti")
+                    {
+                        if (!filter.CanEditTimers)
+                        {
+                            await WebServerModule.WriteResponce("Nope", response);
+                            return true;
+                        }
+
+                        var data = prms.FirstOrDefault(a => a.StartsWith("data"))?.Split('=')[1];
+                        data = HttpUtility.UrlDecode(data);
+                        if (data != null)
+                        {
+
+                            var convData = JsonConvert.DeserializeObject<List<TiData>>(data);
+                            convData = convData.Where(a => !string.IsNullOrEmpty(a.Name?.Trim()) && !string.IsNullOrEmpty(a.Entities?.Trim()) && !string.IsNullOrEmpty(a.Roles?.Trim())).ToList();
+                            await SaveTimersAuthData(convData);
+                        }
+                        else
+                        {
+                            var ent = SettingsManager.Settings.TimersModule.AccessList.Select(a=> new TiData
+                            {
+                                Name = a.Key,
+                                Entities = string.Join(",", a.Value.FilterEntities.Select(b=> b.ToString())),
+                                Roles = string.Join(",", a.Value.FilterDiscordRoles)
+                            }).ToList();
+                            var x = new {total = ent.Count, totalNotFiltered = ent.Count, rows = ent};
+                            var json = JsonConvert.SerializeObject(x);
+                            await WebServerModule.WriteJsonResponse(json, response);
+                        }
+
+                        return true;
+                    }
+
                     //check in db
                     var timeout = Settings.WebConfigEditorModule.SessionTimeoutInMinutes;
                     if (timeout != 0)
@@ -179,6 +213,8 @@ namespace ThunderED.Modules
                     sb.Remove(sb.Length - 1, 1);
                     var groupList = $"[{sb}]";
 
+                    var timersContent = string.Empty;
+                    var timersScripts = string.Empty;
                     var simpleAuthContent = string.Empty;
                     var simpleAuthScripts = string.Empty;
                     if (filter.CanEditSimplifiedAuth)
@@ -193,29 +229,58 @@ namespace ThunderED.Modules
 
                                 .Replace("{code}", code)
                                 .Replace("{locale}", SettingsManager.Settings.Config.Language)
-                       // .Replace("{availableGroups}", $"{LM.Get("webSettingsAvailableGroupsText")}: {groups}")
                             ;
 
                         simpleAuthScripts = File.ReadAllText(SettingsManager.FileTemplateSettingsPage_SimpleAuth_Scripts)
                                 .Replace("{saGroupList}", groupList)
-                                .Replace("{postSimplifiedAuthUrl}", WebServerModule.GetWebEditorSimplifiedAuthUrl(code))
+                                .Replace("{postTimersUrl}", WebServerModule.GetWebEditorSimplifiedAuthUrl(code))
                             ;
                     }
 
+                    if (filter.CanEditTimers)
+                    {
+                        timersContent = File.ReadAllText(SettingsManager.FileTemplateSettingsPage_Timers)
+                                .Replace("{saAddEntry}", LM.Get("webSettingsAddEntryButton"))
+                               
+                                .Replace("{saAddEntry}", LM.Get("webSettingsAddEntryButton"))
+                                .Replace("{saDeleteEntry}", LM.Get("webSettingsDeleteEntryButton"))
+                                .Replace("{saSave}", LM.Get("webSettingsSaveEntryButton"))
+                                .Replace("{saTableColumnName}", LM.Get("webSettingsSaColumnName"))
+                                .Replace("{tiTableColumnEntities}", LM.Get("webSettingsTiColumnEntities"))
+                                .Replace("{saTableColumnRoles}", LM.Get("webSettingsSaColumnRoles"))
+
+                                .Replace("{code}", code)
+                                .Replace("{locale}", SettingsManager.Settings.Config.Language)
+                            ;
+
+                        timersScripts = File.ReadAllText(SettingsManager.FileTemplateSettingsPage_Timers_Scripts)
+                                .Replace("{postTimersUrl}", WebServerModule.GetWebEditorTimersUrl(code))
+                            ;
+                    }
+
+                    var saActive = filter.CanEditSimplifiedAuth ? "active" : null;
+                    var tiActive = saActive != null || !filter.CanEditTimers ? null : "active";
+
                     var text = File.ReadAllText(SettingsManager.FileTemplateSettingsPage)
-                        .Replace("{headerContent}",  WebServerModule.GetHtmlResourceTables())
-                        .Replace("{header}", LM.Get("webSettingsHeader"))
-                        .Replace("{Back}", LM.Get("Back"))
-                        .Replace("{LogOut}", LM.Get("LogOut"))
-                        .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
-                        .Replace("{LogOutUrl}", WebServerModule.GetWebSiteUrl())
-                        .Replace("{backUrl}", WebServerModule.GetWebSiteUrl())
-                        .Replace("{simpleAuthContent}", simpleAuthContent)
-                        .Replace("{simpleAuthScripts}", simpleAuthScripts)
-                        .Replace("{code}", code)
-                        .Replace("{locale}", SettingsManager.Settings.Config.Language)
-                        .Replace("{saPageVisible}", filter.CanEditSimplifiedAuth ? null : "d-none")
-                        .Replace("{saPageActive}", filter.CanEditSimplifiedAuth ? "active" : null)
+                            .Replace("{headerContent}",  WebServerModule.GetHtmlResourceTables())
+                            .Replace("{header}", LM.Get("webSettingsHeader"))
+                            .Replace("{Back}", LM.Get("Back"))
+                            .Replace("{LogOut}", LM.Get("LogOut"))
+                            .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
+                            .Replace("{LogOutUrl}", WebServerModule.GetWebSiteUrl())
+                            .Replace("{backUrl}", WebServerModule.GetWebSiteUrl())
+                            .Replace("{simpleAuthContent}", simpleAuthContent)
+                            .Replace("{simpleAuthScripts}", simpleAuthScripts)
+                            .Replace("{timersContent}", timersContent)
+                            .Replace("{timersScripts}", timersScripts)
+                            .Replace("{code}", code)
+                            .Replace("{locale}", SettingsManager.Settings.Config.Language)
+                            .Replace("{simpleAuthTabName}",LM.Get("webSettingsSimpleAuthTabName"))
+                            .Replace("{timersTabName}",LM.Get("webSettingsTimersTabName"))
+                            .Replace("{saPageVisible}", filter.CanEditSimplifiedAuth ? null : "d-none")
+                            .Replace("{tiPageVisible}", filter.CanEditTimers ? null : "d-none")
+                            .Replace("{saPageActive}", saActive)
+                            .Replace("{tiPageActive}", tiActive)
                         ;
                     await WebServerModule.WriteResponce(text, response);
                     return true;
@@ -228,10 +293,49 @@ namespace ThunderED.Modules
             return false;
         }
 
+        private async Task SaveTimersAuthData(List<TiData> convData)
+        {
+            try
+            {
+                var groups = new Dictionary<string, TimersAccessGroup>();
+                Settings.TimersModule.AccessList.Clear();
+                foreach (var data in convData)
+                {
+                    var group = new TimersAccessGroup();
+                    var lst = data.Entities.Split(",");
+                    foreach (var item in lst)
+                    {
+                        if (long.TryParse(item, out var value))
+                            group.FilterEntities.Add(value);
+                        else group.FilterEntities.Add(item);
+                    }
+
+                    group.FilterDiscordRoles = data.Roles.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(a => a.Trim()).ToList();
+                    groups.Add(data.Name, group);
+                }
+
+                foreach (var @group in groups)
+                    Settings.TimersModule.AccessList.Add(group.Key, group.Value);
+
+                await Settings.SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(SaveTimersAuthData), ex, Category);
+            }
+        }
+
         private class SaData
         {
             public string Name;
             public string Group;
+            public string Roles;
+        }
+
+        private class TiData
+        {
+            public string Name;
+            public string Entities;
             public string Roles;
         }
 

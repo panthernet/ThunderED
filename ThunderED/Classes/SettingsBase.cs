@@ -83,10 +83,10 @@ namespace ThunderED.Classes
 
         private static bool SaveInternal(object obj, string filePath, bool createBackup)
         {
-            string typeName = obj.GetType().Name;
+            var typeName = obj.GetType().Name;
             Console.WriteLine("{0} save started: {1}", typeName, filePath);
 
-            bool isSuccess = false;
+            var isSuccess = false;
 
             try
             {
@@ -94,20 +94,19 @@ namespace ThunderED.Classes
                 {
                     lock (obj)
                     {
-                        if (!string.IsNullOrEmpty(filePath) && !Directory.Exists(filePath))
+                        if (!string.IsNullOrEmpty(filePath) && !Directory.Exists(Path.GetDirectoryName(filePath)))
                         {
                             Directory.CreateDirectory(filePath);
                         }
 
-                        string tempFilePath = filePath + ".temp";
+                        var tempFilePath = filePath + ".temp";
 
-                        using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
-                        using (StreamWriter streamWriter = new StreamWriter(fileStream))
-                        using (JsonTextWriter jsonWriter = new JsonTextWriter(streamWriter))
+                        using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                        using (var streamWriter = new StreamWriter(fileStream))
+                        using (var jsonWriter = new JsonTextWriter(streamWriter))
                         {
                             jsonWriter.Formatting = Formatting.Indented;
-                            JsonSerializer serializer = new JsonSerializer();
-                            serializer.ContractResolver = new WritablePropertiesOnlyResolver();
+                            var serializer = new JsonSerializer {ContractResolver = new WritablePropertiesOnlyResolver()};
                             serializer.Converters.Add(new StringEnumConverter());
                             serializer.Serialize(jsonWriter, obj);
                             jsonWriter.Flush();
