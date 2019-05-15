@@ -35,6 +35,7 @@ namespace ThunderED.Modules
                 if(result.Data.IsNotModified) return;
 
                 var allCampaigns = result.Result;
+                if(allCampaigns == null) return;
                 foreach (var pair in Settings.NullCampaignModule.Groups)
                 {
                     var groupName = pair.Key;

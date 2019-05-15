@@ -525,7 +525,7 @@ namespace ThunderED.Modules
                 if (!string.IsNullOrEmpty(Settings.Resources.ImgTimerAlert))
                     embed.WithThumbnailUrl(Settings.Resources.ImgTimerAlert);
 
-                await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), Settings.TimersModule.DefaultMention ?? "", embed.Build()).ConfigureAwait(false);
+                await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), Settings.TimersModule.DefaultMention ?? " ", embed.Build()).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
