@@ -185,6 +185,7 @@ namespace ThunderED.Modules
 
         private async Task ProcessContracts(bool isCorp, ContractNotifyGroup group, long characterID, string token)
         {
+            if(group == null) return;
             var maxContracts = Settings.ContractNotificationsModule.MaxTrackingCount > 0 ? Settings.ContractNotificationsModule.MaxTrackingCount : 150;
             List<JsonClasses.Contract> contracts;
 
@@ -236,6 +237,7 @@ namespace ThunderED.Modules
                     continue;                                        
                 }
 
+                if(group.Filters == null) continue;
                 foreach (var filter in group.Filters.Values)
                 {
                     if(filter.Types.Any() && !filter.Types.Contains(contract.type))
