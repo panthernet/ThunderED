@@ -515,7 +515,7 @@ namespace ThunderED.Modules
                 sbValues.Append($"\n[{(ch?.name ?? LM.Get("Unknown"))}](https://zkillboard.com/character/{contract.acceptor_id}/)");
             }
 
-            sbValues.Append($"\n{statusName}");
+            sbValues.Append($"\n**{statusName}**");
             if (contract.type == "courier")
                 sbValues.Append($"\n{contract.collateral:N}\n{contract.reward:N}\n{days} {LM.Get("contractMsgDays")}\n{expire} {LM.Get("contractMsgDays")}");
             else
@@ -572,7 +572,7 @@ namespace ThunderED.Modules
                     .WithColor(color)
                     .AddField(subject, title, true)
                     .AddField(LM.Get("contractMsgIssued"), $"{LM.Get("simpleFrom").FirstLetterToUpper()} {issuerName} {LM.Get("simpleTo")} {asigneeName}", true)
-                    .AddField(LM.Get("contractMsgStatus"), $"{statusName}", true);
+                    .AddField(LM.Get("contractMsgStatus"), $"**{statusName}**", true);
                 if (filter.ShowIngameOpen)
                     embed.WithDescription($"[{LM.Get("contractOpenIngame")}]({WebServerModule.GetOpenContractURL(contract.contract_id)})");
             }
