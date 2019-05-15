@@ -525,7 +525,10 @@ namespace ThunderED.Modules
                 if (!string.IsNullOrEmpty(Settings.Resources.ImgTimerAlert))
                     embed.WithThumbnailUrl(Settings.Resources.ImgTimerAlert);
 
-                await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), Settings.TimersModule.DefaultMention ?? " ", embed.Build()).ConfigureAwait(false);
+                var ch = APIHelper.DiscordAPI.GetChannel(channel);
+                if (ch == null)
+                    await LogHelper.LogWarning($"Discord channel {channel} not found!", Category);
+                else await APIHelper.DiscordAPI.SendMessageAsync(ch, Settings.TimersModule.DefaultMention ?? " ", embed.Build()).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
