@@ -509,6 +509,10 @@
   "hrmTooltipInvalidESIToken": "У персонажа истек ESI токен",
   "webSettingsSimpleAuthTabName": "Простая Аутентификация",
   "webSettingsTimersTabName": "Таймеры",
-  "webSettingsTiColumnEntities": "Сущности"
+  "webSettingsTiColumnEntities": "Сущности",
+  "NotifyHeader_OrbitalReinforced": "{0} принадлежащий {1} вошел в режим укрепления! Выйдет через: {2}",
+  "DateD": "д",
+  "DateH": "ч",
+  "DateM": "м"
 
 }

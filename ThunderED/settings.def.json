@@ -468,6 +468,7 @@
               "StructureUnanchoring",
               "StructureDestroyed",
               "OrbitalAttacked",
+              "OrbitalReinforced",
               "AllAnchoringMsg",
               "AllWarDeclaredMsg",
               "AllWarInvalidatedMsg",

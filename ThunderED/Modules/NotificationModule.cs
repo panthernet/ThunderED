@@ -331,6 +331,37 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                                                     await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
                                                 }
                                                     break;
+                                                case "OrbitalReinforced":
+                                                {
+                                                    var struc = await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data));
+                                                    var planet = await APIHelper.ESIAPI.GetPlanet(Reason, GetData("planetID", data));
+
+                                                    var agressor = (await APIHelper.ESIAPI.GetCharacterData(Reason, GetData("aggressorID", data)))?.name;
+                                                    var aggCorp = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("aggressorCorpID", data)))?.name;
+                                                    var aggAllyId = GetData("aggressorAllianceID", data);
+                                                    var aggAlly = string.IsNullOrEmpty(aggAllyId) || aggAllyId == "0"
+                                                        ? null
+                                                        : (await APIHelper.ESIAPI.GetAllianceData(Reason, aggAllyId))?.ticker;
+                                                    var aggText = $"{agressor} - {aggCorp}{(string.IsNullOrEmpty(aggAlly) ? null : $"[{aggAlly}]")}";
+                                                    var exitTime = TimeSpan.FromTicks(Convert.ToInt64(GetData("reinforceExitTime", data))).ToFormattedString();
+
+                                                    await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
+
+                                                    builder = new EmbedBuilder()
+                                                        .WithColor(new Color(0xdd5353))
+                                                        .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
+                                                        .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_OrbitalReinforced",
+                                                                struc?.name, feederCorp?.name, exitTime))
+                                                            .WithUrl($"https://zkillboard.com/character/{GetData("aggressorID", data)}"))
+                                                        .AddField(LM.Get("Location"), $"{systemName} - {planet?.name ?? LM.Get("Unknown")}", true)
+                                                        .AddField(LM.Get("Aggressor"), aggText, true)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                        .WithTimestamp(timestamp);
+                                                    embed = builder.Build();
+
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                }
+                                                    break;
 
                                                 case "StructureUnderAttack":
                                                 {

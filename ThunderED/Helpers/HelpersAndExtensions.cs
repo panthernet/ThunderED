@@ -93,9 +93,9 @@ namespace ThunderED.Helpers
 
             return string.Join(separator, new string[]
             {
-                ts.Days > 0 ? $"{ts.Days}d " : null,
-                ts.Hours > 0 ? $"{ts.Hours}h " : null,
-                ts.Minutes > 0 ? $"{ts.Minutes}m" : null
+                ts.Days > 0 ? $"{ts.Days}{LM.Get("dateD")} " : null,
+                ts.Hours > 0 ? $"{ts.Hours}{LM.Get("dateH")} " : null,
+                ts.Minutes > 0 ? $"{ts.Minutes}{LM.Get("dateM")}" : null
                 //ts.Seconds > 0 ? ts.Seconds + (ts.Seconds > 1 ? " seconds" : " second") : null,
                 //ts.Milliseconds > 0 ? ts.Milliseconds + (ts.Milliseconds > 1 ? " milliseconds" : " millisecond") : null,
             }.Where(t => t != null));
