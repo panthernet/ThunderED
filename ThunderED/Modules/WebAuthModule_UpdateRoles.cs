@@ -268,149 +268,159 @@ namespace ThunderED.Modules
             var discordGuild = APIHelper.DiscordAPI.GetGuild();
             var u = discordGuild.GetUser(discordUserId);
             var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
-            if (characterData == null)
-                return result;
 
-            if(u != null)
-                result.UpdatedRoles.Add(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
-
-            #region Get personalized foundList
-
-            var groupsToCheck = new List<WebAuthGroup>();
-            var authData = await SQLHelper.GetAuthUserByCharacterId(characterID);
-
-            if (!string.IsNullOrEmpty(authData?.GroupName))
+            try
             {
-                //check specified group for roles
-                var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authData.GroupName).Value;
-                if(group != null)
-                    groupsToCheck.Add(group);
-            }
+                if (characterData == null)
+                    return result;
 
-            if(!groupsToCheck.Any())
-            {
-                //check only GENERAL auth groups for roles
-                //non-general group auth should have group name supplied
-                groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a=> !a.ESICustomAuthRoles.Any() && a.StandingsAuth == null));
-            }
-            #endregion
-            
-            string groupName = null;
-            var hasAuth = false;
+                if (u != null)
+                    result.UpdatedRoles.Add(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
 
-            // Check for Character Roles
-            var authResultCharacter = await GetAuthGroupByCharacterId(groupsToCheck, characterID);
-            if (authResultCharacter != null) 
-            {
-                var aRoles = discordGuild.Roles.Where(a => authResultCharacter.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
-                if (aRoles.Count > 0)
-                    result.UpdatedRoles.AddRange(aRoles);
-                result.ValidManualAssignmentRoles.AddRange( authResultCharacter.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
-                groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCharacter.Group).Key;
-                hasAuth = true;
-                groupsToCheck.Clear();
-                groupsToCheck.Add(authResultCharacter.Group);
-            }
+                #region Get personalized foundList
 
-            if (authResultCharacter == null || (authResultCharacter.Group != null && !authResultCharacter.Group.UseStrictAuthenticationMode))
-            {
-                // Check for Corporation Roles
-                var authResultCorporation = await GetAuthGroupByCorpId(groupsToCheck, characterData.corporation_id);
-                if (authResultCorporation != null)
+                var groupsToCheck = new List<WebAuthGroup>();
+                var authData = await SQLHelper.GetAuthUserByCharacterId(characterID);
+
+                if (!string.IsNullOrEmpty(authData?.GroupName))
                 {
-                    var aRoles = discordGuild.Roles.Where(a => authResultCorporation.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
+                    //check specified group for roles
+                    var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authData.GroupName).Value;
+                    if (group != null)
+                        groupsToCheck.Add(group);
+                }
+
+                if (!groupsToCheck.Any())
+                {
+                    //check only GENERAL auth groups for roles
+                    //non-general group auth should have group name supplied
+                    groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a => !a.ESICustomAuthRoles.Any() && a.StandingsAuth == null));
+                }
+
+                #endregion
+
+                string groupName = null;
+                var hasAuth = false;
+
+                // Check for Character Roles
+                var authResultCharacter = await GetAuthGroupByCharacterId(groupsToCheck, characterID);
+                if (authResultCharacter != null)
+                {
+                    var aRoles = discordGuild.Roles.Where(a => authResultCharacter.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
                     if (aRoles.Count > 0)
                         result.UpdatedRoles.AddRange(aRoles);
-                    result.ValidManualAssignmentRoles.AddRange(authResultCorporation.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
-                    groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCorporation.Group).Key;
+                    result.ValidManualAssignmentRoles.AddRange(authResultCharacter.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
+                    groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCharacter.Group).Key;
                     hasAuth = true;
                     groupsToCheck.Clear();
-                    groupsToCheck.Add(authResultCorporation.Group);
+                    groupsToCheck.Add(authResultCharacter.Group);
                 }
 
-                var group = authResultCharacter?.Group ?? authResultCorporation?.Group;
-
-                if (group == null || !group.UseStrictAuthenticationMode)
+                if (authResultCharacter == null || (authResultCharacter.Group != null && !authResultCharacter.Group.UseStrictAuthenticationMode))
                 {
-                    // Check for Alliance Roles
-                    var authResultAlliance = await GetAuthGroupByAllyId( groupsToCheck, characterData.alliance_id ?? 0);
-                    if (authResultAlliance != null) 
+                    // Check for Corporation Roles
+                    var authResultCorporation = await GetAuthGroupByCorpId(groupsToCheck, characterData.corporation_id);
+                    if (authResultCorporation != null)
                     {
-                        var aRoles = discordGuild.Roles.Where(a => authResultAlliance.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
+                        var aRoles = discordGuild.Roles.Where(a => authResultCorporation.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
                         if (aRoles.Count > 0)
                             result.UpdatedRoles.AddRange(aRoles);
-                        result.ValidManualAssignmentRoles.AddRange(authResultAlliance.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
-                        groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultAlliance.Group).Key;
+                        result.ValidManualAssignmentRoles.AddRange(authResultCorporation.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
+                        groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCorporation.Group).Key;
                         hasAuth = true;
+                        groupsToCheck.Clear();
+                        groupsToCheck.Add(authResultCorporation.Group);
+                    }
+
+                    var group = authResultCharacter?.Group ?? authResultCorporation?.Group;
+
+                    if (group == null || !group.UseStrictAuthenticationMode)
+                    {
+                        // Check for Alliance Roles
+                        var authResultAlliance = await GetAuthGroupByAllyId(groupsToCheck, characterData.alliance_id ?? 0);
+                        if (authResultAlliance != null)
+                        {
+                            var aRoles = discordGuild.Roles.Where(a => authResultAlliance.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
+                            if (aRoles.Count > 0)
+                                result.UpdatedRoles.AddRange(aRoles);
+                            result.ValidManualAssignmentRoles.AddRange(authResultAlliance.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
+                            groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultAlliance.Group).Key;
+                            hasAuth = true;
+                        }
                     }
                 }
-            }
 
-            if (!hasAuth)
-            {
-                result.UpdatedRoles = result.UpdatedRoles.Distinct().ToList();
-                result.ValidManualAssignmentRoles = result.ValidManualAssignmentRoles.Distinct().ToList();
-                //search for personal stands
-                var grList = groupsToCheck.Where(a => a.StandingsAuth != null).ToList();
-                if (grList.Count > 0)
+                if (!hasAuth)
                 {
-                    var ar = await GetAuthGroupByCharacterId(groupsToCheck, characterID);
-                    if (ar != null)
+                    result.UpdatedRoles = result.UpdatedRoles.Distinct().ToList();
+                    result.ValidManualAssignmentRoles = result.ValidManualAssignmentRoles.Distinct().ToList();
+                    //search for personal stands
+                    var grList = groupsToCheck.Where(a => a.StandingsAuth != null).ToList();
+                    if (grList.Count > 0)
                     {
-                        var aRoles = discordGuild.Roles.Where(a=> ar.RoleEntity.DiscordRoles.Contains(a.Name)).ToList();
-                        if (aRoles.Count > 0)
+                        var ar = await GetAuthGroupByCharacterId(groupsToCheck, characterID);
+                        if (ar != null)
+                        {
+                            var aRoles = discordGuild.Roles.Where(a => ar.RoleEntity.DiscordRoles.Contains(a.Name)).ToList();
+                            if (aRoles.Count > 0)
+                                result.UpdatedRoles.AddRange(aRoles);
+                            result.ValidManualAssignmentRoles.AddRange(ar.Group.ManualAssignmentRoles);
+                            groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == ar.Group).Key;
+
+                        }
+                    }
+                }
+
+                if (!hasAuth && (isManualAuth || !string.IsNullOrEmpty(authData?.GroupName)))
+                {
+                    var token = await SQLHelper.GetAuthUserByCharacterId(characterID);
+                    if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
+                    {
+                        var group = SettingsManager.Settings.WebAuthModule.AuthGroups[token.GroupName];
+                        if ((!group.AllowedAlliances.Any() || group.AllowedAlliances.Values.All(a => a.Id.All(b => b == 0))) &&
+                            (!group.AllowedCorporations.Any() || group.AllowedCorporations.Values.All(a => a.Id.All(b => b == 0))) &&
+                            (!group.AllowedCharacters.Any() || group.AllowedCharacters.Values.Any(a => a.Id.All(b => b == 0)))
+                            && group.StandingsAuth == null)
+                        {
+                            groupName = token.GroupName;
+                            var l = group.AllowedCorporations.SelectMany(a => a.Value.DiscordRoles);
+                            var aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
                             result.UpdatedRoles.AddRange(aRoles);
-                        result.ValidManualAssignmentRoles.AddRange(ar.Group.ManualAssignmentRoles);
-                        groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == ar.Group).Key;
 
+                            l = group.AllowedAlliances.SelectMany(a => a.Value.DiscordRoles);
+                            aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
+                            result.UpdatedRoles.AddRange(aRoles);
+                        }
+                    }
+
+                    //ordinary guest
+                    if (string.IsNullOrEmpty(groupName))
+                    {
+                        var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a =>
+                            a.Value.AllowedAlliances.Values.All(b => b.Id.All(c => c == 0)) && a.Value.AllowedCorporations.Values.All(b => b.Id.All(c => c == 0)));
+                        if (grp.Value != null)
+                        {
+                            groupName = grp.Key;
+                            var l = grp.Value.AllowedCorporations.SelectMany(a => a.Value.DiscordRoles);
+                            var aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
+                            result.UpdatedRoles.AddRange(aRoles);
+
+                            l = grp.Value.AllowedAlliances.SelectMany(a => a.Value.DiscordRoles);
+                            aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
+                            result.UpdatedRoles.AddRange(aRoles);
+                        }
                     }
                 }
-            }
 
-            if (!hasAuth && (isManualAuth || !string.IsNullOrEmpty(authData?.GroupName)))
+                result.UpdatedRoles = result.UpdatedRoles.Distinct().ToList();
+                result.GroupName = groupName;
+                return result;
+            }
+            catch(Exception ex)
             {
-                var token = await SQLHelper.GetAuthUserByCharacterId(characterID);
-                if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
-                {
-                    var group = SettingsManager.Settings.WebAuthModule.AuthGroups[token.GroupName];
-                    if ((!group.AllowedAlliances.Any() || group.AllowedAlliances.Values.All(a => a.Id.All(b => b == 0))) &&
-                        (!group.AllowedCorporations.Any() || group.AllowedCorporations.Values.All(a => a.Id.All(b => b == 0))) &&
-                        (!group.AllowedCharacters.Any() || group.AllowedCharacters.Values.Any(a => a.Id.All(b => b == 0)))
-                        && group.StandingsAuth == null)
-                    {
-                        groupName = token.GroupName;
-                        var l = group.AllowedCorporations.SelectMany(a => a.Value.DiscordRoles);
-                        var aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
-                        result.UpdatedRoles.AddRange(aRoles);
-                        
-                        l = group.AllowedAlliances.SelectMany(a => a.Value.DiscordRoles);
-                        aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
-                        result.UpdatedRoles.AddRange(aRoles);
-                    }
-                }
-
-                //ordinary guest
-                if (string.IsNullOrEmpty(groupName))
-                {
-                    var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a =>
-                        a.Value.AllowedAlliances.Values.All(b => b.Id.All(c => c == 0)) && a.Value.AllowedCorporations.Values.All(b => b.Id.All(c=> c== 0)));
-                    if (grp.Value != null)
-                    {
-                        groupName = grp.Key;
-                        var l = grp.Value.AllowedCorporations.SelectMany(a => a.Value.DiscordRoles);
-                        var aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
-                        result.UpdatedRoles.AddRange(aRoles);
-                        
-                        l = grp.Value.AllowedAlliances.SelectMany(a => a.Value.DiscordRoles);
-                        aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
-                        result.UpdatedRoles.AddRange(aRoles);
-                    }
-                }
+                await LogHelper.LogError($"EXCEPTION: {ex.Message} CHARACTER: {characterID} [{characterData?.name}][{characterData?.corporation_id}]", LogCat.AuthCheck);
+                throw;
             }
-
-            result.UpdatedRoles = result.UpdatedRoles.Distinct().ToList();
-            result.GroupName = groupName;
-            return result;
         }
 
     }
