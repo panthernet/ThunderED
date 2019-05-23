@@ -264,10 +264,13 @@ namespace ThunderED.Modules
 
         public static async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId, bool isManualAuth = false)
         {
+            var result = new RoleSearchResult();
             var discordGuild = APIHelper.DiscordAPI.GetGuild();
             var u = discordGuild.GetUser(discordUserId);
             var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
-            var result = new RoleSearchResult();
+            if (characterData == null)
+                return result;
+
             if(u != null)
                 result.UpdatedRoles.Add(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
 
