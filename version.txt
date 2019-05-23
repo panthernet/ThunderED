@@ -1,6 +1,8 @@
 ### V1.3.13
 + Added Timers auth to Web Config Editor
 + Fixed contract duplicate when using multiple filters
++ Fixed several auth errors
++ Fixed processing of characters whom has been deleted form EVE
 
 ### V1.3.12
 + Added new HR module param **ValidateTokensWhileLoading**
