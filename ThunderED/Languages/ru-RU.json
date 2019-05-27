@@ -513,6 +513,16 @@
   "NotifyHeader_OrbitalReinforced": "{0} принадлежащий {1} вошел в режим укрепления! Выйдет через: {2}",
   "DateD": "д",
   "DateH": "ч",
-  "DateM": "м"
+  "DateM": "м",
+  "roleCommandsUnknownRoles": "КНастройка команд ролей содержит неизвестные группы: {0}",
+  "roleCommandsRoleNotFound": "Роль Дискорда `{0}` не найдена или недоступна!",
+  "roleCommandsRoleAdded": ":white_check_mark: Роль `{0}` успешно назначена!",
+  "roleCommandsRoleNotAdded": ":no_entry_sign: Не удалось назначить роль `{0}`!",
+  "roleCommandsDontHaveRole": "У пользователя нет роли `{0}`!",
+  "roleCommandsRoleRemoved": ":white_check_mark: Роль `{0}` успешно удалена!",
+  "roleCommandsRoleNotRemoved": ":no_entry_sign: Не удалось удалить роль `{0}`!",
+  "roleCommandsListRoles": "Доступные роли для ручного добавления: `{0}`\nИспользуйте команду `{1}{2} roleName` для добавления выбранной роли",
+  "helpAddRoleCommand": "Назначить указанную роль автору сообщения. Список доступных ролей можно получить при помощи команды `{0}{2}`. Синтаксис: `{0}{1} roleName`",
+  "helpRemoveRoleCommand": "Удаляет указанную роль Дискорда у автора сообщения. Синтаксис: `{0}{1} roleName`"
 
 }

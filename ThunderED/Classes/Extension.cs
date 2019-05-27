@@ -8,6 +8,11 @@ namespace ThunderED.Classes
 {
     public static class Extension
     {
+        public static bool ContainsCaseInsensitive(this IEnumerable<string> obj, string value)
+        {
+            return obj.Where(item => item != null).Any(item => item.Equals(value, StringComparison.OrdinalIgnoreCase));
+        }
+
         public static T ReturnMinimum<T>(this T obj, T minimum)
         {
             return Convert.ToInt64(obj) == 0 ? minimum : obj;

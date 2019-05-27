@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Modules.OnDemand;
 
 namespace ThunderED.Modules
 {
@@ -24,6 +25,12 @@ namespace ThunderED.Modules
             var discordGuild = APIHelper.DiscordAPI.GetGuild();
             var discordUsers = discordGuild.Users;
             var dids = discordUsers.Select(a => a.Id).ToList();
+
+            if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands)
+            {
+                authCheckIgnoreRoles = authCheckIgnoreRoles.ToList();
+                authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
+            }
 
             await dids.ParallelForEachAsync(async id =>
             {

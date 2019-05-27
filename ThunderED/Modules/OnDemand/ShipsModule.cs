@@ -17,7 +17,7 @@ using ThunderED.Json;
 
 namespace ThunderED.Modules.OnDemand
 {
-    public class CapsModule: AppModuleBase
+    public class ShipsModule: AppModuleBase
     {
         public override LogCat Category => LogCat.Caps;
 

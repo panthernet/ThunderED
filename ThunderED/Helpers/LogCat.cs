@@ -41,6 +41,7 @@
         SovTracker,
         SimplAuth,
         Caps,
-        WebSettings
+        WebSettings,
+        DiscordRoles
     }
 }

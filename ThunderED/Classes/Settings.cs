@@ -154,6 +154,7 @@ namespace ThunderED.Classes
 
     public class CommandsConfigSettings
     {
+#region Ships commands
 #if EDITOR
         public ObservableCollection<string> CapsCommandDiscordRoles { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<ulong> CapsCommandDiscordChannels { get; set; } = new ObservableCollection<ulong>();
@@ -161,9 +162,22 @@ namespace ThunderED.Classes
         public List<string> ShipsCommandDiscordRoles { get; set; } = new List<string>();
         public List<ulong> ShipsCommandDiscordChannels { get; set; } = new List<ulong>();
 #endif
-
-        [Comment("Enable !caps command")]
+        [Comment("Enable !ships command")]
         public bool EnableShipsCommand { get; set; } = false;
+#endregion
+
+#region Roles commands
+        [Comment("Enable !addrole, !remrole, !listroles commands")]
+        public bool EnableRoleManagementCommands { get; set; } = false;
+#if EDITOR
+        public ObservableCollection<string> RolesCommandDiscordRoles { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<ulong> RolesCommandDiscordChannels { get; set; } = new ObservableCollection<ulong>();
+#else
+        public List<string> RolesCommandDiscordRoles { get; set; } = new List<string>();
+        public List<ulong> RolesCommandDiscordChannels { get; set; } = new List<ulong>();
+#endif
+#endregion
+
     }
 
     public class SovTrackerModuleSettings: ValidatableSettings

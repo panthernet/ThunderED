@@ -338,9 +338,17 @@ namespace ThunderED.API
             return Client.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
         }
 
-        public SocketRole GetGuildRole(string roleName)
+        public SocketRole GetGuildRole(string roleName, bool caseInsensitive = false)
         {
-            return GetGuild().Roles.FirstOrDefault(x => x.Name == roleName);
+            return caseInsensitive
+                ? GetGuild().Roles.FirstOrDefault(x => x.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase))
+                : GetGuild().Roles.FirstOrDefault(x => x.Name == roleName);
+        }
+
+        
+        public List<string> GetGuildRoleNames()
+        {
+            return GetGuild().Roles.Select(a => a.Name).ToList();
         }
 
         public SocketRole GetUserRole(SocketGuildUser user, string roleName)
@@ -351,6 +359,59 @@ namespace ThunderED.API
         public SocketGuildUser GetUser(ulong authorId)
         {
             return GetGuild().GetUser(authorId);
+        }
+
+        public async Task<bool> AssignRoleToUser(ulong userId, SocketRole role)
+        {
+            var discordUser = GetUser(userId);
+            if (discordUser == null) return false;
+            try
+            {
+                await discordUser.AddRoleAsync(role);
+                return true;
+            }
+            catch (Exception e)
+            {
+                await LogHelper.LogEx($"Unable to assign role {role.Name} to {discordUser.Nickname}", e, LogCat.Discord);
+                return false;
+            }
+        }
+
+        public async Task<bool> AssignRoleToUser(ulong userId, string roleName)
+        {
+            var discordUser = GetUser(userId);
+            if (discordUser == null) return false;
+            try
+            {
+                var role = GetGuildRole(roleName, true);
+                if (role == null) return false;
+                await discordUser.AddRoleAsync(role);
+                return true;
+            }
+            catch (Exception e)
+            {
+                await LogHelper.LogEx($"Unable to assign role {roleName} to {discordUser?.Nickname}", e, LogCat.Discord);
+                return false;
+            }
+        }
+
+        
+        public async Task<bool> StripUserRole(ulong userId, string roleName)
+        {
+            var discordUser = GetUser(userId);
+            if (discordUser == null) return false;
+            try
+            {
+                var role = GetGuildRole(roleName, true);
+                if (role == null) return false;
+                await discordUser.RemoveRoleAsync(role);
+                return true;
+            }
+            catch (Exception e)
+            {
+                await LogHelper.LogEx($"Unable to remove role {roleName} from {discordUser?.Nickname}", e, LogCat.Discord);
+                return false;
+            }
         }
 
         public async Task AssignRolesToUser(SocketGuildUser discordUser, List<SocketRole> rolesToAdd)
@@ -388,5 +449,6 @@ namespace ThunderED.API
             var users = channelId == 0 ? GetGuild().Users.ToList() : GetGuild().GetChannel(channelId).Users.ToList();
             return onlineOnly ? users.Where(a => a.Status != UserStatus.Offline).ToList() : users;
         }
+
     }
 }

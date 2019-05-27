@@ -1,8 +1,17 @@
 ### V1.3.13
 + Added Timers auth to Web Config Editor
++ Added new !listroles, !addrole and !remrole commands (read below)
 + Fixed contract duplicate when using multiple filters
 + Fixed several auth errors
 + Fixed processing of characters whom has been deleted form EVE
+
+### FEATURE HIGHLIGHT - MANUAL DISCORD ROLE
+It is now possible for users to self assign/remove Discord roles from the predefined list.
+Enable this feature in `CommandsConfig` using `EnableRoleManagementCommands` parameter and set roles list using the `RolesCommandDiscordRoles` parameter.
+
+!listroles - lists available roles
+!addrole - adds selected role to message author
+!remrole - removes selected role from message author
 
 ### V1.3.12
 + Added new HR module param **ValidateTokensWhileLoading**

@@ -78,7 +78,11 @@
   "CommandsConfig": {
     "EnableShipsCommand": "false",
     "ShipsCommandDiscordChannels": [],
-    "ShipsCommandDiscordRoles": []
+    "ShipsCommandDiscordRoles": [],
+
+    "EnableRoleManagementCommands": false,
+    "RolesCommandDiscordRoles": ["DiscordRole"],
+    "RolesCommandDiscordChannels":  [] 
   },
 
   "Database": {

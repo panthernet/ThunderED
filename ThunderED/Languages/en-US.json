@@ -520,5 +520,15 @@
   "NotifyHeader_OrbitalReinforced": "{0} belonging to {1} has been reinforced! It will exit in {2}",
   "DateD": "d",
   "DateH": "h",
-  "DateM": "m"
+  "DateM": "m",
+  "roleCommandsUnknownRoles": "Roles command settings contains unknown roles: {0}",
+  "roleCommandsRoleNotFound": "Discord role `{0}` not found or not available!",
+  "roleCommandsRoleAdded": ":white_check_mark: Role `{0}` has been assigned successfully!",
+  "roleCommandsRoleNotAdded": ":no_entry_sign: Unable to assign `{0}` role!",
+  "roleCommandsDontHaveRole": "User don't have `{0}` role!",
+  "roleCommandsRoleRemoved": ":white_check_mark: Role `{0}` has been removed successfully!",
+  "roleCommandsRoleNotRemoved": ":no_entry_sign: Unable to remove `{0}` role!",
+  "roleCommandsListRoles": "Available roles for manual assignment: `{0}`\nUse `{1}{2} roleName` command to add selected role",
+  "helpAddRoleCommand": "Assigns selected Discord role to the command author. List available roles using `{0}{2}` command. Syntax: `{0}{1} roleName`",
+  "helpRemoveRoleCommand": "Removes selected manual Discord role from the command author. Syntax: `{0}{1} roleName`"
 }

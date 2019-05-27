@@ -109,10 +109,12 @@ namespace ThunderED.Classes
                 OnDemandModules.Add(new ChatRelayModule());
 
             if (SettingsManager.Settings.CommandsConfig.EnableShipsCommand)
-                OnDemandModules.Add(new CapsModule());
+                OnDemandModules.Add(new ShipsModule());
 
             if (SettingsManager.Settings.Config.ModuleWebConfigEditor)
                 OnDemandModules.Add(new WebSettingsModule());
+            if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands)
+                OnDemandModules.Add(new DiscordRolesManagementModule());
          
             //IMPORTANT - web auth is the last module - to be the last for 404 handling
             if (SettingsManager.Settings.Config.ModuleAuthWeb)

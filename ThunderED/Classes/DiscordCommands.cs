@@ -78,6 +78,10 @@ namespace ThunderED.Classes
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}ships ");
             }
+            if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands)
+            {
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}{CMD_LISTROLES} | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}{CMD_ADDROLE} | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}{CMD_REMROLE} ");
+            }
 
 
             sb.Append("**\n");
@@ -172,8 +176,79 @@ namespace ThunderED.Classes
                 case "ships":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpShips", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "ships"), true);
                     break;
+                case CMD_ADDROLE:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpAddRoleCommand", SettingsManager.Settings.Config.BotDiscordCommandPrefix, CMD_ADDROLE), true);
+                    break;
+                case CMD_REMROLE:
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpRemoveRoleCommand", SettingsManager.Settings.Config.BotDiscordCommandPrefix, CMD_REMROLE), true);
+                    break;
             }
         }
+
+        #region Groups command
+
+        internal const string CMD_ADDROLE= "addrole";
+
+        [Command(CMD_ADDROLE, RunMode = RunMode.Async), Summary("Add manual Discord role")]
+        public async Task AddDiscordRole()
+        {
+            if(!SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands) return;
+            if(IsForbidden()) return;
+            if (SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Any() &&
+                SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Contains(Context.Channel.Id))
+                return;
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpAddRoleCommand", SettingsManager.Settings.Config.BotDiscordCommandPrefix, CMD_ADDROLE), true);
+        }
+        [Command(CMD_ADDROLE, RunMode = RunMode.Async), Summary("Add manual Discord role")]
+        public async Task AddDiscordRole(string role)
+        {
+            if(!SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands) return;
+            if(IsForbidden()) return;
+            if (SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Any() &&
+                SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Contains(Context.Channel.Id))
+                return;
+
+            await DiscordRolesManagementModule.AddRole(Context, role);
+        }
+
+        internal const string CMD_REMROLE= "remrole";
+        [Command(CMD_REMROLE, RunMode = RunMode.Async), Summary("Add manual Discord role")]
+        public async Task RemoveDiscordRole()
+        {
+            if(!SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands) return;
+            if(IsForbidden()) return;
+            if (SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Any() &&
+                SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Contains(Context.Channel.Id))
+                return;
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpRemoveRoleCommand", SettingsManager.Settings.Config.BotDiscordCommandPrefix, CMD_REMROLE), true);
+        }
+
+        [Command(CMD_REMROLE, RunMode = RunMode.Async), Summary("Remove manual Discord role")]
+        public async Task RemoveDiscordRole(string role)
+        {
+            if(!SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands) return;
+            if(IsForbidden()) return;
+            if (SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Any() &&
+                SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Contains(Context.Channel.Id))
+                return;
+
+            await DiscordRolesManagementModule.RemoveRole(Context, role);
+        }
+
+        internal const string CMD_LISTROLES= "listroles";
+        [Command(CMD_LISTROLES, RunMode = RunMode.Async), Summary("List manual Discord roles")]
+        public async Task ListDiscordRoles()
+        {
+            if(!SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands) return;
+            if(IsForbidden()) return;
+            if (SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Any() &&
+                SettingsManager.Settings.CommandsConfig.RolesCommandDiscordChannels.Contains(Context.Channel.Id))
+                return;
+
+            await DiscordRolesManagementModule.ListRoles(Context);
+        }
+
+        #endregion
 
         internal const string CMD_TQ= "tq";
         [Command(CMD_TQ, RunMode = RunMode.Async), Summary("Reports TQ status")]
@@ -1050,7 +1125,7 @@ namespace ThunderED.Classes
 
             try
             {
-                await TickManager.GetModule<CapsModule>().ProcessWhoCommand(Context, x);
+                await TickManager.GetModule<ShipsModule>().ProcessWhoCommand(Context, x);
             }
             catch (Exception ex)
             {
