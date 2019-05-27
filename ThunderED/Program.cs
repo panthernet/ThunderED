@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json.ZKill;
+using ThunderED.Modules;
 
 namespace ThunderED
 {
@@ -22,7 +23,7 @@ namespace ThunderED
 
            // var ssss = new List<JsonZKill.ZkillOnly>().Count(a => a.killmail_id == 0);
 
-            if (!File.Exists(SettingsManager.FileSettingsPath))
+           if (!File.Exists(SettingsManager.FileSettingsPath))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");

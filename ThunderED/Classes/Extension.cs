@@ -3,11 +3,18 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ThunderED.Classes
 {
     public static class Extension
     {
+        public static string ConvertToCyrillic(this string obj)
+        {
+            var  rx = new Regex( @"\\[uU]([0-9A-F]{4})" );
+            return rx.Replace(obj, match => ((char)int.Parse(match.Value.Substring(2), NumberStyles.HexNumber)).ToString());
+        }
+
         public static bool ContainsCaseInsensitive(this IEnumerable<string> obj, string value)
         {
             return obj.Where(item => item != null).Any(item => item.Equals(value, StringComparison.OrdinalIgnoreCase));

@@ -663,9 +663,16 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                                                     }
 
                                                     builder = new EmbedBuilder()
-                                                        .WithColor(color)
-                                                        .WithDescription(applicationText)
-                                                        .WithAuthor(author => author.WithName(text).WithUrl($"https://zkillboard.com/character/{GetData("charID", data)}/"))
+                                                        .WithColor(color);
+                                                    if (!string.IsNullOrEmpty(applicationText) && applicationText != "''")
+                                                    {
+                                                        applicationText = (await MailModule.PrepareBodyMessage(applicationText))[0];
+                                                        if (applicationText.StartsWith(@"\u"))
+                                                            applicationText = applicationText.ConvertToCyrillic();
+                                                        builder.WithDescription(applicationText);
+                                                    }
+
+                                                    builder.WithAuthor(author => author.WithName(text).WithUrl($"https://zkillboard.com/character/{GetData("charID", data)}/"))
                                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
