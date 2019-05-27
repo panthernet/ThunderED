@@ -5,6 +5,7 @@
 + Fixed several auth errors
 + Fixed processing of characters whom has been deleted form EVE
 + Fixed config editor naming for !ships command
++ Fixed contracts processing incl. initial ongoing contracts catchup
 
 ### FEATURE HIGHLIGHT - MANUAL DISCORD ROLE
 It is now possible for users to self assign/remove Discord roles from the predefined list.

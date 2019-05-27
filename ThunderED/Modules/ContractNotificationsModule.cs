@@ -25,6 +25,7 @@ namespace ThunderED.Modules
 
         private readonly ConcurrentDictionary<long, string> _etokens = new ConcurrentDictionary<long, string>();
         private readonly ConcurrentDictionary<long, string> _corpEtokens = new ConcurrentDictionary<long, string>();
+        private bool _isStartUp = true;
 
         public ContractNotificationsModule()
         {
@@ -217,14 +218,25 @@ namespace ThunderED.Modules
             var lst = !isCorp ? await SQLHelper.LoadContracts(characterID, false) : await SQLHelper.LoadContracts(characterID, true);
             var otherList = isCorp ? await SQLHelper.LoadContracts(characterID, false) : null;
 
+            if ((lst == null || !lst.Any()) && _isStartUp && contracts.Any())
+            {
+                _isStartUp = false;
+                lst = new List<JsonClasses.Contract>(contracts.Where(a=> _activeStatuses.ContainsCaseInsensitive(a.status)).TakeSmart(maxContracts));
+                if (lst.Any())
+                {
+                    await SQLHelper.SaveContracts(characterID, lst, isCorp);
+                    return;
+                }
+            }
 
+            /*
             if (lst == null)
             {
                 var cs = contracts.Where(a => !_completeStatuses.Contains(a.status)).TakeSmart(maxContracts).ToList();
                 //initial cache - only progressing contracts
                 await SQLHelper.SaveContracts(characterID, cs, isCorp);
                 return;
-            }
+            }*/
 
             //process cache
             foreach (var contract in lst.ToList())
