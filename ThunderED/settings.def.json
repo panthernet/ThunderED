@@ -81,8 +81,9 @@
     "ShipsCommandDiscordRoles": [],
 
     "EnableRoleManagementCommands": false,
-    "RolesCommandDiscordRoles": ["DiscordRole"],
-    "RolesCommandDiscordChannels":  [] 
+    "RolesCommandDiscordRoles": [ "DiscordRole" ],
+    "RolesCommandAllowedRoles": ["Admins"], 
+    "RolesCommandDiscordChannels":  []
   },
 
   "Database": {

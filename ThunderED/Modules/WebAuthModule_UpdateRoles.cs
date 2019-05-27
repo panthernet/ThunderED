@@ -26,10 +26,10 @@ namespace ThunderED.Modules
             var discordUsers = discordGuild.Users;
             var dids = discordUsers.Select(a => a.Id).ToList();
 
-            if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands)
+            if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands && DiscordRolesManagementModule.AvailableRoleNames.Any())
             {
-                authCheckIgnoreRoles = authCheckIgnoreRoles.ToList();
-                authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
+                exemptRoles = exemptRoles.ToList();
+                exemptRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
             }
 
             await dids.ParallelForEachAsync(async id =>

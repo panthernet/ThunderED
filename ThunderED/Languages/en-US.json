@@ -530,5 +530,6 @@
   "roleCommandsRoleNotRemoved": ":no_entry_sign: Unable to remove `{0}` role!",
   "roleCommandsListRoles": "Available roles for manual assignment: `{0}`\nUse `{1}{2} roleName` command to add selected role",
   "helpAddRoleCommand": "Assigns selected Discord role to the command author. List available roles using `{0}{2}` command. Syntax: `{0}{1} roleName`",
-  "helpRemoveRoleCommand": "Removes selected manual Discord role from the command author. Syntax: `{0}{1} roleName`"
+  "helpRemoveRoleCommand": "Removes selected manual Discord role from the command author. Syntax: `{0}{1} roleName`",
+  "roleCommandsAccessDenied":  "You do not have access to use this command!" 
 }

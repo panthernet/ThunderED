@@ -14,6 +14,7 @@ namespace ThunderED.Modules.OnDemand
         public override LogCat Category => LogCat.DiscordRoles;
 
         internal static List<string> AvailableRoleNames { get; set; } = new List<string>();
+        internal static List<string> AvailableAllowedRoleNames { get; set; } = new List<string>();
 
         public override async Task Initialize()
         {
@@ -31,6 +32,17 @@ namespace ThunderED.Modules.OnDemand
                     AvailableRoleNames.Add(role);
                 }
             }else AvailableRoleNames = Settings.CommandsConfig.RolesCommandDiscordRoles;
+
+            missing = Settings.CommandsConfig.RolesCommandAllowedRoles.Except(groups).ToList();
+            if (missing.Any())
+            {
+                await LogHelper.LogWarning(LM.Get("roleCommandsUnknownRoles", string.Join(',', missing)), Category);
+                foreach (var role in Settings.CommandsConfig.RolesCommandAllowedRoles)
+                {
+                    if(missing.ContainsCaseInsensitive(role)) continue;
+                    AvailableAllowedRoleNames.Add(role);
+                }
+            }else AvailableAllowedRoleNames = Settings.CommandsConfig.RolesCommandAllowedRoles;
         }
 
         public static async Task AddRole(ICommandContext context, string role)
@@ -44,6 +56,12 @@ namespace ThunderED.Modules.OnDemand
                 if (!validGroups.ContainsCaseInsensitive(role))
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("roleCommandsRoleNotFound", role), true);
+                    return;
+                }
+
+                if(!IsUserAllowed(context.Message.Author.Id))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("roleCommandsAccessDenied"), true);
                     return;
                 }
 
@@ -74,6 +92,12 @@ namespace ThunderED.Modules.OnDemand
                     return;
                 }
 
+                if(!IsUserAllowed(context.Message.Author.Id))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("roleCommandsAccessDenied"), true);
+                    return;
+                }
+
                 if (await APIHelper.DiscordAPI.StripUserRole(context.Message.Author.Id, role))
                 {
                     var message = LM.Get("roleCommandsRoleRemoved", role);
@@ -92,12 +116,24 @@ namespace ThunderED.Modules.OnDemand
         {
             try
             {
-                 await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("roleCommandsListRoles", string.Join(", ", AvailableRoleNames), SettingsManager.Settings.Config.BotDiscordCommandPrefix, DiscordCommands.CMD_ADDROLE), true);
+                if(!IsUserAllowed(context.Message.Author.Id))
+                {
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("roleCommandsAccessDenied"), true);
+                    return;
+                }
+
+                await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("roleCommandsListRoles", string.Join(", ", AvailableRoleNames), SettingsManager.Settings.Config.BotDiscordCommandPrefix, DiscordCommands.CMD_ADDROLE), true);
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(nameof(RemoveRole), ex, StaticCategory);
             }
+        }
+
+        private static bool IsUserAllowed(ulong id)
+        {
+            var userRoles = APIHelper.DiscordAPI.GetUserRoleNames(id);
+            return !SettingsManager.Settings.CommandsConfig.RolesCommandAllowedRoles.Any() || AvailableAllowedRoleNames.Intersect(userRoles).Any();
         }
     }
 }

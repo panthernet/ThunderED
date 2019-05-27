@@ -8,6 +8,7 @@
 ### FEATURE HIGHLIGHT - MANUAL DISCORD ROLE
 It is now possible for users to self assign/remove Discord roles from the predefined list.
 Enable this feature in `CommandsConfig` using `EnableRoleManagementCommands` parameter and set roles list using the `RolesCommandDiscordRoles` parameter.
+Use `RolesCommandAllowedRoles` to specify Discord roles eligible for these commands. Leave empty to allow everyone.
 
 !listroles - lists available roles
 !addrole - adds selected role to message author

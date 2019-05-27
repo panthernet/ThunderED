@@ -171,9 +171,11 @@ namespace ThunderED.Classes
         public bool EnableRoleManagementCommands { get; set; } = false;
 #if EDITOR
         public ObservableCollection<string> RolesCommandDiscordRoles { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> RolesCommandAllowedRoles { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<ulong> RolesCommandDiscordChannels { get; set; } = new ObservableCollection<ulong>();
 #else
         public List<string> RolesCommandDiscordRoles { get; set; } = new List<string>();
+        public List<string> RolesCommandAllowedRoles { get; set; } = new List<string>();
         public List<ulong> RolesCommandDiscordChannels { get; set; } = new List<ulong>();
 #endif
 #endregion
