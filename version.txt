@@ -7,6 +7,8 @@
 + Fixed config editor naming for !ships command
 + Fixed contracts processing incl. initial ongoing contracts catchup
 + Fixed cyrillic text in char application notifications
++ Updated 3rd party libraries
++ Updated Discord library to 2.1.0 release (might fix some exceptions)
 
 ### FEATURE HIGHLIGHT - MANUAL DISCORD ROLE
 It is now possible for users to self assign/remove Discord roles from the predefined list.
