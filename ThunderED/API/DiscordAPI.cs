@@ -291,7 +291,7 @@ namespace ThunderED.API
             var atTicker = km.rAttackerAlliance == null ? null : $"[{km.rAttackerAlliance.ticker}]";
             var killString = LM.Get("killFeedString", !string.IsNullOrEmpty(radiusMessage) ? "R " : null, km.rShipType?.name, km.value, km.rVictimCharacter == null ? km.rShipType?.name : km.rVictimCharacter.name,
                 km.rVictimCorp.name, string.IsNullOrEmpty(aTicker) ? null : aTicker, km.sysName, km.systemSecurityStatus, km.killTime);
-            var killedBy = km.isNPCKill ? null : LM.Get("killFeedBy", km.rAttackerCharacter.name, km.rAttackerCorp.name, string.IsNullOrEmpty(atTicker) ? null : atTicker, km.attackers.Length);
+            var killedBy = km.isNPCKill ? null : LM.Get("killFeedBy", km.rAttackerCharacter?.name, km.rAttackerCorp?.name, string.IsNullOrEmpty(atTicker) ? null : atTicker, km.attackers?.Length ?? 0);
             var builder = new EmbedBuilder()
                 .WithColor(color)
                 .WithThumbnailUrl($"https://image.eveonline.com/Type/{km.shipID}_32.png")

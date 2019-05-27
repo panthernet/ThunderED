@@ -198,7 +198,7 @@ namespace ThunderED.Modules.OnDemand
                     else
                     {
                         var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {srcSystem?.name}" : $"{LM.Get("InSmall")} {km.sysName} ({km.systemSecurityStatus})";
-                        await APIHelper.DiscordAPI.SendEmbedKillMessage(channel, new Color(0x989898), km, jumpsText, group.ShowGroupName ? groupName : " ");
+                        await APIHelper.DiscordAPI.SendEmbedKillMessage(channel, new Color(0x989898), km, string.IsNullOrEmpty(jumpsText) ? "-" : jumpsText, group.ShowGroupName ? groupName : " ");
                     }
                 }
             }
