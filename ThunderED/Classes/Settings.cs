@@ -156,8 +156,8 @@ namespace ThunderED.Classes
     {
 #region Ships commands
 #if EDITOR
-        public ObservableCollection<string> CapsCommandDiscordRoles { get; set; } = new ObservableCollection<string>();
-        public ObservableCollection<ulong> CapsCommandDiscordChannels { get; set; } = new ObservableCollection<ulong>();
+        public ObservableCollection<string> ShipsCommandDiscordRoles { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<ulong> ShipsCommandDiscordChannels { get; set; } = new ObservableCollection<ulong>();
 #else
         public List<string> ShipsCommandDiscordRoles { get; set; } = new List<string>();
         public List<ulong> ShipsCommandDiscordChannels { get; set; } = new List<ulong>();
