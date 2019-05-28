@@ -32,8 +32,8 @@ namespace ThunderED.Modules.Static
             var textNames = $"{LM.Get("Corporation")}:\n{LM.Get("Alliance")}:\n{LM.Get("CEO")}\n{LM.Get("Pilots")}";
             var textValues = $"{corporationData.name}[{corporationData.ticker}]\n{alliance}{allianceTicker}\n[{ceo.name}](https://zkillboard.com/character/{corporationData.ceo_id}/)\n{corporationData.member_count}";
 
-            var supersCount = zkillContent == null ? "???" : ( zkillContent.hasSupers ? zkillContent.supers?.titans?.data?.Length.ToString() : "0");
-            var titansCount = zkillContent == null ? "???" : ( zkillContent.hasSupers ? zkillContent.supers?.supercarriers?.data?.Length.ToString() : "0");
+            var supersCount = zkillContent == null ? "???" : ( zkillContent.hasSupers ? zkillContent.supers?.titans?.data?.Length.ToString() ?? "0" : "0");
+            var titansCount = zkillContent == null ? "???" : ( zkillContent.hasSupers ? zkillContent.supers?.supercarriers?.data?.Length.ToString() ?? "0" : "0");
             var system = zkillContent?.topLists?.FirstOrDefault(a => a.type == "solarSystem")?.values?.FirstOrDefault()?.solarSystemName ?? "???";
             var textPvpNames = $"{LM.Get("Dangerous")}:\n{LM.Get("FleetCHance2")}:\n{LM.Get("corpSoloKills")}\n{LM.Get("corpTotalKills")}\n{LM.Get("corpKnownSupers")}\n{LM.Get("corpActiveSystem")}";
             var textPvpValues = $"{zkillContent?.dangerRatio ?? 0}%\n{zkillContent?.gangRatio ?? 0}%\n{zkillContent?.soloKills ?? 0}\n{zkillContent?.shipsDestroyed ?? 0}\n{supersCount}/{titansCount}\n{system}";
