@@ -1,3 +1,6 @@
+### V1.3.14
++ Fixed several possible exceptions in !corp command
+
 ### V1.3.13
 + Added Timers auth to Web Config Editor
 + Added new !listroles, !addrole and !remrole commands (read below)
@@ -10,7 +13,7 @@
 + Updated 3rd party libraries
 + Updated Discord library to 2.1.0 release (might fix some exceptions)
 
-### FEATURE HIGHLIGHT - MANUAL DISCORD ROLE
+### FEATURE HIGHLIGHT - MANUAL DISCORD ROLES
 It is now possible for users to self assign/remove Discord roles from the predefined list.
 Enable this feature in `CommandsConfig` using `EnableRoleManagementCommands` parameter and set roles list using the `RolesCommandDiscordRoles` parameter.
 Use `RolesCommandAllowedRoles` to specify Discord roles eligible for these commands. Leave empty to allow everyone.
