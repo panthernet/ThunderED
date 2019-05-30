@@ -42,6 +42,7 @@ With this bot you will have tools to:
 
 ## Supported Modules
 * Web Auth - authenticate EVE characters in Discord using built-in web server, use JackKnife utility to inspect them before you accept them into your community
+* Web Config Editor - WIP module which allows sensitive config parts edit from web interface
 * Auth Check - check users access rights and strip permissions when char leaves your corp or ally
 * Live Kill Feed - feed live EVE killmails into multiple channels using ZKill WebSockets or RedisQ
 * Radius Kill Feed - feed live killmails in a radius around selected systems, constellations and regions into multiple channels
@@ -63,6 +64,7 @@ With this bot you will have tools to:
 * HR Module - inspect your members and pilots applying to join your corporation
 * SystemLogFeeder - feed critical bot logs right into the Discord channel
 * Contracts Feeder - keep track on contracts with flexible filtering capabilities
+* Sov Index Tracker - track sov index changes with just-in-time notifications
 
 ## Build Requirements
 * Visual Studio 2017 Community Edition (Windows)
