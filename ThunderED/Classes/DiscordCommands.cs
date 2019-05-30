@@ -1333,5 +1333,29 @@ namespace ThunderED.Classes
         }
 
         #endregion
+
+        #region Easters
+
+        private static readonly List<string> VodkaMessages = new List<string>
+        {
+            "Here you go pal! Grab your :champagne:! What do you mean this is not VODKA?!...",
+            "Fifte-e-e-e-en ma-a-a-a-an and a bo-o-o-o-ttle of... VODKA!",
+            "Have you seen Tricia recently? Here, pass him his bottle of... VODKA!",
+            "Don't you dare, boy? Sure?! Okay, here comes the.. VODKA!",
+            "It doesn't matter how far into space you have stranded in your piece of junk boy. Just make sure you always have a bottle with ya. A bottle of... VODKA!",
+            "Smirnoff VODKA Cerebral Implant: +5 to SP degradation and joy generation skills!",
+            "Grab your glass boys, here comes the... VODKA!",
+            "Do you know why LSH still holds in Aridia? That's right... VODKA!",
+            "Do you know what's Quafe made of? Now you know boy, now you know...",
+        };
+
+        [Command("vodka", RunMode = RunMode.Async), Summary("")]
+        public async Task VodkaCommand()
+        {
+            if(IsForbidden()) return;
+
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, VodkaMessages[IRC.Helpers.Helpers.Random(0, VodkaMessages.Count-1)], true);
+        }
+        #endregion
     }
 }
