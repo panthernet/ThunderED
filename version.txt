@@ -3,6 +3,7 @@
 + Fixed hard coded address in web config templates
 + Improved and updated !clist command to include filtering by type and availability. Read command help for details.
 + Rewrote `helpClist` language file string to reflect recent update
++ Who's ordered some !vodka ?
 
 ### V1.3.13
 + Added Timers auth to Web Config Editor
