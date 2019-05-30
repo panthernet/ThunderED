@@ -227,6 +227,7 @@ namespace ThunderED.Modules
                                 .Replace("{saTableColumnGroup}", LM.Get("webSettingsSaColumnGroup"))
                                 .Replace("{saTableColumnRoles}", LM.Get("webSettingsSaColumnRoles"))
 
+                                .Replace("{serverAddress}", $"{Settings.WebServerModule.WebExternalIP}:{Settings.WebServerModule.WebExternalPort}")
                                 .Replace("{code}", code)
                                 .Replace("{locale}", SettingsManager.Settings.Config.Language)
                             ;

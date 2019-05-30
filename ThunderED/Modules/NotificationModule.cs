@@ -162,21 +162,21 @@ namespace ThunderED.Modules
                                         .OrderBy(x => x.notification_id).ToList();
 
 
-                               /* //check if there are new notifications to process
-                                fNotifications.Add(new JsonClasses.Notification
+                               //check if there are new notifications to process
+                             /*   fNotifications.Add(new JsonClasses.Notification
                                 {
-                                    text = @"autoTime: 131921874600000000
-moonID: 40422957
-oreVolumeByType:
-  45490: 719451.8239967824
-  46678: 2706818.8426698847
-solarSystemID: 31001382
-structureID: 1026884397766
-structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extractor Alpha</a>
-                                    structureName: J103731 - G-23 Extractor Alpha
-                                    structureTypeID: 35835",
+                                    text = @"listOfTypesAndQty:
+- - 211
+  - 4312
+solarsystemID: 30003354
+structureID: &id001 1030256062178
+structureShowInfoData:
+- showinfo
+- 35825
+- *id001
+structureTypeID: 35825",
                                     notification_id = 999990000,
-                                    type = "MoonminingExtractionFinished"
+                                    type = "StructureFuelAlert"
                                 });*/
                                 if (fNotifications.Count > 0 && fNotifications.Last().notification_id != _lastNotification)
                                 {
@@ -236,6 +236,7 @@ structureLink: <a href=""showinfo:35835//1026884397766"">J103731 - G-23 Extracto
                                                         oreComposition = new Dictionary<string, string>();
                                                         for (int i = ltqIndex + 1; i < endIndex; i++)
                                                         {
+                                                            if(!keys[i].All(char.IsDigit)) continue;
                                                             var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, keys[i])).name;
                                                             var value = double.Parse(data[keys[i]].Split('.')[0]).ToString("N");
                                                             oreComposition.Add(typeName, value);
