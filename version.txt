@@ -1,6 +1,8 @@
 ### V1.3.14
 + Fixed several possible exceptions in !corp command
 + Fixed hard coded address in web config templates
++ Improved and updated !clist command to include filtering by type and availability. Read command help for details.
++ Rewrote `helpClist` language file string to reflect recent update
 
 ### V1.3.13
 + Added Timers auth to Web Config Editor

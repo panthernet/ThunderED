@@ -680,6 +680,8 @@ namespace ThunderED.Classes
                 await ReplyAsync(LM.Get("commandToPrivate"));
                 return;
             }
+            if (!SettingsManager.Settings.Config.ModuleContractNotifications) return;
+
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context,LM.Get("helpClist", SettingsManager.Settings.Config.BotDiscordCommandPrefix, "clist"), true);
         }
 

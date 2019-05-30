@@ -688,7 +688,7 @@ namespace ThunderED.Modules
                 var group = groupPair.Value;
                 var personalContracts = new List<JsonClasses.Contract>();
                 var corpContracts = new List<JsonClasses.Contract>();
-                
+
                 foreach (var characterID in @group.CharacterIDs)
                 {       
                     if(group.FeedPersonalContracts)
@@ -697,30 +697,76 @@ namespace ThunderED.Modules
                         corpContracts.AddRange(await SQLHelper.LoadContracts(characterID, true));
                 }
 
-                switch (mod)
+                if (mod.Length > 1)
                 {
-                    case "opened":
-                    case "o":
+                    var type = mod[1];
+                    switch (char.ToLower(type))
+                    {
+                        case 'c': //courier
+                            personalContracts.RemoveAll(a => !a.status.Equals("courier", StringComparison.OrdinalIgnoreCase));
+                            corpContracts.RemoveAll(a => !a.status.Equals("courier", StringComparison.OrdinalIgnoreCase));
+                            break;
+                        case 'e': //exchange
+                            personalContracts.RemoveAll(a => !a.status.Equals("item_exchange", StringComparison.OrdinalIgnoreCase));
+                            corpContracts.RemoveAll(a => !a.status.Equals("item_exchange", StringComparison.OrdinalIgnoreCase));
+                            break;
+                        case 'a': //auction
+                            personalContracts.RemoveAll(a => !a.status.Equals("auction", StringComparison.OrdinalIgnoreCase));
+                            corpContracts.RemoveAll(a => !a.status.Equals("auction", StringComparison.OrdinalIgnoreCase));
+                            break;
+                        case '0':
+                            break;
+                        default:
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("helpClist"), true);
+                            return;
+                    }
+
+                    if (mod.Length > 2)
+                    {
+                        var avail = mod[2];
+                        switch (char.ToLower(avail))
+                        {
+                            case 'a': //alliance
+                                personalContracts.RemoveAll(a => !a.availability.Equals("alliance", StringComparison.OrdinalIgnoreCase));
+                                corpContracts.RemoveAll(a => !a.availability.Equals("alliance", StringComparison.OrdinalIgnoreCase));
+                                break;
+                            case 'c': //exchange
+                                personalContracts.RemoveAll(a => !a.availability.Equals("corporation", StringComparison.OrdinalIgnoreCase));
+                                corpContracts.RemoveAll(a => !a.availability.Equals("corporation", StringComparison.OrdinalIgnoreCase));
+                                break;
+                            case 'p': //public
+                                personalContracts.RemoveAll(a => !a.availability.Equals("public", StringComparison.OrdinalIgnoreCase));
+                                corpContracts.RemoveAll(a => !a.availability.Equals("public", StringComparison.OrdinalIgnoreCase));
+                                break;
+                            case '0':
+                                break;
+                            default:
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("helpClist"), true);
+                                return;
+                        }
+                    }
+                }
+
+
+                switch (char.ToLower(mod[0]))
+                {
+                    case 'o':
                         personalContracts = personalContracts.Where(a => _activeStatuses.Contains(a.status)).ToList();
                         corpContracts = corpContracts.Where(a => _activeStatuses.Contains(a.status)).ToList();
                         break;
-                    case "closed":
-                    case "c":
+                    case 'c':
                         personalContracts = personalContracts.Where(a => _completeStatuses.Contains(a.status)).ToList();
                         corpContracts = corpContracts.Where(a => _completeStatuses.Contains(a.status)).ToList();
                         break;
-                    case "finished":
-                    case "f":
+                    case 'f':
                         personalContracts = personalContracts.Where(a => _finishedStatuses.Contains(a.status)).ToList();
                         corpContracts = corpContracts.Where(a => _finishedStatuses.Contains(a.status)).ToList();
                         break;
-                    case "rejected":
-                    case "r":
+                    case 'r':
                         personalContracts = personalContracts.Where(a => _rejectedStatuses.Contains(a.status)).ToList();
                         corpContracts = corpContracts.Where(a => _rejectedStatuses.Contains(a.status)).ToList();
                         break;
-                    case "all":
-                    case "a":
+                    case 'a':
                         break;
                     default:
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("helpClist"), true);

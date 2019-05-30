@@ -438,7 +438,7 @@
   "hrmSpyButtonTooltip": "Move member to Spies section",
   "hrmDeleteAuthButtonTooltip": "Delete member authentication",
   "hrmDumpAuthButtonTooltip": "Move member to Dumped section",
-  "helpClist": "Lists all contracts for specified group. Syntax: clist FILTER GROUP_NAME. Filters are: all(a), opened(o), closed(c), finished(f), rejected(r). Example: {0}{1} all my_group  {0}{1} a group 4",
+  "helpClist": "Lists all contracts for specified group. Syntax:  {0}{1} {{STATUS}}{{TYPE}}{{AVAILABILITY}} GROUP_NAME. \nStatuses are: A - all, O - opened, C - closed, F - finished, R - rejected. \nTypes are: C - courier, E - exchange, A - auction, 0 - ALL (omit if not specifying availability). \nAvailability is: A - alliance, C - corp, P - public, 0 - all (can be omitted). \nExamples: {0}{1} AC my_group  {0}{1} FAP group 4",
   "clistPersonalTitle": "Personal Contracts",
   "clistCorpTitle": "Corporation Contracts",
   "clistExpired": "expired",
@@ -531,5 +531,5 @@
   "roleCommandsListRoles": "Available roles for manual assignment: `{0}`\nUse `{1}{2} roleName` command to add selected role",
   "helpAddRoleCommand": "Assigns selected Discord role to the command author. List available roles using `{0}{2}` command. Syntax: `{0}{1} roleName`",
   "helpRemoveRoleCommand": "Removes selected manual Discord role from the command author. Syntax: `{0}{1} roleName`",
-  "roleCommandsAccessDenied":  "You do not have access to use this command!" 
+  "roleCommandsAccessDenied": "You do not have access to use this command!"
 }
