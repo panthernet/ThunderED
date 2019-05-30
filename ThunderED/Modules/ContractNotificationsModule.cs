@@ -703,16 +703,16 @@ namespace ThunderED.Modules
                     switch (char.ToLower(type))
                     {
                         case 'c': //courier
-                            personalContracts.RemoveAll(a => !a.status.Equals("courier", StringComparison.OrdinalIgnoreCase));
-                            corpContracts.RemoveAll(a => !a.status.Equals("courier", StringComparison.OrdinalIgnoreCase));
+                            personalContracts.RemoveAll(a => !a.type.Equals("courier", StringComparison.OrdinalIgnoreCase));
+                            corpContracts.RemoveAll(a => !a.type.Equals("courier", StringComparison.OrdinalIgnoreCase));
                             break;
                         case 'e': //exchange
-                            personalContracts.RemoveAll(a => !a.status.Equals("item_exchange", StringComparison.OrdinalIgnoreCase));
-                            corpContracts.RemoveAll(a => !a.status.Equals("item_exchange", StringComparison.OrdinalIgnoreCase));
+                            personalContracts.RemoveAll(a => !a.type.Equals("item_exchange", StringComparison.OrdinalIgnoreCase));
+                            corpContracts.RemoveAll(a => !a.type.Equals("item_exchange", StringComparison.OrdinalIgnoreCase));
                             break;
                         case 'a': //auction
-                            personalContracts.RemoveAll(a => !a.status.Equals("auction", StringComparison.OrdinalIgnoreCase));
-                            corpContracts.RemoveAll(a => !a.status.Equals("auction", StringComparison.OrdinalIgnoreCase));
+                            personalContracts.RemoveAll(a => !a.type.Equals("auction", StringComparison.OrdinalIgnoreCase));
+                            corpContracts.RemoveAll(a => !a.type.Equals("auction", StringComparison.OrdinalIgnoreCase));
                             break;
                         case '0':
                             break;
