@@ -1619,12 +1619,12 @@ namespace ThunderED.Classes
           public string WebListenIP { get; set; }
           [Comment("Numeric port value")]
           [Required]
-          public int WebListenPort { get; set; }
-          [Comment("Text IP address or domain name which is used to receive connections from the internet")]
-          [Required]*/
-        [Comment("Use the port in urls")]
+          public int WebListenPort { get; set; }*/
+        [Comment("Use the port in URLs")]
         [Required]
         public bool UsePortInURl { get; set; }
+        [Comment("Text IP address or domain name which is used to receive connections from the internet")]
+        [Required]
         public string WebExternalIP { get; set; }
         [Comment("Numeric port value")]
         [Required]
