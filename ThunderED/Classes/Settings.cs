@@ -1624,7 +1624,6 @@ namespace ThunderED.Classes
         [Required]
         public bool UsePortInURl { get; set; }
         [Comment("Text IP address or domain name which is used to receive connections from the internet")]
-        [Required]
         public string WebExternalIP { get; set; }
         [Comment("Numeric port value")]
         [Required]
