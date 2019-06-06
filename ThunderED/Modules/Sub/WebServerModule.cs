@@ -129,7 +129,7 @@ namespace ThunderED.Modules.Sub
                         if (request.Url.LocalPath == "/authPage.html" || request.Url.LocalPath == $"{port}/authPage.html" || request.Url.LocalPath == $"{extPort}/authPage.html")
                         {
                             var extIp = Settings.WebServerModule.WebExternalIP;
-                            var authUrl = $"{HttpPrefix}://{extIp}:{extPort}/auth.php";
+                            var authUrl = $"{HttpPrefix}://{extIp}:{extPort}/auth";
 
                             var text = File.ReadAllText(SettingsManager.FileTemplateAuthPage)
                                 .Replace("{headerContent}", GetHtmlResourceDefault(false))
@@ -330,7 +330,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=settings";
         }
 
@@ -340,7 +340,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             return $"https://login.eveonline.com/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-characters.read_notifications.v1+esi-universe.read_structures.v1&state=9";
         }
 
@@ -349,7 +349,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             var permissions = new []
             {
                 "esi-alliances.read_contacts.v1",
@@ -366,7 +366,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=11";
         }
 
@@ -375,7 +375,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=opencontract{contractId}&scope=esi-ui.open_window.v1";
         }
 
@@ -384,7 +384,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope=esi-mail.read_mail.v1+esi-mail.send_mail.v1+esi-mail.organize_mail.v1&state=12";
         }
 
@@ -393,7 +393,7 @@ namespace ThunderED.Modules.Sub
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
             var text = !string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) && SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.Contains(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
-                ? $"auth.php?group={HttpUtility.UrlEncode(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)}"
+                ? $"auth?group={HttpUtility.UrlEncode(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)}"
                 : null;
             return $"{HttpPrefix}://{extIp}:{extPort}/{text}";
         }
@@ -411,7 +411,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             var grp = string.IsNullOrEmpty(groupName) ? null : $"&state=x{HttpUtility.UrlEncode(groupName)}";
             var mc = mainCharacterId == 0 ? null : $"|{mainCharacterId}";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&amp;redirect_uri={callbackurl}&amp;client_id={clientID}{grp}{mc}";
@@ -422,7 +422,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=oneButton";
         }
         internal static string GetAuthUrlAltRegButton()
@@ -430,7 +430,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=altReg";
         }
 
@@ -439,7 +439,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
 
             var grp = string.IsNullOrEmpty(group) ? null : $"&state=x{HttpUtility.UrlEncode(group)}";
             var mc = mainCharacterId == 0 ? null : $"|{mainCharacterId}";
@@ -453,7 +453,7 @@ namespace ThunderED.Modules.Sub
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"{HttpPrefix}://{extIp}:{extPort}/timers.php";
+            return $"{HttpPrefix}://{extIp}:{extPort}/timers";
         }
 
 
@@ -464,7 +464,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=matahari";
         }
 
@@ -473,7 +473,7 @@ namespace ThunderED.Modules.Sub
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback.php";
+            var callbackurl =  $"{HttpPrefix}://{extIp}:{extPort}/callback";
             var list = new List<string>();
             if(readChar)
                 list.Add("esi-contracts.read_character_contracts.v1");
@@ -488,35 +488,35 @@ namespace ThunderED.Modules.Sub
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"{HttpPrefix}://{extIp}:{extPort}/hrm.php?data=inspect{id}&id={authCode}&state=matahari";
+            return $"{HttpPrefix}://{extIp}:{extPort}/hrm?data=inspect{id}&id={authCode}&state=matahari";
         }
 
         public static string GetHRMMainURL(string authCode)
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"{HttpPrefix}://{extIp}:{extPort}/hrm.php?data=0&id={authCode}&state=matahari";
+            return $"{HttpPrefix}://{extIp}:{extPort}/hrm?data=0&id={authCode}&state=matahari";
         }
 
         public static string GetHRM_AjaxMailURL(long mailId, long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=mail{mailId}_{inspectCharId}&id={authCode}&state=matahari";
+            return $"hrm?data=mail{mailId}_{inspectCharId}&id={authCode}&state=matahari";
         }
 
         
         public static string GetHRM_AjaxMailListURL(long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=maillist{inspectCharId}&id={authCode}&state=matahari&page=";
+            return $"hrm?data=maillist{inspectCharId}&id={authCode}&state=matahari&page=";
         }
         
         public static string GetHRM_AjaxTransactListURL(long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=transactlist{inspectCharId}&id={authCode}&state=matahari&page=";
+            return $"hrm?data=transactlist{inspectCharId}&id={authCode}&state=matahari&page=";
         }
 
         public static string GetHRM_AjaxJournalListURL(long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=journallist{inspectCharId}&id={authCode}&state=matahari&page=";
+            return $"hrm?data=journallist{inspectCharId}&id={authCode}&state=matahari&page=";
         }
         
         public void Dispose()
@@ -526,63 +526,63 @@ namespace ThunderED.Modules.Sub
 
         public static string GetHRM_AjaxLysListURL(long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=lys{inspectCharId}&id={authCode}&state=matahari&page=";
+            return $"hrm?data=lys{inspectCharId}&id={authCode}&state=matahari&page=";
         }
 
         public static string GetHRM_AjaxContractsListURL(long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=contracts{inspectCharId}&id={authCode}&state=matahari&page=";
+            return $"hrm?data=contracts{inspectCharId}&id={authCode}&state=matahari&page=";
         }
 
         public static string GetHRM_AjaxContactsListURL(long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=contacts{inspectCharId}&id={authCode}&state=matahari&page=";
+            return $"hrm?data=contacts{inspectCharId}&id={authCode}&state=matahari&page=";
         }
 
         public static string GetHRM_AjaxSkillsListURL(long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=skills{inspectCharId}&id={authCode}&state=matahari&page=";
+            return $"hrm?data=skills{inspectCharId}&id={authCode}&state=matahari&page=";
         }
 
         public static string GetHRM_SearchMailURL(long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=searchMail{inspectCharId}&id={authCode}&state=matahari&query=";
+            return $"hrm?data=searchMail{inspectCharId}&id={authCode}&state=matahari&query=";
 
         }
 
         public static string GetHRM_DeleteCharAuthURL(long inspectCharId, string authCode)
         {
-            return $"hrm.php?data=deleteAuth{inspectCharId}&id={authCode}&state=matahari";
+            return $"hrm?data=deleteAuth{inspectCharId}&id={authCode}&state=matahari";
         }
 
         public static string GetHRM_AjaxMembersURL(long value, string authCode)
         {
-            return $"hrm.php?data=loadMembers&id={authCode}&state=matahari&memberType={value}&filter=";
+            return $"hrm?data=loadMembers&id={authCode}&state=matahari&memberType={value}&filter=";
 
         }
 
         public static string GetHRM_MoveToSpiesURL(long itemCharacterId, string authCode)
         {
-            return $"hrm.php?data=moveToSpies{itemCharacterId}&id={authCode}&state=matahari";
+            return $"hrm?data=moveToSpies{itemCharacterId}&id={authCode}&state=matahari";
         }
 
         public static string GetHRM_RestoreDumpedURL(long itemCharacterId, string authCode)
         {
-            return $"hrm.php?data=restoreAuth{itemCharacterId}&id={authCode}&state=matahari";
+            return $"hrm?data=restoreAuth{itemCharacterId}&id={authCode}&state=matahari";
         }
 
         public static string GetWebEditorUrl(string code)
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"{HttpPrefix}://{extIp}:{extPort}/settings.php?code={code}&state=settings";
+            return $"{HttpPrefix}://{extIp}:{extPort}/settings?code={code}&state=settings";
         }
 
         public static string GetWebEditorSimplifiedAuthUrl(string code)
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"{HttpPrefix}://{extIp}:{extPort}/settings.php?code={code}&state=settings_sa&data=";
+            return $"{HttpPrefix}://{extIp}:{extPort}/settings?code={code}&state=settings_sa&data=";
         }
 
         
@@ -590,7 +590,7 @@ namespace ThunderED.Modules.Sub
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            return $"{HttpPrefix}://{extIp}:{extPort}/settings.php?code={code}&state=settings_ti&data=";
+            return $"{HttpPrefix}://{extIp}:{extPort}/settings?code={code}&state=settings_ti&data=";
         }
     }
 }

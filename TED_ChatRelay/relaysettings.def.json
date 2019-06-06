@@ -3,7 +3,7 @@
   "RelayChannels": [
     {
       "eveChannelName": "channel name",
-      "endpoint": "http://IP:PORT/chatrelay.php",
+      "endpoint": "http://IP:PORT/chatrelay",
       "code": "thesecretsupercode",
       "dateformat": "HH:mm",
       "RelayStartsWithText": [],

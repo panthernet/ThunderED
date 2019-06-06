@@ -116,7 +116,7 @@ namespace ThunderED.Modules
 
                 if (request.HttpMethod == HttpMethod.Get.ToString())
                 {
-                    if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php")
+                    if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" || request.Url.LocalPath == $"{port}/callback")
                     {
                         var clientID = Settings.WebServerModule.CcpAppClientId;
                         var secret = Settings.WebServerModule.CcpAppSecret;
@@ -147,8 +147,8 @@ namespace ThunderED.Modules
                         return true;
                     }
 
-                    if (request.Url.LocalPath.StartsWith("/hrm.php") || request.Url.LocalPath.StartsWith($"{extPort}/hrm.php") ||
-                        request.Url.LocalPath.StartsWith($"{port}/hrm.php"))
+                    if (request.Url.LocalPath.StartsWith("/hrm") || request.Url.LocalPath.StartsWith($"{extPort}/hrm") ||
+                        request.Url.LocalPath.StartsWith($"{port}/hrm"))
                     {
                         if (string.IsNullOrWhiteSpace(request.Url.Query))
                         {
