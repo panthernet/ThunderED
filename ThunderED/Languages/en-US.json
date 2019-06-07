@@ -130,8 +130,13 @@
   "authTokenBodyFail": "ERROR receiving token!",
   "authTokenRcv": "Token received successfully!",
   "authTokenRcv2": "Now your Discord group will get ingame notifications from {0} character",
-  "killFeedString": "{0}{1} {2:n0} ISK* - {3}<{4}{5}> in {6}({7}) at {8}",
-  "killFeedBy": " killed by {0}<{1}{2}> ({3})",
+  "killFeedHeader": "{0} Destroyed in {1}",
+  "killFeedName": "Name: {0}",
+  "killFeedCorp": "Corp: {0}",
+  "killFeedAlliance": "Alliance: {0}",
+  "killFeedShip": "Ship: {0}",
+  "killFeedDetails": "Time: {0}\nValue: {1}",
+  "killFeedDetailsSystem": "System: {0}",
   "radiusInfoHeader": "Radius Info",
   "fuNeedSetup": "FleetUp module setup is incomplete! Please check your settings.json file and make sure bot have access to specified Discord channel!",
   "fuNotification": "FleetUp Notification",
@@ -531,5 +536,7 @@
   "roleCommandsListRoles": "Available roles for manual assignment: `{0}`\nUse `{1}{2} roleName` command to add selected role",
   "helpAddRoleCommand": "Assigns selected Discord role to the command author. List available roles using `{0}{2}` command. Syntax: `{0}{1} roleName`",
   "helpRemoveRoleCommand": "Removes selected manual Discord role from the command author. Syntax: `{0}{1} roleName`",
-  "roleCommandsAccessDenied": "You do not have access to use this command!"
+  "roleCommandsAccessDenied": "You do not have access to use this command!",
+  "Victim": "Victim",
+  "FinalBlow": "Final Blow"
 }

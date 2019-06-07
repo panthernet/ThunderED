@@ -2,6 +2,8 @@
 //{NewLine} - adds line break
 //{shipID} - destroyed ship type ID
 //{shipType} - destroyed ship type name
+//{attackershipID} - Final blow ship type ID
+//{attackershipType} - Final blow ship type name
 //{iskValue} - km isk value
 //{iskFittedValue} - km isk fitted value
 //{systemName} - KM system name

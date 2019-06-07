@@ -284,25 +284,61 @@ namespace ThunderED.API
 
         #endregion
 
+        internal enum KillMailLinkTypes
+        {
+            character,
+            corporation,
+            alliance,
+            ship,
+            system
+        }
+
+        internal static string GetKillMailLink(long id, KillMailLinkTypes killMailLinkTypes)
+        {
+            return $"https://zkillboard.com/{killMailLinkTypes}/{id}/";
+        }
+
         internal async Task SendEmbedKillMessage(ulong channelId, Color color, KillDataEntry km, string radiusMessage, string msg = "")
         {
             msg = msg ?? "";
-            var aTicker = km.rVictimAlliance == null ? "" : $"[{km.rVictimAlliance.ticker}]";
-            var atTicker = km.rAttackerAlliance == null ? null : $"[{km.rAttackerAlliance.ticker}]";
-            var killString = LM.Get("killFeedString", !string.IsNullOrEmpty(radiusMessage) ? "R " : null, km.rShipType?.name, km.value, km.rVictimCharacter == null ? km.rShipType?.name : km.rVictimCharacter.name,
-                km.rVictimCorp.name, string.IsNullOrEmpty(aTicker) ? null : aTicker, km.sysName, km.systemSecurityStatus, km.killTime);
-            var killedBy = km.isNPCKill ? null : LM.Get("killFeedBy", km.rAttackerCharacter?.name, km.rAttackerCorp?.name, string.IsNullOrEmpty(atTicker) ? null : atTicker, km.attackers?.Length ?? 0);
+
+            var victimName = $"{LM.Get("killFeedName", $"[{km.rVictimCharacter.name}]({GetKillMailLink(km.victimCharacterID, KillMailLinkTypes.character)})")}";
+            var victimCorp = $"{LM.Get("killFeedCorp", $"[{km.rVictimCorp.name}]({GetKillMailLink(km.victimCorpID, KillMailLinkTypes.corporation)})")}";
+            var victimAlliance = km.rVictimAlliance == null ? "" : $"{LM.Get("killFeedAlliance", $"[{km.rVictimAlliance.name}]")}({GetKillMailLink(km.victimAllianceID, KillMailLinkTypes.alliance)})";
+            var victimShip = $"{LM.Get("killFeedShip", $"[{km.rVictimShipType.name}]({GetKillMailLink(km.victimShipID, KillMailLinkTypes.ship)})")}";
+
+
+            string[] victimStringArray = new string[] {victimName, victimCorp, victimAlliance, victimShip}; 
+
+            var attackerName = $"{LM.Get("killFeedName", $"[{km.rAttackerCharacter.name}]({GetKillMailLink(km.finalBlowAttackerCharacterId, KillMailLinkTypes.character)})")}";
+            var attackerCorp = $"{LM.Get("killFeedCorp", $"[{km.rAttackerCorp.name}]({GetKillMailLink(km.finalBlowAttackerCorpId, KillMailLinkTypes.corporation)})")}";
+            var attackerAlliance = $"{LM.Get("killFeedAlliance", $"[{km.rAttackerAlliance.name}]({GetKillMailLink(km.finalBlowAttackerAllyId, KillMailLinkTypes.alliance)})")}";
+            var attackerShip = $"{LM.Get("killFeedShip", $"[{km.rAttackerShipType.name}]({GetKillMailLink(km.attackerShipID, KillMailLinkTypes.ship)})")}";
+
+            string[] attackerStringArray = new string[] { attackerName, attackerCorp, attackerAlliance, attackerShip};
+
+
+            var killFeedDetails = LM.Get("killFeedDetails", km.killTime, km.value.ToString("#,##0 ISk"));
+            var killFeedDetailsSystem = LM.Get("killFeedDetailsSystem", $"[{km.sysName}]({GetKillMailLink(km.systemId, KillMailLinkTypes.system)})");
+
+            string[] detailsStringArray = new string[] { killFeedDetails, killFeedDetailsSystem};
+
+
             var builder = new EmbedBuilder()
                 .WithColor(color)
-                .WithThumbnailUrl($"https://image.eveonline.com/Type/{km.shipID}_32.png")
+                .WithThumbnailUrl($"https://image.eveonline.com/Type/{km.victimShipID}_64.png")
                 .WithAuthor(author =>
                 {
-                    author.WithName($"{killString} {killedBy}")
+                    author.WithName(LM.Get("killFeedHeader", km.rVictimShipType.name, km.rSystem.name))
                         .WithUrl($"https://zkillboard.com/kill/{km.killmailID}/");
                     if (km.isNPCKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
-                });
+                })
+                .AddField(LM.Get("Victim"), string.Join("\n", victimStringArray.Where(c => !string.IsNullOrWhiteSpace(c))))
+                .AddField(LM.Get("Finalblow"), string.Join("\n", attackerStringArray.Where(c => !string.IsNullOrWhiteSpace(c))))
+                .AddField(LM.Get("Details"), string.Join("\n", detailsStringArray.Where(c => !string.IsNullOrWhiteSpace(c))));
+
             if (!string.IsNullOrEmpty(radiusMessage))
-                builder.AddField(LM.Get("radiusInfoHeader"), radiusMessage, true);
+                builder.AddField(LM.Get("radiusInfoHeader"), radiusMessage);
 
             var embed = builder.Build();
             var channel = GetGuild()?.GetTextChannel(channelId);
