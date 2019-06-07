@@ -1,9 +1,14 @@
 ### V1.3.14
++ Added `UsePortInUrl` param to `WebServerModule` to be able to disable port usage for some connectivity scenarios
 + Fixed several possible exceptions in !corp command
 + Fixed hard coded address in web config templates
 + Improved and updated !clist command to include filtering by type and availability. Read command help for details.
 + Rewrote `helpClist` language file string to reflect recent update
++ Remove `.php` endings from all URLs. They were obsolete from the very begining :)
 + Who's ordered some !vodka ?
+
+### BREAKING CHANGES
+- **REMOVE `.php` ENDING FROM YOUR CALLBACK URL IN CCP APP!** It is no longer needed and will cause validation error.
 
 ### V1.3.13
 + Added Timers auth to Web Config Editor

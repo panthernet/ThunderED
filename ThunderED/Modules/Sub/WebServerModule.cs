@@ -343,7 +343,7 @@ namespace ThunderED.Modules.Sub
         {
             var extIp = SettingsManager.Settings.WebServerModule.WebExternalIP;
             var extPort = SettingsManager.Settings.WebServerModule.WebExternalPort;
-            var usePort = SettingsManager.Settings.WebServerModule.UsePortInURl;
+            var usePort = SettingsManager.Settings.WebServerModule.UsePortInUrl;
 
             return usePort ? $"{HttpPrefix}://{extIp}:{extPort}" : $"{HttpPrefix}://{extIp}";
         }

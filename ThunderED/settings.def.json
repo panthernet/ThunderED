@@ -243,9 +243,9 @@
   },
 
   "webServerModule": {
-    "UsePortInURl": false,
+    "UsePortInUrl": true,
     "webExternalIP": "IP",
-    "webExternalPort": 80,
+    "webExternalPort": 8001,
     "discordUrl": "https://discord.gg/xxxxxx",
     "ccpAppClientId": "REQUIRED",
     "ccpAppSecret": "REQUIRED"
