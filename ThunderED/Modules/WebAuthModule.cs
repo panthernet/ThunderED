@@ -430,7 +430,7 @@ namespace ThunderED.Modules
                 return false;
             try
             {
-                if (request.Url.LocalPath == "/auth.php" || request.Url.LocalPath == $"{extPort}/auth.php"|| request.Url.LocalPath == $"{port}/auth.php")
+                if (request.Url.LocalPath == "/auth" || request.Url.LocalPath == $"{extPort}/auth"|| request.Url.LocalPath == $"{port}/auth")
                 {
                     var prms = request.Url.Query.TrimStart('?').Split('&');
                     
@@ -481,7 +481,7 @@ namespace ThunderED.Modules
                     return true;
                 }
 
-                if ((request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php")
+                if ((request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" || request.Url.LocalPath == $"{port}/callback")
                     && request.Url.Query.Contains("&state=authst"))
                 {
                     var prms = request.Url.Query.TrimStart('?').Split('&');
@@ -543,7 +543,7 @@ namespace ThunderED.Modules
                     return true;
                 }
                 
-                if ((request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php")
+                if ((request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" || request.Url.LocalPath == $"{port}/callback")
                     && (!request.Url.Query.Contains("&state=") || request.Url.Query.Contains("&state=x") || request.Url.Query.Contains("&state=oneButton") || request.Url.Query.Contains("&state=altReg") ))
                 {
                     var assembly = Assembly.GetEntryAssembly();

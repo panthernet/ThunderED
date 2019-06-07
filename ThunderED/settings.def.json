@@ -240,9 +240,10 @@
         "FilterDiscordRoles": []
       }
     }
-  },  
-  
+  },
+
   "webServerModule": {
+    "UsePortInURl": false,
     "webExternalIP": "IP",
     "webExternalPort": 80,
     "discordUrl": "https://discord.gg/xxxxxx",

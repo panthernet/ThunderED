@@ -50,7 +50,7 @@ namespace ThunderED.Modules
 
             try
             {
-                if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php")
+                if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback")
                 {
                     var clientID = Settings.WebServerModule.CcpAppClientId;
                     var secret = Settings.WebServerModule.CcpAppSecret;
@@ -93,7 +93,7 @@ namespace ThunderED.Modules
                     return true;
                 }
 
-                if (request.Url.LocalPath == "/settings.php" || request.Url.LocalPath == $"{extPort}/settings.php")
+                if (request.Url.LocalPath == "/settings" || request.Url.LocalPath == $"{extPort}/settings")
                 {
                     var prms = request.Url.Query.TrimStart('?').Split('&');
                     if (prms.Length == 0 || prms[0].Split('=').Length == 0 || string.IsNullOrEmpty(prms[0]))

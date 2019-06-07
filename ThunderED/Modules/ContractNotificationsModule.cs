@@ -49,7 +49,7 @@ namespace ThunderED.Modules
 
                 if (request.HttpMethod == HttpMethod.Get.ToString())
                 {
-                    if (request.Url.LocalPath == "/callback.php" || request.Url.LocalPath == $"{extPort}/callback.php" || request.Url.LocalPath == $"{port}/callback.php")
+                    if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" || request.Url.LocalPath == $"{port}/callback")
                     {
                         var clientID = Settings.WebServerModule.CcpAppClientId;
                         var secret = Settings.WebServerModule.CcpAppSecret;

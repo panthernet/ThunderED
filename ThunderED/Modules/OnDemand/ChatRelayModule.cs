@@ -36,7 +36,7 @@ namespace ThunderED.Modules.OnDemand
 
                 if (request.HttpMethod == HttpMethod.Post.ToString())
                 {
-                    if (request.Url.LocalPath == "/chatrelay.php" || request.Url.LocalPath == $"{extPort}/chatrelay.php" || request.Url.LocalPath == $"{port}/chatrelay.php")
+                    if (request.Url.LocalPath == "/chatrelay" || request.Url.LocalPath == $"{extPort}/chatrelay" || request.Url.LocalPath == $"{port}/chatrelay")
                     {
                         var prms = request.Url.Query.TrimStart('?').Split('&');
                         if (prms.Length != 3)
