@@ -1622,7 +1622,7 @@ namespace ThunderED.Classes
           public int WebListenPort { get; set; }*/
         [Comment("Use the port in URLs")]
         [Required]
-        public bool UsePortInURl { get; set; }
+        public bool UsePortInUrl { get; set; } = true;
         [Comment("Text IP address or domain name which is used to receive connections from the internet")]
         public string WebExternalIP { get; set; }
         [Comment("Numeric port value")]
