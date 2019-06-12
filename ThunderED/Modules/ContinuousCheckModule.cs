@@ -404,13 +404,12 @@ namespace ThunderED.Modules
                 {
                     date = today.Subtract(TimeSpan.FromDays(1));
                     var msg =
-                        $"**{LM.Get("dailyStats", date, entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)";
+                        GetMsg(LM.Get("dailyStats", date, entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
                     await APIHelper.DiscordAPI.SendMessageAsync(APIHelper.DiscordAPI.GetChannel(channel), msg).ConfigureAwait(false);
                 }
                 else
                 {
-                    var msg =
-                        $"**{LM.Get("dailyStats", date, entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)";
+                    var msg = GetMsg(LM.Get("dailyStats", date, entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg, true).ConfigureAwait(false);
                 }
             }
@@ -419,31 +418,31 @@ namespace ThunderED.Modules
                 if (command == "week" || command == "w")
                 {
                     var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, DateTime.UtcNow.StartOfWeek(DayOfWeek.Monday), DateTime.UtcNow);
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                        $"\n**{LM.Get("statsCalendarWeekly", entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                    var msg = GetMsg(LM.Get("statsCalendarWeekly", entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                     return;
                 }
                 if (command == "lastweek" || command == "lw")
                 {
                     var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, null, null, 604800);
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                        $"\n**{LM.Get("statsLastWeek", entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                    var msg = GetMsg(LM.Get("statsLastWeek", entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                     return;
                 }
                 if (command == "lastday" || command == "ld")
                 {
                     var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, null, null, 86400);
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                        $"\n**{LM.Get("statsLastDay", entity)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                    var msg = GetMsg(LM.Get("statsLastDay", entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                     return;
                 }
 
 
                 var t = isAlliance ? "allianceID" : "corporationID";
-                var relPath = $"/api/stats/{t}/{id}";
+                var relPath = $"/api/stats/{t}/{id}/";
                 var result = await RequestAsync<ZkbStatResponse>(requestHandler, new Uri(new Uri("https://zkillboard.com"), relPath));
 
-                if (command == "month" || command == "m")
+                if ( command == "month" || command == "m")
                 {
                     var data = result.Months.FirstOrDefault(a => a.Value.Year == now.Year && a.Value.Month == now.Month).Value;
                     if (data == null)
@@ -451,8 +450,8 @@ namespace ThunderED.Modules
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statNoDataFound"), true).ConfigureAwait(false);
                         return;
                     }
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                        $"**{LM.Get("monthlyStats", result.Info.Name)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                    var msg = GetMsg(LM.Get("monthlyStats", entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                 }else if (command == "year" || command == "y")
                 {
                     var data = result.Months.FirstOrDefault(a => a.Value.Year == now.Year).Value;
@@ -461,8 +460,8 @@ namespace ThunderED.Modules
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("statNoDataFound"), true).ConfigureAwait(false);
                         return;
                     }
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                        $"**{LM.Get("yearlyStats", result.Info.Name, now.Year)}**\n{LM.Get("Killed")}:\t**{data.ShipsDestroyed}** ({data.IskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{data.ShipsLost}** ({data.IskLost:n0} ISK)");
+                    var msg = GetMsg(LM.Get("yearlyStats", result.Info.Name, now.Year), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                 }
                 else if (command.All(char.IsDigit))
                 {
@@ -476,8 +475,8 @@ namespace ThunderED.Modules
                     var shipsLost = list.Sum(a => a.Value.ShipsLost);
                     var iskDestroyed = list.Sum(a => a.Value.IskDestroyed);
                     var iskLost = list.Sum(a => a.Value.IskLost);
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                        $"**{LM.Get("yearlyStats", result.Info.Name, command)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)");
+                    var msg = GetMsg(LM.Get("yearlyStats", result.Info.Name, now.Year), shipsDestroyed, iskDestroyed, shipsLost, iskLost);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                 }
                 else if (command.Contains("/"))
                 {
@@ -504,13 +503,28 @@ namespace ThunderED.Modules
                     var shipsLost = list.Sum(a => a.Value.ShipsLost);
                     var iskDestroyed = list.Sum(a => a.Value.IskDestroyed);
                     var iskLost = list.Sum(a => a.Value.IskLost);
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(context,
-                        $"**{LM.Get("monthlyCustomStats", result.Info.Name, command)}**\n{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)\n{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)");
+                    var msg = GetMsg(LM.Get("monthlyCustomStats", result.Info.Name, now.Year), shipsDestroyed, iskDestroyed, shipsLost, iskLost);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                 }
             }
         }
 
-        
+        private static string GetMsg(string header, int shipsDestroyed, long iskDestroyed, int shipsLost, long iskLost)
+        {
+            double iskTotal = iskLost + iskDestroyed;
+            double shipTotal = shipsLost + shipsDestroyed;
+            var iskEfficiency = iskTotal == 0 ? 0 : iskDestroyed / iskTotal * 100;
+            var shipEfficiency = shipTotal == 0 ? 0 : shipsDestroyed / shipTotal * 100;
+            var stringArray = new string[] {
+                $"**{header}**",
+                $"{LM.Get("Killed")}:\t**{shipsDestroyed}** ({iskDestroyed:n0} ISK)",
+                $"{LM.Get("Lost")}:\t**{shipsLost}** ({iskLost:n0} ISK)",
+                $"{LM.Get("iskEfficiency")}:\t**{iskEfficiency:n0}%**",
+                $"{LM.Get("shipEfficiency")}:\t**{shipEfficiency:n0}%**"
+            };
+            return String.Join("\n", stringArray);
+        }
+
         private static Task<T> RequestAsync<T>(ZkbRequestHandler h, Uri uri) {
             return h.RequestAsync<T>(uri);
         }

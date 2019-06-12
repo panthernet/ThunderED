@@ -113,6 +113,8 @@
   "monthlyStats": "{0} monthly stats",
   "monthlyCustomStats": "{0} stats for {1}",
   "yearlyStats": "{0} stats for {1}",
+  "iskEfficiency": "Isk efficiency",
+  "shipEfficiency": "Ship efficiency",
   "renewingRoles": "Renewing roles for",
   "resettingRoles": "Resetting roles for",
   "welcomeMessage": "Welcome {0}, please register here {1} to get access. Send {2}help for available commands list!",
