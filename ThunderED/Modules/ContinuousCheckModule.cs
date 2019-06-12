@@ -18,6 +18,7 @@ namespace ThunderED.Modules
     {
         public override LogCat Category => LogCat.Continuous;
 
+        private const StringComparison stringComparison = StringComparison.InvariantCultureIgnoreCase;
         private DateTime _checkOneSec = DateTime.Now;
         private DateTime _checkDailyPost = DateTime.Now;
         private static DateTime _30minTime = DateTime.Now;
@@ -185,7 +186,7 @@ namespace ThunderED.Modules
                 var comms = commandText.Split(' ').ToList();
                 var isSingle = comms.Count == 1;
                 var command = string.IsNullOrEmpty(commandText) ? "t" : comms[0].ToLower();
-                var isNewDay = command == "newday";
+                var isNewDay = command.Equals("newday", stringComparison);
                 if(!isNewDay && !SettingsManager.Settings.StatsModule.EnableStatsCommand)
                     return;
 
@@ -234,8 +235,8 @@ namespace ThunderED.Modules
             var now = DateTime.Now;
             var today = DateTime.Today;
 
-            var isNewDay = command == "newday";
-            var isRatingCommand = command == "r" || command == "rating";
+            var isNewDay = command.Equals("newday", stringComparison);
+            var isRatingCommand = command.Equals("r", stringComparison) || command.Equals("rating",stringComparison);
             var requestHandler = new ZkbRequestHandler(new JsonSerializer("yyyy-MM-dd HH:mm:ss"));
 
             //daily rating
@@ -360,8 +361,8 @@ namespace ThunderED.Modules
             var isAlliance = allyId > 0;
             var id = isAlliance ? allyId : corpId;
             entity = string.IsNullOrEmpty(entity) ? (isAlliance ? (await APIHelper.ESIAPI.GetAllianceData("Stats", id))?.name :(await APIHelper.ESIAPI.GetCorporationData("Stats", id))?.name) : entity;
-
-            if (command == "d" || command == "t" || command== "today" || command== "newday")
+            var dayCommands = new List<string> { "d", "t", "today", "newday" };
+            if (dayCommands.Contains(command,StringComparer.InvariantCultureIgnoreCase))
             {
                /* var channel = grp?.DailyStatsChannel ?? 0;
                 if(isNewDay && channel == 0) return;
@@ -415,21 +416,21 @@ namespace ThunderED.Modules
             }
             else
             {
-                if (command == "week" || command == "w")
+                if (command.Equals("week", stringComparison) || command.Equals("w", stringComparison))
                 {
                     var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, DateTime.UtcNow.StartOfWeek(DayOfWeek.Monday), DateTime.UtcNow);
                     var msg = GetMsg(LM.Get("statsCalendarWeekly", entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                     return;
                 }
-                if (command == "lastweek" || command == "lw")
+                if (command.Equals("lastweek", stringComparison) || command.Equals("lw", stringComparison))
                 {
                     var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, null, null, 604800);
                     var msg = GetMsg(LM.Get("statsLastWeek", entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                     return;
                 }
-                if (command == "lastday" || command == "ld")
+                if (command.Equals("lastday", stringComparison) || command.Equals("ld", stringComparison))
                 {
                     var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, null, null, 86400);
                     var msg = GetMsg(LM.Get("statsLastDay", entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
@@ -442,7 +443,7 @@ namespace ThunderED.Modules
                 var relPath = $"/api/stats/{t}/{id}/";
                 var result = await RequestAsync<ZkbStatResponse>(requestHandler, new Uri(new Uri("https://zkillboard.com"), relPath));
 
-                if ( command == "month" || command == "m")
+                if (command.Equals("month", stringComparison) || command.Equals("m", stringComparison))
                 {
                     var data = result.Months.FirstOrDefault(a => a.Value.Year == now.Year && a.Value.Month == now.Month).Value;
                     if (data == null)
@@ -452,7 +453,7 @@ namespace ThunderED.Modules
                     }
                     var msg = GetMsg(LM.Get("monthlyStats", entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
-                }else if (command == "year" || command == "y")
+                }else if (command.Equals("year", stringComparison) || command.Equals("y", stringComparison))
                 {
                     var data = result.Months.FirstOrDefault(a => a.Value.Year == now.Year).Value;
                     if (data == null)
