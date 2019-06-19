@@ -21,8 +21,12 @@ namespace ThunderED.Modules.OnDemand
 
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedVictimsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedAttackersLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeVictimsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeAttackersLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedLocationLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeLocationLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
 
         public override LogCat Category => LogCat.KillFeed;
 
@@ -73,24 +77,57 @@ namespace ThunderED.Modules.OnDemand
             foreach (var (key, value) in Settings.LiveKillFeedModule.Groups)
             {
                 var aGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
+                var exaGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 var vGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
+                var exvGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 var lGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
+                var exlGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 var sGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
+                var exsGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 foreach (var (fKey, fValue) in value.Filters)
                 {
-                    var aData = await ParseMemberDataArray(fValue.AttackerEntities);
+                    var aData = await ParseMemberDataArray(fValue.AttackerEntities.Where(a=> !a.ToString().StartsWith("-")).ToList());
                     aGroupDic.Add(fKey, aData);
-                    var vData = await ParseMemberDataArray(fValue.VictimEntities);
+                    var vData = await ParseMemberDataArray(fValue.VictimEntities.Where(a=> !a.ToString().StartsWith("-")).ToList());
                     vGroupDic.Add(fKey, vData);
-                    var lData = await ParseLocationDataArray(fValue.LocationEntities);
+                    var lData = await ParseLocationDataArray(fValue.LocationEntities.Where(a=> !a.ToString().StartsWith("-")).ToList());
                     lGroupDic.Add(fKey, lData);
-                    var sData = await ParseTypeDataArray(fValue.ShipEntities);
+                    var sData = await ParseTypeDataArray(fValue.ShipEntities.Where(a=> !a.ToString().StartsWith("-")).ToList());
                     sGroupDic.Add(fKey, sData);
+                    //excluded
+                    var exaData = await ParseMemberDataArray(fValue.AttackerEntities.Where(a=> a.ToString().StartsWith("-")).Select(a=>
+                    {
+                        var str = a.ToString();
+                        return (object)str.Substring(1, str.Length-1);
+                    }).ToList());
+                    exaGroupDic.Add(fKey, exaData);
+                    var exvData = await ParseMemberDataArray(fValue.VictimEntities.Where(a=> a.ToString().StartsWith("-")).Select(a=>
+                    {
+                        var str = a.ToString();
+                        return (object)str.Substring(1, str.Length-1);
+                    }).ToList());
+                    exvGroupDic.Add(fKey, exvData);
+                    var exlData = await ParseLocationDataArray(fValue.LocationEntities.Where(a=> a.ToString().StartsWith("-")).Select(a=>
+                    {
+                        var str = a.ToString();
+                        return (object)str.Substring(1, str.Length-1);
+                    }).ToList());
+                    exlGroupDic.Add(fKey, exlData);
+                    var exsData = await ParseTypeDataArray(fValue.ShipEntities.Where(a=> a.ToString().StartsWith("-")).Select(a=>
+                    {
+                        var str = a.ToString();
+                        return (object)str.Substring(1, str.Length-1);
+                    }).ToList());
+                    exsGroupDic.Add(fKey, exsData);
                 }
                 ParsedAttackersLists.Add(key, aGroupDic);
+                ParsedExcludeAttackersLists.Add(key, exaGroupDic);
                 ParsedVictimsLists.Add(key, vGroupDic);
+                ParsedExcludeVictimsLists.Add(key, exvGroupDic);
                 ParsedLocationLists.Add(key, lGroupDic);
+                ParsedExcludeLocationLists.Add(key, exlGroupDic);
                 ParsedShipsLists.Add(key, sGroupDic);
+                ParsedExcludeShipsLists.Add(key, exsGroupDic);
             }
 
         }
@@ -127,6 +164,37 @@ namespace ThunderED.Modules.OnDemand
                         var isAllowedToFeed = false;
 
                         #region Person checks
+                        //exclusions
+                        var exList = GetTier2CharacterIds(ParsedExcludeAttackersLists, groupName, filterName);
+                        if(exList.ContainsAnyFromList(kill.attackers.Select(a=> a.character_id).Distinct())) continue;
+                        exList = GetTier2CorporationIds(ParsedExcludeAttackersLists, groupName, filterName);
+                        if(exList.ContainsAnyFromList(kill.attackers.Select(a=> a.corporation_id).Distinct())) continue;
+                        exList = GetTier2AllianceIds(ParsedExcludeAttackersLists, groupName, filterName);
+                        if(exList.ContainsAnyFromList(kill.attackers.Where(a=> a.alliance_id > 0).Select(a=> a.alliance_id).Distinct())) continue;
+
+                        exList = GetTier2CharacterIds(ParsedExcludeVictimsLists, groupName, filterName);
+                        if(exList.Contains(kill.victim.character_id)) continue;
+                        exList = GetTier2CorporationIds(ParsedExcludeVictimsLists, groupName, filterName);
+                        if(exList.Contains(kill.victim.corporation_id)) continue;
+                        if (kill.victim.alliance_id > 0)
+                        {
+                            exList = GetTier2AllianceIds(ParsedExcludeVictimsLists, groupName, filterName);
+                            if (exList.Contains(kill.victim.alliance_id)) continue;
+                        }
+
+                        exList = GetTier2SystemIds(ParsedExcludeLocationLists, groupName, filterName);
+                        if(exList.Contains(kill.solar_system_id)) continue;
+
+                        var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, kill.solar_system_id);
+
+                        exList = GetTier2ConstellationIds(ParsedExcludeLocationLists, groupName, filterName);
+                        if(rSystem != null && exList.Contains(rSystem.constellation_id)) continue;
+                        exList = GetTier2RegionIds(ParsedExcludeLocationLists, groupName, filterName);
+                        if(rSystem?.DB_RegionId != null && exList.Contains(rSystem.DB_RegionId.Value)) continue;
+
+                        exList = GetTier2TypeIds(ParsedExcludeShipsLists, groupName, filterName);
+                        if(exList.Contains(kill.victim.ship_type_id)) continue;
+
                         //character check
                         var fChars = GetTier2CharacterIds(ParsedAttackersLists, groupName, filterName);
                         if (fChars.Any())
@@ -251,7 +319,6 @@ namespace ThunderED.Modules.OnDemand
 
                         #region Location checks
 
-                        var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, kill.solar_system_id);
                         if (filter.Radius == 0 && !isAllowedToFeed)
                         {
                             if (!CheckLocation(rSystem, kill, isInclusive, groupName, filterName)) continue;

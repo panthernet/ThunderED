@@ -14,6 +14,7 @@ On top of the existing features now you can:
  - Filter by SOLO, GROUP, AWOX, NOTAWOX, PVP, PVE tags
  - Filter by attackers and victims separately
  - Filter by maximum KM isk value
+ - Exclude any entity from search by specifying leading `-` sign
  - Redirect feed to multiple channels for every filter
  - Choose inclusive or exclusive filtering modes
  - Specify custom template filename for feed Group to use
