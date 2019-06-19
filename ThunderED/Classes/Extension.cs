@@ -36,6 +36,13 @@ namespace ThunderED.Classes
             return str.ToUpper();
         }
 
+        public static IEnumerable<string> GetDupes(this IEnumerable<string> list)
+        {
+            return list.GroupBy(x => x)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key);
+        }
+
         public static IEnumerable<string> SplitToLines(this string stringToSplit, int maxLineLength, string delimiter = " ", bool preserveDelimiter = false)
         {
             var words = stringToSplit.Split(delimiter);

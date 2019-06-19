@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Async;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,25 @@ namespace ThunderED.Modules.Sub
         public override LogCat Category => LogCat.KillFeed;
         public static List<Func<JsonZKill.Killmail, Task>> Queryables = new List<Func<JsonZKill.Killmail, Task>>();
         private readonly List<long> _receivedIds = new List<long>();
+
+        
+        private static readonly ConcurrentQueue<long> SharedIdPool = new ConcurrentQueue<long>();
+        /// <summary>
+        /// Update pool with new ID
+        /// </summary>
+        /// <param name="id">ID</param>
+        internal static void UpdateSharedIdPool(long id)
+        {
+            if (SharedIdPool.Contains(id)) return;
+            SharedIdPool.Enqueue(id);
+            if (SharedIdPool.Count > 30)
+                SharedIdPool.TryDequeue(out _);
+        }
+
+        internal static bool IsInSharedPool(long id)
+        {
+            return SharedIdPool.Contains(id);
+        }
 
         public override async Task Run(object prm)
         {

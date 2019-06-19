@@ -27,9 +27,6 @@ namespace ThunderED.Modules.OnDemand
             {
                 if (_lastPosted == kill.killmail_id) return;
 
-                if(Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds && RadiusKillFeedModule.UpdateDistinctEntriesExternal(kill.killmail_id))
-                    return;
-
                 var postedGlobalBigKill = false;
                 var bigKillGlobalValue = SettingsManager.Settings.LiveKillFeedModule.BigKill;
                 var bigKillGlobalChan = SettingsManager.Settings.LiveKillFeedModule.BigKillChannel;
@@ -39,6 +36,9 @@ namespace ThunderED.Modules.OnDemand
 
                 foreach (var groupPair in Settings.LiveKillFeedModule.GroupsConfig)
                 {
+                    if(Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds && ZKillLiveFeedModule.IsInSharedPool(kill.killmail_id))
+                        return;
+
                     var group = groupPair.Value;
                     if ((!group.FeedPveKills && isNPCKill) || (!group.FeedPvpKills && !isNPCKill)) continue;
 
@@ -76,6 +76,8 @@ namespace ThunderED.Modules.OnDemand
                             }
                         }
 
+                        if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
+                            ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
                         await LogHelper.LogInfo($"Posting Global Big Kill: {kill.killmail_id}  Value: {value:n0} ISK", Category);
                     }
 
@@ -90,6 +92,8 @@ namespace ThunderED.Modules.OnDemand
                                 await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), km, null);
                             }
 
+                            if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
+                                ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
                             await LogHelper.LogInfo($"Posting Global Kills: {kill.killmail_id}  Value: {value:n0} ISK", Category);
                         }
                     }
@@ -132,6 +136,8 @@ namespace ThunderED.Modules.OnDemand
                                     }
                                 }
 
+                                if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
+                                    ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
                                 await LogHelper.LogInfo($"Posting     Big Loss: {kill.killmail_id}  Value: {value:n0} ISK", Category);
                                 continue;
                             }
@@ -162,6 +168,8 @@ namespace ThunderED.Modules.OnDemand
                                     }
                                 }
 
+                                if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
+                                    ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
                                 await LogHelper.LogInfo($"Posting         Loss: {kill.killmail_id}  Value: {value:n0} ISK", Category);
 
                                 continue;
@@ -200,6 +208,9 @@ namespace ThunderED.Modules.OnDemand
                                                             groupPair.Value.ShowGroupName ? discordGroupName : " ");
                                                 }
 
+                                                if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
+                                                    ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
+
                                                 await LogHelper.LogInfo($"Posting     Big Kill: {kill.killmail_id}  Value: {value:#,##0} ISK", Category);
                                             }
                                         }
@@ -235,6 +246,8 @@ namespace ThunderED.Modules.OnDemand
                                     }
                                 }
 
+                                if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
+                                    ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
                                 await LogHelper.LogInfo($"Posting         Kill: {kill.killmail_id}  Value: {value:#,##0} ISK", Category);
                                 break;
                             }

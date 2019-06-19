@@ -19,7 +19,6 @@ namespace ThunderED.Modules.OnDemand
 
         private static readonly ConcurrentDictionary<string, long> LastPostedDictionary = new ConcurrentDictionary<string, long>();
         public sealed override LogCat Category => LogCat.RadiusKill;
-        private static readonly ConcurrentQueue<long> SharedIdPool = new ConcurrentQueue<long>();
         public RadiusKillFeedModule()
         {
             LogHelper.LogModule("Inititalizing RadiusKillFeed module...", Category).GetAwaiter().GetResult();
@@ -27,20 +26,21 @@ namespace ThunderED.Modules.OnDemand
             LastPostedDictionary.Clear();
         }
 
-        public static bool UpdateDistinctEntriesExternal(long id)
-        {
-            if (SharedIdPool.Contains(id))
-                return true;
-            SharedIdPool.Enqueue(id);
-            if (SharedIdPool.Count > 30)
-                SharedIdPool.TryDequeue(out _);
-            return false;
-        }
-
         public override async Task Initialize()
         {
             var data = Settings.RadiusKillFeedModule.GroupsConfig.ToDictionary(pair => pair.Key, pair => pair.Value.RadiusEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Location);
+            var dupes = SettingsManager.Settings.RadiusKillFeedModule.GroupsConfig.Keys.GetDupes();
+            if(dupes.Any())
+                await LogHelper.LogWarning($"RadiusKillFeed module has groups with identical names: {string.Join(',', dupes)}\n Please set unique group names to avoid inconsistency during KM checks.");
+            if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
+            {
+                var d = new List<string>();
+                d.AddRange(dupes);
+                d.AddRange(SettingsManager.Settings.LiveKillFeedModule.GroupsConfig.Keys.GetDupes());
+                if(d.Any())
+                    await LogHelper.LogWarning($"Radius and Live kill feed has groups with identical names: {string.Join(',', d)}\n Please set unique group names to avoid inconsistency during KM checks.");
+            }
         }
 
         private enum RadiusMode
@@ -54,11 +54,11 @@ namespace ThunderED.Modules.OnDemand
         {
             try
             {
-                if(Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds && UpdateDistinctEntriesExternal(kill.killmail_id))
-                    return;
-
                 foreach (var groupPair in Settings.RadiusKillFeedModule.GroupsConfig)
                 {
+                    if(Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds && ZKillLiveFeedModule.IsInSharedPool(kill.killmail_id))
+                        return;
+
                     var groupName = groupPair.Key;
                     var group = groupPair.Value;
                     if(!LastPostedDictionary.ContainsKey(groupName))
@@ -203,6 +203,8 @@ namespace ThunderED.Modules.OnDemand
                 }
             }
 
+            if(Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
+                ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
             await LogHelper.LogInfo($"Posting  Radius Kill: {kill.killmail_id}  Value: {km.value:n0} ISK", Category);
         }
     }
