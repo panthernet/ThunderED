@@ -113,6 +113,8 @@
   "monthlyStats": "Статы за месяц по *{0}*",
   "monthlyCustomStats": "Статы *{0}* за {1}",
   "yearlyStats": "Статы *{0}* за {1} год",
+  "iskEfficiency": "!!needs translated!!",
+  "shipEfficiency": "!!needs translated!!",
   "renewingRoles": "Обновляем роли для",
   "resettingRoles": "Сбрасываем роли для",
   "welcomeMessage": "Добро пожаловать {0}, для получения доступа зарегистрируйтесь на {1}. Введите {2}help для списка доступных команд!",
@@ -130,8 +132,13 @@
   "authTokenBodyFail": "ОШИБКА получения токена!",
   "authTokenRcv": "Токен успешно получен!",
   "authTokenRcv2": "Теперь ваша группа в Discord будет получать внутриигровые оповещения от персонажа {0}",
-  "killFeedString": "{0}{1} {2:n0} ISK* - {3}<{4}{5}> в {6}({7}) вр. {8}",
-  "killFeedBy": " убит {0}<{1}{2}> ({3})",
+  "killFeedHeader": "{0} Destroyed in {1}",
+  "killFeedName": "Name: {0}",
+  "killFeedCorp": "Corp: {0}",
+  "killFeedAlliance": "Alliance: {0}",
+  "killFeedShip": "Ship: {0}",
+  "killFeedDetails": "Time: {0}\nValue: {1}",
+  "killFeedDetailsSystem": "System: {0}",
   "radiusInfoHeader": "Радиус",
   "fuNeedSetup": "Настройка FleetUp не завершена! Проверьте файл настроек settings.json, секцию fleetup и убедитесь, что у бота есть доступ к указанному каналу Discord!",
   "fuNotification": "Оповещение FleetUp",
@@ -524,6 +531,7 @@
   "roleCommandsListRoles": "Доступные роли для ручного добавления: `{0}`\nИспользуйте команду `{1}{2} roleName` для добавления выбранной роли",
   "helpAddRoleCommand": "Назначить указанную роль автору сообщения. Список доступных ролей можно получить при помощи команды `{0}{2}`. Синтаксис: `{0}{1} roleName`",
   "helpRemoveRoleCommand": "Удаляет указанную роль Дискорда у автора сообщения. Синтаксис: `{0}{1} roleName`",
-  "roleCommandsAccessDenied": "У вас нет доступа к этой команде!"
-
+  "roleCommandsAccessDenied": "У вас нет доступа к этой команде!",
+  "Victim": "Victim",
+  "FinalBlow": "Final Blow"
 }
