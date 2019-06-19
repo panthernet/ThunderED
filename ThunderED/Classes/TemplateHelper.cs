@@ -10,7 +10,7 @@ namespace ThunderED.Classes
 {
     public static class TemplateHelper
     {
-        public static async Task<bool> PostTemplatedMessage(MessageTemplateType type, Dictionary<string, string> dic, ulong channelId, string message)
+        public static async Task<bool> PostTemplatedMessage(MessageTemplateType type, Dictionary<string, string> dic, List<ulong> channelIds, string message)
         {
             var templateFile = GetTemplate(type);
             if (string.IsNullOrEmpty(templateFile)) return false;
@@ -18,9 +18,30 @@ namespace ThunderED.Classes
             if (embed == null) return false;
             var guildID = SettingsManager.Settings.Config.DiscordGuildId;
             var discordGuild = APIHelper.DiscordAPI.Client.Guilds.FirstOrDefault(x => x.Id == guildID);
-            var channel = discordGuild?.GetTextChannel(channelId);
-            if (channel != null)
-                await APIHelper.DiscordAPI.SendMessageAsync(channel, message, embed).ConfigureAwait(false);
+            foreach (var id in channelIds)
+            {
+                var channel = discordGuild?.GetTextChannel(id);
+                if (channel != null)
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, message, embed).ConfigureAwait(false);
+            }
+            return true;
+        }
+
+        public static async Task<bool> PostTemplatedMessage(string templateFile, Dictionary<string, string> dic, List<ulong> channelIds, string message)
+        {
+            var path = Path.Combine(SettingsManager.DataDirectory, "Templates", "Messages", templateFile);
+            if (string.IsNullOrEmpty(templateFile) || !File.Exists(path))
+                return false;
+            var embed = await CompileTemplate(MessageTemplateType.Custom, path, dic);
+            if (embed == null) return false;
+            var guildID = SettingsManager.Settings.Config.DiscordGuildId;
+            var discordGuild = APIHelper.DiscordAPI.Client.Guilds.FirstOrDefault(x => x.Id == guildID);
+            foreach (var id in channelIds)
+            {
+                var channel = discordGuild?.GetTextChannel(id);
+                if (channel != null)
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, message, embed).ConfigureAwait(false);
+            }
             return true;
         }
 
@@ -95,6 +116,7 @@ namespace ThunderED.Classes
                 }
                 switch (type)
                 {
+                    case MessageTemplateType.Custom:
                     case MessageTemplateType.KillMailBig:
                     case MessageTemplateType.KillMailRadius:
                     case MessageTemplateType.KillMailGeneral:

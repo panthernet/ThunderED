@@ -251,40 +251,63 @@
     "ccpAppSecret": "REQUIRED"
   },
 
-  "radiusKillFeedModule": {
-    "groupsConfig": {
-      "group1": {
-        "radius": 0,
-        "radiusChannels": [],
-        "radiusEntities": ["Asakai", 30045314],
-        "showGroupName":  false, 
-        "minimumValue": 0,
-        "FeedPvpKills":  true, 
-        "FeedPveKills":  true,
-        "FeedUrlsOnly":  false 
-      }
-    }
-  },
-  
   "liveKillFeedModule": {
-    "bigKill": 10000000000,
-    "//": "Post GLOBAL BIG kills to separate chat channel",
-    "bigKillChannel": 0,
-    "groupsConfig": {
+    "StopOnFirstGroupMatch": false,
+    "Groups": {
       "groupName": {
-        "discordChannel": 0,
-        "corpID": [0],
-        "allianceID": [0],
-        "showGroupName":  false, 
-        "minimumValue": 0,
-        "minimumLossValue": 0,
-        "bigKillValue": 300000000,
-        "//": "Post BIG kills to general chat channel",
-        "bigKillChannel": 0,		
-        "bigKillSendToGeneralToo": true,
-        "FeedPvpKills":  true, 
-        "FeedPveKills":  true,
-        "FeedUrlsOnly":  false 
+        "ShowGroupName": false,
+        "DiscordChannels": [],
+        "FeedPvpKills": true,
+        "FeedPveKills": true,
+        "FeedAwoxKills": true,
+        "FeedNotAwoxKills": true,
+        "FeedSoloKills": true,
+        "FeedGroupKills": true,
+        "FeedUrlsOnly": false,
+        "StopOnFirstFilterMatch": true,
+        "MessageTemplateFileName": "",
+        "Filters": {
+          "filter1": {
+            "Inclusive": true,
+            "AllMustMatch": true,
+            "MinimumKillValue": 0,
+            "MaximumKillValue": 0,
+            "MinimumLossValue": 0,
+            "MaximumLossValue": 0,
+            "ShipEntities": [],
+            "VictimEntities": [],
+            "AttackerEntities": [],
+            "Radius": 0,
+            "LocationEntities": [],
+            "DiscordChannels": []
+          }
+        }
+      },
+      "exampleGroup": {
+        "ShowGroupName": false,
+        "DiscordChannels": [ 567625555843743754, 567625555843743756 ],
+        "FeedPvpKills": true,
+        "FeedPveKills": true,
+        "FeedAwoxKills": true,
+        "FeedNotAwoxKills": true,
+        "FeedSoloKills": true,
+        "FeedGroupKills": true,
+        "FeedUrlsOnly": false,
+        "StopOnFirstMatch": true,
+        "MessageTemplateFileName": "Template.killMailGeneral.txt",
+        "Filters": {
+          "filter1": {
+            "Inclusive": true,
+            "MinimumKillValue": 10000000,
+            "MinimumLossValue": 20000000,
+            "ShipEntities": [ "Ibis", 2537 ],
+            "VictimEntities": [ "a:Fraternity", "c:Perkone", "Tau AD", 12121212 ],
+            "AttackerEntities": [ "a:TAPI", 1221212121 ],
+            "Radius": 0,
+            "LocationEntities": [ "Jita", "The Forge", "Kurala", 30045314 ],
+            "DiscordChannels": []
+          }
+        }
       }
     }
   },

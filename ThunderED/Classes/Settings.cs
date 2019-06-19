@@ -651,14 +651,18 @@ namespace ThunderED.Classes
     {
         //[Comment("Enable or disable caching. If you're getting many global KMs it might be better to disable it to free database from large chunks of one time data")]
         //public bool EnableCache { get; set; }
-        [Comment("Numeric value in ISK to consider the kill to be BIG enough")]
+        /*[Comment("Numeric value in ISK to consider the kill to be BIG enough")]
         public long BigKill { get; set; }
         [Comment("Numeric channel ID to post all GLOBAL big kills in EVE, 0 to skip")]
-        public ulong BigKillChannel { get; set; }
+        public ulong BigKillChannel { get; set; }*/
+
+        [Comment("Do not process KM in other groups if KM has been posted within a group")]
+        public bool StopOnFirstGroupMatch { get; set; }
+
 #if EDITOR
-        public ObservableDictionary<string, KillFeedGroup> GroupsConfig { get; set; } = new ObservableDictionary<string, KillFeedGroup>();
+        public ObservableDictionary<string, KillFeedGroup> Groups { get; set; } = new ObservableDictionary<string, KillFeedGroup>();
 #else
-        public Dictionary<string, KillFeedGroup> GroupsConfig { get; set; } = new Dictionary<string, KillFeedGroup>();
+        public Dictionary<string, KillFeedGroup> Groups { get; set; } = new Dictionary<string, KillFeedGroup>();
 #endif
 #if EDITOR
         public override string this[string columnName]
@@ -667,8 +671,8 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    case nameof(GroupsConfig):
-                        return GroupsConfig.Count == 0? Compose(nameof(GroupsConfig), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(Groups):
+                        return Groups.Count == 0? Compose(nameof(Groups), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }
 
                 return null;
@@ -679,38 +683,35 @@ namespace ThunderED.Classes
 
     public class KillFeedGroup: ValidatableSettings
     {
-        [Comment("Numeric ID of the Discord channel to post KMs of this group into")]
-        [Required]
-        public ulong DiscordChannel { get; set; }
-        [Comment("Minimum KM ISK value")]
-        public long MinimumValue { get; set; }
-        [Comment("minimum loss KM ISK value. Set to very high value to disable losses")]
-        public long MinimumLossValue { get; set; }
-        [Comment("Minimum KM ISK value to be considered as BIG for this group")]
-        public long BigKillValue { get; set; }
-        [Comment("Post BIG KMs to separate channel. Numeric channel ID value")]
-        public ulong BigKillChannel { get; set; }
-        [Comment("Also post big kills to the channel specified in discordChannel setting")]
-        public bool BigKillSendToGeneralToo { get; set; }
         [Comment("Post group name into notification message")]
         public bool ShowGroupName { get; set; }
-
+        [Comment("Feed PVP kills in this group")]
         public bool FeedPvpKills { get; set; } = true;
+        [Comment("Feed PVE kills in this group")]
         public bool FeedPveKills { get; set; } = true;
+        [Comment("Feed AWOX kills in this group")]
+        public bool FeedAwoxKills { get; set; } = true;
+        [Comment("Feed not AWOX kills in this group")]
+        public bool FeedNotAwoxKills { get; set; } = true;
+        [Comment("Feed SOLO kills in this group")]
+        public bool FeedSoloKills { get; set; } = true;
+        [Comment("Feed GROUP kills in this group")]
+        public bool FeedGroupKills { get; set; } = true;
         [Comment("Bot will send message containing only ZKB url and Discord will unfurl it automatically")]
         public bool FeedUrlsOnly { get; set; } = false;
+        [Comment("Do not process KM in other filters if KM has been posted within a filter")]
+        public bool StopOnFirstFilterMatch { get; set; } = true;
+        [Comment("Optional template file name from Templates/Messages folder")]
+        public string MessageTemplateFileName { get; set; }
 
 #if EDITOR
-        [Comment("Numeric corporation ID. Specify to fetch all KMs for this corporation. \nMutually exclusive with allianceID.")]
-        [Required]
-        public ObservableCollection<long> CorpID { get; set; } = new ObservableCollection<long>();
-        [Comment("Numeric alliance ID. Specify to fetch all KMs for this alliance. Mutually exclusive with corpID")]
-        [Required]
-        public ObservableCollection<long> AllianceID { get; set; } = new ObservableCollection<long>();
-
+        [Comment("List of Discord channel IDs for KM feed within a group")]
+        public ObservableCollection<ulong> DiscordChannels { get; set; } = new ObservableCollection<ulong>();
+        [Comment("List of filtering rules to filter KMs for a group")]
+        public ObservableDictionary<string, KillMailFilter> Filters { get; set; } = new ObservableDictionary<string, KillMailFilter>();
 #else
-        public List<long> CorpID { get; set; } = new List<long>();
-        public List<long> AllianceID { get; set; } = new List<long>();
+        public List<ulong> DiscordChannels = new List<ulong>();
+        public Dictionary<string, KillMailFilter> Filters = new Dictionary<string, KillMailFilter>();
 #endif
 
 #if EDITOR
@@ -720,15 +721,43 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    case nameof(DiscordChannel):
-                        return DiscordChannel == 0? Compose(nameof(DiscordChannel), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                    case nameof(CorpID):
-                        return !CorpID.Any() && !AllianceID.Any()? Compose(nameof(AllianceID), "Either CorpID or AllianceID must be specified!") : null;
+                    case nameof(DiscordChannels):
+                        return !DiscordChannels.Any() ? Compose(nameof(DiscordChannels), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }
 
                 return null;
             }
         }
+#endif
+    }
+
+    public class KillMailFilter
+    {
+        [Comment("If set to True - will display KM which fit filter criteria, otherwise will exclude KM which fit filter criteria")]
+        public bool Inclusive { get; set; } = true;
+        [Comment("If set to True in Inclusive mode - all filter criteria must match to feed KM, otherwise any match will do")]
+        public bool AllMustMatch { get; set; } = true;
+        public double MinimumKillValue { get; set; }
+        public double MinimumLossValue { get; set; }
+        public double MaximumKillValue { get; set; }
+        public double MaximumLossValue { get; set; }
+
+        [Comment("Numeric value of number of jumps around specified system. Leave 0 to disable radius feed. Has no effect on region or constellation.")]
+        public int Radius { get; set; }
+#if EDITOR
+        [Comment("List of Discord channel IDs for KM feed within a filter")]
+        public ObservableCollection<ulong> DiscordChannels { get; set; } = new ObservableCollection<ulong>();
+
+        public ObservableCollection<object> ShipEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> VictimEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> AttackerEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> RadiusEntities { get; set; } = new ObservableCollection<object>();
+#else
+        public List<object> ShipEntities = new List<object>();
+        public List<object> VictimEntities = new List<object>();
+        public List<object> AttackerEntities = new List<object>();
+        public List<ulong> DiscordChannels = new List<ulong>();
+        public List<object> LocationEntities = new List<object> ();
 #endif
     }
 

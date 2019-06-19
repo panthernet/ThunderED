@@ -4,6 +4,7 @@
     {
         KillMailGeneral,
         KillMailBig,
-        KillMailRadius
+        KillMailRadius,
+        Custom
     }
 }

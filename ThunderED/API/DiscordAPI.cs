@@ -298,7 +298,7 @@ namespace ThunderED.API
             return $"https://zkillboard.com/{killMailLinkTypes}/{id}/";
         }
 
-        internal async Task SendEmbedKillMessage(ulong channelId, Color color, KillDataEntry km, string radiusMessage, string msg = "")
+        internal async Task SendEmbedKillMessage(List<ulong> channelIds, Color color, KillDataEntry km, string radiusMessage, string msg = "")
         {
             msg = msg ?? "";
 
@@ -341,9 +341,12 @@ namespace ThunderED.API
                 builder.AddField(LM.Get("radiusInfoHeader"), radiusMessage);
 
             var embed = builder.Build();
-            var channel = GetGuild()?.GetTextChannel(channelId);
-            if (channel != null)
-                await SendMessageAsync(channel, msg, embed).ConfigureAwait(false);
+            foreach (var id in channelIds)
+            {
+                var channel = GetGuild()?.GetTextChannel(id);
+                if (channel != null)
+                    await SendMessageAsync(channel, msg, embed).ConfigureAwait(false);
+            }
         }
 
         public IMessageChannel GetChannel(ulong guildID, ulong noid)

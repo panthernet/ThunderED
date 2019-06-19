@@ -43,6 +43,11 @@ namespace ThunderED.Classes
                 .Select(group => group.Key);
         }
 
+        public static bool ContainsAnyFromList<T>(this IEnumerable<T> list, IEnumerable<T> fromList)
+        {
+            return list.Intersect(fromList).Any();
+        }
+
         public static IEnumerable<string> SplitToLines(this string stringToSplit, int maxLineLength, string delimiter = " ", bool preserveDelimiter = false)
         {
             var words = stringToSplit.Split(delimiter);

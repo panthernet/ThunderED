@@ -562,6 +562,7 @@ namespace ThunderED.Json
             public List<long> corporation = new List<long>();
             public List<long> faction = new List<long>();
             public List<long> station = new List<long>();
+            public List<long> inventory_type = new List<long>();
         }
 
         public class MoonData

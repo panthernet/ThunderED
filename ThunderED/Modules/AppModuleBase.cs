@@ -128,10 +128,11 @@ namespace ThunderED.Modules
             }
         }
 
-        private async Task<Dictionary<string, List<long>>> ParseMemberDataArray(List<object> list)
+        protected async Task<Dictionary<string, List<long>>> ParseMemberDataArray(List<object> list)
         {
             var result = new Dictionary<string, List<long>> {{"character", new List<long>()}, {"corporation", new List<long>()}, {"alliance", new List<long>()}};
             if (!list.Any()) return result;
+            var failedList = new List<object>();
             foreach (var entity in list)
             {
                 try
@@ -152,6 +153,7 @@ namespace ThunderED.Modules
                                 var rAlliance = await APIHelper.ESIAPI.GetAllianceData(Reason, entity);
                                 if (rAlliance != null)
                                     result["alliance"].Add(longNumber);
+                                else failedList.Add(longNumber);
                             }
                         }
                     }
@@ -167,11 +169,12 @@ namespace ThunderED.Modules
                         {
                             if (res.character.Any() && enumMod == MemberSearchModeEnum.Character)
                                 result["character"].Add(res.character.First());
-                            if (res.corporation.Any() && enumMod == MemberSearchModeEnum.Corporation)
+                            else if (res.corporation.Any() && enumMod == MemberSearchModeEnum.Corporation)
                                 result["corporation"].Add(res.corporation.First());
-                            if (res.alliance.Any() && enumMod == MemberSearchModeEnum.Alliance)
+                            else if (res.alliance.Any() && enumMod == MemberSearchModeEnum.Alliance)
                                 result["alliance"].Add(res.alliance.First());
-                        }
+                            else failedList.Add(searchString);
+                        }else failedList.Add(searchString);
                     }
                 }
                 catch (Exception ex)
@@ -180,13 +183,17 @@ namespace ThunderED.Modules
                 }
             }
 
+            if (failedList.Any())
+                await LogHelper.LogWarning($"Member entities not found: {string.Join(',', failedList)}!");
+
             return result;
         }
 
-        private async Task<Dictionary<string, List<long>>> ParseLocationDataArray(List<object> list)
+        protected async Task<Dictionary<string, List<long>>> ParseLocationDataArray(List<object> list)
         {
             var result = new Dictionary<string, List<long>> {{"solar_system", new List<long>()}, {"constellation", new List<long>()}, {"region", new List<long>()}};
             if (!list.Any()) return result;
+            var failedList = new List<object>();
             foreach (var entity in list)
             {
                 try
@@ -208,6 +215,7 @@ namespace ThunderED.Modules
                                 var rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, entity);
                                 if (rRegion != null)
                                     result["region"].Add(longNumber);
+                                else failedList.Add(longNumber);
                             }
                         }
                     }
@@ -218,11 +226,13 @@ namespace ThunderED.Modules
                         {
                             if (res.solar_system.Any())
                                 result["solar_system"].Add(res.solar_system.First());
-                            if (res.constellation.Any())
+                            else if (res.constellation.Any())
                                 result["constellation"].Add(res.constellation.First());
-                            if (res.region.Any())
+                            else if (res.region.Any())
                                 result["region"].Add(res.region.First());
+                            else failedList.Add(entity);
                         }
+                        else failedList.Add(entity);
                     }
                 }
                 catch (Exception ex)
@@ -231,8 +241,98 @@ namespace ThunderED.Modules
                 }
             }
 
+            if (failedList.Any())
+                await LogHelper.LogWarning($"Location entities not found: {string.Join(',', failedList)}!");
             return result;
         }
+
+        protected async Task<Dictionary<string, List<long>>> ParseTypeDataArray(List<object> list)
+        {
+            var result = new Dictionary<string, List<long>> {{"type", new List<long>()}};
+            if (!list.Any()) return result;
+            var failedList = new List<object>();
+            foreach (var entity in list)
+            {
+                try
+                {
+                    if (entity == null) continue;
+                    if (long.TryParse(entity.ToString(), out var longNumber))
+                    {
+                        //got ID
+                        var rType = await APIHelper.ESIAPI.GetTypeId(Reason, longNumber);
+                        if (rType != null)
+                            result["type"].Add(longNumber);
+                        else failedList.Add(longNumber);
+                    }
+                    else
+                    {
+                        var res = await APIHelper.ESIAPI.SearchTypeEntity(Reason, entity.ToString());
+                        if (res != null)
+                        {
+                            if (res.inventory_type.Any())
+                                result["type"].Add(res.inventory_type.First());
+                            else failedList.Add(entity);
+                        }
+                        else failedList.Add(entity);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx(nameof(Initialize), ex, Category);
+                }
+            }
+
+            if (failedList.Any())
+                await LogHelper.LogWarning($"Type entities not found: {string.Join(',', failedList)}!");
+            return result;
+        }
+
+        #region Tier2 Entity methods
+        protected List<long> GetTier2CharacterIds(Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> dic, string group = null, string filter = null)
+        {
+            return GetFromTier2Dictionary(dic, "character", group, filter);
+        }
+
+        public List<long> GetTier2CorporationIds(Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> dic, string group = null, string filter = null)
+        {
+            return GetFromTier2Dictionary(dic, "corporation", group, filter);
+        }
+
+        protected List<long> GetTier2AllianceIds(Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> dic, string group = null, string filter = null)
+        {
+            return GetFromTier2Dictionary(dic, "alliance", group, filter);
+        }
+
+        protected List<long> GetTier2SystemIds(Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> dic, string group = null, string filter = null)
+        {
+            return GetFromTier2Dictionary(dic, "solar_system", group, filter);
+        }
+
+        protected List<long> GetTier2ConstellationIds(Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> dic, string group = null, string filter = null)
+        {
+            return GetFromTier2Dictionary(dic, "constellation", group, filter);
+        }
+
+        protected List<long> GetTier2RegionIds(Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> dic, string group = null, string filter = null)
+        {
+            return GetFromTier2Dictionary(dic, "region", group, filter);
+        }
+
+        protected List<long> GetTier2TypeIds(Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> dic, string group = null, string filter = null)
+        {
+            return GetFromTier2Dictionary(dic, "type", group, filter);
+        }
+
+        protected List<long> GetFromTier2Dictionary(Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> dic, string prm, string group = null,
+            string filter = null)
+        {
+            if(group == null)
+                return dic.SelectMany(a=> a.Value).Where(a => a.Value.ContainsKey(prm)).SelectMany(a => a.Value[prm]).Distinct().Where(a => a > 0).ToList();
+            if(!dic.ContainsKey(group) && !dic.Values.Any(a=> a.ContainsKey(filter))) return new List<long>();
+            return dic[group][filter].Where(a => a.Key.Equals(prm, StringComparison.OrdinalIgnoreCase)).SelectMany(a => a.Value).Distinct().Where(a => a > 0).ToList();
+        }
+
+        #endregion
 
         protected enum MixedParseModeEnum
         {

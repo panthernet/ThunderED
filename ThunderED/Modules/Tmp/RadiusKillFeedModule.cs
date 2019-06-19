@@ -14,14 +14,14 @@ using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules.OnDemand
 {
-    public class RadiusKillFeedModule: AppModuleBase
+   /* public class RadiusKillFeedModule: AppModuleBase
     {
 
         private static readonly ConcurrentDictionary<string, long> LastPostedDictionary = new ConcurrentDictionary<string, long>();
         public sealed override LogCat Category => LogCat.RadiusKill;
         public RadiusKillFeedModule()
         {
-            LogHelper.LogModule("Inititalizing RadiusKillFeed module...", Category).GetAwaiter().GetResult();
+            LogHelper.LogModule("Initializing RadiusKillFeed module...", Category).GetAwaiter().GetResult();
             ZKillLiveFeedModule.Queryables.Add(ProcessKill);
             LastPostedDictionary.Clear();
         }
@@ -30,6 +30,7 @@ namespace ThunderED.Modules.OnDemand
         {
             var data = Settings.RadiusKillFeedModule.GroupsConfig.ToDictionary(pair => pair.Key, pair => pair.Value.RadiusEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Location);
+            
             var dupes = SettingsManager.Settings.RadiusKillFeedModule.GroupsConfig.Keys.GetDupes();
             if(dupes.Any())
                 await LogHelper.LogWarning($"RadiusKillFeed module has groups with identical names: {string.Join(',', dupes)}\n Please set unique group names to avoid inconsistency during KM checks.");
@@ -37,7 +38,7 @@ namespace ThunderED.Modules.OnDemand
             {
                 var d = new List<string>();
                 d.AddRange(dupes);
-                d.AddRange(SettingsManager.Settings.LiveKillFeedModule.GroupsConfig.Keys.GetDupes());
+                d.AddRange(SettingsManager.Settings.LiveKillFeedModule.Groups.Keys.GetDupes());
                 if(d.Any())
                     await LogHelper.LogWarning($"Radius and Live kill feed has groups with identical names: {string.Join(',', d)}\n Please set unique group names to avoid inconsistency during KM checks.");
             }
@@ -198,7 +199,7 @@ namespace ThunderED.Modules.OnDemand
                     else
                     {
                         var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {srcSystem?.name}" : $"{LM.Get("InSmall")} {km.sysName} ({km.systemSecurityStatus})";
-                        await APIHelper.DiscordAPI.SendEmbedKillMessage(channel, new Color(0x989898), km, string.IsNullOrEmpty(jumpsText) ? "-" : jumpsText, group.ShowGroupName ? groupName : " ");
+                        await APIHelper.DiscordAPI.SendEmbedKillMessage(new List<ulong> {channel}, new Color(0x989898), km, string.IsNullOrEmpty(jumpsText) ? "-" : jumpsText, group.ShowGroupName ? groupName : " ");
                     }
                 }
             }
@@ -207,5 +208,5 @@ namespace ThunderED.Modules.OnDemand
                 ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
             await LogHelper.LogInfo($"Posting  Radius Kill: {kill.killmail_id}  Value: {km.value:n0} ISK", Category);
         }
-    }
+    }*/
 }
