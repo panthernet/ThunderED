@@ -197,9 +197,9 @@ namespace ThunderED.Modules
             }
 
 
-            var ready = dbJobs.Where(a => a.StatusValue == IndustryJobStatusEnum.ready);
-            var ready2 = esiJobs.Where(a => a.StatusValue == IndustryJobStatusEnum.ready);
-            var x = dbJobs.FirstOrDefault(a => a.blueprint_type_id == 41607);
+            // var ready = dbJobs.Where(a => a.StatusValue == IndustryJobStatusEnum.ready);
+            // var ready2 = esiJobs.Where(a => a.StatusValue == IndustryJobStatusEnum.ready);
+            //var x = dbJobs.FirstOrDefault(a => a.blueprint_type_id == 41607);
 
 
             //check db jobs
