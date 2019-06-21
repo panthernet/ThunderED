@@ -218,15 +218,11 @@ namespace ThunderED.Modules
             var lst = !isCorp ? await SQLHelper.LoadContracts(characterID, false) : await SQLHelper.LoadContracts(characterID, true);
             var otherList = isCorp ? await SQLHelper.LoadContracts(characterID, false) : null;
 
-            if ((lst == null || !lst.Any()) && _isStartUp && contracts.Any())
+            if (lst == null)
             {
-                _isStartUp = false;
                 lst = new List<JsonClasses.Contract>(contracts.Where(a=> _activeStatuses.ContainsCaseInsensitive(a.status)).TakeSmart(maxContracts));
-                if (lst.Any())
-                {
-                    await SQLHelper.SaveContracts(characterID, lst, isCorp);
-                    return;
-                }
+                await SQLHelper.SaveContracts(characterID, lst, isCorp);
+                return;
             }
 
             /*
@@ -279,15 +275,14 @@ namespace ThunderED.Modules
                     }
                 }
 
+            }
 
-
-                //silently remove filtered out expired contracts
-                var lefties = lst.Where(a => _completeStatuses.Contains(a.status)).ToList();
-                foreach (var lefty in lefties)
-                {
-                    lst.Remove(lefty);
-                }
-
+            
+            //silently remove filtered out expired contracts
+            var lefties = lst.Where(a => _completeStatuses.Contains(a.status)).ToList();
+            foreach (var lefty in lefties)
+            {
+                lst.Remove(lefty);
             }
 
             //update cache list and look for new contracts

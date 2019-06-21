@@ -234,6 +234,17 @@ namespace ThunderED.Modules.Sub
                                 smth = true;
                             }
 
+                            if (Settings.Config.ModuleIndustrialJobs)
+                            {
+                                foreach (var (key, group) in Settings.IndustrialJobsModule.Groups)
+                                {
+                                    var authNurl = GetIndustryJobsAuthURL(group.Filters.Any(a=> a.Value.FeedPersonalJobs), group.Filters.Any(a=> a.Value.FeedCorporateJobs), key);
+                                    authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{group.ButtonText ?? key}</a>");
+
+                                }
+                                smth = true;
+                            }
+
                             if (smth)
                             {
                                 authText.Insert(len, $"<h2>{LM.Get("authWebSystemHeader")}</h2>{LM.Get("authPageSystemAuthHeader")}");
@@ -484,6 +495,26 @@ namespace ThunderED.Modules.Sub
             list.Add("esi-universe.read_structures.v1");
             var pString = string.Join('+', list);
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=cauth{HttpUtility.UrlEncode(groupName)}";
+        }
+
+        public static string GetIndustryJobsAuthURL(bool readChar, bool readCorp, string groupName)
+        {
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var callbackurl = GetCallBackUrl();
+            var list = new List<string>();
+            if (readChar)
+            {
+                list.Add("esi-industry.read_character_jobs.v1");
+            }
+
+            if (readCorp)
+            {
+                list.Add("esi-industry.read_corporation_jobs.v1");
+            }
+
+            list.Add("esi-universe.read_structures.v1");
+            var pString = string.Join('+', list);
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=ijobsauth{HttpUtility.UrlEncode(groupName)}";
         }
 
         public static string GetHRMInspectURL(long id, string authCode)

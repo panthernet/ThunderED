@@ -111,17 +111,23 @@ namespace ThunderED.Helpers
             return await Query<string>("refresh_tokens", "ctoken", "id", charId);
         }
 
-        internal static async Task InsertOrUpdateTokens(string notifyToken, string userId, string mailToken, string contractsToken)
+        public static async Task<string> GetRefreshTokenForIndustryJobs(long charId)
+        {
+            return await Query<string>("refresh_tokens", "indtoken", "id", charId);
+        }
+
+        internal static async Task InsertOrUpdateTokens(string notifyToken, string userId, string mailToken = null, string contractsToken = null, string industryToken = null)
         {   
             if (string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) || string.IsNullOrEmpty(userId))
             {
-                if(string.IsNullOrEmpty(contractsToken))
+                if(string.IsNullOrEmpty(contractsToken) && string.IsNullOrEmpty(industryToken))
                     return;
             }
 
             var mail = string.IsNullOrEmpty(mailToken) ? await Query<string>("refresh_tokens", "mail", "id", userId) : mailToken;
             var token = string.IsNullOrEmpty(notifyToken) ? await Query<string>("refresh_tokens", "token", "id", userId) : notifyToken;
             var ctoken = string.IsNullOrEmpty(contractsToken) ? await Query<string>("refresh_tokens", "ctoken", "id", userId) : contractsToken;
+            var itoken = string.IsNullOrEmpty(industryToken) ? await Query<string>("refresh_tokens", "indtoken", "id", userId) : industryToken;
             token = token ?? "";
             mail = mail ?? "";
             ctoken = ctoken ?? "";
@@ -131,7 +137,8 @@ namespace ThunderED.Helpers
                 {"id", userId},
                 {"token", token},
                 {"mail", mail},
-                {"ctoken", ctoken}
+                {"ctoken", ctoken},
+                {"indtoken", itoken},
             });
         }
 
@@ -786,8 +793,8 @@ namespace ThunderED.Helpers
             await InsertOrUpdate("contracts", new Dictionary<string, object>
             {
                 {"characterID", characterID},
-                {isCorp ? "corpdata" : "data", string.IsNullOrEmpty(result) ? "[]" : result},
-                {isCorp ? "data" : "corpdata", string.IsNullOrEmpty(d) ? "[]" : d}
+                {isCorp ? "corpdata" : "data", string.IsNullOrEmpty(result) ? null : result},
+                {isCorp ? "data" : "corpdata", string.IsNullOrEmpty(d) ? null : d}
             });
         }
         #endregion
@@ -915,5 +922,26 @@ namespace ThunderED.Helpers
 
         #endregion
 
+        #region Industry Jobs
+        public static async Task<List<JsonClasses.IndustryJob>> LoadIndustryJobs(long characterID, bool isCorp)
+        {
+            var data = (string)(await SelectData("industry_jobs", new [] {isCorp ? "corporate_jobs" : "personal_jobs"}, new Dictionary<string, object> {{"character_id", characterID}}))?.FirstOrDefault()?.FirstOrDefault();
+            return string.IsNullOrEmpty(data) ? null : JsonConvert.DeserializeObject<List<JsonClasses.IndustryJob>>(data).OrderByDescending(a=> a.job_id).ToList();
+        }
+
+        public static async Task SaveIndustryJobs(long characterID, List<JsonClasses.IndustryJob> data, bool isCorp)
+        {
+            var result = JsonConvert.SerializeObject(data);
+
+            var d = (string)(await SelectData("industry_jobs", new [] {isCorp ? "personal_jobs" : "corporate_jobs"}, new Dictionary<string, object> {{"character_id", characterID}}))?.FirstOrDefault()?.FirstOrDefault();
+
+            await InsertOrUpdate("industry_jobs", new Dictionary<string, object>
+            {
+                {"character_id", characterID},
+                {isCorp ? "corporate_jobs" : "personal_jobs", string.IsNullOrEmpty(result) ? null : result},
+                {isCorp ? "personal_jobs" : "corporate_jobs", string.IsNullOrEmpty(d) ? null : d}
+            });
+        }
+        #endregion
     }
 }

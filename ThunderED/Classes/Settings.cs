@@ -87,6 +87,8 @@ namespace ThunderED.Classes
         [StaticConfigEntry]
         public ZKBSettingsModuleSettings ZKBSettingsModule { get; set; } = new ZKBSettingsModuleSettings();
 
+        [ConfigEntryName("ModuleIndustrialJobs")]
+        public IndustrialJobsModuleSettings IndustrialJobsModule { get; set; } = new IndustrialJobsModuleSettings();
 
 #if EDITOR
         public string Validate(List<string> usedModules)
@@ -115,6 +117,56 @@ namespace ThunderED.Classes
 
             return sb.ToString();
         }
+#endif
+    }
+
+    public class IndustrialJobsModuleSettings
+    {
+        public int CheckIntervalInMinutes { get; set; } = 5;
+
+#if EDITOR
+        public ObservableDictionary<string, IndustrialJobGroup> Groups { get; set; } = new  ObservableDictionary<string, IndustrialJobGroup>();
+#else
+        public Dictionary<string, IndustrialJobGroup> Groups { get; set; } = new  Dictionary<string, IndustrialJobGroup>();
+#endif
+    }
+
+    public class IndustrialJobGroup
+    {
+        public string ButtonText { get; set; }
+
+#if EDITOR
+        public ObservableCollection<object> CharacterEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<ulong> DiscordChannels { get; set; } = new ObservableCollection<ulong>();
+        public ObservableDictionary<string, IndustryJobFilter> Filters { get; set; } = new ObservableDictionary<string, IndustryJobFilter>();
+#else
+        public List<object> CharacterEntities { get; set; } = new  List<object>();
+        public List<ulong> DiscordChannels { get; set; } = new  List<ulong>();
+        public Dictionary<string, IndustryJobFilter> Filters { get; set; } = new Dictionary<string, IndustryJobFilter>();
+#endif
+    }
+
+    public class IndustryJobFilter
+    {
+        public bool FeedPersonalJobs { get; set; } = true;
+        public bool FeedCorporateJobs { get; set; } = true;
+        public bool FeedStartingJobs { get; set; } = true;
+        public bool FeedCancelledJobs { get; set; } = true;
+        public bool FeedReadyJobs { get; set; } = true;
+        public bool FeedDeliveredJobs { get; set; } = true;
+        public bool FeedPausedJobs { get; set; } = true;
+        public bool FeedRevertedJobs { get; set; } = true;
+
+        public bool FeedResearchJobs { get; set; } = true;
+        public bool FeedCopyingJobs { get; set; } = true;
+        public bool FeedInventionJobs { get; set; } = true;
+        public bool FeedReactionJobs { get; set; } = true;
+        public bool FeedBuildJobs { get; set; } = true;
+
+#if EDITOR
+        public ObservableCollection<ulong> DiscordChannels { get; set; } = new ObservableCollection<ulong>();
+#else
+        public List<ulong> DiscordChannels { get; set; } = new  List<ulong>();
 #endif
     }
 
@@ -1559,6 +1611,7 @@ namespace ThunderED.Classes
         public bool ModuleContractNotifications { get; set; } = false;
         public bool ModuleSovTracker { get; set; } = false;
         public bool ModuleWebConfigEditor { get; set; } = false;
+        public bool ModuleIndustrialJobs { get; set; } = false;
 
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";

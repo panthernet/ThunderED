@@ -85,11 +85,9 @@ namespace ThunderED.Helpers
             }
         }
 
-        public static string ToFormattedString(this TimeSpan ts)
+        public static string ToFormattedString(this TimeSpan ts, string separator = ", ")
         {
-            const string separator = ", ";
-
-            if (ts.Milliseconds < 1) { return "No time"; }
+            if (ts.TotalMilliseconds < 1) { return "No time"; }
 
             return string.Join(separator, new string[]
             {

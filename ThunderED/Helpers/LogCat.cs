@@ -42,6 +42,7 @@
         SimplAuth,
         Caps,
         WebSettings,
-        DiscordRoles
+        DiscordRoles,
+        IndustrialJobs
     }
 }

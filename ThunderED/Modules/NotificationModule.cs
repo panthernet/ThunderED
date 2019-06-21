@@ -128,6 +128,22 @@ namespace ThunderED.Modules
 
                             var notifications = result.Result;
 
+ /*                           notifications.Add(new JsonClasses.Notification
+   {
+       text = @"listOfTypesAndQty:
+- - 211
+- 4312
+solarsystemID: 30003354
+structureID: &id001 1030256062178
+structureShowInfoData:
+- showinfo
+- 35825
+- *id001
+structureTypeID: 35825",
+       notification_id = 999990000,
+       type = "StructureFuelAlert"
+   });*/
+
                             var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId);
                             var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
 
@@ -138,7 +154,7 @@ namespace ThunderED.Modules
                                 var filter = filterPair.Value;
                                 _lastNotification = await SQLHelper.GetLastNotification(groupPair.Key, filterPair.Key);
 
-                                List<JsonClasses.Notification> fNotifications = new List<JsonClasses.Notification>();
+                                var fNotifications = new List<JsonClasses.Notification>();
                                 if (_lastNotification == 0)
                                 {
                                     var now = DateTime.UtcNow;
@@ -162,22 +178,8 @@ namespace ThunderED.Modules
                                         .OrderBy(x => x.notification_id).ToList();
 
 
-                               //check if there are new notifications to process
-                             /*   fNotifications.Add(new JsonClasses.Notification
-                                {
-                                    text = @"listOfTypesAndQty:
-- - 211
-  - 4312
-solarsystemID: 30003354
-structureID: &id001 1030256062178
-structureShowInfoData:
-- showinfo
-- 35825
-- *id001
-structureTypeID: 35825",
-                                    notification_id = 999990000,
-                                    type = "StructureFuelAlert"
-                                });*/
+                                //check if there are new notifications to process
+
                                 if (fNotifications.Count > 0 && fNotifications.Last().notification_id != _lastNotification)
                                 {
                                     foreach (var notification in fNotifications)

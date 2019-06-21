@@ -16,7 +16,7 @@ namespace ThunderED.Helpers
         private static readonly string[] MajorVersionUpdates = new[]
         {
             "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15",
-            "1.2.16","1.2.19", "1.3.1", "1.3.2", "1.3.4", "1.3.10"
+            "1.2.16","1.2.19", "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16"
         };
 
         public static async Task<bool> Upgrade()
@@ -353,6 +353,12 @@ namespace ThunderED.Helpers
                             break;
                         case "1.3.10":
                             await RunCommand("CREATE TABLE `web_editor_auth` ( `id` int UNIQUE PRIMARY KEY NOT NULL, `code` TEXT NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP);");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
+                        case "1.3.16":
+                            await RunCommand("ALTER TABLE `refresh_tokens` ADD COLUMN `indtoken` bigint NULL;");
+                            await RunCommand("CREATE TABLE `industry_jobs` (`character_id` bigint UNIQUE NOT NULL, `personal_jobs` TEXT NULL, `corporate_jobs` TEXT NULL);");
+                            await RunCommand("DELETE FROM `contracts`;");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:

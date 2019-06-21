@@ -1,5 +1,7 @@
-### V1.3.15
+### V1.3.16
 + Added console warning messages for entities that has not been recognized
++ Added new IndustrialJobsModule
++ Fixed ContractsFeedModule initial cache generation
 + Improved and updated defult KM messages (thanks to @mrurb)
 + Improved daily stats info (thanks to @mrurb)
 + Added KM feed groups check and warning for equal group names. Groups must be unque for KM duplicate filters to work correctly.
@@ -24,6 +26,7 @@ On top of the existing features now you can:
 ### BREAKING CHANGES
 - Removed `RadiusKillFeedModule` and corresponding settings. Its functionality has been merged into `LiveKillFeedModule`
 - Redesigned `LiveKillFeedModule` settings section, please take a look and update
+- Contracts cache will be flushed to correct some inconsistencies. First contracts check will fill the cache.
 
 
 ### V1.3.14

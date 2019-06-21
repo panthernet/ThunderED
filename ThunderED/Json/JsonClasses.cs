@@ -571,5 +571,77 @@ namespace ThunderED.Json
             public string name;
             public long system_id;
         }
+
+        public class IndustryJob
+        {
+            public long activity_id;
+            public long blueprint_id;
+            public long blueprint_location_id;
+            public long blueprint_type_id;
+            public long completed_character_id;
+            public DateTime? completed_date;
+            public double cost;
+            public int duration;
+            public DateTime? end_date;
+            public long facility_id;
+            public long installer_id;
+            public long job_id;
+            public int licensed_runs;
+            public long output_location_id;
+            public DateTime? pause_date;
+            public double probability;
+            public long product_type_id;
+            public int runs;
+            public DateTime? start_date;
+            public long station_id;
+            public string status;
+            public int successful_runs;
+
+            [JsonIgnore]
+            public IndustryJobActivity Activity => (IndustryJobActivity)activity_id;
+            [JsonIgnore]
+            public IndustryJobStatusEnum StatusValue
+            {
+                get
+                {
+                    switch (status.ToLower())
+                    {
+                        case "active":
+                            return IndustryJobStatusEnum.active;
+                        case "ready":
+                            return IndustryJobStatusEnum.ready;
+                        case "paused":
+                            return IndustryJobStatusEnum.paused;
+                        case "delivered":
+                            return IndustryJobStatusEnum.delivered;
+                        case "reverted":
+                            return IndustryJobStatusEnum.reverted;
+                        case "cancelled":
+                            return IndustryJobStatusEnum.cancelled;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+        }
+    }
+
+    public enum IndustryJobStatusEnum
+    {
+        active, cancelled, delivered, paused, ready, reverted 
+    }
+
+    public enum IndustryJobActivity
+    {
+        none = 0,
+        build = 1,
+        techResearch = 2,
+        te = 3,
+        me = 4,
+        copy = 5,
+        duplicating = 6,
+        reverseEng = 7,
+        inventing = 8,
+        reaction = 11
     }
 }

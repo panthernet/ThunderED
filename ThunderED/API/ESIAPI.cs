@@ -554,5 +554,18 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<JsonClasses.MoonData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/moons/{id}/?datasource=tranquility&language={_language}", reason);
 
         }
+
+        public async Task<ESIQueryResult<List<JsonClasses.IndustryJob>>> GetCorpIndustryJobs(string reason, object id, string token, string etag)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.IndustryJob>>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/industry/jobs/?datasource=tranquility&include_completed=true&language={_language}", reason, authHeader);
+        }
+
+        public async Task<ESIQueryResult<List<JsonClasses.IndustryJob>>> GetCharacterIndustryJobs(string reason, object id, string token, string etag)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.IndustryJob>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/industry/jobs/?datasource=tranquility&include_completed=true&language={_language}", reason, authHeader);
+        }
+
     }
 }

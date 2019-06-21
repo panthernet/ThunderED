@@ -91,6 +91,9 @@ namespace ThunderED.Classes
             if(SettingsManager.Settings.Config.ModuleSovTracker)
                 Modules.Add(new SovTrackerModule());
 
+            if(SettingsManager.Settings.Config.ModuleIndustrialJobs)
+                Modules.Add(new IndustrialJobsModule());
+
             if (SettingsManager.Settings.Config.ModuleHRM)
             {
                 Modules.Add(new HRMModule());

@@ -30,37 +30,38 @@
     "moduleIncursionNotify": false,
     "moduleNullsecCampaign": false,
     "moduleFWStats": false,
-    "ModuleLPStock": false, 
-    "moduleHRM":  false, 
-    "ModuleSystemLogFeeder":  false, 
-    "ModuleStats":  true, 
-    "ModuleContractNotifications":  false, 
-    "ModuleSovTracker":  false, 
-    "ModuleWebConfigEditor":  false, 
+    "ModuleLPStock": false,
+    "moduleHRM": false,
+    "ModuleSystemLogFeeder": false,
+    "ModuleStats": true,
+    "ModuleContractNotifications": false,
+    "ModuleSovTracker": false,
+    "ModuleWebConfigEditor": false,
+    "ModuleIndustrialJobs":  false, 
 
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
     "dateFormat": "dd.MM.yyyy",
-     "welcomeMessage": true,
-    "WelcomeMessageChannelId":  0, 
+    "welcomeMessage": true,
+    "WelcomeMessageChannelId": 0,
     "cachePurgeInterval": 30,
     "memoryUsageLimitMb": 100,
-    "logSeverity": "Info",	
+    "logSeverity": "Info",
     "logNewNotifications": true,
     "requestRetries": 3,
-    "extendedESILogging":  false,
+    "extendedESILogging": false,
     "ESIAddress": "https://esi.evetech.net/",
-    "UseHTTPS":  false,
-    "RunAsServiceCompatibility":  false,
+    "UseHTTPS": false,
+    "RunAsServiceCompatibility": false,
     "DisableLogIntoFiles": false,
-    "LanguageFilesFolder":  ""
+    "LanguageFilesFolder": ""
   },
 
   "ZKBSettingsModule": {
     "zkillLiveFeedRedisqID": "",
     "UseSocketsForZKillboard": true,
     "ZKillboardWebSocketUrl": "wss://zkillboard.com:2096",
-    "AvoidDupesAcrossAllFeeds":  false 
+    "AvoidDupesAcrossAllFeeds": false
   },
 
   "WebConfigEditorModule": {
@@ -70,7 +71,7 @@
         "AllowedEntities": [ "Character Name", "c:Corporation Name", "a:Alliance Name", 1234567890 ],
         "AllowedDiscordRoles": [],
         "CanEditSimplifiedAuth": true,
-        "CanEditTimers":  true 
+        "CanEditTimers": true
       }
     }
   },
@@ -82,32 +83,32 @@
 
     "EnableRoleManagementCommands": false,
     "RolesCommandDiscordRoles": [ "DiscordRole" ],
-    "RolesCommandAllowedRoles": ["Admins"], 
-    "RolesCommandDiscordChannels":  []
+    "RolesCommandAllowedRoles": [ "Admins" ],
+    "RolesCommandDiscordChannels": []
   },
 
   "Database": {
-    "databaseProvider":  "sqlite",
+    "databaseProvider": "sqlite",
     "databaseFile": "edb.db",
     "ServerAddress": "",
-    "ServerPort":  0,
+    "ServerPort": 0,
     "DatabaseName": "",
-    "UserId":  "",
+    "UserId": "",
     "Password": "",
-    "CustomConnectionString":  "" 
+    "CustomConnectionString": ""
   },
 
   "ContractNotificationsModule": {
-    "CheckIntervalInMinutes":  1,
-    "MaxTrackingCount":  150, 
+    "CheckIntervalInMinutes": 1,
+    "MaxTrackingCount": 150,
     "Groups": {
       "group1": {
-        "CharacterIDs": [0],
-        "ButtonText":  "Default Contracts Auth",
+        "CharacterIDs": [ 0 ],
+        "ButtonText": "Default Contracts Auth",
         "DefaultMention": "",
-        "FeedPersonalContracts":  true,
-        "FeedCorporateContracts":  true,
-        "Filters":  {
+        "FeedPersonalContracts": true,
+        "FeedCorporateContracts": true,
+        "Filters": {
           "defaultFilter": {
             "FeedIssuedBy": true,
             "FeedIssuedTo": true,
@@ -118,16 +119,16 @@
             "DiscordChannelId": 0,
             "ShowOnlyBasicDetails": false,
             "RedirectByIdInDescription": false,
-            "PostToChannelIfRedirected":  false 
-          }   
+            "PostToChannelIfRedirected": false
+          }
         }
-      } 
-    } 
+      }
+    }
   },
 
   "SystemLogFeederModule": {
-    "DiscordChannelId":  0,
-    "OnlyErrors":  false 
+    "DiscordChannelId": 0,
+    "OnlyErrors": false
   },
 
   "ContinousCheckModule": {
@@ -137,16 +138,16 @@
   },
 
   "StatsModule": {
-    "EnableStatsCommand":  true, 
-    "RatingModeChannelId":  0, 
+    "EnableStatsCommand": true,
+    "RatingModeChannelId": 0,
     "DailyStatsGroups": {
       "group1": {
         "DailyStatsChannel": 0,
         "DailyStatsCorp": 0,
         "DailyStatsAlliance": 0,
-        "IncludeInRating":  false 
-      } 
-    } 
+        "IncludeInRating": false
+      }
+    }
   },
 
   "HRMModule": {
@@ -195,22 +196,22 @@
     "checkIntervalInMinutes": 2,
     "AuthGroups": {
       "VesNa": {
-        "Id": [0],
+        "Id": [ 0 ],
         "IncludePrivateMail": true,
         "DefaultChannel": 0,
         "DefaultMention": "",
         "Filters": {
           "CorpMailFilter": {
-            "FilterLabels": ["[Corp]", "[Alliance]"],
+            "FilterLabels": [ "[Corp]", "[Alliance]" ],
             "FilterSenders": [],
-            "FilterMailList": ["TestList"],
+            "FilterMailList": [ "TestList" ],
             "FeedChannel": 0,
-            "DisplayDetailsSummary": true 
+            "DisplayDetailsSummary": true
           },
           "MailListFilter": {
             "FilterLabels": [],
             "FilterSenders": [],
-            "FilterMailList": ["TestList"],
+            "FilterMailList": [ "TestList" ],
             "FeedChannel": 0,
             "DisplayDetailsSummary": false
           }
@@ -224,10 +225,10 @@
     "autoAddTimerForReinforceNotifications": true,
     "TinyUrl": "",
     "grantEditRolesToDiscordAdmins": true,
-    "announces": [60, 10],
+    "announces": [ 60, 10 ],
     "announceChannel": 0,
-    "TimeInputFormat":  "DD.MM.YYYY HH:mm", 
-    "DefaultMention":  "@everyone",
+    "TimeInputFormat": "DD.MM.YYYY HH:mm",
+    "DefaultMention": "@everyone",
     "accessList": {
       "group1": {
         "FilterEntities": [ "Character Name", "a:Alliance Name", "c:Corporation Name", 795045209 ],
@@ -315,75 +316,75 @@
     "authCheckIntervalMinutes": 480,
     "StandingsRefreshIntervalInMinutes": 60,
     "exemptDiscordRoles": [ "Admins" ],
-    "AuthCheckIgnoreRoles":  [ "CustomDiscordRoleToSkipOnAuthCheck" ],
+    "AuthCheckIgnoreRoles": [ "CustomDiscordRoleToSkipOnAuthCheck" ],
     "authReportChannel": 0,
     "//": "Channels where !auth command is allowed. Empty - everywhere",
-    "comAuthChannels":  [],
+    "comAuthChannels": [],
     "DefaultAuthGroup": "Mode1",
     "enforceCorpTickers": true,
     "enforceAllianceTickers": true,
     "enforceCharName": true,
-    "UseOneAuthButton":  false, 
+    "UseOneAuthButton": false,
     "authGroups": {
       "Mode1_GeneralAuth": {
-        "UseStrictAuthenticationMode": "false", 
-        "AllowedCharacters":  {} ,
+        "UseStrictAuthenticationMode": "false",
+        "AllowedCharacters": {},
         "AllowedCorporations": {
           "corp1": {
-            "Id": [98499225],
-            "DiscordRoles": ["Member", "TestRole2"]
+            "Id": [ 98499225 ],
+            "DiscordRoles": [ "Member", "TestRole2" ]
           },
           "corp2": {
-            "Id": [98499226],
-            "DiscordRoles": ["Ally"]
-          } 
-        },
-        "AllowedAlliances":{
-          "ally1": {
-            "Id": [99003557],
-            "DiscordRoles": ["Member"]
-          },
-          "ally2": {
-            "Id": [99003558],
-            "DiscordRoles": ["Ally", "Dummy"]
+            "Id": [ 98499226 ],
+            "DiscordRoles": [ "Ally" ]
           }
         },
-        "authRoles": ["Admins"],
-        "ManualAssignmentRoles":  [ ], 
+        "AllowedAlliances": {
+          "ally1": {
+            "Id": [ 99003557 ],
+            "DiscordRoles": [ "Member" ]
+          },
+          "ally2": {
+            "Id": [ 99003558 ],
+            "DiscordRoles": [ "Ally", "Dummy" ]
+          }
+        },
+        "authRoles": [ "Admins" ],
+        "ManualAssignmentRoles": [],
         "CustomButtonText": "General Auth",
-        "ExcludeFromOneButtonMode":  false, 
-        "DefaultMention":  ""
+        "ExcludeFromOneButtonMode": false,
+        "DefaultMention": ""
       },
       "Mode2_GeneralWithESIFetch": {
-        "AllowedCharacters":  {} ,
+        "AllowedCharacters": {},
         "AllowedCorporations": {},
-        "AllowedAlliances":{
+        "AllowedAlliances": {
           "ally1": {
-            "Id": [99003599],
-            "DiscordRoles": ["Member"]
+            "Id": [ 99003599 ],
+            "DiscordRoles": [ "Member" ]
           }
         },
         "authRoles": [],
-        "ManualAssignmentRoles":  [ ], 
-        "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
+        "ManualAssignmentRoles": [],
+        "ESICustomAuthRoles": [ "esi-skills.read_skills.v1" ],
         "CustomButtonText": "General Token Auth",
-        "DefaultMention":  ""
+        "DefaultMention": ""
       },
       "Mode3_Preliminary": {
-        "AllowedCharacters":  {} ,
+        "AllowedCharacters": {},
         "AllowedCorporations": {},
-        "AllowedAlliances":{
+        "AllowedAlliances": {
           "ally1": {
-            "Id": [0],
-            "DiscordRoles": ["Member"]
+            "Id": [ 0 ],
+            "DiscordRoles": [ "Member" ]
           }
         },
-        "authRoles": ["Admins"],
-        "ManualAssignmentRoles":  [ ], 
+        "authRoles": [ "Admins" ],
+        "ManualAssignmentRoles": [],
         "PreliminaryAuthMode": true,
         "AppInvalidationInHours": 480,
-        "CustomButtonText":  "Preliminary Auth", 
-        "DefaultMention":  "",
+        "CustomButtonText": "Preliminary Auth",
+        "DefaultMention": "",
         "ESICustomAuthRoles": [
           "esi-assets.read_assets.v1",
           "esi-characters.read_blueprints.v1",
@@ -413,23 +414,23 @@
         ]
       },
       "Mode4_StandingsBased": {
-        "ManualAssignmentRoles":  [ ], 
+        "ManualAssignmentRoles": [],
         "PreliminaryAuthMode": false,
         "ESICustomAuthRoles": [],
         "CustomButtonText": "Standings Based Auth",
-        "DefaultMention":  "",
+        "DefaultMention": "",
 
         "StandingsAuth": {
-          "CharacterIDs": [0],
+          "CharacterIDs": [ 0 ],
           "WebAdminButtonText": "Standings Admin Auth",
           "UseCharacterStandings": true,
           "UseCorporationStandings": false,
           "UseAllianceStandings": false,
           "StandingFilters": {
             "defaultFilter": {
-              "Standings": [0],
+              "Standings": [ 0 ],
               "Modifier": "eq",
-              "DiscordRoles": ["Role1"]
+              "DiscordRoles": [ "Role1" ]
             }
           }
         }
@@ -437,14 +438,14 @@
       "Mode5_ESIWithoutDiscord": {
         "PreliminaryAuthMode": true,
         "AppInvalidationInHours": 24,
-        "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
+        "ESICustomAuthRoles": [ "esi-skills.read_skills.v1" ],
         "CustomButtonText": "ESI without Discord Auth",
-        "SkipDiscordAuthPage":  true
+        "SkipDiscordAuthPage": true
       },
       "Mode6_AltCharactersAuth": {
-        "ESICustomAuthRoles": ["esi-skills.read_skills.v1"],
+        "ESICustomAuthRoles": [ "esi-skills.read_skills.v1" ],
         "CustomButtonText": "Alt Characters Auth",
-        "BindToMainCharacter":  true 
+        "BindToMainCharacter": true
       }
     }
   },
@@ -467,11 +468,11 @@
     "imgTimerAlert": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgTimerAlert.png",
     "imgMail": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgMail.png",
     "imgIncursion": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgIncursion.png",
-    "ImgFactionCaldari":  "https://wiki.eveuniversity.org/images/e/e3/Logo_faction_caldari_state.png", 
-    "ImgFactionGallente":  "https://wiki.eveuniversity.org/images/b/b9/Logo_faction_gallente_federation.png", 
-    "ImgFactionAmarr":  "https://wiki.eveuniversity.org/images/a/a0/Logo_faction_amarr_empire.png",
-    "ImgFactionMinmatar":  "https://wiki.eveuniversity.org/images/1/1f/Logo_faction_minmatar_republic.png",
-    "imgEntosisAlert":  "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgEntosisAlert.png",
+    "ImgFactionCaldari": "https://wiki.eveuniversity.org/images/e/e3/Logo_faction_caldari_state.png",
+    "ImgFactionGallente": "https://wiki.eveuniversity.org/images/b/b9/Logo_faction_gallente_federation.png",
+    "ImgFactionAmarr": "https://wiki.eveuniversity.org/images/a/a0/Logo_faction_amarr_empire.png",
+    "ImgFactionMinmatar": "https://wiki.eveuniversity.org/images/1/1f/Logo_faction_minmatar_republic.png",
+    "imgEntosisAlert": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgEntosisAlert.png",
     "ImgContract": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgContract.png",
     "ImgContractDelete": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgContractDelete.png"
   },
@@ -480,9 +481,9 @@
     "checkIntervalInMinutes": 2,
     "groups": {
       "groupName1": {
-        "characterID": [0],
+        "characterID": [ 0 ],
         "defaultDiscordChannelID": 0,
-        "fetchLastNotifDays":  0,
+        "fetchLastNotifDays": 0,
         "filters": {
           "filter1": {
             "notifications": [
@@ -537,7 +538,7 @@
             "charMentions": [],
             "roleMentions": []
           }
-        }	
+        }
       }
     }
   },
@@ -560,8 +561,8 @@
     "channel": 0,
     "announce_post": true,
     "announce": [ 5, 60 ],
-    "DefaultMention":  "@everyone",
-    "FinalTimeMention": "@here" 
+    "DefaultMention": "@everyone",
+    "FinalTimeMention": "@here"
   },
 
   "jabberModule": {
@@ -615,10 +616,10 @@
 
   "telegramModule": {
     "token": "YOUR TOKEN",
-    "ProxyAddress":  "0",
-    "ProxyPort":  0, 
-    "ProxyUsername":  "", 
-    "ProxyPassword":  "", 
+    "ProxyAddress": "0",
+    "ProxyPort": 0,
+    "ProxyUsername": "",
+    "ProxyPassword": "",
     "RelayChannels": [
       {
         "telegram": 0,
@@ -644,11 +645,11 @@
   },
 
   "incursionNotificationModule": {
-	  "DiscordChannelId": 0,
-    "DefaultMention": "@everyone", 
-	  "Regions": [],
-	  "Constellations": [],
-	  "ReportIncursionStatusAfterDT": true
+    "DiscordChannelId": 0,
+    "DefaultMention": "@everyone",
+    "Regions": [],
+    "Constellations": [],
+    "ReportIncursionStatusAfterDT": true
   },
 
   "NullCampaignModule": {
@@ -659,8 +660,8 @@
         "Constellations": [],
         "Announces": [],
         "Mentions": [],
-        "DefaultMention":  "@everyone", 
-        "ReportNewCampaign":  "true", 
+        "DefaultMention": "@everyone",
+        "ReportNewCampaign": "true",
         "DiscordChannelId": 0
       }
     }
@@ -681,6 +682,38 @@
         "DiscordChannelId": 0
       }
     }
-  }
+  },
+
+  "IndustrialJobsModule": {
+    "CheckIntervalInMinutes": 5,
+    "Groups": {
+      "groupName1": {
+        "DiscordChannels": [],
+        "CharacterEntities": [],
+        "Filters": {
+          "filter1": {
+            "DiscordChannels": [],
+            "FeedPersonalJobs": true,
+            "FeedCorporateJobs": true,
+
+            "FeedStartingJobs": true,
+            "FeedCancelledJobs": true,
+            "FeedReadyJobs": true,
+            "FeedDeliveredJobs": true,
+            "FeedPausedJobs": true,
+            "FeedRevertedJobs": true,
+
+            "FeedResearchJobs": true,
+            "FeedCopyingJobs": true,
+            "FeedInventionJobs": true,
+            "FeedReactionJobs": true,
+            "FeedBuildJobs": true
+
+          }
+        },
+        "ButtonText": ""
+      }
+    }
+  } 
 
 }
