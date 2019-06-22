@@ -15,7 +15,6 @@
     "moduleAuthWeb": false,
     "moduleCharCorp": false,
     "moduleLiveKillFeed": false,
-    "moduleRadiusKillFeed": false,
     "modulePriceCheck": false,
     "moduleTime": false,
     "moduleFleetup": false,
