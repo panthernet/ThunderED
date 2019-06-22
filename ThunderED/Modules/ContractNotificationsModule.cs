@@ -169,9 +169,7 @@ namespace ThunderED.Modules
                         }
                     }
                 }
-
-
-               // await LogHelper.LogModule("Completed", Category);
+                // await LogHelper.LogModule("Completed", Category);
             }
             catch (Exception ex)
             {
@@ -251,6 +249,9 @@ namespace ThunderED.Modules
                     if(filter.Types.Any() && !filter.Types.Contains(contract.type))
                         continue;
 
+                    if (filter.Availability.Any() && !filter.Availability.ContainsCaseInsensitive(contract.availability))
+                        continue;
+
                     //check for completion
                     if (_completeStatuses.Contains(freshContract.status) && filter.Statuses.Contains(freshContract.status))
                     {
@@ -305,8 +306,13 @@ namespace ThunderED.Modules
                 if (!crFilter?.FeedIssuedTo ?? false)
                     list = list.Where(a => a.assignee_id != characterID && a.assignee_id != corpID).ToList();
 
+                //types
                 if (crFilter != null && crFilter.Types.Any())
                     list = list.Where(a => crFilter.Types.Contains(a.type)).ToList();
+
+                //availability
+                if (crFilter != null && crFilter.Availability.Any())
+                    list = list.Where(a=> crFilter.Availability.ContainsCaseInsensitive(a.availability)).ToList();
 
                 foreach (var contract in list)
                 {

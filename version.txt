@@ -2,6 +2,7 @@
 + Added console warning messages for entities that has not been recognized
 + Added new IndustrialJobsModule
 + Fixed ContractsFeedModule initial cache generation
++ Fixed contracts availability filter
 + Improved and updated defult KM messages (thanks to @mrurb)
 + Improved daily stats info (thanks to @mrurb)
 + Added KM feed groups check and warning for equal group names. Groups must be unque for KM duplicate filters to work correctly.
