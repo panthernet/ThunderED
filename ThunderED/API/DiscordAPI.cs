@@ -312,7 +312,7 @@ namespace ThunderED.API
 
             var attackerName = $"{LM.Get("killFeedName", $"[{km.rAttackerCharacter.name}]({GetKillMailLink(km.finalBlowAttackerCharacterId, KillMailLinkTypes.character)})")}";
             var attackerCorp = $"{LM.Get("killFeedCorp", $"[{km.rAttackerCorp.name}]({GetKillMailLink(km.finalBlowAttackerCorpId, KillMailLinkTypes.corporation)})")}";
-            var attackerAlliance = $"{LM.Get("killFeedAlliance", $"[{km.rAttackerAlliance.name}]({GetKillMailLink(km.finalBlowAttackerAllyId, KillMailLinkTypes.alliance)})")}";
+            var attackerAlliance = km.rAttackerAlliance == null || km.finalBlowAttackerAllyId == 0 ? null : $"{LM.Get("killFeedAlliance", $"[{km.rAttackerAlliance.name}]({GetKillMailLink(km.finalBlowAttackerAllyId, KillMailLinkTypes.alliance)})")}";
             var attackerShip = $"{LM.Get("killFeedShip", $"[{km.rAttackerShipType.name}]({GetKillMailLink(km.attackerShipID, KillMailLinkTypes.ship)})")}";
 
             string[] attackerStringArray = new string[] { attackerName, attackerCorp, attackerAlliance, attackerShip};
