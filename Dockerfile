@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.1-sdk AS build-env
+FROM microsoft/dotnet:2.2-sdk AS build-env
 WORKDIR /app/ThunderED
 
 COPY ThunderED/*.csproj ./
@@ -8,7 +8,7 @@ COPY ThunderED/. ./
 COPY Version.cs /app
 RUN dotnet publish -c Release -r debian-x64 -o out
 
-FROM microsoft/dotnet:2.1-aspnetcore-runtime
+FROM microsoft/dotnet:2.2-aspnetcore-runtime
 WORKDIR /app/ThunderED
 COPY --from=build-env /app/ThunderED/out .
 ENTRYPOINT ["dotnet", "ThunderED.dll"]
