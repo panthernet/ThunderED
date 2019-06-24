@@ -88,7 +88,7 @@ namespace ThunderED.Classes
             if (string.IsNullOrEmpty(await APIHelper.DiscordAPI.IsAdminAccess(Context)))
             {
                 sb.Append(LM.Get("helpTextAdminCommands"));
-                sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rehash | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}reauth | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rngroup | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}sys **\n");
+                sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rehash | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}reauth | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}rngroup | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}sys | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}test km**\n");
             }
             sb.Append(LM.Get("helpExpanded", SettingsManager.Settings.Config.BotDiscordCommandPrefix));
 
@@ -774,6 +774,14 @@ namespace ThunderED.Classes
                 if(res.Length < 2) return;
                 await TestModule.DebugKillmailMessage(Context, res[1], res.Length > 2 && Convert.ToBoolean(res[2]));
             }
+        }
+
+        [Command("test", RunMode = RunMode.Async), Summary("Test command")]
+        public async Task Test()
+        {
+            if(!await IsExecByAdmin()) return;
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpTest"), true);
+
         }
 
         [Command("sys", RunMode = RunMode.Async), Summary("Test command")]

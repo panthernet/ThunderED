@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -39,11 +36,11 @@ namespace ThunderED.Modules
                     {"{attackersCount}", "1"},
                     {"{kmId}", "69474440"},
                     {"{timestamp}", "27.04.2018"},
-                    {"{isNpcKill}", "false"},
+                    {"{isNpcKill}", isNpcKill ? "true" : "false"},
                     {"{isLoss}", "false"},
                 };
 
-                var path = Path.Combine(SettingsManager.RootDirectory, "Templates", "Messages", "Template.killMailGeneral.txt");
+                var path = Path.Combine(SettingsManager.RootDirectory, "Templates", "Messages", template);
                 if(!File.Exists(path))
                     return;
                 var embed = await TemplateHelper.CompileTemplate(MessageTemplateType.KillMailGeneral, path, dic);

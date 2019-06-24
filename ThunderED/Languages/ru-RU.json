@@ -560,6 +560,7 @@
   "industryJobsRowTo": "Результат",
   "industryJobsRowDuration": "Осталось",
   "industryJobsRowCompletedBy": "Выполнена",
-  "industryJobsRowBPO": "BPO"
+  "industryJobsRowBPO": "BPO",
+  "helpTest": "Доступные команды:\nkm test TEMPLATE - сгенерировать тестовое KM где TEMPLATE наименование файла шаблонаиз папки Templates/Messages"
 
 }
