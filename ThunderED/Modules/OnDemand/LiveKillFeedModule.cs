@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
@@ -136,6 +137,8 @@ namespace ThunderED.Modules.OnDemand
         {
             try
             {
+               //TEST kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm.txt"));
+
                 var hasBeenPosted = false;
                 foreach (var (groupName, group) in Settings.LiveKillFeedModule.Groups)
                 {
@@ -161,7 +164,7 @@ namespace ThunderED.Modules.OnDemand
                         var isLoss = false;
                         var isPassed = false;
                         var isFirstMatchOnly = !filter.AllMustMatch;
-                        var isAllowedToFeed = false;
+                        var isCertifiedToFeed = false;
 
                         #region Person checks
                         //exclusions
@@ -207,11 +210,11 @@ namespace ThunderED.Modules.OnDemand
                             if (isInclusive)
                             {
                                 isPassed = true;
-                                isAllowedToFeed = isFirstMatchOnly;
+                                isCertifiedToFeed = isFirstMatchOnly;
                             }
                         }
 
-                        if (!isPassed && !isAllowedToFeed)
+                        if (!isPassed && !isCertifiedToFeed)
                         {
                             fChars = GetTier2CharacterIds(ParsedVictimsLists, groupName, filterName);
                             if (fChars.Any())
@@ -224,13 +227,13 @@ namespace ThunderED.Modules.OnDemand
                                 if (isInclusive)
                                 {
                                     isPassed = true;
-                                    isAllowedToFeed = isFirstMatchOnly;
+                                    isCertifiedToFeed = isFirstMatchOnly;
                                 }
                             }
                         }
 
                         //corp check
-                        if (!isPassed && !isAllowedToFeed)
+                        if (!isPassed && !isCertifiedToFeed)
                         {
                             fChars = GetTier2CorporationIds(ParsedAttackersLists, groupName, filterName);
                             if (fChars.Any())
@@ -243,12 +246,12 @@ namespace ThunderED.Modules.OnDemand
                                 if (isInclusive)
                                 {
                                     isPassed = true;
-                                    isAllowedToFeed = isFirstMatchOnly;
+                                    isCertifiedToFeed = isFirstMatchOnly;
                                 }
                             }
                         }
 
-                        if (!isPassed && !isAllowedToFeed)
+                        if (!isPassed && !isCertifiedToFeed)
                         {
                             fChars = GetTier2CorporationIds(ParsedVictimsLists, groupName, filterName);
                             if (fChars.Any())
@@ -261,13 +264,13 @@ namespace ThunderED.Modules.OnDemand
                                 if (isInclusive)
                                 {
                                     isPassed = true;
-                                    isAllowedToFeed = isFirstMatchOnly;
+                                    isCertifiedToFeed = isFirstMatchOnly;
                                 }
                             }
                         }
 
                         //alliance check
-                        if (!isPassed && !isAllowedToFeed)
+                        if (!isPassed && !isCertifiedToFeed)
                         {
                             fChars = GetTier2AllianceIds(ParsedAttackersLists, groupName, filterName);
                             if (fChars.Any())
@@ -280,16 +283,17 @@ namespace ThunderED.Modules.OnDemand
                                 if (isInclusive)
                                 {
                                     isPassed = true;
-                                    isAllowedToFeed = isFirstMatchOnly;
+                                    isCertifiedToFeed = isFirstMatchOnly;
                                 }
                             }
                         }
 
-                        if (!isPassed && !isAllowedToFeed)
+                        if (!isPassed && !isCertifiedToFeed)
                         {
                             fChars = GetTier2AllianceIds(ParsedVictimsLists, groupName, filterName);
-                            if (fChars.Any() && kill.victim.alliance_id > 0)
+                            if (fChars.Any())
                             {
+                                if(isInclusive && kill.victim.alliance_id == 0) continue;
                                 if (isInclusive && !fChars.Contains(kill.victim.alliance_id))
                                     continue;
                                 if (!isInclusive && fChars.Contains(kill.victim.alliance_id))
@@ -298,7 +302,7 @@ namespace ThunderED.Modules.OnDemand
                                 if (isInclusive)
                                 {
                                     isPassed = true;
-                                    isAllowedToFeed = isFirstMatchOnly;
+                                    isCertifiedToFeed = isFirstMatchOnly;
                                 }
                             }
                         }
@@ -306,7 +310,7 @@ namespace ThunderED.Modules.OnDemand
                         #endregion
 
                         //value checks
-                        if (!isAllowedToFeed)
+                        if (!isCertifiedToFeed)
                         {
                             if (isLoss && filter.MinimumLossValue >= kill.zkb.totalValue) continue;
                             if (filter.MaximumLossValue > 0 && isLoss && filter.MaximumLossValue <= kill.zkb.totalValue) continue;
@@ -314,16 +318,19 @@ namespace ThunderED.Modules.OnDemand
                             if (filter.MaximumKillValue > 0 && !isLoss && filter.MaximumKillValue <= kill.zkb.totalValue) continue;
 
                             if (isFirstMatchOnly && (filter.MinimumKillValue > 0 || filter.MinimumLossValue > 0 || filter.MaximumLossValue > 0 || filter.MaximumKillValue > 0))
-                                isAllowedToFeed = true;
+                                isCertifiedToFeed = true;
                         }
 
-                        #region Location checks
+                        #region Location checks (except system radius)
 
-                        if (filter.Radius == 0 && !isAllowedToFeed)
+                        if (!isCertifiedToFeed)
                         {
-                            if (!CheckLocation(rSystem, kill, isInclusive, groupName, filterName)) continue;
-                            if (isInclusive && isFirstMatchOnly)
-                                isAllowedToFeed = true;
+                            if (!CheckLocation(rSystem, kill, isInclusive, groupName, filterName))
+                            {
+                                if(filter.Radius == 0) continue;
+                            }
+                            else if (isInclusive && isFirstMatchOnly)
+                                isCertifiedToFeed = true;
                         }
 
                         #endregion
@@ -331,12 +338,12 @@ namespace ThunderED.Modules.OnDemand
                         #region Type checks
 
                         var types = GetTier2TypeIds(ParsedShipsLists, groupName, filterName);
-                        if (types.Any() && !isAllowedToFeed)
+                        if (types.Any() && !isCertifiedToFeed)
                         {
                             if(isInclusive && !types.Contains(kill.victim.ship_type_id)) continue;
                             if(!isInclusive && types.Contains(kill.victim.ship_type_id)) continue;
                             if (isInclusive && isFirstMatchOnly)
-                                isAllowedToFeed = true;
+                                isCertifiedToFeed = true;
                         }
                         #endregion
 
@@ -344,7 +351,7 @@ namespace ThunderED.Modules.OnDemand
 
                         if (filter.Radius > 0)
                         {
-                            #region Process radius
+                            #region Process system radius check
 
                             var msgType = MessageTemplateType.KillMailRadius;
                             var isDone = false;
