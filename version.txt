@@ -5,6 +5,8 @@
 + Fixed ContractsFeedModule initial cache generation
 + Fixed contracts availability filter
 + Fixed log verbosity order so `Module` value is going below the `Warning`
++ Updated platform to .NET Core 2.2
++ Updated Discord library to V2.1.1
 + Improved and updated defult KM messages (thanks to @mrurb)
 + Improved daily stats info (thanks to @mrurb)
 + Added KM feed groups check and warning for equal group names. Groups must be unque for KM duplicate filters to work correctly.
@@ -28,6 +30,7 @@ On top of the existing features now you can:
  Read https://github.com/panthernet/ThunderED/wiki/Killmails-Feed for details.
 
 ### BREAKING CHANGES
+- Bot has been updated to .NET Core 2.2 so you might have to adjust your environment
 - Removed `RadiusKillFeedModule` and corresponding settings. Its functionality has been merged into `LiveKillFeedModule`
 - Redesigned `LiveKillFeedModule` settings section, please take a look and update
 - Contracts cache will be flushed to correct some inconsistencies. First contracts check will fill the cache.

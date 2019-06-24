@@ -41,7 +41,7 @@ namespace ThunderED.Modules
             _oneTimeWarnings.Add(id);
         }
 
-        public virtual async Task Initialize()
+        public virtual Task Initialize()
         {
 
         }

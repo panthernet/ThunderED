@@ -39,14 +39,13 @@ With this bot you will have tools to:
 * Query any char or corp info including the cyno and danger probability
 * Receive pings from external messengers like Jabber, IRC, Telegram
 * Keep track of personal and corp contracts
+* Keep track of industry jobs for members and corporations
 
 ## Supported Modules
 * Web Auth - authenticate EVE characters in Discord using built-in web server, use JackKnife utility to inspect them before you accept them into your community
-* Web Config Editor - WIP module which allows sensitive config parts edit from web interface
 * Auth Check - check users access rights and strip permissions when char leaves your corp or ally
-* Live Kill Feed - feed live EVE killmails into multiple channels using ZKill WebSockets or RedisQ
-* Radius Kill Feed - feed live killmails in a radius around selected systems, constellations and regions into multiple channels
-* Notifications Feed - feed EVE notifications from different characters into multiple channels
+* Live Kill Feed - feed live EVE killmails into multiple channels with unmatched filtering capabilities including region, constellation, system radius, ISK, ships, members and other filters.
+* Notifications Feed - feed EVE notifications from characters and corporations into multiple channels
 * Char & corp search - fetch information about characters and corps using special commands
 * EVE Time - get EVE Online time
 * Price Check - check relevant prices on item in all major trade hubs using special commands
@@ -61,15 +60,21 @@ With this bot you will have tools to:
 * Incursion notifications - receive notifications when specified regions or constellations has Sansha Incursions
 * Nullsec campaign  - sovereignty contest campaign notifications about TCU/IHUB entosis occurs in specified regions or constellations
 * FWStats - access to !fwstats command to display information about the FW faction along with the LP farming tips
-* HR Module - inspect your members and pilots applying to join your corporation
+* HR Module - inspect your members and pilots applying to join your corporation, select and assign spies, search members mail
 * SystemLogFeeder - feed critical bot logs right into the Discord channel
 * Contracts Feeder - keep track on contracts with flexible filtering capabilities
 * Sov Index Tracker - track sov index changes with just-in-time notifications
+* Web Config Editor (WIP) - edit settings using the web interface
+* Industry Jobs Feeder - feed jobs and their statuses using agile filtering system
+* Stats module - display KM based stats for selected entity with different criteria, schedule and display KM rating between several corps/alliances
+* Commands Module
+  - WIP Ships command - define patterns and receive statistics about the ships/fits your members can fly
+  - Define which roles your members can self-assign
 
 ## Build Requirements
-* Visual Studio 2017 Community Edition (Windows)
+* Visual Studio 2019 Community Edition (Windows)
 * Docker (Linux)
-* .NET Core 2.1
+* .NET Core 2.2
 
 ## Pics
 [The bottom of the 1st post, under the cut](https://forums.eveonline.com/t/thundered-eve-online-discord-bot/74213)
