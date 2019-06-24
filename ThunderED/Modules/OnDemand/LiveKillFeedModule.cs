@@ -203,15 +203,21 @@ namespace ThunderED.Modules.OnDemand
                         if (fChars.Any())
                         {
                             var attackers = kill.attackers.Select(a => a.character_id);
-                            if(isInclusive && !fChars.ContainsAnyFromList(attackers))
-                                continue;
-                            if(!isInclusive && fChars.ContainsAnyFromList(attackers))
-                                continue;
                             if (isInclusive)
                             {
-                                isPassed = true;
-                                isCertifiedToFeed = isFirstMatchOnly;
+                                if (!fChars.ContainsAnyFromList(attackers))
+                                {
+                                    if(!isFirstMatchOnly)
+                                        continue;
+                                }
+                                else
+                                {
+                                    isPassed = true;
+                                    isCertifiedToFeed = isFirstMatchOnly;
+                                }
                             }
+                            if(!isInclusive && fChars.ContainsAnyFromList(attackers))
+                                continue;
                         }
 
                         if (!isPassed && !isCertifiedToFeed)
@@ -219,16 +225,23 @@ namespace ThunderED.Modules.OnDemand
                             fChars = GetTier2CharacterIds(ParsedVictimsLists, groupName, filterName);
                             if (fChars.Any())
                             {
-                                if (isInclusive && !fChars.Contains(kill.victim.character_id))
-                                    continue;
-                                if (!isInclusive && fChars.Contains(kill.victim.character_id))
-                                    continue;
-                                isLoss = true;
                                 if (isInclusive)
                                 {
-                                    isPassed = true;
-                                    isCertifiedToFeed = isFirstMatchOnly;
+                                    if (!fChars.Contains(kill.victim.character_id))
+                                    {
+                                        if (!isFirstMatchOnly)
+                                            continue;
+                                    }
+                                    else
+                                    {
+                                        isLoss = true;
+                                        isPassed = true;
+                                        isCertifiedToFeed = isFirstMatchOnly;
+                                    }
+
                                 }
+                                if (!isInclusive && fChars.Contains(kill.victim.character_id))
+                                    continue;
                             }
                         }
 
@@ -239,15 +252,21 @@ namespace ThunderED.Modules.OnDemand
                             if (fChars.Any())
                             {
                                 var attackers = kill.attackers.Select(a => a.corporation_id);
-                                if (isInclusive && !fChars.ContainsAnyFromList(attackers))
-                                    continue;
-                                if (!isInclusive && fChars.ContainsAnyFromList(attackers))
-                                    continue;
                                 if (isInclusive)
                                 {
-                                    isPassed = true;
-                                    isCertifiedToFeed = isFirstMatchOnly;
+                                    if (!fChars.ContainsAnyFromList(attackers))
+                                    {
+                                        if(!isFirstMatchOnly)
+                                            continue;
+                                    }
+                                    else
+                                    {
+                                        isPassed = true;
+                                        isCertifiedToFeed = isFirstMatchOnly;
+                                    }
                                 }
+                                if (!isInclusive && fChars.ContainsAnyFromList(attackers))
+                                    continue;
                             }
                         }
 
@@ -256,16 +275,23 @@ namespace ThunderED.Modules.OnDemand
                             fChars = GetTier2CorporationIds(ParsedVictimsLists, groupName, filterName);
                             if (fChars.Any())
                             {
-                                if (isInclusive && !fChars.Contains(kill.victim.corporation_id))
-                                    continue;
-                                if (!isInclusive && fChars.Contains(kill.victim.corporation_id))
-                                    continue;
-                                isLoss = true;
                                 if (isInclusive)
                                 {
-                                    isPassed = true;
-                                    isCertifiedToFeed = isFirstMatchOnly;
+                                    if (!fChars.Contains(kill.victim.corporation_id))
+                                    {
+                                        if (!isFirstMatchOnly)
+                                            continue;
+                                    }
+                                    else
+                                    {
+                                        isLoss = true;
+                                        isPassed = true;
+                                        isCertifiedToFeed = isFirstMatchOnly;
+                                    }
+
                                 }
+                                if (!isInclusive && fChars.Contains(kill.victim.corporation_id))
+                                    continue;
                             }
                         }
 
@@ -276,15 +302,22 @@ namespace ThunderED.Modules.OnDemand
                             if (fChars.Any())
                             {
                                 var attackers = kill.attackers.Where(a=> a.alliance_id > 0).Select(a => a.alliance_id);
-                                if (isInclusive && !fChars.ContainsAnyFromList(attackers))
-                                    continue;
-                                if (!isInclusive && fChars.ContainsAnyFromList(attackers))
-                                    continue;
                                 if (isInclusive)
                                 {
-                                    isPassed = true;
-                                    isCertifiedToFeed = isFirstMatchOnly;
+                                    if (!fChars.ContainsAnyFromList(attackers))
+                                    {
+                                        if(!isFirstMatchOnly)
+                                            continue;
+                                    }
+                                    else
+                                    {
+                                        isPassed = true;
+                                        isCertifiedToFeed = isFirstMatchOnly;
+                                    }
                                 }
+
+                                if (!isInclusive && fChars.ContainsAnyFromList(attackers))
+                                    continue;
                             }
                         }
 
@@ -293,17 +326,27 @@ namespace ThunderED.Modules.OnDemand
                             fChars = GetTier2AllianceIds(ParsedVictimsLists, groupName, filterName);
                             if (fChars.Any())
                             {
-                                if(isInclusive && kill.victim.alliance_id == 0) continue;
-                                if (isInclusive && !fChars.Contains(kill.victim.alliance_id))
-                                    continue;
-                                if (!isInclusive && fChars.Contains(kill.victim.alliance_id))
-                                    continue;
-                                isLoss = true;
                                 if (isInclusive)
                                 {
-                                    isPassed = true;
-                                    isCertifiedToFeed = isFirstMatchOnly;
+                                    if(!isFirstMatchOnly && kill.victim.alliance_id == 0) continue;
+                                    if (kill.victim.alliance_id > 0)
+                                    {
+                                        if (!fChars.Contains(kill.victim.alliance_id))
+                                        {
+                                            if (!isFirstMatchOnly)
+                                                continue;
+                                        }
+                                        else
+                                        {
+                                            isLoss = true;
+                                            isPassed = true;
+                                            isCertifiedToFeed = isFirstMatchOnly;
+                                        }
+                                    }
                                 }
+
+                                if (!isInclusive && fChars.Contains(kill.victim.alliance_id))
+                                    continue;
                             }
                         }
                         isPassed = false;
@@ -325,12 +368,17 @@ namespace ThunderED.Modules.OnDemand
 
                         if (!isCertifiedToFeed)
                         {
-                            if (!CheckLocation(rSystem, kill, isInclusive, groupName, filterName))
+                            var check = CheckLocation(rSystem, kill, isInclusive, groupName, filterName);
+                            //if have some location criteria
+                            if (check != null)
                             {
-                                if(filter.Radius == 0) continue;
+                                if (check == false)
+                                {
+                                    if (filter.Radius == 0 && !isFirstMatchOnly) continue;
+                                }
+                                else if (isInclusive && isFirstMatchOnly)
+                                    isCertifiedToFeed = true;
                             }
-                            else if (isInclusive && isFirstMatchOnly)
-                                isCertifiedToFeed = true;
                         }
 
                         #endregion
@@ -340,12 +388,18 @@ namespace ThunderED.Modules.OnDemand
                         var types = GetTier2TypeIds(ParsedShipsLists, groupName, filterName);
                         if (types.Any() && !isCertifiedToFeed)
                         {
-                            if(isInclusive && !types.Contains(kill.victim.ship_type_id)) continue;
+                            if (isInclusive && !types.Contains(kill.victim.ship_type_id))
+                            {
+                                if(!isFirstMatchOnly) continue;
+                            }
                             if(!isInclusive && types.Contains(kill.victim.ship_type_id)) continue;
                             if (isInclusive && isFirstMatchOnly)
                                 isCertifiedToFeed = true;
                         }
                         #endregion
+
+                        //haven't hit any criteria for 1-hit mode
+                        if(!isCertifiedToFeed && isFirstMatchOnly) continue;
 
                         var discordChannels = filter.DiscordChannels.Any() ? filter.DiscordChannels : group.DiscordChannels;
 
@@ -408,238 +462,6 @@ namespace ThunderED.Modules.OnDemand
                         continue; //goto next filter
                     }
                 }
-
-                /* if (_lastPosted == kill.killmail_id) return;
- 
-                 var postedGlobalBigKill = false;
-                 var bigKillGlobalValue = SettingsManager.Settings.LiveKillFeedModule.BigKill;
-                 var bigKillGlobalChan = SettingsManager.Settings.LiveKillFeedModule.BigKillChannel;
-                 var isNPCKill = kill.zkb.npc;
- 
-                 var km = new KillDataEntry();
- 
-                 foreach (var groupPair in Settings.LiveKillFeedModule.GroupsConfig)
-                 {
-                     if(Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds && ZKillLiveFeedModule.IsInSharedPool(kill.killmail_id))
-                         return;
- 
-                     var group = groupPair.Value;
-                     if ((!group.FeedPveKills && isNPCKill) || (!group.FeedPvpKills && !isNPCKill)) continue;
- 
-                     var minimumValue = group.MinimumValue;
-                     var minimumLossValue = group.MinimumLossValue;
-                     var allianceIdList = group.AllianceID;
-                     var corpIdList = group.CorpID;
-                     var bigKillValue = group.BigKillValue;
-                     var c = group.DiscordChannel;
-                     var sendBigToGeneral = group.BigKillSendToGeneralToo;
-                     var bigKillChannel = group.BigKillChannel;
-                     var discordGroupName = groupPair.Key;
-                     var isUrlOnly = group.FeedUrlsOnly;
- 
-                     if (c == 0)
-                     {
-                         await LogHelper.LogWarning($"Group {groupPair.Key} has no 'discordChannel' specified! Kills will be skipped.", Category);
-                         continue;
-                     }
- 
-                     var value = kill.zkb.totalValue;
- 
- 
-                     if (bigKillGlobalChan != 0 && bigKillGlobalValue != 0 && value >= bigKillGlobalValue && !postedGlobalBigKill)
-                     {
-                         postedGlobalBigKill = true;
- 
-                         if (isUrlOnly)
-                             await APIHelper.DiscordAPI.SendMessageAsync(bigKillGlobalChan, kill.zkb.url);
-                         else
-                         {                            
-                             if (await km.Refresh(Reason, kill) && !await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, bigKillGlobalChan, groupPair.Value.ShowGroupName ? discordGroupName : " "))
-                             {
-                                 await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillGlobalChan, new Color(0xFA2FF4), km, null);
-                             }
-                         }
- 
-                         if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
-                             ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
-                         await LogHelper.LogInfo($"Posting Global Big Kill: {kill.killmail_id}  Value: {value:n0} ISK", Category);
-                     }
- 
-                     if (!allianceIdList.Any() && !corpIdList.Any())
-                     {
-                         if (value >= minimumValue)
-                         {
-                             if (isUrlOnly)
-                                 await APIHelper.DiscordAPI.SendMessageAsync(c, kill.zkb.url);
-                             else if (await km.Refresh(Reason, kill) && !await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, km.dic, c, groupPair.Value.ShowGroupName ? discordGroupName : " "))
-                             {
-                                 await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), km, null);
-                             }
- 
-                             if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
-                                 ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
-                             await LogHelper.LogInfo($"Posting Global Kills: {kill.killmail_id}  Value: {value:n0} ISK", Category);
-                         }
-                     }
-                     else
-                     {
-                         //ally & corp 
- 
-                         //Losses
-                         //Big
-                         if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue)
-                         {
-                             if (kill.victim.alliance_id != 0 && allianceIdList.Contains(kill.victim.alliance_id) || corpIdList.Contains(kill.victim.corporation_id))
-                             {
-                                 if (isUrlOnly)
-                                 {
-                                     await APIHelper.DiscordAPI.SendMessageAsync(bigKillChannel, kill.zkb.url);
-                                     if (sendBigToGeneral && c != bigKillChannel)
-                                         await APIHelper.DiscordAPI.SendMessageAsync(c, kill.zkb.url);
-                                 }
-                                 else if (await km.Refresh(Reason, kill))
-                                 {
-                                     km.dic["{isLoss}"] = "true";
-                                     try
-                                     {
-                                         if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, bigKillChannel, 
-                                             groupPair.Value.ShowGroupName ? discordGroupName : " "))
-                                         {
-                                             await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0xD00000), km, null,
-                                                 groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                             if (sendBigToGeneral && c != bigKillChannel)
-                                                 if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, c, 
-                                                     groupPair.Value.ShowGroupName ? discordGroupName : " "))
-                                                     await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xD00000), km, null,
-                                                         groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                         }
-                                     }
-                                     finally
-                                     {
-                                         km.dic.Remove("{isLoss}");
-                                     }
-                                 }
- 
-                                 if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
-                                     ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
-                                 await LogHelper.LogInfo($"Posting     Big Loss: {kill.killmail_id}  Value: {value:n0} ISK", Category);
-                                 continue;
-                             }
-                         }
- 
-                         //Common
-                         if (minimumLossValue == 0 || minimumLossValue <= value)
-                         {
-                             if (kill.victim.alliance_id != 0 && allianceIdList.Contains(kill.victim.alliance_id) || corpIdList.Contains(kill.victim.corporation_id))
-                             {
-                                 if (isUrlOnly)
-                                     await APIHelper.DiscordAPI.SendMessageAsync(c, kill.zkb.url);
-                                 else if (await km.Refresh(Reason, kill))
-                                 {
-                                     km.dic["{isLoss}"] = "true";
-                                     try
-                                     {
-                                         if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, km.dic, c, 
-                                             groupPair.Value.ShowGroupName ? discordGroupName : " "))
-                                         {
-                                             await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0xFF0000), km, null,
-                                                 groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                         }
-                                     }
-                                     finally
-                                     {
-                                         km.dic.Remove("{isLoss}");
-                                     }
-                                 }
- 
-                                 if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
-                                     ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
-                                 await LogHelper.LogInfo($"Posting         Loss: {kill.killmail_id}  Value: {value:n0} ISK", Category);
- 
-                                 continue;
-                             }
-                         }
- 
-                         //Kills
-                         foreach (var attacker in kill.attackers.ToList())
-                         {
-                             if (bigKillChannel != 0 && bigKillValue != 0 && value >= bigKillValue && !isNPCKill)
-                             {
-                                 if ((attacker.alliance_id != 0 && allianceIdList.Contains(attacker.alliance_id)) ||
-                                     (!allianceIdList.Any() && corpIdList.Contains(attacker.corporation_id)))
-                                 {
-                                     if (isUrlOnly)
-                                     {
-                                         await APIHelper.DiscordAPI.SendMessageAsync(bigKillChannel, kill.zkb.url);
-                                         if (sendBigToGeneral && c != bigKillChannel)
-                                             await APIHelper.DiscordAPI.SendMessageAsync(c, kill.zkb.url);
-                                     }
-                                     else if (await km.Refresh(Reason, kill))
-                                     {
-                                         km.dic["{isLoss}"] = "false";
-                                         try
-                                         {
-                                             if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, bigKillChannel, 
-                                                 groupPair.Value.ShowGroupName ? discordGroupName : " "))
-                                             {
-                                                 await APIHelper.DiscordAPI.SendEmbedKillMessage(bigKillChannel, new Color(0x00D000), km, null,
-                                                     groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                                 if (sendBigToGeneral && c != bigKillChannel)
-                                                 {
-                                                     if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailBig, km.dic, c, 
-                                                         groupPair.Value.ShowGroupName ? discordGroupName : " "))
-                                                         await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00D000), km, null,
-                                                             groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                                 }
- 
-                                                 if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
-                                                     ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
- 
-                                                 await LogHelper.LogInfo($"Posting     Big Kill: {kill.killmail_id}  Value: {value:#,##0} ISK", Category);
-                                             }
-                                         }
-                                         finally
-                                         {
-                                             km.dic.Remove("{isLoss}");
-                                         }
-                                     }
- 
-                                     break;
-                                 }
-                             }
-                             else if (!isNPCKill && attacker.alliance_id != 0 && allianceIdList.Any() && allianceIdList.Contains(attacker.alliance_id) ||
-                                      !isNPCKill && !allianceIdList.Any() && corpIdList.Contains(attacker.corporation_id))
-                             {
-                                 if (isUrlOnly)
-                                     await APIHelper.DiscordAPI.SendMessageAsync(c, kill.zkb.url);
-                                 else if (await km.Refresh(Reason, kill))
-                                 {
-                                     km.dic["{isLoss}"] = "false";
-                                     try
-                                     {
-                                         if (!await TemplateHelper.PostTemplatedMessage(MessageTemplateType.KillMailGeneral, km.dic, c, 
-                                             groupPair.Value.ShowGroupName ? discordGroupName : " "))
-                                         {
-                                             await APIHelper.DiscordAPI.SendEmbedKillMessage(c, new Color(0x00FF00), km, null,
-                                                 groupPair.Value.ShowGroupName ? discordGroupName : " ");
-                                         }
-                                     }
-                                     finally
-                                     {
-                                         km.dic.Remove("{isLoss}");
-                                     }
-                                 }
- 
-                                 if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
-                                     ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
-                                 await LogHelper.LogInfo($"Posting         Kill: {kill.killmail_id}  Value: {value:#,##0} ISK", Category);
-                                 break;
-                             }
-                         }
-                     }
-                 }
- 
-                 _lastPosted = kill.killmail_id;*/
             }
             catch (Exception ex)
             {
@@ -754,7 +576,7 @@ namespace ThunderED.Modules.OnDemand
             return true;
         }
 
-        private bool CheckLocation(JsonClasses.SystemName rSystem, JsonZKill.Killmail kill, bool isInclusive, string groupName, string filterName)
+        private bool? CheckLocation(JsonClasses.SystemName rSystem, JsonZKill.Killmail kill, bool isInclusive, string groupName, string filterName)
         {
             var isPassed = false;
             if (rSystem == null)
@@ -763,6 +585,7 @@ namespace ThunderED.Modules.OnDemand
                 return false;
             }
 
+            var fCount = 0;
             //System
             var fLocs = GetTier2SystemIds(ParsedLocationLists, groupName, filterName);
             if (fLocs.Any())
@@ -773,6 +596,7 @@ namespace ThunderED.Modules.OnDemand
                     return false;
                 if (isInclusive) isPassed = true;
             }
+            else fCount++;
 
             //Constellation
             if (!isPassed)
@@ -786,6 +610,7 @@ namespace ThunderED.Modules.OnDemand
                         return false;
                     if (isInclusive) isPassed = true;
                 }
+                else fCount++;
             }
 
             //Region
@@ -800,9 +625,10 @@ namespace ThunderED.Modules.OnDemand
                         return false;
                     if (isInclusive) isPassed = true;
                 }
+                else fCount++;
             }
 
-            return true;
+            return fCount == 3 ? (bool?)null : true;
         }
 
         private bool UpdateLastPosted(string groupName, long id)
