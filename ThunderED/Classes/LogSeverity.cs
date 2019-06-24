@@ -2,10 +2,10 @@
 {
     public enum LogSeverity
     {
-        Module = 6,
-        Critical = 5,
-        Error = 4,
-        Warning = 3,
+        Critical = 6,
+        Error = 5,
+        Warning = 4,
+        Module = 3,
         Info = 2,
         Verbose = 1,
         Debug = 0

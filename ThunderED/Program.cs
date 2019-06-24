@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
-using ThunderED.Json.ZKill;
-using ThunderED.Modules;
 
 namespace ThunderED
 {

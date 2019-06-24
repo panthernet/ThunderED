@@ -1811,29 +1811,18 @@ namespace ThunderED.Classes
     public class WebAuthGroup: ValidatableSettings
     {
 #if EDITOR
-        [Comment("Dictionary containing text character ID and the list of Discord roles which to assign on successful auth")]
-        public ObservableDictionary<string, AuthRoleEntity> AllowedCharacters { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
-
-        [Comment("Dictionary containing text corporation ID and the list of Discord roles which to assign on successful auth. Additive with AllowedAlliances.")]
-        public ObservableDictionary<string, AuthRoleEntity> AllowedCorporations { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
-        [Comment("Dictionary containing text alliance ID and the list of Discord roles which to assign on successful auth.  Additive with AllowedCorporations.")]
-        public ObservableDictionary<string, AuthRoleEntity> AllowedAlliances { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
+        [Comment("Dictionary containing member identification and the list of Discord roles which to assign on successful auth")]
+        public ObservableDictionary<string, AuthRoleEntity> AllowedMembers { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
 
         [Comment("The list of exact Discord role names authorized to manually approve applicants")]
         public ObservableCollection<string> AuthRoles { get; set; } = new ObservableCollection<string>();
 
-        
         [Comment("Text Discord roles list which can be added manually to a user and will persist while he passes auth check for this group. Stripped when he is not in a specified corp/ally anymore.")]
         public ObservableCollection<string> ManualAssignmentRoles { get; set; } = new ObservableCollection<string>();
 
 #else
-       // public List<string> MemberRoles { get; set; } = new List<string>();
         public List<string> AuthRoles { get; set; } = new List<string>();
-        //public List<int> CorpIDList { get; set; } = new List<int>();
-       // public List<int> AllianceIDList { get; set; } = new List<int>();
-        public Dictionary<string, AuthRoleEntity> AllowedCharacters { get; set; } = new Dictionary<string, AuthRoleEntity>();
-        public Dictionary<string, AuthRoleEntity> AllowedCorporations { get; set; } = new Dictionary<string, AuthRoleEntity>();
-        public Dictionary<string, AuthRoleEntity> AllowedAlliances { get; set; } = new Dictionary<string, AuthRoleEntity>();
+        public Dictionary<string, AuthRoleEntity> AllowedMembers { get; set; } = new Dictionary<string, AuthRoleEntity>();
         public List<string> ManualAssignmentRoles { get; set; } = new List<string>();
 #endif
         [Comment("Enable auth mode that will only search roles until first criterial match. Otherwise it wil search and add roles from all matching filters within this group")]
@@ -1865,7 +1854,7 @@ namespace ThunderED.Classes
 
         public bool IsEmpty()
         {
-            return !AllowedCharacters.Any() && !AllowedAlliances.Any() && !AllowedCorporations.Any() && StandingsAuth == null;
+            return !AllowedMembers.Any() && StandingsAuth == null;
         }
 #if EDITOR
         [Comment("The list of ESI access role names to check on auth")]
@@ -1921,13 +1910,15 @@ namespace ThunderED.Classes
         
         [Comment("The list of Discord role names to assign after successful auth")]
 #if EDITOR
+        public ObservableCollection<string> Titles { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<string> DiscordRoles { get; set; } = new ObservableCollection<string>();
-        [Comment("Id of the entity (corp or alliance)")]
+        [Comment("List of names and Ids of entities (char/corp/alliance)")]
         [Required]
-        public ObservableCollection<long> Id { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<object> Entities { get; set; } = new ObservableCollection<object>();
 #else
+        public List<string> Titles { get; set; } = new List<string>();
         public List<string> DiscordRoles { get; set; } = new List<string>();
-        public List<long> Id { get; set; } = new List<long>();
+        public List<object> Entities { get; set; } = new List<object>();
 #endif
 
 #if EDITOR
@@ -1937,8 +1928,8 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    case nameof(Id):
-                        return Id.Count == 0 || Id.Any(a=> a == 0) ? Compose(nameof(Id), "Id must be greater than zero!") : null;
+                    case nameof(Entities):
+                        return Entities.Count == 0  ? Compose(nameof(Entities), "You must set at least one entity!") : null;
                 }
 
                 return null;

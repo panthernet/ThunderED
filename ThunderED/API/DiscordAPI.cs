@@ -489,5 +489,16 @@ namespace ThunderED.API
             return onlineOnly ? users.Where(a => a.Status != UserStatus.Offline).ToList() : users;
         }
 
+        public async Task<IList<string>> CheckAndNotifyBadDiscordRoles(IList<string> roles, LogCat category)
+        {
+            var discordRoles = GetGuildRoleNames();
+            if(!discordRoles.Any()) return new List<string>();
+            if(!roles.Any()) return new List<string>();
+            var missing = roles.Except(discordRoles).ToList();
+            if (missing.Any())
+                await LogHelper.LogWarning($"Unknown roles has been found: {string.Join(',', missing)}!" , category);
+
+            return missing;
+        }
     }
 }

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
-using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Modules.OnDemand;
@@ -286,22 +285,25 @@ namespace ThunderED.Modules
 
                 #region Get personalized foundList
 
-                var groupsToCheck = new List<WebAuthGroup>();
+                var groupsToCheck = new Dictionary<string, WebAuthGroup>();
                 var authData = await SQLHelper.GetAuthUserByCharacterId(characterID);
 
                 if (!string.IsNullOrEmpty(authData?.GroupName))
                 {
                     //check specified group for roles
-                    var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authData.GroupName).Value;
-                    if (group != null)
-                        groupsToCheck.Add(group);
+                    var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authData.GroupName);
+                    if (group.Value != null)
+                        groupsToCheck.Add(group.Key, group.Value);
                 }
 
                 if (!groupsToCheck.Any())
                 {
                     //check only GENERAL auth groups for roles
                     //non-general group auth should have group name supplied
-                    groupsToCheck.AddRange(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Where(a => !a.ESICustomAuthRoles.Any() && a.StandingsAuth == null));
+                    foreach (var groupPair in SettingsManager.Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ESICustomAuthRoles.Any() && a.Value.StandingsAuth == null))
+                    {
+                        groupsToCheck.Add(groupPair.Key, groupPair.Value);
+                    }
                 }
 
                 #endregion
@@ -320,7 +322,7 @@ namespace ThunderED.Modules
                     groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCharacter.Group).Key;
                     hasAuth = true;
                     groupsToCheck.Clear();
-                    groupsToCheck.Add(authResultCharacter.Group);
+                    groupsToCheck.Add(groupName, authResultCharacter.Group);
                 }
 
                 if (authResultCharacter == null || (authResultCharacter.Group != null && !authResultCharacter.Group.UseStrictAuthenticationMode))
@@ -336,7 +338,7 @@ namespace ThunderED.Modules
                         groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCorporation.Group).Key;
                         hasAuth = true;
                         groupsToCheck.Clear();
-                        groupsToCheck.Add(authResultCorporation.Group);
+                        groupsToCheck.Add(groupName, authResultCorporation.Group);
                     }
 
                     var group = authResultCharacter?.Group ?? authResultCorporation?.Group;
@@ -362,7 +364,7 @@ namespace ThunderED.Modules
                     result.UpdatedRoles = result.UpdatedRoles.Distinct().ToList();
                     result.ValidManualAssignmentRoles = result.ValidManualAssignmentRoles.Distinct().ToList();
                     //search for personal stands
-                    var grList = groupsToCheck.Where(a => a.StandingsAuth != null).ToList();
+                    var grList = groupsToCheck.Where(a => a.Value.StandingsAuth != null).ToList();
                     if (grList.Count > 0)
                     {
                         var ar = await GetAuthGroupByCharacterId(groupsToCheck, characterID);
@@ -384,18 +386,12 @@ namespace ThunderED.Modules
                     if (token != null && !string.IsNullOrEmpty(token.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(token.GroupName))
                     {
                         var group = SettingsManager.Settings.WebAuthModule.AuthGroups[token.GroupName];
-                        if ((!group.AllowedAlliances.Any() || group.AllowedAlliances.Values.All(a => a.Id.All(b => b == 0))) &&
-                            (!group.AllowedCorporations.Any() || group.AllowedCorporations.Values.All(a => a.Id.All(b => b == 0))) &&
-                            (!group.AllowedCharacters.Any() || group.AllowedCharacters.Values.Any(a => a.Id.All(b => b == 0)))
+                        if ((!group.AllowedMembers.Any() || group.AllowedMembers.Values.All(a => a.Entities.All(b => b.ToString().All(char.IsDigit) && (long)b == 0)))
                             && group.StandingsAuth == null)
                         {
                             groupName = token.GroupName;
-                            var l = group.AllowedCorporations.SelectMany(a => a.Value.DiscordRoles);
+                            var l = group.AllowedMembers.SelectMany(a => a.Value.DiscordRoles);
                             var aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
-                            result.UpdatedRoles.AddRange(aRoles);
-
-                            l = group.AllowedAlliances.SelectMany(a => a.Value.DiscordRoles);
-                            aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
                             result.UpdatedRoles.AddRange(aRoles);
                         }
                     }
@@ -404,16 +400,12 @@ namespace ThunderED.Modules
                     if (string.IsNullOrEmpty(groupName))
                     {
                         var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a =>
-                            a.Value.AllowedAlliances.Values.All(b => b.Id.All(c => c == 0)) && a.Value.AllowedCorporations.Values.All(b => b.Id.All(c => c == 0)));
+                            a.Value.AllowedMembers.Values.All(b => b.Entities.All(c => c.ToString().All(char.IsDigit) && (long)c == 0)));
                         if (grp.Value != null)
                         {
                             groupName = grp.Key;
-                            var l = grp.Value.AllowedCorporations.SelectMany(a => a.Value.DiscordRoles);
+                            var l = grp.Value.AllowedMembers.SelectMany(a => a.Value.DiscordRoles);
                             var aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
-                            result.UpdatedRoles.AddRange(aRoles);
-
-                            l = grp.Value.AllowedAlliances.SelectMany(a => a.Value.DiscordRoles);
-                            aRoles = discordGuild.Roles.Where(a => l.Contains(a.Name)).ToList();
                             result.UpdatedRoles.AddRange(aRoles);
                         }
                     }

@@ -327,25 +327,10 @@
     "authGroups": {
       "Mode1_GeneralAuth": {
         "UseStrictAuthenticationMode": "false",
-        "AllowedCharacters": {},
-        "AllowedCorporations": {
-          "corp1": {
-            "Id": [ 98499225 ],
-            "DiscordRoles": [ "Member", "TestRole2" ]
-          },
-          "corp2": {
-            "Id": [ 98499226 ],
-            "DiscordRoles": [ "Ally" ]
-          }
-        },
-        "AllowedAlliances": {
-          "ally1": {
-            "Id": [ 99003557 ],
-            "DiscordRoles": [ "Member" ]
-          },
-          "ally2": {
-            "Id": [ 99003558 ],
-            "DiscordRoles": [ "Ally", "Dummy" ]
+        "AllowedMembers": {
+          "entry1": {
+            "Entities": [ 98499225, "Tau AD", "a:Triumvirate", "c:SATRO" ],
+            "DiscordRoles": [ "Member", "TestRole2" ],
           }
         },
         "authRoles": [ "Admins" ],
@@ -355,11 +340,9 @@
         "DefaultMention": ""
       },
       "Mode2_GeneralWithESIFetch": {
-        "AllowedCharacters": {},
-        "AllowedCorporations": {},
-        "AllowedAlliances": {
+        "AllowedMembers": {
           "ally1": {
-            "Id": [ 99003599 ],
+            "Entities": [ 99003599 ],
             "DiscordRoles": [ "Member" ]
           }
         },
@@ -370,11 +353,9 @@
         "DefaultMention": ""
       },
       "Mode3_Preliminary": {
-        "AllowedCharacters": {},
-        "AllowedCorporations": {},
-        "AllowedAlliances": {
+        "AllowedMembers": {
           "ally1": {
-            "Id": [ 0 ],
+            "Entities": [ 0 ],
             "DiscordRoles": [ "Member" ]
           }
         },
@@ -446,6 +427,7 @@
         "CustomButtonText": "Alt Characters Auth",
         "BindToMainCharacter": true
       }
+   
     }
   },
   "resources": {

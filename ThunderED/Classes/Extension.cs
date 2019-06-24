@@ -43,6 +43,12 @@ namespace ThunderED.Classes
                 .Select(group => group.Key);
         }
 
+        public static IEnumerable<string> GetDupeKeys<T>(this IDictionary<string, T> list)
+        {
+            return list.GroupBy(x => x.Key)
+                .Where(group => group.Count() > 1).Select(a=> a.Key);
+        }
+
         public static bool ContainsAnyFromList<T>(this IEnumerable<T> list, IEnumerable<T> fromList)
         {
             return list.Intersect(fromList).Any();
