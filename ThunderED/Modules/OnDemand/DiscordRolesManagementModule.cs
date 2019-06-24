@@ -18,14 +18,9 @@ namespace ThunderED.Modules.OnDemand
 
         public override async Task Initialize()
         {
-            var groups = APIHelper.DiscordAPI.GetGuildRoleNames();
-            if(!groups.Any()) return;
-            if(!Settings.CommandsConfig.RolesCommandDiscordRoles.Any()) return;
-
-            var missing = Settings.CommandsConfig.RolesCommandDiscordRoles.Except(groups).ToList();
+            var missing = await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.CommandsConfig.RolesCommandDiscordRoles, Category);
             if (missing.Any())
             {
-                await LogHelper.LogWarning(LM.Get("roleCommandsUnknownRoles", string.Join(',', missing)), Category);
                 foreach (var role in Settings.CommandsConfig.RolesCommandDiscordRoles)
                 {
                     if(missing.ContainsCaseInsensitive(role)) continue;
@@ -33,16 +28,18 @@ namespace ThunderED.Modules.OnDemand
                 }
             }else AvailableRoleNames = Settings.CommandsConfig.RolesCommandDiscordRoles;
 
-            missing = Settings.CommandsConfig.RolesCommandAllowedRoles.Except(groups).ToList();
+
+            missing = await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.CommandsConfig.RolesCommandAllowedRoles, Category);
             if (missing.Any())
             {
-                await LogHelper.LogWarning(LM.Get("roleCommandsUnknownRoles", string.Join(',', missing)), Category);
                 foreach (var role in Settings.CommandsConfig.RolesCommandAllowedRoles)
                 {
                     if(missing.ContainsCaseInsensitive(role)) continue;
                     AvailableAllowedRoleNames.Add(role);
                 }
             }else AvailableAllowedRoleNames = Settings.CommandsConfig.RolesCommandAllowedRoles;
+
+            
         }
 
         public static async Task AddRole(ICommandContext context, string role)

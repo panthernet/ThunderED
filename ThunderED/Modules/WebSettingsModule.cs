@@ -34,6 +34,9 @@ namespace ThunderED.Modules
 
             foreach (var id in GetAllParsedCharacters())
                 await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
+
+            await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.WebConfigEditorModule.AccessList.Values.SelectMany(a => a.AllowedDiscordRoles).Distinct().ToList(), Category);
+
         }
 
         private async Task<bool> OnAuthRequest(HttpListenerRequestEventArgs context)

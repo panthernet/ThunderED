@@ -330,7 +330,7 @@
         "AllowedMembers": {
           "entry1": {
             "Entities": [ 98499225, "Tau AD", "a:Triumvirate", "c:SATRO" ],
-            "DiscordRoles": [ "Member", "TestRole2" ],
+            "DiscordRoles": [ "Member", "TestRole2" ]
           }
         },
         "authRoles": [ "Admins" ],

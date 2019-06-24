@@ -20,7 +20,7 @@ namespace ThunderED.Modules
             
         public HRMModule()
         {
-            LogHelper.LogModule("Inititalizing HRM module...", Category).GetAwaiter().GetResult();
+            LogHelper.LogModule("Initializing HRM module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, OnRequestReceived);
 
             foreach (var pair in Settings.HRMModule.SpyFilters)
@@ -40,6 +40,11 @@ namespace ThunderED.Modules
                         filter.AllianceIds.Add(name, alliance.alliance.First());
                 } );
             }
+        }
+
+        public override async Task Initialize()
+        {
+            await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.HRMModule.AccessList.Values.SelectMany(a => a.RolesAccessList).Distinct().ToList(), Category);
         }
 
         private static DateTime _lastUpdateDate = DateTime.MinValue;

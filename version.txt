@@ -1,6 +1,7 @@
 ### V1.3.16
 + Added console warning messages for entities that has not been recognized
 + Added new IndustrialJobsModule
++ Added Discord roles validity checks for majority of modules
 + Fixed ContractsFeedModule initial cache generation
 + Fixed contracts availability filter
 + Fixed log verbosity order so `Module` value is going below the `Warning`

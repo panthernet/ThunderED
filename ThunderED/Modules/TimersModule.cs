@@ -51,6 +51,9 @@ namespace ThunderED.Modules
 
             foreach (var id in GetAllCharacterIds())
                 await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
+
+            await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.TimersModule.AccessList.Values.SelectMany(a=> a.FilterDiscordRoles).Distinct().ToList(), Category);
+            await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.TimersModule.EditList.Values.SelectMany(a=> a.FilterDiscordRoles).Distinct().ToList(), Category);
         }
 
         private async Task<bool> OnDisplayTimers(HttpListenerRequestEventArgs context)

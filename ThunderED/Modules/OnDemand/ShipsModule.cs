@@ -55,6 +55,11 @@ namespace ThunderED.Modules.OnDemand
             public string Name;
         }
 
+        public override async Task Initialize()
+        {
+            await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.CommandsConfig.ShipsCommandDiscordRoles, Category);
+        }
+
         private bool IsMod(string value, string mod)
         {
             return value.Equals(mod, StringComparison.OrdinalIgnoreCase) || value.ToLower() == char.ToLower(mod[0]).ToString();
