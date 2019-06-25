@@ -569,5 +569,6 @@
   "industryJobsRowCompletedBy": "Completed",
   "industryJobsRowBPO": "BPO",
   "industryJobsRowInstaller": "Installer",
+  "industryJobsRowStation": "Location",
   "helpTest": "Commands available:\nkm test TEMPLATE - generate test KM where TEMPLATE is the name of the KM template file from Templates/Messages folder"
 }

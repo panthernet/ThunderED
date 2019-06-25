@@ -220,7 +220,7 @@ namespace ThunderED.Modules
                     //check delivered
                     if (freshJob.StatusValue != job.StatusValue)
                     {
-                        await SendDiscordMessage(freshJob, true, filter.DiscordChannels.Any() ? filter.DiscordChannels : @group.DiscordChannels, isCorp);
+                        await SendDiscordMessage(freshJob, true, filter.DiscordChannels.Any() ? filter.DiscordChannels : @group.DiscordChannels, isCorp, token);
                         var index = dbJobs.IndexOf(job);
                         dbJobs.Remove(job);
                         dbJobs.Insert(index, freshJob);
@@ -253,7 +253,7 @@ namespace ThunderED.Modules
                     foreach (var (filterName, filter) in @group.Filters)
                     {
                         if (!CheckJobForFilter(filter, job, isCorp)) continue;
-                        await SendDiscordMessage(job, false, filter.DiscordChannels.Any() ? filter.DiscordChannels : @group.DiscordChannels, isCorp);
+                        await SendDiscordMessage(job, false, filter.DiscordChannels.Any() ? filter.DiscordChannels : @group.DiscordChannels, isCorp, token);
                     }
                 }
 
@@ -296,7 +296,7 @@ namespace ThunderED.Modules
             return true;
         }
 
-        private async Task SendDiscordMessage(JsonClasses.IndustryJob job, bool isStatusChange, List<ulong> discordChannels, bool isCorp)
+        private async Task SendDiscordMessage(JsonClasses.IndustryJob job, bool isStatusChange, List<ulong> discordChannels, bool isCorp, string token)
         {
             if(job == null) return;
 
@@ -370,6 +370,8 @@ namespace ThunderED.Modules
             var unk = LM.Get("Unknown");
             var installer = job.installer_id > 0 ? await APIHelper.ESIAPI.GetCharacterData(Reason, job.installer_id) : null;
 
+            var station = (await APIHelper.ESIAPI.GetStationData(Reason, job.facility_id, token))?.name ?? (await APIHelper.ESIAPI.GetStructureData(Reason, job.facility_id, token))?.name;
+
             var header = isStatusChange ? LM.Get("industryJobsStatusHeader") : LM.Get("industryJobsNewHeader");
             var sb = new StringBuilder();
             var color = isStatusChange ? null : "fix";
@@ -410,6 +412,7 @@ namespace ThunderED.Modules
                 sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowInstaller"),-11}: {installer.name}");
             if(completedBy != null && isCorp)
                 sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowCompletedBy"),-11}: {completedBy.name}");
+            sb.AppendLine($"{colorMark}{LM.Get("industryJobsRowStation"),-11}: {station ?? LM.Get("Unknown")}");
             sb.AppendLine("```");
             //sb.Append($"{LM.Get("industryJobsRowTime"),10}": {job.});
             foreach (var channel in discordChannels)
