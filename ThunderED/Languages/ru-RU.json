@@ -561,6 +561,7 @@
   "industryJobsRowDuration": "Осталось",
   "industryJobsRowCompletedBy": "Выполнена",
   "industryJobsRowBPO": "BPO",
+  "industryJobsRowInstaller": "Установщик",
   "helpTest": "Доступные команды:\nkm test TEMPLATE - сгенерировать тестовое KM где TEMPLATE наименование файла шаблонаиз папки Templates/Messages"
 
 }

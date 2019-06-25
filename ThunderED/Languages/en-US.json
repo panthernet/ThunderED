@@ -568,5 +568,6 @@
   "industryJobsRowDuration": "Time left",
   "industryJobsRowCompletedBy": "Completed",
   "industryJobsRowBPO": "BPO",
-  "helpTest":  "Commands available:\nkm test TEMPLATE - generate test KM where TEMPLATE is the name of the KM template file from Templates/Messages folder" 
+  "industryJobsRowInstaller": "Installer",
+  "helpTest": "Commands available:\nkm test TEMPLATE - generate test KM where TEMPLATE is the name of the KM template file from Templates/Messages folder"
 }

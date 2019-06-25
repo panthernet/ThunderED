@@ -221,6 +221,9 @@ namespace ThunderED.Modules
                     if (freshJob.StatusValue != job.StatusValue)
                     {
                         await SendDiscordMessage(freshJob, true, filter.DiscordChannels.Any() ? filter.DiscordChannels : @group.DiscordChannels, isCorp);
+                        var index = dbJobs.IndexOf(job);
+                        dbJobs.Remove(job);
+                        dbJobs.Insert(index, freshJob);
                     }
                 }
 
@@ -365,6 +368,7 @@ namespace ThunderED.Modules
             var productType = await APIHelper.ESIAPI.GetTypeId(Reason, job.product_type_id);
             var completedBy = job.completed_character_id > 0 ? await APIHelper.ESIAPI.GetCharacterData(Reason, job.completed_character_id) : null;
             var unk = LM.Get("Unknown");
+            var installer = job.installer_id > 0 ? await APIHelper.ESIAPI.GetCharacterData(Reason, job.installer_id) : null;
 
             var header = isStatusChange ? LM.Get("industryJobsStatusHeader") : LM.Get("industryJobsNewHeader");
             var sb = new StringBuilder();
@@ -400,9 +404,12 @@ namespace ThunderED.Modules
                 sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowBPO"),-11}: {productType?.name ?? unk}");
             }
             if (!string.IsNullOrEmpty(timeToComplete))
-                sb.Append($"{colorMove}{LM.Get("industryJobsRowDuration"),-11}: {timeToComplete}");
+                sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowDuration"),-11}: {timeToComplete}");
+
+            if(installer != null)
+                sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowInstaller"),-11}: {installer.name}");
             if(completedBy != null && isCorp)
-                sb.Append($"{colorMove}{LM.Get("industryJobsRowCompletedBy"),-11}: {completedBy.name}");
+                sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowCompletedBy"),-11}: {completedBy.name}");
             sb.AppendLine("```");
             //sb.Append($"{LM.Get("industryJobsRowTime"),10}": {job.});
             foreach (var channel in discordChannels)
