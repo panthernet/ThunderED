@@ -642,6 +642,7 @@ namespace ThunderED.Json
         duplicating = 6,
         reverseEng = 7,
         inventing = 8,
+        reaction2 = 9,
         reaction = 11
     }
 }

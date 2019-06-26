@@ -360,6 +360,9 @@ namespace ThunderED.Modules
                 case IndustryJobActivity.reaction:
                     activityText = LM.Get("industryJobsActivityReaction");     
                     break;
+                case IndustryJobActivity.reaction2:
+                    activityText = LM.Get("industryJobsActivityReaction");     
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException($"Unknown activity {job.activity_id}");
             }
