@@ -359,6 +359,8 @@ namespace ThunderED.Classes
         public bool FeedPersonalContracts { get; set; } = true;
         public bool FeedCorporateContracts { get; set; } = true;
         public string ButtonText { get; set; } = "Default Contracts Auth";
+        [Comment("Do not process contract in other filters if it has been posted within a filter")]
+        public bool StopOnFirstFilterMatch { get; set; } = false;
         public string DefaultMention { get; set; }
 
 #if EDITOR

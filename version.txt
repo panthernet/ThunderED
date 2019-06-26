@@ -3,6 +3,7 @@
 + Added new IndustrialJobsModule
 + Added Discord roles validity checks for majority of modules
 + Added !test km command for admins to be able to test KM templates
++ Added new Contracts module property `StopOnFirstFilterMatch` which is false by default
 + Fixed ContractsFeedModule initial cache generation
 + Fixed contracts availability filter
 + Fixed log verbosity order so `Module` value is going below the `Warning`

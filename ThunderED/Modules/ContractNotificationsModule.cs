@@ -297,35 +297,68 @@ namespace ThunderED.Modules
                     list = list.Where(a => otherList.All(b => b.contract_id != a.contract_id)).ToList();
                 }
 
-                var crFilter = group.Filters.Values.FirstOrDefault(a => a.Statuses.Contains("outstanding"));
-                var crFilterChannel = crFilter?.DiscordChannelId ?? 0;
-
-                //filter by issue target
-                if(!crFilter?.FeedIssuedBy ?? false)
-                    list = list.Where(a => a.issuer_id != characterID && (a.issuer_corporation_id != corpID || a.issuer_corporation_id == 0)).ToList();
-                if (!crFilter?.FeedIssuedTo ?? false)
-                    list = list.Where(a => a.assignee_id != characterID && a.assignee_id != corpID).ToList();
-
-                //types
-                if (crFilter != null && crFilter.Types.Any())
-                    list = list.Where(a => crFilter.Types.Contains(a.type)).ToList();
-
-                //availability
-                if (crFilter != null && crFilter.Availability.Any())
-                    list = list.Where(a=> crFilter.Availability.ContainsCaseInsensitive(a.availability)).ToList();
-
+                //fix loop
                 foreach (var contract in list)
                 {
-                    try
+                    var isCharAssignee = await APIHelper.ESIAPI.GetCharacterData(Reason, contract.assignee_id) != null;
+                    bool isCorpAssignee = false;
+                    bool isAllyAssignee = false;
+                    if (!isCharAssignee)
                     {
-                        await LogHelper.LogModule($"--> New Contract {contract.contract_id} found!", Category);
-                        if(crFilterChannel != 0)
-                            await PrepareDiscordMessage(crFilterChannel, contract, group.DefaultMention, isCorp, characterID, corpID, token, crFilter);
+                        isCorpAssignee = await APIHelper.ESIAPI.GetCorporationData(Reason, contract.assignee_id) != null;
+                        isAllyAssignee = !isCorpAssignee;
                     }
-                    catch (Exception ex)
-                    {
-                        await LogHelper.LogEx($"Contract {contract.contract_id}", ex, Category);
 
+                    contract.availability = isCharAssignee ? "personal" : (isCorpAssignee ? "corporation" : "alliance");
+                }
+
+                bool stop = false;
+                foreach (var contract in list)
+                {
+                    foreach (var (filterName, filter) in group.Filters)
+                    {
+                        if (stop) break;
+                        if (!filter.Statuses.Contains(contract.status)) continue;
+                        //types
+                        if (filter.Types.Any() && !filter.Types.Contains(contract.type)) continue;
+                        //availability
+                        if (filter.Availability.Any() && !filter.Availability.ContainsCaseInsensitive(contract.availability)) continue;
+
+                        //filter by issue target
+                        if (!filter.FeedIssuedBy)
+                        {
+                            if (isCorp)
+                            {
+                                if(contract.for_corporation && contract.issuer_corporation_id == corpID)
+                                    continue;
+                            }
+                            else
+                            {
+                                if(contract.issuer_id == characterID) continue;
+                            }
+
+                        }
+
+                        if (!filter.FeedIssuedTo)
+                        {
+                            if (isCorp)
+                                if(contract.assignee_id == corpID) continue;
+                            else if(contract.assignee_id == characterID) continue;
+                        }
+
+                        try
+                        {
+                            await LogHelper.LogModule($"--> New Contract {contract.contract_id} found!", Category);
+                            if (filter.DiscordChannelId != 0)
+                                await PrepareDiscordMessage(filter.DiscordChannelId, contract, group.DefaultMention, isCorp, characterID, corpID, token, filter);
+                            if (group.StopOnFirstFilterMatch)
+                                stop = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            await LogHelper.LogEx($"Contract {contract.contract_id}", ex, Category);
+
+                        }
                     }
                 }
 

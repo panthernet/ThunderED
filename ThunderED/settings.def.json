@@ -107,6 +107,7 @@
         "DefaultMention": "",
         "FeedPersonalContracts": true,
         "FeedCorporateContracts": true,
+        "StopOnFirstFilterMatch": false,
         "Filters": {
           "defaultFilter": {
             "FeedIssuedBy": true,
