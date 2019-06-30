@@ -237,7 +237,7 @@ namespace ThunderED.Modules
 
                         simpleAuthScripts = File.ReadAllText(SettingsManager.FileTemplateSettingsPage_SimpleAuth_Scripts)
                                 .Replace("{saGroupList}", groupList)
-                                .Replace("{postTimersUrl}", WebServerModule.GetWebEditorSimplifiedAuthUrl(code))
+                                .Replace("{postSimplifiedAuthUrl}", WebServerModule.GetWebEditorSimplifiedAuthUrl(code))
                             ;
                     }
 
@@ -253,6 +253,7 @@ namespace ThunderED.Modules
                                 .Replace("{tiTableColumnEntities}", LM.Get("webSettingsTiColumnEntities"))
                                 .Replace("{saTableColumnRoles}", LM.Get("webSettingsSaColumnRoles"))
 
+                                .Replace("{serverAddress}", $"{Settings.WebServerModule.WebExternalIP}:{Settings.WebServerModule.WebExternalPort}")
                                 .Replace("{code}", code)
                                 .Replace("{locale}", SettingsManager.Settings.Config.Language)
                             ;
