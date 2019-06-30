@@ -40,7 +40,7 @@ namespace ThunderED.Modules
 
         public NotificationModule()
         {
-            LogHelper.LogModule("Inititalizing Notifications module...", Category).GetAwaiter().GetResult();
+            LogHelper.LogModule("Initializing Notifications module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, Auth);
         }
 
@@ -75,6 +75,9 @@ namespace ThunderED.Modules
 
         private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
 
+        private readonly ConcurrentDictionary<long, List<JsonClasses.Notification>> _passContracts = new ConcurrentDictionary<long, List<JsonClasses.Notification>>();
+
+
         #region Notifications
         private async Task NotificationFeed()
         {
@@ -88,7 +91,7 @@ namespace ThunderED.Modules
                     foreach (var groupPair in Settings.NotificationFeedModule.Groups)
                     {
                         var group = groupPair.Value;
-                        if (!group.CharacterID.Any() || group.CharacterID.All(a=> a==0))
+                        if (!group.CharacterID.Any() || group.CharacterID.All(a => a == 0))
                         {
                             await LogHelper.LogError($"[CONFIG] Notification group {groupPair.Key} has no characterID specified!");
                             continue;
@@ -109,9 +112,10 @@ namespace ThunderED.Modules
                             var rToken = await SQLHelper.GetRefreshTokenDefault(charId);
                             if (string.IsNullOrEmpty(rToken))
                             {
-                                await SendOneTimeWarning(charId+100, $"Failed to get notifications refresh token for character {charId}! User is not authenticated.");
+                                await SendOneTimeWarning(charId + 100, $"Failed to get notifications refresh token for character {charId}! User is not authenticated.");
                                 continue;
                             }
+
                             var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                             if (!string.IsNullOrEmpty(token))
                                 await LogHelper.LogInfo($"Checking characterID:{charId}", Category, LogToConsole, false);
@@ -124,25 +128,27 @@ namespace ThunderED.Modules
                             var etag = _tags.GetOrNull(charId);
                             var result = await APIHelper.ESIAPI.GetNotifications(Reason, charId, token, etag);
                             _tags.AddOrUpdateEx(charId, result.Data.ETag);
-                            if(result.Data.IsNotModified || result.Result == null) continue;
+                            if (result.Data.IsNotModified || result.Result == null)
+                            {
+                                if (!_passContracts.ContainsKey(charId))
+                                    continue;
+                                result.Result = _passContracts[charId];
+                            }
+                            else _passContracts.AddOrUpdate(charId, result.Result);
 
                             var notifications = result.Result;
 
- /*                           notifications.Add(new JsonClasses.Notification
-   {
-       text = @"listOfTypesAndQty:
-- - 211
-- 4312
-solarsystemID: 30003354
-structureID: &id001 1030256062178
-structureShowInfoData:
-- showinfo
-- 35825
-- *id001
-structureTypeID: 35825",
-       notification_id = 999990000,
-       type = "StructureFuelAlert"
-   });*/
+                            notifications.Add(new JsonClasses.Notification
+                            {
+                                text = @"applicationText: '<font size=""12"" color=""#bfffffff""></font><font size=""12"" color=""#ffd98d00""><loc><a
+       href=""showinfo:1379//96323075"">Opal Ra</a></loc></font><font size=""12"" color=""#bfffffff"">''s
+       Alt #2</font>'
+       charID: 2115409151
+       corpID: 755437926",
+                                notification_id = 999990000,
+                                type = "CorpAppNewMsg",
+                                timestamp = "2019-06-29T17:20:00Z"
+                            });
 
                             var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId);
                             var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
@@ -230,7 +236,7 @@ structureTypeID: 35825",
                                                     var keys = data.Keys.ToList();
                                                     var ltqIndex = keys.IndexOf("oreVolumeByType");
                                                     var endIndex = keys.IndexOf("solarSystemLink");
-                                                    if(endIndex == -1)
+                                                    if (endIndex == -1)
                                                         endIndex = keys.IndexOf("solarSystemID");
                                                     var pass = endIndex - ltqIndex;
                                                     if (pass > 0)
@@ -238,7 +244,7 @@ structureTypeID: 35825",
                                                         oreComposition = new Dictionary<string, string>();
                                                         for (int i = ltqIndex + 1; i < endIndex; i++)
                                                         {
-                                                            if(!keys[i].All(char.IsDigit)) continue;
+                                                            if (!keys[i].All(char.IsDigit)) continue;
                                                             var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, keys[i])).name;
                                                             var value = double.Parse(data[keys[i]].Split('.')[0]).ToString("N");
                                                             oreComposition.Add(typeName, value);
@@ -397,6 +403,7 @@ structureTypeID: 35825",
                                                     await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
                                                     break;
                                                 }
+
                                                 case "StructureWentLowPower":
                                                 case "StructureWentHighPower":
                                                 {
@@ -506,7 +513,7 @@ structureTypeID: 35825",
                                                 case "AllAnchoringMsg":
                                                 {
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
-                                                    var corpName = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data) ?? null))?.name  ?? LM.Get("Unknown");
+                                                    var corpName = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data) ?? null))?.name ?? LM.Get("Unknown");
                                                     var allianceName = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allianceID", data) ?? null))?.name;
                                                     var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data)))?.name ?? LM.Get("Unknown");
                                                     var moonName = (await APIHelper.ESIAPI.GetMoon(Reason, GetData("moonID", data)))?.name ?? LM.Get("Unknown");
@@ -516,7 +523,7 @@ structureTypeID: 35825",
                                                         .WithThumbnailUrl(Settings.Resources.ImgCitAnchoring)
                                                         .WithAuthor(author =>
                                                             author.WithName(text))
-                                                        .AddField(LM.Get("System"),  $"{systemName} {LM.Get("AtSmall")} {moonName}", true)
+                                                        .AddField(LM.Get("System"), $"{systemName} {LM.Get("AtSmall")} {moonName}", true)
                                                         .AddField(LM.Get("Structure"), typeName, true)
                                                         .AddField(LM.Get("TimeLeft"), timeleft ?? LM.Get("Unknown"), true)
                                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
@@ -571,7 +578,7 @@ structureTypeID: 35825",
                                                     //"text": "autoTime: 131632776620000000\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 1003894.7944164276\n  46676: 3861704.652392864\n  46681: 1934338.7763798237\n  46687: 5183861.7768108845\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                     var compText = new StringBuilder();
-                                                    if(oreComposition != null)
+                                                    if (oreComposition != null)
                                                         foreach (var pair in oreComposition)
                                                         {
                                                             compText.Append($"{pair.Key}: {pair.Value} | ");
@@ -650,7 +657,30 @@ structureTypeID: 35825",
                                                             break;
                                                     }
 
-                                                    var applicationText = notification.type == "CharLeftCorpMsg" ? "" : GetData("applicationText", data);
+                                                    var applicationText = string.Empty;
+                                                    if(notification.type != "CharLeftCorpMsg")
+                                                    {
+                                                        GetData("applicationText", data);
+
+                                                        var sb = new StringBuilder();
+                                                        foreach (var (key, value) in data)
+                                                        {
+                                                            if (key.Equals("applicationText", StringComparison.OrdinalIgnoreCase))
+                                                            {
+                                                                sb.Append(value);
+                                                                sb.Append(" ");
+                                                                continue;
+                                                            }
+
+                                                            if (key == "charID" || key == "corpID")
+                                                                break;
+                                                            sb.Append(key);
+                                                            sb.Append(" ");
+                                                            sb.Append(value);
+                                                        }
+
+                                                        applicationText = sb.ToString();
+                                                    }
                                                     Color color;
                                                     if (notification.type == "CharLeftCorpMsg" || notification.type == "CharAppWithdrawMsg")
                                                     {
@@ -970,12 +1000,16 @@ structureTypeID: 35825",
                     var interval = Settings.NotificationFeedModule.CheckIntervalInMinutes;
                     await SQLHelper.SetCacheDataNextNotificationCheck(interval);
                     _nextNotificationCheck = DateTime.Now.AddMinutes(interval);
-                   // await LogHelper.LogInfo("Check complete", Category, LogToConsole, false);
+                    // await LogHelper.LogInfo("Check complete", Category, LogToConsole, false);
                 }
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+            finally
+            {
+                _passContracts.Clear();
             }
         }
 

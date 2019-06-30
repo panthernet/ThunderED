@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using HtmlAgilityPack;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
@@ -273,6 +274,11 @@ namespace ThunderED.Modules
         public static async Task<string[]> PrepareBodyMessage(string input, bool forWeb = false)
         {
             if (string.IsNullOrEmpty(input)) return new [] {" ", null, null, null};
+
+            var doc = new HtmlDocument();
+            doc.LoadHtml(input);
+            if (doc.ParseErrors.Any())
+                return new [] {input};
 
             string body;
             if (!forWeb)
