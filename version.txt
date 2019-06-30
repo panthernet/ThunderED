@@ -1,9 +1,10 @@
-### V1.3.16
+### V1.4.0
 + Added console warning messages for entities that has not been recognized
 + Added new IndustrialJobsModule
 + Added Discord roles validity checks for majority of modules
 + Added !test km command for admins to be able to test KM templates
 + Added new Contracts module property `StopOnFirstFilterMatch` which is false by default
++ Added new auth mode: authentication by corp Titles
 + Fixed ContractsFeedModule initial cache generation
 + Fixed contracts availability filter
 + Fixed log verbosity order so `Module` value is going below the `Warning`
@@ -31,6 +32,14 @@ On top of the existing features now you can:
  - Specify custom template filename for feed Group to use
 
  Read https://github.com/panthernet/ThunderED/wiki/Killmails-Feed for details.
+
+### FEATURE HIGHLIGHT - CORP TITLES AUTH
+It is now possible to authenticate characters by assigned corporation titles. Look for `Mode7_AuthByTitles` in default config file.
+Several rules:
+ - Titles auth is only enabled when `Titles` property within `AllowedMembers` group is not empty
+ - Auth group must fetch `esi-characters.read_titles.v1` ESI permission from users
+ - `DiscordRoles` property from `AllowedMembers` will be ignored
+ - Corp directors will not be authenticated as they don't have corp titles
 
 ### BREAKING CHANGES
 - Bot has been updated to .NET Core 2.2 so you might have to adjust your environment
