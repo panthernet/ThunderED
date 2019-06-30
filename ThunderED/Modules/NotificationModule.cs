@@ -138,7 +138,7 @@ namespace ThunderED.Modules
 
                             var notifications = result.Result;
 
-                            notifications.Add(new JsonClasses.Notification
+/*                            notifications.Add(new JsonClasses.Notification
                             {
                                 text = @"applicationText: '<font size=""12"" color=""#bfffffff""></font><font size=""12"" color=""#ffd98d00""><loc><a
        href=""showinfo:1379//96323075"">Opal Ra</a></loc></font><font size=""12"" color=""#bfffffff"">''s
@@ -148,7 +148,7 @@ namespace ThunderED.Modules
                                 notification_id = 999990000,
                                 type = "CorpAppNewMsg",
                                 timestamp = "2019-06-29T17:20:00Z"
-                            });
+                            });*/
 
                             var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId);
                             var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
