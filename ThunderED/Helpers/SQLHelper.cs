@@ -390,44 +390,54 @@ namespace ThunderED.Helpers
 
         public static string LoadProvider()
         {
-            var prov = SettingsManager.Settings.Database.DatabaseProvider;
-            switch (prov)
+            try
             {
-                case "sqlite":
-                    Provider = new SqliteDatabaseProvider();
-                    break;
-                case "mysql":
-                    Provider = new MysqlDatabaseProvider();
-                    break;
-                default:
-                    LogHelper.LogInfo("Using default sqlite provider!").GetAwaiter().GetResult();
-                    Provider = new SqliteDatabaseProvider();
-                    break;
-                //  return $"[CRITICAL] Unknown database provider {prov}!";
+                var prov = SettingsManager.Settings.Database.DatabaseProvider;
+                switch (prov)
+                {
+                    case "sqlite":
+                        Provider = new SqliteDatabaseProvider();
+                        break;
+                    case "mysql":
+                        Provider = new MysqlDatabaseProvider();
+                        break;
+                    default:
+                        LogHelper.LogInfo("Using default sqlite provider!").GetAwaiter().GetResult();
+                        Provider = new SqliteDatabaseProvider();
+                        break;
+                    //  return $"[CRITICAL] Unknown database provider {prov}!";
 
+                }
+
+                if (!EnsureDBExists())
+                {
+                    return "[CRITICAL] Failed to check DB integrity or create new instance!";
+                }
+
+                //upgrade database
+                if (!Upgrade().GetAwaiter().GetResult())
+                {
+                    return "[CRITICAL] Failed to upgrade DB to latest version!";
+                }
+
+                //check integrity
+                var users = GetAuthUsers().GetAwaiter().GetResult();
+                var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.ToList();
+                var problem = string.Join(',', users.Where(a => !groups.Contains(a.GroupName)).Select(a => a.GroupName ?? "null").Distinct());
+                if (!string.IsNullOrEmpty(problem))
+                {
+                    LogHelper.LogWarning(
+                            $"Database table auth_users contains entries with invalid groupName fields! It means that these groups hasn't been found in your config file and this can lead to problems in auth validation. Either tell those users to reauth or fix group names manually!\nUnknown groups: {problem}")
+                        .GetAwaiter().GetResult();
+                }
+
+                return null;
             }
-
-            if (!EnsureDBExists())
+            catch (Exception ex)
             {
-                return "[CRITICAL] Failed to check DB integrity or create new instance!";
+                LogHelper.LogEx(nameof(LoadProvider), ex).GetAwaiter().GetResult();
+                return "Unexpected error while loading DB provider!";
             }
-
-            //upgrade database
-            if (!Upgrade().GetAwaiter().GetResult())
-            {
-                return "[CRITICAL] Failed to upgrade DB to latest version!";
-            }
-
-            //check integrity
-            var users = GetAuthUsers().GetAwaiter().GetResult();
-            var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.ToList();
-            var problem = string.Join(',', users.Where(a => !groups.Contains(a.GroupName)).Select(a => a.GroupName ?? "null").Distinct());
-            if (!string.IsNullOrEmpty(problem))
-            {
-                LogHelper.LogWarning($"Database table auth_users contains entries with invalid groupName fields! It means that these groups hasn't been found in your config file and this can lead to problems in auth validation. Either tell those users to reauth or fix group names manually!\nUnknown groups: {problem}").GetAwaiter().GetResult();
-            }
-
-            return null;
         }
         #endregion
 
