@@ -7,7 +7,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
@@ -934,7 +936,7 @@ namespace ThunderED.Modules
                
 
                 //check if we fit some group
-                var result = await GetRoleGroup(authUser.CharacterId, discordId, isManualAuth);
+                var result = await GetRoleGroup(authUser.CharacterId, discordId, isManualAuth, authUser.RefreshToken);
                 var groupName = result?.GroupName;
                 //pass auth
                 if (!string.IsNullOrEmpty(groupName))
@@ -996,5 +998,6 @@ namespace ThunderED.Modules
                 await LogHelper.LogEx($"Failed adding Roles to User {characterData?.name}, Reason: {ex.Message}", ex, LogCat.AuthCheck);
             }
         }
+
     }
 }

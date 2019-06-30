@@ -624,6 +624,12 @@ namespace ThunderED.Json
                 }
             }
         }
+
+        public class CharacterTitle
+        {
+            public string name;
+            public long title_id;
+        }
     }
 
     public enum IndustryJobStatusEnum

@@ -567,5 +567,10 @@ namespace ThunderED.API
             return await APIHelper.ESIRequestWrapper<List<JsonClasses.IndustryJob>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/industry/jobs/?datasource=tranquility&include_completed=true&language={_language}", reason, authHeader);
         }
 
+        public async Task<List<JsonClasses.CharacterTitle>> GetCharacterTitles(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<List<JsonClasses.CharacterTitle>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/titles/?datasource=tranquility&include_completed=true&language={_language}", reason, authHeader);
+        }
     }
 }

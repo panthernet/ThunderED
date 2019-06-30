@@ -1909,19 +1909,21 @@ namespace ThunderED.Classes
     public class AuthRoleEntity: ValidatableSettings
     {
 
-        
-        [Comment("The list of Discord role names to assign after successful auth")]
+
 #if EDITOR
-        public ObservableCollection<string> Titles { get; set; } = new ObservableCollection<string>();
+        [Comment("The list of Discord role names to assign after successful auth")]
         public ObservableCollection<string> DiscordRoles { get; set; } = new ObservableCollection<string>();
         [Comment("List of names and Ids of entities (char/corp/alliance)")]
         [Required]
         public ObservableCollection<object> Entities { get; set; } = new ObservableCollection<object>();
+        [Comment("Optional titles list to assign Discord roles")]
+        public ObservableDictionary<string, TitleAuthGroup> Titles { get; set; } = new ObservableDictionary<string, TitleAuthGroup>();
 #else
-        public List<string> Titles { get; set; } = new List<string>();
         public List<string> DiscordRoles { get; set; } = new List<string>();
         public List<object> Entities { get; set; } = new List<object>();
+        public Dictionary<string, TitleAuthGroup> Titles { get; set; } = new Dictionary<string, TitleAuthGroup>();
 #endif
+
 
 #if EDITOR
         public override string this[string columnName]
@@ -1939,5 +1941,17 @@ namespace ThunderED.Classes
         }
 #endif
     }
-    
+
+    public class TitleAuthGroup
+    {
+#if EDITOR
+        [Comment("List of text title names")]
+        public ObservableCollection<string> TitleNames { get; set; } = new ObservableCollection<string>();
+        [Comment("List of text Discord role names to assign for selected titles")]
+        public ObservableCollection<string> DiscordRoles { get; set; } = new ObservableCollection<string>();
+#else
+        public List<string> TitleNames { get; set; } = new List<string>();
+        public List<string> DiscordRoles { get; set; } = new List<string>();
+#endif
+    }
 }

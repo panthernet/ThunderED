@@ -427,8 +427,25 @@
         "ESICustomAuthRoles": [ "esi-skills.read_skills.v1" ],
         "CustomButtonText": "Alt Characters Auth",
         "BindToMainCharacter": true
+      },
+      "Mode7_AuthByTitles": {
+        "UseStrictAuthenticationMode": "false",
+        "AllowedMembers": {
+          "entry1": {
+            "Entities": [ 98499225, "Tau AD", "a:Triumvirate", "c:SATRO" ],
+            "DiscordRoles": [ "Member", "TestRole2" ],
+            "Titles": {
+              "titleGroup1": {
+                "TitleNames": [],
+                "DiscordRoles": [ "Member", "TestRole2" ]
+              }
+            }
+          }
+        },
+        "ESICustomAuthRoles": [ "esi-characters.read_titles.v1" ],
+        "CustomButtonText": "Auth By Titles",
+        "ExcludeFromOneButtonMode": false
       }
-   
     }
   },
   "resources": {

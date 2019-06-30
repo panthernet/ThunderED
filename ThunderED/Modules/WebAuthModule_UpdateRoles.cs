@@ -3,6 +3,7 @@ using System.Collections.Async;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -77,9 +78,8 @@ namespace ThunderED.Modules
                         await authUser.UpdateData(characterData);
                         await SQLHelper.SaveAuthUser(authUser);
                     }
-
                     var remroles = new List<SocketRole>();
-                    var result = await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth);
+                    var result = await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth, authUser.RefreshToken);
                     var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.IsAuthed;
                     //skip dumped
                     //if (authUser.IsSpying) return null;
@@ -268,7 +268,46 @@ namespace ThunderED.Modules
             }
         }
 
-        public static async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId, bool isManualAuth = false)
+        private static async Task UpdateResultRolesWithTitles(SocketGuild discordGuild, AuthRoleEntity roleEntity, RoleSearchResult result, long charID, string token)
+        {
+            var aRoles = discordGuild.Roles.Where(a => roleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a));
+            //process titles in priority
+            if (roleEntity.Titles.Any())
+            {
+                if (string.IsNullOrEmpty(token))
+                {
+                    await LogHelper.LogWarning(
+                        $"User ID {charID} has no ESI token but is being checked against group with Titles! Titles require esi-characters.read_titles.v1 permissions!");
+                    return;
+                }
+
+                var uToken = await APIHelper.ESIAPI.RefreshToken(token, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                    SettingsManager.Settings.WebServerModule.CcpAppSecret);
+                var userTitles = (await APIHelper.ESIAPI.GetCharacterTitles("AuthCheck", charID, uToken))?.Select(a=> a.name).ToList();
+                if (userTitles != null && userTitles.Any())
+                {
+
+                    foreach (var roleTitle in roleEntity.Titles.Values)
+                    {
+                        if (!roleTitle.TitleNames.ContainsAnyFromList(userTitles)) continue;
+                        foreach (var roleName in roleTitle.DiscordRoles)
+                        {
+                            var role = APIHelper.DiscordAPI.GetGuildRole(roleName);
+                            if (role != null && !result.UpdatedRoles.Contains(role))
+                                result.UpdatedRoles.Add(role);
+                        }
+                    }
+                }
+            }
+            else
+                foreach (var role in aRoles)
+                {
+                    if (!result.UpdatedRoles.Contains(role))
+                        result.UpdatedRoles.Add(role);
+                }
+        }
+
+        public static async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId, bool isManualAuth = false, string refreshToken = null)
         {
             var result = new RoleSearchResult();
             var discordGuild = APIHelper.DiscordAPI.GetGuild();
@@ -315,9 +354,7 @@ namespace ThunderED.Modules
                 var authResultCharacter = await GetAuthGroupByCharacterId(groupsToCheck, characterID);
                 if (authResultCharacter != null)
                 {
-                    var aRoles = discordGuild.Roles.Where(a => authResultCharacter.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
-                    if (aRoles.Count > 0)
-                        result.UpdatedRoles.AddRange(aRoles);
+                    await UpdateResultRolesWithTitles(discordGuild, authResultCharacter.RoleEntity, result, characterID, refreshToken);
                     result.ValidManualAssignmentRoles.AddRange(authResultCharacter.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                     groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCharacter.Group).Key;
                     hasAuth = true;
@@ -331,9 +368,7 @@ namespace ThunderED.Modules
                     var authResultCorporation = await GetAuthGroupByCorpId(groupsToCheck, characterData.corporation_id);
                     if (authResultCorporation != null)
                     {
-                        var aRoles = discordGuild.Roles.Where(a => authResultCorporation.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
-                        if (aRoles.Count > 0)
-                            result.UpdatedRoles.AddRange(aRoles);
+                        await UpdateResultRolesWithTitles(discordGuild, authResultCorporation.RoleEntity, result, characterID, refreshToken);
                         result.ValidManualAssignmentRoles.AddRange(authResultCorporation.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                         groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCorporation.Group).Key;
                         hasAuth = true;
@@ -349,9 +384,7 @@ namespace ThunderED.Modules
                         var authResultAlliance = await GetAuthGroupByAllyId(groupsToCheck, characterData.alliance_id ?? 0);
                         if (authResultAlliance != null)
                         {
-                            var aRoles = discordGuild.Roles.Where(a => authResultAlliance.RoleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a)).ToList();
-                            if (aRoles.Count > 0)
-                                result.UpdatedRoles.AddRange(aRoles);
+                            await UpdateResultRolesWithTitles(discordGuild, authResultAlliance.RoleEntity, result, characterID, refreshToken);
                             result.ValidManualAssignmentRoles.AddRange(authResultAlliance.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                             groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultAlliance.Group).Key;
                             hasAuth = true;
