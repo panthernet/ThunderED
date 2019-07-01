@@ -63,7 +63,7 @@ namespace ThunderED.Modules
                 var aGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 foreach (var (fKey, fValue) in value.AllowedMembers)
                 {
-                    var aData = await ParseMemberDataArray(fValue.Entities.Where(a=> !a.ToString().StartsWith("-")).ToList());
+                    var aData = await ParseMemberDataArray(fValue.Entities.Where(a=> (a is int i && i != 0) && !a.ToString().StartsWith("-")).ToList());
                     aGroupDic.Add(fKey, aData);
                 }
                 ParsedMembersLists.Add(key, aGroupDic);

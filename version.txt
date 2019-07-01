@@ -42,8 +42,8 @@ Several rules:
  - `DiscordRoles` property from `AllowedMembers` will be ignored
  - Corp directors will not be authenticated as they don't have corp titles
 
-### FEATURE HIGHLIGHT - UPGRADE GROUPS
-You can now specify a list of additional group names for auth group in a `UpgradeGroupNames` property. These groups will be checked during an auth check pass. If user will match a group from the list it will be transferred to this auth group including roles.
+### FEATURE HIGHLIGHT - UPGRADE WEB AUTH GROUPS
+You can now specify a list of additional group names for auth group in an `UpgradeGroupNames` property. These groups will be checked during an auth check pass. If user will match a group from the list it will be transferred to this auth group. Discord roles will be assigned according to the new group rules.
 Note that if new group has ESI permissions specified the user will not have them this way. Moreover ESI permissions obtained from previous groups will be maintained.
 
 ### BREAKING CHANGES
