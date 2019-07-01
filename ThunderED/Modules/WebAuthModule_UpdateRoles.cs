@@ -62,7 +62,7 @@ namespace ThunderED.Modules
                 if(u == null && (discordUserId == APIHelper.DiscordAPI.Client.CurrentUser.Id))
                     return null;
 
-               // await LogHelper.LogInfo($"Running Auth Check on {u.Username}", LogCat.AuthCheck, false);
+                // await LogHelper.LogInfo($"Running Auth Check on {u.Username}", LogCat.AuthCheck, false);
 
                 var authUser = await SQLHelper.GetAuthUserByDiscordId(discordUserId);
 
@@ -86,6 +86,13 @@ namespace ThunderED.Modules
                     if (!isMovingToDump)
                     {
                         var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == result.GroupName);
+                        //switch group
+                        if (result.GroupName != authUser.GroupName)
+                        {
+                            await LogHelper.LogInfo($"User {authUser.Data.CharacterName}({authUser.CharacterId}) has been transferred from {authUser.GroupName} to {result.GroupName} group", LogCat.AuthCheck);
+                            authUser.GroupName = result.GroupName;
+                            await SQLHelper.SaveAuthUser(authUser);
+                        }
                         isMovingToDump = group.Value == null || (group.Value.IsEmpty() && authUser.GroupName != group.Key);
                     }
 
@@ -337,7 +344,20 @@ namespace ThunderED.Modules
                     //check specified group for roles
                     var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authData.GroupName);
                     if (group.Value != null)
+                    {
+                        //process linked groups first
+                        if (group.Value.UpgradeGroupNames.Any())
+                        {
+                            foreach (var item in group.Value.UpgradeGroupNames)
+                            {
+                                var group2 = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == item);
+                                if (group2.Value != null)
+                                    groupsToCheck.Add(group2.Key, group2.Value);
+                            }
+                        }
+
                         groupsToCheck.Add(group.Key, group.Value);
+                    }
                 }
 
                 if (!groupsToCheck.Any())

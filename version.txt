@@ -5,6 +5,7 @@
 + Added !test km command for admins to be able to test KM templates
 + Added new Contracts module property `StopOnFirstFilterMatch` which is false by default
 + Added new auth mode: authentication by corp Titles
++ Added new auth poperty `UpgradeGroupNames` (read below)
 + Fixed ContractsFeedModule initial cache generation
 + Fixed contracts availability filter
 + Fixed log verbosity order so `Module` value is going below the `Warning`
@@ -40,6 +41,10 @@ Several rules:
  - Auth group must fetch `esi-characters.read_titles.v1` ESI permission from users
  - `DiscordRoles` property from `AllowedMembers` will be ignored
  - Corp directors will not be authenticated as they don't have corp titles
+
+### FEATURE HIGHLIGHT - UPGRADE GROUPS
+You can now specify a list of additional group names for auth group in a `UpgradeGroupNames` property. These groups will be checked during an auth check pass. If user will match a group from the list it will be transferred to this auth group including roles.
+Note that if new group has ESI permissions specified the user will not have them this way. Moreover ESI permissions obtained from previous groups will be maintained.
 
 ### BREAKING CHANGES
 - Bot has been updated to .NET Core 2.2 so you might have to adjust your environment
