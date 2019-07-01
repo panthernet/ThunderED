@@ -12,34 +12,35 @@ namespace ThunderED
     {
         private static Timer _timer;
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
-           // var ssss = new List<JsonZKill.ZkillOnly>().Count(a => a.killmail_id == 0);
+            // var ssss = new List<JsonZKill.ZkillOnly>().Count(a => a.killmail_id == 0);
 
-           if (!File.Exists(SettingsManager.FileSettingsPath))
+            if (!File.Exists(SettingsManager.FileSettingsPath))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
+                await LogHelper.LogError("Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
                 try
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
                     Console.ReadKey();
                 }
                 catch
                 {
                     // ignored
                 }
+
                 return;
             }
 
             //load settings
-            var result = SettingsManager.Prepare();
+            var result = await SettingsManager.Prepare();
             if (!string.IsNullOrEmpty(result))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(result);
+                await LogHelper.LogError(result);
                 try
                 {
                     Console.ReadKey();
@@ -53,13 +54,12 @@ namespace ThunderED
             }
 
             APIHelper.Prepare();
-            LogHelper.LogInfo($"ThunderED v{VERSION} is running!").GetAwaiter().GetResult();
+            await LogHelper.LogInfo($"ThunderED v{VERSION} is running!").ConfigureAwait(false);
             //load database provider
-            var rs = SQLHelper.LoadProvider();
+            var rs = await SQLHelper.LoadProvider();
             if (!string.IsNullOrEmpty(rs))
             {
-                Console.BackgroundColor = ConsoleColor.Red;
-                Console.WriteLine(result);
+                await LogHelper.LogError(result);
                 try
                 {
                     Console.ReadKey();
@@ -68,32 +68,25 @@ namespace ThunderED
                 {
                     // ignored
                 }
+
                 return;
-            }
-            //update config settings
-            if (SettingsManager.Settings.Config.ModuleNotificationFeed)
-            {
-                var dateStr = SQLHelper.GetCacheDataNextNotificationCheck().GetAwaiter().GetResult();
-                if(DateTime.TryParseExact(dateStr, new [] {"dd.MM.yyyy HH:mm:ss", $"{CultureInfo.InvariantCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.InvariantCulture.DateTimeFormat.LongTimePattern}"}, CultureInfo.InvariantCulture.DateTimeFormat, DateTimeStyles.None, out var x))
-                    SettingsManager.NextNotificationCheck = x;
             }
 
             //load language
-            LM.Load().GetAwaiter().GetResult();
+            await LM.Load();
             //load injected settings
-            SettingsManager.UpdateInjectedSettings().GetAwaiter().GetResult();
+            await SettingsManager.UpdateInjectedSettings();
             //load APIs
-            APIHelper.StartDiscord().GetAwaiter().GetResult();
+            await APIHelper.DiscordAPI.Start();
 
             while (!APIHelper.DiscordAPI.IsAvailable)
             {
-                Task.Delay(10).GetAwaiter().GetResult();
+                await Task.Delay(10);
             }
 
             if (APIHelper.DiscordAPI.GetGuild() == null)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[CRITICAL] DiscordGuildId - Discord guild not found!");
+                await LogHelper.LogError("[CRITICAL] DiscordGuildId - Discord guild not found!");
                 try
                 {
                     Console.ReadKey();
@@ -102,6 +95,7 @@ namespace ThunderED
                 {
                     // ignored
                 }
+
                 return;
             }
 
@@ -110,9 +104,15 @@ namespace ThunderED
 
             Console.CancelKeyPress += (sender, e) =>
             {
-                e.Cancel = false; 
+                e.Cancel = false;
                 _timer?.Dispose();
                 APIHelper.DiscordAPI.Stop();
+            };
+
+            AppDomain.CurrentDomain.UnhandledException += async (sender, eventArgs) =>
+            {
+                await LogHelper.LogEx($"[UNHANDLED EXCEPTION]", (Exception)eventArgs.ExceptionObject);
+                await LogHelper.LogWarning($"Consider restarting the service...");
             };
 
             while (true)
@@ -131,11 +131,11 @@ namespace ThunderED
                             return;
                         case "flushn":
                             Console.WriteLine("Flushing all notifications DB list");
-                            SQLHelper.RunCommand("delete from notificationsList").GetAwaiter().GetResult();
+                            await SQLHelper.RunCommand("delete from notificationsList");
                             break;
                         case "flushcache":
                             Console.WriteLine("Flushing all cache from DB");
-                            SQLHelper.RunCommand("delete from cache").GetAwaiter().GetResult();
+                            await SQLHelper.RunCommand("delete from cache");
                             break;
                         case "help":
                             Console.WriteLine("List of available commands:");
@@ -149,19 +149,16 @@ namespace ThunderED
                             if (arr.Length == 1) continue;
                             if (!long.TryParse(arr[1], out var id))
                                 continue;
-                            var rToken = SQLHelper.GetRefreshTokenDefault(id).GetAwaiter().GetResult();
-                            Console.WriteLine(APIHelper.ESIAPI
-                                .RefreshToken(rToken, SettingsManager.Settings.WebServerModule.CcpAppClientId, SettingsManager.Settings.WebServerModule.CcpAppSecret).GetAwaiter()
-                                .GetResult());
+                            var rToken = await SQLHelper.GetRefreshTokenDefault(id);
+                            Console.WriteLine(await APIHelper.ESIAPI
+                                .RefreshToken(rToken, SettingsManager.Settings.WebServerModule.CcpAppClientId, SettingsManager.Settings.WebServerModule.CcpAppSecret));
                             break;
                     }
 
-                    Thread.Sleep(10);
+                    await Task.Delay(10);
                 }
-                else Thread.Sleep(500);
+                else await Task.Delay(500);
             }
         }
-
-
     }
 }

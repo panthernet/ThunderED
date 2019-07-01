@@ -36,7 +36,7 @@ namespace ThunderED.Helpers
             try
             {
                 _logPath = _logPath ?? Path.Combine(SettingsManager.DataDirectory, "logs");
-                _logSeverity = _logSeverity ?? SettingsManager.Settings.Config.LogSeverity.ToSeverity();
+                _logSeverity = _logSeverity ?? SettingsManager.Settings?.Config.LogSeverity.ToSeverity() ?? LogSeverity.Module;
                 if ((int) _logSeverity > (int) severity) return;
 
                 var file = Path.Combine(_logPath, $"{cat}.log");
@@ -46,7 +46,7 @@ namespace ThunderED.Helpers
 
                 // var cc = Console.ForegroundColor;
 
-                logFile = logFile && !SettingsManager.Settings.Config.DisableLogIntoFiles;
+                logFile = logFile && !(SettingsManager.Settings?.Config.DisableLogIntoFiles ?? false);
 
                 if (logConsole)
                 {
@@ -54,7 +54,7 @@ namespace ThunderED.Helpers
                     var msg = $"{time} [{severity,8}] [{cat,13}]: {message}";
                     await SystemLogFeeder.FeedMessage(msg, severity == LogSeverity.Critical || severity == LogSeverity.Error);
 
-                    if (!SettingsManager.Settings.Config.RunAsServiceCompatibility)
+                    if (!SettingsManager.Settings?.Config.RunAsServiceCompatibility ?? true)
                     {
                         try
                         {

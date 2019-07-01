@@ -34,14 +34,25 @@ namespace ThunderED.API
 
             Client.Log += async message =>
             {
+                await AsyncHelper.RedirectToThreadPool();
                 await LogHelper.Log(message.Message, message.Severity.ToSeverity(), LogCat.Discord);
                 if (message.Exception != null)
-                    await LogHelper.LogEx("Discord Internal Exception", message.Exception).ConfigureAwait(false);
+                    await LogHelper.LogEx("Discord Internal Exception", message.Exception);
             };
             Client.UserJoined += Event_UserJoined;
             Client.Ready += Event_Ready;
-
-
+            Client.Connected += async () =>
+            {
+                await AsyncHelper.RedirectToThreadPool();
+                await LogHelper.LogInfo("Connected!", LogCat.Discord);
+            };
+            Client.Disconnected += async exception => 
+            {
+                await AsyncHelper.RedirectToThreadPool();
+                if(exception == null)
+                    await LogHelper.LogInfo("Disconnected!", LogCat.Discord);
+                else await LogHelper.LogEx("Disconnected!", exception, LogCat.Discord);
+            };
         }
 
         public async Task ReplyMessageAsync(ICommandContext context, string message)
@@ -164,9 +175,9 @@ namespace ThunderED.API
             }
         }
 
-        public void Stop()
+        public async void Stop()
         {
-            Client.StopAsync().GetAwaiter().GetResult();
+            await Client.StopAsync();
         }
 
         private async Task InstallCommands()
@@ -177,6 +188,7 @@ namespace ThunderED.API
 
         private async Task HandleCommand(SocketMessage messageParam)
         {
+            await AsyncHelper.RedirectToThreadPool();
             if (!(messageParam is SocketUserMessage message)) return;
 
             if (SettingsManager.Settings.Config.ModuleIRC)
@@ -214,14 +226,15 @@ namespace ThunderED.API
 
         private static async Task Event_UserJoined(SocketGuildUser arg)
         {
+            await AsyncHelper.RedirectToThreadPool();
             if (SettingsManager.Settings.Config.WelcomeMessage)
             {
                 var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0 ? arg.Guild.DefaultChannel : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
                 var authurl = WebServerModule.GetAuthPageUrl();
                 if (!string.IsNullOrWhiteSpace(authurl))
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeMessage",arg.Mention,authurl, SettingsManager.Settings.Config.BotDiscordCommandPrefix)).ConfigureAwait(false);
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeMessage",arg.Mention,authurl, SettingsManager.Settings.Config.BotDiscordCommandPrefix));
                 else
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention)).ConfigureAwait(false);
+                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention));
             }
         }
 

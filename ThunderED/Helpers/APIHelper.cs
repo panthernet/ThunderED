@@ -33,11 +33,6 @@ namespace ThunderED.Helpers
             FleetUpAPI = new FleetUpAPI();
         }
 
-        public static async Task StartDiscord()
-        {
-            await DiscordAPI.Start();
-        }
-
         public static void PurgeCache()
         {
             ESIAPI.PurgeCache();

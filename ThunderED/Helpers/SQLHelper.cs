@@ -388,7 +388,7 @@ namespace ThunderED.Helpers
             await Provider?.RunCommand(query2, silent);
         }
 
-        public static string LoadProvider()
+        public static async Task<string> LoadProvider()
         {
             try
             {
@@ -402,7 +402,7 @@ namespace ThunderED.Helpers
                         Provider = new MysqlDatabaseProvider();
                         break;
                     default:
-                        LogHelper.LogInfo("Using default sqlite provider!").GetAwaiter().GetResult();
+                        await LogHelper.LogInfo("Using default SQLite provider!");
                         Provider = new SqliteDatabaseProvider();
                         break;
                     //  return $"[CRITICAL] Unknown database provider {prov}!";

@@ -41,7 +41,6 @@ namespace ThunderED.Classes
         public static string DataDirectory { get; }
         public static string DatabaseFilePath { get; private set; }
 
-        public static DateTime NextNotificationCheck { get; set; }
         public static string DefaultUserAgent = "ThunderED v" + Program.VERSION;
         public static string FileTemplateHRM_Main;
         public static string FileTemplateHRM_Inspect;
@@ -55,11 +54,11 @@ namespace ThunderED.Classes
 
 
 
-        public static string Prepare(string settingsPath = null)
+        public static async Task<string> Prepare(string settingsPath = null)
         {
             try
             {
-                UpdateSettings(settingsPath).GetAwaiter().GetResult();
+                await UpdateSettings(settingsPath);
                 FileTemplateMain = Path.Combine(RootDirectory, "Templates", "main.html");
                 FileTemplateSettingsPage = Path.Combine(RootDirectory, "Templates", "settingsMain.html");
                 FileTemplateSettingsPage_SimpleAuth = Path.Combine(RootDirectory, "Templates", "settingsMain_SimpleAuth.html");
