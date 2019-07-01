@@ -99,6 +99,7 @@ namespace ThunderED.Modules
                         {
                             await LogHelper.LogInfo($"{authUser.Data.CharacterName}({authUser.CharacterId}) is being moved into dumpster...", LogCat.AuthCheck);
                             authUser.SetStateDumpster();
+                            authUser.GroupName = null;
                             await authUser.UpdateData();
                             await SQLHelper.SaveAuthUser(authUser);
                         }
@@ -114,11 +115,15 @@ namespace ThunderED.Modules
                     var invalidRoles = initialUserRoles.Where(a => result.UpdatedRoles.FirstOrDefault(b => b.Id == a.Id) == null);
                     foreach (var invalidRole in invalidRoles)
                     {
-                        //if role is not ignored and not in valid roles while char is authed
-                        if (!authCheckIgnoreRoles.Contains(invalidRole.Name) && !(isAuthed && result.ValidManualAssignmentRoles.Contains(invalidRole.Name)))
+                        //if role is not ignored
+                        if (!authCheckIgnoreRoles.Contains(invalidRole.Name))
                         {
-                            remroles.Add(invalidRole);
-                            changed = true;
+                            // if role is in valid roles and char is not authed
+                            if (isAuthed && !result.ValidManualAssignmentRoles.Contains(invalidRole.Name) || !isAuthed)
+                            {
+                                remroles.Add(invalidRole);
+                                changed = true;
+                            }
                         }
                     }
 
