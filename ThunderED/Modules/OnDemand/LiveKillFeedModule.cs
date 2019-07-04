@@ -137,7 +137,7 @@ namespace ThunderED.Modules.OnDemand
         {
             try
             {
-               //TEST kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm.txt"));
+               kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm.txt"));
 
                 var hasBeenPosted = false;
                 foreach (var (groupName, group) in Settings.LiveKillFeedModule.Groups)
@@ -220,7 +220,7 @@ namespace ThunderED.Modules.OnDemand
                                 continue;
                         }
 
-                        if (!isPassed && !isCertifiedToFeed)
+                        if (!isCertifiedToFeed)
                         {
                             fChars = GetTier2CharacterIds(ParsedVictimsLists, groupName, filterName);
                             if (fChars.Any())
@@ -245,6 +245,7 @@ namespace ThunderED.Modules.OnDemand
                             }
                         }
 
+
                         //corp check
                         if (!isPassed && !isCertifiedToFeed)
                         {
@@ -268,30 +269,30 @@ namespace ThunderED.Modules.OnDemand
                                 if (!isInclusive && fChars.ContainsAnyFromList(attackers))
                                     continue;
                             }
-                        }
 
-                        if (!isPassed && !isCertifiedToFeed)
-                        {
-                            fChars = GetTier2CorporationIds(ParsedVictimsLists, groupName, filterName);
-                            if (fChars.Any())
+                            if (!isCertifiedToFeed)
                             {
-                                if (isInclusive)
+                                fChars = GetTier2CorporationIds(ParsedVictimsLists, groupName, filterName);
+                                if (fChars.Any())
                                 {
-                                    if (!fChars.Contains(kill.victim.corporation_id))
+                                    if (isInclusive)
                                     {
-                                        if (!isFirstMatchOnly)
-                                            continue;
-                                    }
-                                    else
-                                    {
-                                        isLoss = true;
-                                        isPassed = true;
-                                        isCertifiedToFeed = isFirstMatchOnly;
-                                    }
+                                        if (!fChars.Contains(kill.victim.corporation_id))
+                                        {
+                                            if (!isFirstMatchOnly)
+                                                continue;
+                                        }
+                                        else
+                                        {
+                                            isLoss = true;
+                                            isPassed = true;
+                                            isCertifiedToFeed = isFirstMatchOnly;
+                                        }
 
+                                    }
+                                    if (!isInclusive && fChars.Contains(kill.victim.corporation_id))
+                                        continue;
                                 }
-                                if (!isInclusive && fChars.Contains(kill.victim.corporation_id))
-                                    continue;
                             }
                         }
 
@@ -319,36 +320,37 @@ namespace ThunderED.Modules.OnDemand
                                 if (!isInclusive && fChars.ContainsAnyFromList(attackers))
                                     continue;
                             }
-                        }
 
-                        if (!isPassed && !isCertifiedToFeed)
-                        {
-                            fChars = GetTier2AllianceIds(ParsedVictimsLists, groupName, filterName);
-                            if (fChars.Any())
+                            if (!isCertifiedToFeed)
                             {
-                                if (isInclusive)
+                                fChars = GetTier2AllianceIds(ParsedVictimsLists, groupName, filterName);
+                                if (fChars.Any())
                                 {
-                                    if(!isFirstMatchOnly && kill.victim.alliance_id == 0) continue;
-                                    if (kill.victim.alliance_id > 0)
+                                    if (isInclusive)
                                     {
-                                        if (!fChars.Contains(kill.victim.alliance_id))
+                                        if (!isFirstMatchOnly && kill.victim.alliance_id == 0) continue;
+                                        if (kill.victim.alliance_id > 0)
                                         {
-                                            if (!isFirstMatchOnly)
-                                                continue;
-                                        }
-                                        else
-                                        {
-                                            isLoss = true;
-                                            isPassed = true;
-                                            isCertifiedToFeed = isFirstMatchOnly;
+                                            if (!fChars.Contains(kill.victim.alliance_id))
+                                            {
+                                                if (!isFirstMatchOnly)
+                                                    continue;
+                                            }
+                                            else
+                                            {
+                                                isLoss = true;
+                                                isPassed = true;
+                                                isCertifiedToFeed = isFirstMatchOnly;
+                                            }
                                         }
                                     }
-                                }
 
-                                if (!isInclusive && fChars.Contains(kill.victim.alliance_id))
-                                    continue;
+                                    if (!isInclusive && fChars.Contains(kill.victim.alliance_id))
+                                        continue;
+                                }
                             }
                         }
+
                         isPassed = false;
                         #endregion
 

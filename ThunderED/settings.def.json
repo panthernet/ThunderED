@@ -360,7 +360,6 @@
             "DiscordRoles": [ "Member" ]
           }
         },
-        "UpgradeGroupNames": [ "Mode2_GeneralWithESIFetch" ],
         "authRoles": [ "Admins" ],
         "ManualAssignmentRoles": [],
         "PreliminaryAuthMode": true,
@@ -445,6 +444,18 @@
         },
         "ESICustomAuthRoles": [ "esi-characters.read_titles.v1" ],
         "CustomButtonText": "Auth By Titles",
+        "ExcludeFromOneButtonMode": false
+      },
+      "Mode8_AuthGroupWithUpgradeToAnotherGroup": {
+        "UseStrictAuthenticationMode": "false",
+        "UpgradeGroupNames": [ "Mode1_GeneralAuth" ],
+        "AllowedMembers": {
+          "entry1": {
+            "Entities": [ 0 ],
+            "DiscordRoles": [ "Guest" ]
+          }
+        },
+        "CustomButtonText": "Auth With Upgrade",
         "ExcludeFromOneButtonMode": false
       }
     }
