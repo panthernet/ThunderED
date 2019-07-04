@@ -280,21 +280,19 @@ namespace ThunderED.Modules
             }
         }
 
-        private static async Task UpdateResultRolesWithTitles(SocketGuild discordGuild, AuthRoleEntity roleEntity, RoleSearchResult result, long charID, string token)
+        private static async Task UpdateResultRolesWithTitles(SocketGuild discordGuild, AuthRoleEntity roleEntity, RoleSearchResult result, long charID, string uToken)
         {
             var aRoles = discordGuild.Roles.Where(a => roleEntity.DiscordRoles.Contains(a.Name) && !result.UpdatedRoles.Contains(a));
             //process titles in priority
             if (roleEntity.Titles.Any())
             {
-                if (string.IsNullOrEmpty(token))
+                if (string.IsNullOrEmpty(uToken))
                 {
                     await LogHelper.LogWarning(
                         $"User ID {charID} has no ESI token but is being checked against group with Titles! Titles require esi-characters.read_titles.v1 permissions!");
                     return;
                 }
 
-                var uToken = await APIHelper.ESIAPI.RefreshToken(token, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                    SettingsManager.Settings.WebServerModule.CcpAppSecret);
                 var userTitles = (await APIHelper.ESIAPI.GetCharacterTitles("AuthCheck", charID, uToken))?.Select(a=> a.name).ToList();
                 if (userTitles != null && userTitles.Any())
                 {
@@ -345,18 +343,30 @@ namespace ThunderED.Modules
                     var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authData.GroupName);
                     if (group.Value != null)
                     {
-                        //process linked groups first
+                        //process upgrade groups first
                         if (group.Value.UpgradeGroupNames.Any())
                         {
                             foreach (var item in group.Value.UpgradeGroupNames)
                             {
-                                var group2 = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == item);
-                                if (group2.Value != null)
-                                    groupsToCheck.Add(group2.Key, group2.Value);
+                                var (key, value) = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == item);
+                                if (value != null)
+                                    groupsToCheck.Add(key, value);
                             }
                         }
 
+                        //add root group
                         groupsToCheck.Add(group.Key, group.Value);
+
+                        //add downgrade groups (checked last)
+                        if (authData.IsAuthed && group.Value.DowngradeGroupNames.Any())
+                        {
+                            foreach (var item in group.Value.DowngradeGroupNames)
+                            {
+                                var (key, value) = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == item);
+                                if (value != null)
+                                    groupsToCheck.Add(key, value);
+                            }
+                        }
                     }
                 }
 
@@ -375,11 +385,16 @@ namespace ThunderED.Modules
                 string groupName = null;
                 var hasAuth = false;
 
+
+                var uToken = string.IsNullOrEmpty(refreshToken) ? null : await APIHelper.ESIAPI.RefreshToken(refreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                    SettingsManager.Settings.WebServerModule.CcpAppSecret);
+
+
                 // Check for Character Roles
                 var authResultCharacter = await GetAuthGroupByCharacterId(groupsToCheck, characterID);
                 if (authResultCharacter != null)
                 {
-                    await UpdateResultRolesWithTitles(discordGuild, authResultCharacter.RoleEntity, result, characterID, refreshToken);
+                    await UpdateResultRolesWithTitles(discordGuild, authResultCharacter.RoleEntity, result, characterID, uToken);
                     result.ValidManualAssignmentRoles.AddRange(authResultCharacter.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                     groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCharacter.Group).Key;
                     hasAuth = true;
@@ -393,7 +408,7 @@ namespace ThunderED.Modules
                     var authResultCorporation = await GetAuthGroupByCorpId(groupsToCheck, characterData.corporation_id);
                     if (authResultCorporation != null)
                     {
-                        await UpdateResultRolesWithTitles(discordGuild, authResultCorporation.RoleEntity, result, characterID, refreshToken);
+                        await UpdateResultRolesWithTitles(discordGuild, authResultCorporation.RoleEntity, result, characterID, uToken);
                         result.ValidManualAssignmentRoles.AddRange(authResultCorporation.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                         groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultCorporation.Group).Key;
                         hasAuth = true;
@@ -409,7 +424,7 @@ namespace ThunderED.Modules
                         var authResultAlliance = await GetAuthGroupByAllyId(groupsToCheck, characterData.alliance_id ?? 0);
                         if (authResultAlliance != null)
                         {
-                            await UpdateResultRolesWithTitles(discordGuild, authResultAlliance.RoleEntity, result, characterID, refreshToken);
+                            await UpdateResultRolesWithTitles(discordGuild, authResultAlliance.RoleEntity, result, characterID, uToken);
                             result.ValidManualAssignmentRoles.AddRange(authResultAlliance.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                             groupName = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value == authResultAlliance.Group).Key;
                             hasAuth = true;

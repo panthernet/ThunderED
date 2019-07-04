@@ -449,6 +449,7 @@
       "Mode8_AuthGroupWithUpgradeToAnotherGroup": {
         "UseStrictAuthenticationMode": "false",
         "UpgradeGroupNames": [ "Mode1_GeneralAuth" ],
+        "DowngradeGroupNames": [ ],
         "AllowedMembers": {
           "entry1": {
             "Entities": [ 0 ],

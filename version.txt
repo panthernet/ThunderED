@@ -5,7 +5,7 @@
 + Added !test km command for admins to be able to test KM templates
 + Added new Contracts module property `StopOnFirstFilterMatch` which is false by default
 + Added new auth mode: authentication by corp Titles
-+ Added new auth poperty `UpgradeGroupNames` (read below)
++ Added new auth group poperties `UpgradeGroupNames` and `DowngradeGroupNames` (read below)
 + Fixed ContractsFeedModule initial cache generation
 + Fixed contracts availability filter
 + Fixed log verbosity order so `Module` value is going below the `Warning`
@@ -42,8 +42,11 @@ Several rules:
  - `DiscordRoles` property from `AllowedMembers` will be ignored
  - Corp directors will not be authenticated as they don't have corp titles
 
-### FEATURE HIGHLIGHT - UPGRADE WEB AUTH GROUPS
-You can now specify a list of additional group names for auth group in an `UpgradeGroupNames` property. These groups will be checked during an auth check pass. If user will match a group from the list it will be transferred to this auth group. Discord roles will be assigned according to the new group rules.
+### FEATURE HIGHLIGHT - UPGRADE/DOWNGRADE WEB AUTH GROUPS
+You can now specify a list of additional group names for auth group in an `UpgradeGroupNames` and `DowngradeGroupNames` properties. These groups will be checked during an auth check pass. 
+- Upgrade: If user will match a group from the list it will be transferred to this auth group. Discord roles will be assigned according to the new group rules.
+- Downgrade: If user do not match it's current group criteria he will be checked against all groups in the list and will be transferred to first group that is matching criteria.  Discord roles will be assigned according to the new group rules.
+
 Note that if new group has ESI permissions specified the user will not have them this way. Moreover ESI permissions obtained from previous groups will be maintained.
 
 ### BREAKING CHANGES

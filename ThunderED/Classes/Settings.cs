@@ -1823,12 +1823,15 @@ namespace ThunderED.Classes
         public ObservableCollection<string> ManualAssignmentRoles { get; set; } = new ObservableCollection<string>();
         [Comment("List of linked group names for additional auth checks. If user passes auth from one of this groups it will be moved there. ")]
         public ObservableCollection<string> UpgradeGroupNames { get; set; } = new ObservableCollection<string>();
+        [Comment("List of linked group names for additional auth checks. If user group has been invalidated he will pass a check for all groups mentioned in this list. ")]
+        public ObservableCollection<string> DowngradeGroupNames { get; set; } = new ObservableCollection<string>();
         
 #else
         public List<string> AuthRoles { get; set; } = new List<string>();
         public Dictionary<string, AuthRoleEntity> AllowedMembers { get; set; } = new Dictionary<string, AuthRoleEntity>();
         public List<string> ManualAssignmentRoles { get; set; } = new List<string>();
         public List<string> UpgradeGroupNames { get; set; } = new List<string>();
+        public List<string> DowngradeGroupNames { get; set; } = new List<string>();
 #endif
         [Comment("Enable auth mode that will only search roles until first criterial match. Otherwise it wil search and add roles from all matching filters within this group")]
         public bool UseStrictAuthenticationMode { get; set; }
