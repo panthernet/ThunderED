@@ -6,6 +6,8 @@ RUN dotnet restore
 
 COPY ThunderED/. ./
 COPY Version.cs /app
+COPY version.txt /app
+COPY LICENSE /app
 RUN dotnet publish -c Release -r debian-x64 -o out
 
 FROM microsoft/dotnet:2.2-aspnetcore-runtime
