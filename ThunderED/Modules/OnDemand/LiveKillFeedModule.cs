@@ -137,7 +137,7 @@ namespace ThunderED.Modules.OnDemand
         {
             try
             {
-               kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm.txt"));
+              // kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm.txt"));
 
                 var hasBeenPosted = false;
                 foreach (var (groupName, group) in Settings.LiveKillFeedModule.Groups)
