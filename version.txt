@@ -10,6 +10,7 @@
 + Fixed contracts availability filter
 + Fixed log verbosity order so `Module` value is going below the `Warning`
 + Fixed notification text parsing routine
++ Fixed standings auth being interpreted as guest failing to move forward
 + Updated platform to .NET Core 2.2
 + Updated Discord library to V2.1.1
 + Improved and updated defult KM messages (thanks to @mrurb)
