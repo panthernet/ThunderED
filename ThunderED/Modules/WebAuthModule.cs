@@ -759,7 +759,7 @@ namespace ThunderED.Modules
                                 //for guest mode during general auth
                                 if (!add)
                                 {
-                                    var grp = Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.BindToMainCharacter).FirstOrDefault(a =>
+                                    var grp = Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.BindToMainCharacter).FirstOrDefault(a => a.Value.StandingsAuth == null &&
                                         a.Value.AllowedMembers.Values.All(b => b.Entities.All(c=> c.ToString().All(char.IsDigit) && (long)c== 0)));
                                     if (grp.Value != null)
                                     {
