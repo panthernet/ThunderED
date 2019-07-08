@@ -56,34 +56,14 @@
     "LanguageFilesFolder": ""
   },
 
-  "ZKBSettingsModule": {
-    "zkillLiveFeedRedisqID": "",
-    "UseSocketsForZKillboard": true,
-    "ZKillboardWebSocketUrl": "wss://zkillboard.com:2096",
-    "AvoidDupesAcrossAllFeeds": false
-  },
-
-  "WebConfigEditorModule": {
-    "SessionTimeoutInMinutes": 10,
-    "AccessList": {
-      "accessList1": {
-        "AllowedEntities": [ "Character Name", "c:Corporation Name", "a:Alliance Name", 1234567890 ],
-        "AllowedDiscordRoles": [],
-        "CanEditSimplifiedAuth": true,
-        "CanEditTimers": true
-      }
-    }
-  },
-
-  "CommandsConfig": {
-    "EnableShipsCommand": "false",
-    "ShipsCommandDiscordChannels": [],
-    "ShipsCommandDiscordRoles": [],
-
-    "EnableRoleManagementCommands": false,
-    "RolesCommandDiscordRoles": [ "DiscordRole" ],
-    "RolesCommandAllowedRoles": [ "Admins" ],
-    "RolesCommandDiscordChannels": []
+  "webServerModule": {
+    "UsePortInUrl": true,
+    "webExternalIP": "IP",
+    "webExternalPort": 8001,
+    "discordUrl": "https://discord.gg/xxxxxx",
+    "ccpAppClientId": "REQUIRED",
+    "ccpAppSecret": "REQUIRED",
+    "ServerStatusPort":  0 
   },
 
   "Database": {
@@ -97,159 +77,11 @@
     "CustomConnectionString": ""
   },
 
-  "ContractNotificationsModule": {
-    "CheckIntervalInMinutes": 1,
-    "MaxTrackingCount": 150,
-    "Groups": {
-      "group1": {
-        "CharacterIDs": [ 0 ],
-        "ButtonText": "Default Contracts Auth",
-        "DefaultMention": "",
-        "FeedPersonalContracts": true,
-        "FeedCorporateContracts": true,
-        "StopOnFirstFilterMatch": false,
-        "Filters": {
-          "defaultFilter": {
-            "FeedIssuedBy": true,
-            "FeedIssuedTo": true,
-            "Statuses": [ "finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed", "in_progress", "outstanding" ],
-            "Availability": [ "public", "personal", "corporation", "alliance" ],
-            "Types": [ "unknown", "item_exchange", "auction", "courier", "loan" ],
-            "ShowIngameOpen": false,
-            "DiscordChannelId": 0,
-            "ShowOnlyBasicDetails": false,
-            "RedirectByIdInDescription": false,
-            "PostToChannelIfRedirected": false
-          }
-        }
-      }
-    }
-  },
-
-  "SystemLogFeederModule": {
-    "DiscordChannelId": 0,
-    "OnlyErrors": false
-  },
-
-  "ContinousCheckModule": {
-    "EnableTQStatusPost": true,
-    "TQStatusPostMention": "@here",
-    "TQStatusPostChannels": []
-  },
-
-  "StatsModule": {
-    "EnableStatsCommand": true,
-    "RatingModeChannelId": 0,
-    "DailyStatsGroups": {
-      "group1": {
-        "DailyStatsChannel": 0,
-        "DailyStatsCorp": 0,
-        "DailyStatsAlliance": 0,
-        "IncludeInRating": false
-      }
-    }
-  },
-
-  "HRMModule": {
-    "AccessList": {
-      "accessList1": {
-        "UsersAccessList": [],
-        "RolesAccessList": [],
-        "AuthGroupNamesFilter": [],
-        "AuthAllianceIdFilter": [],
-        "AuthCorporationIdFilter": [],
-        "ApplyGroupFilterToAwaitingUsers": false,
-        "IsAwaitingUsersVisible": true,
-        "IsDumpedUsersVisible": true,
-        "IsAuthedUsersVisible": true,
-        "IsAltUsersVisible": true,
-        "IsSpyUsersVisible": true,
-        "CanSearchMail": true,
-        "CanKickUsers": true,
-        "CanMoveToSpies": true,
-        "CanInspectAuthedUsers": true,
-        "CanInspectAwaitingUsers": true,
-        "CanInspectDumpedUsers": true,
-        "CanInspectSpyUsers": true,
-        "CanInspectAltUsers": true,
-        "CanRestoreDumped": true
-      }
-    },
-    "AuthTimeoutInMinutes": 30,
-    "TableEntriesPerPage": 10,
-    "TableSkillEntriesPerPage": 20,
-    "UseDumpForMembers": true,
-    "DumpInvalidationInHours": 240,
-    "DefaultSpiesMailFeedChannelId": 0,
-    "ValidateTokensWhileLoading": true,
-    "SpyFilters": {
-      "filter1": {
-        "CorporationNames": [ "Corp Name1", "Corp Name 2" ],
-        "AllianceNames": [],
-        "MailFeedChannelId": 0,
-        "DisplayMailDetailsSummary": true
-      }
-    }
-  },
-
-  "mailModule": {
-    "checkIntervalInMinutes": 2,
-    "AuthGroups": {
-      "VesNa": {
-        "Id": [ 0 ],
-        "IncludePrivateMail": true,
-        "DefaultChannel": 0,
-        "DefaultMention": "",
-        "Filters": {
-          "CorpMailFilter": {
-            "FilterLabels": [ "[Corp]", "[Alliance]" ],
-            "FilterSenders": [],
-            "FilterMailList": [ "TestList" ],
-            "FeedChannel": 0,
-            "DisplayDetailsSummary": true
-          },
-          "MailListFilter": {
-            "FilterLabels": [],
-            "FilterSenders": [],
-            "FilterMailList": [ "TestList" ],
-            "FeedChannel": 0,
-            "DisplayDetailsSummary": false
-          }
-        }
-      }
-    }
-  },
-
-  "timersModule": {
-    "authTimeoutInMinutes": 10,
-    "autoAddTimerForReinforceNotifications": true,
-    "TinyUrl": "",
-    "grantEditRolesToDiscordAdmins": true,
-    "announces": [ 60, 10 ],
-    "announceChannel": 0,
-    "TimeInputFormat": "DD.MM.YYYY HH:mm",
-    "DefaultMention": "@everyone",
-    "accessList": {
-      "group1": {
-        "FilterEntities": [ "Character Name", "a:Alliance Name", "c:Corporation Name", 795045209 ],
-        "FilterDiscordRoles": [ "role1", "role2" ]
-      }
-    },
-    "editList": {
-      "group1": {
-        "FilterEntities": [],
-        "FilterDiscordRoles": []
-      }
-    }
-  },
-
-  "webServerModule": {
-    "UsePortInUrl": true,
-    "webExternalIP": "IP",
-    "webExternalPort": 8001,
-    "discordUrl": "https://discord.gg/xxxxxx",
-    "ccpAppClientId": "REQUIRED",
-    "ccpAppSecret": "REQUIRED"
+  "ZKBSettingsModule": {
+    "zkillLiveFeedRedisqID": "",
+    "UseSocketsForZKillboard": true,
+    "ZKillboardWebSocketUrl": "wss://zkillboard.com:2096",
+    "AvoidDupesAcrossAllFeeds": false
   },
 
   "liveKillFeedModule": {
@@ -461,6 +293,177 @@
       }
     }
   },
+
+  "WebConfigEditorModule": {
+    "SessionTimeoutInMinutes": 10,
+    "AccessList": {
+      "accessList1": {
+        "AllowedEntities": [ "Character Name", "c:Corporation Name", "a:Alliance Name", 1234567890 ],
+        "AllowedDiscordRoles": [],
+        "CanEditSimplifiedAuth": true,
+        "CanEditTimers": true
+      }
+    }
+  },
+
+  "SystemLogFeederModule": {
+    "DiscordChannelId": 0,
+    "OnlyErrors": false
+  },
+
+  "ContinousCheckModule": {
+    "EnableTQStatusPost": true,
+    "TQStatusPostMention": "@here",
+    "TQStatusPostChannels": []
+  },
+
+  "CommandsConfig": {
+    "EnableShipsCommand": "false",
+    "ShipsCommandDiscordChannels": [],
+    "ShipsCommandDiscordRoles": [],
+
+    "EnableRoleManagementCommands": false,
+    "RolesCommandDiscordRoles": [ "DiscordRole" ],
+    "RolesCommandAllowedRoles": [ "Admins" ],
+    "RolesCommandDiscordChannels": []
+  },
+
+  "ContractNotificationsModule": {
+    "CheckIntervalInMinutes": 1,
+    "MaxTrackingCount": 150,
+    "Groups": {
+      "group1": {
+        "CharacterIDs": [ 0 ],
+        "ButtonText": "Default Contracts Auth",
+        "DefaultMention": "",
+        "FeedPersonalContracts": true,
+        "FeedCorporateContracts": true,
+        "StopOnFirstFilterMatch": false,
+        "Filters": {
+          "defaultFilter": {
+            "FeedIssuedBy": true,
+            "FeedIssuedTo": true,
+            "Statuses": [ "finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed", "in_progress", "outstanding" ],
+            "Availability": [ "public", "personal", "corporation", "alliance" ],
+            "Types": [ "unknown", "item_exchange", "auction", "courier", "loan" ],
+            "ShowIngameOpen": false,
+            "DiscordChannelId": 0,
+            "ShowOnlyBasicDetails": false,
+            "RedirectByIdInDescription": false,
+            "PostToChannelIfRedirected": false
+          }
+        }
+      }
+    }
+  },
+
+  "StatsModule": {
+    "EnableStatsCommand": true,
+    "RatingModeChannelId": 0,
+    "DailyStatsGroups": {
+      "group1": {
+        "DailyStatsChannel": 0,
+        "DailyStatsCorp": 0,
+        "DailyStatsAlliance": 0,
+        "IncludeInRating": false
+      }
+    }
+  },
+
+  "HRMModule": {
+    "AccessList": {
+      "accessList1": {
+        "UsersAccessList": [],
+        "RolesAccessList": [],
+        "AuthGroupNamesFilter": [],
+        "AuthAllianceIdFilter": [],
+        "AuthCorporationIdFilter": [],
+        "ApplyGroupFilterToAwaitingUsers": false,
+        "IsAwaitingUsersVisible": true,
+        "IsDumpedUsersVisible": true,
+        "IsAuthedUsersVisible": true,
+        "IsAltUsersVisible": true,
+        "IsSpyUsersVisible": true,
+        "CanSearchMail": true,
+        "CanKickUsers": true,
+        "CanMoveToSpies": true,
+        "CanInspectAuthedUsers": true,
+        "CanInspectAwaitingUsers": true,
+        "CanInspectDumpedUsers": true,
+        "CanInspectSpyUsers": true,
+        "CanInspectAltUsers": true,
+        "CanRestoreDumped": true
+      }
+    },
+    "AuthTimeoutInMinutes": 30,
+    "TableEntriesPerPage": 10,
+    "TableSkillEntriesPerPage": 20,
+    "UseDumpForMembers": true,
+    "DumpInvalidationInHours": 240,
+    "DefaultSpiesMailFeedChannelId": 0,
+    "ValidateTokensWhileLoading": true,
+    "SpyFilters": {
+      "filter1": {
+        "CorporationNames": [ "Corp Name1", "Corp Name 2" ],
+        "AllianceNames": [],
+        "MailFeedChannelId": 0,
+        "DisplayMailDetailsSummary": true
+      }
+    }
+  },
+
+  "mailModule": {
+    "checkIntervalInMinutes": 2,
+    "AuthGroups": {
+      "VesNa": {
+        "Id": [ 0 ],
+        "IncludePrivateMail": true,
+        "DefaultChannel": 0,
+        "DefaultMention": "",
+        "Filters": {
+          "CorpMailFilter": {
+            "FilterLabels": [ "[Corp]", "[Alliance]" ],
+            "FilterSenders": [],
+            "FilterMailList": [ "TestList" ],
+            "FeedChannel": 0,
+            "DisplayDetailsSummary": true
+          },
+          "MailListFilter": {
+            "FilterLabels": [],
+            "FilterSenders": [],
+            "FilterMailList": [ "TestList" ],
+            "FeedChannel": 0,
+            "DisplayDetailsSummary": false
+          }
+        }
+      }
+    }
+  },
+
+  "timersModule": {
+    "authTimeoutInMinutes": 10,
+    "autoAddTimerForReinforceNotifications": true,
+    "TinyUrl": "",
+    "grantEditRolesToDiscordAdmins": true,
+    "announces": [ 60, 10 ],
+    "announceChannel": 0,
+    "TimeInputFormat": "DD.MM.YYYY HH:mm",
+    "DefaultMention": "@everyone",
+    "accessList": {
+      "group1": {
+        "FilterEntities": [ "Character Name", "a:Alliance Name", "c:Corporation Name", 795045209 ],
+        "FilterDiscordRoles": [ "role1", "role2" ]
+      }
+    },
+    "editList": {
+      "group1": {
+        "FilterEntities": [],
+        "FilterDiscordRoles": []
+      }
+    }
+  },
+
+
   "resources": {
     "imgCitLowPower": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgCitLowPower.png",
     "imgCitUnderAttack": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgCitUnderAttack.png",

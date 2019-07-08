@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,15 +7,20 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Web;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using HttpListener = System.Net.Http.HttpListener;
 
 namespace ThunderED.Modules.Sub
 {
     public sealed partial class WebServerModule : AppModuleBase, IDisposable
     {
-        private static System.Net.Http.HttpListener _listener;
+        private static HttpListener _listener;
+        private static HttpListener _statusListener;
+        private readonly ConcurrentQueue<DateTime> _statusQueries = new ConcurrentQueue<DateTime>();
+        private readonly Timer _statusTimer = new Timer(5000);
         public override LogCat Category => LogCat.WebServer;
 
         public static string HttpPrefix => SettingsManager.Settings.Config.UseHTTPS ? "https" : "http";
@@ -24,9 +30,24 @@ namespace ThunderED.Modules.Sub
 
         public WebServerModule()
         {
-            LogHelper.LogModule("Inititalizing WebServer module...", Category).GetAwaiter().GetResult();
+            LogHelper.LogModule("Initializing WebServer module...", Category).GetAwaiter().GetResult();
             ModuleConnectors.Clear();
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+        }
+
+        public override async Task Initialize()
+        {
+            if (Settings.WebServerModule.WebExternalPort == Settings.WebServerModule.ServerStatusPort && Settings.WebServerModule.ServerStatusPort != 0)
+                await LogHelper.LogWarning($"Web server is configured to use teh same {Settings.WebServerModule.ServerStatusPort} port for both http and status queries!");
+            if (Settings.WebServerModule.ServerStatusPort > 0)
+            {
+                _statusTimer.Elapsed += (sender, args) =>
+                {
+                    if (_statusQueries.Any())
+                        _statusQueries.TryDequeue(out _);
+                };
+                _statusTimer.Start();
+            }
         }
 
         public override async Task Run(object prm)
@@ -34,6 +55,59 @@ namespace ThunderED.Modules.Sub
             if (!Settings.Config.ModuleWebServer)
             {
                 return;
+            }
+
+            if (Settings.WebServerModule.ServerStatusPort > 0 && (_statusListener == null || !_statusListener.IsListening))
+            {
+                await LogHelper.LogInfo("Starting Web Server - Status Reporter", Category);
+                try
+                {
+                    _statusListener?.Dispose();
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+                var ip = "0.0.0.0";
+
+                _statusListener = new HttpListener(IPAddress.Parse(ip), Settings.WebServerModule.ServerStatusPort);
+                _statusListener.Request += async (sender, context) =>
+                {
+                    try
+                    {
+                        if(_statusQueries.Count > 10) return;
+                        _statusQueries.Enqueue(DateTime.Now);
+                       // var request = context.Request;
+                        var response = context.Response;
+
+                        if(!APIHelper.DiscordAPI.IsAvailable)
+                            return;
+                        var value = "OK";
+                        if (TickManager.IsESIUnreachable)
+                            value = "NO_ESI";
+                        if (TickManager.IsNoConnection)
+                            value = "NO_CONNECTION";
+
+                        await response.WriteContentAsync(value);
+                    }                   
+                    catch (Exception ex)
+                    {
+                        await LogHelper.LogEx(ex.Message, ex, Category);
+                    }
+                    finally
+                    {
+                        try
+                        {
+                            context.Response.Close();
+                        }
+                        catch
+                        {
+                            //ignore
+                        }
+                    }
+                };
+                _statusListener.Start();
             }
 
             if (_listener == null || !_listener.IsListening)
@@ -49,12 +123,9 @@ namespace ThunderED.Modules.Sub
                 }
 
                 //TODO cleanup all occurences in modules in some of the following releases
-                var port = Settings.WebServerModule.WebExternalPort;
                 var extPort = Settings.WebServerModule.WebExternalPort;
                 var ip = "0.0.0.0";
-
-
-                _listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), port);
+                _listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), extPort);
                 _listener.Request += async (sender, context) =>
                 {
                     try
@@ -102,7 +173,7 @@ namespace ThunderED.Modules.Sub
                             return;
                         }
 
-                        if (request.Url.LocalPath == "/" || request.Url.LocalPath == $"{port}/" || request.Url.LocalPath == $"{extPort}/")
+                        if (request.Url.LocalPath == "/" || request.Url.LocalPath == $"{extPort}/")
                         {
                             // var extIp = Settings.WebServerModule.WebExternalIP;
 
@@ -139,7 +210,7 @@ namespace ThunderED.Modules.Sub
                             return;
                         }
 
-                        if (request.Url.LocalPath == "/authPage.html" || request.Url.LocalPath == $"{port}/authPage.html" || request.Url.LocalPath == $"{extPort}/authPage.html")
+                        if (request.Url.LocalPath == "/authPage.html" || request.Url.LocalPath == $"{extPort}/authPage.html")
                         {
                             var extIp = Settings.WebServerModule.WebExternalIP;
                             var authUrl = $"{GetWebSiteUrl()}/auth";
@@ -550,6 +621,7 @@ namespace ThunderED.Modules.Sub
 
         public void Dispose()
         {
+            _statusTimer?.Stop();
             ModuleConnectors.Clear();
         }
 

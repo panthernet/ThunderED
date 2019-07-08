@@ -27,6 +27,7 @@ CorpNewCEOMsg
 CorpTaxChangeMsg
 OwnershipTransferred
 ```
++ Added web server status reporter, new param `ServerStatusPort`. Query specified port to get status (no response - bot is not running). Set to 0 to disable.
 
 ### BREAKING CHANGES
 - Added new entries to `Resources` config section
