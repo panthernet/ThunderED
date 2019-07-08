@@ -1724,9 +1724,11 @@ namespace ThunderED.Classes
         [Comment("Numeric port value")]
         [Required]
         public int WebExternalPort { get; set; }
-        [Comment("Port for reporting bot status. Will return status on query or nothing if bot or Discord connection is not running.")]
+        [Comment("Port for reporting bot status. Will return status on query or nothing if bot is not running. Return values: OK, NO_ESI, NO_CONNECTION, NO_DISCORD")]
         public int ServerStatusPort { get; set; }
 
+        [Comment("Status report will act as the bot isn't running if Discord connection is not available (do not respond to queries)")]
+        public bool NoStatusResponseOnDiscordDisconnection { get; set; } = true;
         [Comment("Discord group invitation url")]
         public string DiscordUrl { get; set; }
         [Comment("Text client ID from the CCP application")]

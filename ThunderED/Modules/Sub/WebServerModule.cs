@@ -80,14 +80,18 @@ namespace ThunderED.Modules.Sub
                         _statusQueries.Enqueue(DateTime.Now);
                        // var request = context.Request;
                         var response = context.Response;
-
-                        if(!APIHelper.DiscordAPI.IsAvailable)
-                            return;
+                        //OK, NO_ESI, NO_CONNECTION, NO_DISCORD
                         var value = "OK";
                         if (TickManager.IsESIUnreachable)
                             value = "NO_ESI";
                         if (TickManager.IsNoConnection)
                             value = "NO_CONNECTION";
+                        if (!APIHelper.DiscordAPI.IsAvailable)
+                        {
+                            if(Settings.WebServerModule.NoStatusResponseOnDiscordDisconnection)
+                                return;
+                            value = "NO_DISCORD";
+                        }
 
                         await response.WriteContentAsync(value);
                     }                   

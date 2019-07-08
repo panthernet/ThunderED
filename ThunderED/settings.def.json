@@ -63,7 +63,8 @@
     "discordUrl": "https://discord.gg/xxxxxx",
     "ccpAppClientId": "REQUIRED",
     "ccpAppSecret": "REQUIRED",
-    "ServerStatusPort":  0 
+    "ServerStatusPort": 0,
+    "NoStatusResponseOnDiscordDisconnection":  true 
   },
 
   "Database": {
