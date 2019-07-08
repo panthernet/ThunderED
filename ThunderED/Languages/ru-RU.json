@@ -563,6 +563,8 @@
   "industryJobsRowBPO": "BPO",
   "industryJobsRowInstaller": "Установщик",
   "industryJobsRowStation": "Локация",
-  "helpTest": "Доступные команды:\nkm test TEMPLATE - сгенерировать тестовое KM где TEMPLATE наименование файла шаблонаиз папки Templates/Messages"
+  "helpTest": "Доступные команды:\nkm test TEMPLATE - сгенерировать тестовое KM где TEMPLATE наименование файла шаблонаиз папки Templates/Messages",
+  "notifCorpWarEligible": "Корпорация {0} стала доступной для объявления войны!",
+  "notifCorpNotWarEligible": "Корпорация {0} больше недоступна для объявления войны!"
 
 }

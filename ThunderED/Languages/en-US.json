@@ -570,5 +570,7 @@
   "industryJobsRowBPO": "BPO",
   "industryJobsRowInstaller": "Installer",
   "industryJobsRowStation": "Location",
-  "helpTest": "Commands available:\nkm test TEMPLATE - generate test KM where TEMPLATE is the name of the KM template file from Templates/Messages folder"
+  "helpTest": "Commands available:\nkm test TEMPLATE - generate test KM where TEMPLATE is the name of the KM template file from Templates/Messages folder",
+  "notifCorpWarEligible": "Corporation {0} has become war eligible!",
+  "notifCorpNotWarEligible": "Corporation {0} is no longer war eligible!"
 }

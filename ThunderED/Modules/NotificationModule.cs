@@ -632,7 +632,24 @@ namespace ThunderED.Modules
 
                                                     await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
                                                     break;
-                                                case "CharLeftCorpMsg":
+                                                case "CorpBecameWarEligible":
+                                                case "CorpNoLongerWarEligible":
+                                                {
+                                                    var color = notification.type == "CorpBecameWarEligible" ? new Color(0xFF0000) : new Color(0x00FF00);
+                                                    builder = new EmbedBuilder()
+                                                        .WithColor(color);
+                                                    var corp = feederCorp?.name ?? LM.Get("Unknown");
+                                                    var text = notification.type == "CorpBecameWarEligible" ? LM.Get("notifCorpWarEligible", corp) : LM.Get("notifCorpNotWarEligible", corp);
+                                                    builder.WithAuthor(author => author.WithName(text))
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                        .WithTimestamp(timestamp);
+                                                    embed = builder.Build();
+
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                }
+                                                    break;
+
+                                            case "CharLeftCorpMsg":
                                                 case "CharAppAcceptMsg":
                                                 case "CorpAppNewMsg":
                                                 case "CharAppWithdrawMsg":
