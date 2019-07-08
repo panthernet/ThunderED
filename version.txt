@@ -1,3 +1,36 @@
+### V1.4.1
++ Added new notifications, some with temp placeholder until I get real notification information
+```
+WarAdopted
+WarAllyInherited
+WarConcordInvalidates
+WarDeclared
+WarHQRemovedFromSpace
+WarInherited
+WarInvalid
+WarRetracted
+WarRetractedByConcord
+CorpBecameWarEligible
+CorpNoLongerWarEligible
+MutualWarExpired
+MutualWarInviteAccepted
+MutualWarInviteRejected
+MutualWarInviteSent
+AllianceWarDeclaredV2
+CorpWarDeclaredV2
+AllMaintenanceBillMsg
+BillOutOfMoneyMsg
+AllianceCapitalChanged
+BountyPlacedAlliance
+CorpKicked
+CorpNewCEOMsg
+CorpTaxChangeMsg
+OwnershipTransferred
+```
+
+### BREAKING CHANGES
+- Added new entries to `Resources` config section
+
 ### V1.4.0
 + Added console warning messages for entities that has not been recognized
 + Added new IndustrialJobsModule

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Media.Animation;
 
 namespace ThunderED.Classes
 {
@@ -127,6 +128,18 @@ namespace ThunderED.Classes
             int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
             return dt.AddDays(-1 * diff).Date;
         }
+
+        public static DateTime ToEveTime(this string value)
+        {
+            return DateTime.TryParse(value, out var localTimestamp) ? localTimestamp.ToUniversalTime() : DateTime.MinValue;
+        }
+
+        public static string ToEveTimeString(this string value)
+        {
+            var t = value.ToEveTime();
+            return $"{t.ToShortDateString()} {t.ToShortTimeString()}";
+        }
+
 
         public static void AddOnlyNew<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
         {

@@ -152,6 +152,7 @@ namespace ThunderED.Modules
 
                             var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId);
                             var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
+                            var feederAlliance = feederChar?.alliance_id > 0 ? await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.alliance_id): null;
 
 
                             //process filters
@@ -635,12 +636,14 @@ namespace ThunderED.Modules
                                                 case "CorpBecameWarEligible":
                                                 case "CorpNoLongerWarEligible":
                                                 {
-                                                    var color = notification.type == "CorpBecameWarEligible" ? new Color(0xFF0000) : new Color(0x00FF00);
+                                                    var isEligible = notification.type == "CorpBecameWarEligible";
+                                                    var color = isEligible ? new Color(0xFF0000) : new Color(0x00FF00);
                                                     builder = new EmbedBuilder()
                                                         .WithColor(color);
                                                     var corp = feederCorp?.name ?? LM.Get("Unknown");
-                                                    var text = notification.type == "CorpBecameWarEligible" ? LM.Get("notifCorpWarEligible", corp) : LM.Get("notifCorpNotWarEligible", corp);
+                                                    var text = isEligible ? LM.Get("notifCorpWarEligible", corp) : LM.Get("notifCorpNotWarEligible", corp);
                                                     builder.WithAuthor(author => author.WithName(text))
+                                                        .WithThumbnailUrl(isEligible ? Settings.Resources.ImgBecameWarEligible : Settings.Resources.ImgNoLongerWarEligible)
                                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
@@ -649,7 +652,201 @@ namespace ThunderED.Modules
                                                 }
                                                     break;
 
-                                            case "CharLeftCorpMsg":
+                                                case "MutualWarInviteAccepted":
+                                                case "MutualWarInviteRejected":
+                                                case "MutualWarInviteSent":
+                                                case "MutualWarExpired":
+                                                {
+                                                    var corp = feederAlliance?.name ?? feederCorp?.name ?? LM.Get("Unknown");
+                                                    var color = new Color(0x00FF00);
+                                                    string text;
+                                                    string image;
+                                                    switch (notification.type)
+                                                    {
+                                                        case "MutualWarInviteAccepted":
+                                                            text = LM.Get("notifMutualWarInviteAccepted", corp);
+                                                            image = Settings.Resources.ImgWarInviteAccepted;
+                                                            break;
+                                                        case "MutualWarInviteRejected":
+                                                            color = new Color(0xFF0000);
+                                                            text = LM.Get("notifMutualWarInviteRejected", corp);
+                                                            image = Settings.Resources.ImgWarInviteRejected;
+                                                            break;
+                                                        case "MutualWarInviteSent":
+                                                            text = LM.Get("notifMutualWarInviteSent", corp);
+                                                            image = Settings.Resources.ImgWarInviteSent;
+                                                            break;
+                                                        case "MutualWarExpired":
+                                                            color = new Color(0xFF0000);
+                                                            text = LM.Get("notifMutualWarExpired", corp);
+                                                            image = Settings.Resources.ImgWarInvalidate;
+                                                            break;
+                                                        default:
+                                                            return;
+                                                    }
+
+                                                    builder = new EmbedBuilder()
+                                                        .WithColor(color)
+                                                        .WithAuthor(author => author.WithName(text))
+                                                        .WithThumbnailUrl(image)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                        .WithTimestamp(timestamp);
+                                                    embed = builder.Build();
+
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                }
+                                                    break;
+
+                                                case "AllMaintenanceBillMsg":
+                                                case "BillOutOfMoneyMsg":
+                                                case "AllianceCapitalChanged":
+                                                case "BountyPlacedAlliance":
+                                                case "BountyPlacedCorp":
+                                                case "CorpKicked":
+                                                case "CorpNewCEOMsg":
+                                                case "CorpTaxChangeMsg":
+                                                case "OwnershipTransferred":
+                                                {
+                                                    var ally = feederAlliance?.name ?? LM.Get("Unknown");
+                                                    var corp = feederCorp?.name ?? LM.Get("Unknown");
+                                                    var color = new Color(0x00FF00);
+                                                    string text;
+                                                    string image;
+                                                    switch (notification.type)
+                                                    {
+                                                        case "AllMaintenanceBillMsg":
+                                                            text = LM.Get("notifAllMaintenanceBillMsg", ally, GetData("dueDate", data)?.ToEveTimeString());
+                                                            image = Settings.Resources.ImgAllMaintenanceBillMsg;
+                                                            break;
+                                                        case "BillOutOfMoneyMsg":
+                                                            color = new Color(0xFF0000);
+                                                            var btype = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("billTypeID", data)))?.name;
+                                                            text = LM.Get("notifBillOutOfMoneyMsg", corp, btype, GetData("dueDate", data)?.ToEveTimeString());
+                                                            image = Settings.Resources.ImgBillOutOfMoneyMsg;
+                                                            break;
+                                                        case "AllianceCapitalChanged":
+                                                            var allyId = GetData("allianceID", data);
+                                                            var accAlly = string.IsNullOrEmpty(allyId) ? null : (await APIHelper.ESIAPI.GetAllianceData(Reason, allyId))?.name;
+                                                            text = LM.Get("notifAllianceCapitalChanged", accAlly, system?.name);
+                                                            image = Settings.Resources.ImgAllMaintenanceBillMsg;
+                                                            break;
+                                                        case "BountyPlacedAlliance":
+                                                            color = new Color(0xFF0000);
+                                                            var placer = await APIHelper.ESIAPI.GetMemberEntityProperty(Reason, GetData("bountyPlacerID", data), "Name");
+                                                            text = LM.Get("notifBountyPlacedAlliance", ally, placer, Convert.ToInt64(GetData("bounty", data)).ToKMB());
+                                                            image = Settings.Resources.ImgBountyPlacedAlliance;
+                                                            break;
+                                                        case "CorpKicked":
+                                                            color = new Color(0xFF0000);
+                                                            var kcorp = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data)))?.name;
+                                                            text = LM.Get("notifCorpKicked", kcorp, ally);
+                                                            image = Settings.Resources.ImgCorpKicked;
+                                                            break;
+                                                        case "CorpNewCEOMsg":
+                                                            var ccorp = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data)))?.name;
+                                                            var newCeo = await APIHelper.ESIAPI.GetCharacterData(Reason, GetData("newCeoID", data));
+                                                            var oldCeo = await APIHelper.ESIAPI.GetCharacterData(Reason, GetData("oldCeoID", data));
+                                                            text = LM.Get("notifCorpNewCEOMsg", ccorp, newCeo?.name, oldCeo?.name);
+                                                            image = Settings.Resources.ImgCorpNewCEOMsg;
+                                                            break;
+                                                        case "CorpTaxChangeMsg":
+                                                            var corp1 = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data)))?.name;
+                                                            text = LM.Get("notifCorpTaxChangeMsg", corp1, GetData("oldTaxRate", data), GetData("newTaxRate", data));
+                                                            image = Settings.Resources.ImgCorpTaxChangeMsg;
+                                                            break;
+                                                        case "OwnershipTransferred":
+                                                            text = LM.Get("notifOwnershipTransferred", GetData("structureName", data), GetData("fromCorporationName", data), GetData("toCorporationName", data));
+                                                            image = Settings.Resources.ImgCitFuelAlert;
+                                                            break;
+                                                        default:
+                                                            return;
+                                                    }
+
+                                                    builder = new EmbedBuilder()
+                                                        .WithColor(color)
+                                                        .WithAuthor(author => author.WithName(text))
+                                                        .WithThumbnailUrl(image)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                        .WithTimestamp(timestamp);
+                                                    embed = builder.Build();
+
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                }
+                                                    break;
+
+                                                case "WarAdopted":
+                                                case "WarAllyInherited":
+                                                case "WarConcordInvalidates":
+                                                case "WarDeclared":
+                                                case "WarHQRemovedFromSpace":
+                                                case "WarInherited":
+                                                case "WarInvalid":
+                                                case "WarRetracted":
+                                                case "WarRetractedByConcord":
+                                                {
+                                                    var corp = feederAlliance?.name ?? feederCorp?.name ?? LM.Get("Unknown");
+                                                    var color = new Color(0x00FF00);
+                                                    string text;
+                                                    string image;
+                                                    switch (notification.type)
+                                                    {
+                                                        case "WarAdopted":
+                                                            color = new Color(0xFF0000);
+                                                            text = LM.Get("notifWarAdopted", corp);
+                                                            image = Settings.Resources.ImgWarDeclared;
+                                                            break;
+                                                        case "WarAllyInherited":
+                                                            text = LM.Get("notifWarAllyInherited", corp);
+                                                            image = Settings.Resources.ImgWarInviteSent;
+                                                            break;
+                                                        case "WarConcordInvalidates":
+                                                            text = LM.Get("notifWarConcordInvalidates", corp);
+                                                            image = Settings.Resources.ImgWarInvalidate;
+                                                            break;
+                                                        case "WarDeclared":
+                                                            color = new Color(0xFF0000);
+                                                            text = LM.Get("notifWarDeclared", corp);
+                                                            image = Settings.Resources.ImgWarDeclared;
+                                                            break;
+                                                        case "WarHQRemovedFromSpace":
+                                                            color = new Color(0xFF0000);
+                                                            text = LM.Get("notifWarHQRemovedFromSpace", corp);
+                                                            image = Settings.Resources.ImgCitDestroyed;
+                                                            break;
+                                                        case "WarInherited":
+                                                            color = new Color(0xFF0000);
+                                                            text = LM.Get("notifWarInherited", corp);
+                                                            image = Settings.Resources.ImgWarInviteSent;
+                                                            break;
+                                                        case "WarInvalid":
+                                                            text = LM.Get("notifWarInvalid", corp);
+                                                            image = Settings.Resources.ImgWarInvalidate;
+                                                            break;
+                                                        case "WarRetracted":
+                                                            text = LM.Get("notifWarRetracted", corp);
+                                                            image = Settings.Resources.ImgWarInvalidate;
+                                                            break;
+                                                        case "WarRetractedByConcord":
+                                                            text = LM.Get("notifWarRetractedByConcord", corp);
+                                                            image = Settings.Resources.ImgWarInvalidate;
+                                                            break;
+                                                        default:
+                                                            return;
+                                                    }
+
+                                                    builder = new EmbedBuilder()
+                                                        .WithColor(color)
+                                                        .WithAuthor(author => author.WithName(text))
+                                                        .WithThumbnailUrl(image)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                        .WithTimestamp(timestamp);
+                                                    embed = builder.Build();
+
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                }
+                                                    break;
+
+                                                case "CharLeftCorpMsg":
                                                 case "CharAppAcceptMsg":
                                                 case "CorpAppNewMsg":
                                                 case "CharAppWithdrawMsg":
@@ -833,6 +1030,8 @@ namespace ThunderED.Modules
                                                     break;
 
 
+                                                case "AllianceWarDeclaredV2":
+                                                case "CorpWarDeclaredV2":
                                                 case "AllWarDeclaredMsg":
                                                 case "CorpWarDeclaredMsg":
                                                 case "AllWarInvalidatedMsg":

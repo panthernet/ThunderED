@@ -565,6 +565,27 @@
   "industryJobsRowStation": "Локация",
   "helpTest": "Доступные команды:\nkm test TEMPLATE - сгенерировать тестовое KM где TEMPLATE наименование файла шаблонаиз папки Templates/Messages",
   "notifCorpWarEligible": "Корпорация {0} стала доступной для объявления войны!",
-  "notifCorpNotWarEligible": "Корпорация {0} больше недоступна для объявления войны!"
+  "notifCorpNotWarEligible": "Корпорация {0} больше недоступна для объявления войны!",
+  "notifMutualWarExpired": "Срок взаимной войны между {0} и {1} истек!",
+  "notifMutualWarInviteAccepted": "{0} приняли приглашение для участия в совместной войне!",
+  "notifMutualWarInviteRejected": "{0} отклонили приглашение для участия в совместной войне!",
+  "notifMutualWarInviteSent": "{0} выслали {1} приглашение на участие в совместной войне!",
+  "notifWarAdopted": "{0} унаследовали войну против {1}!",
+  "notifWarAllyInherited": "Военный союзник {0} был унаследован!",
+  "notifWarConcordInvalidates": "CONCORD прекращает войну между {0} и {1}!",
+  "notifWarDeclared": "{0} объявили войну {1}!",
+  "notifWarHQRemovedFromSpace": "Военный штаб {0} больше не существует!",
+  "notifWarInherited": "Была унаследована война между {0} и {1}!",
+  "notifWarInvalid": "Война между {0} и {1} больше не валидна!",
+  "notifWarRetracted": "Война между {0} и {1} была отозвана!",
+  "notifWarRetractedByConcord": "Война между {0} и {1} была отозвана CONCORD!",
+  "notifAllMaintenanceBillMsg": "Счет альянса {0} должен быть оплачен до {1}",
+  "notifBillOutOfMoneyMsg": "Недостаточно ISK  для оплаты {1} счета {0} корпорации до {2}!",
+  "notifAllianceCapitalChanged": "Капитолий альянса {0} был переведен в систему {1}!",
+  "notifBountyPlacedAlliance": "Вознаграждение {2} ISK за головы членов альянса {0} было установлено {1}!",
+  "notifCorpKicked": "Корпорация {0} была исключена из альянса {1}!",
+  "notifCorpNewCEOMsg": "CEO {2} корпорации {0} покинул свой пост. Новый CEO - {1}!",
+  "notifCorpTaxChangeMsg": "Налог корпорации {0} был изменен с {1} до {2}!",
+  "notifOwnershipTransferred": "Право владение структурой {0} было передано от {1} к {2}!"
 
 }

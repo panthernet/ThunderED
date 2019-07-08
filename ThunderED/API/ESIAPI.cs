@@ -73,6 +73,12 @@ namespace ThunderED.API
                 forceUpdate, noCache);
         }
 
+        internal async Task<object> GetMemberEntityProperty(string reason, object id, string propertyName)
+        {
+            var ch = await GetCharacterData(reason, id) ?? (object)await GetCorporationData(reason, id) ?? await GetAllianceData(reason, id);
+            return ch?.GetType().GetProperty(propertyName)?.GetValue(ch);
+        }
+
         internal async Task<JsonClasses.FactionData> GetFactionData(string reason, long id)
         {
             var factions = await APIHelper.RequestWrapper<List<JsonClasses.FactionData>>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/factions/?datasource=tranquility&language={_language}", reason);

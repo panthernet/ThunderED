@@ -36,7 +36,7 @@
     "ModuleContractNotifications": false,
     "ModuleSovTracker": false,
     "ModuleWebConfigEditor": false,
-    "ModuleIndustrialJobs":  false, 
+    "ModuleIndustrialJobs": false,
 
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
@@ -449,7 +449,7 @@
       "Mode8_AuthGroupWithUpgradeToAnotherGroup": {
         "UseStrictAuthenticationMode": "false",
         "UpgradeGroupNames": [ "Mode1_GeneralAuth" ],
-        "DowngradeGroupNames": [ ],
+        "DowngradeGroupNames": [],
         "AllowedMembers": {
           "entry1": {
             "Entities": [ 0 ],
@@ -486,7 +486,19 @@
     "ImgFactionMinmatar": "https://wiki.eveuniversity.org/images/1/1f/Logo_faction_minmatar_republic.png",
     "imgEntosisAlert": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgEntosisAlert.png",
     "ImgContract": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgContract.png",
-    "ImgContractDelete": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgContractDelete.png"
+    "ImgContractDelete": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgContractDelete.png",
+    "ImgNoLongerWarEligible": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgNoLongerWarEligible.png",
+    "ImgBecameWarEligible": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgBecameWarEligible.png",
+    "ImgWarInviteAccepted": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgWarInviteAccepted.png",
+    "ImgWarInviteRejected": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgWarInviteRejected.png",
+    "ImgWarInviteSent": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgWarInviteSent.png",
+    "ImgAllMaintenanceBillMsg": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgAllMaintenanceBillMsg.png",
+    "ImgBillOutOfMoneyMsg": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgBillOutOfMoneyMsg.png",
+    "ImgAllianceCapitalChanged": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgAllianceCapitalChanged.png",
+    "ImgBountyPlacedAlliance": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgBountyPlacedAlliance.png",
+    "ImgCorpKicked": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgCorpKicked.png",
+    "ImgCorpNewCEOMsg": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgCorpNewCEOMsg.png",
+    "ImgCorpTaxChangeMsg": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgCorpTaxChangeMsg.png"
   },
 
   "notificationFeedModule": {
@@ -543,7 +555,32 @@
               "MoonminingExtractionCancelled",
               "FWAllianceWarningMsg",
               "CorpAppNewMsg",
-              "CharAppWithdrawMsg"
+              "CharAppWithdrawMsg",
+              "WarAdopted",
+              "WarAllyInherited",
+              "WarConcordInvalidates",
+              "WarDeclared",
+              "WarHQRemovedFromSpace",
+              "WarInherited",
+              "WarInvalid",
+              "WarRetracted",
+              "WarRetractedByConcord",
+              "CorpBecameWarEligible",
+              "CorpNoLongerWarEligible",
+              "MutualWarExpired",
+              "MutualWarInviteAccepted",
+              "MutualWarInviteRejected",
+              "MutualWarInviteSent",
+              "AllianceWarDeclaredV2",
+              "CorpWarDeclaredV2",
+              "AllMaintenanceBillMsg",
+              "BillOutOfMoneyMsg",
+              "AllianceCapitalChanged",
+              "BountyPlacedAlliance",
+              "CorpKicked",
+              "CorpNewCEOMsg",
+              "CorpTaxChangeMsg",
+              "OwnershipTransferred"
             ],
             "channelID": 0,
             "defaultMention": "@everyone",
@@ -726,6 +763,6 @@
         "ButtonText": ""
       }
     }
-  } 
+  }
 
 }

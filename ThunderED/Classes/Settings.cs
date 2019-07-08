@@ -699,6 +699,18 @@ namespace ThunderED.Classes
         public string ImgEntosisAlert { get; set; }
         public string ImgContract { get; set; }
         public string ImgContractDelete { get; set; }
+        public string ImgNoLongerWarEligible { get; set; }
+        public string ImgBecameWarEligible { get; set; }
+        public string ImgWarInviteAccepted{ get; set; }
+        public string ImgWarInviteRejected{ get; set; }
+        public string ImgWarInviteSent{ get; set; }
+        public string ImgAllMaintenanceBillMsg{ get; set; }
+        public string ImgBillOutOfMoneyMsg{ get; set; }
+        public string ImgAllianceCapitalChanged{ get; set; }
+        public string ImgBountyPlacedAlliance{ get; set; }
+        public string ImgCorpKicked{ get; set; }
+        public string ImgCorpNewCEOMsg{ get; set; }
+        public string ImgCorpTaxChangeMsg{ get; set; }
     }
 
     public class LiveKillFeedModuleSettings: ValidatableSettings
