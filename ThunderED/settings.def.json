@@ -161,7 +161,7 @@
     "UseOneAuthButton": false,
     "authGroups": {
       "Mode1_GeneralAuth": {
-        "UseStrictAuthenticationMode": "false",
+        "StopSearchingOnFirstMatch": "false",
         "AllowedMembers": {
           "entry1": {
             "Entities": [ 98499225, "Tau AD", "a:Triumvirate", "c:SATRO" ],
@@ -263,7 +263,7 @@
         "BindToMainCharacter": true
       },
       "Mode7_AuthByTitles": {
-        "UseStrictAuthenticationMode": "false",
+        "StopSearchingOnFirstMatch": "false",
         "AllowedMembers": {
           "entry1": {
             "Entities": [ 98499225, "Tau AD", "a:Triumvirate", "c:SATRO" ],
@@ -281,7 +281,7 @@
         "ExcludeFromOneButtonMode": false
       },
       "Mode8_AuthGroupWithUpgradeToAnotherGroup": {
-        "UseStrictAuthenticationMode": "false",
+        "StopSearchingOnFirstMatch": "false",
         "UpgradeGroupNames": [ "Mode1_GeneralAuth" ],
         "DowngradeGroupNames": [],
         "AllowedMembers": {
@@ -310,7 +310,8 @@
 
   "SystemLogFeederModule": {
     "DiscordChannelId": 0,
-    "OnlyErrors": false
+    "LogSeverity": "Info",
+    "SendInterval":  5000 
   },
 
   "ContinousCheckModule": {

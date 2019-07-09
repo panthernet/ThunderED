@@ -21,6 +21,8 @@ namespace ThunderED.Modules
             IsFirstPass = false;
         }
 
+        public virtual void Cleanup() {}
+
         /// <summary>
         /// List of IDs to control one-time warnings during the single bot session
         /// </summary>

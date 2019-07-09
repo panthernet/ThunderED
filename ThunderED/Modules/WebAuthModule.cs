@@ -151,7 +151,111 @@ namespace ThunderED.Modules
             }
         }
 
-        public static async Task<AuthRoleEntity> GetCorpEntityById(Dictionary<string, WebAuthGroup> groups, long id)
+
+        public static async Task<WebAuthResult> GetAuthRoleEntityById(Dictionary<string, WebAuthGroup> groups, JsonClasses.CharacterData chData)
+        {
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups;
+            var result = new WebAuthResult();
+            foreach (var (groupName, group) in groups)
+            {
+                if (group.StandingsAuth == null)
+                {
+                    foreach (var (entityName, entity) in group.AllowedMembers)
+                    {
+                        //found guest
+                        if (!entity.Entities.Any())
+                        {
+                            result.RoleEntities.Add(entity);
+                            result.Group = group;
+                            result.GroupName = groupName;
+                            return result;
+                        }
+
+                        var data = Instance.GetTier2CharacterIds(Instance.ParsedMembersLists, groupName, entityName);
+                        if (data.Contains(chData.character_id))
+                            result.RoleEntities.Add(entity);
+                        else
+                        {
+                            data = Instance.GetTier2CorporationIds(Instance.ParsedMembersLists, groupName, entityName);
+                            if (data.Contains(chData.corporation_id))
+                                result.RoleEntities.Add(entity);
+                            else
+                            {
+                                data = Instance.GetTier2AllianceIds(Instance.ParsedMembersLists, groupName, entityName);
+                                if (chData.alliance_id.HasValue && data.Contains(chData.alliance_id.Value))
+                                    result.RoleEntities.Add(entity);
+                            }
+                        }
+
+                        //return if we have a match and fon;t need to check all members
+                        if (result.RoleEntities.Any() && group.StopSearchingOnFirstMatch)
+                        {
+                            result.Group = group;
+                            result.GroupName = groupName;
+                            return result;
+                        }
+                    }
+
+                    //return after all members has been checked
+                    if (result.RoleEntities.Any())
+                    {
+                        result.Group = group;
+                        result.GroupName = groupName;
+                        return result;
+                    }
+                }
+                else
+                {
+                    var r = await GetEntityForStandingsAuth(group, chData);
+                    if (r.Any())
+                    {
+                        result.Group = group;
+                        result.GroupName = groupName;
+                        result.RoleEntities.AddRange(r);
+                        return result;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+      /*  public static async Task<AuthRoleEntity> GetAuthRoleEntityById(Dictionary<string, WebAuthGroup> groups, long id, MemberTypeEnum type)
+        {
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups;
+            foreach (var (groupName, group) in groups)
+            {
+                if (group.StandingsAuth == null)
+                {
+                    foreach (var (entityName, entity) in group.AllowedMembers)
+                    {
+                        var list = type == MemberTypeEnum.Corporation
+                            ? Instance.GetTier2CorporationIds(Instance.ParsedMembersLists, groupName, entityName)
+                            : (type == MemberTypeEnum.Character
+                                ? Instance.GetTier2CharacterIds(Instance.ParsedMembersLists, groupName, entityName)
+                                : Instance.GetTier2AllianceIds(Instance.ParsedMembersLists, groupName, entityName));
+                        //if found match or it is a guest entity (empty)
+                        if (list.Contains(id) || !entity.Entities.Any())
+                            return entity;
+                    }
+                }
+                else
+                {
+                    return await GetEntityForStandingsAuth(group, id, type);
+                }
+            }
+
+            return null;
+        }*/
+
+        public static async Task<WebAuthResult> GetAuthRoleEntityById(KeyValuePair<string, WebAuthGroup> group, JsonClasses.CharacterData chData)
+        {
+            var (key, value) = @group;
+            return await GetAuthRoleEntityById(new Dictionary<string, WebAuthGroup> {{key, value}}, chData);
+        }
+
+       /* public static async Task<AuthRoleEntity> GetCorpEntityById(Dictionary<string, WebAuthGroup> groups, long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups;
             foreach (var (groupName, group) in groups)
@@ -237,56 +341,83 @@ namespace ThunderED.Modules
             var (key, value) = @group;
             return await GetCharEntityById(new Dictionary<string, WebAuthGroup> {{key, value}}, id);
         }
+        */
 
-        private static async Task<AuthRoleEntity> GetEntityForStandingsAuth(WebAuthGroup group, long id, int type) //0 personal, 1 corp, 2 ally, 3 faction
+        private static async Task<List<AuthRoleEntity>> GetEntityForStandingsAuth(WebAuthGroup group, JsonClasses.CharacterData chData) //0 personal, 1 corp, 2 ally, 3 faction
         {
+            var list = new List<AuthRoleEntity>();
             foreach (var characterID in group.StandingsAuth.CharacterIDs)
             {
-                string typeName;
-                switch (type)
-                {
-                    case 0:
-                        typeName = "character";
-                        break;
-                    case 1:
-                        typeName = "corporation";
-                        break;
-                    case 2:
-                        typeName = "alliance";
-                        break;
-                    default:
-                        return null;
-                }
-
                 var standings = await SQLHelper.LoadAuthStands(characterID);
-                if (standings == null) return null;
+                if (standings == null) return list;
 
-                var st = new List<JsonClasses.Contact>();
-                st.AddRange(group.StandingsAuth.UseCharacterStandings && standings.PersonalStands != null ? standings.PersonalStands : new List<JsonClasses.Contact>());
-                st.AddRange(group.StandingsAuth.UseCorporationStandings && standings.CorpStands != null ? standings.CorpStands : new List<JsonClasses.Contact>());
-                st.AddRange(group.StandingsAuth.UseAllianceStandings && standings.AllianceStands != null? standings.AllianceStands : new List<JsonClasses.Contact>());
+                for (var typeNumber = 0; typeNumber < 3; typeNumber++)
+                {
+                    string typeName;
+                    var id = 0L;
+                    switch (typeNumber)
+                    {
+                        case 0:
+                            typeName = "character";
+                            id = chData.character_id;
+                            break;
+                        case 1:
+                            typeName = "corporation";
+                            id = chData.corporation_id;
+                            break;
+                        case 2:
+                            typeName = "alliance";
+                            id = chData.alliance_id ?? 0;
+                            break;
+                        default:
+                            return list;
+                    }
 
-                var stands = st.Where(a => a.contact_type == typeName && a.contact_id == id).Select(a=> a.standing).Distinct();
-                var s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "eq").FirstOrDefault(a => a.Standings.Any(b => stands.Contains(b)));
-                if (s != null) return new AuthRoleEntity {Entities = new List<object> {id}, DiscordRoles = s.DiscordRoles};
+                    var st = new List<JsonClasses.Contact>();
+                    st.AddRange(group.StandingsAuth.UseCharacterStandings && standings.PersonalStands != null ? standings.PersonalStands : new List<JsonClasses.Contact>());
+                    st.AddRange(group.StandingsAuth.UseCorporationStandings && standings.CorpStands != null ? standings.CorpStands : new List<JsonClasses.Contact>());
+                    st.AddRange(group.StandingsAuth.UseAllianceStandings && standings.AllianceStands != null? standings.AllianceStands : new List<JsonClasses.Contact>());
 
-                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "le").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c <= b)));
-                if (s != null) return new AuthRoleEntity {Entities = new List<object>  {id}, DiscordRoles = s.DiscordRoles};
-                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "ge").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c >= b)));
-                if (s != null) return new AuthRoleEntity {Entities = new List<object>  {id}, DiscordRoles = s.DiscordRoles};
+                    var stands = st.Where(a => a.contact_type == typeName && a.contact_id == id).Select(a=> a.standing).Distinct();
+                    var s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "eq").FirstOrDefault(a => a.Standings.Any(b => stands.Contains(b)));
+                    if (s != null) 
+                        list.Add(new AuthRoleEntity {Entities = new List<object> {id}, DiscordRoles = s.DiscordRoles});
+                    if (group.StopSearchingOnFirstMatch)
+                        return list;
 
-                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "lt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c < b)));
-                if (s != null) return new AuthRoleEntity {Entities = new List<object>  {id}, DiscordRoles = s.DiscordRoles};
-                s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "gt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c > b)));
-                if (s != null) return new AuthRoleEntity {Entities = new List<object>  {id}, DiscordRoles = s.DiscordRoles};
+                    s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "le").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c <= b)));
+                    if (s != null) list.Add( new AuthRoleEntity {Entities = new List<object>  {id}, DiscordRoles = s.DiscordRoles});
+                    if (group.StopSearchingOnFirstMatch)
+                        return list;
 
-
+                    s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "ge").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c >= b)));
+                    if (s != null) list.Add(new AuthRoleEntity {Entities = new List<object>  {id}, DiscordRoles = s.DiscordRoles});
+                    if (group.StopSearchingOnFirstMatch)
+                        return list;
+                    s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "lt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c < b)));
+                    if (s != null) list.Add(new AuthRoleEntity {Entities = new List<object>  {id}, DiscordRoles = s.DiscordRoles});
+                    if (group.StopSearchingOnFirstMatch)
+                        return list;
+                    s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "gt").FirstOrDefault(a => a.Standings.Any(b => stands.Any(c => c > b)));
+                    if (s != null) list.Add(new AuthRoleEntity {Entities = new List<object>  {id}, DiscordRoles = s.DiscordRoles});
+                    if (group.StopSearchingOnFirstMatch)
+                        return list;
+                }
             }
 
-            return null;
+            return list;
         }
 
-        public static async Task<WebAuthResult> GetAuthGroupByCorpId(Dictionary<string, WebAuthGroup> groups, long id)
+        
+        private static async Task<WebAuthResult> GetAuthGroupByCharacter(Dictionary<string, WebAuthGroup> groups, long id)
+        {
+            var chData = await APIHelper.ESIAPI.GetCharacterData("AuthCheck", id);
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups;
+            var result = await GetAuthRoleEntityById(groups, chData);
+            return result.RoleEntities.Any() ? new WebAuthResult {GroupName = result.GroupName, Group = result.Group, RoleEntities = result.RoleEntities} : null;
+        }
+
+      /*  public static async Task<WebAuthResult> GetAuthGroupByCorpId(Dictionary<string, WebAuthGroup> groups, long id)
         {
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups;
             var eResult = await GetCorpEntityById(groups, id);
@@ -333,7 +464,7 @@ namespace ThunderED.Modules
             }
 
             return null;
-        }
+        }*/
 
         public async Task ProcessPreliminaryApplicant(AuthUserEntity user, ICommandContext context = null)
         {
@@ -355,9 +486,9 @@ namespace ThunderED.Modules
                     await SQLHelper.SaveAuthUser(user);
                 }
 
-                var longCorpId = rChar.corporation_id;
-                var longAllyId = rChar.alliance_id ?? 0;
-                if (await GetCharEntityById(group, user.CharacterId) != null || await GetCorpEntityById(group, longCorpId) != null || (rChar.alliance_id > 0 && await GetAllyEntityById(group, longAllyId) != null))
+                // var longCorpId = rChar.corporation_id;
+                //var longAllyId = rChar.alliance_id ?? 0;
+                if ((await GetAuthRoleEntityById(group, rChar)).RoleEntities.Any())
                 {
                     if (group.Value == null)
                     {
@@ -711,65 +842,36 @@ namespace ThunderED.Modules
                         }
                         else //normal auth
                         {
-                            var longCorpId = rChar.corporation_id;
-                            var longAllyId = allianceID;
-
-                            //has custom ESI roles or name specified
+                            //ordinary named group check
                             if (inputGroup != null)
                             {
                                 group = inputGroup;
-                                var groupPair = new Dictionary<string, WebAuthGroup> {{inputGroupName, inputGroup}};
-
-                                //guest check
-                                if (group.AllowedMembers.Values.All(b => !b.Entities.Any() || b.Entities.All(c => c.ToString().All(char.IsDigit) && (long)c == 0)))
+                                if ((await GetAuthRoleEntityById(new KeyValuePair<string, WebAuthGroup>(inputGroupName, inputGroup), rChar)).RoleEntities.Any())
                                 {
-                                    add = true;
                                     groupName = inputGroupName;
+                                    add = true;
                                     cFoundList.Add(rChar.corporation_id);
-                                }
-                                else
-                                {
-                                    if (await GetCorpEntityById(groupPair, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(groupPair, longAllyId) != null) ||
-                                        await GetCharEntityById(groupPair, longCharacterId) != null)
-                                    {
-                                        groupName = inputGroupName;
-                                        add = true;
-                                        cFoundList.Add(rChar.corporation_id);
-                                    }
                                 }
                             }
                             else
                             {
-                                var searchFor = autoSearchGroup
-                                    ? Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.ExcludeFromOneButtonMode && !a.Value.BindToMainCharacter)
-                                    : Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode && !a.Value.BindToMainCharacter);
-                                //general auth
-                                foreach (var grp in searchFor)
+                                //check all the shit if we fall here
+                                if (Settings.WebAuthModule.UseOneAuthButton)
                                 {
-                                    if (await GetCorpEntityById(grp, longCorpId) != null || (allianceID != 0 && await GetAllyEntityById(grp, longAllyId) != null) || await GetCharEntityById(grp, longCharacterId) != null)
+                                    var searchFor = autoSearchGroup
+                                        ? Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ExcludeFromOneButtonMode && !a.Value.BindToMainCharacter)
+                                        : Settings.WebAuthModule.AuthGroups.Where(a =>
+                                            !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode && !a.Value.BindToMainCharacter);
+                                    //general auth
+                                    var gResult = await GetAuthRoleEntityById(searchFor.ToDictionary(a=> a.Key, a=> a.Value), rChar);
+                                    if (gResult.RoleEntities.Any())
                                     {
                                         cFoundList.Add(rChar.corporation_id);
-                                        groupName = grp.Key;
-                                        group = grp.Value;
+                                        groupName = gResult.GroupName;
+                                        group = gResult.Group;
                                         add = true;
-                                        break;
                                     }
                                 }
-
-                                //for guest mode during general auth
-                                if (!add)
-                                {
-                                    var grp = Settings.WebAuthModule.AuthGroups.Where(a=> !a.Value.BindToMainCharacter).FirstOrDefault(a => a.Value.StandingsAuth == null &&
-                                        a.Value.AllowedMembers.Values.All(b => b.Entities.All(c=> c.ToString().All(char.IsDigit) && (long)c== 0)));
-                                    if (grp.Value != null)
-                                    {
-                                        add = true;
-                                        groupName = grp.Key;
-                                        group = grp.Value;
-                                        cFoundList.Add(rChar.corporation_id);
-                                    }
-                                }
-
                             }
                         }
 

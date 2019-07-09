@@ -118,7 +118,10 @@ namespace ThunderED.Classes
                 OnDemandModules.Add(new WebSettingsModule());
             if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands)
                 OnDemandModules.Add(new DiscordRolesManagementModule());
-         
+
+            if (SettingsManager.Settings.Config.ModuleSystemLogFeeder)
+                OnDemandModules.Add(new SystemLogFeeder());
+
             //IMPORTANT - web auth is the last module - to be the last for 404 handling
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
                 Modules.Add(new WebAuthModule());
@@ -220,6 +223,7 @@ namespace ThunderED.Classes
         {
             WebServerModule.ModuleConnectors.Clear();
             ZKillLiveFeedModule.Queryables.Clear();
+            Modules.ForEach(a=> a.Cleanup());
             _isModulesLoaded = false;
         }
     }

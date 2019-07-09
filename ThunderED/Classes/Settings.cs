@@ -1691,8 +1691,11 @@ namespace ThunderED.Classes
         [Required]
         public ulong DiscordChannelId { get; set; }
 
-        [Comment("Feed only critical and error messages")]
-        public bool OnlyErrors { get; set; }
+        [Comment("Log severity: Info, Module, Warning, Error, Critical")]
+        public string LogSeverity { get; set; } = "Info";
+
+        [Comment("Message send interval to Discord in msec")]
+        public int SendInterval { get; set; } = 5000;
 
 #if EDITOR
         public override string this[string columnName]
@@ -1853,7 +1856,7 @@ namespace ThunderED.Classes
         public List<string> DowngradeGroupNames { get; set; } = new List<string>();
 #endif
         [Comment("Enable auth mode that will only search roles until first criterial match. Otherwise it wil search and add roles from all matching filters within this group")]
-        public bool UseStrictAuthenticationMode { get; set; }
+        public bool StopSearchingOnFirstMatch { get; set; }
 
         [Comment("Enable auth to require manual acceptance from authorized members")]
         public bool PreliminaryAuthMode { get; set; }
@@ -1890,7 +1893,7 @@ namespace ThunderED.Classes
         public List<string> ESICustomAuthRoles { get; set; } = new List<string>();
 
         [JsonIgnore]
-        public bool MustHaveGroupName => ESICustomAuthRoles.Any() || StandingsAuth != null;
+        public bool MustHaveGroupName => true; //ESICustomAuthRoles.Any() || StandingsAuth != null;
 #endif
 #if EDITOR
         public override string this[string columnName]

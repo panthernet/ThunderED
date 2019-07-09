@@ -52,7 +52,12 @@ namespace ThunderED.Helpers
                 {
                     var time = DateTime.Now.ToString("HH:mm:ss");
                     var msg = $"{time} [{severity,8}] [{cat,13}]: {message}";
-                    await SystemLogFeeder.FeedMessage(msg, severity == LogSeverity.Critical || severity == LogSeverity.Error);
+                    if(severity == LogSeverity.Critical || severity == LogSeverity.Error)
+                        await SystemLogFeeder.FeedMessage($"```diff\n-{msg}\n```", severity);
+                    else if(severity == LogSeverity.Warning)
+                        await SystemLogFeeder.FeedMessage($"```diff\n+{msg}\n```", severity);
+                    else 
+                        await SystemLogFeeder.FeedMessage(msg, severity);
 
                     if (!SettingsManager.Settings?.Config.RunAsServiceCompatibility ?? true)
                     {
@@ -63,7 +68,6 @@ namespace ThunderED.Helpers
                                 case LogSeverity.Critical:
                                 case LogSeverity.Error:
                                     Console.ForegroundColor = ConsoleColor.Red;
-
                                     break;
                                 case LogSeverity.Warning:
                                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -133,7 +137,7 @@ namespace ThunderED.Helpers
                     }
                 }
 
-                await SystemLogFeeder.FeedMessage(msg, true);
+                await SystemLogFeeder.FeedMessage($"```\n{msg}\n```", LogSeverity.Error);
 
             }
             catch

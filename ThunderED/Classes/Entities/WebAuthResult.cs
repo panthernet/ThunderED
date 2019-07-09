@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace ThunderED.Classes.Entities
 {
     public class WebAuthResult
     {
+        public string GroupName;
         public WebAuthGroup Group;
-        public AuthRoleEntity RoleEntity;
+        public List<AuthRoleEntity> RoleEntities = new List<AuthRoleEntity>();
     }
 }

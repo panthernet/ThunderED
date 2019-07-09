@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace ThunderED.Json
 {
@@ -17,6 +18,9 @@ namespace ThunderED.Json
             public long? ancestry_id { get; set; }
             public float? security_status { get; set; }
             public long? faction_id { get; set; }
+
+            [JsonIgnore] 
+            public long character_id;
         }
     }
 }
