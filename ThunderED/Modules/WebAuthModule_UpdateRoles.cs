@@ -28,8 +28,8 @@ namespace ThunderED.Modules
 
             if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands && DiscordRolesManagementModule.AvailableRoleNames.Any())
             {
-                exemptRoles = exemptRoles.ToList();
-                exemptRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
+                authCheckIgnoreRoles = authCheckIgnoreRoles.ToList();
+                authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
             }
 
             await dids.ParallelForEachAsync(async id =>
