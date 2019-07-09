@@ -134,14 +134,12 @@ namespace ThunderED.Modules
                         }
                     }
 
-                    //mark changed if we have at least one new role to add
-                    changed = changed || result.UpdatedRoles.Any(role => initialUserRoles.FirstOrDefault(x => x.Id == role.Id) == null);
-    
+                    //remove already assigned roles and mark changed if we have at least one new role to add
+                    result.UpdatedRoles.RemoveAll(role => initialUserRoles.FirstOrDefault(a => a.Id == role.Id) != null);
+                    changed = changed || result.UpdatedRoles.Count > 0;
 
                     if (changed)
                     {
-                        result.UpdatedRoles.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
-
                         var actuallyDone = false;
                         if (result.UpdatedRoles.Count > 0)
                         {
@@ -152,9 +150,8 @@ namespace ThunderED.Modules
                             }
                             catch
                             {
-                                await LogHelper.LogWarning($"Failed to add {string.Join(',', result.UpdatedRoles.Select(a=> a.Name))} roles to {characterData.name} ({u.Username})!", LogCat.AuthCheck);
+                                await LogHelper.LogWarning($"Failed to add {string.Join(", ", result.UpdatedRoles.Select(a=> a.Name))} roles to {characterData.name} ({u.Username})!", LogCat.AuthCheck);
                             }
-
                         }
 
                         if (remroles.Count > 0)
@@ -166,14 +163,14 @@ namespace ThunderED.Modules
                             }
                             catch
                             {
-                                await LogHelper.LogWarning($"Failed to remove {string.Join(',', remroles.Select(a=> a.Name))} roles from {characterData.name} ({u.Username})!", LogCat.AuthCheck);
+                                await LogHelper.LogWarning($"Failed to remove {string.Join(", ", remroles.Select(a=> a.Name))} roles from {characterData.name} ({u.Username})!", LogCat.AuthCheck);
                             }
                         }
 
                         if (actuallyDone)
                         {
-                            var stripped = remroles.Count > 0 ? $" {LM.Get("authStripped")}: {string.Join(',', remroles.Select(a => a.Name))}" : null;
-                            var added = result.UpdatedRoles.Count > 0 ? $" {LM.Get("authAddedRoles")}: {string.Join(',', result.UpdatedRoles.Select(a => a.Name))}" : null;
+                            var stripped = remroles.Count > 0 ? $" {LM.Get("authStripped")}: {string.Join(", ", remroles.Select(a => a.Name))}" : null;
+                            var added = result.UpdatedRoles.Count > 0 ? $" {LM.Get("authAddedRoles")}: {string.Join(", ", result.UpdatedRoles.Select(a => a.Name))}" : null;
                             if (SettingsManager.Settings.WebAuthModule.AuthReportChannel != 0)
                             {
                                 var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
