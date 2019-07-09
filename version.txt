@@ -29,6 +29,7 @@ OwnershipTransferred
 ```
 + Added web server status reporter, new param `ServerStatusPort`. Query specified port to get status (no response - bot is not running). Set to 0 to disable.
 + Added web server `NoStatusResponseOnDiscordDisconnection` param to not respond on status queries if DIscord id not connected. Act like bot is not running.
++ Added ability to assign roles to members without corp titles
 
 ### BREAKING CHANGES
 - Added new entries to `Resources` config section

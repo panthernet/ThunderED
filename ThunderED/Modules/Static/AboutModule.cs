@@ -26,12 +26,10 @@ namespace ThunderED.Modules.Static
             await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{context.User.Mention},{Environment.NewLine}{Environment.NewLine}" +
                                            $"```ThunderED v{Program.VERSION} - Thunder EVE Discord Bot{Environment.NewLine}{Environment.NewLine}" +
                                            $"Developer: panthernet (In-game Name: Captain PantheR){Environment.NewLine}" +
-                                           $"Initial code based on OpuxV1 by Jimy06{Environment.NewLine}{Environment.NewLine}" +
                                            $"Bot ID: {botid}{Environment.NewLine}{Environment.NewLine}" +
                                            $"Run Time: {runTime.Days} Days {runTime.Hours} Hours {runTime.Minutes} Minutes {runTime.Seconds} Seconds{Environment.NewLine}{Environment.NewLine}" +
                                            $"Statistics:{Environment.NewLine}" +
                                            $"Memory Used: {Math.Round(memoryUsed.LargestWholeNumberValue, 2)} {memoryUsed.LargestWholeNumberSymbol}{Environment.NewLine}" +
-                                           $"Total Connected Guilds: {guilds}{Environment.NewLine}" +
                                            $"Total Users Seen: {totalUsers}```").ConfigureAwait(false);
             await Task.CompletedTask;
         }

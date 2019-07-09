@@ -305,6 +305,19 @@ namespace ThunderED.Modules
                         }
                     }
                 }
+                else
+                {
+                    var forEmpty = roleEntity.Titles.FirstOrDefault(a => a.Value.TitleNames.Count == 0 && a.Value.DiscordRoles.Any()).Value;
+                    if (forEmpty != null)
+                    {
+                        foreach (var roleName in forEmpty.DiscordRoles)
+                        {
+                            var role = APIHelper.DiscordAPI.GetGuildRole(roleName);
+                            if (role != null && !result.UpdatedRoles.Contains(role))
+                                result.UpdatedRoles.Add(role);
+                        }
+                    }
+                }
             }
             else
                 foreach (var role in aRoles)
