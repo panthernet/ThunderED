@@ -43,6 +43,6 @@
         Caps,
         WebSettings,
         DiscordRoles,
-        IndustrialJobs
+        IndustryJobs
     }
 }

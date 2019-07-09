@@ -1640,6 +1640,8 @@ namespace ThunderED.Classes
         public int MemoryUsageLimitMb { get; set; } = 100;
         [Comment("Log all the app messages by specified severity and above (Values: Info, Error, Critical)")]
         public string LogSeverity { get; set; } = "Info";
+        [Comment("Log all app output into a single file instead of many files each for its own module")]
+        public bool UseSingleFileForLogging { get; set; }
         [Comment("FALSE by default. Set to TRUE if you want to log all raw notifications data the bot will fetch. This is needed to catch notifications which the bot could not yet process. Send me acquired data to add notifications you will like to be processed by the bot")]
         public bool LogNewNotifications { get; set; } = true;
         [Comment("Number of web-request retries before treating it as failed")]

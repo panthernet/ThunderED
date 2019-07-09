@@ -16,7 +16,7 @@ namespace ThunderED.Modules
 {
     public class IndustrialJobsModule: AppModuleBase
     {
-        public override LogCat Category => LogCat.IndustrialJobs;
+        public override LogCat Category => LogCat.IndustryJobs;
         private readonly int _checkInterval;
         private DateTime _lastCheckTime = DateTime.MinValue;
         private readonly ConcurrentDictionary<long, string> _etokens = new ConcurrentDictionary<long, string>();

@@ -18,7 +18,6 @@ namespace ThunderED
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // var ssss = new List<JsonZKill.ZkillOnly>().Count(a => a.killmail_id == 0);
-
             if (!File.Exists(SettingsManager.FileSettingsPath))
             {
                 await LogHelper.LogError("Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");

@@ -46,6 +46,7 @@
     "cachePurgeInterval": 30,
     "memoryUsageLimitMb": 100,
     "logSeverity": "Info",
+    "UseSingleFileForLogging": false, 
     "logNewNotifications": true,
     "requestRetries": 3,
     "extendedESILogging": false,

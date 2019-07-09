@@ -39,7 +39,7 @@ namespace ThunderED.Helpers
                 _logSeverity = _logSeverity ?? SettingsManager.Settings?.Config.LogSeverity.ToSeverity() ?? LogSeverity.Module;
                 if ((int) _logSeverity > (int) severity) return;
 
-                var file = Path.Combine(_logPath, $"{cat}.log");
+                var file = Path.Combine(_logPath, (SettingsManager.Settings?.Config.UseSingleFileForLogging ?? false) ? "Default.log" : $"{cat}.log");
 
                 if (!Directory.Exists(_logPath))
                     Directory.CreateDirectory(_logPath);
@@ -88,8 +88,14 @@ namespace ThunderED.Helpers
                         }
                     }
                 }
+
                 if (logFile)
-                    await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{severity,8}]: {message}{Environment.NewLine}");
+                {
+                    var format = (SettingsManager.Settings?.Config.UseSingleFileForLogging ?? false)
+                        ? $"{DateTime.Now,-19} [{severity,8}] [{cat,13}]: {message}{Environment.NewLine}"
+                        : $"{DateTime.Now,-19} [{severity,8}]: {message}{Environment.NewLine}";
+                    await File.AppendAllTextAsync(file, format);
+                }
 
             }
             catch
@@ -103,7 +109,7 @@ namespace ThunderED.Helpers
             try
             {
                 _logPath = _logPath ?? Path.Combine(SettingsManager.DataDirectory, "logs");
-                var file = Path.Combine(_logPath, $"{cat}.log");
+                var file = Path.Combine(_logPath, (SettingsManager.Settings?.Config.UseSingleFileForLogging ?? false) ? "Default.log" : $"{cat}.log");
 
                 if (!Directory.Exists(_logPath))
                     Directory.CreateDirectory(_logPath);
@@ -112,7 +118,7 @@ namespace ThunderED.Helpers
                 await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}").ConfigureAwait(false);
                 
                 var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat,13}]: {message}";
-                var logConsole = !SettingsManager.Settings.Config.RunAsServiceCompatibility;
+                var logConsole = !SettingsManager.Settings?.Config.RunAsServiceCompatibility ?? true;
 
                 if (logConsole)
                 {
