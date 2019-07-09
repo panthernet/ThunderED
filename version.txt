@@ -39,13 +39,13 @@ OwnershipTransferred
 ### BREAKING CHANGES
 - Added new entries to `Resources` config section
 - Replaced `SystemLogFeederSettings.OnlyErrors` with `SystemLogFeederSettings.LogSeverity`
-- Renamed web auth group `UseStrictAuthenticationMode` to ``
+- Renamed web auth group `UseStrictAuthenticationMode` to `StopSearchingOnFirstMatch`
 - New rules to follow for auth setup:
-  - Auth groups will be checked by their order in config file: top to bottom. Independent of the auth type (general, standing, titles, etc.).
+  - Auth groups will be checked according to their order in config file: top to bottom. Independent of the auth type (general, standing, titles, etc.).
   - Allowed members in auth groups will be checked from top to bottom with the following priority: character, corporation, alliance
   - Guest groups should go last in the list or they will be chosen before latter groups
   - Guest groups must have empty `Entities` list (no more 0)!
-  - `StopSearchingOnFirstMatch` now properly limits the search. If it is `false` when all members within a single group will be checked. This will allow to assign roles to user from multiple `AllowedMembers` entries matching the criteria. If mentioned  property is `true` then only the first matching entry will be used to grant roles. The same rules applies to standings auth.
+  - `StopSearchingOnFirstMatch` now properly limits the search. If it is `false` when all members within a single group will be checked. This will allow to assign roles to user from multiple `AllowedMembers` entries form ONE group matching the criteria. If mentioned  property is `true` then only the first matching entry will be used to grant roles. The same rules applies to standings auth.
   - If user matches several criteria within the group and they contain `Titles`: only the 1st found entry with `Titles` auth will be selected and all other matches will be omitted
 
 ### V1.4.0
