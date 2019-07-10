@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using ThunderED.Classes;
+using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.OnDemand;
@@ -44,15 +45,16 @@ namespace ThunderED.Modules
 
         private static async Task UpdateDBUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles, IEnumerable<ulong> dids)
         {
-            var ids = (await SQLHelper.GetAuthUsers(2)).Where(a=> !a.MainCharacterId.HasValue).Select(a=> a.DiscordId);
-            var x = ids.FirstOrDefault(a => a == 268473315843112960);
+            var ids = (await SQLHelper.GetAuthUsers((int)UserStatusEnum.Authed)).Where(a=> !a.MainCharacterId.HasValue).Select(a=> a.DiscordId);
+           // var x = ids.FirstOrDefault(a => a == 268473315843112960);
             await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false); 
             }, 8);
         }
 
-        public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles, bool isManualAuth)
+        public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles, bool isManualAuth,
+            bool forceRemove = false)
         {
             try
             {
@@ -75,14 +77,14 @@ namespace ThunderED.Modules
                     //skip bad requests
                     if(characterData == null) return null;
 
-                    if (authUser.Data.CorporationId != characterData.corporation_id || authUser.Data.AllianceId != characterData.alliance_id)
+                    if (authUser.Data.CorporationId != characterData.corporation_id || authUser.Data.AllianceId != (characterData.alliance_id ?? 0))
                     {
                         await authUser.UpdateData(characterData);
                         await SQLHelper.SaveAuthUser(authUser);
                     }
                     var remroles = new List<SocketRole>();
 
-                    var result = await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth, authUser.RefreshToken);
+                    var result = authUser.IsDumped ? new RoleSearchResult() : await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth, authUser.RefreshToken);
                     var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.IsAuthed;
                     var isAuthed = !string.IsNullOrEmpty(result.GroupName);
                     var changed = false;
@@ -104,13 +106,14 @@ namespace ThunderED.Modules
                     // var isAuthed = result.UpdatedRoles.Count > 1;
 
                     //move to dumpster
-                    if (isMovingToDump && !authUser.IsDumped)
+                    if (forceRemove || isMovingToDump && !authUser.IsDumped)
                     {
                         if (SettingsManager.Settings.Config.ModuleHRM && SettingsManager.Settings.HRMModule.UseDumpForMembers)
                         {
                             await LogHelper.LogInfo($"{authUser.Data.CharacterName}({authUser.CharacterId}) is being moved into dumpster...", LogCat.AuthCheck);
                             authUser.SetStateDumpster();
-                            authUser.GroupName = null;
+                            if(!forceRemove)
+                                authUser.GroupName = null;
                             await authUser.UpdateData();
                             await SQLHelper.SaveAuthUser(authUser);
                         }
@@ -124,7 +127,7 @@ namespace ThunderED.Modules
                     if (u == null) return null;
 
                     var initialUserRoles = new List<SocketRole>(u.Roles);
-                    var invalidRoles = initialUserRoles.Where(a => result.UpdatedRoles.FirstOrDefault(b => b.Id == a.Id) == null);
+                    var invalidRoles = initialUserRoles.Where(a => result.UpdatedRoles.FirstOrDefault(b => b.Id == a.Id) == null && !a.Name.StartsWith("@everyone"));
                     foreach (var invalidRole in invalidRoles)
                     {
                         //if role is not ignored

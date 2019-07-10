@@ -298,6 +298,10 @@ namespace ThunderED.Modules
                                         await SQLHelper.DeleteAuthDataByCharId(searchCharId, true);
                                     }
 
+                                    if(sUser.DiscordId > 0)
+                                        await WebAuthModule.UpdateUserRoles(sUser.DiscordId, Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles,
+                                            false, true);
+
                                     await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
                                 }
                                 catch (Exception ex)
