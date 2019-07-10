@@ -255,7 +255,7 @@ namespace ThunderED.API
                 var roles = new List<IRole>(guild.Roles);
                 var userRoleIDs = (await guild.GetUserAsync(context.User.Id)).RoleIds;
                 var roleMatch = SettingsManager.Settings.Config.DiscordAdminRoles;
-                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name == role) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
+                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name.Equals(role, StringComparison.OrdinalIgnoreCase)) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
                     .All(check => check == 0)) return LM.Get("comRequirePriv");
             }
 

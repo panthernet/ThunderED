@@ -1855,7 +1855,7 @@ namespace ThunderED.Classes
         public List<string> UpgradeGroupNames { get; set; } = new List<string>();
         public List<string> DowngradeGroupNames { get; set; } = new List<string>();
 #endif
-        [Comment("Enable auth mode that will only search roles until first criterial match. Otherwise it wil search and add roles from all matching filters within this group")]
+        [Comment("Enable auth mode that will only search roles until first criteria match. Otherwise it wil search and add roles from all matching filters within this group")]
         public bool StopSearchingOnFirstMatch { get; set; }
 
         [Comment("Enable auth to require manual acceptance from authorized members")]

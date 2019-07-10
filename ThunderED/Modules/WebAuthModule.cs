@@ -47,7 +47,7 @@ namespace ThunderED.Modules
                 var keys = group.AllowedMembers.GetDupeKeys();
                 if (keys.Any())
                     await LogHelper.LogWarning(
-                        $"Group {groupName} contains duplicate member entries {string.Join(',', keys)}! Set unique names to avoid inconsistency during auth checks!", Category);
+                        $"Group {groupName} contains duplicate `AllowedMembers` names {string.Join(',', keys)}! Set unique names to avoid inconsistency during auth checks!", Category);
                 await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(group.AllowedMembers.Values.SelectMany(a => a.DiscordRoles).Distinct().ToList(), Category);
                 await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(group.ManualAssignmentRoles, Category);
                 await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(group.AuthRoles, Category);
