@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Modules.OnDemand;
@@ -10,6 +11,7 @@ namespace ThunderED.Helpers
     {
         private static string _logPath;
         private static LogSeverity? _logSeverity;
+        private static ReaderWriterLock _rwl = new ReaderWriterLock();
 
         public static async Task LogWarning(string message, LogCat cat = LogCat.Default, bool logConsole = true, bool logFile = true)
         {
@@ -98,7 +100,8 @@ namespace ThunderED.Helpers
                     var format = (SettingsManager.Settings?.Config.UseSingleFileForLogging ?? false)
                         ? $"{DateTime.Now,-19} [{severity,8}] [{cat,13}]: {message}{Environment.NewLine}"
                         : $"{DateTime.Now,-19} [{severity,8}]: {message}{Environment.NewLine}";
-                    await File.AppendAllTextAsync(file, format);
+
+                    await WriteToResource(file, format);
                 }
 
             }
@@ -106,6 +109,22 @@ namespace ThunderED.Helpers
             {
                 // ignored
             }
+        }
+
+        private static async Task WriteToResource(string filename, string message)
+        {
+            _rwl.AcquireWriterLock(1000);
+            try
+            {
+                File.AppendAllText(filename, message);
+            }
+            finally
+            {
+                // Ensure that the lock is released.
+                _rwl.ReleaseWriterLock();
+            }
+
+            await Task.Delay(1);
         }
 
         public static async Task LogEx(string message, Exception exception, LogCat cat = LogCat.Default)
@@ -119,8 +138,8 @@ namespace ThunderED.Helpers
                     Directory.CreateDirectory(_logPath);
 
                 // if(!SettingsManager.Settings.Config.DisableLogIntoFiles)
-                await File.AppendAllTextAsync(file, $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}").ConfigureAwait(false);
-                
+                await WriteToResource(file,  $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}");
+
                 var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat,13}]: {message}";
                 var logConsole = !SettingsManager.Settings?.Config.RunAsServiceCompatibility ?? true;
 

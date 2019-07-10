@@ -35,6 +35,7 @@ OwnershipTransferred
 + Added new `AutoClearAuthCommandsFromDiscord` property to web auth module to cleanup auth requests
 + Fixed standings in config editor
 + Fixed minor bugs and made some updates to config editor
++ Fixed async logging issues
 + Greatly improved and refactored web auth module for better maintenance and performance
 + Greatly improved log feeder for better coverage, less CPU and network utilization
 + Improved HR module to strip roles when user is moved to dumpster
