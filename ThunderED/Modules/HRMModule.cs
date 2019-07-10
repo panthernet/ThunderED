@@ -357,7 +357,7 @@ namespace ThunderED.Modules
                                     {
                                         item = JsonConvert.DeserializeObject<SearchMailItem>(HttpUtility.UrlDecode(query));
                                     }
-                                    catch(Exception ex)
+                                    catch
                                     {
                                         await WebServerModule.WriteResponce(LM.Get("hrmSearchMailInvalidRequest"), response);
                                         return true;

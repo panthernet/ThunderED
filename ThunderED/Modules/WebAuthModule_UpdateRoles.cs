@@ -401,7 +401,7 @@ namespace ThunderED.Modules
                 }
                 #endregion
 
-                string groupName = null;
+               // string groupName = null;
 
                 //refresh token
                 var uToken = string.IsNullOrEmpty(refreshToken) ? null : await APIHelper.ESIAPI.RefreshToken(refreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,

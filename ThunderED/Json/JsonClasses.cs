@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ThunderED.Helpers;
+// ReSharper disable InconsistentNaming
+#pragma warning disable CS0649
 
 namespace ThunderED.Json
 {
@@ -651,4 +653,5 @@ namespace ThunderED.Json
         reaction2 = 9,
         reaction = 11
     }
+#pragma warning restore CS0649
 }

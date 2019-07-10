@@ -24,12 +24,12 @@ namespace ThunderED.Classes.Entities
 
 
         //for compatibility
-        [Obsolete("Maintained for upgrade possibility")]
+     /*   [Obsolete("Maintained for upgrade possibility")]
         public string EveName;
         [Obsolete("Maintained for upgrade possibility")]
         public string Group;
         [Obsolete("Maintained for upgrade possibility")]
-        public bool IsActive;
+        public bool IsActive;*/
 
         [JsonIgnore]
         public bool IsDumped => AuthState == 3;

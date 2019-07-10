@@ -1,5 +1,6 @@
 ﻿using System;
-
+// ReSharper disable InconsistentNaming
+#pragma warning disable CS0649
 namespace ThunderED.Json
 {
     public partial class JsonClasses
@@ -34,3 +35,4 @@ namespace ThunderED.Json
         }
     }
 }
+#pragma warning restore CS0649

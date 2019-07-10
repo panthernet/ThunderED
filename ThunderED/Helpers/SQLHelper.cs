@@ -177,7 +177,7 @@ namespace ThunderED.Helpers
                 await Delete("auth_users", "main_character_id", characterID);
         }
 
-        [Obsolete("Maintained for upgrade possibility")]
+      /*  [Obsolete("Maintained for upgrade possibility")]
         private static async Task<List<AuthUserEntity>> GetAuthUsersEx()
         {
             var res = await SelectData("authUsers", new[] {"*"});
@@ -191,7 +191,7 @@ namespace ThunderED.Helpers
                 Group = Convert.ToString(item[4]),
                 IsActive = (string) item[5] == "yes"
             }).ToList();
-        }
+        }*/
 
         private static async Task<List<AuthUserEntity>> GetAuthUsers(Dictionary<string,object> where)
         {
@@ -272,7 +272,7 @@ namespace ThunderED.Helpers
             else await InsertOrUpdate("auth_users", dic);
         }
 
-        [Obsolete("Maintained for upgrade possibility")]
+      /*  [Obsolete("Maintained for upgrade possibility")]
         public static async Task SaveAuthUserEx(AuthUserEntity user, bool insertOnly = false)
         {
             var dic = new Dictionary<string, object>();
@@ -287,7 +287,7 @@ namespace ThunderED.Helpers
             if (insertOnly)
                 await Insert("authUsers", dic);
             else await InsertOrUpdate("authUsers", dic);
-        }
+        }*/
 
         internal static async Task<AuthUserEntity> GetAuthUserByDiscordId(ulong discordId, bool order = false)
         {
@@ -309,7 +309,7 @@ namespace ThunderED.Helpers
             return result != null && result.Count > 0;
         }
 
-        [Obsolete("Maintained for upgrade")]
+       /* [Obsolete("Maintained for upgrade")]
         internal static async Task<List<PendingUserEntity>> GetPendingUsersEx()
         {
             return (await SelectData("pending_users", new[] {"*"})).Select(item => new PendingUserEntity
@@ -324,7 +324,7 @@ namespace ThunderED.Helpers
                 CreateDate = Convert.ToDateTime(item[7]),
                 DiscordId = Convert.ToInt64(item[8]),
             }).ToList();
-        }
+        }*/
 
         public static async Task<AuthUserEntity> GetAuthUserByRegCode(string code)
         {
@@ -344,7 +344,7 @@ namespace ThunderED.Helpers
             return res?.Select(ParseAuthUser).ToList();
         }
 
-        [Obsolete("Maintained for upgrade possibility")]
+      /*  [Obsolete("Maintained for upgrade possibility")]
         private static async Task<List<UserTokenEntity>> UserTokensGetAllEntriesEx(Dictionary<string, object> where = null)
         {
             var data = await SelectData("userTokens", new[] {"characterID", "characterName", "discordUserId", "refreshToken", "groupName", "permissions", "authState"}, where);
@@ -363,7 +363,7 @@ namespace ThunderED.Helpers
                 });
             });
             return list;
-        }
+        }*/
         #endregion
 
         #region System

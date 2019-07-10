@@ -332,9 +332,15 @@ namespace ThunderED.Modules
 
         private class SaData
         {
+#pragma warning disable 649
             public string Name;
+#pragma warning restore 649
+#pragma warning disable 649
             public string Group;
+#pragma warning restore 649
+#pragma warning disable 649
             public string Roles;
+#pragma warning restore 649
         }
 
         private class TiData

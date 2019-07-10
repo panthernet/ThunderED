@@ -1069,7 +1069,7 @@ namespace ThunderED.Modules
                         await SQLHelper.DeleteAuthDataByCharId(authUser.CharacterId);
                     }
 
-                    authUser.CharacterId = authUser.CharacterId;
+                    // authUser.CharacterId = authUser.CharacterId;
                     authUser.DiscordId = discordId;
                     authUser.GroupName = groupName;
                     authUser.SetStateAuthed();

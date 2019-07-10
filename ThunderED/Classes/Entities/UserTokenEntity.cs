@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace ThunderED.Classes.Entities
 {
-    [Obsolete("Maintained for upgrade possibility")]
+   /* [Obsolete("Maintained for upgrade possibility")]
     public class UserTokenEntity
     {
         public long CharacterId { get; set; }
@@ -18,5 +18,5 @@ namespace ThunderED.Classes.Entities
 
         [JsonIgnore]
         public List<string> PermissionsList => string.IsNullOrEmpty(Permissions) ? new List<string>() : Permissions.Split(',').ToList();
-    }
+    }*/
 }

@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Web;
 using Discord;
 using Discord.Commands;
-using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
@@ -25,7 +24,6 @@ namespace ThunderED.Modules
 
         private readonly ConcurrentDictionary<long, string> _etokens = new ConcurrentDictionary<long, string>();
         private readonly ConcurrentDictionary<long, string> _corpEtokens = new ConcurrentDictionary<long, string>();
-        private bool _isStartUp = true;
 
         public ContractNotificationsModule()
         {

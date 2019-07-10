@@ -409,7 +409,7 @@ namespace ThunderED.Modules.OnDemand
                         {
                             #region Process system radius check
 
-                            var msgType = MessageTemplateType.KillMailRadius;
+                            //var msgType = MessageTemplateType.KillMailRadius;
                             var isDone = false;
                             foreach (var radiusSystemId in GetTier2SystemIds(ParsedLocationLists, groupName, filterName))
                             {

@@ -64,9 +64,9 @@ namespace ThunderED.Modules.Sub
                 {
                     _statusListener?.Dispose();
                 }
-                catch (Exception ex)
+                catch
                 {
-
+                    // ignored
                 }
 
                 var ip = "0.0.0.0";
@@ -121,9 +121,9 @@ namespace ThunderED.Modules.Sub
                 {
                     _listener?.Dispose();
                 }
-                catch (Exception ex)
+                catch
                 {
-
+                    // ignored
                 }
 
                 //TODO cleanup all occurences in modules in some of the following releases

@@ -1,22 +1,18 @@
 ﻿using System;
-using System.Collections.Async;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 
 namespace ThunderED.Helpers
 {
     public static partial class SQLHelper
     {
+        //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19",
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15",
-            "1.2.16","1.2.19", "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16"
+            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16"
         };
 
         public static async Task<bool> Upgrade()
@@ -42,7 +38,7 @@ namespace ThunderED.Helpers
 
                     switch (update)
                     {
-                        case "1.0.1":
+                       /* case "1.0.1":
                             await RunCommand("DELETE FROM cacheData where name='version'");
                             await RunCommand("CREATE UNIQUE INDEX cacheData_name_uindex ON cacheData (name)");
                             await RunCommand("CREATE TABLE `killFeedCache` ( `type` text NOT NULL, `id` text NOT NULL, `lastId` TEXT)");
@@ -335,7 +331,7 @@ namespace ThunderED.Helpers
                             //MYSQL HAS BEEN ADDED HERE
                         case "1.2.19":
                             await Delete("notifications_list", "id", 999990000);
-                            break;
+                            break;*/
                         case "1.3.1":
                             await RunCommand("ALTER TABLE `auth_users` ADD COLUMN `dump_date` timestamp NULL;");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");

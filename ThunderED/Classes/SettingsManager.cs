@@ -102,12 +102,13 @@ namespace ThunderED.Classes
             FileSettingsPath = Path.Combine(DataDirectory, "settings.json");
         }
 
-        public static async Task UpdateSettings(string settingsPath = null)
+        public static Task UpdateSettings(string settingsPath = null)
         {
             Settings = ThunderSettings.Load(settingsPath ?? FileSettingsPath);
 
             if (Settings.Database.DatabaseProvider == "sqlite")
                 DatabaseFilePath = Path.Combine(DataDirectory, "edb.db");
+            return Task.CompletedTask;
         }
 
         public static async Task UpdateInjectedSettings()
