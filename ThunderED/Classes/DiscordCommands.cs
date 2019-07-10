@@ -553,6 +553,9 @@ namespace ThunderED.Classes
             {
                 try
                 {
+                    if (SettingsManager.Settings.WebAuthModule.AutoClearAuthCommandsFromDiscord)
+                        await APIHelper.DiscordAPI.RemoveMessage(Context.Message);
+
                     if (!IsAuthAllowed())
                         return;
 
@@ -925,6 +928,9 @@ namespace ThunderED.Classes
         [Command("auth", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task Auth()
         {
+            if (SettingsManager.Settings.WebAuthModule.AutoClearAuthCommandsFromDiscord)
+                await APIHelper.DiscordAPI.RemoveMessage(Context.Message);
+
             if(!IsAuthAllowed()) return;
 
             if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
@@ -984,6 +990,9 @@ namespace ThunderED.Classes
         [Command("auth", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task Auth([Remainder] string x)
         {
+            if (SettingsManager.Settings.WebAuthModule.AutoClearAuthCommandsFromDiscord)
+                await APIHelper.DiscordAPI.RemoveMessage(Context.Message);
+
             if(!IsAuthAllowed())
                 return;
 

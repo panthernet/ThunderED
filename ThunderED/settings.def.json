@@ -155,6 +155,7 @@
     "//": "Channels where !auth command is allowed. Empty - everywhere",
     "comAuthChannels": [],
     "DefaultAuthGroup": "Mode1",
+    "AutoClearAuthCommandsFromDiscord":  false, 
     "enforceCorpTickers": true,
     "enforceAllianceTickers": true,
     "enforceCharName": true,

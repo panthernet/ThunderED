@@ -513,5 +513,10 @@ namespace ThunderED.API
 
             return missing;
         }
+
+        public async Task RemoveMessage(IUserMessage message)
+        {
+            await message.DeleteAsync();
+        }
     }
 }
