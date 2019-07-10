@@ -27,6 +27,8 @@ namespace TED_ConfigEditor
         public ObservableCollection<string> AvailableModulesList { get; set; }
         public ObservableCollection<string> ModulesList { get; set; } = new ObservableCollection<string>();
 
+        private bool isStartup = true;
+
         public string SelectedModuleToAdd
         {
             get => _selectedModuleToAdd;
@@ -120,7 +122,7 @@ namespace TED_ConfigEditor
                     return;
                 }
 
-                Settings.Save(FileName);
+                ActualSaveRoutine();
             }
             catch (Exception ex)
             {
@@ -170,7 +172,7 @@ namespace TED_ConfigEditor
 
         private async void AddFileExecuted(object obj)
         {
-            if (!string.IsNullOrEmpty(FileName) || (ModulesList.Count > 0 && ModulesList.Count != GetStaticModulesList().Count))
+            if (!isStartup && (!string.IsNullOrEmpty(FileName) || (ModulesList.Count > 0 && ModulesList.Count != GetStaticModulesList().Count)))
             {
                 if(await this.ShowMessageAsync("Warning", "Create new settings file? All unsaved changed will be lost.", MessageDialogStyle.AffirmativeAndNegative) == MessageDialogResult.Negative)
                     return;
@@ -185,6 +187,7 @@ namespace TED_ConfigEditor
                 return;
             }
 
+            isStartup = false;
             ResetFile();
             FileName = dlg.FileName;
             UpdateTitle(FileName);
@@ -199,7 +202,7 @@ namespace TED_ConfigEditor
         {
             try
             {
-                if (!string.IsNullOrEmpty(FileName) || ModulesList.Count > 0)
+                if (!isStartup && (!string.IsNullOrEmpty(FileName) || ModulesList.Count > 0))
                 {
                     if (await this.ShowMessageAsync("Warning", "Open new settings file? All unsaved changed will be lost.", MessageDialogStyle.AffirmativeAndNegative) ==
                         MessageDialogResult.Negative)
@@ -220,7 +223,7 @@ namespace TED_ConfigEditor
                     return;
                 }
 
-
+                isStartup = false;
                 FileName = dlg.FileName;
                 UpdateTitle(FileName);
                 LoadModules();
@@ -346,6 +349,12 @@ namespace TED_ConfigEditor
         private void ContinueOverlay_OnClick(object sender, RoutedEventArgs e)
         {
             UnloadOverlay();
+            ActualSaveRoutine();
+        }
+
+        private void ActualSaveRoutine()
+        {
+            Settings.BeforeEditorSave();
             Settings.Save(FileName);
         }
     }

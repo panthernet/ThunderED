@@ -48,8 +48,6 @@ namespace ThunderED.Classes
         public MailModuleSettings MailModule { get; set; } = new MailModuleSettings();
         [ConfigEntryName("moduleTimers")]
         public TimersModuleSettings TimersModule { get; set; } = new TimersModuleSettings();
-        [ConfigEntryName("moduleRadiusKillFeed")]
-        public RadiusKillFeedModuleSettings RadiusKillFeedModule { get; set; } = new RadiusKillFeedModuleSettings();
         [ConfigEntryName("moduleLiveKillFeed")]
         public LiveKillFeedModuleSettings LiveKillFeedModule { get; set; } = new LiveKillFeedModuleSettings();
         [ConfigEntryName("")]
@@ -95,13 +93,13 @@ namespace ThunderED.Classes
         {
             var sb = new StringBuilder();
 
-            if ((Config.ModuleNotificationFeed || Config.ModuleAuthWeb || Config.ModuleMail || Config.ModuleTimers) && !Config.ModuleWebServer)
+            if ((Config.ModuleNotificationFeed || Config.ModuleAuthWeb || Config.ModuleMail || Config.ModuleTimers || Config.ModuleContractNotifications || Config.ModuleHRM || Config.ModuleIndustrialJobs || Config.ModuleWebConfigEditor) && !Config.ModuleWebServer)
             {
                 sb.AppendLine("General Config Settings");
-                sb.AppendLine("ModuleWebServer must be enabled if you plan to use Notifications, WebAuth, Mail or Timers modules!\n");
+                sb.AppendLine("ModuleWebServer must be enabled if you plan to use Notifications, WebAuth, Mail, Timers, ContractsFeed, HRM, IndustryFeed or WebConfigEditor modules!\n");
             }
 
-           // var checkList = usedModules?.Select(a => a.ToString()).ToList() ?? new List<string>();
+            // var checkList = usedModules?.Select(a => a.ToString()).ToList() ?? new List<string>();
             foreach (var info in GetType().GetProperties().Where(a=> typeof(IValidatable).IsAssignableFrom(a.PropertyType)))
             {
                 if(info.Name != "Config" && !usedModules.Contains(info.GetValue(this).GetAttributeValue<ConfigEntryNameAttribute>("Name"))) continue;
@@ -116,6 +114,14 @@ namespace ThunderED.Classes
             }
 
             return sb.ToString();
+        }
+
+        public void BeforeEditorSave()
+        {
+            foreach (var value in WebAuthModule.AuthGroups.Values)
+            {
+                value.OnEditorSave();
+            }
         }
 #endif
     }
@@ -827,74 +833,6 @@ namespace ThunderED.Classes
 #endif
     }
 
-    public class RadiusKillFeedModuleSettings: ValidatableSettings
-    {
-        //[Comment("Enable or disable caching. If you're getting many global KMs it might be better \nto disable it to free database from large chunks of one time data.")]
-        //public bool EnableCache { get; set; }
-#if EDITOR
-        [Comment("Can have several feeds (groups) defined")]
-        public ObservableDictionary<string, RadiusGroup> GroupsConfig { get; set; } = new ObservableDictionary<string, RadiusGroup>();
-#else
-        public Dictionary<string, RadiusGroup> GroupsConfig { get; set; } = new Dictionary<string, RadiusGroup>();
-#endif
-#if EDITOR
-        public override string this[string columnName]
-        {
-            get
-            {
-                switch (columnName)
-                {
-                    case nameof(GroupsConfig):
-                        return GroupsConfig.Count == 0 ? Compose(nameof(GroupsConfig), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                }
-
-                return null;
-            }
-        }
-#endif
-    }
-
-    public class RadiusGroup: ValidatableSettings
-    {
-#if EDITOR
-        [Comment("List of Discord channel IDs to feed killmails")]
-        public ObservableCollection<ulong> RadiusChannels { get; set; } = new ObservableCollection<ulong> ();
-        [Comment("Mixed list of system, constellation and region IDs or names")]
-        public ObservableCollection<object> RadiusEntities { get; set; } = new ObservableCollection<object> ();
-#else
-        public List<ulong> RadiusChannels { get; set; } = new List<ulong> ();
-        public List<object> RadiusEntities { get; set; } = new List<object> ();
-#endif
-        [Comment("Numeric value of number of jump around specified system. Leave 0 and specify radiusSystemId to limit feed by only one system")]
-        public int Radius { get; set; }
-        [Comment("Minimum ISK value to filter killmails")]
-        public long MinimumValue { get; set; }
-        [Comment("Post group name into notification message")]
-        public bool ShowGroupName { get; set; }
-
-        public bool FeedPvpKills { get; set; } = true;
-        public bool FeedPveKills { get; set; } = true;
-        [Comment("Bot will send message containing only ZKB url and Discord will unfurl it automatically")]
-        public bool FeedUrlsOnly { get; set; } = false;
-#if EDITOR
-        public override string this[string columnName]
-        {
-            get
-            {
-                switch (columnName)
-                {
-                    case nameof(RadiusEntities):
-                        return !RadiusEntities.Any() ? Compose(nameof(RadiusEntities), "Radius is greater than 0 but entities are not set!") : null;
-                    case nameof(RadiusChannels):
-                        return !RadiusChannels.Any()? Compose(nameof(RadiusChannels), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                }
-
-                return null;
-            }
-        }
-#endif
-    }
-
     public class TimersModuleSettings: ValidatableSettings
     {
         [Comment("Automatically add timer event upon receiving structure reinforce notification (if notifications feed module is enabled)")]
@@ -1600,8 +1538,7 @@ namespace ThunderED.Classes
         [Comment("Enable char and corp query module (!char and !corp commands)")]
         public bool ModuleCharCorp { get; set; } = false;
         public bool ModuleLiveKillFeed { get; set; } = false;
-        public bool ModuleRadiusKillFeed { get; set; } = false;
-       // public bool ModuleReliableKillFeed { get; set; } = false;
+        // public bool ModuleReliableKillFeed { get; set; } = false;
         [Comment("Enable price check module (!pc, !jita etc. commands)")]
         public bool ModulePriceCheck { get; set; } = false;
         [Comment("Enable EVE time module (!time command)")]
@@ -1869,7 +1806,7 @@ namespace ThunderED.Classes
         [Comment("Optional default Discord mention for auth report")]
         public string DefaultMention { get; set; }
 
-        [Comment("Optional data for standings based auth")]
+        [Comment("Optional data for standings auth. Will be auto removed if no CharacterIDs are specified otherwise will make this group to work using standings.")]
         public StandingsAuthGroupExtension StandingsAuth { get; set; } = null;
 
         [Comment("Skip Discord auth page display after CCP auth (when you want to get ESI token without actual auth)")]
@@ -1896,6 +1833,14 @@ namespace ThunderED.Classes
         public bool MustHaveGroupName => true; //ESICustomAuthRoles.Any() || StandingsAuth != null;
 #endif
 #if EDITOR
+
+        public override void OnEditorSave()
+        {
+            if (StandingsAuth != null && !StandingsAuth.CharacterIDs.Any())
+                StandingsAuth = null;
+        }
+
+
         public override string this[string columnName]
         {
             get

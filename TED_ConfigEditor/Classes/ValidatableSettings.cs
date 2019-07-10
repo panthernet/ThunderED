@@ -57,5 +57,7 @@ namespace TED_ConfigEditor.Classes
         {
             return $"--> {property}: {message}";
         }
+
+        public virtual void OnEditorSave() {}
     }
 }

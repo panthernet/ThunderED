@@ -184,6 +184,16 @@ namespace TED_ConfigEditor.Controls.Modules
                     cb.SetBinding(ToggleButton.IsCheckedProperty, myBinding);
                     d.Children.Add(cb);
                 }
+                else if (property.PropertyType == typeof(StandingsAuthGroupExtension))
+                {
+                    var value = property.GetValue(Settings) ?? new StandingsAuthGroupExtension();
+                    property.SetValue(Settings, value);
+
+                    var dp = new DockPanel();
+                    DockPanel.SetDock(dp, Dock.Top);
+                    d.Children.Add(dp);
+                    new ConfigModuleBase<StandingsAuthGroupExtension>(value, dp);
+                }
                 else
                 {
                     //var makeme = Type.GetType("TED_ConfigEditor.Controls.ListBoxControlBase`1").MakeGenericType(property.PropertyType.GenericTypeArguments);

@@ -23,6 +23,7 @@ namespace TED_ConfigEditor.Controls
 
         public Type ItemType { get; set; }
 
+
         protected void RemoveCommandMethod(object obj)
         {
             var list = new List<object>();
