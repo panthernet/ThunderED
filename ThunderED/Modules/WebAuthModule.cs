@@ -1054,7 +1054,8 @@ namespace ThunderED.Modules
                     if (string.IsNullOrEmpty(token))
                     {
                         await LogHelper.LogWarning($"Authenticating character {authUser.Data.CharacterName} has invalid token and will be deleted from DB.");
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authUnableToCompleteTryAgainLater"), true).ConfigureAwait(false);
+                        if(context != null)
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authUnableToCompleteTryAgainLater"), true).ConfigureAwait(false);
                         await SQLHelper.DeleteAuthDataByCharId(authUser.CharacterId);
                         return;
                     }
