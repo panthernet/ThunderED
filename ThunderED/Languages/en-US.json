@@ -593,5 +593,6 @@
   "notifCorpKicked": "{0} corporation has been kicked from {1} alliance!",
   "notifCorpNewCEOMsg": "{0} corporation CEO {2} has resigned. New CEO is {1}!",
   "notifCorpTaxChangeMsg": "{0} corporation tax has been changed from {1} to {2}!",
-  "notifOwnershipTransferred": "{0} ownership has been transferred from {1} to {2}!"
+  "notifOwnershipTransferred": "{0} ownership has been transferred from {1} to {2}!",
+  "authUnableToCompleteTryAgainLater":  "Unable to complete your request at the moment. Please try again later." 
 }

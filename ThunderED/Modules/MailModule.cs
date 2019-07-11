@@ -123,10 +123,11 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                        var tq = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                        var token = tq.Result;
                         if (string.IsNullOrEmpty(token))
                         {
-                            await LogHelper.LogWarning($"Unable to get contracts token for character {charId}. Refresh token might be outdated or no more valid.", Category);
+                            await LogHelper.LogWarning($"Unable to get contracts token for character {charId}. Refresh token might be outdated or no more valid {tq.Data.ErrorCode}({tq.Data.Message})", Category);
                             continue;
                         }
 
@@ -490,8 +491,8 @@ namespace ThunderED.Modules
                     if (!SettingsManager.HasReadMailScope(user.Data.PermissionsList))
                         continue;
 
-                    var token = await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret);
+                    var token = (await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret))?.Result;
 
                     if (string.IsNullOrEmpty(token))
                         continue;
@@ -595,8 +596,8 @@ namespace ThunderED.Modules
                 if (!SettingsManager.HasReadMailScope(user.Data.PermissionsList))
                     continue;
 
-                var token = await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                    SettingsManager.Settings.WebServerModule.CcpAppSecret);
+                var token = (await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                    SettingsManager.Settings.WebServerModule.CcpAppSecret))?.Result;
 
                 var mailHeaders = (await APIHelper.ESIAPI.GetMailHeaders(Reason, user.CharacterId.ToString(), token, 0, null))?.Result;
 

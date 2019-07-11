@@ -116,14 +116,18 @@ namespace ThunderED.Modules
                                 continue;
                             }
 
-                            var token = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
-                            if (!string.IsNullOrEmpty(token))
-                                await LogHelper.LogInfo($"Checking characterID:{charId}", Category, LogToConsole, false);
-                            else
+                            var tq = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                            var token = tq.Result;
+                            if (string.IsNullOrEmpty(token))
                             {
-                                await SendOneTimeWarning(charId, $"Failed to get notifications token for character {charId}! Refresh token might be outdated or no more valid.");
+                                if (tq.Data.IsNotValid)
+                                    await SendOneTimeWarning(charId, $"Notifications token for character {charId} is outdated or no more valid!");
+                                else
+                                    await LogHelper.LogWarning($"Unable to get notifications token for character {charId}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})");
+
                                 continue;
                             }
+                            await LogHelper.LogInfo($"Checking characterID:{charId}", Category, LogToConsole, false);
 
                             var etag = _tags.GetOrNull(charId);
                             var result = await APIHelper.ESIAPI.GetNotifications(Reason, charId, token, etag);

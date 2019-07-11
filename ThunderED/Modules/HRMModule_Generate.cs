@@ -536,7 +536,7 @@ namespace ThunderED.Modules
                 var hrUserInfo = await SQLHelper.GetAuthUserByCharacterId(hrId);
                 if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.Data.PermissionsList))
                 {
-                    var hrToken = await APIHelper.ESIAPI.RefreshToken(hrUserInfo.RefreshToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    var hrToken = (await APIHelper.ESIAPI.RefreshToken(hrUserInfo.RefreshToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret))?.Result;
                     if(!string.IsNullOrEmpty(hrToken))
                         hrContacts = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, hrId, hrToken)).Result;
                 }

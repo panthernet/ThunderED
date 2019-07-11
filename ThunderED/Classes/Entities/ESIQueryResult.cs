@@ -16,6 +16,9 @@
         public bool IsNotModified => ErrorCode == 304;
         public bool IsNoConnection;
         public bool IsNotDeserialized => ErrorCode == -100;
+        public bool IsNotValid => ErrorCode == -99;
+
         public bool IsFailed => ErrorCode != 0;
+
     }
 }

@@ -119,11 +119,15 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        var token = await APIHelper.ESIAPI.RefreshToken(rtoken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
-                        if (token == null)
+                        var tq = await APIHelper.ESIAPI.RefreshToken(rtoken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                        var token = tq.Result;
+                        if (string.IsNullOrEmpty(token))
                         {
-                            await LogHelper.LogWarning(
-                                $"Unable to get contracts token for character {characterID}. Refresh token might be outdated or no more valid.");
+                            if (tq.Data.IsNotValid)
+                                await LogHelper.LogWarning($"Industry token for character {characterID} is outdated or no more valid!");
+                            else
+                                await LogHelper.LogWarning($"Unable to get industry token for character {characterID}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})");
+
                             continue;
                         }
 

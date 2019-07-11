@@ -21,6 +21,7 @@ namespace ThunderED.Modules
             public WebAuthGroup Group;
             public List<SocketRole> UpdatedRoles = new List<SocketRole>();
             public List<string> ValidManualAssignmentRoles = new List<string>();
+            public bool IsConnectionError { get; set; }
         }
 
         internal static async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
@@ -85,6 +86,9 @@ namespace ThunderED.Modules
                     var remroles = new List<SocketRole>();
 
                     var result = authUser.IsDumped ? new RoleSearchResult() : await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth, authUser.RefreshToken);
+                    if (result.IsConnectionError)
+                        return null;
+
                     var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.IsAuthed;
                     var isAuthed = !string.IsNullOrEmpty(result.GroupName);
                     var changed = false;
@@ -407,8 +411,15 @@ namespace ThunderED.Modules
                // string groupName = null;
 
                 //refresh token
-                var uToken = string.IsNullOrEmpty(refreshToken) ? null : await APIHelper.ESIAPI.RefreshToken(refreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                var tq = string.IsNullOrEmpty(refreshToken) ? null : await APIHelper.ESIAPI.RefreshToken(refreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
                     SettingsManager.Settings.WebServerModule.CcpAppSecret);
+
+                var uToken = tq?.Result;
+                if (tq != null && tq.Data.IsFailed && !tq.Data.IsNotValid)
+                {
+                    result.IsConnectionError = true;
+                    return result;
+                }
 
                 var foundGroup = await GetAuthGroupByCharacter(groupsToCheck, characterID);
                 if (foundGroup != null)

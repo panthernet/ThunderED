@@ -91,12 +91,22 @@ namespace ThunderED.Modules
                         {
                             var st = await SQLHelper.LoadAuthStands(numericCharId);
                             if (st == null) return;
-                            var token = await APIHelper.ESIAPI.RefreshToken(st.Token, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                            var tq = await APIHelper.ESIAPI.RefreshToken(st.Token, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                            var token = tq.Result;
 
-                            await RefreshStandings(st, token);
-                            await SQLHelper.DeleteAuthStands(numericCharId);
-                            await SQLHelper.SaveAuthStands(st);
-                            sb.Append($"{numericCharId},");
+                            if (!tq.Data.IsFailed)
+                            {
+                                await RefreshStandings(st, token);
+                                await SQLHelper.DeleteAuthStands(numericCharId);
+                                await SQLHelper.SaveAuthStands(st);
+                                sb.Append($"{numericCharId},");
+                            }
+                            else
+                            {
+                                await LogHelper.LogWarning($"Token fetch error while standings update! Skipping update. {tq.Data.ErrorCode} ({tq.Data.Message})", Category);
+                                if(tq.Data.IsNotValid)
+                                    await LogHelper.LogWarning($"Standings update token for character {numericCharId} is invalid or outdated. Please reauth!", Category);
+                            }
                         }
 
                         if (sb.Length > 0)
@@ -666,9 +676,11 @@ namespace ThunderED.Modules
                     await SQLHelper.DeleteAuthStands(numericCharId);
                     var data = new AuthStandsEntity {CharacterID = numericCharId, Token = result[1]};
 
-                    var token = await APIHelper.ESIAPI.RefreshToken(data.Token, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    var tq = await APIHelper.ESIAPI.RefreshToken(data.Token, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    var token = tq.Result;
 
-                    await RefreshStandings(data, token);
+                    if(!tq.Data.IsFailed)
+                        await RefreshStandings(data, token);
                     await SQLHelper.SaveAuthStands(data);
                     
                     await LogHelper.LogInfo($"Auth stands feed added for character: {characterID}({rChar.name})", LogCat.AuthWeb);
@@ -1036,11 +1048,13 @@ namespace ThunderED.Modules
 
                 if (authUser.Data.PermissionsList.Any())
                 {
-                    var token = await APIHelper.ESIAPI.RefreshToken(authUser.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret);
+                    var token = (await APIHelper.ESIAPI.RefreshToken(authUser.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret))?.Result;
                     //delete char if token is invalid
                     if (string.IsNullOrEmpty(token))
                     {
+                        await LogHelper.LogWarning($"Authenticating character {authUser.Data.CharacterName} has invalid token and will be deleted from DB.");
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authUnableToCompleteTryAgainLater"), true).ConfigureAwait(false);
                         await SQLHelper.DeleteAuthDataByCharId(authUser.CharacterId);
                         return;
                     }
@@ -1049,6 +1063,12 @@ namespace ThunderED.Modules
 
                 //check if we fit some group
                 var result = await GetRoleGroup(authUser.CharacterId, discordId, isManualAuth, authUser.RefreshToken);
+                if (result.IsConnectionError)
+                {
+                    await LogHelper.LogWarning($"Possible connection error while processing auth request(search for group)!", LogCat.AuthCheck);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authUnableToCompleteTryAgainLater"), true).ConfigureAwait(false);
+                    return;
+                }
                 var groupName = result?.GroupName;
                 //pass auth
                 if (!string.IsNullOrEmpty(groupName))

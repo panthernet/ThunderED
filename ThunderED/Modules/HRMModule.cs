@@ -626,12 +626,13 @@ namespace ThunderED.Modules
                                     //private info
                                     if (hasToken)
                                     {
-                                        var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        var tq = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
                                             Settings.WebServerModule.CcpAppSecret);
+                                        var token = tq.Result;
 
                                         if (string.IsNullOrEmpty(token))
                                         {
-                                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("hrmInvalidUserToken"), WebServerModule.GetHRMMainURL(authCode)), response);
+                                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", $"{LM.Get("hrmInvalidUserToken")} [{(tq.Data.IsNotValid ? "INVALID" : "QUERY_ERROR")}]", WebServerModule.GetHRMMainURL(authCode)), response);
                                             return true;
                                         }
                                         if (SettingsManager.HasReadMailScope(pList))
@@ -732,8 +733,8 @@ namespace ThunderED.Modules
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret);
+                                    var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        Settings.WebServerModule.CcpAppSecret))?.Result;
                                     var mailHtml = await GenerateMailHtml(token, inspectCharId, authCode, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -757,8 +758,8 @@ namespace ThunderED.Modules
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret);
+                                    var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        Settings.WebServerModule.CcpAppSecret))?.Result;
                                     var html = await GenerateTransactionsHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -782,8 +783,8 @@ namespace ThunderED.Modules
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret);
+                                    var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        Settings.WebServerModule.CcpAppSecret))?.Result;
                                     var html = await GenerateJournalHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -807,8 +808,8 @@ namespace ThunderED.Modules
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret);
+                                    var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        Settings.WebServerModule.CcpAppSecret))?.Result;
                                     var html = await GenerateContractsHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -832,8 +833,8 @@ namespace ThunderED.Modules
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret);
+                                    var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        Settings.WebServerModule.CcpAppSecret))?.Result;
                                     var html = await GenerateContactsHtml(token, inspectCharId, page, characterId);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -857,8 +858,8 @@ namespace ThunderED.Modules
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret);
+                                    var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        Settings.WebServerModule.CcpAppSecret))?.Result;
                                     var html = await GenerateSkillsHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -883,8 +884,8 @@ namespace ThunderED.Modules
                                 var hasToken = authUserEntity != null && authUserEntity.HasToken;
                                 if (hasToken && page > 0)
                                 {
-                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret);
+                                    var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        Settings.WebServerModule.CcpAppSecret))?.Result;
                                     var html = await GenerateLysHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -908,8 +909,8 @@ namespace ThunderED.Modules
                                         await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("HRM Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
                                         return true;
                                     }
-                                    var token = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret);
+                                    var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken, Settings.WebServerModule.CcpAppClientId,
+                                        Settings.WebServerModule.CcpAppSecret))?.Result;
                                     var mail = await APIHelper.ESIAPI.GetMail(Reason, inspectCharacterId, token, mailBodyId);
                                     if (mail != null)
                                     {
