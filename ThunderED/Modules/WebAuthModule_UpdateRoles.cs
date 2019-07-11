@@ -36,14 +36,14 @@ namespace ThunderED.Modules
                 authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
             }
 
-            foreach (var id in dids)
+           /* foreach (var id in dids)
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }
-           /* await dids.ParallelForEachAsync(async id =>
+            }*/
+            await dids.ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }, 4);*/
+            }, 4);
 
             await UpdateDBUserRoles(exemptRoles, authCheckIgnoreRoles, dids);
         }
@@ -51,14 +51,14 @@ namespace ThunderED.Modules
         private static async Task UpdateDBUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles, IEnumerable<ulong> dids)
         {
             var ids = (await SQLHelper.GetAuthUsers((int)UserStatusEnum.Authed)).Where(a=> !a.MainCharacterId.HasValue).Select(a=> a.DiscordId);
-           /* await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
+            await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }, 4);*/
-           foreach (var id in ids.Where(a => !dids.Contains(a)))
+            }, 4);
+         /*  foreach (var id in ids.Where(a => !dids.Contains(a)))
            {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
-           }
+           }*/
         }
 
         public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles,
@@ -480,7 +480,7 @@ namespace ThunderED.Modules
                 }
                 
 
-                await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterID} DID: {authData.DiscordId} AUTH: {authData.AuthState} GRP{authData.GroupName}", true);
+                await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterID} DID: {authData.DiscordId} AUTH: {authData.AuthState} GRP: {authData.GroupName}", true);
                 var foundGroup = await GetAuthGroupByCharacter(groupsToCheck, characterData);
                 if (foundGroup != null)
                 {
