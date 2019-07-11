@@ -160,7 +160,8 @@
     "enforceAllianceTickers": true,
     "enforceCharName": true,
     "UseOneAuthButton": false,
-    "EnableDetailedLogging":  false, 
+    "EnableDetailedLogging": false, 
+    "RemoveAuthIfTokenIsInvalid":  false, 
     "authGroups": {
       "Mode1_GeneralAuth": {
         "StopSearchingOnFirstMatch": "false",

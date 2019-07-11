@@ -126,7 +126,7 @@ namespace ThunderED.Modules
                     {
                         if (SettingsManager.Settings.Config.ModuleHRM && SettingsManager.Settings.HRMModule.UseDumpForMembers)
                         {
-                            await AuthInfoLog(characterData, $"[RUPD] {authUser.Data.CharacterName}({authUser.CharacterId}) is being moved into dumpster...");
+                            await AuthInfoLog(characterData, $"[RUPD] Character is being moved into dumpster...");
                             authUser.SetStateDumpster();
                             if(!forceRemove)
                                 authUser.GroupName = null;
@@ -459,8 +459,11 @@ namespace ThunderED.Modules
                         else
                         {
                             //bad token
-                            await AuthWarningLog(characterData, $"[RG] User {characterData.name} token is no more valid. Authentication will be declined.");
-                            return result;
+                            if (SettingsManager.Settings.WebAuthModule.RemoveAuthIfTokenIsInvalid)
+                            {
+                                await AuthWarningLog(characterData, $"[RG] User {characterData.name} token is no more valid. Authentication will be declined.");
+                                return result;
+                            }
                         }
 
                         return result;
