@@ -36,10 +36,14 @@ namespace ThunderED.Modules
                 authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
             }
 
-            await dids.ParallelForEachAsync(async id =>
+            foreach (var id in dids)
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }, 8);
+            }
+           /* await dids.ParallelForEachAsync(async id =>
+            {
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
+            }, 8);*/
 
             await UpdateDBUserRoles(exemptRoles, authCheckIgnoreRoles, dids);
         }
@@ -47,11 +51,14 @@ namespace ThunderED.Modules
         private static async Task UpdateDBUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles, IEnumerable<ulong> dids)
         {
             var ids = (await SQLHelper.GetAuthUsers((int)UserStatusEnum.Authed)).Where(a=> !a.MainCharacterId.HasValue).Select(a=> a.DiscordId);
-           // var x = ids.FirstOrDefault(a => a == 268473315843112960);
-            await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
+           /* await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }, 8);
+            }, 8);*/
+           foreach (var id in ids.Where(a => !dids.Contains(a)))
+           {
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
+           }
         }
 
         public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles,
@@ -93,6 +100,7 @@ namespace ThunderED.Modules
                     }
                     var remroles = new List<SocketRole>();
 
+                    await AuthInfoLog(characterData, $"[RUPD] PRE CHARID: {authUser.CharacterId} DID: {discordUserId} AUTH: {authUser.AuthState} GRP: {authUser.GroupName} TOKEN: {!string.IsNullOrEmpty(authUser.RefreshToken)}", true);
                     var result = authUser.IsDumped ? new RoleSearchResult() : await GetRoleGroup(authUser.CharacterId, discordUserId, authUser.RefreshToken);
                     if (result.IsConnectionError)
                     {
