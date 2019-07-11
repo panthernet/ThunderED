@@ -1024,6 +1024,41 @@ namespace ThunderED.Modules
         }
 
 
+        private static async Task AuthInfoLog(object charId, string message, bool isOptional = false)
+        {
+            if(!isOptional || SettingsManager.Settings.WebAuthModule.EnableDetailedLogging)
+                await LogHelper.LogInfo($"[CH{charId}]: {message}", LogCat.AuthCheck);
+        }
+
+        private static async Task AuthInfoLog(JsonClasses.CharacterData ch, string message, bool isOptional = false)
+        {
+            if(!isOptional || SettingsManager.Settings.WebAuthModule.EnableDetailedLogging)
+                await LogHelper.LogInfo($"[{ch.character_id}|{ch.name}]: {message}", LogCat.AuthCheck);
+        }
+        private static async Task AuthInfoLog(AuthUserEntity ch, string message, bool isOptional = false)
+        {
+            if(!isOptional || SettingsManager.Settings.WebAuthModule.EnableDetailedLogging)
+                await LogHelper.LogInfo($"[{ch.CharacterId}|{ch.Data.CharacterName}]: {message}", LogCat.AuthCheck);
+        }
+
+        private static async Task AuthWarningLog(object charId, string message, bool isOptional = false)
+        {
+            if(!isOptional || SettingsManager.Settings.WebAuthModule.EnableDetailedLogging)
+                await LogHelper.LogWarning($"[CH{charId}]: {message}", LogCat.AuthCheck);
+        }
+        private static async Task AuthWarningLog(JsonClasses.CharacterData ch, string message, bool isOptional = false)
+        {
+            if(!isOptional || SettingsManager.Settings.WebAuthModule.EnableDetailedLogging)
+                await LogHelper.LogWarning($"[{ch.character_id}|{ch.name}]: {message}", LogCat.AuthCheck);
+        }
+
+        private static async Task AuthWarningLog(AuthUserEntity ch, string message, bool isOptional = false)
+        {
+            if(!isOptional || SettingsManager.Settings.WebAuthModule.EnableDetailedLogging)
+                await LogHelper.LogWarning($"[{ch.CharacterId}|{ch.Data.CharacterName}]: {message}", LogCat.AuthCheck);
+        }
+
+
         internal static async Task AuthUser(ICommandContext context, string remainder, ulong discordId, bool isManualAuth)
         {
             JsonClasses.CharacterData characterData = null;
@@ -1035,12 +1070,14 @@ namespace ThunderED.Modules
                 var authUser = !string.IsNullOrEmpty(remainder) ? await SQLHelper.GetAuthUserByRegCode(remainder) : await SQLHelper.GetAuthUserByDiscordId(discordId);
                 if (authUser == null)
                 {
+                    await AuthWarningLog(discordId, $"Failed to get authUser from `{remainder}` or by Discord ID");
                     if(context != null)
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel, LM.Get("authHasInvalidKey", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);
                     return;
                 }
                 if(authUser.IsAuthed || string.IsNullOrEmpty(authUser.RegCode))
                 {
+                    await AuthWarningLog(authUser, authUser.IsAuthed ? "User already authenticated" : "Specified reg code is empty");
                     if(context != null)
                         await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authHasInactiveKey", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true).ConfigureAwait(false);
                     return;
@@ -1053,7 +1090,8 @@ namespace ThunderED.Modules
                     //delete char if token is invalid
                     if (string.IsNullOrEmpty(token))
                     {
-                        await LogHelper.LogWarning($"Authenticating character {authUser.Data.CharacterName} has invalid token and will be deleted from DB.");
+                        //just reauth... if happens
+                        await AuthWarningLog(authUser, $"Character has invalid token and will be deleted from DB.");
                         if(context != null)
                             await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authUnableToCompleteTryAgainLater"), true).ConfigureAwait(false);
                         await SQLHelper.DeleteAuthDataByCharId(authUser.CharacterId);
@@ -1066,17 +1104,29 @@ namespace ThunderED.Modules
                 var result = await GetRoleGroup(authUser.CharacterId, discordId, isManualAuth, authUser.RefreshToken);
                 if (result.IsConnectionError)
                 {
-                    await LogHelper.LogWarning($"Possible connection error while processing auth request(search for group)!", LogCat.AuthCheck);
+                    await AuthWarningLog(authUser, $"Possible connection error while processing auth request(search for group)!");
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authUnableToCompleteTryAgainLater"), true).ConfigureAwait(false);
                     return;
                 }
-                var groupName = result?.GroupName;
+
+                await AuthInfoLog(authUser, $"GRPFETCH GROUP: {result.GroupName} ROLES: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.UpdatedRoles?.Select(a=> a.Name)))} MANUAL: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.ValidManualAssignmentRoles))}", true);
+
+                //var groupName = result?.GroupName;
                 //pass auth
-                if (!string.IsNullOrEmpty(groupName))
+                if (!string.IsNullOrEmpty(result?.GroupName))
                 {
-                    var group = SettingsManager.Settings.WebAuthModule.AuthGroups[groupName];
+                    var group = SettingsManager.Settings.WebAuthModule.AuthGroups[result.GroupName];
                     var channel = context?.Channel?.Id ?? SettingsManager.Settings.WebAuthModule.AuthReportChannel;
                     characterData = await APIHelper.ESIAPI.GetCharacterData("Auth", authUser.CharacterId);
+
+                    if (characterData == null)
+                    {
+                        await AuthWarningLog(authUser, $"Unable to get character {authUser.CharacterId} from ESI. Aborting auth.");
+                        if(context != null)
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(context, context.Channel,LM.Get("authUnableToCompleteTryAgainLater"), true).ConfigureAwait(false);
+                        //await SQLHelper.DeleteAuthDataByCharId(authUser.CharacterId);
+                        return;
+                    }
                     
                     //report to discord
                     var reportChannel = SettingsManager.Settings.WebAuthModule.AuthReportChannel;
@@ -1084,13 +1134,12 @@ namespace ThunderED.Modules
                     {
                         var mention = group.DefaultMention;
                         if (group.PreliminaryAuthMode)
-                            await APIHelper.DiscordAPI.SendMessageAsync(reportChannel, $"{mention} {LM.Get("grantRolesPrelMessage", characterData.name, groupName)}")
+                            await APIHelper.DiscordAPI.SendMessageAsync(reportChannel, $"{mention} {LM.Get("grantRolesPrelMessage", characterData.name, result.GroupName)}")
                                 .ConfigureAwait(false);
                         else
                             await APIHelper.DiscordAPI.SendMessageAsync(reportChannel, $"{mention} {LM.Get("grantRolesMessage", characterData.name)}")
                                 .ConfigureAwait(false);
                     }
-                    await LogHelper.LogInfo($"Granting roles to {characterData.name} {(group.PreliminaryAuthMode ? $"[AUTO-AUTH from {groupName}]" : $"[MANUAL-AUTH {groupName}]")}", LogCat.AuthCheck);
 
                     //remove all prevoius users associated with discordID or charID
                     List<long> altCharIds = null;
@@ -1101,8 +1150,10 @@ namespace ThunderED.Modules
                     }
 
                     // authUser.CharacterId = authUser.CharacterId;
-                    authUser.DiscordId = discordId;
-                    authUser.GroupName = groupName;
+                    authUser.DiscordId = discordId > 0 ? discordId : authUser.DiscordId;
+                    if (discordId == 0)
+                        await AuthWarningLog(authUser, "Assigning 0 Discord ID to auth user?");
+                    authUser.GroupName = result.GroupName;
                     authUser.SetStateAuthed();
                     authUser.RegCode = null;
 
@@ -1113,22 +1164,26 @@ namespace ThunderED.Modules
                         altCharIds.ForEach(async a=> await SQLHelper.UpdateMainCharacter(a, authUser.CharacterId));
 
                     //run roles assignment
+                    await AuthInfoLog(authUser, $"Running roles update for {characterData.name} {(group.PreliminaryAuthMode ? $"[AUTO-AUTH from {result.GroupName}]" : $"[MANUAL-AUTH {result.GroupName}]")}");
+
                     await UpdateUserRoles(discordId, SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles,
                         SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles, isManualAuth);
 
                     //notify about success
                     if(channel != 0)
                         await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("msgAuthSuccess", APIHelper.DiscordAPI.GetUserMention(discordId), characterData.name));
+                    await AuthInfoLog(authUser, $"Character {characterData.name} has been successfully authenticated");
                 }
                 else
                 {
-                    await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, "Unable to accept user as he don't fit into auth group access criteria!").ConfigureAwait(false);
-                    await LogHelper.LogError("ESI Failure or No Access", LogCat.AuthWeb);
+                    if(context != null)
+                        await APIHelper.DiscordAPI.SendMessageAsync(context.Channel, "Unable to accept user as he don't fit into auth group access criteria!").ConfigureAwait(false);
+                    await LogHelper.LogError($"ESI Failure or No Access - auth group name not matching user data! DiscordID: {discordId}", LogCat.AuthWeb);
                 }
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx($"Failed adding Roles to User {characterData?.name}, Reason: {ex.Message}", ex, LogCat.AuthCheck);
+                await LogHelper.LogEx($"Failed to auth character {characterData?.name}, Reason: {ex.Message}", ex, LogCat.AuthCheck);
             }
         }
 

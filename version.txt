@@ -32,6 +32,7 @@ OwnershipTransferred
 + Added ability to assign roles to members without corp titles
 + Added new config property `UseSingleFileForLogging` to enable logging into single file
 + Added new property to log feeder `SendInterval` which is default to 5000 msec
++ Added new web auth param `EnableDetailedLogging` for better auth tracing
 + Added new `AutoClearAuthCommandsFromDiscord` property to web auth module to cleanup auth requests
 + Fixed standings in config editor
 + Fixed minor bugs and made some updates to config editor
