@@ -265,7 +265,7 @@ namespace ThunderED.Modules
                                     sUser.RegCode = Guid.NewGuid().ToString("N");
                                     await SQLHelper.SaveAuthUser(sUser);
                                     if (sUser.DiscordId > 0)
-                                        await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId, false);
+                                        await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId);
 
                                     await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
                                 }
@@ -291,16 +291,17 @@ namespace ThunderED.Modules
                                     if (Settings.HRMModule.UseDumpForMembers && !sUser.IsDumped)
                                     {
                                         sUser.SetStateDumpster();
+                                        await LogHelper.LogInfo($"HR moving character {sUser.Data.CharacterName} to dumpster...");
                                         await SQLHelper.SaveAuthUser(sUser);
                                     }
                                     else
                                     {
+                                        await LogHelper.LogInfo($"HR deleting character {sUser.Data.CharacterName} auth...");
                                         await SQLHelper.DeleteAuthDataByCharId(searchCharId, true);
                                     }
 
                                     if(sUser.DiscordId > 0)
-                                        await WebAuthModule.UpdateUserRoles(sUser.DiscordId, Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles,
-                                            false, true);
+                                        await WebAuthModule.UpdateUserRoles(sUser.DiscordId, Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles, true);
 
                                     await response.RedirectAsync(new Uri(WebServerModule.GetHRMMainURL(authCode)));
                                 }

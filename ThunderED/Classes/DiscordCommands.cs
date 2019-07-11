@@ -619,7 +619,7 @@ namespace ThunderED.Classes
                             //authed for action!
                             if (authUser.DiscordId > 0)
                             {
-                                await WebAuthModule.AuthUser(Context, code, authUser.DiscordId, true);
+                                await WebAuthModule.AuthUser(Context, code, authUser.DiscordId);
                             }
                             else
                             {
@@ -1017,7 +1017,7 @@ namespace ThunderED.Classes
                     }
                     else
                     {
-                        await WebAuthModule.AuthUser(Context, x, 0, true);
+                        await WebAuthModule.AuthUser(Context, x, 0);
                     }
                 }
                 catch (Exception ex)

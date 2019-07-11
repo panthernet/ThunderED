@@ -1729,8 +1729,6 @@ namespace ThunderED.Classes
         [Comment("By default each auth group have own auth button. With this option on there wll be only one button and auth will search for first group with matching condition automatically.")]
         public bool UseOneAuthButton { get; set; } = false;
         public bool EnableDetailedLogging { get; set; }
-        [Comment("Remove user authentication if supplied ESI token has become invalid")]
-        public bool RemoveAuthIfTokenIsInvalid { get;set; }
 
         [Comment("Auto clear !auth commands text from discord channels to reduce clutter")]
         public bool AutoClearAuthCommandsFromDiscord { get; set; }
@@ -1777,6 +1775,7 @@ namespace ThunderED.Classes
 
     public class WebAuthGroup: ValidatableSettings
     {
+
 #if EDITOR
         [Comment("Dictionary containing member identification and the list of Discord roles which to assign on successful auth")]
         public ObservableDictionary<string, AuthRoleEntity> AllowedMembers { get; set; } = new ObservableDictionary<string, AuthRoleEntity>();
@@ -1798,6 +1797,9 @@ namespace ThunderED.Classes
         public List<string> UpgradeGroupNames { get; set; } = new List<string>();
         public List<string> DowngradeGroupNames { get; set; } = new List<string>();
 #endif
+        [Comment("Remove user authentication if supplied ESI token has become invalid")]
+        public bool RemoveAuthIfTokenIsInvalid { get;set; }
+
         [Comment("Enable auth mode that will only search roles until first criteria match. Otherwise it wil search and add roles from all matching filters within this group")]
         public bool StopSearchingOnFirstMatch { get; set; }
 

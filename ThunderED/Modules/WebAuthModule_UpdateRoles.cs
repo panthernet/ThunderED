@@ -38,7 +38,7 @@ namespace ThunderED.Modules
 
             await dids.ParallelForEachAsync(async id =>
             {
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false); 
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
             }, 8);
 
             await UpdateDBUserRoles(exemptRoles, authCheckIgnoreRoles, dids);
@@ -50,11 +50,11 @@ namespace ThunderED.Modules
            // var x = ids.FirstOrDefault(a => a == 268473315843112960);
             await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
             {
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false); 
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
             }, 8);
         }
 
-        public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles, bool isManualAuth,
+        public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles,
             bool forceRemove = false)
         {
             try
@@ -93,13 +93,13 @@ namespace ThunderED.Modules
                     }
                     var remroles = new List<SocketRole>();
 
-                    var result = authUser.IsDumped ? new RoleSearchResult() : await GetRoleGroup(authUser.CharacterId, discordUserId, isManualAuth, authUser.RefreshToken);
+                    var result = authUser.IsDumped ? new RoleSearchResult() : await GetRoleGroup(authUser.CharacterId, discordUserId, authUser.RefreshToken);
                     if (result.IsConnectionError)
                     {
                         await AuthWarningLog(characterData, "[RUPD] Connection error while searching for group! Skipping roles update.");
                         return null;
                     }
-                    await AuthInfoLog(characterData, $"[RUPD] GRPFETCH GROUP: {result.GroupName} ROLES: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.UpdatedRoles?.Select(a=> a.Name)))} MANUAL: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.ValidManualAssignmentRoles))}", true);
+                    await AuthInfoLog(characterData, $"[RUPD] GRPFETCH GROUP: {result.GroupName} ROLES: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.UpdatedRoles.Where(a=> !a.Name.StartsWith("@")).Select(a=> a.Name)))} MANUAL: {(result.ValidManualAssignmentRoles == null || !result.ValidManualAssignmentRoles.Any() ? "null" : string.Join(',', result.ValidManualAssignmentRoles))}", true);
 
                     var isMovingToDump = string.IsNullOrEmpty(result.GroupName) && authUser.IsAuthed;
                     var isAuthed = !string.IsNullOrEmpty(result.GroupName);
@@ -110,8 +110,8 @@ namespace ThunderED.Modules
                     {
                         if (!string.IsNullOrEmpty(result.GroupName) && !string.IsNullOrEmpty(authUser.GroupName) && result.GroupName != authUser.GroupName)
                         {
-                            var oldGroup = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authUser.GroupName).Value;
-                            if (oldGroup != null && (oldGroup.UpgradeGroupNames.Contains(result.GroupName) || oldGroup.DowngradeGroupNames.Contains(result.GroupName)))
+                            var oldGroup = GetGroupByName(authUser.GroupName).Value;
+                            if (oldGroup != null && (oldGroup.UpgradeGroupNames.ContainsCaseInsensitive(result.GroupName) || oldGroup.DowngradeGroupNames.ContainsCaseInsensitive(result.GroupName)))
                             {
                                 await AuthInfoLog(characterData,
                                     $"[RUPD] Character has been transferred from {authUser.GroupName} to {result.GroupName} group");
@@ -365,7 +365,13 @@ namespace ThunderED.Modules
             }
         }
 
-        public static async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId, bool isManualAuth = false, string refreshToken = null)
+        private static KeyValuePair<string, WebAuthGroup> GetGroupByName(string name)
+        {
+            var trimmedName = name.Trim();
+            return SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key.Trim().Equals(trimmedName,StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId, string refreshToken = null)
         {
             var result = new RoleSearchResult();
             var discordGuild = APIHelper.DiscordAPI.GetGuild();
@@ -393,32 +399,32 @@ namespace ThunderED.Modules
                     await AuthInfoLog(characterData, $"[RG] Has group name {authData.GroupName}", true);
 
                     //check specified group for roles
-                    var group = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authData.GroupName);
-                    if (group.Value != null)
+                    var (groupName, group) = GetGroupByName(authData.GroupName);
+                    if (group != null)
                     {
                         //process upgrade groups first
-                        if (group.Value.UpgradeGroupNames.Any())
+                        if (group.UpgradeGroupNames.Any())
                         {
-                            await AuthInfoLog(characterData, $"[RG] Adding upgrade groups: {string.Join(',', group.Value.UpgradeGroupNames)}", true);
+                            await AuthInfoLog(characterData, $"[RG] Adding upgrade groups: {string.Join(',', group.UpgradeGroupNames)}", true);
 
-                            foreach (var item in group.Value.UpgradeGroupNames)
+                            foreach (var item in group.UpgradeGroupNames)
                             {
-                                var (key, value) = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == item);
+                                var (key, value) = GetGroupByName(item);
                                 if (value != null)
                                     groupsToCheck.Add(key, value);
                             }
                         }
 
                         //add root group
-                        groupsToCheck.Add(group.Key, group.Value);
+                        groupsToCheck.Add(groupName, group);
 
                         //add downgrade groups (checked last)
-                        if (authData.IsAuthed && group.Value.DowngradeGroupNames.Any())
+                        if (authData.IsAuthed && group.DowngradeGroupNames.Any())
                         {
-                            await AuthInfoLog(characterData, $"[RG] Adding downgrade groups: {string.Join(',', group.Value.DowngradeGroupNames)}", true);
-                            foreach (var item in group.Value.DowngradeGroupNames)
+                            await AuthInfoLog(characterData, $"[RG] Adding downgrade groups: {string.Join(',', group.DowngradeGroupNames)}", true);
+                            foreach (var item in group.DowngradeGroupNames)
                             {
-                                var (key, value) = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == item);
+                                var (key, value) = GetGroupByName(item);
                                 if (value != null)
                                     groupsToCheck.Add(key, value);
                             }
@@ -432,7 +438,7 @@ namespace ThunderED.Modules
                 {
                     //check only GENERAL auth groups for roles
                     //non-general group auth should have group name supplied
-                    foreach (var (key, value) in SettingsManager.Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ESICustomAuthRoles.Any()))
+                    foreach (var (key, value) in SettingsManager.Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ESICustomAuthRoles.Any() && !a.Value.BindToMainCharacter))
                     {
                         groupsToCheck.Add(key, value);
                     }
@@ -456,25 +462,25 @@ namespace ThunderED.Modules
                             result.IsConnectionError = true;
                             await AuthWarningLog(characterData, $"[RG] {characterData.name} Connection error while fetching token!");
                         }
-                        else
-                        {
-                            //bad token
-                            if (SettingsManager.Settings.WebAuthModule.RemoveAuthIfTokenIsInvalid)
-                            {
-                                await AuthWarningLog(characterData, $"[RG] User {characterData.name} token is no more valid. Authentication will be declined.");
-                                return result;
-                            }
-                        }
 
                         return result;
                     }
                 }
                 
 
+                await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterID} DID: {authData.DiscordId} AUTH: {authData.AuthState} GRP{authData.GroupName}", true);
                 var foundGroup = await GetAuthGroupByCharacter(groupsToCheck, characterID);
                 if (foundGroup != null)
                 {
                     await AuthInfoLog(characterData, $"[RG] Group found: {foundGroup.GroupName} Roles: {string.Join(',', foundGroup.RoleEntities.SelectMany(a=> a.DiscordRoles))} Titles: {string.Join(',', foundGroup.RoleEntities.SelectMany(a=> a.Titles))}!", true);
+
+                    //bad token
+                    if (foundGroup.Group.RemoveAuthIfTokenIsInvalid && tq != null && tq.Data.IsNotValid)
+                    {
+                        await AuthWarningLog(characterData, $"[RG] User {characterData.name} token is no more valid. Authentication will be declined.");
+                        return result;
+                    }
+
 
                     await UpdateResultRolesWithTitles(discordGuild, foundGroup.RoleEntities, result, characterData, uToken);
                     result.ValidManualAssignmentRoles.AddRange(foundGroup.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));

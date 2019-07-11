@@ -161,9 +161,9 @@
     "enforceCharName": true,
     "UseOneAuthButton": false,
     "EnableDetailedLogging": false, 
-    "RemoveAuthIfTokenIsInvalid":  false, 
     "authGroups": {
       "Mode1_GeneralAuth": {
+        "RemoveAuthIfTokenIsInvalid": false,
         "StopSearchingOnFirstMatch": "false",
         "AllowedMembers": {
           "entry1": {
@@ -193,10 +193,11 @@
       "Mode3_Preliminary": {
         "AllowedMembers": {
           "ally1": {
-            "Entities": [ ],
+            "Entities": [],
             "DiscordRoles": [ "Member" ]
           }
         },
+        "RemoveAuthIfTokenIsInvalid": true,
         "authRoles": [ "Admins" ],
         "ManualAssignmentRoles": [],
         "PreliminaryAuthMode": true,

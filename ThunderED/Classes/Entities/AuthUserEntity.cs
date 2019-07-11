@@ -66,11 +66,13 @@ namespace ThunderED.Classes.Entities
         public void SetStateAwaiting()
         {
             AuthState = 1;
+            DumpDate = null;
         }
 
         public void SetStateAuthed()
         {
             AuthState = 2;
+            DumpDate = null;
         }
 
         public async Task UpdateData(string permissions = null)
