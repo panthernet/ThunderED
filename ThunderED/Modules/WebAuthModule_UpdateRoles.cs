@@ -43,7 +43,7 @@ namespace ThunderED.Modules
            /* await dids.ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }, 8);*/
+            }, 4);*/
 
             await UpdateDBUserRoles(exemptRoles, authCheckIgnoreRoles, dids);
         }
@@ -54,7 +54,7 @@ namespace ThunderED.Modules
            /* await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }, 8);*/
+            }, 4);*/
            foreach (var id in ids.Where(a => !dids.Contains(a)))
            {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
@@ -134,7 +134,7 @@ namespace ThunderED.Modules
                     {
                         if (SettingsManager.Settings.Config.ModuleHRM && SettingsManager.Settings.HRMModule.UseDumpForMembers)
                         {
-                            await AuthInfoLog(characterData, $"[RUPD] Character is being moved into dumpster...");
+                            await AuthInfoLog(characterData, $"[RUPD] Character is being moved into dumpster [F:{forceRemove}]...");
                             authUser.SetStateDumpster();
                             if(!forceRemove)
                                 authUser.GroupName = null;
@@ -378,6 +378,8 @@ namespace ThunderED.Modules
 
         private static KeyValuePair<string, WebAuthGroup> GetGroupByName(string name)
         {
+            if(string.IsNullOrEmpty(name)) 
+                return new KeyValuePair<string, WebAuthGroup>();
             var trimmedName = name.Trim();
             return SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key.Trim().Equals(trimmedName,StringComparison.OrdinalIgnoreCase));
         }
