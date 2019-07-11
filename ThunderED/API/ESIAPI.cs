@@ -466,22 +466,22 @@ namespace ThunderED.API
         }
 
 
-        public async Task<List<JsonClasses.Contact>> GetCharacterContacts(string reason, object id, string token)
+        public async Task<ESIQueryResult<List<JsonClasses.Contact>>> GetCharacterContacts(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<List<JsonClasses.Contact>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/contacts/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.Contact>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/contacts/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
-        public async Task<List<JsonClasses.Contact>> GetCorpContacts(string reason, object id, string token)
+        public async Task<ESIQueryResult<List<JsonClasses.Contact>>> GetCorpContacts(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<List<JsonClasses.Contact>>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/contacts/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.Contact>>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/contacts/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
-        public async Task<List<JsonClasses.Contact>> GetAllianceContacts(string reason, object id, string token)
+        public async Task<ESIQueryResult<List<JsonClasses.Contact>>> GetAllianceContacts(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<List<JsonClasses.Contact>>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/contacts/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await APIHelper.ESIRequestWrapper<List<JsonClasses.Contact>>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/contacts/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
         public async Task<JsonClasses.SkillsData> GetCharSkills(string reason, object id, string token)

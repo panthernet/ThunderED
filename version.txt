@@ -40,6 +40,7 @@ OwnershipTransferred
 + Greatly improved log feeder for better coverage, less CPU and network utilization
 + Improved HR module to strip roles when user is moved to dumpster
 + Improved HR module to proceed with auth check right after character has been deleted from the web page
++ Improved standings update to a fail-resistant version
 + Colorized important log feeder posts (desktop Discord client only)
 
 ### BREAKING CHANGES

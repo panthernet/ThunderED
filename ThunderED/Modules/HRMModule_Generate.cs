@@ -44,7 +44,7 @@ namespace ThunderED.Modules
         }
         private async Task<int> GetCharContactsPagesCount(string token, long inspectCharId)
         {
-            var entries = await APIHelper.ESIAPI.GetCharacterContacts(Reason, inspectCharId, token);
+            var entries = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, inspectCharId, token))?.Result;
             return  (entries?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage; 
         }
 
@@ -526,7 +526,7 @@ namespace ThunderED.Modules
 
         private async Task<string> GenerateContactsHtml(string token, long inspectCharId, int page, long hrId = 0)
         {
-            var items = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, inspectCharId, token)).OrderByDescending(a=> a.standing).ToList();
+            var items = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, inspectCharId, token)).Result.OrderByDescending(a=> a.standing).ToList();
             var startIndex = (page-1) * Settings.HRMModule.TableEntriesPerPage;
             items = items.Count == 0 ? items : items.GetRange(startIndex, items.Count > startIndex+Settings.HRMModule.TableEntriesPerPage ? Settings.HRMModule.TableEntriesPerPage : (items.Count-startIndex));
 
@@ -538,7 +538,7 @@ namespace ThunderED.Modules
                 {
                     var hrToken = await APIHelper.ESIAPI.RefreshToken(hrUserInfo.RefreshToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                     if(!string.IsNullOrEmpty(hrToken))
-                        hrContacts = await APIHelper.ESIAPI.GetCharacterContacts(Reason, hrId, hrToken);
+                        hrContacts = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, hrId, hrToken)).Result;
                 }
             }
 

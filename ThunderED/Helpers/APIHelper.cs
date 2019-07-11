@@ -126,6 +126,9 @@ namespace ThunderED.Helpers
                 catch (TaskCanceledException)
                 {
                     //skip, probably due to timeout
+                    result.Data.Message = "Task has been cancelled";
+                    result.Data.ErrorCode = 1;
+                    return result;
                 }
                 catch (Exception ex)
                 {
@@ -139,7 +142,7 @@ namespace ThunderED.Helpers
                     if (!silent)
                     {
                         await LogHelper.LogEx(request, ex, LogCat.ESI);
-                        await LogHelper.LogInfo($"[try: {i}][{reason}]{Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONCE: {raw}", LogCat.ESI);
+                        await LogHelper.LogInfo($"[try: {i}][{reason}]{Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONSE: {raw}", LogCat.ESI);
                     }
                 }
             }

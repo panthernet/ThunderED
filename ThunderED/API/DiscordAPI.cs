@@ -115,7 +115,7 @@ namespace ThunderED.API
 
         public async Task<IUserMessage> SendMessageAsync(ulong channel, string message, Embed embed = null)
         {
-            if (channel == 0) return null;
+            if (channel == 0 || string.IsNullOrWhiteSpace(message)) return null;
             var ch = GetChannel(channel);
             if (ch == null)
             {

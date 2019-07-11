@@ -25,6 +25,10 @@ namespace ThunderED.Modules.OnDemand
                     if (Package.Count > 0)
                         await SendMessage().ConfigureAwait(false);
                 }
+                catch
+                {
+                    //ignore
+                }
                 finally
                 {
                     _timer.Start();

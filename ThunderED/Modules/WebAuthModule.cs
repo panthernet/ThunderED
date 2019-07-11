@@ -977,10 +977,20 @@ namespace ThunderED.Modules
 
         private async Task RefreshStandings(AuthStandsEntity data, string token)
         {
-            data.PersonalStands = await APIHelper.ESIAPI.GetCharacterContacts(Reason, data.CharacterID, token);
+            var stands = await APIHelper.ESIAPI.GetCharacterContacts(Reason, data.CharacterID, token);
+            data.PersonalStands = stands.Data.IsFailed ? data.PersonalStands : stands.Result;
             var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, data.CharacterID, true);
-            data.CorpStands = await APIHelper.ESIAPI.GetCorpContacts(Reason, rChar?.corporation_id ?? 0, token);
-            data.AllianceStands = await APIHelper.ESIAPI.GetAllianceContacts(Reason, rChar?.alliance_id ?? 0, token);
+            if (rChar != null)
+            {
+                stands = await APIHelper.ESIAPI.GetCorpContacts(Reason, rChar.corporation_id, token);
+                data.CorpStands = stands.Data.IsFailed ? data.CorpStands : stands.Result;
+                if (rChar.alliance_id.HasValue)
+                {
+                    stands = await APIHelper.ESIAPI.GetAllianceContacts(Reason, rChar.alliance_id.Value, token);
+                    data.AllianceStands = stands.Data.IsFailed ? data.AllianceStands : stands.Result;
+                }
+                else data.AllianceStands = new List<JsonClasses.Contact>();
+            }
         }
 
         public static string GetUniqID()
