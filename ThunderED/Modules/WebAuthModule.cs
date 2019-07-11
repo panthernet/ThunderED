@@ -171,17 +171,20 @@ namespace ThunderED.Modules
             {
                 if (group.StandingsAuth == null)
                 {
+                    var nameList = new List<string>();
                     foreach (var (entityName, entity) in group.AllowedMembers)
                     {
                         //found guest
                         if (!entity.Entities.Any())
                         {
+                            await AuthInfoLog(chData, $"[GARE] Found guest group {groupName}! Return OK.", true);
                             result.RoleEntities.Add(entity);
                             result.Group = group;
                             result.GroupName = groupName;
                             return result;
                         }
 
+                        await AuthInfoLog(chData, $"[GARE] Checking {groupName}|{entityName} - FSTOP: {group.StopSearchingOnFirstMatch} ...", true);
                         var data = Instance.GetTier2CharacterIds(Instance.ParsedMembersLists, groupName, entityName);
                         if (data.Contains(chData.character_id))
                             result.RoleEntities.Add(entity);
@@ -198,18 +201,24 @@ namespace ThunderED.Modules
                             }
                         }
 
-                        //return if we have a match and fon;t need to check all members
-                        if (result.RoleEntities.Any() && group.StopSearchingOnFirstMatch)
+                        //return if we have a match and don't need to check all members
+                        if (result.RoleEntities.Any())
                         {
-                            result.Group = group;
-                            result.GroupName = groupName;
-                            return result;
+                            nameList.Add(entityName);
+                            if (group.StopSearchingOnFirstMatch)
+                            {
+                                await AuthInfoLog(chData, $"[GARE] Found match. Return OK.", true);
+                                result.Group = group;
+                                result.GroupName = groupName;
+                                return result;
+                            }
                         }
                     }
 
                     //return after all members has been checked
                     if (result.RoleEntities.Any())
                     {
+                        await AuthInfoLog(chData, $"[GARE] Found matches from {string.Join(',', nameList)}. Return OK.", true);
                         result.Group = group;
                         result.GroupName = groupName;
                         return result;
@@ -220,9 +229,10 @@ namespace ThunderED.Modules
                     var r = await GetEntityForStandingsAuth(group, chData);
                     if (r.Any())
                     {
+                        await AuthInfoLog(chData, $"[GARE] Found match. Return OK.", true);
                         result.Group = group;
                         result.GroupName = groupName;
-                        result.RoleEntities.AddRange(r);
+                        result.RoleEntities = r;
                         return result;
                     }
                 }
@@ -244,6 +254,8 @@ namespace ThunderED.Modules
             {
                 var standings = await SQLHelper.LoadAuthStands(characterID);
                 if (standings == null) return list;
+
+                await AuthInfoLog(chData, $"[GARE] Checking stands from {characterID}...", true);
 
                 for (var typeNumber = 0; typeNumber < 3; typeNumber++)
                 {
@@ -271,6 +283,7 @@ namespace ThunderED.Modules
                     st.AddRange(group.StandingsAuth.UseCharacterStandings && standings.PersonalStands != null ? standings.PersonalStands : new List<JsonClasses.Contact>());
                     st.AddRange(group.StandingsAuth.UseCorporationStandings && standings.CorpStands != null ? standings.CorpStands : new List<JsonClasses.Contact>());
                     st.AddRange(group.StandingsAuth.UseAllianceStandings && standings.AllianceStands != null? standings.AllianceStands : new List<JsonClasses.Contact>());
+                    await AuthInfoLog(chData, $"[GARE] Total stands to check {st.Count}...", true);
 
                     var stands = st.Where(a => a.contact_type == typeName && a.contact_id == id).Select(a=> a.standing).Distinct();
                     var s = group.StandingsAuth.StandingFilters.Values.Where(a => a.Modifier == "eq").FirstOrDefault(a => a.Standings.Any(b => stands.Contains(b)));
@@ -302,15 +315,13 @@ namespace ThunderED.Modules
             return list;
         }
 
-        
-        private static async Task<WebAuthResult> GetAuthGroupByCharacter(Dictionary<string, WebAuthGroup> groups, long id)
+        private static async Task<WebAuthResult> GetAuthGroupByCharacter(Dictionary<string, WebAuthGroup> groups, JsonClasses.CharacterData chData)
         {
-            var chData = await APIHelper.ESIAPI.GetCharacterData("AuthCheck", id);
             groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups;
             var result = await GetAuthRoleEntityById(groups, chData);
             return result.RoleEntities.Any() ? new WebAuthResult {GroupName = result.GroupName, Group = result.Group, RoleEntities = result.RoleEntities} : null;
         }
-
+        
         public async Task ProcessPreliminaryApplicant(AuthUserEntity user, ICommandContext context = null)
         {
             try

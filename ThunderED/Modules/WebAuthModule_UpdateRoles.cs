@@ -140,8 +140,11 @@ namespace ThunderED.Modules
                         }
                     }
                     //skip if we don't have discord user (discord-less auth)
-                    await AuthInfoLog(characterData, $"[RUPD] Skipping roles check as discord user is null", true);
-                    if (u == null) return null;
+                    if (u == null)
+                    {
+                        await AuthInfoLog(characterData, $"[RUPD] Skipping roles check as discord user is null", true);
+                        return null;
+                    }
 
                     var initialUserRoles = new List<SocketRole>(u.Roles);
                     var invalidRoles = initialUserRoles.Where(a => result.UpdatedRoles.FirstOrDefault(b => b.Id == a.Id) == null && !a.Name.StartsWith("@everyone"));
@@ -461,15 +464,14 @@ namespace ThunderED.Modules
                         {
                             result.IsConnectionError = true;
                             await AuthWarningLog(characterData, $"[RG] {characterData.name} Connection error while fetching token!");
+                            return result;
                         }
-
-                        return result;
                     }
                 }
                 
 
                 await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterID} DID: {authData.DiscordId} AUTH: {authData.AuthState} GRP{authData.GroupName}", true);
-                var foundGroup = await GetAuthGroupByCharacter(groupsToCheck, characterID);
+                var foundGroup = await GetAuthGroupByCharacter(groupsToCheck, characterData);
                 if (foundGroup != null)
                 {
                     await AuthInfoLog(characterData, $"[RG] Group found: {foundGroup.GroupName} Roles: {string.Join(',', foundGroup.RoleEntities.SelectMany(a=> a.DiscordRoles))} Titles: {string.Join(',', foundGroup.RoleEntities.SelectMany(a=> a.Titles))}!", true);
