@@ -126,8 +126,8 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
                 Modules.Add(new WebAuthModule());
 
-            await Modules.ParallelForEachAsync(async a => await a.Initialize());
-            await OnDemandModules.ParallelForEachAsync(async a => await a.Initialize());
+            await Modules.ParallelForEachAsync(async a => await a.Initialize(),  SettingsManager.MaxConcurrentThreads);
+            await OnDemandModules.ParallelForEachAsync(async a => await a.Initialize(),  SettingsManager.MaxConcurrentThreads);
 
             //subscriptions
             if (SettingsManager.Settings.Config.ModuleIRC)
@@ -191,7 +191,7 @@ namespace ThunderED.Classes
                 await Modules.ParallelForEachAsync(async module =>
                 {
                     await module.Run(null);
-                });
+                }, SettingsManager.MaxConcurrentThreads);
                 
             }
             catch (Exception ex)

@@ -35,6 +35,7 @@ OwnershipTransferred
 + Added new web auth param `EnableDetailedLogging` for better auth tracing
 + Added new `AutoClearAuthCommandsFromDiscord` property to web auth module to cleanup auth requests
 + Added new `RemoveAuthIfTokenIsInvalid` property to web auth module to remove auth for users with invalid ESI tokens
++ Added new `ConcurrentThreadsNumber` property to be able to control number of threads for parallel processes. Usually 4-8 up to one per CPU core.
 + Fixed standings in config editor
 + Fixed minor bugs and made some updates to config editor
 + Fixed async logging issues

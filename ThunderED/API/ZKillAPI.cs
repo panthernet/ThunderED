@@ -111,7 +111,7 @@ namespace ThunderED.API
             {
                 var kill = await APIHelper.ESIAPI.GetKillmail(_reason, z.killmail_id, z.zkb.hash);
                 list.Add(kill);
-            }, 5);
+            },  SettingsManager.MaxConcurrentThreads);
 
             return list.OrderByDescending(a=> a.killmail_id).ToList();
         }
@@ -132,7 +132,7 @@ namespace ThunderED.API
             {
                 var kill = await APIHelper.ESIAPI.GetKillmail(_reason, z.killmail_id, z.zkb.hash);
                 list.Add(kill);
-            }, 5);
+            },  SettingsManager.MaxConcurrentThreads);
 
             return list.OrderByDescending(a=> a.killmail_id).ToList();
         }

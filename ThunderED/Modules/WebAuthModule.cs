@@ -945,9 +945,10 @@ namespace ThunderED.Modules
                     }
                 }
                
+                characterData = await APIHelper.ESIAPI.GetCharacterData("Auth", authUser.CharacterId, true);
 
                 //check if we fit some group
-                var result = await GetRoleGroup(authUser.CharacterId, discordId, authUser.RefreshToken);
+                var result = await GetRoleGroup(characterData, discordId, authUser.RefreshToken);
                 if (result.IsConnectionError)
                 {
                     await AuthWarningLog(authUser, $"Possible connection error while processing auth request(search for group)!");
@@ -963,7 +964,6 @@ namespace ThunderED.Modules
                 {
                     var group = result.Group;
                     var channel = context?.Channel?.Id ?? SettingsManager.Settings.WebAuthModule.AuthReportChannel;
-                    characterData = await APIHelper.ESIAPI.GetCharacterData("Auth", authUser.CharacterId);
 
                     if (characterData == null)
                     {

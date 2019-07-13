@@ -1583,6 +1583,8 @@ namespace ThunderED.Classes
         public bool LogNewNotifications { get; set; } = true;
         [Comment("Number of web-request retries before treating it as failed")]
         public int RequestRetries { get; set; } = 3;
+        [Comment("Number of threads for concurrent operations. Default value is 4.")]
+        public int ConcurrentThreadsNumber { get; set; } = 4;
 
         public bool ExtendedESILogging { get; set; } = false;
         public string ESIAddress { get; set; } = "https://esi.evetech.net/";

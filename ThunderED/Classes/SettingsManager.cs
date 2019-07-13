@@ -15,7 +15,7 @@ namespace ThunderED.Classes
     /// </summary>
     public static partial class SettingsManager
     {
-        
+        public static int MaxConcurrentThreads => Settings.Config.ConcurrentThreadsNumber > 0 ? Settings.Config.ConcurrentThreadsNumber : 1;
         public static bool IsNew { get; set; }
         public static string FileSettingsPath;
         public static string FileTemplateMain;

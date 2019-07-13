@@ -632,6 +632,12 @@ namespace ThunderED.Json
             public string name;
             public long title_id;
         }
+
+        public class ESIError
+        {
+            public string error;
+            public int timeout;
+        }
     }
 
     public enum IndustryJobStatusEnum

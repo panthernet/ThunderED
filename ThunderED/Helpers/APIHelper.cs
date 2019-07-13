@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
+using ThunderED.Json;
 
 namespace ThunderED.Helpers
 {
@@ -60,6 +61,7 @@ namespace ThunderED.Helpers
             {
                 try
                 {
+                    await WaitReq.WaitIfNeeded(i);
                     var handler = new HttpClientHandler {AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate};
                     using (var httpClient = new HttpClient(handler))
                     {
@@ -72,26 +74,29 @@ namespace ThunderED.Helpers
                         if(!string.IsNullOrEmpty(etag))
                             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("if-none-match", etag);
 
-                        using (var responceMessage = await httpClient.GetAsync(request))
+                        using (var responseMessage = await httpClient.GetAsync(request))
                         {
-                            result.Data.ETag = responceMessage.Headers.FirstOrDefault(a => a.Key == "ETag").Value?.FirstOrDefault().Trim('"');
+                            result.Data.ETag = responseMessage.Headers.FirstOrDefault(a => a.Key == "ETag").Value?.FirstOrDefault().Trim('"');
 
-                            raw = await responceMessage.Content.ReadAsStringAsync();
-                            if (!responceMessage.IsSuccessStatusCode)
+                            raw = await responseMessage.Content.ReadAsStringAsync();
+                            if (!responseMessage.IsSuccessStatusCode)
                             {
-                                result.Data.ErrorCode = (int)responceMessage.StatusCode;
+                                result.Data.ErrorCode = (int)responseMessage.StatusCode;
                                 result.Data.Message = raw;
-                                if (responceMessage.StatusCode != HttpStatusCode.NotModified && responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
-                                    (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
-                                    await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
-                                if (responceMessage.StatusCode == HttpStatusCode.NotModified)
+                                if (responseMessage.StatusCode != HttpStatusCode.NotModified && responseMessage.StatusCode != HttpStatusCode.NotFound && responseMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                    (responseMessage.StatusCode != HttpStatusCode.BadGateway && responseMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
+                                    await LogHelper.LogError($"[try: {i}][{reason}] Potential {responseMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
+                                if (responseMessage.StatusCode == HttpStatusCode.NotModified)
                                     return result;
 
-                                if (raw.StartsWith("{\"error\""))
+                                var errParsed = JsonConvert.DeserializeObject<JsonClasses.ESIError>(raw);
+                                if (errParsed != null)
                                 {
+                                    if(errParsed.timeout > 0)
+                                        WaitReq.Update(errParsed.timeout);
                                     if(SettingsManager.Settings.Config.ExtendedESILogging)
-                                        await LogHelper.LogError($"[{reason}] Request failure: {request}\n{raw}", LogCat.ESI, false);
-                                    return result;
+                                        await LogHelper.LogError($"[{reason}] Request failure: {request}\nMessage: {errParsed.error}", LogCat.ESI, false);
+                                    return null;
                                 }
                                 continue;
                             }
@@ -150,7 +155,9 @@ namespace ThunderED.Helpers
             return result;
         }
 
-        public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null, string etoken = null, bool noRetries = false, bool silent = false, string encoding = null)
+        private static readonly WaitRequestData WaitReq = new WaitRequestData();
+
+        public static async Task<T> RequestWrapper<T>(string request, string reason, string auth = null, string eToken = null, bool noRetries = false, bool silent = false, string encoding = null)
             where T : class
         {
             string raw = null;
@@ -160,6 +167,7 @@ namespace ThunderED.Helpers
             {
                 try
                 {
+                    await WaitReq.WaitIfNeeded(i);
                     var handler = new HttpClientHandler {AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate};
                     using (var httpClient = new HttpClient(handler))
                     {
@@ -171,31 +179,34 @@ namespace ThunderED.Helpers
                             httpClient.DefaultRequestHeaders.Add("Accept-Encoding", encoding);
                         if (!string.IsNullOrEmpty(auth))
                             httpClient.DefaultRequestHeaders.Add("Authorization", auth);
-                        if(!string.IsNullOrEmpty(etoken))
-                            httpClient.DefaultRequestHeaders.Add("Etoken", etoken);                        
+                        if(!string.IsNullOrEmpty(eToken))
+                            httpClient.DefaultRequestHeaders.Add("Etoken", eToken);                        
 
-                        using (var responceMessage = await httpClient.GetAsync(request))
+                        using (var responseMessage = await httpClient.GetAsync(request))
                         {
-                            raw = await responceMessage.Content.ReadAsStringAsync();
-                            if (responceMessage.Content.Headers.ContentEncoding.Any(a=> "br".Equals(a, StringComparison.OrdinalIgnoreCase)))
+                            raw = await responseMessage.Content.ReadAsStringAsync();
+                            if (responseMessage.Content.Headers.ContentEncoding.Any(a=> "br".Equals(a, StringComparison.OrdinalIgnoreCase)))
                             {
-                                using (var b = new BrotliStream(await responceMessage.Content.ReadAsStreamAsync(), CompressionMode.Decompress, true))
+                                using (var b = new BrotliStream(await responseMessage.Content.ReadAsStreamAsync(), CompressionMode.Decompress, true))
                                 {
                                     using (var s = new StreamReader(b))
                                         raw = await s.ReadToEndAsync();
                                 }
                             }
-                            if (!responceMessage.IsSuccessStatusCode)
+                            if (!responseMessage.IsSuccessStatusCode)
                             {
-                                if (responceMessage.StatusCode != HttpStatusCode.NotModified && responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
-                                    (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
-                                    await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
-                                if (responceMessage.StatusCode == HttpStatusCode.NotModified)
+                                if (responseMessage.StatusCode == HttpStatusCode.NotModified)
                                     return null;
-                                if (raw.StartsWith("{\"error\""))
+                                if (responseMessage.StatusCode != HttpStatusCode.NotFound && responseMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                    (responseMessage.StatusCode != HttpStatusCode.BadGateway && responseMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
+                                    await LogHelper.LogError($"[try: {i}][{reason}] Potential {responseMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
+                                var errParsed = JsonConvert.DeserializeObject<JsonClasses.ESIError>(raw);
+                                if (errParsed != null)
                                 {
+                                    if(errParsed.timeout > 0)
+                                        WaitReq.Update(errParsed.timeout);
                                     if(SettingsManager.Settings.Config.ExtendedESILogging)
-                                        await LogHelper.LogError($"[{reason}] Request failure: {request}\n{raw}", LogCat.ESI, false);
+                                        await LogHelper.LogError($"[{reason}] Request failure: {request}\nMessage: {errParsed.error}", LogCat.ESI, false);
                                     return null;
                                 }
                                 continue;
@@ -293,6 +304,47 @@ namespace ThunderED.Helpers
 
             }
             return false;
+        }
+    }
+
+    internal class WaitRequestData
+    {
+        private DateTime _from = DateTime.Now;
+        private volatile int _waitSeconds;
+        private readonly object _locker = new object();
+
+        public void Update(int seconds)
+        {
+            lock (_locker)
+            {
+                _from = DateTime.Now;
+                _waitSeconds = seconds;
+            }
+        }
+
+        public async Task WaitIfNeeded(int retryNum)
+        {
+            var value = GetWaitInMsec();
+            if (value > 0)
+                await Task.Delay(value * 1000);
+            else if(retryNum > 0) 
+                await Task.Delay(100);
+        }
+
+        private int GetWaitInMsec()
+        {
+            if (_waitSeconds == 0) return 0;
+            lock (_locker)
+            {
+                var i = (DateTime.Now - _from).Seconds;
+                if (i >= _waitSeconds)
+                {
+                    _waitSeconds = 0;
+                    return 0;
+                }
+
+                return _waitSeconds - i;
+            }
         }
     }
 }

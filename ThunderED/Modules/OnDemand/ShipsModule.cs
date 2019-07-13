@@ -196,7 +196,7 @@ namespace ThunderED.Modules.OnDemand
                         User = userEntity,
                         Skills = skills
                     });
-                }, 8);
+                }, SettingsManager.MaxConcurrentThreads);
 
                 var groupsToCheck = singleGroup.Value != null ? new Dictionary<string, ShipDataGroup> { {singleGroup.Key, singleGroup.Value}} : data.Groups; 
 

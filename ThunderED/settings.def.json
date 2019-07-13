@@ -49,6 +49,7 @@
     "UseSingleFileForLogging": false, 
     "logNewNotifications": true,
     "requestRetries": 3,
+    "ConcurrentThreadsNumber": 4,
     "extendedESILogging": false,
     "ESIAddress": "https://esi.evetech.net/",
     "UseHTTPS": false,

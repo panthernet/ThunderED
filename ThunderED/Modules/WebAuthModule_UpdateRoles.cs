@@ -43,7 +43,7 @@ namespace ThunderED.Modules
             await dids.ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }, 4);
+            }, SettingsManager.MaxConcurrentThreads);
 
             await UpdateDBUserRoles(exemptRoles, authCheckIgnoreRoles, dids);
         }
@@ -54,7 +54,7 @@ namespace ThunderED.Modules
             await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }, 4);
+            },  SettingsManager.MaxConcurrentThreads);
          /*  foreach (var id in ids.Where(a => !dids.Contains(a)))
            {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
@@ -102,7 +102,7 @@ namespace ThunderED.Modules
                     var remroles = new List<SocketRole>();
 
                     await AuthInfoLog(characterData, $"[RUPD] PRE CHARID: {authUser.CharacterId} DID: {discordUserId} AUTH: {authUser.AuthState} GRP: {authUser.GroupName} TOKEN: {!string.IsNullOrEmpty(authUser.RefreshToken)}", true);
-                    var result = authUser.IsDumped ? new RoleSearchResult() : await GetRoleGroup(authUser.CharacterId, discordUserId, authUser.RefreshToken);
+                    var result = authUser.IsDumped ? new RoleSearchResult() : await GetRoleGroup(characterData, discordUserId, authUser.RefreshToken);
                     if (result.IsConnectionError)
                     {
                         await AuthWarningLog(characterData, "[RUPD] Connection error while searching for group! Skipping roles update.");
@@ -385,12 +385,11 @@ namespace ThunderED.Modules
             return SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key.Trim().Equals(trimmedName,StringComparison.OrdinalIgnoreCase));
         }
 
-        public static async Task<RoleSearchResult> GetRoleGroup(long characterID, ulong discordUserId, string refreshToken = null)
+        public static async Task<RoleSearchResult> GetRoleGroup(JsonClasses.CharacterData characterData, ulong discordUserId, string refreshToken = null)
         {
             var result = new RoleSearchResult();
             var discordGuild = APIHelper.DiscordAPI.GetGuild();
             var u = discordGuild.GetUser(discordUserId);
-            var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", characterID, true);
 
             try
             {
@@ -405,7 +404,7 @@ namespace ThunderED.Modules
 
 
                 var groupsToCheck = new Dictionary<string, WebAuthGroup>();
-                var authData = await SQLHelper.GetAuthUserByCharacterId(characterID);
+                var authData = await SQLHelper.GetAuthUserByCharacterId(characterData.character_id);
 
                 #region Select groups to check
                 if (!string.IsNullOrEmpty(authData?.GroupName))
@@ -481,7 +480,7 @@ namespace ThunderED.Modules
                 }
                 
 
-                await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterID} DID: {authData.DiscordId} AUTH: {authData.AuthState} GRP: {authData.GroupName}", true);
+                await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterData.character_id} DID: {authData.DiscordId} AUTH: {authData.AuthState} GRP: {authData.GroupName}", true);
                 var foundGroup = await GetAuthGroupByCharacter(groupsToCheck, characterData);
                 if (foundGroup != null)
                 {
@@ -506,7 +505,7 @@ namespace ThunderED.Modules
             }
             catch(Exception ex)
             {
-                await LogHelper.LogError($"EXCEPTION: {ex.Message} CHARACTER: {characterID} [{characterData?.name}][{characterData?.corporation_id}]", LogCat.AuthCheck);
+                await LogHelper.LogError($"EXCEPTION: {ex.Message} CHARACTER: {characterData.character_id} [{characterData?.name}][{characterData?.corporation_id}]", LogCat.AuthCheck);
                 throw;
             }
         }
