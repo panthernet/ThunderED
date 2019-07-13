@@ -22,7 +22,7 @@ namespace ThunderED.API
     /// </summary>
     public partial class DiscordAPI: CacheBase
     {
-        internal DiscordSocketClient Client { get; set; }
+        private DiscordSocketClient Client { get; set; }
         private CommandService Commands { get; }
 
         public bool IsAvailable { get; private set; }
@@ -55,14 +55,35 @@ namespace ThunderED.API
             };
         }
 
+        public SocketSelfUser GetCurrentUser()
+        {
+            try
+            {
+                return Client?.CurrentUser;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx(nameof(GetCurrentUser), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return null;
+            }
+        }
+
         public async Task ReplyMessageAsync(ICommandContext context, string message)
         {
             await ReplyMessageAsync(context, message, false);
         }
 
-        public string GetUserMention(ulong userId)
+        public async Task<string> GetUserMention(ulong userId)
         {
-            return GetGuild()?.GetUser(userId)?.Mention;
+            try
+            {
+                return GetGuild()?.GetUser(userId)?.Mention;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(GetUserMention), ex, LogCat.Discord);
+                return null;
+            }
         }
 
         public async Task ReplyMessageAsync(ICommandContext context, string message, bool mentionSender)
@@ -94,7 +115,10 @@ namespace ThunderED.API
             {
                 if (ex.DiscordCode == 50013)
                     await LogHelper.LogError($"The bot don't have rights to send message to {context.Message.Channel.Id} ({context.Message.Channel.Name}) channel!");
-                throw;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
             }
         }
 
@@ -109,20 +133,33 @@ namespace ThunderED.API
             {
                 if (ex.DiscordCode == 50013)
                     await LogHelper.LogError($"The bot don't have rights to send message to {context.Message.Channel.Id} ({context.Message.Channel.Name}) channel!");
-                throw;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
             }
         }
 
         public async Task<IUserMessage> SendMessageAsync(ulong channel, string message, Embed embed = null)
         {
-            if (channel == 0 || string.IsNullOrWhiteSpace(message)) return null;
-            var ch = GetChannel(channel);
-            if (ch == null)
+            try
             {
-                await LogHelper.LogWarning($"Discord channel {channel} not found!", LogCat.Discord);
+                if (channel == 0 || string.IsNullOrWhiteSpace(message)) return null;
+                var ch = GetChannel(channel);
+                if (ch == null)
+                {
+                    await LogHelper.LogWarning($"Discord channel {channel} not found!", LogCat.Discord);
+                    return null;
+                }
+
+                return await SendMessageAsync(ch, message.FixedLength(MAX_MSG_LENGTH), embed);
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(SendMessageAsync), ex, LogCat.Discord);
                 return null;
             }
-            return await SendMessageAsync(ch, message.FixedLength(MAX_MSG_LENGTH), embed);
+
         }
 
 
@@ -136,7 +173,12 @@ namespace ThunderED.API
             {
                 if (ex.DiscordCode == 50013)
                     await LogHelper.LogError($"The bot don't have rights to send message to {channel.Id} ({channel.Name}) channel!");
-                throw;
+                return null;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
+                return null;
             }
         }
 
@@ -144,9 +186,16 @@ namespace ThunderED.API
 
         public async Task<string> GetMentionedUserString(ICommandContext context)
         {
-            var id = context.Message.MentionedUserIds.FirstOrDefault();
-            if (id == 0) return context.Message.Author.Mention;
-            return (await context.Guild.GetUserAsync(id))?.Mention;
+            try
+            {
+                var id = context.Message.MentionedUserIds.FirstOrDefault();
+                return id == 0 ? context.Message.Author.Mention : (await context.Guild.GetUserAsync(id))?.Mention;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(GetMentionedUserString), ex, LogCat.Discord);
+                return null;
+            }
         }
 
         public async Task Start()
@@ -177,7 +226,14 @@ namespace ThunderED.API
 
         public async void Stop()
         {
-            await Client.StopAsync();
+            try
+            {
+                await Client.StopAsync();
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(Stop), ex, LogCat.Discord);
+            }
         }
 
         private async Task InstallCommands()
@@ -191,27 +247,36 @@ namespace ThunderED.API
             await AsyncHelper.RedirectToThreadPool();
             if (!(messageParam is SocketUserMessage message)) return;
 
-            if (SettingsManager.Settings.Config.ModuleIRC)
+            try
             {
-                var module = TickManager.GetModule<IRCModule>();
-                module?.SendMessage(message.Channel.Id, message.Author.Id, message.Author.Username, message.Content);
+
+
+                if (SettingsManager.Settings.Config.ModuleIRC)
+                {
+                    var module = TickManager.GetModule<IRCModule>();
+                    module?.SendMessage(message.Channel.Id, message.Author.Id, message.Author.Username, message.Content);
+                }
+
+
+                if (SettingsManager.Settings.Config.ModuleTelegram)
+                {
+                    var name = APIHelper.DiscordAPI.GetGuild().GetUser(message.Author.Id)?.Nickname ?? message.Author.Username;
+                    TickManager.GetModule<TelegramModule>()?.SendMessage(message.Channel.Id, message.Author.Id, name, message.Content);
+                }
+
+                int argPos = 0;
+
+                if (!(message.HasCharPrefix(SettingsManager.Settings.Config.BotDiscordCommandPrefix[0], ref argPos) || message.HasMentionPrefix
+                          (Client.CurrentUser, ref argPos))) return;
+
+                var context = new CommandContext(Client, message);
+
+                await Commands.ExecuteAsync(context, argPos, null);
             }
-
-
-            if (SettingsManager.Settings.Config.ModuleTelegram)
+            catch (Exception ex)
             {
-                var name = APIHelper.DiscordAPI.GetGuild().GetUser(message.Author.Id)?.Nickname ?? message.Author.Username;
-                TickManager.GetModule<TelegramModule>()?.SendMessage(message.Channel.Id, message.Author.Id, name, message.Content);
+                await LogHelper.LogEx(nameof(HandleCommand), ex, LogCat.Discord);
             }
-
-            int argPos = 0;
-
-            if (!(message.HasCharPrefix(SettingsManager.Settings.Config.BotDiscordCommandPrefix[0], ref argPos) || message.HasMentionPrefix
-                      (Client.CurrentUser, ref argPos))) return;
-
-            var context = new CommandContext(Client, message);
-
-            await Commands.ExecuteAsync(context, argPos, null);
         }
 
         private async Task Event_Ready()
@@ -227,40 +292,62 @@ namespace ThunderED.API
         private static async Task Event_UserJoined(SocketGuildUser arg)
         {
             await AsyncHelper.RedirectToThreadPool();
-            if (SettingsManager.Settings.Config.WelcomeMessage)
+            try
             {
-                var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0 ? arg.Guild.DefaultChannel : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
-                var authurl = WebServerModule.GetAuthPageUrl();
-                if (!string.IsNullOrWhiteSpace(authurl))
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeMessage",arg.Mention,authurl, SettingsManager.Settings.Config.BotDiscordCommandPrefix));
-                else
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention));
+                if (SettingsManager.Settings.Config.WelcomeMessage)
+                {
+                    var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0
+                        ? arg.Guild.DefaultChannel
+                        : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
+                    var authurl = WebServerModule.GetAuthPageUrl();
+                    if (!string.IsNullOrWhiteSpace(authurl))
+                        await APIHelper.DiscordAPI.SendMessageAsync(channel,
+                            LM.Get("welcomeMessage", arg.Mention, authurl, SettingsManager.Settings.Config.BotDiscordCommandPrefix));
+                    else
+                        await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention));
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(Event_UserJoined), ex, LogCat.Discord);
             }
         }
 
         public async Task<string> IsAdminAccess(ICommandContext context)
         {
-            if (context.Guild != null)
+            try
             {
-                var roles = new List<IRole>(context.Guild.Roles);
-                var userRoleIDs = (await context.Guild.GetUserAsync(context.User.Id)).RoleIds;
-                var roleMatch = SettingsManager.Settings.Config.DiscordAdminRoles;
-                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name == role) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
-                    .All(check => check == 0)) return LM.Get("comRequirePriv");
-            }
-            else
-            {
-                var guild = (await context.Client.GetGuildsAsync()).FirstOrDefault();
-                if (guild == null) return "Error getting guild!";
-                var roles = new List<IRole>(guild.Roles);
-                var userRoleIDs = (await guild.GetUserAsync(context.User.Id)).RoleIds;
-                var roleMatch = SettingsManager.Settings.Config.DiscordAdminRoles;
-                if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name.Equals(role, StringComparison.OrdinalIgnoreCase)) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
-                    .All(check => check == 0)) return LM.Get("comRequirePriv");
-            }
+                if (context.Guild != null)
+                {
+                    var roles = new List<IRole>(context.Guild.Roles);
+                    var userRoleIDs = (await context.Guild.GetUserAsync(context.User.Id)).RoleIds;
+                    var roleMatch = SettingsManager.Settings.Config.DiscordAdminRoles;
+                    if ((from role in roleMatch select roles.FirstOrDefault(x => x.Name == role) into tmp where tmp != null select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
+                        .All(check => check == 0)) return LM.Get("comRequirePriv");
+                }
+                else
+                {
+                    var guild = (await context.Client.GetGuildsAsync()).FirstOrDefault();
+                    if (guild == null) return "Error getting guild!";
+                    var roles = new List<IRole>(guild.Roles);
+                    var userRoleIDs = (await guild.GetUserAsync(context.User.Id)).RoleIds;
+                    var roleMatch = SettingsManager.Settings.Config.DiscordAdminRoles;
+                    if ((from role in roleMatch
+                            select roles.FirstOrDefault(x => x.Name.Equals(role, StringComparison.OrdinalIgnoreCase))
+                            into tmp
+                            where tmp != null
+                            select userRoleIDs.FirstOrDefault(x => x == tmp.Id))
+                        .All(check => check == 0)) return LM.Get("comRequirePriv");
+                }
 
-            await Task.CompletedTask;
-            return null;
+                await Task.CompletedTask;
+                return null;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(IsAdminAccess), ex, LogCat.Discord);
+                return "ERROR";
+            }
         }
 
         #region Cached queries
@@ -292,7 +379,16 @@ namespace ThunderED.API
 
         internal bool IsUserMention(ICommandContext context)
         {
-            return context.Message.MentionedUserIds.Count != 0;
+            try
+            {
+                return context.Message.MentionedUserIds.Count != 0;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx(nameof(IsUserMention), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return false;
+            }
+            
         }
 
         #endregion
@@ -313,63 +409,90 @@ namespace ThunderED.API
 
         internal async Task SendEmbedKillMessage(List<ulong> channelIds, Color color, KillDataEntry km, string radiusMessage, string msg = "")
         {
-            msg = msg ?? "";
-
-            var victimName = $"{LM.Get("killFeedName", $"[{km.rVictimCharacter?.name}]({GetKillMailLink(km.victimCharacterID, KillMailLinkTypes.character)})")}";
-            var victimCorp = $"{LM.Get("killFeedCorp", $"[{km.rVictimCorp?.name}]({GetKillMailLink(km.victimCorpID, KillMailLinkTypes.corporation)})")}";
-            var victimAlliance = km.rVictimAlliance == null ? "" : $"{LM.Get("killFeedAlliance", $"[{km.rVictimAlliance?.name}]")}({GetKillMailLink(km.victimAllianceID, KillMailLinkTypes.alliance)})";
-            var victimShip = $"{LM.Get("killFeedShip", $"[{km.rVictimShipType?.name}]({GetKillMailLink(km.victimShipID, KillMailLinkTypes.ship)})")}";
-
-
-            string[] victimStringArray = new string[] {victimName, victimCorp, victimAlliance, victimShip}; 
-
-            var attackerName = $"{LM.Get("killFeedName", $"[{km.rAttackerCharacter?.name}]({GetKillMailLink(km.finalBlowAttackerCharacterId, KillMailLinkTypes.character)})")}";
-            var attackerCorp = $"{LM.Get("killFeedCorp", $"[{km.rAttackerCorp?.name}]({GetKillMailLink(km.finalBlowAttackerCorpId, KillMailLinkTypes.corporation)})")}";
-            var attackerAlliance = km.rAttackerAlliance == null || km.finalBlowAttackerAllyId == 0 ? null : $"{LM.Get("killFeedAlliance", $"[{km.rAttackerAlliance?.name}]({GetKillMailLink(km.finalBlowAttackerAllyId, KillMailLinkTypes.alliance)})")}";
-            var attackerShip = $"{LM.Get("killFeedShip", $"[{km.rAttackerShipType?.name}]({GetKillMailLink(km.attackerShipID, KillMailLinkTypes.ship)})")}";
-
-            string[] attackerStringArray = new string[] { attackerName, attackerCorp, attackerAlliance, attackerShip};
-
-
-            var killFeedDetails = LM.Get("killFeedDetails", km.killTime, km.value.ToString("#,##0 ISk"));
-            var killFeedDetailsSystem = LM.Get("killFeedDetailsSystem", $"[{km.sysName}]({GetKillMailLink(km.systemId, KillMailLinkTypes.system)})");
-
-            string[] detailsStringArray = new string[] { killFeedDetails, killFeedDetailsSystem};
-
-
-            var builder = new EmbedBuilder()
-                .WithColor(color)
-                .WithThumbnailUrl($"https://image.eveonline.com/Type/{km.victimShipID}_64.png")
-                .WithAuthor(author =>
-                {
-                    author.WithName(LM.Get("killFeedHeader", km.rVictimShipType?.name, km.rSystem?.name))
-                        .WithUrl($"https://zkillboard.com/kill/{km.killmailID}/");
-                    if (km.isNPCKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
-                })
-                .AddField(LM.Get("Victim"), string.Join("\n", victimStringArray.Where(c => !string.IsNullOrWhiteSpace(c))))
-                .AddField(LM.Get("Finalblow"), string.Join("\n", attackerStringArray.Where(c => !string.IsNullOrWhiteSpace(c))))
-                .AddField(LM.Get("Details"), string.Join("\n", detailsStringArray.Where(c => !string.IsNullOrWhiteSpace(c))));
-
-            if (!string.IsNullOrEmpty(radiusMessage))
-                builder.AddField(LM.Get("radiusInfoHeader"), radiusMessage);
-
-            var embed = builder.Build();
-            foreach (var id in channelIds)
+            try
             {
-                var channel = GetGuild()?.GetTextChannel(id);
-                if (channel != null)
-                    await SendMessageAsync(channel, msg, embed).ConfigureAwait(false);
+                msg = msg ?? "";
+
+                var victimName = $"{LM.Get("killFeedName", $"[{km.rVictimCharacter?.name}]({GetKillMailLink(km.victimCharacterID, KillMailLinkTypes.character)})")}";
+                var victimCorp = $"{LM.Get("killFeedCorp", $"[{km.rVictimCorp?.name}]({GetKillMailLink(km.victimCorpID, KillMailLinkTypes.corporation)})")}";
+                var victimAlliance = km.rVictimAlliance == null
+                    ? ""
+                    : $"{LM.Get("killFeedAlliance", $"[{km.rVictimAlliance?.name}]")}({GetKillMailLink(km.victimAllianceID, KillMailLinkTypes.alliance)})";
+                var victimShip = $"{LM.Get("killFeedShip", $"[{km.rVictimShipType?.name}]({GetKillMailLink(km.victimShipID, KillMailLinkTypes.ship)})")}";
+
+
+                string[] victimStringArray = new string[] {victimName, victimCorp, victimAlliance, victimShip};
+
+                var attackerName = $"{LM.Get("killFeedName", $"[{km.rAttackerCharacter?.name}]({GetKillMailLink(km.finalBlowAttackerCharacterId, KillMailLinkTypes.character)})")}";
+                var attackerCorp = $"{LM.Get("killFeedCorp", $"[{km.rAttackerCorp?.name}]({GetKillMailLink(km.finalBlowAttackerCorpId, KillMailLinkTypes.corporation)})")}";
+                var attackerAlliance = km.rAttackerAlliance == null || km.finalBlowAttackerAllyId == 0
+                    ? null
+                    : $"{LM.Get("killFeedAlliance", $"[{km.rAttackerAlliance?.name}]({GetKillMailLink(km.finalBlowAttackerAllyId, KillMailLinkTypes.alliance)})")}";
+                var attackerShip = $"{LM.Get("killFeedShip", $"[{km.rAttackerShipType?.name}]({GetKillMailLink(km.attackerShipID, KillMailLinkTypes.ship)})")}";
+
+                string[] attackerStringArray = new string[] {attackerName, attackerCorp, attackerAlliance, attackerShip};
+
+
+                var killFeedDetails = LM.Get("killFeedDetails", km.killTime, km.value.ToString("#,##0 ISk"));
+                var killFeedDetailsSystem = LM.Get("killFeedDetailsSystem", $"[{km.sysName}]({GetKillMailLink(km.systemId, KillMailLinkTypes.system)})");
+
+                string[] detailsStringArray = new string[] {killFeedDetails, killFeedDetailsSystem};
+
+
+                var builder = new EmbedBuilder()
+                    .WithColor(color)
+                    .WithThumbnailUrl($"https://image.eveonline.com/Type/{km.victimShipID}_64.png")
+                    .WithAuthor(author =>
+                    {
+                        author.WithName(LM.Get("killFeedHeader", km.rVictimShipType?.name, km.rSystem?.name))
+                            .WithUrl($"https://zkillboard.com/kill/{km.killmailID}/");
+                        if (km.isNPCKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
+                    })
+                    .AddField(LM.Get("Victim"), string.Join("\n", victimStringArray.Where(c => !string.IsNullOrWhiteSpace(c))))
+                    .AddField(LM.Get("Finalblow"), string.Join("\n", attackerStringArray.Where(c => !string.IsNullOrWhiteSpace(c))))
+                    .AddField(LM.Get("Details"), string.Join("\n", detailsStringArray.Where(c => !string.IsNullOrWhiteSpace(c))));
+
+                if (!string.IsNullOrEmpty(radiusMessage))
+                    builder.AddField(LM.Get("radiusInfoHeader"), radiusMessage);
+
+                var embed = builder.Build();
+                foreach (var id in channelIds)
+                {
+                    var channel = GetGuild()?.GetTextChannel(id);
+                    if (channel != null)
+                        await SendMessageAsync(channel, msg, embed).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(SendEmbedKillMessage), ex, LogCat.Discord);
             }
         }
 
         public IMessageChannel GetChannel(ulong guildID, ulong noid)
-        {                                                    
-            return Client.GetGuild(guildID).GetTextChannel(noid);
+        {
+            try
+            {
+                return Client.GetGuild(guildID).GetTextChannel(noid);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx(nameof(GetChannel), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return null;
+            }
         }
 
         public IMessageChannel GetChannel(ulong noid)
-        {                                                    
-            return GetGuild().GetTextChannel(noid);
+        {
+            try
+            {
+                return GetGuild().GetTextChannel(noid);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx(nameof(SendEmbedKillMessage), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return null;
+            }
         }
 
         public void SubscribeRelay(IDiscordRelayModule m)
@@ -380,9 +503,17 @@ namespace ThunderED.API
 
         public string GetRoleMention(string role)
         {
-            var r = GetGuild().Roles.FirstOrDefault(a => a.Name == role);
-            if(r == null || !r.IsMentionable) return null;
-            return r.Mention;
+            try
+            {
+                var r = GetGuild().Roles.FirstOrDefault(a => a.Name == role);
+                if (r == null || !r.IsMentionable) return null;
+                return r.Mention;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx(nameof(GetRoleMention), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return null;
+            }
         }
 
         public SocketGuild GetGuild()
@@ -392,40 +523,56 @@ namespace ThunderED.API
 
         public SocketRole GetGuildRole(string roleName, bool caseInsensitive = false)
         {
-            return caseInsensitive
-                ? GetGuild().Roles.FirstOrDefault(x => x.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase))
-                : GetGuild().Roles.FirstOrDefault(x => x.Name == roleName);
+            try
+            {
+                return caseInsensitive
+                    ? GetGuild().Roles.FirstOrDefault(x => x.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase))
+                    : GetGuild().Roles.FirstOrDefault(x => x.Name == roleName);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx(nameof(GetGuildRole), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return null;
+            }
         }
 
         
         public List<string> GetGuildRoleNames()
         {
-            return GetGuild().Roles.Select(a => a.Name).ToList();
+            try
+            {
+                return GetGuild().Roles.Select(a => a.Name).ToList();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx(nameof(GetGuildRoleNames), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return null;
+            }
         }
 
         public SocketRole GetUserRole(SocketGuildUser user, string roleName)
         {
-            return user.Roles.FirstOrDefault(x => x.Name == roleName);
+            try
+            {
+                return user.Roles.FirstOrDefault(x => x.Name == roleName);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx(nameof(GetUserRole), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return null;
+            }
         }
 
         public SocketGuildUser GetUser(ulong authorId)
         {
-            return GetGuild().GetUser(authorId);
-        }
-
-        public async Task<bool> AssignRoleToUser(ulong userId, SocketRole role)
-        {
-            var discordUser = GetUser(userId);
-            if (discordUser == null) return false;
             try
             {
-                await discordUser.AddRoleAsync(role);
-                return true;
+                return GetGuild().GetUser(authorId);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                await LogHelper.LogEx($"Unable to assign role {role.Name} to {discordUser.Nickname}", e, LogCat.Discord);
-                return false;
+                LogHelper.LogEx(nameof(GetUser), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return null;
             }
         }
 
@@ -450,10 +597,11 @@ namespace ThunderED.API
         
         public async Task<bool> StripUserRole(ulong userId, string roleName)
         {
-            var discordUser = GetUser(userId);
-            if (discordUser == null) return false;
             try
             {
+                var discordUser = GetUser(userId);
+                if (discordUser == null) return false;
+
                 var role = GetGuildRole(roleName, true);
                 if (role == null) return false;
                 await discordUser.RemoveRoleAsync(role);
@@ -461,45 +609,41 @@ namespace ThunderED.API
             }
             catch (Exception e)
             {
-                await LogHelper.LogEx($"Unable to remove role {roleName} from {discordUser?.Nickname}", e, LogCat.Discord);
+                await LogHelper.LogEx($"Unable to remove role {roleName} from D:{userId}", e, LogCat.Discord);
                 return false;
             }
         }
 
-        public async Task AssignRolesToUser(SocketGuildUser discordUser, List<SocketRole> rolesToAdd)
-        {
-            foreach (var r in rolesToAdd)
-            {
-                if (APIHelper.DiscordAPI.GetUserRole(discordUser, r.Name) == null)
-                {
-                    try
-                    {
-                        await discordUser.AddRoleAsync(r);
-                    }
-                    catch (Exception e)
-                    {
-                        await LogHelper.LogEx($"Unable to assign role {r.Name} to {discordUser.Nickname}", e, LogCat.Discord);
-                    }
-                }
-            }
-        }
-
-
         public async Task<bool> IsBotPrivateChannel(IMessageChannel contextChannel)
         {
-            return contextChannel.GetType() == typeof(SocketDMChannel) && await contextChannel.GetUserAsync(Client.CurrentUser.Id) != null;
-
+            try
+            {
+                return contextChannel.GetType() == typeof(SocketDMChannel) && await contextChannel.GetUserAsync(Client.CurrentUser.Id) != null;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(IsBotPrivateChannel), ex, LogCat.Discord);
+                return false;
+            }
         }
 
         public List<string> GetUserRoleNames(ulong id)
         {
-            return GetUser(id).Roles.Select(a => a.Name).ToList();
+            return GetUser(id)?.Roles.Select(a => a.Name).ToList();
         }
 
         public List<SocketGuildUser> GetUsers(ulong channelId, bool onlineOnly)
         {
-            var users = channelId == 0 ? GetGuild().Users.ToList() : GetGuild().GetChannel(channelId).Users.ToList();
-            return onlineOnly ? users.Where(a => a.Status != UserStatus.Offline).ToList() : users;
+            try
+            {
+                var users = channelId == 0 ? GetGuild().Users.ToList() : GetGuild().GetChannel(channelId).Users.ToList();
+                return onlineOnly ? users.Where(a => a.Status != UserStatus.Offline).ToList() : users;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx(nameof(GetUsers), ex, LogCat.Discord).GetAwaiter().GetResult();
+                return new List<SocketGuildUser>();
+            }
         }
 
         public async Task<IList<string>> CheckAndNotifyBadDiscordRoles(IList<string> roles, LogCat category)
@@ -516,7 +660,19 @@ namespace ThunderED.API
 
         public async Task RemoveMessage(IUserMessage message)
         {
-            await message.DeleteAsync();
+            try
+            {
+                await message.DeleteAsync();
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(RemoveMessage), ex, LogCat.Discord);
+            }
+        }
+
+        public int GetUsersCount()
+        {
+            return GetGuild()?.Users.Count ?? 0;
         }
     }
 }

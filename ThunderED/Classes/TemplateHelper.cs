@@ -16,13 +16,9 @@ namespace ThunderED.Classes
             if (string.IsNullOrEmpty(templateFile)) return false;
             var embed = await CompileTemplate(type, templateFile, dic);
             if (embed == null) return false;
-            var guildID = SettingsManager.Settings.Config.DiscordGuildId;
-            var discordGuild = APIHelper.DiscordAPI.Client.Guilds.FirstOrDefault(x => x.Id == guildID);
             foreach (var id in channelIds)
-            {
-                var channel = discordGuild?.GetTextChannel(id);
-                if (channel != null)
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, message, embed).ConfigureAwait(false);
+            { 
+                await APIHelper.DiscordAPI.SendMessageAsync(id, message, embed).ConfigureAwait(false);
             }
             return true;
         }
@@ -34,13 +30,9 @@ namespace ThunderED.Classes
                 return false;
             var embed = await CompileTemplate(MessageTemplateType.Custom, path, dic);
             if (embed == null) return false;
-            var guildID = SettingsManager.Settings.Config.DiscordGuildId;
-            var discordGuild = APIHelper.DiscordAPI.Client.Guilds.FirstOrDefault(x => x.Id == guildID);
             foreach (var id in channelIds)
             {
-                var channel = discordGuild?.GetTextChannel(id);
-                if (channel != null)
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, message, embed).ConfigureAwait(false);
+                await APIHelper.DiscordAPI.SendMessageAsync(id, message, embed).ConfigureAwait(false);
             }
             return true;
         }

@@ -1017,7 +1017,7 @@ namespace ThunderED.Modules
 
                     //notify about success
                     if(channel != 0)
-                        await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("msgAuthSuccess", APIHelper.DiscordAPI.GetUserMention(discordId), characterData.name));
+                        await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("msgAuthSuccess", await APIHelper.DiscordAPI.GetUserMention(discordId), characterData.name));
                     await AuthInfoLog(authUser, $"Character {characterData.name} has been successfully authenticated");
                 }
                 else

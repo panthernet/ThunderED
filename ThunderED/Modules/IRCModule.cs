@@ -116,8 +116,8 @@ namespace ThunderED.Modules
             //check if we relay only bot messages
             if (relay.RelayFromDiscordBotOnly)
             {
-                var u = APIHelper.DiscordAPI.Client.GetUser(authorId);
-                if(APIHelper.DiscordAPI.Client.CurrentUser.Id != u.Id) return;
+                var u = APIHelper.DiscordAPI.GetUser(authorId);
+                if(u == null || APIHelper.DiscordAPI.GetCurrentUser().Id != u.Id) return;
             }
 
             var msg = $"[DISCORD][{user}]: {message}";

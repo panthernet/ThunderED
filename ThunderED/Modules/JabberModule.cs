@@ -92,9 +92,9 @@ namespace ThunderED.Modules
                         if (e.Message.Value.ToLower().Contains(filter.Key.ToLower()))
                         {
                             var prepend = SettingsManager.Settings.JabberModule.Prepend;
-                            var channel = APIHelper.DiscordAPI.Client.GetGuild(SettingsManager.Settings.Config.DiscordGuildId).GetTextChannel(Convert.ToUInt64(filter.Value));
+                            var channelId = Convert.ToUInt64(filter.Value);
                             filtered = true;
-                            await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```").ConfigureAwait(false);
+                            await APIHelper.DiscordAPI.SendMessageAsync(channelId, $"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```").ConfigureAwait(false);
                         }
                     }
                 }
@@ -102,8 +102,8 @@ namespace ThunderED.Modules
                 if (!string.IsNullOrWhiteSpace(e.Message.Value) && !filtered)
                 {
                     var prepend = SettingsManager.Settings.JabberModule.Prepend;
-                    var channel = APIHelper.DiscordAPI.Client.GetGuild(SettingsManager.Settings.Config.DiscordGuildId).GetTextChannel(SettingsManager.Settings.JabberModule.DefChan);
-                    await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```").ConfigureAwait(false);
+                    if(SettingsManager.Settings.JabberModule.DefChan > 0)
+                        await APIHelper.DiscordAPI.SendMessageAsync(SettingsManager.Settings.JabberModule.DefChan, $"{prepend + Environment.NewLine}{LM.Get("From")}: {e.Message.From.User} {Environment.NewLine} {LM.Get("Message")}: ```{e.Message.Value}```").ConfigureAwait(false);
                 }
             }
         }

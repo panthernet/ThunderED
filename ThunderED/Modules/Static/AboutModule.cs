@@ -17,11 +17,10 @@ namespace ThunderED.Modules.Static
             
             var channel = context.Channel;
             
-            var botid = APIHelper.DiscordAPI.Client.CurrentUser.Id;
+            var botid = APIHelper.DiscordAPI.GetCurrentUser().Id;
             var memoryUsed = ByteSize.FromBytes(Process.GetCurrentProcess().WorkingSet64);
             var runTime = DateTime.Now - Process.GetCurrentProcess().StartTime;
-            var guilds = APIHelper.DiscordAPI.Client.Guilds.Count;
-            var totalUsers = APIHelper.DiscordAPI.Client.Guilds.Aggregate(0, (current, guild) => current + guild.Users.Count);
+            var totalUsers = APIHelper.DiscordAPI.GetUsersCount();
 
             await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{context.User.Mention},{Environment.NewLine}{Environment.NewLine}" +
                                            $"```ThunderED v{Program.VERSION} - Thunder EVE Discord Bot{Environment.NewLine}{Environment.NewLine}" +

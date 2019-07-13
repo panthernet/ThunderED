@@ -68,14 +68,15 @@ namespace ThunderED.Modules
             {
                 var discordGuild = APIHelper.DiscordAPI.GetGuild();
                 var u = discordGuild.GetUser(discordUserId);
+                var currentUser = APIHelper.DiscordAPI.GetCurrentUser();
 
-                if (u != null && (u.Id == APIHelper.DiscordAPI.Client.CurrentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name))))
+                if (u != null && (u.Id == currentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name))))
                 {
                     await AuthInfoLog(discordUserId, "[RUPD] User is bot or have an exempt role. Skipping roles update", true);
                     return null;
                 }
 
-                if (u == null && (discordUserId == APIHelper.DiscordAPI.Client.CurrentUser.Id))
+                if (u == null && (discordUserId == currentUser.Id))
                 {
                     await AuthInfoLog(discordUserId, "[RUPD] Discord user not found. Skipping roles update.", true);
                     return null;

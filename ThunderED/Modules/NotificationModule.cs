@@ -284,7 +284,7 @@ namespace ThunderED.Modules
                                                     {
                                                         try
                                                         {
-                                                            return APIHelper.DiscordAPI.GetUserMention(a);
+                                                            return APIHelper.DiscordAPI.GetUserMention(a).GetAwaiter().GetResult();
                                                         }
                                                         catch
                                                         {

@@ -46,13 +46,13 @@ namespace ThunderED.Tests
             role.Should().NotBeNull();
             _fix.API.GetUserRoleNames(TEST_USER_ID).Should().NotBeNullOrEmpty();
             _fix.API.GetRoleMention(TEST_GUILD_ROLE).Should().NotBeNullOrEmpty();
-            _fix.API.GetUserMention(TEST_USER_ID).Should().NotBeNullOrEmpty();
+            (await _fix.API.GetUserMention(TEST_USER_ID)).Should().NotBeNullOrEmpty();
         }
 
         [Fact]
         public async void SendMessageTest()
         {
-            await _fix.API.SendMessageAsync(TEST_CHANNEL, "This is a test messge!");
+            await _fix.API.SendMessageAsync(TEST_CHANNEL, "This is a test message!");
         }
 
         [Fact]
