@@ -36,7 +36,8 @@ OwnershipTransferred
 + Added new `AutoClearAuthCommandsFromDiscord` property to web auth module to cleanup auth requests
 + Added new `RemoveAuthIfTokenIsInvalid` property to web auth group to remove auth for users with invalid ESI tokens
 + Added new `RemoveTokenIfTokenIsInvalid` property to web auth group to remove token from user auth data if it is invalid
-+ added new `AuthTakeNumberOfUsersPerPass` property to web auth module allowing to specify how many users are checked per pass
++ Added new `AuthTakeNumberOfUsersPerPass` property to web auth module allowing to specify how many users are checked per pass
++ Added new `EnforceSingleTickerPerUser` for web auth module to force users to have ally or corp ticker
 + Added new `ConcurrentThreadsCount` property to be able to control number of threads for parallel processes. Usually 4-8 up to one per CPU core.
 + Added KM template vars {systemID}, {constID}, {regionID}, {victimID}, {victimCorpID}, {victimAllyID}, {attackerID}, {attackerCorpID}, {attackerAllyID}
 + Fixed standings in config editor

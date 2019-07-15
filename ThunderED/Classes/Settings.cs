@@ -1727,6 +1727,8 @@ namespace ThunderED.Classes
         public bool EnforceCorpTickers { get; set; }
         [Comment("Automatically assign alliance tickers to users")]
         public bool EnforceAllianceTickers { get; set; }
+        [Comment("Automatically assign alliance ticker to user or corp ticker if not in alliance")]
+        public bool EnforceSingleTickerPerUser { get; set; }
         [Comment("Automatically assign character names to users (setup Discord group to disallow name change also)")]
         public bool EnforceCharName { get; set; }
         [Comment("Default group to use for auth url display")]

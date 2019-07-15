@@ -239,8 +239,11 @@ namespace ThunderED.Modules
                         string corpPart = null;
                         if (SettingsManager.Settings.WebAuthModule.EnforceCorpTickers)
                         {
-                            var ad = await APIHelper.ESIAPI.GetCorporationData("authCheck", characterData.corporation_id, true);
-                            corpPart = ad != null ? $"[{ad.ticker}] " : null;
+                            if (!SettingsManager.Settings.WebAuthModule.EnforceSingleTickerPerUser || string.IsNullOrEmpty(alliancePart))
+                            {
+                                var ad = await APIHelper.ESIAPI.GetCorporationData("authCheck", characterData.corporation_id, true);
+                                corpPart = ad != null ? $"[{ad.ticker}] " : null;
+                            }
                         }
 
                         var nickname = $"{alliancePart}{corpPart}{(SettingsManager.Settings.WebAuthModule.EnforceCharName ? eveName : u.Username)}";
