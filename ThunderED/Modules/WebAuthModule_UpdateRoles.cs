@@ -85,6 +85,13 @@ namespace ThunderED.Modules
                 var authUser = await SQLHelper.GetAuthUserByDiscordId(discordUserId);
                 if (authUser != null)
                 {
+                    if (!string.IsNullOrEmpty(authUser.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(authUser.GroupName) &&
+                        SettingsManager.Settings.WebAuthModule.AuthGroups[authUser.GroupName].SkipDiscordAuthPage)
+                    {
+                        await AuthInfoLog(authUser, "[RUPD] Discord-less auth found. Skipping roles update...", true);
+                        return null;
+                    }
+
                     //get data
                     var characterData = await APIHelper.ESIAPI.GetCharacterData("authCheck", authUser.CharacterId, true);
                     //skip bad requests
@@ -505,7 +512,7 @@ namespace ThunderED.Modules
                         {
                             await AuthWarningLog(characterData, $"[RG] User {characterData.name} token is no more valid. Token will be omitted from auth data.");
                             result.TokenMustBeDeleted = true;
-                            return result;
+                           // return result;
                         }
                     }
 
