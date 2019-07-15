@@ -7,13 +7,18 @@
 //{iskValue} - km isk value
 //{iskFittedValue} - km isk fitted value
 //{systemName} - KM system name
+//{systemID}
 //{constName} - KM constellation name
 //{regionName} - KM region name
+//{regionID}
 //{systemSec} - km system security status
 //{victimName} - victim name
+//{victimID}
 //{victimCorpName} - victim corp name
+//{victimCorpID}
 //{victimCorpTicker} - victim corp ticker
 //{victimAllyTicker} - victim ally ticker
+//{victimAllyID}
 //{victimAllyOrCorpName} - victim alliance name or corp name if no alliance
 //{victimAllyOrCorpTicker} - victim alliance ticker or corp ticker if no alliance
 //{isNpcKill} - (BOOL) is this an npc kill
@@ -21,9 +26,12 @@
 //{isSoloKill} - (BOOL) this is solo kill KM
 //{isAwoxKill} - (BOOL) this is awox KM
 //{attackerName} - attacker name
+//{attackerID}
 //{attackerCorpName} - attacker corp name
+//{attackerCorpID}
 //{attackerCorpTicker} - attacker corp ticker
 //{attackerAllyName} - attacker ally name
+//{attackerAllyID}
 //{attackerAllyTicker} - attacker ally ticker
 //{attackerAllyOrCorpName} - attacker alliance name or corp name if no alliance
 //{attackerAllyOrCorpTicker} - attacker alliance ticker or corp ticker if no alliance
