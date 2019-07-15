@@ -291,6 +291,24 @@ namespace ThunderED.Providers
 
         }
 
+        public async Task Update(string table, string setField, object setData)
+        {
+            var query = $"UPDATE {table} SET {setField} = @data";
+            await SessionWrapper(query, async command =>
+            {
+                command.Parameters.Add(CreateParam<SqliteParameter>("@data", setData ?? DBNull.Value));
+                try
+                {
+                    command.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx($"[{nameof(Update)}]: {query}", ex, LogCat.Database);
+                }
+            });
+        }
+
+
         public async Task Update(string table, string setField, object setData, Dictionary<string, object> where)
         {
             if (where == null)

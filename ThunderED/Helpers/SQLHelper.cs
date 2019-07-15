@@ -246,6 +246,11 @@ namespace ThunderED.Helpers
             await Update("auth_users", "last_check", date, "discordID", id);
         }
 
+        public static async Task ResetAuthUsersLastCheck()
+        {
+            await Provider?.Update("auth_users", "last_check", null);
+        }
+
         private static AuthUserEntity ParseAuthUser(object[] item)
         {
             return new AuthUserEntity
