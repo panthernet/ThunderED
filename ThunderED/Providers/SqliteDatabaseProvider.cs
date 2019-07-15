@@ -506,7 +506,7 @@ namespace ThunderED.Providers
         public async Task<List<object[]>> SelectDataWithDateCondi(string table, string[] fields, string whereField, int minutes, int limit)
         {
             var field = string.Join(',', fields);
-            var query = $"SELECT {field} FROM {table} WHERE authState=2 and main_character_id is null and (`{whereField}` is null or `{whereField}` <= date('now','-{minutes} minutes')) LIMIT {limit}";
+            var query = $"SELECT {field} FROM {table} WHERE authState=2 and main_character_id is null and (`{whereField}` is null or `{whereField}` <= datetime('now','-{minutes} minutes')) LIMIT {limit}";
 
             return await SessionWrapper(query, async command =>
             {
