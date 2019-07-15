@@ -869,6 +869,11 @@ namespace ThunderED.Modules
             return result;
         }
 
+        private static async Task AuthInfoLog(string message, bool isOptional = false)
+        {
+            if(!isOptional || SettingsManager.Settings.WebAuthModule.EnableDetailedLogging)
+                await LogHelper.LogInfo($"[CHK]: {message}", LogCat.AuthCheck);
+        }
 
         private static async Task AuthInfoLog(object charId, string message, bool isOptional = false)
         {

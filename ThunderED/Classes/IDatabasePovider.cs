@@ -32,5 +32,6 @@ namespace ThunderED.Classes
         Task PurgeCache();
         
         Task CleanupNotificationsList();
+        Task<List<object[]>> SelectDataWithDateCondi(string table, string[] fields, string whereField, int minutes, int limit);
     }
 }

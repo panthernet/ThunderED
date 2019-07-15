@@ -498,5 +498,53 @@ namespace ThunderED.Providers
                 }
             });
         }
+
+        public async Task<List<object[]>> SelectDataWithDateCondi(string table, string[] fields, string whereField, int minutes, int limit)
+        {
+            var field = string.Join(',', fields);
+            var query = $"SELECT {field} FROM {table} WHERE authState=2 and main_character_id is null and (`{whereField}` is null or `{whereField}` <= DATE_SUB(NOW(), INTERVAL {minutes} MINUTE)) LIMIT {limit}";
+
+            return await SessionWrapper(query, async command =>
+            {
+                try
+                {
+                    using (var r = await command.ExecuteReaderAsync())
+                    {
+                        var list = new List<object[]>();
+                        if (r.HasRows)
+                        {
+                            while (await r.ReadAsync())
+                            {
+                                var obj = new List<object>();
+
+                                if (field == "*")
+                                {
+                                    for (int i = 0; i < r.VisibleFieldCount; i++)
+                                    {
+                                        obj.Add(r.IsDBNull(i) ? null : r.GetValue(i));
+                                    }
+                                }
+                                else
+                                {
+                                    for (int i = 0; i < fields.Length; i++)
+                                    {
+                                        obj.Add(r.IsDBNull(i) ? null : r.GetValue(i));
+                                    }
+                                }
+
+                                list.Add(obj.ToArray());
+                            }
+                        }
+                        return list;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx($"[SelectDataWithDateCondi]: {query} ", ex, LogCat.Database);
+                    return default;
+                }
+
+            });
+        }
     }
 }

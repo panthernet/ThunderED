@@ -1584,7 +1584,7 @@ namespace ThunderED.Classes
         [Comment("Number of web-request retries before treating it as failed")]
         public int RequestRetries { get; set; } = 3;
         [Comment("Number of threads for concurrent operations. Default value is 4.")]
-        public int ConcurrentThreadsNumber { get; set; } = 4;
+        public int ConcurrentThreadsCount { get; set; } = 4;
 
         public bool ExtendedESILogging { get; set; } = false;
         public string ESIAddress { get; set; } = "https://esi.evetech.net/";
@@ -1713,7 +1713,10 @@ namespace ThunderED.Classes
     {
         [Comment("Numeric time interval in minutes to run auth checks of existing users")]
         [Required]
-        public int AuthCheckIntervalMinutes { get; set; } = 30;
+        public int AuthCheckIntervalMinutes { get; set; } = 60;
+
+        [Comment("Take this amount of users per auth check pass. Auth delay is 2 min so it's N users per 2 minutes. If check interval is 60 min then it is max 60/2*100=3000 users per hour can be checked.")]
+        public int AuthTakeNumberOfUsersPerPass { get; set; } = 100;
         
         [Comment("Numeric time interval in minutes to run standings update for feed users")]
         public int StandingsRefreshIntervalInMinutes { get; set; } = 60;
@@ -1801,6 +1804,9 @@ namespace ThunderED.Classes
 #endif
         [Comment("Remove user authentication if supplied ESI token has become invalid")]
         public bool RemoveAuthIfTokenIsInvalid { get;set; }
+
+        [Comment("Remove token form user authentication data if supplied ESI token has become invalid")]
+        public bool RemoveTokenIfTokenIsInvalid { get; set; }
 
         [Comment("Enable auth mode that will only search roles until first criteria match. Otherwise it wil search and add roles from all matching filters within this group")]
         public bool StopSearchingOnFirstMatch { get; set; }

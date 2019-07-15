@@ -21,6 +21,7 @@ namespace ThunderED.Classes.Entities
         public DateTime? DumpDate;
         public string RegCode;
         public long? MainCharacterId;
+        public DateTime? LastCheck;
 
 
         //for compatibility
@@ -50,6 +51,7 @@ namespace ThunderED.Classes.Entities
         [JsonIgnore]
         public bool HasRegCode => !string.IsNullOrEmpty(RegCode);
 
+        
 
         public void SetStateDumpster()
         {

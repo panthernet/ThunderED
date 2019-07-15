@@ -234,6 +234,18 @@ namespace ThunderED.Helpers
             return res?.Select(ParseAuthUser).Where(a=> !string.IsNullOrEmpty(a.Data.Permissions)).ToList();
         }
 
+        public static async Task<List<ulong>> GetAuthUserIdsToCheck(int minutes, int limit)
+        {
+            if(Provider == null) return new List<ulong>();
+            return (await Provider.SelectDataWithDateCondi("auth_users", new [] {"discordID"}, "last_check", minutes, limit)).Select(a=> Convert.ToUInt64(a[0])).ToList();
+        }
+
+        
+        public static async Task SetAuthUserLastCheck(ulong id, DateTime date)
+        {
+            await Update("auth_users", "last_check", date, "discordID", id);
+        }
+
         private static AuthUserEntity ParseAuthUser(object[] item)
         {
             return new AuthUserEntity
@@ -248,7 +260,8 @@ namespace ThunderED.Helpers
                 RegCode = (string) item[7],
                 CreateDate = Convert.ToDateTime(item[8]),
                 DumpDate = item[9] == null ? null : (DateTime?)Convert.ToDateTime(item[9]),
-                MainCharacterId = item[10] == null ? null : (long?)Convert.ToInt64(item[10])
+                MainCharacterId = item[10] == null ? null : (long?)Convert.ToInt64(item[10]),
+                LastCheck = item[11] == null? null : (DateTime?)Convert.ToDateTime(item[11]),
             };
         }
 
@@ -267,6 +280,7 @@ namespace ThunderED.Helpers
             dic.Add("dump_date", user.DumpDate);
             dic.Add("data", JsonConvert.SerializeObject(user.Data));
             dic.Add("main_character_id", user.MainCharacterId);
+            dic.Add("last_check", user.LastCheck);
             if (insertOnly)
                 await Insert("auth_users", dic);
             else await InsertOrUpdate("auth_users", dic);
@@ -953,5 +967,6 @@ namespace ThunderED.Helpers
             });
         }
         #endregion
+
     }
 }

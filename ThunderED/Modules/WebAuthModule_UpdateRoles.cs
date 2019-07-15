@@ -3,10 +3,8 @@ using System.Collections.Async;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
 using Discord.WebSocket;
 using ThunderED.Classes;
-using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.OnDemand;
@@ -21,44 +19,46 @@ namespace ThunderED.Modules
             public WebAuthGroup Group;
             public List<SocketRole> UpdatedRoles = new List<SocketRole>();
             public List<string> ValidManualAssignmentRoles = new List<string>();
-            public bool IsConnectionError { get; set; }
+            public bool IsConnectionError;
+            public bool TokenMustBeDeleted;
         }
 
-        internal static async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
+        internal static async Task UpdateAuthUserRolesFromDiscord(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
         {
-            var discordGuild = APIHelper.DiscordAPI.GetGuild();
-            var discordUsers = discordGuild.Users;
-            var dids = discordUsers.Select(a => a.Id).ToList();
-
             if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands && DiscordRolesManagementModule.AvailableRoleNames.Any())
             {
                 authCheckIgnoreRoles = authCheckIgnoreRoles.ToList();
                 authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
             }
+            var idList = APIHelper.DiscordAPI.GetGuild().Users.Select(a => a.Id).ToList();
 
-           /* foreach (var id in dids)
+            await idList.ParallelForEachAsync(async id =>
             {
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }*/
-            await dids.ParallelForEachAsync(async id =>
-            {
+                //make sure we only check not authed users present in Discord group
+                var user = await SQLHelper.GetAuthUserByDiscordId(id);
+                if(user != null && user.IsAuthed) return;
+                //check user roles
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
             }, SettingsManager.MaxConcurrentThreads);
-
-            await UpdateDBUserRoles(exemptRoles, authCheckIgnoreRoles, dids);
         }
 
-        private static async Task UpdateDBUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles, IEnumerable<ulong> dids)
+        internal static async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
         {
-            var ids = (await SQLHelper.GetAuthUsers((int)UserStatusEnum.Authed)).Where(a=> !a.MainCharacterId.HasValue).Select(a=> a.DiscordId);
-            await ids.Where(a => !dids.Contains(a)).ParallelForEachAsync(async id =>
+            if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands && DiscordRolesManagementModule.AvailableRoleNames.Any())
             {
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            },  SettingsManager.MaxConcurrentThreads);
-         /*  foreach (var id in ids.Where(a => !dids.Contains(a)))
-           {
+                authCheckIgnoreRoles = authCheckIgnoreRoles.ToList();
+                authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
+            }
+            var minutes = SettingsManager.Settings.WebAuthModule.AuthCheckIntervalMinutes < 10 ? 10 : SettingsManager.Settings.WebAuthModule.AuthCheckIntervalMinutes;
+            var users = SettingsManager.Settings.WebAuthModule.AuthTakeNumberOfUsersPerPass < 10 ? 10 : SettingsManager.Settings.WebAuthModule.AuthTakeNumberOfUsersPerPass;
+            var ids = await SQLHelper.GetAuthUserIdsToCheck(minutes, users);
+            await AuthInfoLog($"Fetched {ids?.Count} users to check within this pass", true);
+
+            await ids.ParallelForEachAsync(async id =>
+            {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
-           }*/
+                await SQLHelper.SetAuthUserLastCheck(id, DateTime.Now);
+            },  SettingsManager.MaxConcurrentThreads);
         }
 
         public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles,
@@ -72,13 +72,13 @@ namespace ThunderED.Modules
 
                 if (u != null && (u.Id == currentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name))))
                 {
-                    await AuthInfoLog(discordUserId, "[RUPD] User is bot or have an exempt role. Skipping roles update", true);
+                    await AuthInfoLog(discordUserId, "[RUPD] User is bot or have an exempt role. Skipping roles update...", true);
                     return null;
                 }
 
                 if (u == null && (discordUserId == currentUser.Id))
                 {
-                    await AuthInfoLog(discordUserId, "[RUPD] Discord user not found. Skipping roles update.", true);
+                    await AuthInfoLog(discordUserId, "[RUPD] Discord user not found. Skipping roles update...", true);
                     return null;
                 }
 
@@ -107,6 +107,12 @@ namespace ThunderED.Modules
                     {
                         await AuthWarningLog(characterData, "[RUPD] Connection error while searching for group! Skipping roles update.");
                         return null;
+                    }
+
+                    if (result.TokenMustBeDeleted)
+                    {
+                        authUser.RefreshToken = null;
+                        await SQLHelper.SaveAuthUser(authUser);
                     }
                     await AuthInfoLog(characterData, $"[RUPD] GRPFETCH GROUP: {result.GroupName} ROLES: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.UpdatedRoles.Where(a=> !a.Name.StartsWith("@")).Select(a=> a.Name)))} MANUAL: {(result.ValidManualAssignmentRoles == null || !result.ValidManualAssignmentRoles.Any() ? "null" : string.Join(',', result.ValidManualAssignmentRoles))}", true);
 
@@ -260,48 +266,45 @@ namespace ThunderED.Modules
                 }
 
 
-                await AuthInfoLog(discordUserId, "[RUPD] Auth user not found. Checking live discord user", true);
+                await AuthInfoLog(discordUserId, "[RUPD] Auth user not found. Checking live discord user...", true);
 
 
                 //auth user not found
                 if (u == null) return null;
                 var rroles = new List<SocketRole>();
                 var rolesOrig = new List<SocketRole>(u.Roles);
-                foreach (var rrole in rolesOrig)
+                foreach (var role in rolesOrig)
                 {
-                    var exemptRole = exemptRoles.FirstOrDefault(x => x == rrole.Name);
-                    if (exemptRole == null)
-                    {
-                        rroles.Add(rrole);
-                    }
+                    if (exemptRoles.FirstOrDefault(x => x == role.Name) == null)
+                        rroles.Add(role);
                 }
 
                 rolesOrig.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
                 rroles.Remove(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
 
-                bool rchanged = false;
+                var hasBeenChanged = false;
 
                 if (rroles != rolesOrig)
                 {
                     foreach (var exempt in rroles)
                     {
                         if (exemptRoles.FirstOrDefault(x => x == exempt.Name) == null && !authCheckIgnoreRoles.Contains(exempt.Name))
-                            rchanged = true;
+                            hasBeenChanged = true;
                     }
                 }
 
-                if (rchanged)
+                if (hasBeenChanged)
                 {
                     try
                     {
                         var channel = discordGuild.GetTextChannel(SettingsManager.Settings.WebAuthModule.AuthReportChannel);
                         if(channel != null)
                             await APIHelper.DiscordAPI.SendMessageAsync(channel, $"{LM.Get("resettingRoles")} {u.Username}");
-                        var trueRroles = rroles.Where(a => !exemptRoles.Contains(a.Name) && !authCheckIgnoreRoles.Contains(a.Name));
-                        if (trueRroles.Any())
+                        var roles = rroles.Where(a => !exemptRoles.Contains(a.Name) && !authCheckIgnoreRoles.Contains(a.Name)).ToList();
+                        if (roles.Any())
                         {
-                            await AuthInfoLog(discordUserId, $"[RUPD] Resetting roles for {u.Username}: {string.Join(',', trueRroles.Select(a=> a.Name))}");
-                            await u.RemoveRolesAsync(trueRroles);
+                            await AuthInfoLog(discordUserId, $"[RUPD] Resetting roles for {u.Username}: {string.Join(',', roles.Select(a=> a.Name))}");
+                            await u.RemoveRolesAsync(roles);
                         }
                     }
                     catch (Exception ex)
@@ -396,6 +399,7 @@ namespace ThunderED.Modules
                 if (characterData == null)
                 {
                     await AuthWarningLog(discordUserId, "[RG] Aborted due to character data is null");
+                    result.IsConnectionError = true;
                     return result;
                 }
 
@@ -487,10 +491,19 @@ namespace ThunderED.Modules
                     await AuthInfoLog(characterData, $"[RG] Group found: {foundGroup.GroupName} Roles: {string.Join(',', foundGroup.RoleEntities.SelectMany(a=> a.DiscordRoles))} Titles: {string.Join(',', foundGroup.RoleEntities.SelectMany(a=> a.Titles))}!", true);
 
                     //bad token
-                    if (foundGroup.Group.RemoveAuthIfTokenIsInvalid && tq != null && tq.Data.IsNotValid)
+                    if (tq != null && tq.Data.IsNotValid)
                     {
-                        await AuthWarningLog(characterData, $"[RG] User {characterData.name} token is no more valid. Authentication will be declined.");
-                        return result;
+                        if (foundGroup.Group.RemoveAuthIfTokenIsInvalid)
+                        {
+                            await AuthWarningLog(characterData, $"[RG] User {characterData.name} token is no more valid. Authentication will be declined.");
+                            return result;
+                        }
+                        if (foundGroup.Group.RemoveTokenIfTokenIsInvalid)
+                        {
+                            await AuthWarningLog(characterData, $"[RG] User {characterData.name} token is no more valid. Token will be omitted from auth data.");
+                            result.TokenMustBeDeleted = true;
+                            return result;
+                        }
                     }
 
 

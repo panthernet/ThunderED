@@ -49,7 +49,7 @@
     "UseSingleFileForLogging": false, 
     "logNewNotifications": true,
     "requestRetries": 3,
-    "ConcurrentThreadsNumber": 4,
+    "ConcurrentThreadsCount": 4,
     "extendedESILogging": false,
     "ESIAddress": "https://esi.evetech.net/",
     "UseHTTPS": false,
@@ -148,7 +148,9 @@
     }
   },
   "WebAuthModule": {
-    "authCheckIntervalMinutes": 480,
+    "authCheckIntervalMinutes": 60,
+    "AuthTakeNumberOfUsersPerPass": 100, 
+
     "StandingsRefreshIntervalInMinutes": 60,
     "exemptDiscordRoles": [ "Admins" ],
     "AuthCheckIgnoreRoles": [ "CustomDiscordRoleToSkipOnAuthCheck" ],
@@ -165,6 +167,7 @@
     "authGroups": {
       "Mode1_GeneralAuth": {
         "RemoveAuthIfTokenIsInvalid": false,
+        "RemoveTokenIfTokenIsInvalid": false,
         "StopSearchingOnFirstMatch": "false",
         "AllowedMembers": {
           "entry1": {

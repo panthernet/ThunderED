@@ -1,4 +1,4 @@
-### V1.4.1
+### V1.4.2
 + Added new notifications, some with temp placeholder until I get real notification information
 ```
 WarAdopted
@@ -34,8 +34,10 @@ OwnershipTransferred
 + Added new property to log feeder `SendInterval` which is default to 5000 msec
 + Added new web auth param `EnableDetailedLogging` for better auth tracing
 + Added new `AutoClearAuthCommandsFromDiscord` property to web auth module to cleanup auth requests
-+ Added new `RemoveAuthIfTokenIsInvalid` property to web auth module to remove auth for users with invalid ESI tokens
-+ Added new `ConcurrentThreadsNumber` property to be able to control number of threads for parallel processes. Usually 4-8 up to one per CPU core.
++ Added new `RemoveAuthIfTokenIsInvalid` property to web auth group to remove auth for users with invalid ESI tokens
++ Added new `RemoveTokenIfTokenIsInvalid` property to web auth group to remove token from user auth data if it is invalid
++ added new `AuthTakeNumberOfUsersPerPass` property to web auth module allowing to specify how many users are checked per pass
++ Added new `ConcurrentThreadsCount` property to be able to control number of threads for parallel processes. Usually 4-8 up to one per CPU core.
 + Fixed standings in config editor
 + Fixed minor bugs and made some updates to config editor
 + Fixed async logging issues
