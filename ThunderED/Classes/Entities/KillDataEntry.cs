@@ -208,7 +208,7 @@ namespace ThunderED.Classes.Entities
                         {"{attackerName}", rAttackerCharacter?.name},
                         {"{attackerID}", rAttackerCharacter?.character_id.ToString()},
                         {"{attackerCorpName}", rAttackerCorp?.name},
-                        {"{attackerCorpID}", rAttackerCharacter.corporation_id.ToString()},
+                        {"{attackerCorpID}", rAttackerCharacter?.corporation_id.ToString()},
                         {"{attackerCorpTicker}", rAttackerCorp?.ticker},
                         {"{attackerAllyName}", rAttackerAlliance?.name},
                         {"{attackerAllyID}", rAttackerAlliance != null ? rAttackerCorp?.alliance_id.ToString() : null},
