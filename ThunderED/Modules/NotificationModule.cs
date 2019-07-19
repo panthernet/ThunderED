@@ -86,6 +86,12 @@ namespace ThunderED.Modules
                 if (DateTime.Now > _nextNotificationCheck)
                 {
                     await LogHelper.LogModule("Running Notifications module check...", Category);
+                    //update timers
+                    var interval = Settings.NotificationFeedModule.CheckIntervalInMinutes;
+                    await SQLHelper.SetCacheDataNextNotificationCheck(interval);
+                    _nextNotificationCheck = DateTime.Now.AddMinutes(interval);
+
+
                     var guildID = Settings.Config.DiscordGuildId;
 
                     foreach (var groupPair in Settings.NotificationFeedModule.Groups)
@@ -118,6 +124,7 @@ namespace ThunderED.Modules
 
                             var tq = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                             var token = tq.Result;
+                            if (tq.Data.IsNoConnection) return;
                             if (string.IsNullOrEmpty(token))
                             {
                                 if (tq.Data.IsNotValid)
@@ -132,6 +139,9 @@ namespace ThunderED.Modules
                             var etag = _tags.GetOrNull(charId);
                             var result = await APIHelper.ESIAPI.GetNotifications(Reason, charId, token, etag);
                             _tags.AddOrUpdateEx(charId, result.Data.ETag);
+                            //abort if no connection
+                            if(result.Data.IsNoConnection)
+                                return;
                             if (result.Data.IsNotModified || result.Result == null)
                             {
                                 if (!_passContracts.ContainsKey(charId))
@@ -1216,11 +1226,6 @@ namespace ThunderED.Modules
 
                         }
                     }
-
-                    var interval = Settings.NotificationFeedModule.CheckIntervalInMinutes;
-                    await SQLHelper.SetCacheDataNextNotificationCheck(interval);
-                    _nextNotificationCheck = DateTime.Now.AddMinutes(interval);
-                    // await LogHelper.LogInfo("Check complete", Category, LogToConsole, false);
                 }
             }
             catch (Exception ex)

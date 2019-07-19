@@ -186,7 +186,7 @@ namespace ThunderED.Classes
 
                 await ContinuousCheckModule.OneSec_TQStatusPost(_asyncNow);
 
-                if(IsNoConnection) return;
+                if(IsNoConnection || IsESIUnreachable) return;
 
                 await Modules.ParallelForEachAsync(async module =>
                 {
