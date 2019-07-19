@@ -336,7 +336,7 @@ namespace ThunderED.Modules
             var editChars = new List<long>();
             bool skip2 = false;
 
-            if (authgroups.Count == 0 ||  authgroups.Values.All(a => !a.FilterEntities.Any()))
+            if (authgroups.Count == 0 ||  (authgroups.Values.All(a => !a.FilterEntities.Any()) && authgroups.Values.All(a => !a.FilterDiscordRoles.Any())))
             {
                 skip2 = true;
             }
@@ -358,9 +358,9 @@ namespace ThunderED.Modules
             }
 
             //check for Discord admins
-            if (!skip && !skip2 && Settings.TimersModule.GrantEditRolesToDiscordAdmins)
+            if (!skip2 && Settings.TimersModule.GrantEditRolesToDiscordAdmins)
             {
-                var discordId = SQLHelper.GetAuthUserDiscordId(characterId).GetAwaiter().GetResult();
+                var discordId = await SQLHelper.GetAuthUserDiscordId(characterId);
                 if (discordId > 0)
                 {
                     var roles = string.Join(',', APIHelper.DiscordAPI.GetUserRoleNames(discordId));
