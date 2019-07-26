@@ -134,6 +134,7 @@ namespace ThunderED.Modules
                 {
                     foreach (var characterID in group.CharacterIDs)
                     {
+                        if(characterID <=0) continue;
                         try
                         {
                             var rtoken = await SQLHelper.GetRefreshTokenForContracts(characterID);
@@ -195,16 +196,17 @@ namespace ThunderED.Modules
             {
                 var etag = _corpEtokens.GetOrNull(characterID);
                 var result = await APIHelper.ESIAPI.GetCorpContracts(Reason, corpID, token, etag);
+                if(result?.Data == null || result.Data.IsNotModified) return;
                 _corpEtokens.AddOrUpdateEx(characterID, result.Data.ETag);
-                if(result.Data.IsNotModified) return;
+
                 contracts = result.Result?.OrderByDescending(a => a.contract_id).ToList();
             }
             else
             {
                 var etag = _etokens.GetOrNull(characterID);
                 var result = await APIHelper.ESIAPI.GetCharacterContracts(Reason, characterID, token, etag);
+                if(result?.Data == null || result.Data.IsNotModified) return;
                 _etokens.AddOrUpdateEx(characterID, result.Data.ETag);
-                if(result.Data.IsNotModified) return;
 
                 contracts = result.Result?.OrderByDescending(a => a.contract_id).ToList();
             }
