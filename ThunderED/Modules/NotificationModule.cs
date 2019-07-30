@@ -812,7 +812,7 @@ namespace ThunderED.Modules
                                                         ? ((await APIHelper.ESIAPI.GetAllianceData(Reason, declaredAgainstId, true))?.name ?? (await APIHelper.ESIAPI.GetCorporationData(Reason, declaredAgainstId, true))?.name)
                                                         : null;
 
-                                                    var hq = GetData("declaredByID", data)?.Replace("<b>", "").Replace("</b>", "");
+                                                    var hq = GetData("warHQ", data)?.Replace("<b>", "").Replace("</b>", "");
 
 
                                                     switch (notification.type)
