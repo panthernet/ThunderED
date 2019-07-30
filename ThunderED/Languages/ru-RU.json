@@ -573,7 +573,7 @@
   "notifWarAdopted": "{0} унаследовали войну против {1}!",
   "notifWarAllyInherited": "Военный союзник {0} был унаследован!",
   "notifWarConcordInvalidates": "CONCORD прекращает войну между {0} и {1}!",
-  "notifWarDeclared": "{0} объявили войну {1}!",
+  "notifWarDeclared": "{0} объявили войну {1}. Штаб агрессора: {2}",
   "notifWarHQRemovedFromSpace": "Военный штаб {0} больше не существует!",
   "notifWarInherited": "Была унаследована война между {0} и {1}!",
   "notifWarInvalid": "Война между {0} и {1} больше не валидна!",
