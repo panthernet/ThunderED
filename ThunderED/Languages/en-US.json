@@ -580,7 +580,7 @@
   "notifWarAdopted": "{0} has adopted war against {1}!",
   "notifWarAllyInherited": "War ally {0} has been inherited!",
   "notifWarConcordInvalidates": "Concord invalidates war between {0} and {1}!",
-  "notifWarDeclared": "{0} has declared war on {1}!",
+  "notifWarDeclared": "{0} has declared war against {1}! Attackers HQ: {2}",
   "notifWarHQRemovedFromSpace": "{0} war HQ has been removed from space!",
   "notifWarInherited": "The war between {0} and {1} has been inherited!",
   "notifWarInvalid": "Invalid war between {0} and {1}!",

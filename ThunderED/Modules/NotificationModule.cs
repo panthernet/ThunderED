@@ -130,8 +130,8 @@ namespace ThunderED.Modules
                                 if (tq.Data.IsNotValid)
                                     await SendOneTimeWarning(charId, $"Notifications token for character {charId} is outdated or no more valid!");
                                 else
-                                    await LogHelper.LogWarning($"Unable to get notifications token for character {charId}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})");
-
+                                    await LogHelper.LogWarning(
+                                        $"Unable to get notifications token for character {charId}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})");
                                 continue;
                             }
                             await LogHelper.LogInfo($"Checking characterID:{charId}", Category, LogToConsole, false);
@@ -802,6 +802,19 @@ namespace ThunderED.Modules
                                                     var color = new Color(0x00FF00);
                                                     string text;
                                                     string image;
+
+                                                    var declaredById = GetData("declaredByID", data);
+                                                    var declareByName = !string.IsNullOrEmpty(declaredById)
+                                                        ? ((await APIHelper.ESIAPI.GetAllianceData(Reason, declaredById, true))?.name ?? (await APIHelper.ESIAPI.GetCorporationData(Reason, declaredById, true))?.name)
+                                                        : null;
+                                                    var declaredAgainstId = GetData("againstID", data);
+                                                    var declareAgainstName = !string.IsNullOrEmpty(declaredAgainstId)
+                                                        ? ((await APIHelper.ESIAPI.GetAllianceData(Reason, declaredAgainstId, true))?.name ?? (await APIHelper.ESIAPI.GetCorporationData(Reason, declaredAgainstId, true))?.name)
+                                                        : null;
+
+                                                    var hq = GetData("declaredByID", data)?.Replace("<b>", "").Replace("</b>", "");
+
+
                                                     switch (notification.type)
                                                     {
                                                         case "WarAdopted":
@@ -819,7 +832,7 @@ namespace ThunderED.Modules
                                                             break;
                                                         case "WarDeclared":
                                                             color = new Color(0xFF0000);
-                                                            text = LM.Get("notifWarDeclared", corp);
+                                                            text = LM.Get("notifWarDeclared", declareByName, declareAgainstName, hq);
                                                             image = Settings.Resources.ImgWarDeclared;
                                                             break;
                                                         case "WarHQRemovedFromSpace":
