@@ -827,7 +827,7 @@ namespace ThunderED.Modules
                                                             image = Settings.Resources.ImgWarInviteSent;
                                                             break;
                                                         case "WarConcordInvalidates":
-                                                            text = LM.Get("notifWarConcordInvalidates", corp);
+                                                            text = LM.Get("notifWarConcordInvalidates", declareByName, declareAgainstName);
                                                             image = Settings.Resources.ImgWarInvalidate;
                                                             break;
                                                         case "WarDeclared":
@@ -846,15 +846,15 @@ namespace ThunderED.Modules
                                                             image = Settings.Resources.ImgWarInviteSent;
                                                             break;
                                                         case "WarInvalid":
-                                                            text = LM.Get("notifWarInvalid", corp);
+                                                            text = LM.Get("notifWarInvalid", declareByName, declareAgainstName);
                                                             image = Settings.Resources.ImgWarInvalidate;
                                                             break;
                                                         case "WarRetracted":
-                                                            text = LM.Get("notifWarRetracted", corp);
+                                                            text = LM.Get("notifWarRetracted", declareByName, declareAgainstName);
                                                             image = Settings.Resources.ImgWarInvalidate;
                                                             break;
                                                         case "WarRetractedByConcord":
-                                                            text = LM.Get("notifWarRetractedByConcord", corp);
+                                                            text = LM.Get("notifWarRetractedByConcord", declareByName, declareAgainstName);
                                                             image = Settings.Resources.ImgWarInvalidate;
                                                             break;
                                                         default:
