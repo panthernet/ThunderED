@@ -817,7 +817,7 @@ namespace ThunderED.Modules
                                                     {
                                                         case "WarAdopted":
                                                             color = new Color(0xFF0000);
-                                                            text = LM.Get("notifWarAdopted", corp);
+                                                            text = LM.Get("notifWarAdopted", declareByName, declareAgainstName);
                                                             image = Settings.Resources.ImgWarDeclared;
                                                             break;
                                                         case "WarAllyInherited":

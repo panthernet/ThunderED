@@ -66,7 +66,15 @@ namespace ThunderED
                 LogHelper.LogWarning($"Requested translation not found: {key}", LogCat.Translation, false).GetAwaiter().GetResult();
                 return "-NO-TRANS-";
             }
-            return string.Format(Translations[key.ToLower()], prms);
+
+            try
+            {
+                return string.Format(Translations[key.ToLower()], prms);
+            }
+            catch
+            {
+                return "-FORMAT-ERR-";
+            }
         }
     }
 }
