@@ -17,6 +17,8 @@ namespace ThunderED
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
+            var x = string.IsNullOrWhiteSpace("");
+
             // var ssss = new List<JsonZKill.ZkillOnly>().Count(a => a.killmail_id == 0);
             if (!File.Exists(SettingsManager.FileSettingsPath))
             {

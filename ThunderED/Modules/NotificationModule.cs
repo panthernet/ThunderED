@@ -811,9 +811,7 @@ namespace ThunderED.Modules
                                                     var declareAgainstName = !string.IsNullOrEmpty(declaredAgainstId)
                                                         ? ((await APIHelper.ESIAPI.GetAllianceData(Reason, declaredAgainstId, true))?.name ?? (await APIHelper.ESIAPI.GetCorporationData(Reason, declaredAgainstId, true))?.name)
                                                         : null;
-
                                                     var hq = GetData("warHQ", data)?.Replace("<b>", "").Replace("</b>", "");
-
 
                                                     switch (notification.type)
                                                     {
@@ -901,7 +899,7 @@ namespace ThunderED.Modules
                                                     var applicationText = string.Empty;
                                                     if(notification.type != "CharLeftCorpMsg")
                                                     {
-                                                        GetData("applicationText", data);
+                                                        //GetData("applicationText", data);
 
                                                         var sb = new StringBuilder();
                                                         foreach (var (key, value) in data)
@@ -941,8 +939,7 @@ namespace ThunderED.Modules
                                                     if (!string.IsNullOrEmpty(applicationText) && applicationText != "''")
                                                     {
                                                         applicationText = (await MailModule.PrepareBodyMessage(applicationText))[0];
-                                                        if (applicationText.StartsWith(@"\u"))
-                                                            applicationText = applicationText.ConvertToCyrillic();
+                                                        applicationText = applicationText.ConvertToCyrillic();
                                                         builder.WithDescription(applicationText);
                                                     }
 
