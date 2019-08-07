@@ -144,7 +144,7 @@ namespace ThunderED.API
         {
             try
             {
-                if (channel == 0 || string.IsNullOrWhiteSpace(message)) return null;
+                if (channel == 0 || (string.IsNullOrWhiteSpace(message) && embed == null)) return null;
                 var ch = GetChannel(channel);
                 if (ch == null)
                 {

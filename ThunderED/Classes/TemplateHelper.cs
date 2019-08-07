@@ -10,7 +10,7 @@ namespace ThunderED.Classes
 {
     public static class TemplateHelper
     {
-        public static async Task<bool> PostTemplatedMessage(MessageTemplateType type, Dictionary<string, string> dic, List<ulong> channelIds, string message)
+       /* public static async Task<bool> PostTemplatedMessage(MessageTemplateType type, Dictionary<string, string> dic, List<ulong> channelIds, string message)
         {
             var templateFile = GetTemplate(type);
             if (string.IsNullOrEmpty(templateFile)) return false;
@@ -21,7 +21,7 @@ namespace ThunderED.Classes
                 await APIHelper.DiscordAPI.SendMessageAsync(id, message, embed).ConfigureAwait(false);
             }
             return true;
-        }
+        }*/
 
         public static async Task<bool> PostTemplatedMessage(string templateFile, Dictionary<string, string> dic, List<ulong> channelIds, string message)
         {

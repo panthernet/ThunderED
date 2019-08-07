@@ -52,6 +52,7 @@ OwnershipTransferred
 + Colorized important log feeder posts (desktop Discord client only)
 
 ### BREAKING CHANGES
+- Automatic KM templates has been removed. Now you have to specify template file for each KM group manually or leave empty for default.
 - Added new entries to `Resources` config section
 - Replaced `SystemLogFeederSettings.OnlyErrors` with `SystemLogFeederSettings.LogSeverity`
 - Renamed web auth group `UseStrictAuthenticationMode` to `StopSearchingOnFirstMatch`

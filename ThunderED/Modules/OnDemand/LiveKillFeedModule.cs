@@ -438,26 +438,31 @@ namespace ThunderED.Modules.OnDemand
                             {
                                 var hasTemplate = !string.IsNullOrWhiteSpace(group.MessageTemplateFileName);
                                 var msgColor = isLoss ? new Color(0xD00000) : new Color(0x00FF00);
-                                var msgType = !hasTemplate ? MessageTemplateType.KillMailGeneral : MessageTemplateType.Custom;
+                               // var msgType = !hasTemplate ? MessageTemplateType.KillMailGeneral : MessageTemplateType.Custom;
                                 var km = new KillDataEntry();
 
                                 if (await km.Refresh(Reason, kill))
                                 {
                                     km.dic["{isLoss}"] = isLoss ? "true" : "false";
-                                    var isDone = hasTemplate
-                                        ? await TemplateHelper.PostTemplatedMessage(group.MessageTemplateFileName, km.dic, discordChannels, group.ShowGroupName ? groupName : " ")
-                                        : await TemplateHelper.PostTemplatedMessage(msgType, km.dic, discordChannels,
+                                    if (hasTemplate)
+                                    {
+                                        hasBeenPosted = await TemplateHelper.PostTemplatedMessage(group.MessageTemplateFileName, km.dic, discordChannels,
                                             group.ShowGroupName ? groupName : " ");
-                                    if(!isDone)
+                                        await LogHelper.LogInfo($"Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                    }
+                                    else
+                                    {
                                         await APIHelper.DiscordAPI.SendEmbedKillMessage(discordChannels, msgColor, km, null);
+                                        hasBeenPosted = true;
+                                        await LogHelper.LogInfo($"Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                    }
+                                        
                                 }
                             }
 
                             if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
                                 ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
-                            await LogHelper.LogInfo($"Posting     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
 
-                            hasBeenPosted = true;
                             if(group.StopOnFirstFilterMatch) break; //goto next group
                         }
 
