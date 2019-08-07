@@ -769,7 +769,9 @@ namespace ThunderED.Modules
                                                             image = Settings.Resources.ImgCorpTaxChangeMsg;
                                                             break;
                                                         case "OwnershipTransferred":
-                                                            text = LM.Get("notifOwnershipTransferred", GetData("structureName", data), GetData("fromCorporationName", data), GetData("toCorporationName", data));
+                                                            var oldOwner = await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("oldOwnerCorpID", data));
+                                                            var newOwner = await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("newOwnerCorpID", data));
+                                                            text = LM.Get("notifOwnershipTransferred", GetData("structureName", data), oldOwner?.name, newOwner?.name);
                                                             image = Settings.Resources.ImgCitFuelAlert;
                                                             break;
                                                         default:
