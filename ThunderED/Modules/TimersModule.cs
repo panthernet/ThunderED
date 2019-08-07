@@ -308,7 +308,7 @@ namespace ThunderED.Modules
            // isEditor = false;
             bool skip = false;
 
-            if (authgroups.Count == 0 || authgroups.Values.All(a => !a.FilterEntities.Any()))
+            if (authgroups.Count == 0 || authgroups.Values.All(a => !a.FilterEntities.Any() && !a.FilterDiscordRoles.Any()))
             {
                 skip = true;
             }
@@ -336,7 +336,7 @@ namespace ThunderED.Modules
             var editChars = new List<long>();
             bool skip2 = false;
 
-            if (authgroups.Count == 0 ||  (authgroups.Values.All(a => !a.FilterEntities.Any()) && authgroups.Values.All(a => !a.FilterDiscordRoles.Any())))
+            if (authgroups.Count == 0 ||  authgroups.Values.All(a => !a.FilterEntities.Any() && !a.FilterDiscordRoles.Any()))
             {
                 skip2 = true;
             }
