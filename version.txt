@@ -1,6 +1,7 @@
 ### V1.4.3
 + Added new auth module property `AuthCheckUnregisteredDiscordUsers` to be able to switch off unregisteres users checks
 + Fixed timers web page access malfunction
++ Fixed auth check entries selection based on time
 + Made unregistered Discord user checks linear to reduce Discord server load
 
 ### V1.4.2
