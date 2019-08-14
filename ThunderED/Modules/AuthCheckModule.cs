@@ -19,7 +19,8 @@ namespace ThunderED.Modules
 
             try
             {
-                await CheckDiscordUsers(manual);
+                if(Settings.WebAuthModule.AuthCheckUnregisteredDiscordUsers)
+                    await CheckDiscordUsers(manual);
                 await CheckDBUsers(manual);
             }
             finally
@@ -51,7 +52,7 @@ namespace ThunderED.Modules
             {
                 _lastDiscordAuthCheck = DateTime.Now;
                 await LogHelper.LogModule("Running Discord users auth check...", Category);
-                await WebAuthModule.UpdateAuthUserRolesFromDiscord(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles);
+                await WebAuthModule.UpdateAuthUserRolesFromDiscord(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles, false);
             }
         }
     }

@@ -154,6 +154,7 @@
     "StandingsRefreshIntervalInMinutes": 60,
     "exemptDiscordRoles": [ "Admins" ],
     "AuthCheckIgnoreRoles": [ "CustomDiscordRoleToSkipOnAuthCheck" ],
+    "AuthCheckUnregisteredDiscordUsers": true,
     "authReportChannel": 0,
     "//": "Channels where !auth command is allowed. Empty - everywhere",
     "comAuthChannels": [],
@@ -427,7 +428,7 @@
   "mailModule": {
     "checkIntervalInMinutes": 2,
     "AuthGroups": {
-      "VesNa": {
+      "Group1": {
         "Id": [ 0 ],
         "IncludePrivateMail": true,
         "DefaultChannel": 0,

@@ -490,7 +490,7 @@ namespace ThunderED.API
             }
             catch (Exception ex)
             {
-                LogHelper.LogEx(nameof(SendEmbedKillMessage), ex, LogCat.Discord).GetAwaiter().GetResult();
+                LogHelper.LogEx(nameof(GetChannel), ex, LogCat.Discord).GetAwaiter().GetResult();
                 return null;
             }
         }

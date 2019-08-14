@@ -44,6 +44,11 @@ namespace ThunderED.Modules
             WebServerModule.ModuleConnectors.Add(Reason, Auth);
         }
 
+        public async override Task Initialize()
+        {
+            
+        }
+
         private DateTime _lastCleanupCheck = DateTime.FromFileTime(0);
 
 
@@ -75,8 +80,8 @@ namespace ThunderED.Modules
 
         private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
 
-        private readonly ConcurrentDictionary<long, List<JsonClasses.Notification>> _passContracts = new ConcurrentDictionary<long, List<JsonClasses.Notification>>();
-
+        private readonly ConcurrentDictionary<long, List<JsonClasses.Notification>> _passNotifications = new ConcurrentDictionary<long, List<JsonClasses.Notification>>();
+        private long _lastLoggerNotificationId;
 
         #region Notifications
         private async Task NotificationFeed()
@@ -144,11 +149,11 @@ namespace ThunderED.Modules
                                 return;
                             if (result.Data.IsNotModified || result.Result == null)
                             {
-                                if (!_passContracts.ContainsKey(charId))
+                                if (!_passNotifications.ContainsKey(charId))
                                     continue;
-                                result.Result = _passContracts[charId];
+                                result.Result = _passNotifications[charId];
                             }
-                            else _passContracts.AddOrUpdate(charId, result.Result);
+                            else _passNotifications.AddOrUpdate(charId, result.Result);
 
                             var notifications = result.Result;
 
@@ -1246,7 +1251,7 @@ namespace ThunderED.Modules
             }
             finally
             {
-                _passContracts.Clear();
+                _passNotifications.Clear();
             }
         }
 

@@ -1739,6 +1739,8 @@ namespace ThunderED.Classes
 
         [Comment("Auto clear !auth commands text from discord channels to reduce clutter")]
         public bool AutoClearAuthCommandsFromDiscord { get; set; }
+        [Comment("Check Discord users that do not have authentication")]
+        public bool AuthCheckUnregisteredDiscordUsers { get; set; } = true;
 
 #if EDITOR
         [Comment("The list of Discord role names which will not be checked for authentication (admins etc.)")]

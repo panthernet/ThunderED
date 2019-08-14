@@ -23,7 +23,7 @@ namespace ThunderED.Modules
             public bool TokenMustBeDeleted;
         }
 
-        internal static async Task UpdateAuthUserRolesFromDiscord(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
+        internal static async Task UpdateAuthUserRolesFromDiscord(List<string> exemptRoles, List<string> authCheckIgnoreRoles, bool useParallel)
         {
             if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands && DiscordRolesManagementModule.AvailableRoleNames.Any())
             {
@@ -32,14 +32,27 @@ namespace ThunderED.Modules
             }
             var idList = APIHelper.DiscordAPI.GetGuild().Users.Select(a => a.Id).ToList();
 
-            await idList.ParallelForEachAsync(async id =>
+            if (useParallel)
             {
-                //make sure we only check not authed users present in Discord group
-                var user = await SQLHelper.GetAuthUserByDiscordId(id);
-                if(user != null && user.IsAuthed) return;
-                //check user roles
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles); 
-            }, SettingsManager.MaxConcurrentThreads);
+                await idList.ParallelForEachAsync(async id =>
+                {
+                    //make sure we only check not authed users present in Discord group
+                    var user = await SQLHelper.GetAuthUserByDiscordId(id);
+                    if (user != null && user.IsAuthed) return;
+                    //check user roles
+                    await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
+                }, SettingsManager.MaxConcurrentThreads);
+            }
+            else
+            {
+                foreach (var id in idList)
+                {
+                    var user = await SQLHelper.GetAuthUserByDiscordId(id);
+                    if (user != null && user.IsAuthed) return;
+                    //check user roles
+                    await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
+                }
+            }
         }
 
         internal static async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles)

@@ -452,7 +452,7 @@ namespace ThunderED.Modules.OnDemand
                                     }
                                     else
                                     {
-                                        await APIHelper.DiscordAPI.SendEmbedKillMessage(discordChannels, msgColor, km, null);
+                                        await APIHelper.DiscordAPI.SendEmbedKillMessage(discordChannels, msgColor, km, group.ShowGroupName ? groupName : " ");
                                         hasBeenPosted = true;
                                         await LogHelper.LogInfo($"Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
                                     }
