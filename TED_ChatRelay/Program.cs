@@ -29,6 +29,7 @@ namespace ThunderED
                 catch (Exception ex)
                 {
                     Console.WriteLine("Error loading config file! Make sure it has correct syntax.");
+                    Console.WriteLine(ex.ToString());
                     Console.WriteLine(ex.InnerException?.ToString());
                     Console.ReadKey();
                     return;

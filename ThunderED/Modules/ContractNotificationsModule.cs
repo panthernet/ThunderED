@@ -263,7 +263,7 @@ namespace ThunderED.Modules
                             await PrepareFinishedDiscordMessage(filter.DiscordChannelId, freshContract, group.DefaultMention, isCorp, characterID, corpID, token, filter);
                         else
                             await LogHelper.LogWarning($"Specified filter channel ID: {filter.DiscordChannelId} is not accessible!", Category);
-                        await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is expired!", Category);
+                        await LogHelper.LogModule($"--> Contract {freshContract.contract_id} is {freshContract.status}!", Category);
                         if(lst.Contains(contract))
                             lst.Remove(contract);
                         continue;
