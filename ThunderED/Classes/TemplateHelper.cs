@@ -37,7 +37,7 @@ namespace ThunderED.Classes
             return true;
         }
 
-        public static async Task<Embed> GetTemplatedMessage(MessageTemplateType type, Dictionary<string, string> dic)
+      /*  public static async Task<Embed> GetTemplatedMessage(MessageTemplateType type, Dictionary<string, string> dic)
         {
             var templateFile = GetTemplate(type);
             if (string.IsNullOrEmpty(templateFile)) return null;
@@ -65,7 +65,7 @@ namespace ThunderED.Classes
             if (!string.IsNullOrEmpty(typeFile) && File.Exists(typeFile))
                 return typeFile;
             return null;
-        }
+        }*/
 
         public static async Task<Embed> CompileTemplate(MessageTemplateType type, string fileName, Dictionary<string, string> dic)
         {

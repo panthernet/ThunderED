@@ -2,6 +2,7 @@
 + Added new auth module property `AuthCheckUnregisteredDiscordUsers` to be able to switch off unregisteres users checks
 + Fixed timers web page access malfunction
 + Fixed auth check entries selection based on time
++ Fixed kill feed to correctly use template file for radius kills
 + Made unregistered Discord user checks linear to reduce Discord server load
 
 ### V1.4.2

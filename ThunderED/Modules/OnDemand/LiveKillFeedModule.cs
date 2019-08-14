@@ -562,21 +562,19 @@ namespace ThunderED.Modules.OnDemand
             km.dic.AddOrUpdateEx("{constName}", rConst?.name);
             km.dic.AddOrUpdateEx("{regionName}", rRegion?.name);
 
-            var template = isUrlOnly ? null : await TemplateHelper.GetTemplatedMessage(MessageTemplateType.KillMailRadius, km.dic);
             var channels = filter.DiscordChannels.Any() ? filter.DiscordChannels : group.DiscordChannels;
+
+            if (!string.IsNullOrEmpty(group.MessageTemplateFileName))
+                if (await TemplateHelper.PostTemplatedMessage(group.MessageTemplateFileName, km.dic, channels, group.ShowGroupName ? groupName : " "))
+                    return true;
             foreach (var channel in channels)
             {
                 if (isUrlOnly)
                     await APIHelper.DiscordAPI.SendMessageAsync(channel, kill.zkb.url);
                 else
                 {
-                    if (template != null)
-                        await APIHelper.DiscordAPI.SendMessageAsync(channel, group.ShowGroupName ? groupName : " ", template).ConfigureAwait(false);
-                    else
-                    {
-                        var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {srcSystem?.name}" : $"{LM.Get("InSmall")} {km.sysName} ({km.systemSecurityStatus})";
-                        await APIHelper.DiscordAPI.SendEmbedKillMessage(new List<ulong> {channel}, new Color(0x989898), km, string.IsNullOrEmpty(jumpsText) ? "-" : jumpsText, group.ShowGroupName ? groupName : " ");
-                    }
+                    var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {srcSystem?.name}" : $"{LM.Get("InSmall")} {km.sysName} ({km.systemSecurityStatus})";
+                    await APIHelper.DiscordAPI.SendEmbedKillMessage(new List<ulong> {channel}, new Color(0x989898), km, string.IsNullOrEmpty(jumpsText) ? "-" : jumpsText, group.ShowGroupName ? groupName : " ");
                 }
             }
 
