@@ -36,8 +36,8 @@ namespace ThunderED.API
                     var o = new PureWebSocketOptions();
                     _webSocket?.Dispose();
                     _webSocket = new PureWebSocket(SettingsManager.Settings.ZKBSettingsModule.ZKillboardWebSocketUrl, o);
-                    _webSocket.OnMessage += _webSocket_OnMessage;
-                    _webSocket.OnError += async exception => { await LogHelper.LogEx("_webSocket.OnError", exception, LogCat.ZKill); };
+                    _webSocket.OnMessage += WebSocket_OnMessage;
+                    _webSocket.OnError += async (sender, exception) => { await LogHelper.LogEx("WebSocket.OnError", exception, LogCat.ZKill); };
 
                     if (!_webSocket.Connect())
                     {
@@ -72,11 +72,11 @@ namespace ThunderED.API
             return null;
         }
 
-        private async void _webSocket_OnMessage(string data)
+        private async void WebSocket_OnMessage(object sender, string message)
         {
             try
             {
-                var entry = JsonConvert.DeserializeObject<JsonZKill.Killmail>(data);
+                var entry = JsonConvert.DeserializeObject<JsonZKill.Killmail>(message);
                 _webMailsQueue.Enqueue(entry);
             }
             catch (Exception ex)

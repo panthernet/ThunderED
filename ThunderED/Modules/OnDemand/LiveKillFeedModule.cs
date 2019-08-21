@@ -441,7 +441,6 @@ namespace ThunderED.Modules.OnDemand
                             {
                                 var hasTemplate = !string.IsNullOrWhiteSpace(group.MessageTemplateFileName);
                                 var msgColor = isLoss ? new Color(0xD00000) : new Color(0x00FF00);
-                               // var msgType = !hasTemplate ? MessageTemplateType.KillMailGeneral : MessageTemplateType.Custom;
                                 var km = new KillDataEntry();
 
                                 if (await km.Refresh(Reason, kill))

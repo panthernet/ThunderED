@@ -16,8 +16,6 @@ namespace ThunderED.Modules
         {
             try
             {
-               // var lines = (await File.ReadAllLinesAsync(Path.Combine(SettingsManager.RootDirectory, "Templates/Messages/default", "def.Template.killMailGeneral.txt")))
-               //     .Where(a => !a.StartsWith("//") && !string.IsNullOrWhiteSpace(a)).ToList();
                 var dic = new Dictionary<string, string>
                 {
                     {"{shipID}", "28848"},
@@ -43,7 +41,7 @@ namespace ThunderED.Modules
                 var path = Path.Combine(SettingsManager.RootDirectory, "Templates", "Messages", template);
                 if(!File.Exists(path))
                     return;
-                var embed = await TemplateHelper.CompileTemplate(MessageTemplateType.KillMailGeneral, path, dic);
+                var embed = await TemplateHelper.CompileTemplate(path, dic);
                 if (embed == null)
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, "Test embed failed!");
