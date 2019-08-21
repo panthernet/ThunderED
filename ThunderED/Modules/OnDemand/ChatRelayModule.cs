@@ -18,7 +18,7 @@ namespace ThunderED.Modules.OnDemand
 
         public ChatRelayModule()
         {
-            LogHelper.LogModule("Inititalizing ChatRelay module...", Category).GetAwaiter().GetResult();
+            LogHelper.LogModule("Initializing ChatRelay module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, OnRequestReceived);
         }
 

@@ -29,11 +29,18 @@ namespace ThunderED.Classes
             if (string.IsNullOrEmpty(templateFile) || !File.Exists(path))
                 return false;
             var embed = await CompileTemplate(MessageTemplateType.Custom, path, dic);
-            if (embed == null) return false;
+            if (embed == null)
+            {
+                await LogHelper.LogError($"There was an error compiling '{templateFile}' template for ZKILL!");
+                return false;
+            }
             foreach (var id in channelIds)
             {
                 await APIHelper.DiscordAPI.SendMessageAsync(id, message, embed).ConfigureAwait(false);
             }
+
+            if (!channelIds.Any())
+                await LogHelper.LogError($"No channels specified for KB feed! Check config.");
             return true;
         }
 

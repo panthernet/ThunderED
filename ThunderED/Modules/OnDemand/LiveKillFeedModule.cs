@@ -432,8 +432,11 @@ namespace ThunderED.Modules.OnDemand
                         else
                         {
                             if (group.FeedUrlsOnly)
+                            {
                                 foreach (var channel in discordChannels)
                                     await APIHelper.DiscordAPI.SendMessageAsync(channel, kill.zkb.url);
+                                await LogHelper.LogInfo($"Posted.     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                            }
                             else
                             {
                                 var hasTemplate = !string.IsNullOrWhiteSpace(group.MessageTemplateFileName);
@@ -448,7 +451,8 @@ namespace ThunderED.Modules.OnDemand
                                     {
                                         hasBeenPosted = await TemplateHelper.PostTemplatedMessage(group.MessageTemplateFileName, km.dic, discordChannels,
                                             group.ShowGroupName ? groupName : " ");
-                                        await LogHelper.LogInfo($"Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                        if(hasBeenPosted)
+                                            await LogHelper.LogInfo($"Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
                                     }
                                     else
                                     {

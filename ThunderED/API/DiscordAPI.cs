@@ -458,9 +458,10 @@ namespace ThunderED.API
                 var embed = builder.Build();
                 foreach (var id in channelIds)
                 {
-                    var channel = GetGuild()?.GetTextChannel(id);
+                    var channel = GetChannel(id);
                     if (channel != null)
-                        await SendMessageAsync(channel, msg, embed).ConfigureAwait(false);
+                        await SendMessageAsync(channel, msg, embed);
+                    else await LogHelper.LogWarning($"Channel {id} not found!", LogCat.ZKill);
                 }
             }
             catch (Exception ex)

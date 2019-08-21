@@ -143,6 +143,7 @@ namespace ThunderED.Modules
 
                             var etag = _tags.GetOrNull(charId);
                             var result = await APIHelper.ESIAPI.GetNotifications(Reason, charId, token, etag);
+                            if(result == null) continue;
                             _tags.AddOrUpdateEx(charId, result.Data.ETag);
                             //abort if no connection
                             if(result.Data.IsNoConnection)
