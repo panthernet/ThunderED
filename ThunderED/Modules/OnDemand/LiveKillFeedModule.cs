@@ -435,7 +435,7 @@ namespace ThunderED.Modules.OnDemand
                             {
                                 foreach (var channel in discordChannels)
                                     await APIHelper.DiscordAPI.SendMessageAsync(channel, kill.zkb.url);
-                                await LogHelper.LogInfo($"Posted.     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                await LogHelper.LogInfo($"U.Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
                             }
                             else
                             {
@@ -452,13 +452,13 @@ namespace ThunderED.Modules.OnDemand
                                         hasBeenPosted = await TemplateHelper.PostTemplatedMessage(group.MessageTemplateFileName, km.dic, discordChannels,
                                             group.ShowGroupName ? groupName : " ");
                                         if(hasBeenPosted)
-                                            await LogHelper.LogInfo($"Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                            await LogHelper.LogInfo($"T.Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
                                     }
                                     else
                                     {
-                                        await APIHelper.DiscordAPI.SendEmbedKillMessage(discordChannels, msgColor, km, group.ShowGroupName ? groupName : " ");
+                                        await SendEmbedKillMessage(discordChannels, msgColor, km, group.ShowGroupName ? groupName : " ");
                                         hasBeenPosted = true;
-                                        await LogHelper.LogInfo($"Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                        await LogHelper.LogInfo($"N.Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
                                     }
                                         
                                 }
@@ -578,7 +578,7 @@ namespace ThunderED.Modules.OnDemand
                 else
                 {
                     var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {srcSystem?.name}" : $"{LM.Get("InSmall")} {km.sysName} ({km.systemSecurityStatus})";
-                    await APIHelper.DiscordAPI.SendEmbedKillMessage(new List<ulong> {channel}, new Color(0x989898), km, string.IsNullOrEmpty(jumpsText) ? "-" : jumpsText, group.ShowGroupName ? groupName : " ");
+                    await SendEmbedKillMessage(new List<ulong> {channel}, new Color(0x989898), km, string.IsNullOrEmpty(jumpsText) ? "-" : jumpsText, group.ShowGroupName ? groupName : " ");
                 }
             }
 
@@ -649,6 +649,96 @@ namespace ThunderED.Modules.OnDemand
             LastPostedDictionary[groupName] = id;
             return false;
         }
+
+        #region Send message
+
+        internal enum KillMailLinkTypes
+        {
+            character,
+            corporation,
+            alliance,
+            ship,
+            system
+        }
+
+        private static string GetKillMailLink(long id, KillMailLinkTypes killMailLinkTypes)
+        {
+            return $"https://zkillboard.com/{killMailLinkTypes}/{id}/";
+        }
+
+        private async Task SendEmbedKillMessage(List<ulong> channelIds, Color color, KillDataEntry km, string radiusMessage, string msg = "")
+        {
+            try
+            {
+                if (!channelIds.Any())
+                {
+                    await LogHelper.LogError($"No channels specified for KB feed! Check config.", Category);
+                    return;
+                }
+
+                msg = msg ?? "";
+
+                var victimName = $"{LM.Get("killFeedName", $"[{km.rVictimCharacter?.name}]({GetKillMailLink(km.victimCharacterID, KillMailLinkTypes.character)})")}";
+                var victimCorp = $"{LM.Get("killFeedCorp", $"[{km.rVictimCorp?.name}]({GetKillMailLink(km.victimCorpID, KillMailLinkTypes.corporation)})")}";
+                var victimAlliance = km.rVictimAlliance == null
+                    ? ""
+                    : $"{LM.Get("killFeedAlliance", $"[{km.rVictimAlliance?.name}]")}({GetKillMailLink(km.victimAllianceID, KillMailLinkTypes.alliance)})";
+                var victimShip = $"{LM.Get("killFeedShip", $"[{km.rVictimShipType?.name}]({GetKillMailLink(km.victimShipID, KillMailLinkTypes.ship)})")}";
+
+
+                string[] victimStringArray = new string[] {victimName, victimCorp, victimAlliance, victimShip};
+
+                var attackerName = $"{LM.Get("killFeedName", $"[{km.rAttackerCharacter?.name}]({GetKillMailLink(km.finalBlowAttackerCharacterId, KillMailLinkTypes.character)})")}";
+                var attackerCorp = $"{LM.Get("killFeedCorp", $"[{km.rAttackerCorp?.name}]({GetKillMailLink(km.finalBlowAttackerCorpId, KillMailLinkTypes.corporation)})")}";
+                var attackerAlliance = km.rAttackerAlliance == null || km.finalBlowAttackerAllyId == 0
+                    ? null
+                    : $"{LM.Get("killFeedAlliance", $"[{km.rAttackerAlliance?.name}]({GetKillMailLink(km.finalBlowAttackerAllyId, KillMailLinkTypes.alliance)})")}";
+                var attackerShip = $"{LM.Get("killFeedShip", $"[{km.rAttackerShipType?.name}]({GetKillMailLink(km.attackerShipID, KillMailLinkTypes.ship)})")}";
+
+                string[] attackerStringArray = new string[] {attackerName, attackerCorp, attackerAlliance, attackerShip};
+
+
+                var killFeedDetails = LM.Get("killFeedDetails", km.killTime, km.value.ToString("#,##0 ISk"));
+                var killFeedDetailsSystem = LM.Get("killFeedDetailsSystem", $"[{km.sysName}]({GetKillMailLink(km.systemId, KillMailLinkTypes.system)})");
+
+                string[] detailsStringArray = new string[] {killFeedDetails, killFeedDetailsSystem};
+
+
+                var builder = new EmbedBuilder()
+                    .WithColor(color)
+                    .WithThumbnailUrl($"https://image.eveonline.com/Type/{km.victimShipID}_64.png")
+                    .WithAuthor(author =>
+                    {
+                        author.WithName(LM.Get("killFeedHeader", km.rVictimShipType?.name, km.rSystem?.name))
+                            .WithUrl($"https://zkillboard.com/kill/{km.killmailID}/");
+                        if (km.isNPCKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
+                    })
+                    .AddField(LM.Get("Victim"), string.Join("\n", victimStringArray.Where(c => !string.IsNullOrWhiteSpace(c))))
+                    .AddField(LM.Get("Finalblow"), string.Join("\n", attackerStringArray.Where(c => !string.IsNullOrWhiteSpace(c))))
+                    .AddField(LM.Get("Details"), string.Join("\n", detailsStringArray.Where(c => !string.IsNullOrWhiteSpace(c))));
+
+                if (!string.IsNullOrEmpty(radiusMessage))
+                    builder.AddField(LM.Get("radiusInfoHeader"), radiusMessage);
+
+                var embed = builder.Build();
+                foreach (var id in channelIds)
+                {
+                    var channel = APIHelper.DiscordAPI.GetChannel(id);
+                    if (channel != null)
+                    {
+                        if(await APIHelper.DiscordAPI.SendMessageAsync(channel, msg, embed) == null)
+                            await LogHelper.LogError($"Error sending KM to channel {id}!", Category);
+                    }
+                    else await LogHelper.LogWarning($"Channel {id} not found!", Category);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(nameof(SendEmbedKillMessage), ex, Category);
+            }
+        }
+        #endregion
+
 
         private enum RadiusMode
         {

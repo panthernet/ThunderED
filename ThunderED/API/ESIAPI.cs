@@ -420,14 +420,22 @@ namespace ThunderED.API
 
         public async Task<int> IsServerOnlineEx(string reason)
         {
-            var res = await GetServerStatus(reason);
-            if (res.Data.IsFailed || res.Data.IsNotValid || res.Data.IsNoConnection)
+            try
             {
-                if (DateTime.UtcNow.Hour == 11 && DateTime.UtcNow.Minute <= 30)
-                    return 0;
-                return -1; //esi down
+                var res = await GetServerStatus(reason);
+                if (res.Data.IsFailed || res.Data.IsNotValid || res.Data.IsNoConnection)
+                {
+                    if (DateTime.UtcNow.Hour == 11 && DateTime.UtcNow.Minute <= 30)
+                        return 0;
+                    return -1; //esi down
+                }
+
+                return res.Result.players > 20 ? 1 : 0;
             }
-            return res.Result.players > 20 ? 1 : 0;
+            catch
+            {
+                return -1;
+            }
         }
 
         public async Task<ESIQueryResult<JsonClasses.ServerStatus>> GetServerStatus(string reason)
