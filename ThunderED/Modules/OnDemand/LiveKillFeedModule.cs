@@ -725,8 +725,8 @@ namespace ThunderED.Modules.OnDemand
                     var channel = APIHelper.DiscordAPI.GetChannel(id);
                     if (channel != null)
                     {
-                        if(await APIHelper.DiscordAPI.SendMessageAsync(channel, msg, embed) == null)
-                            await LogHelper.LogError($"Error sending KM to channel {id}!", Category);
+                        await APIHelper.DiscordAPI.SendMessageAsync(channel, msg, embed);
+                        // await LogHelper.LogError($"Error sending KM to channel {id}!", Category);
                     }
                     else await LogHelper.LogWarning($"Channel {id} not found!", Category);
                 }
