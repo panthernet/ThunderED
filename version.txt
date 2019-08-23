@@ -1,5 +1,7 @@
 ### V1.4.4
 + Fixed config editor LiveKillFeedModule write
++ Improved contracts module performance
++ Updated basic contract messages content
 
 ### V1.4.3
 + Added new auth module property `AuthCheckUnregisteredDiscordUsers` to be able to switch off unregisteres users checks

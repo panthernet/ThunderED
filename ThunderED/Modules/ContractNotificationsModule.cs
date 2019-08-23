@@ -424,24 +424,6 @@ namespace ThunderED.Modules
                     break;
             }
 
-            /* var availName = string.Empty;
-             switch (contract.availability)
-             {
-                 case "public":
-                     availName = "Public";
-                     break;
-                 case "personal":
-                     availName = "Personal";
-                     break;
-                 case "corporation":
-                     availName = "Corporation";
-                     break;
-                 case "alliance":
-                     availName = "Alliance";
-                     break;
-                 default:
-                     return;
-             }*/
 
             var statusName = string.Empty;
             switch (contract.status)
@@ -504,8 +486,7 @@ namespace ThunderED.Modules
             }
 
             var subject = $"{typeName} {LM.Get("contractSubject")}";
-
-            //var lookupCorp = corpId > 0 ? await APIHelper.ESIAPI.GetCorporationData(Reason, corpId) : null;
+            var title = string.IsNullOrEmpty(contract.title) ? "-" : contract.title;
 
             var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, contract.issuer_id);
             var issuerName = $"[{ch.name}](https://zkillboard.com/character/{contract.issuer_id}/)";
@@ -532,107 +513,113 @@ namespace ThunderED.Modules
                 }
             }
 
-
             //location
 
-            var startLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.start_location_id, token))?.name;
-            if (startLocation == null)
-                startLocation = (await APIHelper.ESIAPI.GetStationData(Reason, contract.start_location_id, token))?.name;
+            var startLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.start_location_id, token))?.name ??
+                                (await APIHelper.ESIAPI.GetStationData(Reason, contract.start_location_id, token))?.name;
             startLocation = string.IsNullOrEmpty(startLocation) ? LM.Get("contractSomeCitadel") : startLocation;
+            var locationText = LM.Get("contractMsgIssued");
+            locationText = string.IsNullOrWhiteSpace(locationText) ? "-" : locationText;
 
-            var sbNames = new StringBuilder();
-            var sbValues = new StringBuilder();
-
-            sbNames.Append($"{LM.Get("contractMsgType")}: \n{LM.Get("contractMsgIssuedBy")}: \n{LM.Get("contractMsgIssuedTo")}: ");
-            if (contract.acceptor_id > 0)
-                sbNames.Append($"\n{LM.Get("contractMsgContractor")}: ");
-            sbNames.Append($"\n{LM.Get("contractMsgStatus")}: ");
-            if (contract.type == "courier")
-                sbNames.Append($"\n{LM.Get("contractMsgCollateral")}: \n{LM.Get("contractMsgReward")}: \n{LM.Get("contractMsgCompleteIn")}: \n{LM.Get("contractMsgExpireIn")}: ");
-            else
-            {
-                if (contract.price > 0) sbNames.Append($"\n{LM.Get("contractMsgPrice")}: ");
-                else if (contract.reward > 0) sbNames.Append($"\n{LM.Get("contractMsgReward2")}: ");
-
-                if (contract.type == "auction")
-                    sbNames.Append($"\n{LM.Get("contractMsgBuyout")}: ");
-            }
-
-            sbValues.Append($"{typeName}\n{issuerName}\n{asigneeName}");
-            if (contract.acceptor_id > 0)
-            {
-                ch = await APIHelper.ESIAPI.GetCharacterData(Reason, contract.acceptor_id);
-                sbValues.Append($"\n[{(ch?.name ?? LM.Get("Unknown"))}](https://zkillboard.com/character/{contract.acceptor_id}/)");
-            }
-
-            sbValues.Append($"\n**{statusName}**");
-            if (contract.type == "courier")
-                sbValues.Append($"\n{contract.collateral:N}\n{contract.reward:N}\n{days} {LM.Get("contractMsgDays")}\n{expire} {LM.Get("contractMsgDays")}");
-            else
-            {
-                if (contract.price > 0 || contract.reward > 0)
-                    sbValues.Append(contract.price > 0 ? $"\n{contract.price:N}" : $"\n{contract.reward:N}");
-                if (contract.type == "auction")
-                    sbValues.Append($"\n{contract.buyout:N}");
-            }
-
-            var title = string.IsNullOrEmpty(contract.title) ? "-" : contract.title;
-            var stampIssued = contract.DateIssued?.ToString(Settings.Config.ShortTimeFormat);
-            var stampAccepted = contract.DateAccepted?.ToString(Settings.Config.ShortTimeFormat);
-            var stampCompleted = contract.DateCompleted?.ToString(Settings.Config.ShortTimeFormat);
-            var stampExpired = contract.DateExpired?.ToString(Settings.Config.ShortTimeFormat);
-
-            var items = isCorp
-                ? await APIHelper.ESIAPI.GetCorpContractItems(Reason, corpId, contract.contract_id, token)
-                : await APIHelper.ESIAPI.GetCharacterContractItems(Reason, characterId, contract.contract_id, token);
-
-            // var x2 =  await APIHelper.ESIAPI.GetPublicContractItems(Reason, contract.contract_id);
-            items = items ?? await APIHelper.ESIAPI.GetCharacterContractItems(Reason, contract.issuer_id, contract.contract_id, token);
-            var sbItemsSubmitted = new StringBuilder();
-            var sbItemsAsking = new StringBuilder();
-            if (items != null && items.Count > 0)
-            {
-                foreach (var item in items)
-                {
-                    var t = await APIHelper.ESIAPI.GetTypeId(Reason, item.type_id);
-                    if (item.is_included)
-                    {
-                        sbItemsSubmitted.Append($"{t?.name} x{item.quantity}\n");
-                    }
-                    else sbItemsAsking.Append($"{t?.name} x{item.quantity}\n");
-                }
-            }
-
-            if (contract.volume > 0)
-            {
-                sbNames.Append($"\n{LM.Get("contractMsgVolume")}: ");
-                sbValues.Append($"\n{contract.volume:N1} m3");
-            }
-
-            var issuedText = $"{LM.Get("contractMsgIssued")}: {stampIssued}";
-
-            var loc = LM.Get("contractMsgIssued");
-            loc = string.IsNullOrWhiteSpace(loc) ? "-" : loc;
 
             var embed = new EmbedBuilder();
-
             if (filter.ShowOnlyBasicDetails)
             {
                 embed.WithThumbnailUrl(image)
                     .WithColor(color)
                     .AddField(subject, title, true)
                     .AddField(LM.Get("contractMsgIssued"), $"{LM.Get("simpleFrom").FirstLetterToUpper()} {issuerName} {LM.Get("simpleTo")} {asigneeName}", true)
-                    .AddField(LM.Get("contractMsgStatus"), $"**{statusName}**", true);
+                    .AddField(LM.Get("contractMsgStatus"), $"**{statusName}**", true)
+                    .AddField(locationText, startLocation, true);
+                if (contract.volume > 0)
+                {
+                    embed.AddField(LM.Get("contractMsgVolume"), $"{contract.volume:N1} m3", true);
+                }
                 if (filter.ShowIngameOpen)
                     embed.WithDescription($"[{LM.Get("contractOpenIngame")}]({WebServerModule.GetOpenContractURL(contract.contract_id)})");
             }
             else
             {
 
+
+                var sbNames = new StringBuilder();
+                var sbValues = new StringBuilder();
+
+                sbNames.Append($"{LM.Get("contractMsgType")}: \n{LM.Get("contractMsgIssuedBy")}: \n{LM.Get("contractMsgIssuedTo")}: ");
+                if (contract.acceptor_id > 0)
+                    sbNames.Append($"\n{LM.Get("contractMsgContractor")}: ");
+                sbNames.Append($"\n{LM.Get("contractMsgStatus")}: ");
+                if (contract.type == "courier")
+                    sbNames.Append(
+                        $"\n{LM.Get("contractMsgCollateral")}: \n{LM.Get("contractMsgReward")}: \n{LM.Get("contractMsgCompleteIn")}: \n{LM.Get("contractMsgExpireIn")}: ");
+                else
+                {
+                    if (contract.price > 0) sbNames.Append($"\n{LM.Get("contractMsgPrice")}: ");
+                    else if (contract.reward > 0) sbNames.Append($"\n{LM.Get("contractMsgReward2")}: ");
+
+                    if (contract.type == "auction")
+                        sbNames.Append($"\n{LM.Get("contractMsgBuyout")}: ");
+                }
+
+                sbValues.Append($"{typeName}\n{issuerName}\n{asigneeName}");
+                if (contract.acceptor_id > 0)
+                {
+                    ch = await APIHelper.ESIAPI.GetCharacterData(Reason, contract.acceptor_id);
+                    sbValues.Append($"\n[{(ch?.name ?? LM.Get("Unknown"))}](https://zkillboard.com/character/{contract.acceptor_id}/)");
+                }
+
+                sbValues.Append($"\n**{statusName}**");
+                if (contract.type == "courier")
+                    sbValues.Append($"\n{contract.collateral:N}\n{contract.reward:N}\n{days} {LM.Get("contractMsgDays")}\n{expire} {LM.Get("contractMsgDays")}");
+                else
+                {
+                    if (contract.price > 0 || contract.reward > 0)
+                        sbValues.Append(contract.price > 0 ? $"\n{contract.price:N}" : $"\n{contract.reward:N}");
+                    if (contract.type == "auction")
+                        sbValues.Append($"\n{contract.buyout:N}");
+                }
+
+                var stampIssued = contract.DateIssued?.ToString(Settings.Config.ShortTimeFormat);
+                var stampAccepted = contract.DateAccepted?.ToString(Settings.Config.ShortTimeFormat);
+                var stampCompleted = contract.DateCompleted?.ToString(Settings.Config.ShortTimeFormat);
+                var stampExpired = contract.DateExpired?.ToString(Settings.Config.ShortTimeFormat);
+
+                var items = isCorp
+                    ? await APIHelper.ESIAPI.GetCorpContractItems(Reason, corpId, contract.contract_id, token)
+                    : await APIHelper.ESIAPI.GetCharacterContractItems(Reason, characterId, contract.contract_id, token);
+
+                // var x2 =  await APIHelper.ESIAPI.GetPublicContractItems(Reason, contract.contract_id);
+                items = items ?? await APIHelper.ESIAPI.GetCharacterContractItems(Reason, contract.issuer_id, contract.contract_id, token);
+                var sbItemsSubmitted = new StringBuilder();
+                var sbItemsAsking = new StringBuilder();
+                if (items != null && items.Count > 0)
+                {
+                    foreach (var item in items)
+                    {
+                        var t = await APIHelper.ESIAPI.GetTypeId(Reason, item.type_id);
+                        if (item.is_included)
+                        {
+                            sbItemsSubmitted.Append($"{t?.name} x{item.quantity}\n");
+                        }
+                        else sbItemsAsking.Append($"{t?.name} x{item.quantity}\n");
+                    }
+                }
+
+                if (contract.volume > 0)
+                {
+                    sbNames.Append($"\n{LM.Get("contractMsgVolume")}: ");
+                    sbValues.Append($"\n{contract.volume:N1} m3");
+                }
+
+                var issuedText = $"{LM.Get("contractMsgIssued")}: {stampIssued}";
+
+
+                //EMBED
+
                 embed.WithThumbnailUrl(image)
                     .WithColor(color)
                     .AddField(subject, title)
-                    .AddField(loc, startLocation);
+                    .AddField(locationText, startLocation);
 
                 if (filter.ShowIngameOpen)
                 {
@@ -665,9 +652,6 @@ namespace ThunderED.Modules
                     foreach (var field in fields)
                         embed.AddField($"-", string.IsNullOrWhiteSpace(field) ? "---" : field);
                 }
-
-                // if(sbItemsAsking.Length == 0 && sbItemsSubmitted.Length == 0)
-                //    embed.AddField($"Items", "This contract do not include items or it is impossible to fetch them due to CCP API restrictions");
 
             }
 
