@@ -1,3 +1,6 @@
+### V1.4.4
++ Fixed config editor LiveKillFeedModule write
+
 ### V1.4.3
 + Added new auth module property `AuthCheckUnregisteredDiscordUsers` to be able to switch off unregisteres users checks
 + Fixed timers web page access malfunction

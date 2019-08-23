@@ -823,7 +823,7 @@ namespace ThunderED.Classes
         public ObservableCollection<object> ShipEntities { get; set; } = new ObservableCollection<object>();
         public ObservableCollection<object> VictimEntities { get; set; } = new ObservableCollection<object>();
         public ObservableCollection<object> AttackerEntities { get; set; } = new ObservableCollection<object>();
-        public ObservableCollection<object> RadiusEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> LocationEntities { get; set; } = new ObservableCollection<object>();
 #else
         public List<object> ShipEntities = new List<object>();
         public List<object> VictimEntities = new List<object>();
