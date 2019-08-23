@@ -716,7 +716,7 @@ namespace ThunderED.Modules.OnDemand
                     .AddField(LM.Get("Finalblow"), string.Join("\n", attackerStringArray.Where(c => !string.IsNullOrWhiteSpace(c))))
                     .AddField(LM.Get("Details"), string.Join("\n", detailsStringArray.Where(c => !string.IsNullOrWhiteSpace(c))));
 
-                if (!string.IsNullOrEmpty(radiusMessage))
+                if (!string.IsNullOrWhiteSpace(radiusMessage))
                     builder.AddField(LM.Get("radiusInfoHeader"), radiusMessage);
 
                 var embed = builder.Build();

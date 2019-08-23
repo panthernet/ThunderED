@@ -3,6 +3,7 @@
 + Fixed timers web page access malfunction
 + Fixed auth check entries selection based on time
 + Fixed kill feed to correctly use template file for radius kills
++ Fixed missing KMs
 + Fixed chat relay dependencies
 + Made unregistered Discord user checks linear to reduce Discord server load
 

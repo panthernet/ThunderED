@@ -182,6 +182,13 @@ namespace ThunderED.Classes
             return length < value.Length ? value.Substring(0, length) : (value.Length < length ? FillSpaces(value, length) : value);
         }
 
+        public static string TrimLengthOrSpace(this string value, int length)
+        {
+            if (string.IsNullOrEmpty(value)) return " ";
+            return length < value.Length ? value.Substring(0, length) : value;
+        }
+
+
         private static string FillSpaces(this string value, int length)
         {
             if (value.Length >= length) return value;

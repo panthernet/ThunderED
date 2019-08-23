@@ -110,7 +110,7 @@ namespace ThunderED.API
 
             try
             {
-                await channel.SendMessageAsync(message.FixedLength(MAX_MSG_LENGTH));
+                await channel.SendMessageAsync(message.TrimLengthOrSpace(MAX_MSG_LENGTH));
             }
             catch (HttpException ex)
             {
@@ -128,7 +128,7 @@ namespace ThunderED.API
             if (context?.Message == null) return;
             try
             {
-                await context.Message.Channel.SendMessageAsync(message.FixedLength(MAX_MSG_LENGTH), false, embed).ConfigureAwait(false);
+                await context.Message.Channel.SendMessageAsync(message.TrimLengthOrSpace(MAX_MSG_LENGTH), false, embed).ConfigureAwait(false);
             }
             catch (HttpException ex)
             {
@@ -153,7 +153,7 @@ namespace ThunderED.API
                     return null;
                 }
 
-                return await SendMessageAsync(ch, message.FixedLength(MAX_MSG_LENGTH), embed);
+                return await SendMessageAsync(ch, message.TrimLengthOrSpace(MAX_MSG_LENGTH), embed);
             }
             catch (Exception ex)
             {
@@ -168,7 +168,7 @@ namespace ThunderED.API
         {
             try
             {
-                return await channel.SendMessageAsync(message.FixedLength(MAX_MSG_LENGTH), false, embed);
+                return await channel.SendMessageAsync(message.TrimLengthOrSpace(MAX_MSG_LENGTH), false, embed);
             }
             catch (HttpException ex)
             {
