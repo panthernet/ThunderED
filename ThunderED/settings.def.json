@@ -134,6 +134,7 @@
         "Filters": {
           "filter1": {
             "Inclusive": true,
+			"AllMustMatch": false,
             "MinimumKillValue": 10000000,
             "MinimumLossValue": 20000000,
             "ShipEntities": [ "Ibis", 2537 ],

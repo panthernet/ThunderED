@@ -174,6 +174,7 @@ namespace ThunderED.API
             {
                 if (ex.DiscordCode == 50013)
                     await LogHelper.LogError($"The bot don't have rights to send message to {channel.Id} ({channel.Name}) channel!");
+                else await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
                 return null;
             }
             catch (Exception ex)
