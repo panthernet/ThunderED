@@ -847,8 +847,14 @@ namespace ThunderED.Modules
                                                             image = Settings.Resources.ImgCitDestroyed;
                                                             break;
                                                         case "WarInherited":
+                                                            /*WarInherited [1092637000]
+                                                            againstID: 99008923
+                                                            allianceID: 99001134
+                                                            declaredByID: 99001134
+                                                            opponentID: 99008923
+                                                            quitterID: 98608854*/
                                                             color = new Color(0xFF0000);
-                                                            text = LM.Get("notifWarInherited", corp);
+                                                            text = LM.Get("notifWarInherited", declareByName, declareAgainstName);
                                                             image = Settings.Resources.ImgWarInviteSent;
                                                             break;
                                                         case "WarInvalid":

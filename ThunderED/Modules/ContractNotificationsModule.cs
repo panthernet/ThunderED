@@ -476,9 +476,8 @@ namespace ThunderED.Modules
                     typeName = LM.Get("contractTypeCourier");
                     days = contract.days_to_complete;
                     expire = (int) (contract.DateExpired - contract.DateIssued).Value.TotalDays;
-                    endLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.end_location_id, token))?.name;
-                    if (endLocation == null)
-                        endLocation = (await APIHelper.ESIAPI.GetStationData(Reason, contract.end_location_id, token))?.name;
+                    endLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.end_location_id, token))?.name ??
+                                  (await APIHelper.ESIAPI.GetStationData(Reason, contract.end_location_id, token))?.name;
                     endLocation = string.IsNullOrEmpty(endLocation) ? LM.Get("contractSomeCitadel") : endLocation;
                     break;
                 default:
