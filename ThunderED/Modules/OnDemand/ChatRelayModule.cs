@@ -75,6 +75,11 @@ namespace ThunderED.Modules.OnDemand
                                 await response.WriteContentAsync("DUPE");
                                 return true;
                             }
+                            if (messsage.Contains("Channel MOTD"))
+                            {
+                                await response.WriteContentAsync("MOTD");
+                                return true;
+                            }
 
                             await APIHelper.DiscordAPI.SendMessageAsync(relay.DiscordChannelId, message);
 
