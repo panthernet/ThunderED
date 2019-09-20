@@ -55,7 +55,7 @@ namespace ThunderED.Modules
                     {
                         var list = GetUpdatedList(data, group);
                         if (!list.Any())
-                            await SendOneTimeWarning(groupName, $"No systems found for Sov Tracker group {group}!");
+                            await SendOneTimeWarning(groupName, $"No systems found for Sov Tracker group {groupName}!");
                         else
                             await SQLHelper.SaveSovIndexTrackerData(groupName, list);
                         return;

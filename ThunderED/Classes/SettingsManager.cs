@@ -203,7 +203,7 @@ namespace ThunderED.Classes
                     var result = (await APIHelper.ESIAPI.SearchAllianceId("SimplAuth", entry.Name))?.alliance?[0] ?? 0;
                     if (result > 0) //alliance
                     {
-                        group.AllowedMembers.Add(entry.Name, new AuthRoleEntity
+                        group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
                         {
                             Entities = new List<object> {result},
                             DiscordRoles = entry.RolesList
@@ -214,7 +214,7 @@ namespace ThunderED.Classes
                         result = (await APIHelper.ESIAPI.SearchCorporationId("SimplAuth", entry.Name))?.corporation?[0] ?? 0;
                         if (result > 0) //corp
                         {
-                            group.AllowedMembers.Add(entry.Name, new AuthRoleEntity
+                            group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
                             {
                                 Entities = new List<object> {result},
                                 DiscordRoles = entry.RolesList
@@ -225,7 +225,7 @@ namespace ThunderED.Classes
                             result = (await APIHelper.ESIAPI.SearchCharacterId("SimplAuth", entry.Name))?.character?[0] ?? 0;
                             if (result > 0) //char
                             {
-                                group.AllowedMembers.Add(entry.Name, new AuthRoleEntity
+                                group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
                                 {
                                     Entities = new List<object> {result},
                                     DiscordRoles = entry.RolesList

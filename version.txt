@@ -1,6 +1,7 @@
 ### V1.4.4
 + Fixed config editor LiveKillFeedModule write
 + Fixed war inherited notification
++ Improved simplified auth entries to be written ahead of the original ones to avoid guest filters conflict
 + Improved contracts module performance
 + Updated basic contract messages content
 

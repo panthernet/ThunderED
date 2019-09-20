@@ -36,6 +36,14 @@ namespace ThunderED.Classes
             return str.ToUpper();
         }
 
+        public static Dictionary<T1,T2> Insert<T1, T2>(this IDictionary<T1, T2> dic, T1 key, T2 value)
+        {
+            if(dic == null) return null;
+            var list = dic.ToList();
+            list.Insert(0, new KeyValuePair<T1, T2>(key, value));
+            return list.ToDictionary(a => a.Key, a => a.Value);
+        }
+
         public static IEnumerable<string> GetDupes(this IEnumerable<string> list)
         {
             return list.GroupBy(x => x)
