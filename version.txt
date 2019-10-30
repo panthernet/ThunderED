@@ -1,4 +1,5 @@
 ### V1.4.4
++ Added `Hidden` param to auth groups to hide their buttons but allow to participate in upgrade logic
 + Fixed config editor LiveKillFeedModule write
 + Fixed war inherited notification
 + Improved simplified auth entries to be written ahead of the original ones to avoid guest filters conflict

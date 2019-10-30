@@ -1815,6 +1815,9 @@ namespace ThunderED.Classes
         [Comment("Enable auth mode that will only search roles until first criteria match. Otherwise it wil search and add roles from all matching filters within this group")]
         public bool StopSearchingOnFirstMatch { get; set; }
 
+        [Comment("Hide this group button but allow to participate in upgrades")]
+        public bool Hidden { get; set; }
+
         [Comment("Enable auth to require manual acceptance from authorized members")]
         public bool PreliminaryAuthMode { get; set; }
 

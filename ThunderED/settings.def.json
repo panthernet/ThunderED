@@ -172,6 +172,7 @@
         "RemoveAuthIfTokenIsInvalid": false,
         "RemoveTokenIfTokenIsInvalid": false,
         "StopSearchingOnFirstMatch": "false",
+        "Hidden":  false, 
         "AllowedMembers": {
           "entry1": {
             "Entities": [ 98499225, "Tau AD", "a:Triumvirate", "c:SATRO" ],
@@ -192,6 +193,7 @@
           }
         },
         "authRoles": [],
+        "Hidden": false,
         "ManualAssignmentRoles": [],
         "ESICustomAuthRoles": [ "esi-skills.read_skills.v1" ],
         "CustomButtonText": "General Token Auth",

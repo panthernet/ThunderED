@@ -251,6 +251,7 @@ namespace ThunderED.Modules.Sub
                                 foreach (var groupPair in groupsForCycle.Where(a => a.Value.StandingsAuth != null))
                                 {
                                     var group = groupPair.Value;
+                                    if(group.Hidden) continue;
                                     var url = $"{authUrl}?group={HttpUtility.UrlEncode(groupPair.Key)}";
                                     authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.CustomButtonText}</a>");
                                 }
@@ -261,6 +262,7 @@ namespace ThunderED.Modules.Sub
                             {
                                 foreach (var @group in groupsForCycle.Where(a => a.Value.StandingsAuth == null))
                                 {
+                                    if(group.Value.Hidden) continue;
                                     var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Value.BindToMainCharacter ? WebAuthModule.DEF_ALTREGGROUP_NAME : group.Key)}";
                                     var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
                                     authText.Append($"<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>");
@@ -277,6 +279,7 @@ namespace ThunderED.Modules.Sub
                                 foreach (var groupPair in Settings.WebAuthModule.AuthGroups.Where(a => a.Value.StandingsAuth != null))
                                 {
                                     var group = groupPair.Value;
+                                    if(group.Hidden) continue;
                                     var url = GetStandsAuthURL();
                                     authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{group.StandingsAuth.WebAdminButtonText}</a>");
                                 }
