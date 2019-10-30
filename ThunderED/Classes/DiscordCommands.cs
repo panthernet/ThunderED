@@ -66,10 +66,10 @@ namespace ThunderED.Classes
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}lp ");
             }
 
-            if (SettingsManager.Settings.Config.ModuleFleetup)
+           /* if (SettingsManager.Settings.Config.ModuleFleetup)
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}ops ");
-            }
+            }*/
             if (SettingsManager.Settings.Config.ModuleContractNotifications)
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}clist ");
@@ -1178,7 +1178,7 @@ namespace ThunderED.Classes
         /// 
         /// </summary>
         /// <returns></returns>
-        [Command("ops", RunMode = RunMode.Async), Summary("Shows current Fleetup Operations")]
+      /*  [Command("ops", RunMode = RunMode.Async), Summary("Shows current Fleetup Operations")]
         public async Task Ops()
         {
             if(IsForbidden()) return;
@@ -1191,12 +1191,12 @@ namespace ThunderED.Classes
             {
                 await LogHelper.LogEx("ops", ex);
             }
-        }
+        }*/
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        [Command("ops", RunMode = RunMode.Async), Summary("Shows current Fleetup Operations")]
+       /* [Command("ops", RunMode = RunMode.Async), Summary("Shows current Fleetup Operations")]
         public async Task Ops([Remainder] string x)
         {
             if(IsForbidden()) return;
@@ -1209,7 +1209,7 @@ namespace ThunderED.Classes
             {
                 await LogHelper.LogEx("ops", ex);
             }
-        }
+        }*/
 
         /// <summary>
         /// 

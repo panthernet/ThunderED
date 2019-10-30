@@ -56,8 +56,8 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleJabber)
                 Modules.Add(new JabberModule());
 
-            if (SettingsManager.Settings.Config.ModuleFleetup)
-                Modules.Add(new FleetUpModule());
+            /*if (SettingsManager.Settings.Config.ModuleFleetup)
+                Modules.Add(new FleetUpModule());*/
 
             if (SettingsManager.Settings.Config.ModuleTimers)
                 Modules.Add(new TimersModule());

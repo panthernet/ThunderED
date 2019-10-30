@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -1009,21 +1010,41 @@ namespace ThunderED.Modules
 
         private async Task<HRMAccessFilter> CheckAccess(long characterId)
         {
-            var result = Settings.HRMModule.AccessList.Values.FirstOrDefault(a=> a.UsersAccessList.Contains(characterId));
+            var result = Settings.HRMModule.AccessList.Values.Where(a=> a.UsersAccessList.Contains(characterId)).ToList();
 
-            if (result != null) return result;
+            if (result.Count > 0) return MergeHRMFilters(result);
             var discordId = await SQLHelper.GetAuthUserDiscordId(characterId);
             if (discordId <= 0) return null;
             var discordRoles = APIHelper.DiscordAPI.GetUserRoleNames(discordId);
-            foreach (var list in Settings.HRMModule.AccessList.Values)
-            {
-                if (discordRoles.Intersect(list.RolesAccessList).Any())
-                    return list;
-            }
 
-            return null;
+            var list = Settings.HRMModule.AccessList.Values.Where(a => discordRoles.Intersect(a.RolesAccessList).Any());
+            return list.Any() ? MergeHRMFilters(list) : null;
         }
 
+        private HRMAccessFilter MergeHRMFilters(IEnumerable<HRMAccessFilter> result)
+        {
+            return new HRMAccessFilter
+            {
+                ApplyGroupFilterToAwaitingUsers = result.Any(a=> a.ApplyGroupFilterToAwaitingUsers),
+                CanInspectAltUsers = result.Any(a=> a.CanInspectAltUsers),
+                CanInspectAuthedUsers = result.Any(a=> a.CanInspectAuthedUsers),
+                CanInspectAwaitingUsers = result.Any(a=> a.CanInspectAwaitingUsers),
+                CanInspectDumpedUsers = result.Any(a=> a.CanInspectDumpedUsers),
+                CanInspectSpyUsers = result.Any(a=> a.CanInspectSpyUsers),
+                CanKickUsers = result.Any(a=> a.CanKickUsers),
+                CanMoveToSpies = result.Any(a=> a.CanMoveToSpies),
+                CanRestoreDumped = result.Any(a=> a.CanRestoreDumped),
+                CanSearchMail = result.Any(a=> a.CanSearchMail),
+                IsAltUsersVisible = result.Any(a=> a.IsAltUsersVisible),
+                IsAuthedUsersVisible = result.Any(a=> a.IsAuthedUsersVisible),
+                IsAwaitingUsersVisible = result.Any(a=> a.IsAwaitingUsersVisible),
+                IsDumpedUsersVisible = result.Any(a=> a.IsDumpedUsersVisible),
+                IsSpyUsersVisible = result.Any(a=> a.IsSpyUsersVisible),
+                AuthGroupNamesFilter = result.SelectMany(a=> a.AuthGroupNamesFilter).Distinct().ToList(),
+                AuthAllianceIdFilter = result.SelectMany(a=> a.AuthAllianceIdFilter).Distinct().ToList(),
+                AuthCorporationIdFilter = result.SelectMany(a=> a.AuthCorporationIdFilter).Distinct().ToList(),
+            };
+        }
     }
 
     internal enum GenMemType

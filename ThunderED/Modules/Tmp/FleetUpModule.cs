@@ -11,7 +11,7 @@ using ThunderED.Json.FleetUp;
 
 namespace ThunderED.Modules
 {
-    public class FleetUpModule: AppModuleBase
+  /*  public class FleetUpModule: AppModuleBase
     {
         public override LogCat Category => LogCat.FleetUp;
 
@@ -72,7 +72,7 @@ namespace ThunderED.Modules
             }
         }
 
-        protected async Task FleetUp()
+       protected async Task FleetUp()
         {
             try
             {
@@ -160,7 +160,7 @@ namespace ThunderED.Modules
                 await LogHelper.LogEx($"ERROR {ex.Message}", ex, Category);
             }
         }
-
+        
        // private Dictionary<string, List<FleetUpCache> _cache = new Dictionary<string, FleetUpCache>();
 
 
@@ -209,5 +209,5 @@ namespace ThunderED.Modules
     internal class FleetUpCache
     {
         //public List<string>
-    }
+    }*/
 }

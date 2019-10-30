@@ -4,6 +4,7 @@
 + Fixed war inherited notification
 + Improved simplified auth entries to be written ahead of the original ones to avoid guest filters conflict
 + Improved contracts module performance
++ Improved HRM auth to check user through multiple access lists
 + Updated basic contract messages content
 + Decomissioned FleetUp module
 
