@@ -17,7 +17,6 @@
     "moduleLiveKillFeed": false,
     "modulePriceCheck": false,
     "moduleTime": false,
-    "moduleFleetup": false,
     "moduleJabber": false,
     "moduleMOTD": false,
     "moduleNotificationFeed": false,
@@ -619,18 +618,6 @@
     "MOTDChan": "",
     "updatetopic": false,
     "restricted": 0
-  },
-
-  "fleetupModule": {
-    "UserId": "",
-    "APICode": "",
-    "AppKey": "",
-    "GroupID": "",
-    "channel": 0,
-    "announce_post": true,
-    "announce": [ 5, 60 ],
-    "DefaultMention": "@everyone",
-    "FinalTimeMention": "@here"
   },
 
   "jabberModule": {

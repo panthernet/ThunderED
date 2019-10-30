@@ -5,6 +5,7 @@
 + Improved simplified auth entries to be written ahead of the original ones to avoid guest filters conflict
 + Improved contracts module performance
 + Updated basic contract messages content
++ Decomissioned FleetUp module
 
 
 ### V1.4.3

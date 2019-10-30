@@ -53,8 +53,8 @@ namespace ThunderED.Classes
         [ConfigEntryName("")]
         [StaticConfigEntry]
         public ResourcesSettings Resources { get; set; } = new ResourcesSettings();
-        [ConfigEntryName("moduleFleetup")]
-        public FleetupModuleSettings FleetupModule { get; set; } = new FleetupModuleSettings();
+        //[ConfigEntryName("moduleFleetup")]
+        //public FleetupModuleSettings FleetupModule { get; set; } = new FleetupModuleSettings();
         [ConfigEntryName("moduleJabber")]
         public JabberModuleSettings JabberModule { get; set; } = new JabberModuleSettings();
         [ConfigEntryName("moduleHRM")]
@@ -627,7 +627,7 @@ namespace ThunderED.Classes
 #endif
     }
 
-    public class FleetupModuleSettings: ValidatableSettings
+   /* public class FleetupModuleSettings: ValidatableSettings
     {
         [Comment("FleetUp user ID")]
         [Required]
@@ -676,7 +676,7 @@ namespace ThunderED.Classes
             }
         }
 #endif
-    }
+    }*/
 
     public class ResourcesSettings
     {
@@ -1543,7 +1543,7 @@ namespace ThunderED.Classes
         public bool ModulePriceCheck { get; set; } = false;
         [Comment("Enable EVE time module (!time command)")]
         public bool ModuleTime { get; set; } = false;
-        public bool ModuleFleetup { get; set; } = false;
+        //public bool ModuleFleetup { get; set; } = false;
         public bool ModuleJabber { get; set; } = false;
         public bool ModuleMOTD { get; set; } = false;
         public bool ModuleNotificationFeed { get; set; } = false;
