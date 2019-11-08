@@ -961,7 +961,7 @@ namespace ThunderED.Modules
                     return;
                 }
 
-                await AuthInfoLog(authUser, $"GRPFETCH GROUP: {result.GroupName} ROLES: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.UpdatedRoles?.Select(a=> a.Name)))} MANUAL: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.ValidManualAssignmentRoles))}", true);
+                await AuthInfoLog(authUser, $"GRPFETCH GROUP: {result.GroupName} ROLES: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.UpdatedRoles?.Select(a=> a.Name.Replace("@", "_"))))} MANUAL: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.ValidManualAssignmentRoles.Select(a=> a.Replace("@", "_"))))}", true);
 
                 //var groupName = result?.GroupName;
                 //pass auth
