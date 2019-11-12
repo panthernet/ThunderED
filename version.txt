@@ -6,6 +6,7 @@
 + Improved contracts module performance
 + Improved HRM auth to check user through multiple access lists
 + Improved ChatRelay to send messages in chunks to improve performance
++ Improved web settings editor to apply auth changes on the fly
 + Updated basic contract messages content
 + Decomissioned FleetUp module
 

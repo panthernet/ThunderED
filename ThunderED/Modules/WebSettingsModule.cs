@@ -147,6 +147,7 @@ namespace ThunderED.Modules
                             var convData = JsonConvert.DeserializeObject<List<SaData>>(data);
                             convData = convData.Where(a => !string.IsNullOrEmpty(a.Name?.Trim()) && !string.IsNullOrEmpty(a.Group?.Trim()) && !string.IsNullOrEmpty(a.Roles?.Trim())).ToList();
                             await SettingsManager.SaveSimplifiedAuthData(convData.Select(a => $"{a.Name}|{a.Group}|{a.Roles}").ToList());
+                            await SettingsManager.LoadSimplifiedAuth();
                         }
                         else
                         {

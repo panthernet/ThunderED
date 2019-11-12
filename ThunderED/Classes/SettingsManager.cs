@@ -176,8 +176,10 @@ namespace ThunderED.Classes
             return list;
         }
 
-        private static async Task LoadSimplifiedAuth(string path)
+        internal static async Task LoadSimplifiedAuth(string path = null)
         {
+            path = path ?? Path.Combine(DataDirectory, "_simplifiedAuth.txt");
+
             if(!File.Exists(path) || !Settings.Config.ModuleAuthWeb) return;
             await LogHelper.LogInfo("Injecting Simplified Auth information...", LogCat.SimplAuth);
            
@@ -202,7 +204,8 @@ namespace ThunderED.Classes
 
                     var result = (await APIHelper.ESIAPI.SearchAllianceId("SimplAuth", entry.Name))?.alliance?[0] ?? 0;
                     if (result > 0) //alliance
-                    {
+                    { 
+                        DeleteIfContainsMemberEntry(group.AllowedMembers, entry.Name);
                         group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
                         {
                             Entities = new List<object> {result},
@@ -214,6 +217,7 @@ namespace ThunderED.Classes
                         result = (await APIHelper.ESIAPI.SearchCorporationId("SimplAuth", entry.Name))?.corporation?[0] ?? 0;
                         if (result > 0) //corp
                         {
+                            DeleteIfContainsMemberEntry(group.AllowedMembers, entry.Name);
                             group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
                             {
                                 Entities = new List<object> {result},
@@ -225,6 +229,7 @@ namespace ThunderED.Classes
                             result = (await APIHelper.ESIAPI.SearchCharacterId("SimplAuth", entry.Name))?.character?[0] ?? 0;
                             if (result > 0) //char
                             {
+                                DeleteIfContainsMemberEntry(group.AllowedMembers, entry.Name);
                                 group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
                                 {
                                     Entities = new List<object> {result},
@@ -248,6 +253,10 @@ namespace ThunderED.Classes
 
         }
 
-
+        private static void DeleteIfContainsMemberEntry(Dictionary<string, AuthRoleEntity> groupAllowedMembers, string entryName)
+        {
+            if (groupAllowedMembers.ContainsKey(entryName))
+                groupAllowedMembers.Remove(entryName);
+        }
     }
 }
