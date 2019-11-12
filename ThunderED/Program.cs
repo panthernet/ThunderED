@@ -73,6 +73,8 @@ namespace ThunderED
                 return;
             }
 
+            await SQLHelper.InitializeBackup();
+
             //load language
             await LM.Load();
             //load injected settings

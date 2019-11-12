@@ -76,7 +76,9 @@
     "DatabaseName": "",
     "UserId": "",
     "Password": "",
-    "CustomConnectionString": ""
+    "CustomConnectionString": "",
+    "SqliteBackupFrequencyInHours": 8,
+    "SqliteBackupMaxFiles": 10
   },
 
   "ZKBSettingsModule": {

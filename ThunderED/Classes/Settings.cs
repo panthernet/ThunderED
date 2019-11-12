@@ -1496,6 +1496,10 @@ namespace ThunderED.Classes
         public string UserId { get; set; }
         public string Password { get; set; }
         public string CustomConnectionString { get; set; }
+        [Comment("How often the SQLite backups should be created. Has no effect if value set to 0 or DatabaseProvider is not sqlite. Default value is 8 hours.")]
+        public int SqliteBackupFrequencyInHours { get; set; } = 8;
+        [Comment("Maximum number of backup files. Oldest will be deleted. Minimum value is 2. Default value is 10.")]
+        public int SqliteBackupMaxFiles { get; set; } = 10;
     }
 
 

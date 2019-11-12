@@ -389,12 +389,12 @@ namespace ThunderED.Helpers
             }
         }
 
-        private static async Task BackupDatabase()
+        private static async Task BackupDatabase(string bkFile = null)
         {
             if(SettingsManager.Settings.Database.DatabaseProvider != "sqlite") return;
             try
             {
-                var bkFile = $"{SettingsManager.DatabaseFilePath}.bk";
+                bkFile = bkFile ?? $"{SettingsManager.DatabaseFilePath}.bk";
                 if (File.Exists(bkFile))
                     File.Delete(bkFile);
                 using (var source = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
