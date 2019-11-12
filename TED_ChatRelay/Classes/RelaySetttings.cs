@@ -9,6 +9,7 @@ namespace TED_ChatRelay.Classes
     {
         public string EveLogsFolder { get; set; }
         public List<RelayChannel> RelayChannels { get; set; } = new List<RelayChannel>();
+        public int SendInterval { get; set; } = 5000;
     }
 
     public class RelayChannel

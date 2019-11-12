@@ -168,5 +168,11 @@ namespace TED_ConfigEditor.Classes
             //use the converter to get the correct value
             oProp.SetValue(target, Convert.ChangeType(propertyValue, tProp), null);
         }
+
+        public static IEnumerable<T> TakeSmart<T>(this IEnumerable<T> list, int count)
+        {
+            if (list == null) return null;
+            return list.Count() > count ? list.Take(count): list;
+        }
     }
 }
