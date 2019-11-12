@@ -7,6 +7,7 @@
     "discordGuildId": 0,
     "discordAdminRoles": [ "Admins" ],
     "comForbiddenChannels": [],
+    "comAllowedChannels": [],
     "language": "en-US",
     "useEnglishESIOnly": "true",
 
@@ -45,7 +46,7 @@
     "cachePurgeInterval": 30,
     "memoryUsageLimitMb": 100,
     "logSeverity": "Info",
-    "UseSingleFileForLogging": false, 
+    "UseSingleFileForLogging": false,
     "logNewNotifications": true,
     "requestRetries": 3,
     "ConcurrentThreadsCount": 4,

@@ -729,16 +729,11 @@ namespace ThunderED.Classes
 
             if (SettingsManager.Settings.Config.ModulePriceCheck)
             {
-                var forbiddenChannels = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
                 if (x == null)
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("enterItemName"), true);
-                }
-                else if (forbiddenChannels.Contains(Context.Channel.Id))
-                {
-                    await ReplyAsync(LM.Get("commandToPrivate"));
-
-                }else
+                } 
+                else
                 {
                     await PriceCheckModule.Check(Context, x, "");
                 }
@@ -1340,6 +1335,12 @@ namespace ThunderED.Classes
 
         private bool IsForbidden()
         {
+            var allowed = APIHelper.DiscordAPI.GetConfigAllowedPublicChannels();
+            if (allowed.Any())
+            {
+               return allowed.Any(a => a == Context.Channel.Id);
+            }
+
             var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();
             return forbidden.Any() && forbidden.Contains(Context.Channel.Id);
         }

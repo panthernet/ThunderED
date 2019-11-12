@@ -1523,12 +1523,15 @@ namespace ThunderED.Classes
         [Required]
         public ObservableCollection<string> DiscordAdminRoles { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<ulong> ComForbiddenChannels { get; set; } = new ObservableCollection<ulong>();
+        public ObservableCollection<ulong> ComAllowedChannels { get; set; } = new ObservableCollection<ulong>();
 #else
         [Comment("At least one role name from Discord with admin privilegies")]
         [Required]
         public List<string> DiscordAdminRoles { get; set; } = new List<string>();
         [Comment("The list of numeric channel IDs in which bot commands will be ignored")]
         public List<ulong> ComForbiddenChannels { get; set; } = new List<ulong>();
+        [Comment("The list of numeric channel IDs in which bot commands can be used. Has higher priority than ComForbiddenChannels. All other channels will be blocked if specified.")]
+        public List<ulong> ComAllowedChannels { get; set; } = new List<ulong>();
 #endif
         [Comment("Interface and message language. Note that console text and logs will always be in english. You can add your own translation files in Languages directory.")]
         public string Language { get; set; } = "en-US";

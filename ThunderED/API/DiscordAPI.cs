@@ -363,6 +363,11 @@ namespace ThunderED.API
                        SettingsManager.Settings.Config.ComForbiddenChannels.ToArray());
         }
 
+        internal ulong[] GetConfigAllowedPublicChannels()
+        {
+            return SettingsManager.Settings.Config.ComAllowedChannels.ToArray();
+        }
+
         internal ulong[] GetAuthAllowedChannels()
         {
             return _authAllowedChannels ?? (_authAllowedChannels =
