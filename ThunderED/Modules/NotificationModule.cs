@@ -158,17 +158,22 @@ namespace ThunderED.Modules
 
                             var notifications = result.Result;
 
-/*                            notifications.Add(new JsonClasses.Notification
+                            notifications.Add(new JsonClasses.Notification
                             {
-                                text = @"applicationText: '<font size=""12"" color=""#bfffffff""></font><font size=""12"" color=""#ffd98d00""><loc><a
-       href=""showinfo:1379//96323075"">Opal Ra</a></loc></font><font size=""12"" color=""#bfffffff"">''s
-       Alt #2</font>'
-       charID: 2115409151
-       corpID: 755437926",
+                                text = @"aggressorAllianceID: 99008425
+aggressorCorpID: 98278226
+aggressorID: 95494038
+planetID: 40212927
+planetTypeID: 2016
+reinforceExitTime: 132147728200000000
+solarSystemID: 30003358
+typeID: 2233",
+
+
                                 notification_id = 999990000,
-                                type = "CorpAppNewMsg",
+                                type = "OrbitalReinforced",
                                 timestamp = "2019-06-29T17:20:00Z"
-                            });*/
+                            });
 
                             var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId);
                             var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
@@ -373,7 +378,7 @@ namespace ThunderED.Modules
                                                         ? null
                                                         : (await APIHelper.ESIAPI.GetAllianceData(Reason, aggAllyId))?.ticker;
                                                     var aggText = $"{agressor} - {aggCorp}{(string.IsNullOrEmpty(aggAlly) ? null : $"[{aggAlly}]")}";
-                                                    var exitTime = TimeSpan.FromTicks(Convert.ToInt64(GetData("reinforceExitTime", data))).ToFormattedString();
+                                                    var exitTime = DateTime.FromFileTime(Convert.ToInt64(GetData("reinforceExitTime", data)));
 
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
 

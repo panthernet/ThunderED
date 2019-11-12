@@ -524,7 +524,7 @@
   "webSettingsSimpleAuthTabName": "Simple Auth",
   "webSettingsTimersTabName": "Timers",
   "webSettingsTiColumnEntities": "Entities",
-  "NotifyHeader_OrbitalReinforced": "{0} belonging to {1} has been reinforced! It will exit in {2}",
+  "NotifyHeader_OrbitalReinforced": "{0} belonging to {1} has been reinforced! It will exit on {2}",
   "DateD": "d",
   "DateH": "h",
   "DateM": "m",
