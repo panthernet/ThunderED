@@ -530,6 +530,17 @@ namespace ThunderED.Modules
                     .AddField(LM.Get("contractMsgIssued"), $"{LM.Get("simpleFrom").FirstLetterToUpper()} {issuerName} {LM.Get("simpleTo")} {asigneeName}", true)
                     .AddField(LM.Get("contractMsgStatus"), $"**{statusName}**", true)
                     .AddField(locationText, startLocation, true);
+
+                if (contract.type == "courier")
+                    embed.AddField($"{LM.Get("contractMsgCollateral")}/{LM.Get("contractMsgReward")}", $"{contract.collateral:N} / {contract.reward:N}", true);
+                else
+                {
+                    if (contract.price > 0 || contract.reward > 0)
+                        embed.AddField(LM.Get(contract.price > 0 ?"contractMsgPrice": "contractMsgReward"),  contract.price > 0 ? $"{contract.price:N}" : $"{contract.reward:N}");
+                    else if (contract.type == "auction")
+                        embed.AddField(LM.Get("contractMsgBuyout"), $"{contract.buyout:N}");
+                }
+
                 if (contract.volume > 0)
                 {
                     embed.AddField(LM.Get("contractMsgVolume"), $"{contract.volume:N1} m3", true);

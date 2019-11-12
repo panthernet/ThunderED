@@ -2,6 +2,7 @@
 + Added `Hidden` param to auth groups to hide their buttons but allow to participate in upgrade logic
 + Added automatic SQLite DB backup logic with new settings `SqliteBackupFrequencyInHours` and `SqliteBackupMaxFiles`
 + Added `comAllowedChannels` param to specify allowed channels. All other channels and `comForbiddenChannels` param will no have effect if `comAllowedChannels` has any value
++ Added price to compact contracts notification mode
 + Fixed `OrbitalReinforced` notification date
 + Fixed config editor LiveKillFeedModule write
 + Fixed war inherited notification
