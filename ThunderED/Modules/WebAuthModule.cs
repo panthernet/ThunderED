@@ -421,6 +421,9 @@ namespace ThunderED.Modules
 
             if (request.HttpMethod != HttpMethod.Get.ToString())
                 return false;
+
+            var remoteAddress = HttpUtility.UrlEncode(Convert.ToBase64String(Encoding.UTF8.GetBytes($"{request.RemoteEndpoint.Address}:{request.RemoteEndpoint.Port}")));
+
             try
             {
                 if (request.Url.LocalPath == "/auth" || request.Url.LocalPath == $"{extPort}/auth"|| request.Url.LocalPath == $"{port}/auth")
@@ -442,13 +445,13 @@ namespace ThunderED.Modules
 
                     if (!Settings.WebAuthModule.AuthGroups.Keys.ContainsCaseInsensitive(groupName) && DEF_NOGROUP_NAME.Equals(groupName))
                     {
-                        var url = WebServerModule.GetAuthUrlOneButton();
+                        var url = WebServerModule.GetAuthUrlOneButton(remoteAddress);
                         await response.RedirectAsync(new Uri(url));
                     }
                     else if (!Settings.WebAuthModule.AuthGroups.Keys.ContainsCaseInsensitive(groupName) && DEF_ALTREGGROUP_NAME.Equals(groupName))
                     {
 
-                        var url = WebServerModule.GetAuthUrlAltRegButton();
+                        var url = WebServerModule.GetAuthUrlAltRegButton(remoteAddress);
                         var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{authUrl}", url)
                             .Replace("{authButtonDiscordText}", LM.Get("authAltRegTemplateHeader"))
                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
@@ -461,8 +464,8 @@ namespace ThunderED.Modules
                     {
                         var grp = GetGroupByName(groupName).Value;
                         var url = grp.MustHaveGroupName || (Settings.WebAuthModule.UseOneAuthButton && grp.ExcludeFromOneButtonMode)
-                            ? WebServerModule.GetCustomAuthUrl(grp.ESICustomAuthRoles, groupName)
-                            : WebServerModule.GetAuthUrl();
+                            ? WebServerModule.GetCustomAuthUrl(remoteAddress, grp.ESICustomAuthRoles, groupName)
+                            : WebServerModule.GetAuthUrl(remoteAddress);
 
                         var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{authUrl}", url)
                             .Replace("{authButtonDiscordText}", LM.Get("authButtonDiscordText"))
@@ -509,7 +512,7 @@ namespace ThunderED.Modules
 
                     if (Settings.WebAuthModule.AuthGroups.Values.All(g => g.StandingsAuth == null || !g.StandingsAuth.CharacterIDs.Contains(numericCharId)))
                     {
-                        await LogHelper.LogWarning($"Unathorized auth stands feed request from {characterID}");
+                        await LogHelper.LogWarning($"Unauthorized auth stands feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{message}", LM.Get("authTokenInvalid"))
@@ -556,11 +559,15 @@ namespace ThunderED.Modules
                         var code = prms.ContainsKey("code") ? prms["code"].LastOrDefault() : null;
                         var state = prms.ContainsKey("state") ? prms["state"].LastOrDefault() : null;
                         var mainCharId = 0L;
+                        string ip = null;
+                        string rawIp = null;
                         if (state?.Contains('|') ?? false)
                         {
                             var lst = state.Split('|');
                             state = lst[0];
                             long.TryParse(lst[1], out mainCharId);
+                            rawIp = lst.LastOrDefault();
+                            ip = Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(lst.LastOrDefault())));
                         }
 
                         var inputGroupName = state?.Length > 1 ? HttpUtility.UrlDecode(state.Substring(1, state.Length - 1)) : null;
@@ -635,8 +642,8 @@ namespace ThunderED.Modules
                             group = pair.Value;
                             groupName = pair.Key;
                             var url = group.ESICustomAuthRoles.Any()
-                                ? WebServerModule.GetCustomAuthUrl(group.ESICustomAuthRoles, user.GroupName, longCharacterId)
-                                : WebServerModule.GetAuthUrl(groupName, longCharacterId);
+                                ? WebServerModule.GetCustomAuthUrl(rawIp, group.ESICustomAuthRoles, user.GroupName, longCharacterId)
+                                : WebServerModule.GetAuthUrl(rawIp, groupName, longCharacterId);
                             await response.RedirectAsync(new Uri(url));
 
                             return true;
@@ -666,6 +673,7 @@ namespace ThunderED.Modules
                             groupName = pair.Key;
 
                             var altUser = await AuthUserEntity.CreateAlt(altCharId, refreshToken, group, groupName, mainCharId);
+                            altUser.Ip = ip;
                             await SQLHelper.SaveAuthUser(altUser);
 
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
@@ -737,7 +745,7 @@ namespace ThunderED.Modules
                         {
                             if (autoSearchGroup && group.ESICustomAuthRoles.Any()) //for one button with ESI - had to auth twice
                             {
-                                await response.RedirectAsync(new Uri(WebServerModule.GetCustomAuthUrl(group.ESICustomAuthRoles, groupName)));
+                                await response.RedirectAsync(new Uri(WebServerModule.GetCustomAuthUrl(rawIp ?? remoteAddress, group.ESICustomAuthRoles, groupName)));
                                 return true;
                             }
 
@@ -755,7 +763,8 @@ namespace ThunderED.Modules
                                 GroupName = groupName,
                                 AuthState = inputGroup != null && inputGroup.PreliminaryAuthMode ? 0 : 1,
                                 RegCode = uid,
-                                CreateDate = DateTime.Now
+                                CreateDate = DateTime.Now,
+                                Ip = ip
                             };
                             await authUser.UpdateData();
                             await SQLHelper.SaveAuthUser(authUser);

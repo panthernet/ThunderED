@@ -517,7 +517,7 @@ namespace ThunderED.Classes
                             : SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault();
                     if (grp.Value != null)
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl(grp.Value.ESICustomAuthRoles, grp.Key)}");
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
                     }
                 }
             }
@@ -538,7 +538,7 @@ namespace ThunderED.Classes
                 var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a=> a.Key == group);
                 if (grp.Value != null)
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl(grp.Value.ESICustomAuthRoles, grp.Key)}");
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
                 }
             }
             else

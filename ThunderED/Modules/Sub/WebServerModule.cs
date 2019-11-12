@@ -505,29 +505,29 @@ namespace ThunderED.Modules.Sub
         }
 
 
-        internal static string GetAuthUrl(string groupName = null, long mainCharacterId = 0)
+        internal static string GetAuthUrl(string ip, string groupName = null, long mainCharacterId = 0)
         {
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var callbackurl = GetCallBackUrl();
             var grp = string.IsNullOrEmpty(groupName) ? null : $"&state=x{HttpUtility.UrlEncode(groupName)}";
             var mc = mainCharacterId == 0 ? null : $"|{mainCharacterId}";
-            return $"https://login.eveonline.com/oauth/authorize?response_type=code&amp;redirect_uri={callbackurl}&amp;client_id={clientID}{grp}{mc}";
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&amp;redirect_uri={callbackurl}&amp;client_id={clientID}{grp}{mc}|{ip}";
         }
 
-        internal static string GetAuthUrlOneButton()
+        internal static string GetAuthUrlOneButton(string ip)
         {
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var callbackurl = GetCallBackUrl();
-            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=oneButton";
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=oneButton|{ip}";
         }
-        internal static string GetAuthUrlAltRegButton()
+        internal static string GetAuthUrlAltRegButton(string ip)
         {
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var callbackurl = GetCallBackUrl();
-            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=altReg";
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&state=altReg|{ip}";
         }
 
-        internal static string GetCustomAuthUrl(List<string> permissions, string group = null, long mainCharacterId = 0)
+        internal static string GetCustomAuthUrl(string ip, List<string> permissions, string group = null, long mainCharacterId = 0)
         {
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var callbackurl = GetCallBackUrl();
@@ -536,7 +536,7 @@ namespace ThunderED.Modules.Sub
             var mc = mainCharacterId == 0 ? null : $"|{mainCharacterId}";
 
             var pString = string.Join('+', permissions);
-            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}{grp}{mc}";
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}{grp}{mc}|{ip}";
         }
 
 

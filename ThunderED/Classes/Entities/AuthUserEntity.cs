@@ -22,6 +22,7 @@ namespace ThunderED.Classes.Entities
         public string RegCode;
         public long? MainCharacterId;
         public DateTime? LastCheck;
+        public string Ip;
 
 
         //for compatibility
@@ -51,7 +52,7 @@ namespace ThunderED.Classes.Entities
         [JsonIgnore]
         public bool HasRegCode => !string.IsNullOrEmpty(RegCode);
 
-        
+
 
         public void SetStateDumpster()
         {

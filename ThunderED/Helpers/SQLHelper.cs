@@ -267,6 +267,7 @@ namespace ThunderED.Helpers
                 DumpDate = item[9] == null ? null : (DateTime?)Convert.ToDateTime(item[9]),
                 MainCharacterId = item[10] == null ? null : (long?)Convert.ToInt64(item[10]),
                 LastCheck = item[11] == null? null : (DateTime?)Convert.ToDateTime(item[11]),
+                Ip = (string)item[12],
             };
         }
 
@@ -286,6 +287,7 @@ namespace ThunderED.Helpers
             dic.Add("data", JsonConvert.SerializeObject(user.Data));
             dic.Add("main_character_id", user.MainCharacterId);
             dic.Add("last_check", user.LastCheck);
+            dic.Add("ip", user.Ip);
             if (insertOnly)
                 await Insert("auth_users", dic);
             else await InsertOrUpdate("auth_users", dic);
