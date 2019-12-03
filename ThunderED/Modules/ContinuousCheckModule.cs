@@ -271,6 +271,8 @@ namespace ThunderED.Modules
                         }
                     }
                     list.Add(data);
+                    //ZKB limitation one request per second
+                    await Task.Delay(1000);
                 }
                 list = list.OrderByDescending(item =>
                 {

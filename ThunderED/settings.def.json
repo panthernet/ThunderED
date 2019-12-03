@@ -173,7 +173,7 @@
       "Mode1_GeneralAuth": {
         "RemoveAuthIfTokenIsInvalid": false,
         "RemoveTokenIfTokenIsInvalid": false,
-        "StopSearchingOnFirstMatch": "false",
+        "StopSearchingOnFirstMatch": false,
         "Hidden":  false, 
         "AllowedMembers": {
           "entry1": {
