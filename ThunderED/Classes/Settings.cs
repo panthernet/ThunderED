@@ -721,13 +721,6 @@ namespace ThunderED.Classes
 
     public class LiveKillFeedModuleSettings: ValidatableSettings
     {
-        //[Comment("Enable or disable caching. If you're getting many global KMs it might be better to disable it to free database from large chunks of one time data")]
-        //public bool EnableCache { get; set; }
-        /*[Comment("Numeric value in ISK to consider the kill to be BIG enough")]
-        public long BigKill { get; set; }
-        [Comment("Numeric channel ID to post all GLOBAL big kills in EVE, 0 to skip")]
-        public ulong BigKillChannel { get; set; }*/
-
         [Comment("Do not process KM in other groups if KM has been posted within a group")]
         public bool StopOnFirstGroupMatch { get; set; }
 
@@ -805,31 +798,40 @@ namespace ThunderED.Classes
 
     public class KillMailFilter
     {
-        [Comment("If set to True - will display KM which fit filter criteria, otherwise will exclude KM which fit filter criteria")]
-        public bool Inclusive { get; set; } = true;
-        [Comment("If set to True in Inclusive mode - all filter criteria must match to feed KM, otherwise any match will do")]
-        public bool AllMustMatch { get; set; } = true;
-        public double MinimumKillValue { get; set; }
-        public double MinimumLossValue { get; set; }
-        public double MaximumKillValue { get; set; }
-        public double MaximumLossValue { get; set; }
+        public double MinimumIskValue { get; set; }
+        public double MaximumIskValue { get; set; }
 
+        [Comment("Enable strict 'AND' check rule for Victims and Attackers if True. Otherwise 'OR' rule will apply where any of Attackers or Victims should match for a filter to pass.")]
+        public bool EnableStrictPartiesCheck { get; set; }
+        [Comment("Filter will pass if any specified condition is met when value set to True. Otherwise all conditions must be met.")]
+        public bool EnableMatchOnFirstConditionMet { get; set; }
+
+        
         [Comment("Numeric value of number of jumps around specified system. Leave 0 to disable radius feed. Has no effect on region or constellation.")]
         public int Radius { get; set; }
 #if EDITOR
         [Comment("List of Discord channel IDs for KM feed within a filter")]
         public ObservableCollection<ulong> DiscordChannels { get; set; } = new ObservableCollection<ulong>();
 
-        public ObservableCollection<object> ShipEntities { get; set; } = new ObservableCollection<object>();
-        public ObservableCollection<object> VictimEntities { get; set; } = new ObservableCollection<object>();
-        public ObservableCollection<object> AttackerEntities { get; set; } = new ObservableCollection<object>();
-        public ObservableCollection<object> LocationEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasShipEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasNoShipEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasVictimEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasNoVictimEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasAttackerEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasNoAttackerEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasLocationEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasNoLocationEntities { get; set; } = new ObservableCollection<object>();
 #else
-        public List<object> ShipEntities = new List<object>();
-        public List<object> VictimEntities = new List<object>();
-        public List<object> AttackerEntities = new List<object>();
         public List<ulong> DiscordChannels = new List<ulong>();
-        public List<object> LocationEntities = new List<object> ();
+
+        public List<object> HasShipEntities = new List<object>();
+        public List<object> HasNoShipEntities = new List<object>();
+        public List<object> HasVictimEntities = new List<object>();
+        public List<object> HasNoVictimEntities = new List<object>();
+        public List<object> HasAttackerEntities = new List<object>();
+        public List<object> HasNoAttackerEntities = new List<object>();
+        public List<object> HasLocationEntities = new List<object>();
+        public List<object> HasNoLocationEntities = new List<object>();
 #endif
     }
 

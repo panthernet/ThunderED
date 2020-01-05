@@ -1,5 +1,5 @@
 version: '1.0.{build}'
-image: Visual Studio 2017
+image: Visual Studio 2019
 branches:
   only:
   - master
@@ -19,7 +19,7 @@ build_script:
 after_build:
   # For once the build has completed
 artifacts:
- - path: '\ThunderED\bin\Debug\netcoreapp2.1\publish'
+ - path: '\ThunderED\bin\Debug\netcoreapp3.1\publish'
    name: WebSite
    type: WebDeployPackage
 clone_depth: 1

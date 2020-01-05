@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
@@ -15,18 +16,17 @@ using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules.OnDemand
 {
-    public partial class LiveKillFeedModule: AppModuleBase
+    /*public partial class LiveKillFeedModule: AppModuleBase
     {
         private static readonly ConcurrentDictionary<string, long> LastPostedDictionary = new ConcurrentDictionary<string, long>();
 
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedVictimsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedAttackersLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
-        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedLocationLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
-        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
-        
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeVictimsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeAttackersLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedLocationLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeLocationLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
 
         public override LogCat Category => LogCat.KillFeed;
@@ -87,22 +87,38 @@ namespace ThunderED.Modules.OnDemand
                 var exsGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 foreach (var (fKey, fValue) in value.Filters)
                 {
-                    var aData = await ParseMemberDataArray(fValue.HasAttackerEntities);
+                    var aData = await ParseMemberDataArray(fValue.AttackerEntities.Where(a=> !a.ToString().StartsWith("-")).ToList());
                     aGroupDic.Add(fKey, aData);
-                    var vData = await ParseMemberDataArray(fValue.HasVictimEntities);
+                    var vData = await ParseMemberDataArray(fValue.VictimEntities.Where(a=> !a.ToString().StartsWith("-")).ToList());
                     vGroupDic.Add(fKey, vData);
-                    var lData = await ParseLocationDataArray(fValue.HasLocationEntities);
+                    var lData = await ParseLocationDataArray(fValue.LocationEntities.Where(a=> !a.ToString().StartsWith("-")).ToList());
                     lGroupDic.Add(fKey, lData);
-                    var sData = await ParseTypeDataArray(fValue.HasShipEntities);
+                    var sData = await ParseTypeDataArray(fValue.ShipEntities.Where(a=> !a.ToString().StartsWith("-")).ToList());
                     sGroupDic.Add(fKey, sData);
                     //excluded
-                    var exaData = await ParseMemberDataArray(fValue.HasNoAttackerEntities);
+                    var exaData = await ParseMemberDataArray(fValue.AttackerEntities.Where(a=> a.ToString().StartsWith("-")).Select(a=>
+                    {
+                        var str = a.ToString();
+                        return (object)str.Substring(1, str.Length-1);
+                    }).ToList());
                     exaGroupDic.Add(fKey, exaData);
-                    var exvData = await ParseMemberDataArray(fValue.HasNoVictimEntities);
+                    var exvData = await ParseMemberDataArray(fValue.VictimEntities.Where(a=> a.ToString().StartsWith("-")).Select(a=>
+                    {
+                        var str = a.ToString();
+                        return (object)str.Substring(1, str.Length-1);
+                    }).ToList());
                     exvGroupDic.Add(fKey, exvData);
-                    var exlData = await ParseMemberDataArray(fValue.HasNoLocationEntities);
+                    var exlData = await ParseLocationDataArray(fValue.LocationEntities.Where(a=> a.ToString().StartsWith("-")).Select(a=>
+                    {
+                        var str = a.ToString();
+                        return (object)str.Substring(1, str.Length-1);
+                    }).ToList());
                     exlGroupDic.Add(fKey, exlData);
-                    var exsData = await ParseMemberDataArray(fValue.HasNoShipEntities);
+                    var exsData = await ParseTypeDataArray(fValue.ShipEntities.Where(a=> a.ToString().StartsWith("-")).Select(a=>
+                    {
+                        var str = a.ToString();
+                        return (object)str.Substring(1, str.Length-1);
+                    }).ToList());
                     exsGroupDic.Add(fKey, exsData);
                 }
                 ParsedAttackersLists.Add(key, aGroupDic);
@@ -144,12 +160,14 @@ namespace ThunderED.Modules.OnDemand
 
                     foreach (var (filterName, filter) in group.Filters)
                     {
+                        var isInclusive = filter.Inclusive;
                         var isLoss = false;
+                        var isPassed = false;
+                        var isFirstMatchOnly = !filter.AllMustMatch;
                         var isCertifiedToFeed = false;
 
-                        #region Person & Value checks
-
-                        #region Exclusions
+                        #region Person checks
+                        //exclusions
                         var exList = GetTier2CharacterIds(ParsedExcludeAttackersLists, groupName, filterName);
                         if(exList.ContainsAnyFromList(kill.attackers.Select(a=> a.character_id).Distinct())) continue;
                         exList = GetTier2CorporationIds(ParsedExcludeAttackersLists, groupName, filterName);
@@ -179,154 +197,189 @@ namespace ThunderED.Modules.OnDemand
 
                         exList = GetTier2TypeIds(ParsedExcludeShipsLists, groupName, filterName);
                         if(exList.Contains(kill.victim.ship_type_id)) continue;
-                        #endregion
-
-                        //value checks
-                        if (filter.MinimumIskValue > kill.zkb.totalValue) continue;
-                        if (filter.MaximumIskValue > 0 && filter.MaximumIskValue < kill.zkb.totalValue) continue;
-
-                        //if (filter.EnableMatchOnFirstConditionMet && (filter.MinimumIskValue > 0 || filter.MaximumIskValue > 0 ))
-                        //    isCertifiedToFeed = true;
 
                         //character check
-                        var hasAttackerMatch = false;
-                        var hasPartyCheck = false;
-                        List<long> entityIds;
+                        var fChars = GetTier2CharacterIds(ParsedAttackersLists, groupName, filterName);
+                        if (fChars.Any())
+                        {
+                            var attackers = kill.attackers.Select(a => a.character_id);
+                            if (isInclusive)
+                            {
+                                if (!fChars.ContainsAnyFromList(attackers))
+                                {
+                                    if(!isFirstMatchOnly)
+                                        continue;
+                                }
+                                else
+                                {
+                                    isPassed = true;
+                                    isCertifiedToFeed = isFirstMatchOnly;
+                                }
+                            }
+                            if(!isInclusive && fChars.ContainsAnyFromList(attackers))
+                                continue;
+                        }
+
                         if (!isCertifiedToFeed)
                         {
-                            entityIds = GetTier2CharacterIds(ParsedAttackersLists, groupName, filterName);
-                            if (entityIds.Any())
+                            fChars = GetTier2CharacterIds(ParsedVictimsLists, groupName, filterName);
+                            if (fChars.Any())
                             {
-                                hasPartyCheck = true;
-                                var attackers = kill.attackers.Select(a => a.character_id);
-                                if (entityIds.ContainsAnyFromList(attackers))
+                                if (isInclusive)
                                 {
-                                    if (filter.EnableMatchOnFirstConditionMet)
-                                        isCertifiedToFeed = true;
-                                    hasAttackerMatch = true;
+                                    if (!fChars.Contains(kill.victim.character_id))
+                                    {
+                                        if (!isFirstMatchOnly)
+                                            continue;
+                                    }
+                                    else
+                                    {
+                                        isLoss = true;
+                                        isPassed = true;
+                                        isCertifiedToFeed = isFirstMatchOnly;
+                                    }
+
                                 }
+                                if (!isInclusive && fChars.Contains(kill.victim.character_id))
+                                    continue;
                             }
                         }
 
-                        var hasVictimMatch = false;
-                        if (!isCertifiedToFeed)
-                        {
-                            entityIds = GetTier2CharacterIds(ParsedVictimsLists, groupName, filterName);
-                            if (entityIds.Any())
-                            {
-                                hasPartyCheck = true;
-                                if (entityIds.Contains(kill.victim.character_id))
-                                {
-                                    if(filter.EnableMatchOnFirstConditionMet)
-                                        isCertifiedToFeed = true;
-                                    hasVictimMatch = true;
-                                    isLoss = true;
-                                }
-                            }
-                        }
 
                         //corp check
-                        if ((!hasVictimMatch || !hasAttackerMatch) && !isCertifiedToFeed)
+                        if (!isPassed && !isCertifiedToFeed)
                         {
-                            if (!hasAttackerMatch)
+                            fChars = GetTier2CorporationIds(ParsedAttackersLists, groupName, filterName);
+                            if (fChars.Any())
                             {
-                                entityIds = GetTier2CorporationIds(ParsedAttackersLists, groupName, filterName);
-                                if (entityIds.Any())
+                                var attackers = kill.attackers.Select(a => a.corporation_id);
+                                if (isInclusive)
                                 {
-                                    hasPartyCheck = true;
-                                    var attackers = kill.attackers.Select(a => a.corporation_id);
-                                    if (entityIds.ContainsAnyFromList(attackers))
+                                    if (!fChars.ContainsAnyFromList(attackers))
                                     {
-                                        if (filter.EnableMatchOnFirstConditionMet)
-                                            isCertifiedToFeed = true;
-                                        hasAttackerMatch = true;
+                                        if(!isFirstMatchOnly)
+                                            continue;
+                                    }
+                                    else
+                                    {
+                                        isPassed = true;
+                                        isCertifiedToFeed = isFirstMatchOnly;
                                     }
                                 }
+                                if (!isInclusive && fChars.ContainsAnyFromList(attackers))
+                                    continue;
                             }
 
-                            if (!isCertifiedToFeed && !hasVictimMatch)
+                            if (!isCertifiedToFeed)
                             {
-                                entityIds = GetTier2CorporationIds(ParsedVictimsLists, groupName, filterName);
-                                if (entityIds.Any())
+                                fChars = GetTier2CorporationIds(ParsedVictimsLists, groupName, filterName);
+                                if (fChars.Any())
                                 {
-                                    hasPartyCheck = true;
-                                    if (entityIds.Contains(kill.victim.corporation_id))
+                                    if (isInclusive)
                                     {
-                                        if(filter.EnableMatchOnFirstConditionMet)
-                                            isCertifiedToFeed = true; 
-                                        hasVictimMatch = true;
-                                        isLoss = true;
+                                        if (!fChars.Contains(kill.victim.corporation_id))
+                                        {
+                                            if (!isFirstMatchOnly)
+                                                continue;
+                                        }
+                                        else
+                                        {
+                                            isLoss = true;
+                                            isPassed = true;
+                                            isCertifiedToFeed = isFirstMatchOnly;
+                                        }
+
                                     }
+                                    if (!isInclusive && fChars.Contains(kill.victim.corporation_id))
+                                        continue;
                                 }
                             }
                         }
 
                         //alliance check
-                        if ((!hasVictimMatch || !hasAttackerMatch) && !isCertifiedToFeed)
+                        if (!isPassed && !isCertifiedToFeed)
                         {
-                            if (!hasAttackerMatch)
+                            fChars = GetTier2AllianceIds(ParsedAttackersLists, groupName, filterName);
+                            if (fChars.Any())
                             {
-                                entityIds = GetTier2AllianceIds(ParsedAttackersLists, groupName, filterName);
-                                if (entityIds.Any())
+                                var attackers = kill.attackers.Where(a=> a.alliance_id > 0).Select(a => a.alliance_id);
+                                if (isInclusive)
                                 {
-                                    hasPartyCheck = true;
-                                    var attackers = kill.attackers.Where(a => a.alliance_id > 0)
-                                        .Select(a => a.alliance_id);
-                                    if (entityIds.ContainsAnyFromList(attackers))
+                                    if (!fChars.ContainsAnyFromList(attackers))
                                     {
-                                        if (filter.EnableMatchOnFirstConditionMet)
-                                            isCertifiedToFeed = true;
-                                        hasAttackerMatch = true;
+                                        if(!isFirstMatchOnly)
+                                            continue;
+                                    }
+                                    else
+                                    {
+                                        isPassed = true;
+                                        isCertifiedToFeed = isFirstMatchOnly;
                                     }
                                 }
+
+                                if (!isInclusive && fChars.ContainsAnyFromList(attackers))
+                                    continue;
                             }
 
-                            if (!isCertifiedToFeed && !hasVictimMatch)
+                            if (!isCertifiedToFeed)
                             {
-                                entityIds = GetTier2AllianceIds(ParsedVictimsLists, groupName, filterName);
-                                if (entityIds.Any())
+                                fChars = GetTier2AllianceIds(ParsedVictimsLists, groupName, filterName);
+                                if (fChars.Any())
                                 {
-                                    hasPartyCheck = true;
-                                    if (entityIds.Contains(kill.victim.alliance_id))
+                                    if (isInclusive)
                                     {
-                                        if(filter.EnableMatchOnFirstConditionMet)
-                                            isCertifiedToFeed = true; 
-                                        hasVictimMatch = true;
-                                        isLoss = true;
+                                        if (!isFirstMatchOnly && kill.victim.alliance_id == 0) continue;
+                                        if (kill.victim.alliance_id > 0)
+                                        {
+                                            if (!fChars.Contains(kill.victim.alliance_id))
+                                            {
+                                                if (!isFirstMatchOnly)
+                                                    continue;
+                                            }
+                                            else
+                                            {
+                                                isLoss = true;
+                                                isPassed = true;
+                                                isCertifiedToFeed = isFirstMatchOnly;
+                                            }
+                                        }
                                     }
+
+                                    if (!isInclusive && fChars.Contains(kill.victim.alliance_id))
+                                        continue;
                                 }
                             }
                         }
 
-                        //has no strict match = continue
-                        if(hasPartyCheck && !isCertifiedToFeed && filter.EnableStrictPartiesCheck && (!hasAttackerMatch || !hasVictimMatch))
-                            continue;
-
-                        //has no party match on check
-                        if(hasPartyCheck && !isCertifiedToFeed  && !filter.EnableStrictPartiesCheck && !hasAttackerMatch && !hasVictimMatch)
-                            continue;
-
+                        isPassed = false;
                         #endregion
+
+                        //value checks
+                        if (!isCertifiedToFeed)
+                        {
+                            if (isLoss && filter.MinimumLossValue >= kill.zkb.totalValue) continue;
+                            if (filter.MaximumLossValue > 0 && isLoss && filter.MaximumLossValue <= kill.zkb.totalValue) continue;
+                            if (!isLoss && filter.MinimumKillValue >= kill.zkb.totalValue) continue;
+                            if (filter.MaximumKillValue > 0 && !isLoss && filter.MaximumKillValue <= kill.zkb.totalValue) continue;
+
+                            if (isFirstMatchOnly && (filter.MinimumKillValue > 0 || filter.MinimumLossValue > 0 || filter.MaximumLossValue > 0 || filter.MaximumKillValue > 0))
+                                isCertifiedToFeed = true;
+                        }
 
                         #region Location checks (except system radius)
 
                         if (!isCertifiedToFeed)
                         {
-                            var check = CheckLocation(rSystem, kill, groupName, filterName);
+                            var check = CheckLocation(rSystem, kill, isInclusive, groupName, filterName);
                             //if have some location criteria
                             if (check != null)
                             {
-                                if (check.Value) //match
+                                if (check == false)
                                 {
-                                    if (filter.EnableMatchOnFirstConditionMet)
-                                        isCertifiedToFeed = true;
+                                    if (filter.Radius == 0 && !isFirstMatchOnly) continue;
                                 }
-                                else //no match
-                                {
-                                    //no radius checks planned
-                                    if(filter.Radius == 0)
-                                        continue;
-                                }
+                                else if (isInclusive && isFirstMatchOnly)
+                                    isCertifiedToFeed = true;
                             }
                         }
 
@@ -337,21 +390,18 @@ namespace ThunderED.Modules.OnDemand
                         var types = GetTier2TypeIds(ParsedShipsLists, groupName, filterName);
                         if (types.Any() && !isCertifiedToFeed)
                         {
-                            if (types.Contains(kill.victim.ship_type_id))
+                            if (isInclusive && !types.Contains(kill.victim.ship_type_id))
                             {
-                                if (filter.EnableMatchOnFirstConditionMet)
-                                    isCertifiedToFeed = true;
+                                if(!isFirstMatchOnly) continue;
                             }
-                            else
-                            {
-                                //type not match
-                                continue;
-                            }
+                            if(!isInclusive && types.Contains(kill.victim.ship_type_id)) continue;
+                            if (isInclusive && isFirstMatchOnly)
+                                isCertifiedToFeed = true;
                         }
                         #endregion
 
                         //haven't hit any criteria for 1-hit mode
-                       // if(!isCertifiedToFeed && filter.EnableMatchOnFirstConditionMet) continue;
+                        if(!isCertifiedToFeed && isFirstMatchOnly) continue;
 
                         var discordChannels = filter.DiscordChannels.Any() ? filter.DiscordChannels : group.DiscordChannels;
 
@@ -534,27 +584,59 @@ namespace ThunderED.Modules.OnDemand
             return true;
         }
 
-        private bool? CheckLocation(JsonClasses.SystemName rSystem, JsonZKill.Killmail kill, string groupName, string filterName)
+        private bool? CheckLocation(JsonClasses.SystemName rSystem, JsonZKill.Killmail kill, bool isInclusive, string groupName, string filterName)
         {
+            var isPassed = false;
             if (rSystem == null)
             {
                 LogHelper.LogError($"System not found: {kill.solar_system_id}!", Category).GetAwaiter().GetResult();
                 return false;
             }
-            //System
-            var fSystems = GetTier2SystemIds(ParsedLocationLists, groupName, filterName);
-            if (fSystems.Any() && fSystems.Contains(kill.solar_system_id))
-                return true;
-            //Constellation
-            var fConsts = GetTier2ConstellationIds(ParsedLocationLists, groupName, filterName);
-            if (fConsts.Any() && fConsts.Contains(rSystem.constellation_id))
-                return true;
-            //Region
-            var fRegions = GetTier2RegionIds(ParsedLocationLists, groupName, filterName);
-            if (fRegions.Any() && rSystem.DB_RegionId.HasValue && fRegions.Contains(rSystem.DB_RegionId.Value))
-                return true;
 
-            return fSystems.Any() || fConsts.Any() || fRegions.Any() ? false : (bool?)null;
+            var fCount = 0;
+            //System
+            var fLocs = GetTier2SystemIds(ParsedLocationLists, groupName, filterName);
+            if (fLocs.Any())
+            {
+                if (isInclusive && !fLocs.Contains(kill.solar_system_id))
+                    return false;
+                if (!isInclusive && fLocs.Contains(kill.solar_system_id))
+                    return false;
+                if (isInclusive) isPassed = true;
+            }
+            else fCount++;
+
+            //Constellation
+            if (!isPassed)
+            {
+                fLocs = GetTier2ConstellationIds(ParsedLocationLists, groupName, filterName);
+                if (fLocs.Any())
+                {
+                    if (isInclusive && !fLocs.Contains(rSystem.constellation_id))
+                        return false;
+                    if (!isInclusive && fLocs.Contains(rSystem.constellation_id))
+                        return false;
+                    if (isInclusive) isPassed = true;
+                }
+                else fCount++;
+            }
+
+            //Region
+            if (!isPassed)
+            {
+                fLocs = GetTier2RegionIds(ParsedLocationLists, groupName, filterName);
+                if (fLocs.Any() && rSystem.DB_RegionId.HasValue)
+                {
+                    if (isInclusive && !fLocs.Contains(rSystem.DB_RegionId.Value))
+                        return false;
+                    if (!isInclusive && fLocs.Contains(rSystem.DB_RegionId.Value))
+                        return false;
+                    if (isInclusive) isPassed = true;
+                }
+                else fCount++;
+            }
+
+            return fCount == 3 ? (bool?)null : true;
         }
 
         private bool UpdateLastPosted(string groupName, long id)
@@ -664,4 +746,5 @@ namespace ThunderED.Modules.OnDemand
             Region
         }
     }
+    */
 }

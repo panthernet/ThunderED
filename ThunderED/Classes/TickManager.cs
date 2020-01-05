@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Async;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dasync.Collections;
 using Discord.Commands;
 using ThunderED.Helpers;
 using ThunderED.Modules;
@@ -38,9 +38,14 @@ namespace ThunderED.Classes
             OnDemandModules.Clear();
 
             //sub modules - core modules that are called in each tick and can supply other modules with some data
-            Modules.Add(new ZKillLiveFeedModule());
-            Modules.Add(new WebServerModule());
             Modules.Add(new ContinuousCheckModule());
+
+            if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
+                Modules.Add(new ZKillLiveFeedModule());
+
+            if (SettingsManager.Settings.Config.ModuleWebServer)
+                Modules.Add(new WebServerModule());
+
 
             //dynamic modules - called in each tick
 

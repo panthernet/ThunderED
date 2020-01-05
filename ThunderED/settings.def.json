@@ -66,7 +66,7 @@
     "ccpAppClientId": "REQUIRED",
     "ccpAppSecret": "REQUIRED",
     "ServerStatusPort": 0,
-    "NoStatusResponseOnDiscordDisconnection":  true 
+    "NoStatusResponseOnDiscordDisconnection": true
   },
 
   "Database": {
@@ -90,6 +90,7 @@
   },
 
   "liveKillFeedModule": {
+    "dsc1": "This is a default config with all possible properties mentioned",
     "StopOnFirstGroupMatch": false,
     "Groups": {
       "groupName": {
@@ -106,50 +107,76 @@
         "MessageTemplateFileName": "",
         "Filters": {
           "filter1": {
-            "Inclusive": true,
-            "AllMustMatch": true,
-            "MinimumKillValue": 0,
-            "MaximumKillValue": 0,
-            "MinimumLossValue": 0,
-            "MaximumLossValue": 0,
-            "ShipEntities": [],
-            "VictimEntities": [],
-            "AttackerEntities": [],
+            "MinimumIskValue": 0,
+            "MaximumIskValue": 0,
+            "HasShipEntities": [],
+            "HasNoShipEntities": [],
+            "HasVictimEntities": [],
+            "HasAttackerEntities": [],
+            "HasNoVictimEntities": [],
+            "HasNoAttackerEntities": [],
             "Radius": 0,
-            "LocationEntities": [],
-            "DiscordChannels": []
+            "HasLocationEntities": [],
+            "HasNoLocationEntities": [],
+            "DiscordChannels": [],
+            "EnableMatchOnFirstConditionMet": false,
+            "EnableStrictPartiesCheck": false
           }
         }
       },
       "exampleGroup": {
-        "ShowGroupName": false,
+        "dsc1": "You can safely remove all default entries to reduce config size. They will automatically use default values on app startup.",
+        "dsc2": "HasNo' properties are always checked before any 'Has' properties. They are not affected by any modifiers.",
+        "dsc3": "Provided config is just an example for the most useful cases. You can mix different filter properties to achieve insane agility with KM feeds.",
         "DiscordChannels": [ 567625555843743754, 567625555843743756 ],
-        "FeedPvpKills": true,
-        "FeedPveKills": true,
-        "FeedAwoxKills": true,
-        "FeedNotAwoxKills": true,
-        "FeedSoloKills": true,
-        "FeedGroupKills": true,
-        "FeedUrlsOnly": false,
-        "StopOnFirstMatch": true,
         "MessageTemplateFileName": "Template.killMailGeneral.txt",
         "Filters": {
-          "filter1": {
-            "Inclusive": true,
-			"AllMustMatch": false,
-            "MinimumKillValue": 10000000,
-            "MinimumLossValue": 20000000,
-            "ShipEntities": [ "Ibis", 2537 ],
-            "VictimEntities": [ "a:Fraternity", "c:Perkone", "Tau AD", 12121212 ],
-            "AttackerEntities": [ "a:TAPI", 1221212121 ],
-            "Radius": 0,
-            "LocationEntities": [ "Jita", "The Forge", "Kurala", 30045314 ],
-            "DiscordChannels": []
+          "killFeedExample": {
+            "dsc": "This feed will be limited by isk values and report supers killed by TAPI alliance",
+            "MinimumIskValue": 10000000,
+            "MaximumIskValue": 40000000000,
+            "HasShipEntities": [ "Nyx", "Hel", "Aeon", "Wyvern" ],
+            "HasAttackerEntities": [ "a:TAPI" ]
+          },
+          "killFeedExample2": {
+            "dsc": "This feed will report both kills and losses for TAPI alliance. Loose 'OR' check is applied. Feed will be sent into separate channel that differs from default.",
+            "HasAttackerEntities": [ "a:Test Alliance Please Ignore" ],
+            "HasVictimEntities": [ "a:Test Alliance Please Ignore" ],
+            "DiscordChannels": [ 567625555843743757 ]
+          },
+          "killFeedExample3": {
+            "dsc": "This feed will report only GSF killed by TAPI alliance. Strict 'AND' check is applied to victims and attackers.",
+            "HasAttackerEntities": [ "a:TAPI" ],
+            "HasVictimEntities": [ "a:Goonswarm Federation" ],
+            "EnableStrictPartiesCheck": true
+          },
+          "killFeedExample4": {
+            "dsc": "This feed will report both kills and losses for TAPI alliance everywhere except Jita system. Loose 'OR' check is applied.",
+            "HasAttackerEntities": [ "a:TAPI" ],
+            "HasVictimEntities": [ "a:TAPI" ],
+            "HasNoLocationEntities": [ "Jita" ]
+          },
+          "radiusFeedExample1": {
+            "dsc": "This feed will report only GSF killed in a radius of 3 jumps around Jita system. Specified region or constellation will not have an effect in this case.",
+            "HasVictimEntities": [ "a:Goonswarm Federation" ],
+            "Radius": 3,
+            "HasLocationEntities": [ "Jita" ]
+          },
+          "radiusFeedExample2": {
+            "dsc": "This feed will report only INIT killed within the Black Rise region and Taurus constellation. You can specify many locations and entities in the lists.",
+            "HasVictimEntities": [ "a:INIT." ],
+            "HasLocationEntities": [ "Black Rise", "Taurus" ]
+          },
+          "radiusFeedExample3": {
+            "dsc": "This feed will report all KMs in Fountain region without the lossmails from INIT side.",
+            "HasNoVictimEntities": [ "a:INIT." ],
+            "HasLocationEntities": [ "Fountain" ]
           }
         }
       }
     }
   },
+
   "WebAuthModule": {
     "authCheckIntervalMinutes": 60,
     "AuthTakeNumberOfUsersPerPass": 100,
@@ -174,7 +201,7 @@
         "RemoveAuthIfTokenIsInvalid": false,
         "RemoveTokenIfTokenIsInvalid": false,
         "StopSearchingOnFirstMatch": false,
-        "Hidden":  false, 
+        "Hidden": false,
         "AllowedMembers": {
           "entry1": {
             "Entities": [ 98499225, "Tau AD", "a:Triumvirate", "c:SATRO" ],
@@ -326,7 +353,7 @@
   "SystemLogFeederModule": {
     "DiscordChannelId": 0,
     "LogSeverity": "Info",
-    "SendInterval":  5000 
+    "SendInterval": 5000
   },
 
   "ContinousCheckModule": {

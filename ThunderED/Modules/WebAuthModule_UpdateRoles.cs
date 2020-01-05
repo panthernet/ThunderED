@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Async;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dasync.Collections;
 using Discord.WebSocket;
 using ThunderED.Classes;
 using ThunderED.Helpers;

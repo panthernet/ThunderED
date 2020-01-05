@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Async;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading.Tasks;
-using Discord.Net.WebSockets;
+using Dasync.Collections;
 using Newtonsoft.Json;
 using PureWebSockets;
 using ThunderED.Classes;

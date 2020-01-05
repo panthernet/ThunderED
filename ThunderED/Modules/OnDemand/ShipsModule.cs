@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Async;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dasync.Collections;
 using Discord.Commands;
 using Newtonsoft.Json;
-using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;

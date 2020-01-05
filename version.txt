@@ -1,5 +1,20 @@
 ### V1.4.6
++ Reworked LiveKillFeed module (again) for better usability
++ Fixed search quieries to ESI
 + Fixed ZKB errors due to server request limitations
++ Updated .NET Core to v3.1
+
+### BREAKING CHANGES
+- Redesigned LiveKillFeed module filters for better usability. Check default config file for new properties and explanations.
+  
+  Here's the quick breakthrough:
+  - Filters are now work under 'AND' rule by default. Items in lists are always work under 'OR' rule (read PS).
+  - `HasNo` props has been added instead of minus sign logic. They are always checked before any other values and will filter out KMs on match
+  - `HasAttackerEntities` and `HasVictimEntities` work under 'OR' rule by default. Set `EnableStrictPartiesCheck` to enable 'AND' rule for these props.
+  - `EnableMatchOnFirstConditionMet` will match the filter on the first 'Has' prop condition match
+  - `MinimumIskValue` and `MaximumIskValue` props validates independently and are not affected by any modifiers.
+
+  PS: 'OR' rule - at least one must match, 'AND' rule - all must match
 
 ### V1.4.5
 + Added `Hidden` param to auth groups to hide their buttons but allow to participate in upgrade logic

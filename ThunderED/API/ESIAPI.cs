@@ -107,7 +107,7 @@ namespace ThunderED.API
         internal async Task<JsonClasses.SystemIDSearch> GetRadiusSystems(string reason, object id)
         {
             if (id == null || id.ToString() == "0") return null;
-            return await APIHelper.RequestWrapper<JsonClasses.SystemIDSearch>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=solar_system&datasource=tranquility&language={_language}&search={id}&strict=true", reason);
+            return await APIHelper.RequestWrapper<JsonClasses.SystemIDSearch>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=solar_system&datasource=tranquility&search={id}&strict=true", reason);
         }
 
         internal async Task<string> GetRawRoute(string reason, object firstId, object secondId)
@@ -169,7 +169,7 @@ namespace ThunderED.API
         {
             name = HttpUtility.UrlEncode(name);
             return await APIHelper.RequestWrapper<JsonClasses.CharacterID>(
-                $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=character&datasource=tranquility&language={_language}&search={name}&strict=true", reason);
+                $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=character&datasource=tranquility&search={name}&strict=true", reason);
         }
 
         internal async Task<bool> OpenContractIngame(string reason, long contractId, string token)
@@ -188,14 +188,14 @@ namespace ThunderED.API
         {
             name = HttpUtility.UrlEncode(name);
             return await APIHelper.RequestWrapper<JsonClasses.CorpIDLookup>(
-                $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=corporation&datasource=tranquility&language={_language}&search={name}&strict=true", reason);
+                $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=corporation&datasource=tranquility&search={name}&strict=true", reason);
         }
 
         internal async Task<JsonClasses.AllianceIDLookup> SearchAllianceId(string reason, string name)
         {
             name = HttpUtility.UrlEncode(name);
             return await APIHelper.RequestWrapper<JsonClasses.AllianceIDLookup>(
-                $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance&datasource=tranquility&language={_language}&search={name}&strict=true", reason);
+                $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance&datasource=tranquility&search={name}&strict=true", reason);
         }
 
         internal async Task<ESIQueryResult<List<JsonClasses.FWSystemStat>>> GetFWSystemStats(string reason, string etag)
@@ -564,7 +564,7 @@ namespace ThunderED.API
         public async Task<JsonClasses.SearchResult> SearchLocationEntity(string reason, string value)
         {
             var searchValue = HttpUtility.UrlEncode(value);
-            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=constellation,region,solar_system&datasource=tranquility&language={_language}&search={searchValue}&strict=true", reason);
+            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=constellation,region,solar_system&datasource=tranquility&search={searchValue}&strict=true", reason);
         }
 
         public async Task<JsonClasses.SearchResult> SearchTypeEntity(string reason, string value)
@@ -577,7 +577,7 @@ namespace ThunderED.API
         public async Task<JsonClasses.SearchResult> SearchMemberEntity(string reason, string value)
         {
             var searchValue = HttpUtility.UrlEncode(value);
-            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance,character,corporation&datasource=tranquility&language={_language}&search={searchValue}&strict=true", reason);
+            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance,character,corporation&datasource=tranquility&search={searchValue}&strict=true", reason);
         }
 
         public async Task<JsonClasses.MoonData> GetMoon(string reason, object id)
