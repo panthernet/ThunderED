@@ -227,14 +227,15 @@ namespace ThunderED.Modules.Sub
                             //auth controls
                             var authText = new StringBuilder();
 
-                            if (Settings.Config.ModuleAuthWeb && SettingsManager.Settings.WebAuthModule.AuthGroups.Count > 0)
+                            var grps = Settings.WebAuthModule.GetEnabledAuthGroups();
+                            if (Settings.Config.ModuleAuthWeb && grps.Count > 0)
                             {
                                 authText.Append($"<h2>{LM.Get("authWebDiscordHeader")}</h4>{LM.Get("authPageGeneralAuthHeader")}");
                             }
 
                             var groupsForCycle = Settings.WebAuthModule.UseOneAuthButton
-                                ? Settings.WebAuthModule.AuthGroups.Where(a => a.Value.ExcludeFromOneButtonMode || a.Value.BindToMainCharacter)
-                                : Settings.WebAuthModule.AuthGroups;
+                                ? grps.Where(a => a.Value.ExcludeFromOneButtonMode || a.Value.BindToMainCharacter)
+                                : grps;
 
                             if (Settings.WebAuthModule.UseOneAuthButton)
                             {
@@ -276,7 +277,7 @@ namespace ThunderED.Modules.Sub
                             //stands auth
                             if (Settings.Config.ModuleAuthWeb)
                             {
-                                foreach (var groupPair in Settings.WebAuthModule.AuthGroups.Where(a => a.Value.StandingsAuth != null))
+                                foreach (var groupPair in grps.Where(a => a.Value.StandingsAuth != null))
                                 {
                                     var group = groupPair.Value;
                                     if(group.Hidden) continue;
@@ -302,7 +303,7 @@ namespace ThunderED.Modules.Sub
                             }
                             if (Settings.Config.ModuleContractNotifications)
                             {
-                                foreach (var notifyGroup in Settings.ContractNotificationsModule.Groups)
+                                foreach (var notifyGroup in Settings.ContractNotificationsModule.GetEnabledGroups())
                                 {
                                     var group = notifyGroup.Value;
                                     var authNurl = GetContractsAuthURL(group.FeedPersonalContracts, group.FeedCorporateContracts, notifyGroup.Key);
@@ -314,7 +315,7 @@ namespace ThunderED.Modules.Sub
 
                             if (Settings.Config.ModuleIndustrialJobs)
                             {
-                                foreach (var (key, group) in Settings.IndustrialJobsModule.Groups)
+                                foreach (var (key, group) in Settings.IndustrialJobsModule.GetEnabledGroups())
                                 {
                                     var authNurl = GetIndustryJobsAuthURL(group.Filters.Any(a=> a.Value.FeedPersonalJobs), group.Filters.Any(a=> a.Value.FeedCorporateJobs), key);
                                     authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{group.ButtonText ?? key}</a>");
@@ -493,7 +494,7 @@ namespace ThunderED.Modules.Sub
 
         internal static string GetAuthPageUrl()
         {
-            var text = !string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) && SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.Contains(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
+            var text = !string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) && SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().Keys.Contains(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
                 ? $"auth?group={HttpUtility.UrlEncode(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)}"
                 : null;
             return $"{GetWebSiteUrl()}/{text}";

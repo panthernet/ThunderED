@@ -36,7 +36,7 @@ namespace ThunderED.Modules
 
                 var allCampaigns = result.Result;
                 if(allCampaigns == null) return;
-                foreach (var pair in Settings.NullCampaignModule.Groups)
+                foreach (var pair in Settings.NullCampaignModule.GetEnabledGroups())
                 {
                     var groupName = pair.Key;
                     var group = pair.Value;
@@ -95,7 +95,7 @@ namespace ThunderED.Modules
                 _nextNotificationCheck2 = DateTime.Now.AddMinutes(1);
 
                 await LogHelper.LogModule("Running NullCampaign module check...", Category);
-                foreach (var pair in Settings.NullCampaignModule.Groups)
+                foreach (var pair in Settings.NullCampaignModule.GetEnabledGroups())
                 {
                     foreach (var campaign in await SQLHelper.GetNullCampaigns(pair.Key))
                     {

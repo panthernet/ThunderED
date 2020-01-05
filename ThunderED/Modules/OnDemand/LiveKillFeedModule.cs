@@ -75,7 +75,7 @@ namespace ThunderED.Modules.OnDemand
             }
 
             //parse data
-            foreach (var (key, value) in Settings.LiveKillFeedModule.Groups)
+            foreach (var (key, value) in Settings.LiveKillFeedModule.GetEnabledGroups())
             {
                 var aGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 var exaGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
@@ -124,7 +124,7 @@ namespace ThunderED.Modules.OnDemand
               // kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm.txt"));
 
                 var hasBeenPosted = false;
-                foreach (var (groupName, group) in Settings.LiveKillFeedModule.Groups)
+                foreach (var (groupName, group) in Settings.LiveKillFeedModule.GetEnabledGroups())
                 {
                     if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds && ZKillLiveFeedModule.IsInSharedPool(kill.killmail_id))
                         return;

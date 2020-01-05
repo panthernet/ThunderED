@@ -37,7 +37,7 @@ namespace ThunderED.Modules
                 await LogHelper.LogModule("Running Sov Tracker check...", Category);
 
                 var data = await APIHelper.ESIAPI.GetSovStructuresData(Reason);
-                foreach (var pair in Settings.SovTrackerModule.Groups)
+                foreach (var pair in Settings.SovTrackerModule.GetEnabledGroups())
                 {
                    // var t = Stopwatch.StartNew();
                     var group = pair.Value;

@@ -29,13 +29,13 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
-            var data = Settings.WebConfigEditorModule.AccessList.ToDictionary(pair => pair.Key, pair => pair.Value.AllowedEntities);
+            var data = Settings.WebConfigEditorModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.AllowedEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member);
 
             foreach (var id in GetAllParsedCharacters())
                 await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
 
-            await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.WebConfigEditorModule.AccessList.Values.SelectMany(a => a.AllowedDiscordRoles).Distinct().ToList(), Category);
+            await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.WebConfigEditorModule.GetEnabledGroups().Values.SelectMany(a => a.AllowedDiscordRoles).Distinct().ToList(), Category);
 
         }
 
@@ -353,7 +353,7 @@ namespace ThunderED.Modules
 
         private async Task<WCEAccessFilter> CheckAccess(long characterId, JsonClasses.CharacterData rChar)
         {
-            var authgroups = Settings.WebConfigEditorModule.AccessList;
+            var authgroups = Settings.WebConfigEditorModule.GetEnabledGroups();
 
             if (authgroups.Count == 0 || authgroups.Values.All(a => !a.AllowedEntities.Any() && !a.AllowedDiscordRoles.Any()))
             {
@@ -389,7 +389,7 @@ namespace ThunderED.Modules
 
 
 
-            foreach (var accessList in Settings.WebConfigEditorModule.AccessList)
+            foreach (var accessList in Settings.WebConfigEditorModule.GetEnabledGroups())
             {
                 var filterName = accessList.Key;
                 var filter = accessList.Value;

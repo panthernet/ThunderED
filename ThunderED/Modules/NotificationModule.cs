@@ -99,7 +99,7 @@ namespace ThunderED.Modules
 
                     var guildID = Settings.Config.DiscordGuildId;
 
-                    foreach (var groupPair in Settings.NotificationFeedModule.Groups)
+                    foreach (var groupPair in Settings.NotificationFeedModule.GetEnabledGroups())
                     {
                         var group = groupPair.Value;
                         if (!group.CharacterID.Any() || group.CharacterID.All(a => a == 0))
@@ -1311,7 +1311,7 @@ typeID: 2233",
                         return true;
                     }
 
-                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.Groups.Values.All(g => !g.CharacterID.Contains(numericCharId)))
+                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.GetEnabledGroups().Values.All(g => !g.CharacterID.Contains(numericCharId)))
                     {
                         await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)

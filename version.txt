@@ -1,4 +1,5 @@
 ### V1.4.6
++ Added `IsEnabled` properties for auth, killfeed, contract, config editor, stats, HRM, mail, null campaigns, sov tracker, industrial groups and lists. You can now switch them off.
 + Reworked LiveKillFeed module (again) for better usability
 + Fixed search quieries to ESI
 + Fixed ZKB errors due to server request limitations

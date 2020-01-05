@@ -33,7 +33,7 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
-            var data = Settings.IndustrialJobsModule.Groups.ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
+            var data = Settings.IndustrialJobsModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member);
         }
 
@@ -108,7 +108,7 @@ namespace ThunderED.Modules
                 _lastCheckTime = DateTime.Now;
                 await LogHelper.LogModule("Running Industrial Jobs module check...", Category);
 
-                foreach (var (groupName, group) in Settings.IndustrialJobsModule.Groups)
+                foreach (var (groupName, group) in Settings.IndustrialJobsModule.GetEnabledGroups())
                 {
                     foreach (var characterID in GetParsedCharacters(groupName))
                     {

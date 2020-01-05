@@ -506,15 +506,16 @@ namespace ThunderED.Classes
 
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
-                if(SettingsManager.Settings.WebAuthModule.AuthGroups.Values.Any(a=> a.PreliminaryAuthMode == false))
+                var grps = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
+                if(grps.Values.Any(a=> a.PreliminaryAuthMode == false))
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
                 else
                 {
                     var grp =
                         !string.IsNullOrEmpty(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup) &&
-                        SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
-                            ? SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
-                            : SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault();
+                        grps.ContainsKey(SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
+                            ? grps.FirstOrDefault(a => a.Key == SettingsManager.Settings.WebAuthModule.DefaultAuthGroup)
+                            : grps.FirstOrDefault();
                     if (grp.Value != null)
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
@@ -535,7 +536,7 @@ namespace ThunderED.Classes
                 if(!IsAuthAllowed())
                     return;
 
-                var grp = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a=> a.Key == group);
+                var grp = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().FirstOrDefault(a=> a.Key == group);
                 if (grp.Value != null)
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
@@ -602,7 +603,7 @@ namespace ThunderED.Classes
                                 return;
                             }
 
-                            var groupRoles = SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key == authUser.GroupName).Value?.AuthRoles;
+                            var groupRoles = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().FirstOrDefault(a => a.Key == authUser.GroupName).Value?.AuthRoles;
                             //check if group exists
                             if (string.IsNullOrEmpty(authUser.GroupName) || groupRoles == null)
                             {
@@ -707,7 +708,7 @@ namespace ThunderED.Classes
                     return;
                 }
                 var groupName = x.Substring(mod.Length, x.Length - mod.Length).Trim();
-                var group = SettingsManager.Settings.ContractNotificationsModule.Groups.FirstOrDefault(a => a.Key == groupName);
+                var group = SettingsManager.Settings.ContractNotificationsModule.GetEnabledGroups().FirstOrDefault(a => a.Key == groupName);
                 if (group.Value == null)
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("clistGroupNotFound", groupName), true);

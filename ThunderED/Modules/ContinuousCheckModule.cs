@@ -199,12 +199,12 @@ namespace ThunderED.Modules
 
                 if (isNewDay)
                 {
-                    foreach (var group in SettingsManager.Settings.StatsModule.DailyStatsGroups.Where(a=> !a.Value.IncludeInRating))
+                    foreach (var group in SettingsManager.Settings.StatsModule.GetEnabledGroups().Where(a=> !a.Value.IncludeInRating))
                     {
                         await ProcessStats(context, command, entity, group.Value);
                     }
 
-                    var groups = SettingsManager.Settings.StatsModule.DailyStatsGroups.Values.Where(a => a.IncludeInRating);
+                    var groups = SettingsManager.Settings.StatsModule.GetEnabledGroups().Values.Where(a => a.IncludeInRating);
                     if (groups.Any())
                         await ProcessStats(context, command, entity, null);
                 }
@@ -245,7 +245,7 @@ namespace ThunderED.Modules
                 if (context != null)
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("dailyStatsWait"), false).ConfigureAwait(false);
 
-                var groups = SettingsManager.Settings.StatsModule.DailyStatsGroups.Values.Where(a => a.IncludeInRating);
+                var groups = SettingsManager.Settings.StatsModule.GetEnabledGroups().Values.Where(a => a.IncludeInRating);
                 var channel = isRatingCommand ? context.Channel.Id : SettingsManager.Settings.StatsModule.RatingModeChannelId;
                 var to = (now.Add(TimeSpan.FromHours(1)));
                 to = to.Subtract(TimeSpan.FromMinutes(to.Minute));

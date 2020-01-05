@@ -58,7 +58,7 @@ namespace ThunderED.Modules
             }
 
             //parse data
-            foreach (var (key, value) in Settings.WebAuthModule.AuthGroups)
+            foreach (var (key, value) in Settings.WebAuthModule.GetEnabledAuthGroups())
             {
                 var aGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 foreach (var (fKey, fValue) in value.AllowedMembers)
@@ -86,7 +86,7 @@ namespace ThunderED.Modules
                     try
                     {
                         var sb = new StringBuilder();
-                        foreach (var numericCharId in Settings.WebAuthModule.AuthGroups.Values.Where(a => a.StandingsAuth != null).SelectMany(a => a.StandingsAuth.CharacterIDs)
+                        foreach (var numericCharId in Settings.WebAuthModule.GetEnabledAuthGroups().Values.Where(a => a.StandingsAuth != null).SelectMany(a => a.StandingsAuth.CharacterIDs)
                             .Distinct())
                         {
                             var st = await SQLHelper.LoadAuthStands(numericCharId);
@@ -165,7 +165,7 @@ namespace ThunderED.Modules
 
         public static async Task<WebAuthResult> GetAuthRoleEntityById(Dictionary<string, WebAuthGroup> groups, JsonClasses.CharacterData chData)
         {
-            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups;
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
             var result = new WebAuthResult();
             foreach (var (groupName, group) in groups)
             {
@@ -317,7 +317,7 @@ namespace ThunderED.Modules
 
         private static async Task<WebAuthResult> GetAuthGroupByCharacter(Dictionary<string, WebAuthGroup> groups, JsonClasses.CharacterData chData)
         {
-            groups = groups ?? SettingsManager.Settings.WebAuthModule.AuthGroups;
+            groups = groups ?? SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
             var result = await GetAuthRoleEntityById(groups, chData);
             return result.RoleEntities.Any() ? new WebAuthResult {GroupName = result.GroupName, Group = result.Group, RoleEntities = result.RoleEntities} : null;
         }
@@ -436,19 +436,21 @@ namespace ThunderED.Modules
                         return true;
                     }
 
+                    var grps = Settings.WebAuthModule.GetEnabledAuthGroups();
+
                     var groupName = HttpUtility.UrlDecode(prms[0].Split('=')[1]);//string.IsNullOrEmpty(Settings.WebAuthModule.DefaultAuthGroup) || !Settings.WebAuthModule.AuthGroups.ContainsKey(Settings.WebAuthModule.DefaultAuthGroup) ? Settings.WebAuthModule.AuthGroups.Keys.FirstOrDefault() : Settings.WebAuthModule.DefaultAuthGroup;
-                    if (!Settings.WebAuthModule.AuthGroups.Keys.ContainsCaseInsensitive(groupName) && !DEF_NOGROUP_NAME.Equals(groupName)&& !DEF_ALTREGGROUP_NAME.Equals(groupName))
+                    if (!grps.Keys.ContainsCaseInsensitive(groupName) && !DEF_NOGROUP_NAME.Equals(groupName)&& !DEF_ALTREGGROUP_NAME.Equals(groupName))
                     {
                         await WebServerModule.WriteResponce(WebServerModule.Get404Page(), response);
                         return true;
                     }
 
-                    if (!Settings.WebAuthModule.AuthGroups.Keys.ContainsCaseInsensitive(groupName) && DEF_NOGROUP_NAME.Equals(groupName))
+                    if (!grps.Keys.ContainsCaseInsensitive(groupName) && DEF_NOGROUP_NAME.Equals(groupName))
                     {
                         var url = WebServerModule.GetAuthUrlOneButton(remoteAddress);
                         await response.RedirectAsync(new Uri(url));
                     }
-                    else if (!Settings.WebAuthModule.AuthGroups.Keys.ContainsCaseInsensitive(groupName) && DEF_ALTREGGROUP_NAME.Equals(groupName))
+                    else if (!grps.Keys.ContainsCaseInsensitive(groupName) && DEF_ALTREGGROUP_NAME.Equals(groupName))
                     {
 
                         var url = WebServerModule.GetAuthUrlAltRegButton(remoteAddress);
@@ -510,7 +512,9 @@ namespace ThunderED.Modules
                         return true;
                     }
 
-                    if (Settings.WebAuthModule.AuthGroups.Values.All(g => g.StandingsAuth == null || !g.StandingsAuth.CharacterIDs.Contains(numericCharId)))
+                    var grps = Settings.WebAuthModule.GetEnabledAuthGroups();
+
+                    if (grps.Values.All(g => g.StandingsAuth == null || !g.StandingsAuth.CharacterIDs.Contains(numericCharId)))
                     {
                         await LogHelper.LogWarning($"Unauthorized auth stands feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
@@ -619,6 +623,8 @@ namespace ThunderED.Modules
                         var groupName = string.Empty;
                         WebAuthGroup group = null;
 
+                        var grps = Settings.WebAuthModule.GetEnabledAuthGroups();
+
                         //alt character registration check
                         if (altCharReg)
                         {
@@ -631,7 +637,7 @@ namespace ThunderED.Modules
                                 return true;
                             }
 
-                            var pair = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value.BindToMainCharacter);
+                            var pair = grps.FirstOrDefault(a => a.Value.BindToMainCharacter);
                             if (pair.Value == null)
                             {
                                 await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"), LM.Get("authAltRegGroupNotFound"), WebServerModule.GetAuthPageUrl()), response);
@@ -661,7 +667,7 @@ namespace ThunderED.Modules
                                 await LogHelper.LogWarning($"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}", Category);
                                 return true;
                             }
-                            var pair = Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value.BindToMainCharacter);
+                            var pair = grps.FirstOrDefault(a => a.Value.BindToMainCharacter);
                             if (pair.Value == null)
                             {
                                 await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"), LM.Get("authAltRegGroupNotFound"), WebServerModule.GetAuthPageUrl()), response);
@@ -725,8 +731,8 @@ namespace ThunderED.Modules
                                 if (Settings.WebAuthModule.UseOneAuthButton)
                                 {
                                     var searchFor = autoSearchGroup
-                                        ? Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ExcludeFromOneButtonMode && !a.Value.BindToMainCharacter)
-                                        : Settings.WebAuthModule.AuthGroups.Where(a =>
+                                        ? grps.Where(a => !a.Value.ExcludeFromOneButtonMode && !a.Value.BindToMainCharacter)
+                                        : grps.Where(a =>
                                             !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode && !a.Value.BindToMainCharacter);
                                     //general auth
                                     var gResult = await GetAuthRoleEntityById(searchFor.ToDictionary(a=> a.Key, a=> a.Value), rChar);

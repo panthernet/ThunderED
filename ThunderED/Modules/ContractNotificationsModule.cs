@@ -89,7 +89,7 @@ namespace ThunderED.Modules
                         }
 
                         var lCharId = Convert.ToInt64(result[0]);
-                        var group = Settings.ContractNotificationsModule.Groups[groupName];
+                        var group = Settings.ContractNotificationsModule.GetEnabledGroups()[groupName];
                         if (!group.CharacterIDs.Contains(lCharId))
                         {
                             await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
@@ -130,7 +130,7 @@ namespace ThunderED.Modules
                 _lastCheckTime = DateTime.Now;
                 await LogHelper.LogModule("Running Contracts module check...", Category);
 
-                foreach (var group in Settings.ContractNotificationsModule.Groups.Values)
+                foreach (var group in Settings.ContractNotificationsModule.GetEnabledGroups().Values)
                 {
                     foreach (var characterID in group.CharacterIDs)
                     {

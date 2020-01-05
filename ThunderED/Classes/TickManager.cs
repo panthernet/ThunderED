@@ -70,7 +70,7 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleMail)
             {
                 Modules.Add(new MailModule());
-                foreach (var id in SettingsManager.Settings.MailModule.AuthGroups.Values.SelectMany(a => a.Id).Distinct())
+                foreach (var id in SettingsManager.Settings.MailModule.GetEnabledGroups().Values.SelectMany(a => a.Id).Distinct())
                     await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
             }
 
@@ -89,7 +89,7 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleContractNotifications)
             {
                 Modules.Add(new ContractNotificationsModule());
-                foreach (var id in SettingsManager.Settings.ContractNotificationsModule.Groups.SelectMany(a => a.Value.CharacterIDs).Distinct())
+                foreach (var id in SettingsManager.Settings.ContractNotificationsModule.GetEnabledGroups().SelectMany(a => a.Value.CharacterIDs).Distinct())
                     await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
             }
 
@@ -102,7 +102,7 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleHRM)
             {
                 Modules.Add(new HRMModule());
-                foreach (var id in SettingsManager.Settings.HRMModule.AccessList.SelectMany(a => a.Value.UsersAccessList).Distinct())
+                foreach (var id in SettingsManager.Settings.HRMModule.GetEnabledGroups().SelectMany(a => a.Value.UsersAccessList).Distinct())
                     await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
             }
 

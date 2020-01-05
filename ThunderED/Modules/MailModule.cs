@@ -69,7 +69,7 @@ namespace ThunderED.Modules
 
                         var lCharId = Convert.ToInt64(result[0]);
 
-                        if (Settings.MailModule.AuthGroups.Values.All(a => !a.Id.Contains(lCharId)))
+                        if (Settings.MailModule.GetEnabledGroups().Values.All(a => !a.Id.Contains(lCharId)))
                         {
                             await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Mail Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
                             return true;
@@ -105,7 +105,7 @@ namespace ThunderED.Modules
                 _lastCheckTime = DateTime.Now;
                 await LogHelper.LogModule("Running Mail module check...", Category);
 
-                foreach (var groupPair in Settings.MailModule.AuthGroups)
+                foreach (var groupPair in Settings.MailModule.GetEnabledGroups())
                 {
                     var group = groupPair.Value;
                     if (group.DefaultChannel == 0)

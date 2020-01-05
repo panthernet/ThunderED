@@ -95,11 +95,12 @@ namespace ThunderED.Modules
                     return null;
                 }
 
+                var grps = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
                 var authUser = await SQLHelper.GetAuthUserByDiscordId(discordUserId);
                 if (authUser != null)
                 {
-                    if (!string.IsNullOrEmpty(authUser.GroupName) && SettingsManager.Settings.WebAuthModule.AuthGroups.ContainsKey(authUser.GroupName) &&
-                        SettingsManager.Settings.WebAuthModule.AuthGroups[authUser.GroupName].SkipDiscordAuthPage)
+                    if (!string.IsNullOrEmpty(authUser.GroupName) && grps.ContainsKey(authUser.GroupName) &&
+                        grps[authUser.GroupName].SkipDiscordAuthPage)
                     {
                         await AuthInfoLog(authUser, "[RUPD] Discord-less auth found. Skipping roles update...", true);
                         return null;
@@ -408,7 +409,7 @@ namespace ThunderED.Modules
             if(string.IsNullOrEmpty(name)) 
                 return new KeyValuePair<string, WebAuthGroup>();
             var trimmedName = name.Trim();
-            return SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Key.Trim().Equals(trimmedName,StringComparison.OrdinalIgnoreCase));
+            return SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value.IsEnabled && a.Key.Trim().Equals(trimmedName,StringComparison.OrdinalIgnoreCase));
         }
 
         public static async Task<RoleSearchResult> GetRoleGroup(JsonClasses.CharacterData characterData, ulong discordUserId, string refreshToken = null)
@@ -478,7 +479,7 @@ namespace ThunderED.Modules
                 {
                     //check only GENERAL auth groups for roles
                     //non-general group auth should have group name supplied
-                    foreach (var (key, value) in SettingsManager.Settings.WebAuthModule.AuthGroups.Where(a => !a.Value.ESICustomAuthRoles.Any() && !a.Value.BindToMainCharacter))
+                    foreach (var (key, value) in SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().Where(a => !a.Value.ESICustomAuthRoles.Any() && !a.Value.BindToMainCharacter))
                     {
                         groupsToCheck.Add(key, value);
                     }

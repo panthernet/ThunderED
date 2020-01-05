@@ -135,10 +135,22 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, IndustrialJobGroup> Groups { get; set; } = new  Dictionary<string, IndustrialJobGroup>();
 #endif
+
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, IndustrialJobGroup> GetEnabledGroups()
+        {
+            return Groups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
     }
 
     public class IndustrialJobGroup
     {
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
+
         public string ButtonText { get; set; }
 
 #if EDITOR
@@ -195,6 +207,15 @@ namespace ThunderED.Classes
 #endif
         public int SessionTimeoutInMinutes { get; set; } = 10;
 
+        
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, WCEAccessFilter> GetEnabledGroups()
+        {
+            return AccessList.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
     }
 
     public class WCEAccessFilter
@@ -208,6 +229,9 @@ namespace ThunderED.Classes
 #endif
         public bool CanEditSimplifiedAuth { get; set; } = true;
         public bool CanEditTimers { get; set; } = true;
+
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
     }
 
     public class CommandsConfigSettings
@@ -251,6 +275,16 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, SovTrackerGroup> Groups { get; set; } = new Dictionary<string, SovTrackerGroup>();        
 #endif
+
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, SovTrackerGroup> GetEnabledGroups()
+        {
+            return Groups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
+
 #if EDITOR
         public override string this[string columnName]
         {
@@ -272,6 +306,9 @@ namespace ThunderED.Classes
 
     public class SovTrackerGroup
     {
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
+
 #if EDITOR
         public ObservableCollection<long> Regions { get; set; } = new ObservableCollection<long>();
         public ObservableCollection<long> Constellations { get; set; } = new ObservableCollection<long>();
@@ -334,6 +371,15 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, ContractNotifyGroup> Groups { get; set; } = new Dictionary<string, ContractNotifyGroup>();        
 #endif
+
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, ContractNotifyGroup> GetEnabledGroups()
+        {
+            return Groups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
 #if EDITOR
         public override string this[string columnName]
         {
@@ -368,6 +414,9 @@ namespace ThunderED.Classes
         [Comment("Do not process contract in other filters if it has been posted within a filter")]
         public bool StopOnFirstFilterMatch { get; set; } = false;
         public string DefaultMention { get; set; }
+
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
 
 #if EDITOR
         public override string this[string columnName]
@@ -424,11 +473,21 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, DailyStatsGroup> DailyStatsGroups { get; set; } = new  Dictionary<string, DailyStatsGroup>();
 #endif
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, DailyStatsGroup> GetEnabledGroups()
+        {
+            return DailyStatsGroups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
 
     }
 
     public class DailyStatsGroup: ValidatableSettings
     {
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
+
         [Comment("Numeric discord channel ID for auto posting daily stats upon new day")]
         public ulong DailyStatsChannel { get; set; }
         [Comment("Default numeric corporation ID to display stats for. Mutually exclusive with DailyStatsAlliance")]
@@ -466,6 +525,14 @@ namespace ThunderED.Classes
         public Dictionary<string, HRMAccessFilter> AccessList { get; set; } = new  Dictionary<string, HRMAccessFilter>();
         public Dictionary<string, SpyFilter> SpyFilters { get; set; } = new  Dictionary<string, SpyFilter>();
 #endif
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, HRMAccessFilter> GetEnabledGroups()
+        {
+            return AccessList.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
         [Comment("Authentication timeout in minutes")]
         public int AuthTimeoutInMinutes { get; set; } = 10;
         [Comment("Number of entries to display in tables")]
@@ -540,6 +607,10 @@ namespace ThunderED.Classes
         public List<long> AuthAllianceIdFilter { get; set; } = new List<long>();
         public List<long> AuthCorporationIdFilter { get; set; } = new List<long>();
 #endif
+
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
+
         public bool ApplyGroupFilterToAwaitingUsers { get; set; } = false;
         public bool IsAwaitingUsersVisible { get; set; } = true;
         public bool IsDumpedUsersVisible { get; set; } = true;
@@ -729,6 +800,15 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, KillFeedGroup> Groups { get; set; } = new Dictionary<string, KillFeedGroup>();
 #endif
+
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, KillFeedGroup> GetEnabledGroups()
+        {
+            return Groups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
 #if EDITOR
         public override string this[string columnName]
         {
@@ -748,6 +828,9 @@ namespace ThunderED.Classes
 
     public class KillFeedGroup: ValidatableSettings
     {
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
+
         [Comment("Post group name into notification message")]
         public bool ShowGroupName { get; set; }
         [Comment("Feed PVP kills in this group")]
@@ -928,6 +1011,16 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, MailAuthGroup> AuthGroups { get; set; } = new Dictionary<string, MailAuthGroup>();
 #endif
+
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, MailAuthGroup> GetEnabledGroups()
+        {
+            return AuthGroups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
+
 #if EDITOR
         public override string this[string columnName]
         {
@@ -949,6 +1042,9 @@ namespace ThunderED.Classes
 
     public class MailAuthGroup: ValidatableSettings
     {
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
+
         [Comment("Include private mail to this feed")]
         public bool IncludePrivateMail { get; set; }
 #if EDITOR
@@ -1118,6 +1214,15 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, NullCampaignGroup> Groups { get; set; } = new Dictionary<string, NullCampaignGroup>(); 
 #endif
+
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, NullCampaignGroup> GetEnabledGroups()
+        {
+            return Groups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
 #if EDITOR
         public override string this[string columnName]
         {
@@ -1139,6 +1244,9 @@ namespace ThunderED.Classes
 
     public class NullCampaignGroup: ValidatableSettings
     {
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
+
 #if EDITOR
         public ObservableCollection<long> Regions { get; set; } = new ObservableCollection<long>();
         public ObservableCollection<long> Constellations { get; set; } = new ObservableCollection<long>();
@@ -1189,6 +1297,15 @@ namespace ThunderED.Classes
 #else
         public Dictionary<string, NotificationSettingsGroup> Groups { get; set; } = new Dictionary<string, NotificationSettingsGroup>();
 #endif
+
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, NotificationSettingsGroup> GetEnabledGroups()
+        {
+            return Groups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
 #if EDITOR
         public override string this[string columnName]
         {
@@ -1210,6 +1327,9 @@ namespace ThunderED.Classes
 
     public class NotificationSettingsGroup: ValidatableSettings
     {
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
+
         [Comment("Numeric default Discord channel ID. All notification filters will use this channel to send messages by default")]
         [Required]
         public ulong DefaultDiscordChannelID { get; set; }
@@ -1768,6 +1888,15 @@ namespace ThunderED.Classes
         public List<ulong> ComAuthChannels { get; set; } = new List<ulong>();
         public Dictionary<string, WebAuthGroup> AuthGroups { get; set; } = new Dictionary<string, WebAuthGroup>();
 #endif
+
+        /// <summary>
+        /// Returns only enabled auth groups
+        /// </summary>
+        public Dictionary<string, WebAuthGroup> GetEnabledAuthGroups()
+        {
+            return AuthGroups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+
 #if EDITOR
         public override string this[string columnName]
         {
@@ -1850,6 +1979,10 @@ namespace ThunderED.Classes
 
         [Comment("Optional switch to exclude this group from OneButtonMode if corresponding option is enabled on a section level")]
         public bool ExcludeFromOneButtonMode { get; set; } = false;
+
+        [Comment("Is config element enabled at runtime")]
+        public bool IsEnabled { get; set; } = true;
+
 
         public bool IsEmpty()
         {

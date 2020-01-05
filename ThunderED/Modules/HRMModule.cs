@@ -45,7 +45,7 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
-            await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.HRMModule.AccessList.Values.SelectMany(a => a.RolesAccessList).Distinct().ToList(), Category);
+            await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.HRMModule.GetEnabledGroups().Values.SelectMany(a => a.RolesAccessList).Distinct().ToList(), Category);
         }
 
         private static DateTime _lastUpdateDate = DateTime.MinValue;
@@ -1010,14 +1010,14 @@ namespace ThunderED.Modules
 
         private async Task<HRMAccessFilter> CheckAccess(long characterId)
         {
-            var result = Settings.HRMModule.AccessList.Values.Where(a=> a.UsersAccessList.Contains(characterId)).ToList();
+            var result = Settings.HRMModule.GetEnabledGroups().Values.Where(a=> a.UsersAccessList.Contains(characterId)).ToList();
 
             if (result.Count > 0) return MergeHRMFilters(result);
             var discordId = await SQLHelper.GetAuthUserDiscordId(characterId);
             if (discordId <= 0) return null;
             var discordRoles = APIHelper.DiscordAPI.GetUserRoleNames(discordId);
 
-            var list = Settings.HRMModule.AccessList.Values.Where(a => discordRoles.Intersect(a.RolesAccessList).Any());
+            var list = Settings.HRMModule.GetEnabledGroups().Values.Where(a => discordRoles.Intersect(a.RolesAccessList).Any());
             return list.Any() ? MergeHRMFilters(list) : null;
         }
 

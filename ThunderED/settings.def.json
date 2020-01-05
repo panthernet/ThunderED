@@ -94,6 +94,7 @@
     "StopOnFirstGroupMatch": false,
     "Groups": {
       "groupName": {
+        "IsEnabled": true,
         "ShowGroupName": false,
         "DiscordChannels": [],
         "FeedPvpKills": true,
@@ -128,6 +129,7 @@
         "dsc1": "You can safely remove all default entries to reduce config size. They will automatically use default values on app startup.",
         "dsc2": "HasNo' properties are always checked before any 'Has' properties. They are not affected by any modifiers.",
         "dsc3": "Provided config is just an example for the most useful cases. You can mix different filter properties to achieve insane agility with KM feeds.",
+        "IsEnabled": false, 
         "DiscordChannels": [ 567625555843743754, 567625555843743756 ],
         "MessageTemplateFileName": "Template.killMailGeneral.txt",
         "Filters": {
@@ -197,7 +199,13 @@
     "UseOneAuthButton": false,
     "EnableDetailedLogging": false,
     "authGroups": {
+      "DefaultGroup": {
+        "AllowedMembers": {},
+        "ManualAssignmentRoles": [],
+        "CustomButtonText": "General Auth"
+      },
       "Mode1_GeneralAuth": {
+        "IsEnabled": false,
         "RemoveAuthIfTokenIsInvalid": false,
         "RemoveTokenIfTokenIsInvalid": false,
         "StopSearchingOnFirstMatch": false,
@@ -215,6 +223,7 @@
         "DefaultMention": ""
       },
       "Mode2_GeneralWithESIFetch": {
+        "IsEnabled": false,
         "AllowedMembers": {
           "ally1": {
             "Entities": [ 99003599 ],
@@ -229,6 +238,7 @@
         "DefaultMention": ""
       },
       "Mode3_Preliminary": {
+        "IsEnabled": false,
         "AllowedMembers": {
           "ally1": {
             "Entities": [],
@@ -271,6 +281,7 @@
         ]
       },
       "Mode4_StandingsBased": {
+        "IsEnabled": false,
         "ManualAssignmentRoles": [],
         "PreliminaryAuthMode": false,
         "ESICustomAuthRoles": [],
@@ -293,6 +304,7 @@
         }
       },
       "Mode5_ESIWithoutDiscord": {
+        "IsEnabled": false,
         "PreliminaryAuthMode": true,
         "AppInvalidationInHours": 24,
         "ESICustomAuthRoles": [ "esi-skills.read_skills.v1" ],
@@ -300,11 +312,13 @@
         "SkipDiscordAuthPage": true
       },
       "Mode6_AltCharactersAuth": {
+        "IsEnabled": false,
         "ESICustomAuthRoles": [ "esi-skills.read_skills.v1" ],
         "CustomButtonText": "Alt Characters Auth",
         "BindToMainCharacter": true
       },
       "Mode7_AuthByTitles": {
+        "IsEnabled": false,
         "StopSearchingOnFirstMatch": "false",
         "AllowedMembers": {
           "entry1": {
@@ -323,6 +337,7 @@
         "ExcludeFromOneButtonMode": false
       },
       "Mode8_AuthGroupWithUpgradeToAnotherGroup": {
+        "IsEnabled": false,
         "StopSearchingOnFirstMatch": "false",
         "UpgradeGroupNames": [ "Mode1_GeneralAuth" ],
         "DowngradeGroupNames": [],
@@ -341,9 +356,16 @@
   "WebConfigEditorModule": {
     "SessionTimeoutInMinutes": 10,
     "AccessList": {
-      "accessList1": {
-        "AllowedEntities": [ "Character Name", "c:Corporation Name", "a:Alliance Name", 1234567890 ],
+      "DefaultList": {
+        "AllowedEntities": [],
         "AllowedDiscordRoles": [],
+        "CanEditSimplifiedAuth": true,
+        "CanEditTimers": true
+      },
+      "ExampleList": {
+        "IsEnabled": false,
+        "AllowedEntities": [ "Character Name", "c:Corporation Name", "a:Alliance Name", 1234567890 ],
+        "AllowedDiscordRoles": [ "Adminz" ],
         "CanEditSimplifiedAuth": true,
         "CanEditTimers": true
       }
@@ -378,6 +400,7 @@
     "MaxTrackingCount": 150,
     "Groups": {
       "group1": {
+        "IsEnabled": false,
         "CharacterIDs": [ 0 ],
         "ButtonText": "Default Contracts Auth",
         "DefaultMention": "",
@@ -407,6 +430,7 @@
     "RatingModeChannelId": 0,
     "DailyStatsGroups": {
       "group1": {
+        "IsEnabled": false,
         "DailyStatsChannel": 0,
         "DailyStatsCorp": 0,
         "DailyStatsAlliance": 0,
@@ -418,6 +442,7 @@
   "HRMModule": {
     "AccessList": {
       "accessList1": {
+        "IsEnabled": true,
         "UsersAccessList": [],
         "RolesAccessList": [],
         "AuthGroupNamesFilter": [],
@@ -461,6 +486,7 @@
     "checkIntervalInMinutes": 2,
     "AuthGroups": {
       "Group1": {
+        "IsEnabled": true,
         "Id": [ 0 ],
         "IncludePrivateMail": true,
         "DefaultChannel": 0,
@@ -553,6 +579,7 @@
     "checkIntervalInMinutes": 2,
     "groups": {
       "groupName1": {
+        "IsEnabled": true,
         "characterID": [ 0 ],
         "defaultDiscordChannelID": 0,
         "fetchLastNotifDays": 0,
@@ -741,6 +768,7 @@
     "CheckIntervalInMinutes": 1,
     "Groups": {
       "groupName1": {
+        "IsEnabled": true,
         "Regions": [],
         "Constellations": [],
         "Announces": [],
@@ -755,6 +783,7 @@
     "CheckIntervalInMinutes": 60,
     "Groups": {
       "groupName1": {
+        "IsEnabled": true,
         "HolderAlliances": [],
         "Systems": [],
         "Regions": [],
@@ -773,6 +802,7 @@
     "CheckIntervalInMinutes": 5,
     "Groups": {
       "groupName1": {
+        "IsEnabled": true,
         "DiscordChannels": [],
         "CharacterEntities": [],
         "Filters": {
