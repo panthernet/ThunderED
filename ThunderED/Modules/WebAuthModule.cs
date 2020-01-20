@@ -39,6 +39,8 @@ namespace ThunderED.Modules
             Instance = this;
         }
 
+        private static object UpdateLock = new object();
+
         public override async Task Initialize()
         {
             //check entities
@@ -57,17 +59,24 @@ namespace ThunderED.Modules
                 }
             }
 
+            lock (UpdateLock)
+                ParsedMembersLists.Clear();
+
             //parse data
             foreach (var (key, value) in Settings.WebAuthModule.GetEnabledAuthGroups())
             {
                 var aGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 foreach (var (fKey, fValue) in value.AllowedMembers)
                 {
-                    var aData = await ParseMemberDataArray(fValue.Entities.Where(a => (a is long i && i != 0) || (a is string s && s != string.Empty)).ToList());
+                    var aData = await ParseMemberDataArray(fValue.Entities
+                        .Where(a => (a is long i && i != 0) || (a is string s && s != string.Empty)).ToList());
                     aGroupDic.Add(fKey, aData);
                 }
-                ParsedMembersLists.Add(key, aGroupDic);
+
+                lock (UpdateLock)
+                    ParsedMembersLists.Add(key, aGroupDic);
             }
+
         }
 
         public override async Task Run(object prm)
@@ -185,17 +194,21 @@ namespace ThunderED.Modules
                         }
 
                         await AuthInfoLog(chData, $"[GARE] Checking {groupName}|{entityName} - FSTOP: {group.StopSearchingOnFirstMatch} ...", true);
-                        var data = Instance.GetTier2CharacterIds(Instance.ParsedMembersLists, groupName, entityName);
+                        List<long> data;
+                        lock (UpdateLock)
+                            data = Instance.GetTier2CharacterIds(Instance.ParsedMembersLists, groupName, entityName);
                         if (data.Contains(chData.character_id))
                             result.RoleEntities.Add(entity);
                         else
                         {
-                            data = Instance.GetTier2CorporationIds(Instance.ParsedMembersLists, groupName, entityName);
+                            lock (UpdateLock)
+                                data = Instance.GetTier2CorporationIds(Instance.ParsedMembersLists, groupName, entityName);
                             if (data.Contains(chData.corporation_id))
                                 result.RoleEntities.Add(entity);
                             else
                             {
-                                data = Instance.GetTier2AllianceIds(Instance.ParsedMembersLists, groupName, entityName);
+                                lock (UpdateLock)
+                                    data = Instance.GetTier2AllianceIds(Instance.ParsedMembersLists, groupName, entityName);
                                 if (chData.alliance_id.HasValue && data.Contains(chData.alliance_id.Value))
                                     result.RoleEntities.Add(entity);
                             }

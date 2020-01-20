@@ -1,3 +1,6 @@
+### V1.4.7
++ Fixed erroneous behavior when updating simplified auth through the web settings editor
+
 ### V1.4.6
 + Added `IsEnabled` properties for auth, killfeed, contract, config editor, stats, HRM, mail, null campaigns, sov tracker, industrial groups and lists. You can now switch them off.
 + Reworked LiveKillFeed module (again) for better usability

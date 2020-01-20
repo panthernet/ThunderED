@@ -116,7 +116,7 @@ namespace ThunderED.Modules.OnDemand
                     return;
                 }
 
-                KeyValuePair<string, ShipDataGroup> singleGroup = new KeyValuePair<string, ShipDataGroup>();
+                var singleGroup = new KeyValuePair<string, ShipDataGroup>();
                 string singleShip = null;
                 if (!string.IsNullOrEmpty(inputName))
                 {

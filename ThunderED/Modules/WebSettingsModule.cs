@@ -143,11 +143,18 @@ namespace ThunderED.Modules
                         data = HttpUtility.UrlDecode(data);
                         if (data != null)
                         {
+                            //load clean settings from file
+                            await SettingsManager.UpdateSettings();
 
                             var convData = JsonConvert.DeserializeObject<List<SaData>>(data);
                             convData = convData.Where(a => !string.IsNullOrEmpty(a.Name?.Trim()) && !string.IsNullOrEmpty(a.Group?.Trim()) && !string.IsNullOrEmpty(a.Roles?.Trim())).ToList();
                             await SettingsManager.SaveSimplifiedAuthData(convData.Select(a => $"{a.Name}|{a.Group}|{a.Roles}").ToList());
+                            //inject updated simplified auth data
                             await SettingsManager.LoadSimplifiedAuth();
+                            //rebuild auth cache
+                            if(Settings.Config.ModuleAuthWeb)
+                                await TickManager.GetModule<WebAuthModule>().Initialize();
+                            await LogHelper.LogInfo("Simplified auth update completed!", Category);
                         }
                         else
                         {
