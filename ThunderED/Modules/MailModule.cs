@@ -232,7 +232,7 @@ namespace ThunderED.Modules
             var body = sList[0];
             var fits = sList[1];
             var urls = sList[2];
-            var fields = body.SplitToLines(1923);
+            var fields = string.IsNullOrWhiteSpace(body) ? new List<string>() : body.SplitToLines(1923);
 
            /* var embed = new EmbedBuilder()
                 .WithThumbnailUrl(SettingsManager.Settings.Resources.ImgMail);
