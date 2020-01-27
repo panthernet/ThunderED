@@ -928,7 +928,7 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.WebAuthModule.AutoClearAuthCommandsFromDiscord)
                 await APIHelper.DiscordAPI.RemoveMessage(Context.Message);
 
-            if(!IsAuthAllowed()) return;
+            if(!IsAuthAllowed() || IsForbidden()) return;
 
             if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
             {
@@ -957,7 +957,7 @@ namespace ThunderED.Classes
         [Command("authnotify", RunMode = RunMode.Async), Summary("Auth User")]
         public async Task AuthNotify()
         {
-            if(!IsAuthAllowed()) return;
+            if(!IsAuthAllowed() || IsForbidden()) return;
 
             if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleNotificationFeed)
             {
@@ -990,7 +990,7 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.WebAuthModule.AutoClearAuthCommandsFromDiscord)
                 await APIHelper.DiscordAPI.RemoveMessage(Context.Message);
 
-            if(!IsAuthAllowed())
+            if(!IsAuthAllowed() || IsForbidden())
                 return;
 
             if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
