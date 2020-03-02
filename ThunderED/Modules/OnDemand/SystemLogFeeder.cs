@@ -48,7 +48,11 @@ namespace ThunderED.Modules.OnDemand
             Package.Clear();
             if(message.Length > DiscordAPI.MAX_MSG_LENGTH)
                 foreach (var line in message.SplitToLines(DiscordAPI.MAX_MSG_LENGTH))
-                    await APIHelper.DiscordAPI.SendMessageAsync(SettingsManager.Settings.SystemLogFeederModule.DiscordChannelId, line);
+                {
+                    await APIHelper.DiscordAPI.SendMessageAsync(
+                        SettingsManager.Settings.SystemLogFeederModule.DiscordChannelId, line);
+                    await Task.Delay(500);
+                }
             else await APIHelper.DiscordAPI.SendMessageAsync(SettingsManager.Settings.SystemLogFeederModule.DiscordChannelId, message);
         }
 
