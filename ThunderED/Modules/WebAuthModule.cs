@@ -695,6 +695,12 @@ namespace ThunderED.Modules
                             altUser.Ip = ip;
                             await SQLHelper.SaveAuthUser(altUser);
 
+
+
+                            if (Settings.WebAuthModule.AuthReportChannel > 0)
+                                await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,
+                                    LM.Get("authReportCreateAlt", altUser.Data.CharacterName, user.Data.CharacterName));
+
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
                                     .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                     .Replace("{url}", Settings.WebServerModule.DiscordUrl)

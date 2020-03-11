@@ -149,9 +149,9 @@ namespace ThunderED.Modules
                             if (string.IsNullOrEmpty(token))
                             {
                                 if (tq.Data.IsNotValid)
-                                    await LogHelper.LogWarning($"Contracts token for character {characterID} is outdated or no more valid!");
+                                    await LogHelper.LogWarning($"Contracts token for character {characterID} is outdated or no more valid!", Category);
                                 else
-                                    await LogHelper.LogWarning($"Unable to get contracts token for character {characterID}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})");
+                                    await LogHelper.LogWarning($"Unable to get contracts token for character {characterID}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})", Category);
 
                                 continue;
                             }
