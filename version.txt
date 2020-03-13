@@ -1,6 +1,7 @@
 ### V1.4.7
 + Added message to AuthReportChannel upon successfull alt character registration
 + Added new #var directive to KM templates
++ Added new `OldKMDaysThreshold param` to ZKB section to be able to filter out outdated KMs
 + Fixed erroneous behavior when updating simplified auth through the web settings editor
 
 ### V1.4.6

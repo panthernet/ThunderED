@@ -34,10 +34,18 @@ namespace ThunderED.Modules.Sub
             return SharedIdPool.Contains(id);
         }
 
+        public ZKillLiveFeedModule()
+        {
+            Settings.ZKBSettingsModule.OldKMDaysThreshold = Settings.ZKBSettingsModule.OldKMDaysThreshold < 0
+                ? 0
+                : Settings.ZKBSettingsModule.OldKMDaysThreshold;
+        }
+
         public override async Task Run(object prm)
         {
             if (IsRunning || Queryables.Count == 0) return;
             IsRunning = true;
+            var minus = Settings.ZKBSettingsModule.OldKMDaysThreshold == 0 ? DateTime.Now : DateTime.Now.Subtract(TimeSpan.FromDays(Settings.ZKBSettingsModule.OldKMDaysThreshold));
             try
             {
                 if(TickManager.IsNoConnection || !Queryables.Any()) return;
@@ -52,13 +60,16 @@ namespace ThunderED.Modules.Sub
                 }
                 else
                 {
-
                     var currentEntry =  await APIHelper.ZKillAPI.GetRedisqResponce();
                     if (currentEntry?.package == null) return;
                     if (!IsUniqueId(currentEntry.package.killID)) return;
                     currentEntry.package.killmail.zkb = currentEntry.package.zkb;
                     entry = currentEntry.package.killmail;
                 }
+
+                //do the minus days check
+                if(entry.killmail_time < minus)
+                    return;
 
                 foreach (var q in Queryables)
                 {

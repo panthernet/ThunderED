@@ -196,6 +196,8 @@ namespace ThunderED.Classes
         public string ZKillboardWebSocketUrl { get; set; } = "wss://zkillboard.com:2096";
         [Comment("Try avoid duplicate killmails across all radius and live kill feeds")]
         public bool AvoidDupesAcrossAllFeeds { get; set; } = false;
+        [Comment("Don't feed KMs that are older than this number of days")]
+        public int OldKMDaysThreshold { get; set; } = 2;
     }
 
     public class WebConfigEditorModuleSettings
