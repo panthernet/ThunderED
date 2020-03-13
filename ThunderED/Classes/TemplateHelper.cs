@@ -35,6 +35,7 @@ namespace ThunderED.Classes
         {
             try
             {
+                var vars = new Dictionary<string, string>();
                 var isNpcKill = dic.ContainsKey("{isNpcKill}") && Convert.ToBoolean(dic["{isNpcKill}"]);
                 var isLoss = dic.ContainsKey("{isLoss}") && Convert.ToBoolean(dic["{isLoss}"]);
                 var isAwox = dic.ContainsKey( "{isAwoxKill}" ) && Convert.ToBoolean( dic["{isAwoxKill}"] );
@@ -83,75 +84,94 @@ namespace ThunderED.Classes
                     if (text.StartsWith("#if {isRangeMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isRadiusRange) return;
-                        text = text.Substring(17, text.Length - 17).Trim();
+                        text = text.Substring(17).Trim();
                     }
                     if (text.StartsWith("#if !{isRangeMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isRadiusRange) return;
-                        text = text.Substring(18, text.Length - 18).Trim();
+                        text = text.Substring(18).Trim();
                     }
                     if (text.StartsWith("#if {isConstMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isRadiusConst) return;
-                        text = text.Substring(17, text.Length - 17).Trim();
+                        text = text.Substring(17).Trim();
                     }
                     if (text.StartsWith("#if !{isConstMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isRadiusConst) return;
-                        text = text.Substring(18, text.Length - 18).Trim();
+                        text = text.Substring(18).Trim();
                     }
 
                     if (text.StartsWith("#if {isRegionMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isRadiusRegion) return;
-                        text = text.Substring(18, text.Length - 18).Trim();
+                        text = text.Substring(18).Trim();
                     }
                     if (text.StartsWith("#if !{isRegionMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isRadiusRegion) return;
-                        text = text.Substring(19, text.Length - 19).Trim();
+                        text = text.Substring(19).Trim();
                     }
 
                     if (text.StartsWith("#if {isNpcKill}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isNpcKill) return;
-                        text = text.Substring(15, text.Length - 15).Trim();
+                        text = text.Substring(15).Trim();
                     }
                     if (text.StartsWith("#if !{isNpcKill}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isNpcKill) return;
-                        text = text.Substring(16, text.Length - 16).Trim();
+                        text = text.Substring(16).Trim();
                     }
 
                     if (text.StartsWith("#if {isLoss}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isLoss) return;
-                        text = text.Substring(12, text.Length - 12).Trim();
+                        text = text.Substring(12).Trim();
                     }
                     if (text.StartsWith("#if !{isLoss}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isLoss) return;
-                        text = text.Substring(13, text.Length - 13).Trim();
+                        text = text.Substring(13).Trim();
                     }
                             
                     if (text.StartsWith("#if {isAwoxKill}", StringComparison.OrdinalIgnoreCase)) {
                         if (!isAwox) return;
-                        text = text.Substring(16, text.Length - 16).Trim();
+                        text = text.Substring(16).Trim();
                     }
                     if (text.StartsWith( "#if !{isAwoxKill}", StringComparison.OrdinalIgnoreCase )) {
                         if (isAwox) return;
-                        text = text.Substring(17, text.Length - 17).Trim();
+                        text = text.Substring(17).Trim();
                     }
                             
                     if (text.StartsWith( "#if {isSoloKill}", StringComparison.OrdinalIgnoreCase )) {
                         if (!isSolo) return;
-                        text = text.Substring(16, text.Length - 16).Trim();
+                        text = text.Substring(16).Trim();
                     }
                     if (text.StartsWith( "#if !{isSoloKill}", StringComparison.OrdinalIgnoreCase )) {
                         if (isSolo) return;
-                        text = text.Substring(17, text.Length - 17).Trim();
+                        text = text.Substring(17).Trim();
                     }
-                            
+
+                    if (text.StartsWith("#var", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var data = text.Substring(4).Trim().Split(" ");
+                        if(data.Length < 2)
+                            throw new Exception($"Invalid #var declaration in template file {fileName}");
+                        var name = data[0];
+                        var value = string.Join(' ', data).Trim().Substring(name.Length + 1);
+                       // LogHelper.Log($"{name} : {value}", LogSeverity.Info, LogCat.Templates, true, true).GetAwaiter().GetResult();
+                        vars.Add(name, value);
+                        return;
+                    }
+
+                    if(text.Contains("{var:"))
+                    {
+                        var name = text.GetUntilOrEmpty(text.IndexOf("{var:")+ 5, "}");
+                        var v = vars[name];
+                        text = text.Replace($"{{var:{name}}}", v);
+                    }
+
                     if (!isAuthor && text.StartsWith(".WithAuthor", StringComparison.OrdinalIgnoreCase))
                     {
                         isAuthor = true;

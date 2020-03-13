@@ -550,8 +550,6 @@ namespace ThunderED.Modules
             }
             else
             {
-
-
                 var sbNames = new StringBuilder();
                 var sbValues = new StringBuilder();
 
