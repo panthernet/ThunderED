@@ -1,3 +1,6 @@
+### V1.4.8
++ Made KM template variables case insensitive
+
 ### V1.4.7
 + Added message to AuthReportChannel upon successfull alt character registration
 + Added new #var directive to KM templates
