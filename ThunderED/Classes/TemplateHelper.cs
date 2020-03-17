@@ -79,83 +79,83 @@ namespace ThunderED.Classes
                 lines.ForEach(line =>
                 {
                     var text = line;
-                    var lowerText = text.ToLower();
+                    //var lowerText = text.ToLower();
 
-                    if (lowerText.StartsWith("EmbedBuilder")) return;
+                    if (text.StartsWith("EmbedBuilder", StringComparison.OrdinalIgnoreCase)) return;
 
-                    if (lowerText.StartsWith("#if {isRangeMode}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if {isRangeMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isRadiusRange) return;
                         text = text.Substring(17).Trim();
                     }
-                    if (lowerText.StartsWith("#if !{isRangeMode}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if !{isRangeMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isRadiusRange) return;
                         text = text.Substring(18).Trim();
                     }
-                    if (lowerText.StartsWith("#if {isConstMode}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if {isConstMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isRadiusConst) return;
                         text = text.Substring(17).Trim();
                     }
-                    if (lowerText.StartsWith("#if !{isConstMode}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if !{isConstMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isRadiusConst) return;
                         text = text.Substring(18).Trim();
                     }
 
-                    if (lowerText.StartsWith("#if {isRegionMode}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if {isRegionMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isRadiusRegion) return;
                         text = text.Substring(18).Trim();
                     }
-                    if (lowerText.StartsWith("#if !{isRegionMode}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if !{isRegionMode}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isRadiusRegion) return;
                         text = text.Substring(19).Trim();
                     }
 
-                    if (lowerText.StartsWith("#if {isNpcKill}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if {isNpcKill}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isNpcKill) return;
                         text = text.Substring(15).Trim();
                     }
-                    if (lowerText.StartsWith("#if !{isNpcKill}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if !{isNpcKill}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isNpcKill) return;
                         text = text.Substring(16).Trim();
                     }
 
-                    if (lowerText.StartsWith("#if {isLoss}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if {isLoss}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!isLoss) return;
                         text = text.Substring(12).Trim();
                     }
-                    if (lowerText.StartsWith("#if !{isLoss}", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#if !{isLoss}", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isLoss) return;
                         text = text.Substring(13).Trim();
                     }
                             
-                    if (lowerText.StartsWith("#if {isAwoxKill}", StringComparison.OrdinalIgnoreCase)) {
+                    if (text.StartsWith("#if {isAwoxKill}", StringComparison.OrdinalIgnoreCase)) {
                         if (!isAwox) return;
                         text = text.Substring(16).Trim();
                     }
-                    if (lowerText.StartsWith( "#if !{isAwoxKill}", StringComparison.OrdinalIgnoreCase )) {
+                    if (text.StartsWith( "#if !{isAwoxKill}", StringComparison.OrdinalIgnoreCase )) {
                         if (isAwox) return;
                         text = text.Substring(17).Trim();
                     }
                             
-                    if (lowerText.StartsWith( "#if {isSoloKill}", StringComparison.OrdinalIgnoreCase )) {
+                    if (text.StartsWith( "#if {isSoloKill}", StringComparison.OrdinalIgnoreCase )) {
                         if (!isSolo) return;
                         text = text.Substring(16).Trim();
                     }
-                    if (lowerText.StartsWith( "#if !{isSoloKill}", StringComparison.OrdinalIgnoreCase )) {
+                    if (text.StartsWith( "#if !{isSoloKill}", StringComparison.OrdinalIgnoreCase )) {
                         if (isSolo) return;
                         text = text.Substring(17).Trim();
                     }
 
-                    if (lowerText.StartsWith("#var", StringComparison.OrdinalIgnoreCase))
+                    if (text.StartsWith("#var", StringComparison.OrdinalIgnoreCase))
                     {
                         var data = text.Substring(4).Trim().Split(" ");
                         if(data.Length < 2)
@@ -167,14 +167,14 @@ namespace ThunderED.Classes
                         return;
                     }
 
-                    if(lowerText.Contains("{var:"))
+                    if(text.Contains("{var:", StringComparison.OrdinalIgnoreCase))
                     {
                         var name = text.GetUntilOrEmpty(text.IndexOf("{var:", StringComparison.OrdinalIgnoreCase)+ 5, "}");
                         var v = vars[name];
                         text = text.Replace($"{{var:{name}}}", v);
                     }
 
-                    if (!isAuthor && lowerText.StartsWith(".WithAuthor", StringComparison.OrdinalIgnoreCase))
+                    if (!isAuthor && text.StartsWith(".WithAuthor", StringComparison.OrdinalIgnoreCase))
                     {
                         isAuthor = true;
                         author = new EmbedAuthorBuilder();
@@ -190,38 +190,38 @@ namespace ThunderED.Classes
 
                     if (isAuthor)
                     {
-                        if (lowerText.StartsWith(".WithName", StringComparison.OrdinalIgnoreCase))
+                        if (text.StartsWith(".WithName", StringComparison.OrdinalIgnoreCase))
                             author.WithName(GetText(text));
-                        else if (lowerText.StartsWith(".WithUrl", StringComparison.OrdinalIgnoreCase))
+                        else if (text.StartsWith(".WithUrl", StringComparison.OrdinalIgnoreCase))
                             author.WithUrl(GetText(text));
-                        else if (lowerText.StartsWith(".WithIconUrl", StringComparison.OrdinalIgnoreCase))
+                        else if (text.StartsWith(".WithIconUrl", StringComparison.OrdinalIgnoreCase))
                             author.WithIconUrl(GetText(text));
                     }
                     else
                     {
-                        if (lowerText.StartsWith(".WithColor", StringComparison.OrdinalIgnoreCase))
+                        if (text.StartsWith(".WithColor", StringComparison.OrdinalIgnoreCase))
                             embed.WithColor(GetColor(text));
-                        else if (lowerText.StartsWith(".WithDescription(", StringComparison.OrdinalIgnoreCase))
+                        else if (text.StartsWith(".WithDescription(", StringComparison.OrdinalIgnoreCase))
                             embed.WithDescription(GetText(text));
-                        else if (lowerText.StartsWith(".WithThumbnailUrl(", StringComparison.OrdinalIgnoreCase))
+                        else if (text.StartsWith(".WithThumbnailUrl(", StringComparison.OrdinalIgnoreCase))
                             embed.WithThumbnailUrl(GetText(text));
-                        else if (lowerText.StartsWith(".WithImageUrl(", StringComparison.OrdinalIgnoreCase))
+                        else if (text.StartsWith(".WithImageUrl(", StringComparison.OrdinalIgnoreCase))
                             embed.WithImageUrl(GetText(text));
-                        else if (lowerText.StartsWith(".WithTitle(", StringComparison.OrdinalIgnoreCase))
+                        else if (text.StartsWith(".WithTitle(", StringComparison.OrdinalIgnoreCase))
                             embed.WithTitle(GetText(text));
-                        else if (lowerText.StartsWith(".AddField"))
+                        else if (text.StartsWith(".AddField"))
                         {
                             var result = GetDoubleText(text);
                             embed.AddField(result[0], result[1]);
                         }
-                        else if (lowerText.StartsWith(".AddInlineField", StringComparison.OrdinalIgnoreCase))
+                        else if (text.StartsWith(".AddInlineField", StringComparison.OrdinalIgnoreCase))
                         {
                             var result = GetDoubleText(text);
                             embed.AddField(result[0], result[1], true);
                         }
-                        else if (lowerText.StartsWith(".WithFooter", StringComparison.OrdinalIgnoreCase))
+                        else if (text.StartsWith(".WithFooter", StringComparison.OrdinalIgnoreCase))
                             embed.WithFooter(GetText(text));
-                        else if (lowerText.StartsWith(".WithTimestamp", StringComparison.OrdinalIgnoreCase))
+                        else if (text.StartsWith(".WithTimestamp", StringComparison.OrdinalIgnoreCase))
                         {
                             if (DateTimeOffset.TryParse(dic["{timestamp}"], out var time))
                                     embed.WithTimestamp(time);
