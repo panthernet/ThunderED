@@ -1,9 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ThunderED.Json.EveCentral
 {
     internal partial class JsonEveCentral
     {
+
+        //FUZZ
+
+        public class FuzzQuery
+        {
+            public Dictionary<int, FuzzItems> Items = new Dictionary<int, FuzzItems>();
+        }
+
+        public class FuzzItems
+        {
+            public FuzzBuy buy { get; set; }
+            public FuzzBuy sell { get; set; }
+        }
+
+        public class FuzzBuy
+        {
+            public double weightedAverage;
+            public double max;
+            public double min;
+            public double stddev;
+            public double median;
+            public double volume;
+            public int orderCount;
+            public double percentile;
+        }
+
         //EVE Central
 
         public class EveCentralApi

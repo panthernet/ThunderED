@@ -128,57 +128,8 @@ namespace ThunderED.Modules.Static
                             var itemNameResults = JsonConvert.DeserializeObject<List<JsonClasses.SearchName>>(itemNameResult)[0];
                             itemName?.Dispose();
 
-                            var url = "https://api.evemarketer.com/ec";
+                            await GoFuzz(httpClient, context, system, itemIDResults, itemNameResults);
 
-                            var systemAddon = string.Empty;
-                            var systemTextAddon = string.IsNullOrEmpty(system) ? null : $"{LM.Get("fromSmall")} {system}";
-
-                            switch (system?.ToLower())
-                            {
-                                case "jita":
-                                    systemAddon = "&usesystem=30000142";
-                                    break;
-                                case "amarr":
-                                    systemAddon = "&usesystem=30002187";
-                                    break;
-                                case "rens":
-                                    systemAddon = "&usesystem=30002510";
-                                    break;
-                                case "dodixie":
-                                    systemAddon = "&usesystem=30002659";
-                                    break;
-                            }
-
-                            httpClient.DefaultRequestHeaders.Clear();
-                            httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
-                            var webReply = await httpClient.GetStringAsync($"{url}/marketstat/json?typeid={itemIDResults.inventory_type[0]}{systemAddon}");
-                            var marketReply = JsonConvert.DeserializeObject<List<JsonEveCentral.Items>>(webReply)[0];
-
-                            await LogHelper.LogInfo($"Sending {context.Message.Author}'s Price check", LogCat.PriceCheck);
-                            var builder = new EmbedBuilder()
-                                .WithColor(new Color(0x00D000))
-                                .WithThumbnailUrl($"https://image.eveonline.com/Type/{itemNameResults.id}_64.png")
-                                .WithAuthor(author =>
-                                {
-                                    author
-                                        .WithName($"{LM.Get("Item")}: {itemNameResults.name}")
-                                        .WithUrl($"https://www.fuzzwork.co.uk/info/?typeid={itemNameResults.id}/");
-                                })
-                                .WithDescription($"{LM.Get("Prices")} {systemTextAddon}")
-                                .AddField(LM.Get("Buy"), $"{LM.Get("marketLow")}: {marketReply.buy.min:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("marketMid")}: {marketReply.buy.avg:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("marketHigh")}: {marketReply.buy.max:N2}", true)
-                                .AddField(LM.Get("Sell"), $"{LM.Get("marketLow")}: {marketReply.sell.min:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("marketMid")}: {marketReply.sell.avg:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("marketHigh")}: {marketReply.sell.max:N2}", true)
-                                .AddField(LM.Get("Extra"), "\u200b")
-                                .AddField(LM.Get("Buy"), $"5%: {marketReply.buy.fivePercent:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("Volume")}: {marketReply.buy.volume}", true)
-                                .AddField(LM.Get("Sell"), $"5%: {marketReply.sell.fivePercent:N2}{Environment.NewLine}" +
-                                                            $"{LM.Get("Volume")}: {marketReply.sell.volume:N0}", true);
-                            var embed = builder.Build();
-                            await APIHelper.DiscordAPI.ReplyMessageAsync(context, "", embed).ConfigureAwait(false);
-                            
                         }
                         catch (Exception ex)
                         {
@@ -193,5 +144,116 @@ namespace ThunderED.Modules.Static
                 await LogHelper.LogEx(ex.Message, ex, LogCat.PriceCheck);
             }
         }
+
+        private static async Task GoFuzz(HttpClient httpClient, ICommandContext context, string system,
+            JsonClasses.SearchInventoryType itemIDResults, JsonClasses.SearchName itemNameResults)
+        {
+            var url = "https://market.fuzzwork.co.uk/aggregates/";
+
+            var systemAddon = string.Empty;
+            var systemTextAddon = string.IsNullOrEmpty(system) ? null : $"{LM.Get("fromSmall")} {system}";
+            switch (system?.ToLower())
+            {
+                default:
+                    systemAddon = "?station=60003760";
+                    break;
+                case "amarr":
+                    systemAddon = "?station=60008494";
+                    break;
+                case "rens":
+                    systemAddon = "?station=60004588";
+                    break;
+                case "dodixie":
+                    systemAddon = "?station=60011866";
+                    break;
+            }
+
+            httpClient.DefaultRequestHeaders.Clear();
+            httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+            var webReply = await httpClient.GetStringAsync($"{url}{systemAddon}&types={itemIDResults.inventory_type[0]}");
+            var market = JsonConvert.DeserializeObject<Dictionary<string,JsonEveCentral.FuzzItems>>(webReply);
+
+            await LogHelper.LogInfo($"Sending {context.Message.Author}'s Price check", LogCat.PriceCheck);
+            foreach (var marketReply in market.Values)
+            {
+                var builder = new EmbedBuilder()
+                    .WithColor(new Color(0x00D000))
+                    .WithThumbnailUrl($"https://image.eveonline.com/Type/{itemNameResults.id}_64.png")
+                    .WithAuthor(author =>
+                    {
+                        author
+                            .WithName($"{LM.Get("Item")}: {itemNameResults.name}")
+                            .WithUrl($"https://www.fuzzwork.co.uk/info/?typeid={itemNameResults.id}/");
+                    })
+                    .WithDescription($"{LM.Get("Prices")} {systemTextAddon}")
+                    .AddField(LM.Get("Buy"), $"{LM.Get("marketHigh")}: {marketReply.buy.max:N2}{Environment.NewLine}" +
+                                             $"{LM.Get("marketMid")}: {marketReply.buy.weightedAverage:N2}{Environment.NewLine}" +
+                                             $"{LM.Get("marketLow")}: {marketReply.buy.min:N2}{Environment.NewLine}" +
+                                             $"{LM.Get("Volume")}: {marketReply.buy.volume}", true)
+                    .AddField(LM.Get("Sell"), $"{LM.Get("marketLow")}: {marketReply.sell.min:N2}{Environment.NewLine}" +
+                                              $"{LM.Get("marketMid")}: {marketReply.sell.weightedAverage:N2}{Environment.NewLine}" +
+                                              $"{LM.Get("marketHigh")}: {marketReply.sell.max:N2}{Environment.NewLine}" +
+                                              $"{LM.Get("Volume")}: {marketReply.sell.volume:N0}", true);
+
+                var embed = builder.Build();
+                await APIHelper.DiscordAPI.ReplyMessageAsync(context, "", embed).ConfigureAwait(false);
+                await Task.Delay(500);
+            }
+        }
+
+        private static async Task GoMarketeer(HttpClient httpClient, ICommandContext context, string system, JsonClasses.SearchInventoryType itemIDResults, JsonClasses.SearchName itemNameResults)
+        {
+            var url = "https://api.evemarketer.com/ec";
+
+            var systemAddon = string.Empty;
+            var systemTextAddon = string.IsNullOrEmpty(system) ? null : $"{LM.Get("fromSmall")} {system}";
+
+            switch (system?.ToLower())
+            {
+                case "jita":
+                    systemAddon = "&usesystem=30000142";
+                    break;
+                case "amarr":
+                    systemAddon = "&usesystem=30002187";
+                    break;
+                case "rens":
+                    systemAddon = "&usesystem=30002510";
+                    break;
+                case "dodixie":
+                    systemAddon = "&usesystem=30002659";
+                    break;
+            }
+
+            httpClient.DefaultRequestHeaders.Clear();
+            httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+            var webReply = await httpClient.GetStringAsync($"{url}/marketstat/json?typeid={itemIDResults.inventory_type[0]}{systemAddon}");
+            var marketReply = JsonConvert.DeserializeObject<List<JsonEveCentral.Items>>(webReply)[0];
+
+            await LogHelper.LogInfo($"Sending {context.Message.Author}'s Price check", LogCat.PriceCheck);
+            var builder = new EmbedBuilder()
+                .WithColor(new Color(0x00D000))
+                .WithThumbnailUrl($"https://image.eveonline.com/Type/{itemNameResults.id}_64.png")
+                .WithAuthor(author =>
+                {
+                    author
+                        .WithName($"{LM.Get("Item")}: {itemNameResults.name}")
+                        .WithUrl($"https://www.fuzzwork.co.uk/info/?typeid={itemNameResults.id}/");
+                })
+                .WithDescription($"{LM.Get("Prices")} {systemTextAddon}")
+                .AddField(LM.Get("Buy"), $"{LM.Get("marketLow")}: {marketReply.buy.min:N2}{Environment.NewLine}" +
+                                            $"{LM.Get("marketMid")}: {marketReply.buy.avg:N2}{Environment.NewLine}" +
+                                            $"{LM.Get("marketHigh")}: {marketReply.buy.max:N2}", true)
+                .AddField(LM.Get("Sell"), $"{LM.Get("marketLow")}: {marketReply.sell.min:N2}{Environment.NewLine}" +
+                                            $"{LM.Get("marketMid")}: {marketReply.sell.avg:N2}{Environment.NewLine}" +
+                                            $"{LM.Get("marketHigh")}: {marketReply.sell.max:N2}", true)
+                .AddField(LM.Get("Extra"), "\u200b")
+                .AddField(LM.Get("Buy"), $"5%: {marketReply.buy.fivePercent:N2}{Environment.NewLine}" +
+                                            $"{LM.Get("Volume")}: {marketReply.buy.volume}", true)
+                .AddField(LM.Get("Sell"), $"5%: {marketReply.sell.fivePercent:N2}{Environment.NewLine}" +
+                                            $"{LM.Get("Volume")}: {marketReply.sell.volume:N0}", true);
+            var embed = builder.Build();
+            await APIHelper.DiscordAPI.ReplyMessageAsync(context, "", embed).ConfigureAwait(false);
+        }
+
     }
 }
