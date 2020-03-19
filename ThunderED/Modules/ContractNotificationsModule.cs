@@ -42,12 +42,14 @@ namespace ThunderED.Modules
 
             try
             {
+                RunningRequestCount++;
                 var extPort = Settings.WebServerModule.WebExternalPort;
                 var port = Settings.WebServerModule.WebExternalPort;
 
                 if (request.HttpMethod == HttpMethod.Get.ToString())
                 {
-                    if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" || request.Url.LocalPath == $"{port}/callback")
+                    if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" ||
+                        request.Url.LocalPath == $"{port}/callback")
                     {
                         var clientID = Settings.WebServerModule.CcpAppClientId;
                         var secret = Settings.WebServerModule.CcpAppSecret;
@@ -62,7 +64,9 @@ namespace ThunderED.Modules
                             var res = await APIHelper.ESIAPI.GetAuthToken(code, clientID, secret);
                             if (string.IsNullOrEmpty(res[0]))
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("contractFailedToOpen"), WebServerModule.GetWebSiteUrl()), response);
+                                await WebServerModule.WriteResponce(
+                                    WebServerModule.GetAccessDeniedPage("Contracts Module",
+                                        LM.Get("contractFailedToOpen"), WebServerModule.GetWebSiteUrl()), response);
                                 return true;
                             }
 
@@ -72,19 +76,23 @@ namespace ThunderED.Modules
                             }
                             else
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("contractFailedToOpen"), WebServerModule.GetWebSiteUrl()), response);
+                                await WebServerModule.WriteResponce(
+                                    WebServerModule.GetAccessDeniedPage("Contracts Module",
+                                        LM.Get("contractFailedToOpen"), WebServerModule.GetWebSiteUrl()), response);
                             }
 
                             return true;
                         }
-                        
+
                         if (!state.StartsWith("cauth")) return false;
                         var groupName = HttpUtility.UrlDecode(state.Replace("cauth", ""));
 
                         var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
                         if (result == null)
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
+                            await WebServerModule.WriteResponce(
+                                WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"),
+                                    WebServerModule.GetAuthPageUrl()), response);
                             return true;
                         }
 
@@ -92,12 +100,15 @@ namespace ThunderED.Modules
                         var group = Settings.ContractNotificationsModule.GetEnabledGroups()[groupName];
                         if (!group.CharacterIDs.Contains(lCharId))
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
+                            await WebServerModule.WriteResponce(
+                                WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"),
+                                    WebServerModule.GetAuthPageUrl()), response);
                             return true;
                         }
 
                         await SQLHelper.InsertOrUpdateTokens("", result[0], "", result[1]);
-                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
+                        await WebServerModule.WriteResponce(File
+                                .ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", "authTemplateHeader")
                                 .Replace("{body}", LM.Get("contractAuthSuccessHeader"))
@@ -111,6 +122,10 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+            finally
+            {
+                RunningRequestCount--;
             }
             return false;
         }

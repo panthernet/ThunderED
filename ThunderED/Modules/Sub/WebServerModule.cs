@@ -132,8 +132,10 @@ namespace ThunderED.Modules.Sub
                 _listener = new System.Net.Http.HttpListener(IPAddress.Parse(ip), extPort);
                 _listener.Request += async (sender, context) =>
                 {
+                    if(Program.IsClosing) return;
                     try
                     {
+                        RunningRequestCount++;
                         var request = context.Request;
                         var response = context.Response;
 
@@ -363,6 +365,7 @@ namespace ThunderED.Modules.Sub
                     }
                     finally
                     {
+                        RunningRequestCount--;
                         try
                         {
                             context.Response.Close();

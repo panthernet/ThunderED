@@ -62,7 +62,7 @@ namespace ThunderED.Modules
             try
             {
                 if(IRC?.IsWorking ?? false) return;
-                await LogHelper.LogModule("Inititalizing IRC module...", Category);
+                await LogHelper.LogModule("Initializing IRC module...", Category);
                 IRC = new IRC();
                 IRC.Message += IRC_Message;
                 IRC.ErrorOutput += IRC_ErrorOutput;

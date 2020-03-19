@@ -1,6 +1,9 @@
 ### V1.4.8
++ Added !sys shutdown and !sys restart commands. Needs testing on Linux.
 + Made KM template variables case insensitive
 + Fixed and reworked market price module to work with Fuzzworks data
++ Improved shutdown procedures to avoid possible DB corruption
++ Improved !sys command set. Use !sys help for more info
 
 ### V1.4.7
 + Added message to AuthReportChannel upon successfull alt character registration

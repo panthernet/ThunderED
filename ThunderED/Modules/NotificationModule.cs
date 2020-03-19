@@ -1277,20 +1277,24 @@ typeID: 2233",
             var port = Settings.WebServerModule.WebExternalPort;
             try
             {
+                RunningRequestCount++;
                 if (request.HttpMethod != HttpMethod.Get.ToString())
                     return false;
-                if ((request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" || request.Url.LocalPath == $"{port}/callback")
+                if ((request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" ||
+                     request.Url.LocalPath == $"{port}/callback")
                     && request.Url.Query.Contains("&state=9"))
                 {
                     var prms = request.Url.Query.TrimStart('?').Split('&');
                     var code = prms[0].Split('=')[1];
                     // var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
 
-                    var result = await WebAuthModule.GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    var result = await WebAuthModule.GetCharacterIdFromCode(code,
+                        Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
                     if (result == null)
                     {
                         var message = LM.Get("ESIFailure");
-                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
+                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3)
+                            .Replace("{message}", message)
                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{header}", LM.Get("authTemplateHeader"))
                             .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
@@ -1305,19 +1309,26 @@ typeID: 2233",
                     {
                         await LogHelper.LogWarning("Bad or outdated notify feed request!");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                            .Replace("{message}", LM.Get("authTokenBadRequest"))
-                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
+                                .Replace("{message}", LM.Get("authTokenBadRequest"))
+                                .Replace("{header}", LM.Get("authTokenHeader"))
+                                .Replace("{body}", LM.Get("authTokenBodyFail"))
+                                .Replace("{backText}", LM.Get("backText")),
+                            response);
                         return true;
                     }
 
-                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.GetEnabledGroups().Values.All(g => !g.CharacterID.Contains(numericCharId)))
+                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.GetEnabledGroups()
+                        .Values.All(g => !g.CharacterID.Contains(numericCharId)))
                     {
                         await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                            .Replace("{message}", LM.Get("authTokenInvalid"))
-                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
+                                .Replace("{message}", LM.Get("authTokenInvalid"))
+                                .Replace("{header}", LM.Get("authTokenHeader"))
+                                .Replace("{body}", LM.Get("authTokenBodyFail"))
+                                .Replace("{backText}", LM.Get("backText")),
+                            response);
                         return true;
                     }
 
@@ -1328,13 +1339,18 @@ typeID: 2233",
                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                         .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                         .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
-                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader")).Replace("{backText}", LM.Get("backText")), response);
+                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader"))
+                        .Replace("{backText}", LM.Get("backText")), response);
                     return true;
-                }                
+                }
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+            finally
+            {
+                RunningRequestCount--;
             }
 
             return false;

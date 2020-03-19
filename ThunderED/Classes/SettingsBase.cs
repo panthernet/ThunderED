@@ -84,7 +84,7 @@ namespace ThunderED.Classes
         private static bool SaveInternal(object obj, string filePath, bool createBackup)
         {
             var typeName = obj.GetType().Name;
-            Console.WriteLine("{0} save started: {1}", typeName, filePath);
+            LogHelper.WriteConsole("{0} save started: {1}", typeName, filePath);
 
             var isSuccess = false;
 
@@ -130,11 +130,11 @@ namespace ThunderED.Classes
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                LogHelper.WriteConsole(e.ToString());
             }
             finally
             {
-                Console.WriteLine("{0} save {1}: {2}", typeName, isSuccess ? "successful" : "failed", filePath);
+                LogHelper.WriteConsole("{0} save {1}: {2}", typeName, isSuccess ? "successful" : "failed", filePath);
             }
 
             return isSuccess;
@@ -220,7 +220,7 @@ namespace ThunderED.Classes
                 }
                 catch (Exception ex) //some other exception
                 {
-                    Console.WriteLine(ex.ToString());
+                    LogHelper.WriteConsole(ex.ToString());
                     return ex.Message;
                 }
             }

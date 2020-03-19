@@ -31,12 +31,15 @@ namespace ThunderED.Modules.OnDemand
 
             try
             {
+                RunningRequestCount++;
+
                 var extPort = Settings.WebServerModule.WebExternalPort;
                 var port = Settings.WebServerModule.WebExternalPort;
 
                 if (request.HttpMethod == HttpMethod.Post.ToString())
                 {
-                    if (request.Url.LocalPath == "/chatrelay" || request.Url.LocalPath == $"{extPort}/chatrelay" || request.Url.LocalPath == $"{port}/chatrelay")
+                    if (request.Url.LocalPath == "/chatrelay" || request.Url.LocalPath == $"{extPort}/chatrelay" ||
+                        request.Url.LocalPath == $"{port}/chatrelay")
                     {
                         var prms = request.Url.Query.TrimStart('?').Split('&');
                         if (prms.Length != 3)
@@ -46,7 +49,8 @@ namespace ThunderED.Modules.OnDemand
                         }
 
                         var message = HttpUtility.UrlDecode(prms[0].Split('=')[1]);
-                        var code = Encoding.UTF8.GetString(Convert.FromBase64String($"{HttpUtility.UrlDecode(prms[1].Split('=')[1])?.Replace("-", "+").Replace("_", "/")}"));
+                        var code = Encoding.UTF8.GetString(Convert.FromBase64String(
+                            $"{HttpUtility.UrlDecode(prms[1].Split('=')[1])?.Replace("-", "+").Replace("_", "/")}"));
                         var relays = Settings.ChatRelayModule.RelayChannels.Where(a => a.Code == code);
                         var iChannel = HttpUtility.UrlDecode(prms[2].Split('=')[1]);
 
@@ -54,14 +58,16 @@ namespace ThunderED.Modules.OnDemand
                         {
                             if (relay.DiscordChannelId == 0)
                             {
-                                await LogHelper.LogError($"Relay with code {code} has no discord channel specified!", Category);
+                                await LogHelper.LogError($"Relay with code {code} has no discord channel specified!",
+                                    Category);
                                 await response.WriteContentAsync("ERROR: Bad server config");
                                 return true;
                             }
 
                             if (relay.EVEChannelName != iChannel)
                             {
-                                await LogHelper.LogError($"Relay with code {code} has got message with channel mismatch!", Category);
+                                await LogHelper.LogError(
+                                    $"Relay with code {code} has got message with channel mismatch!", Category);
                                 await response.WriteContentAsync("ERROR: Invalid channel name");
                                 return true;
 
@@ -78,7 +84,7 @@ namespace ThunderED.Modules.OnDemand
 
                             await APIHelper.DiscordAPI.SendMessageAsync(relay.DiscordChannelId, message);
 
-                            
+
                             list.Add(message);
                             if (list.Count > 20)
                                 list.RemoveAt(0);
@@ -94,6 +100,10 @@ namespace ThunderED.Modules.OnDemand
             {
                 await response.WriteContentAsync("ERROR: Server error");
                 await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+            finally
+            {
+                RunningRequestCount--;
             }
 
             return false;

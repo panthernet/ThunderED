@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using ThunderED.Helpers;
 
 namespace ThunderED.Classes.IRC.Helpers
 {
@@ -67,11 +68,11 @@ namespace ThunderED.Classes.IRC.Helpers
                     {
                         Process.Start(url);
 
-                        Console.WriteLine("URL opened: " + url);
+                        LogHelper.WriteConsole("URL opened: " + url);
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("OpenURL failed: {0}{1}{2}", url, Environment.NewLine, e);
+                        LogHelper.WriteConsole("OpenURL failed: {0}{1}{2}", url, Environment.NewLine, e);
                     }
                 });
             }
@@ -87,7 +88,7 @@ namespace ThunderED.Classes.IRC.Helpers
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    LogHelper.WriteConsole(e.ToString());
                 }
             }
         }

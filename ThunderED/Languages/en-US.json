@@ -434,7 +434,7 @@
   "hrmInspectLocation": "Location",
   "hrmInspectShip": "Ship",
   "hrmDumpHeader": "Dumped",
-  "helpSys": "System command available only to bot Admin. Contains following sub-commands: cleartable. Example: **!sys cleartable cache**",
+  "helpSys": "```\nList of available admin commands:\n  shutdown - shutdown server\n  restart - restart server\n  cleartable NAME - clear all data in the DB table with corresponding NAME\n  flush notifcache - clear all notifications cache\n  flush dbcache - clear all cache from database\n  esitoken [ID] - gets character ESI token by specified character ID  \n```",
   "helpSysClear": "Subcommand to clear specified DB table. Use it on your own risk. Example: **!sys cleartable cache**",
   "sysClearTableNotFound": "Specified DB table not found or there is a database error!",
   "sysOperationComplete": ":white_check_mark: Operation completed!",
@@ -595,5 +595,12 @@
   "notifCorpTaxChangeMsg": "{0} corporation tax has been changed from {1} to {2}!",
   "notifOwnershipTransferred": "{0} ownership has been transferred from {1} to {2}!",
   "authUnableToCompleteTryAgainLater": "Unable to complete your request at the moment. Please try again later.",
-  "authReportCreateAlt":  "{0} character has been successfully registered as the alt of {1}!" 
+  "authReportCreateAlt": "{0} character has been successfully registered as the alt of {1}!",
+  "sysShutdownStarted": "App shutdown initiated...",
+  "sysShutdownComplete": "Shutdown complete!",
+  "sysRestartStarted": "Server restart initiated...",
+  "sysRestartComplete": "Server has been successfully restarted!",
+  "sysFlushedNotifications": "Notifications cache has been cleared!",
+  "sysFlushedAllCache": "All server cache has been cleared!",
+  "helpSysToken": "esitoken [ID] - gets character ESI token by specified character ID"
 }

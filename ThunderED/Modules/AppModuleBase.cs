@@ -28,7 +28,23 @@ namespace ThunderED.Modules
         /// </summary>
         private readonly List<object> _oneTimeWarnings = new List<object>();
 
-        public bool IsRunning { get; set; }
+        /// <summary>
+        /// Returns True internal subroutine is running
+        /// </summary>
+        public bool IsRunning { get; protected set; }
+
+        /// <summary>
+        /// Returns True internal web request processing is running
+        /// </summary>
+        public bool IsRequestRunning => RunningRequestCount > 0;
+
+        protected volatile int RunningRequestCount;
+
+        internal async Task RunInternal(object prm)
+        {
+            if (Program.IsClosing) return;
+            await Run(prm);
+        }
 
         public virtual Task Run(object prm)
         {

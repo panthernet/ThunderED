@@ -46,6 +46,7 @@ namespace ThunderED.Modules
 
             try
             {
+                RunningRequestCount++;
                 var port = Settings.WebServerModule.WebExternalPort;
 
                 if (request.HttpMethod == HttpMethod.Get.ToString())
@@ -66,7 +67,9 @@ namespace ThunderED.Modules
                         var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
                         if (result == null)
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Industry Jobs Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
+                            await WebServerModule.WriteResponce(
+                                WebServerModule.GetAccessDeniedPage("Industry Jobs Module", LM.Get("accessDenied"),
+                                    WebServerModule.GetAuthPageUrl()), response);
                             return true;
                         }
 
@@ -75,12 +78,15 @@ namespace ThunderED.Modules
                         var allowedCharacterIds = GetParsedCharacters(groupName);
                         if (!allowedCharacterIds.Contains(lCharId))
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Industry Jobs Module", LM.Get("accessDenied"), WebServerModule.GetAuthPageUrl()), response);
+                            await WebServerModule.WriteResponce(
+                                WebServerModule.GetAccessDeniedPage("Industry Jobs Module", LM.Get("accessDenied"),
+                                    WebServerModule.GetAuthPageUrl()), response);
                             return true;
                         }
 
                         await SQLHelper.InsertOrUpdateTokens("", result[0], null, null, result[1]);
-                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
+                        await WebServerModule.WriteResponce(File
+                                .ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", "authTemplateHeader")
                                 .Replace("{body}", LM.Get("industryJobsAuthSuccessHeader"))
@@ -94,6 +100,10 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+            finally
+            {
+                RunningRequestCount--;
             }
             return false;
         }

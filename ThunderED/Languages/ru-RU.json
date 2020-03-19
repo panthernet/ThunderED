@@ -418,7 +418,7 @@
   "hrmInspectLocation": "Локация",
   "hrmInspectShip": "Корабль",
   "hrmDumpHeader": "Cброшенные",
-  "helpSys": "Системная команда, доступная только админам. Содержит следующие подкоманды: cleartable. Пример: **!sys cleartable cache**",
+  "helpSys": "```\nList of available admin commands:\n  shutdown - shutdown server\n  restart - restart server\n  cleartable NAME - clear all data in the DB table with corresponding NAME\n  flush notifcache - clear all notifications cache\n  flush dbcache - clear all cache from database\n  esitoken [ID] - gets character ESI token by specified character ID  \n```",
   "helpSysClear": "Подкоманда очистки указанной таблицы БД. Используйте на свой страх и риск. Пример: **!sys cleartable cache**",
   "sysClearTableNotFound": "Указанная таблица БД не найдена или возникла ошибка работы с БД!",
   "sysOperationComplete": ":white_check_mark: Операция выполнена!",
@@ -588,6 +588,13 @@
   "notifCorpTaxChangeMsg": "Налог корпорации {0} был изменен с {1} до {2}!",
   "notifOwnershipTransferred": "Право владение структурой {0} было передано от {1} к {2}!",
   "authUnableToCompleteTryAgainLater": "В настоящий момент не удалось выполнить ваш запрос. Пожалуйста, повторите попытку позже. ",
-  "authReportCreateAlt": "Персонаж {0} был успешно зарегистрирован как альт персонажа {1}!"
+  "authReportCreateAlt": "Персонаж {0} был успешно зарегистрирован как альт персонажа {1}!",
+  "sysShutdownStarted": "Начата процедура остановки сервера...",
+  "sysShutdownComplete": "Остановка сервера выполнена!",
+  "sysRestartStarted": "Инициирован перезапуск сервера...",
+  "sysRestartComplete": "Сервер был успешно перезапущен!",
+  "sysFlushedNotifications": "Кэш уведомлений был сброшен!",
+  "sysFlushedAllCache": "Весь серверный кэш был сброшен!",
+  "helpSysToken": "esitoken [ID] - возращает токен ESI для персонажа с указанным ID"
 
 }

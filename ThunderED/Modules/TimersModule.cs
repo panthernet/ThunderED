@@ -65,12 +65,14 @@ namespace ThunderED.Modules
 
             try
             {
+                RunningRequestCount++;
                 var extPort = Settings.WebServerModule.WebExternalPort;
                 var port = Settings.WebServerModule.WebExternalPort;
 
                 if (request.HttpMethod == HttpMethod.Get.ToString())
                 {
-                    if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" || request.Url.LocalPath == $"{port}/callback")
+                    if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" ||
+                        request.Url.LocalPath == $"{port}/callback")
                     {
                         var clientID = Settings.WebServerModule.CcpAppClientId;
                         var secret = Settings.WebServerModule.CcpAppSecret;
@@ -89,6 +91,7 @@ namespace ThunderED.Modules
                             await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                             return true;
                         }
+
                         var characterId = Convert.ToInt64(result[0]);
 
                         await SQLHelper.UpdateTimersAuth(characterId);
@@ -100,7 +103,8 @@ namespace ThunderED.Modules
                         return true;
                     }
 
-                    if (request.Url.LocalPath == "/timers" || request.Url.LocalPath == $"{extPort}/timers" || request.Url.LocalPath == $"{port}/timers")
+                    if (request.Url.LocalPath == "/timers" || request.Url.LocalPath == $"{extPort}/timers" ||
+                        request.Url.LocalPath == $"{port}/timers")
                     {
                         if (string.IsNullOrWhiteSpace(request.Url.Query))
                         {
@@ -124,7 +128,10 @@ namespace ThunderED.Modules
                             await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                             return true;
                         }
-                        var characterId = Convert.ToInt64(Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
+
+                        var characterId =
+                            Convert.ToInt64(
+                                Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
 
                         var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                         if (rChar == null)
@@ -132,7 +139,7 @@ namespace ThunderED.Modules
                             await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                             return true;
                         }
-                        
+
                         //have charId - had to check it
                         //check in db
                         var timeout = Settings.TimersModule.AuthTimeoutInMinutes;
@@ -150,7 +157,9 @@ namespace ThunderED.Modules
                         var checkResult = await CheckAccess(characterId, rChar);
                         if (!checkResult[0])
                         {
-                            await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Timers Module", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                            await WebServerModule.WriteResponce(
+                                WebServerModule.GetAccessDeniedPage("Timers Module", LM.Get("accessDenied"),
+                                    WebServerModule.GetWebSiteUrl()), response);
                             return true;
                         }
 
@@ -176,25 +185,28 @@ namespace ThunderED.Modules
                         //await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                         return false;
                     }
+
                     var inputId = prms[1].Split('=')[1];
                     var state = prms[2].Split('=')[1];
                     if (state != "11")
                     {
-                       // await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                        // await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                         return false;
                     }
 
-                    var characterId = Convert.ToInt64(Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
+                    var characterId =
+                        Convert.ToInt64(
+                            Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(inputId))));
 
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                     if (rChar == null)
                     {
-                       // await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
+                        // await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                         return false;
                     }
 
                     var checkResult = await CheckAccess(characterId, rChar);
-                    if(!checkResult[0])
+                    if (!checkResult[0])
                         return true;
 
                     var data = await request.ReadContentAsStringAsync();
@@ -241,6 +253,7 @@ namespace ThunderED.Modules
                             entry.timerChar = rChar.name;
                             await SQLHelper.UpdateTimer(entry);
                         }
+
                         return true;
                     }
                 }
@@ -248,6 +261,10 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+            finally
+            {
+                RunningRequestCount--;
             }
 
             return false;

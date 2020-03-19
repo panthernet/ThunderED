@@ -16,28 +16,39 @@ namespace ThunderED.Modules
 
         public JabberModule()
         {
-            LogHelper.LogModule("Inititalizing Jabber module...", Category).GetAwaiter().GetResult();
+            LogHelper.LogModule("Initializing Jabber module...", Category).GetAwaiter().GetResult();
         }
+
+        private bool _isJabberRunning;
 
         public override async Task Run(object prm)
         {
-            if (!IsRunning)
+            if (IsRunning) return;
+            IsRunning = true;
+            try
             {
-                var username = Settings.JabberModule.Username;
-                var password = Settings.JabberModule.Password;
-                var domain = Settings.JabberModule.Domain;
+                if (!_isJabberRunning)
+                {
+                    var username = Settings.JabberModule.Username;
+                    var password = Settings.JabberModule.Password;
+                    var domain = Settings.JabberModule.Domain;
 
-                try
-                {
-                    var xmppWrapper = new ReconnectXmppWrapper(domain, username, password);
-                    xmppWrapper.Connect(null);
-                    IsRunning = true;
+                    try
+                    {
+                        var xmppWrapper = new ReconnectXmppWrapper(domain, username, password);
+                        xmppWrapper.Connect(null);
+                        _isJabberRunning = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        await LogHelper.LogEx(ex.Message, ex, Category);
+                        _isJabberRunning = false;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx(ex.Message, ex, Category);
-                    IsRunning = false;
-                }
+            }
+            finally
+            {
+                IsRunning = false;
             }
 
         }
@@ -124,20 +135,20 @@ namespace ThunderED.Modules
 
         private void XmppClientOnOnBindError(object sender, IqEventArgs iqEventArgs)
         {
-            Console.WriteLine("OnBindError");
+            LogHelper.WriteConsole("OnBindError");
             _xmppClient.Close();
         }
 
         private static void OnStreamError(object sender, Matrix.StreamErrorEventArgs e)
         {
-            Console.WriteLine("OnStreamError: error condition {0}", e.Error.Condition.ToString());
+            LogHelper.WriteConsole("OnStreamError: error condition {0}", e.Error.Condition.ToString());
         }
 
         private static void OnXmlError(object sender, Matrix.ExceptionEventArgs e)
         {
-            Console.WriteLine("OnXmlError");
-            Console.WriteLine(e.Exception.Message);
-            Console.WriteLine(e.Exception.StackTrace);
+            LogHelper.WriteConsole("OnXmlError");
+            LogHelper.WriteConsole(e.Exception.Message);
+            LogHelper.WriteConsole(e.Exception.StackTrace);
         }
 
         private static async void OnAuthError(object sender, Matrix.Xmpp.Sasl.SaslEventArgs e)
@@ -149,7 +160,7 @@ namespace ThunderED.Modules
         private void OnError(object sender, Matrix.ExceptionEventArgs e)
         {
             var msg = e != null ? (e.Exception != null ? e.Exception.Message : "") : "";
-            Console.WriteLine("OnError: " + msg);
+            LogHelper.WriteConsole("OnError: " + msg);
 
             if (!_onLogin)
                 StartConnectTimer();
@@ -160,18 +171,18 @@ namespace ThunderED.Modules
 
         private void OnLogin(object sender, Matrix.EventArgs e)
         {
-            Console.WriteLine("OnLogin");
+            LogHelper.WriteConsole("OnLogin");
             _onLogin = true;
         }
 
         private void OnBind(object sender, Matrix.JidEventArgs e)
         {
-            Console.WriteLine("OnBind: XMPP connected. JID: " + e.Jid);
+            LogHelper.WriteConsole("OnBind: XMPP connected. JID: " + e.Jid);
         }
 
         private void OnClose(object sender, Matrix.EventArgs e)
         {
-            Console.WriteLine("OnClose: XMPP connection closed");
+            LogHelper.WriteConsole("OnClose: XMPP connection closed");
             StartConnectTimer();
         }
         #endregion
@@ -179,7 +190,7 @@ namespace ThunderED.Modules
 
         private void StartConnectTimer()
         {
-            Console.WriteLine("starting reconnect timer...");
+            LogHelper.WriteConsole("starting reconnect timer...");
             _connectTimer.Change(5000, Timeout.Infinite);
         }
 
@@ -187,8 +198,8 @@ namespace ThunderED.Modules
         {
             if (!_xmppClient.StreamActive)
             {
-                Console.WriteLine("StreamActive=" + _xmppClient.StreamActive);
-                Console.WriteLine("connect: XMPP connecting.... ");
+                LogHelper.WriteConsole("StreamActive=" + _xmppClient.StreamActive);
+                LogHelper.WriteConsole("connect: XMPP connecting.... ");
                 _onLogin = false;
                 _xmppClient.Open();
             }

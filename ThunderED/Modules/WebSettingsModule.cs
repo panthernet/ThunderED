@@ -53,6 +53,7 @@ namespace ThunderED.Modules
 
             try
             {
+                RunningRequestCount++;
                 if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback")
                 {
                     var clientID = Settings.WebServerModule.CcpAppClientId;
@@ -69,26 +70,30 @@ namespace ThunderED.Modules
 
                     if (characterId == 0)
                     {
-                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                        await WebServerModule.WriteResponce(
+                            WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"),
+                                WebServerModule.GetWebSiteUrl()), response);
                         return true;
                     }
+
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
                     if (rChar == null)
                     {
                         await response.RedirectAsync(new Uri(WebServerModule.GetWebSiteUrl()));
                         return true;
                     }
+
                     if (await CheckAccess(characterId, rChar) == null)
                     {
-                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                        await WebServerModule.WriteResponce(
+                            WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"),
+                                WebServerModule.GetWebSiteUrl()), response);
                         return true;
                     }
 
                     var we = new WebEditorAuthEntry
                     {
-                        Id = characterId,
-                        Code = Guid.NewGuid().ToString("N"),
-                        Time = DateTime.Now
+                        Id = characterId, Code = Guid.NewGuid().ToString("N"), Time = DateTime.Now
                     };
                     await SQLHelper.SaveWebEditorAuthEntry(we);
                     var url = WebServerModule.GetWebEditorUrl(we.Code);
@@ -107,13 +112,18 @@ namespace ThunderED.Modules
                     if (state != "settings" && state != "settings_sa" && state != "settings_ti") return false;
                     if (code == null)
                     {
-                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                        await WebServerModule.WriteResponce(
+                            WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"),
+                                WebServerModule.GetWebSiteUrl()), response);
                         return true;
                     }
+
                     var we = await SQLHelper.GetWebEditorAuthEntry(code);
                     if (we == null)
                     {
-                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                        await WebServerModule.WriteResponce(
+                            WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"),
+                                WebServerModule.GetWebSiteUrl()), response);
                         return true;
                     }
 
@@ -127,7 +137,9 @@ namespace ThunderED.Modules
                     var filter = await CheckAccess(we.Id, rChar);
                     if (filter == null)
                     {
-                        await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"), WebServerModule.GetWebSiteUrl()), response);
+                        await WebServerModule.WriteResponce(
+                            WebServerModule.GetAccessDeniedPage("Web Config Editor", LM.Get("accessDenied"),
+                                WebServerModule.GetWebSiteUrl()), response);
                         return true;
                     }
 
@@ -147,19 +159,27 @@ namespace ThunderED.Modules
                             await SettingsManager.UpdateSettings();
 
                             var convData = JsonConvert.DeserializeObject<List<SaData>>(data);
-                            convData = convData.Where(a => !string.IsNullOrEmpty(a.Name?.Trim()) && !string.IsNullOrEmpty(a.Group?.Trim()) && !string.IsNullOrEmpty(a.Roles?.Trim())).ToList();
-                            await SettingsManager.SaveSimplifiedAuthData(convData.Select(a => $"{a.Name}|{a.Group}|{a.Roles}").ToList());
+                            convData = convData.Where(a =>
+                                !string.IsNullOrEmpty(a.Name?.Trim()) && !string.IsNullOrEmpty(a.Group?.Trim()) &&
+                                !string.IsNullOrEmpty(a.Roles?.Trim())).ToList();
+                            await SettingsManager.SaveSimplifiedAuthData(convData
+                                .Select(a => $"{a.Name}|{a.Group}|{a.Roles}").ToList());
                             //inject updated simplified auth data
                             await SettingsManager.LoadSimplifiedAuth();
                             //rebuild auth cache
-                            if(Settings.Config.ModuleAuthWeb)
+                            if (Settings.Config.ModuleAuthWeb)
                                 await TickManager.GetModule<WebAuthModule>().Initialize();
                             await LogHelper.LogInfo("Simplified auth update completed!", Category);
                         }
                         else
                         {
                             var simplifiedAuthEntities = await SettingsManager.GetSimplifiedAuthData();
-                            var x = new {total = simplifiedAuthEntities.Count, totalNotFiltered = simplifiedAuthEntities.Count, rows = simplifiedAuthEntities};
+                            var x = new
+                            {
+                                total = simplifiedAuthEntities.Count,
+                                totalNotFiltered = simplifiedAuthEntities.Count,
+                                rows = simplifiedAuthEntities
+                            };
                             var json = JsonConvert.SerializeObject(x);
                             await WebServerModule.WriteJsonResponse(json, response);
                         }
@@ -181,15 +201,17 @@ namespace ThunderED.Modules
                         {
 
                             var convData = JsonConvert.DeserializeObject<List<TiData>>(data);
-                            convData = convData.Where(a => !string.IsNullOrEmpty(a.Name?.Trim()) && !string.IsNullOrEmpty(a.Entities?.Trim()) && !string.IsNullOrEmpty(a.Roles?.Trim())).ToList();
+                            convData = convData.Where(a =>
+                                !string.IsNullOrEmpty(a.Name?.Trim()) && !string.IsNullOrEmpty(a.Entities?.Trim()) &&
+                                !string.IsNullOrEmpty(a.Roles?.Trim())).ToList();
                             await SaveTimersAuthData(convData);
                         }
                         else
                         {
-                            var ent = SettingsManager.Settings.TimersModule.AccessList.Select(a=> new TiData
+                            var ent = SettingsManager.Settings.TimersModule.AccessList.Select(a => new TiData
                             {
                                 Name = a.Key,
-                                Entities = string.Join(",", a.Value.FilterEntities.Select(b=> b.ToString())),
+                                Entities = string.Join(",", a.Value.FilterEntities.Select(b => b.ToString())),
                                 Roles = string.Join(",", a.Value.FilterDiscordRoles)
                             }).ToList();
                             var x = new {total = ent.Count, totalNotFiltered = ent.Count, rows = ent};
@@ -211,6 +233,7 @@ namespace ThunderED.Modules
                             await response.RedirectAsync(new Uri(WebServerModule.GetWebConfigAuthURL()));
                             return true;
                         }
+
                         //update session overwise
                         we.Time = DateTime.Now;
                         await SQLHelper.SaveWebEditorAuthEntry(we);
@@ -238,12 +261,14 @@ namespace ThunderED.Modules
                                 .Replace("{saTableColumnGroup}", LM.Get("webSettingsSaColumnGroup"))
                                 .Replace("{saTableColumnRoles}", LM.Get("webSettingsSaColumnRoles"))
 
-                                .Replace("{serverAddress}", $"{Settings.WebServerModule.WebExternalIP}:{Settings.WebServerModule.WebExternalPort}")
+                                .Replace("{serverAddress}",
+                                    $"{Settings.WebServerModule.WebExternalIP}:{Settings.WebServerModule.WebExternalPort}")
                                 .Replace("{code}", code)
                                 .Replace("{locale}", SettingsManager.Settings.Config.Language)
                             ;
 
-                        simpleAuthScripts = File.ReadAllText(SettingsManager.FileTemplateSettingsPage_SimpleAuth_Scripts)
+                        simpleAuthScripts = File
+                                .ReadAllText(SettingsManager.FileTemplateSettingsPage_SimpleAuth_Scripts)
                                 .Replace("{saGroupList}", groupList)
                                 .Replace("{postSimplifiedAuthUrl}", WebServerModule.GetWebEditorSimplifiedAuthUrl(code))
                             ;
@@ -253,7 +278,7 @@ namespace ThunderED.Modules
                     {
                         timersContent = File.ReadAllText(SettingsManager.FileTemplateSettingsPage_Timers)
                                 .Replace("{saAddEntry}", LM.Get("webSettingsAddEntryButton"))
-                               
+
                                 .Replace("{saAddEntry}", LM.Get("webSettingsAddEntryButton"))
                                 .Replace("{saDeleteEntry}", LM.Get("webSettingsDeleteEntryButton"))
                                 .Replace("{saSave}", LM.Get("webSettingsSaveEntryButton"))
@@ -261,7 +286,8 @@ namespace ThunderED.Modules
                                 .Replace("{tiTableColumnEntities}", LM.Get("webSettingsTiColumnEntities"))
                                 .Replace("{saTableColumnRoles}", LM.Get("webSettingsSaColumnRoles"))
 
-                                .Replace("{serverAddress}", $"{Settings.WebServerModule.WebExternalIP}:{Settings.WebServerModule.WebExternalPort}")
+                                .Replace("{serverAddress}",
+                                    $"{Settings.WebServerModule.WebExternalIP}:{Settings.WebServerModule.WebExternalPort}")
                                 .Replace("{code}", code)
                                 .Replace("{locale}", SettingsManager.Settings.Config.Language)
                             ;
@@ -275,7 +301,7 @@ namespace ThunderED.Modules
                     var tiActive = saActive != null || !filter.CanEditTimers ? null : "active";
 
                     var text = File.ReadAllText(SettingsManager.FileTemplateSettingsPage)
-                            .Replace("{headerContent}",  WebServerModule.GetHtmlResourceTables())
+                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceTables())
                             .Replace("{header}", LM.Get("webSettingsHeader"))
                             .Replace("{Back}", LM.Get("Back"))
                             .Replace("{LogOut}", LM.Get("LogOut"))
@@ -288,8 +314,8 @@ namespace ThunderED.Modules
                             .Replace("{timersScripts}", timersScripts)
                             .Replace("{code}", code)
                             .Replace("{locale}", SettingsManager.Settings.Config.Language)
-                            .Replace("{simpleAuthTabName}",LM.Get("webSettingsSimpleAuthTabName"))
-                            .Replace("{timersTabName}",LM.Get("webSettingsTimersTabName"))
+                            .Replace("{simpleAuthTabName}", LM.Get("webSettingsSimpleAuthTabName"))
+                            .Replace("{timersTabName}", LM.Get("webSettingsTimersTabName"))
                             .Replace("{saPageVisible}", filter.CanEditSimplifiedAuth ? null : "d-none")
                             .Replace("{tiPageVisible}", filter.CanEditTimers ? null : "d-none")
                             .Replace("{saPageActive}", saActive)
@@ -302,6 +328,10 @@ namespace ThunderED.Modules
             catch (Exception ex)
             {
                 await LogHelper.LogEx($"Error: {ex.Message}", ex, Category);
+            }
+            finally
+            {
+                RunningRequestCount--;
             }
             return false;
         }

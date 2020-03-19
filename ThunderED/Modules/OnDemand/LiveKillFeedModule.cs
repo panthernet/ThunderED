@@ -119,28 +119,31 @@ namespace ThunderED.Modules.OnDemand
 
         private async Task ProcessKill(JsonZKill.Killmail kill)
         {
+
             try
             {
-              // kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm.txt"));
+                RunningRequestCount++;
+                // kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm.txt"));
 
                 var hasBeenPosted = false;
                 foreach (var (groupName, group) in Settings.LiveKillFeedModule.GetEnabledGroups())
                 {
-                    if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds && ZKillLiveFeedModule.IsInSharedPool(kill.killmail_id))
+                    if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds &&
+                        ZKillLiveFeedModule.IsInSharedPool(kill.killmail_id))
                         return;
 
                     if (hasBeenPosted && Settings.LiveKillFeedModule.StopOnFirstGroupMatch) break;
 
-                    if(UpdateLastPosted(groupName, kill.killmail_id)) continue;
+                    if (UpdateLastPosted(groupName, kill.killmail_id)) continue;
 
                     var isPveKill = kill.zkb.npc;
                     var isPvpKill = !kill.zkb.npc;
 
                     if (!@group.FeedPveKills && isPveKill || !@group.FeedPvpKills && isPvpKill) continue;
-                    if(!group.FeedAwoxKills && kill.zkb.awox) continue;
-                    if(!group.FeedNotAwoxKills && !kill.zkb.awox) continue;
-                    if(!group.FeedSoloKills && kill.zkb.solo) continue;
-                    if(!group.FeedGroupKills && !kill.zkb.solo) continue;
+                    if (!group.FeedAwoxKills && kill.zkb.awox) continue;
+                    if (!group.FeedNotAwoxKills && !kill.zkb.awox) continue;
+                    if (!group.FeedSoloKills && kill.zkb.solo) continue;
+                    if (!group.FeedGroupKills && !kill.zkb.solo) continue;
 
                     foreach (var (filterName, filter) in group.Filters)
                     {
@@ -150,17 +153,20 @@ namespace ThunderED.Modules.OnDemand
                         #region Person & Value checks
 
                         #region Exclusions
+
                         var exList = GetTier2CharacterIds(ParsedExcludeAttackersLists, groupName, filterName);
-                        if(exList.ContainsAnyFromList(kill.attackers.Select(a=> a.character_id).Distinct())) continue;
+                        if (exList.ContainsAnyFromList(kill.attackers.Select(a => a.character_id).Distinct())) continue;
                         exList = GetTier2CorporationIds(ParsedExcludeAttackersLists, groupName, filterName);
-                        if(exList.ContainsAnyFromList(kill.attackers.Select(a=> a.corporation_id).Distinct())) continue;
+                        if (exList.ContainsAnyFromList(kill.attackers.Select(a => a.corporation_id).Distinct()))
+                            continue;
                         exList = GetTier2AllianceIds(ParsedExcludeAttackersLists, groupName, filterName);
-                        if(exList.ContainsAnyFromList(kill.attackers.Where(a=> a.alliance_id > 0).Select(a=> a.alliance_id).Distinct())) continue;
+                        if (exList.ContainsAnyFromList(kill.attackers.Where(a => a.alliance_id > 0)
+                            .Select(a => a.alliance_id).Distinct())) continue;
 
                         exList = GetTier2CharacterIds(ParsedExcludeVictimsLists, groupName, filterName);
-                        if(exList.Contains(kill.victim.character_id)) continue;
+                        if (exList.Contains(kill.victim.character_id)) continue;
                         exList = GetTier2CorporationIds(ParsedExcludeVictimsLists, groupName, filterName);
-                        if(exList.Contains(kill.victim.corporation_id)) continue;
+                        if (exList.Contains(kill.victim.corporation_id)) continue;
                         if (kill.victim.alliance_id > 0)
                         {
                             exList = GetTier2AllianceIds(ParsedExcludeVictimsLists, groupName, filterName);
@@ -168,17 +174,18 @@ namespace ThunderED.Modules.OnDemand
                         }
 
                         exList = GetTier2SystemIds(ParsedExcludeLocationLists, groupName, filterName);
-                        if(exList.Contains(kill.solar_system_id)) continue;
+                        if (exList.Contains(kill.solar_system_id)) continue;
 
                         var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, kill.solar_system_id);
 
                         exList = GetTier2ConstellationIds(ParsedExcludeLocationLists, groupName, filterName);
-                        if(rSystem != null && exList.Contains(rSystem.constellation_id)) continue;
+                        if (rSystem != null && exList.Contains(rSystem.constellation_id)) continue;
                         exList = GetTier2RegionIds(ParsedExcludeLocationLists, groupName, filterName);
-                        if(rSystem?.DB_RegionId != null && exList.Contains(rSystem.DB_RegionId.Value)) continue;
+                        if (rSystem?.DB_RegionId != null && exList.Contains(rSystem.DB_RegionId.Value)) continue;
 
                         exList = GetTier2TypeIds(ParsedExcludeShipsLists, groupName, filterName);
-                        if(exList.Contains(kill.victim.ship_type_id)) continue;
+                        if (exList.Contains(kill.victim.ship_type_id)) continue;
+
                         #endregion
 
                         //value checks
@@ -217,7 +224,7 @@ namespace ThunderED.Modules.OnDemand
                                 hasPartyCheck = true;
                                 if (entityIds.Contains(kill.victim.character_id))
                                 {
-                                    if(filter.EnableMatchOnFirstConditionMet)
+                                    if (filter.EnableMatchOnFirstConditionMet)
                                         isCertifiedToFeed = true;
                                     hasVictimMatch = true;
                                     isLoss = true;
@@ -252,8 +259,8 @@ namespace ThunderED.Modules.OnDemand
                                     hasPartyCheck = true;
                                     if (entityIds.Contains(kill.victim.corporation_id))
                                     {
-                                        if(filter.EnableMatchOnFirstConditionMet)
-                                            isCertifiedToFeed = true; 
+                                        if (filter.EnableMatchOnFirstConditionMet)
+                                            isCertifiedToFeed = true;
                                         hasVictimMatch = true;
                                         isLoss = true;
                                     }
@@ -289,8 +296,8 @@ namespace ThunderED.Modules.OnDemand
                                     hasPartyCheck = true;
                                     if (entityIds.Contains(kill.victim.alliance_id))
                                     {
-                                        if(filter.EnableMatchOnFirstConditionMet)
-                                            isCertifiedToFeed = true; 
+                                        if (filter.EnableMatchOnFirstConditionMet)
+                                            isCertifiedToFeed = true;
                                         hasVictimMatch = true;
                                         isLoss = true;
                                     }
@@ -299,11 +306,13 @@ namespace ThunderED.Modules.OnDemand
                         }
 
                         //has no strict match = continue
-                        if(hasPartyCheck && !isCertifiedToFeed && filter.EnableStrictPartiesCheck && (!hasAttackerMatch || !hasVictimMatch))
+                        if (hasPartyCheck && !isCertifiedToFeed && filter.EnableStrictPartiesCheck &&
+                            (!hasAttackerMatch || !hasVictimMatch))
                             continue;
 
                         //has no party match on check
-                        if(hasPartyCheck && !isCertifiedToFeed  && !filter.EnableStrictPartiesCheck && !hasAttackerMatch && !hasVictimMatch)
+                        if (hasPartyCheck && !isCertifiedToFeed && !filter.EnableStrictPartiesCheck &&
+                            !hasAttackerMatch && !hasVictimMatch)
                             continue;
 
                         #endregion
@@ -324,7 +333,7 @@ namespace ThunderED.Modules.OnDemand
                                 else //no match
                                 {
                                     //no radius checks planned
-                                    if(filter.Radius == 0)
+                                    if (filter.Radius == 0)
                                         continue;
                                 }
                             }
@@ -348,12 +357,15 @@ namespace ThunderED.Modules.OnDemand
                                 continue;
                             }
                         }
+
                         #endregion
 
                         //haven't hit any criteria for 1-hit mode
-                       // if(!isCertifiedToFeed && filter.EnableMatchOnFirstConditionMet) continue;
+                        // if(!isCertifiedToFeed && filter.EnableMatchOnFirstConditionMet) continue;
 
-                        var discordChannels = filter.DiscordChannels.Any() ? filter.DiscordChannels : group.DiscordChannels;
+                        var discordChannels = filter.DiscordChannels.Any()
+                            ? filter.DiscordChannels
+                            : group.DiscordChannels;
 
                         if (filter.Radius > 0)
                         {
@@ -361,7 +373,8 @@ namespace ThunderED.Modules.OnDemand
 
                             //var msgType = MessageTemplateType.KillMailRadius;
                             var isDone = false;
-                            foreach (var radiusSystemId in GetTier2SystemIds(ParsedLocationLists, groupName, filterName))
+                            foreach (var radiusSystemId in GetTier2SystemIds(ParsedLocationLists, groupName, filterName)
+                            )
                             {
                                 if (await ProcessLocation(radiusSystemId, kill, group, filter, groupName))
                                 {
@@ -369,13 +382,15 @@ namespace ThunderED.Modules.OnDemand
                                     hasBeenPosted = true;
                                     if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
                                         ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
-                                    await LogHelper.LogInfo($"Posting     {(isLoss ? "RLoss" : "RKill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                    await LogHelper.LogInfo(
+                                        $"Posting     {(isLoss ? "RLoss" : "RKill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK",
+                                        Category);
 
                                     break;
                                 }
                             }
 
-                            if( isDone && group.StopOnFirstFilterMatch) break; //goto next group
+                            if (isDone && group.StopOnFirstFilterMatch) break; //goto next group
 
                             #endregion
                         }
@@ -385,7 +400,9 @@ namespace ThunderED.Modules.OnDemand
                             {
                                 foreach (var channel in discordChannels)
                                     await APIHelper.DiscordAPI.SendMessageAsync(channel, kill.zkb.url);
-                                await LogHelper.LogInfo($"U.Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                await LogHelper.LogInfo(
+                                    $"U.Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK",
+                                    Category);
                             }
                             else
                             {
@@ -398,25 +415,31 @@ namespace ThunderED.Modules.OnDemand
                                     km.dic["{isLoss}"] = isLoss ? "true" : "false";
                                     if (hasTemplate)
                                     {
-                                        hasBeenPosted = await TemplateHelper.PostTemplatedMessage(group.MessageTemplateFileName, km.dic, discordChannels,
+                                        hasBeenPosted = await TemplateHelper.PostTemplatedMessage(
+                                            group.MessageTemplateFileName, km.dic, discordChannels,
                                             group.ShowGroupName ? groupName : " ");
-                                        if(hasBeenPosted)
-                                            await LogHelper.LogInfo($"T.Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                        if (hasBeenPosted)
+                                            await LogHelper.LogInfo(
+                                                $"T.Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK",
+                                                Category);
                                     }
                                     else
                                     {
-                                        await SendEmbedKillMessage(discordChannels, msgColor, km, group.ShowGroupName ? groupName : " ");
+                                        await SendEmbedKillMessage(discordChannels, msgColor, km,
+                                            group.ShowGroupName ? groupName : " ");
                                         hasBeenPosted = true;
-                                        await LogHelper.LogInfo($"N.Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK", Category);
+                                        await LogHelper.LogInfo(
+                                            $"N.Posted     {(isLoss ? "Loss" : "Kill")}: {kill.killmail_id}  Value: {kill.zkb.totalValue:n0} ISK",
+                                            Category);
                                     }
-                                        
+
                                 }
                             }
 
                             if (Settings.ZKBSettingsModule.AvoidDupesAcrossAllFeeds)
                                 ZKillLiveFeedModule.UpdateSharedIdPool(kill.killmail_id);
 
-                            if(group.StopOnFirstFilterMatch) break; //goto next group
+                            if (group.StopOnFirstFilterMatch) break; //goto next group
                         }
 
                         continue; //goto next filter
@@ -426,7 +449,12 @@ namespace ThunderED.Modules.OnDemand
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, Category);
-                await LogHelper.LogWarning($"Error processing kill ID {kill?.killmail_id} ! Msg: {ex.Message}", Category);
+                await LogHelper.LogWarning($"Error processing kill ID {kill?.killmail_id} ! Msg: {ex.Message}",
+                    Category);
+            }
+            finally
+            {
+                RunningRequestCount--;
             }
         }
 

@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThunderED", "ThunderED\ThunderED.csproj", "{3F2BC1E5-94A6-4E27-A711-43A8050D18FB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488} = {2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5599E2F4-09A2-4585-85ED-829515B56E25}"
 	ProjectSection(SolutionItems) = preProject
@@ -20,6 +23,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TED_ConfigEditor", "TED_ConfigEditor\TED_ConfigEditor.csproj", "{004EDB05-71E9-4989-B71C-7CB6BABB5203}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThunderED.Tests", "ThunderED.Tests\ThunderED.Tests.csproj", "{51109563-90B0-4103-9DBE-7E81ED5A4CE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Restarter", "Restarter\Restarter.csproj", "{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +48,10 @@ Global
 		{51109563-90B0-4103-9DBE-7E81ED5A4CE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51109563-90B0-4103-9DBE-7E81ED5A4CE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51109563-90B0-4103-9DBE-7E81ED5A4CE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

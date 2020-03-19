@@ -43,12 +43,12 @@ namespace ThunderED.Modules.Sub
 
         public override async Task Run(object prm)
         {
-            if (IsRunning || Queryables.Count == 0) return;
-            IsRunning = true;
+            if (IsRunning || Queryables.Count == 0 || Program.IsClosing) return;
             var minus = Settings.ZKBSettingsModule.OldKMDaysThreshold == 0 ? DateTime.Now : DateTime.Now.Subtract(TimeSpan.FromDays(Settings.ZKBSettingsModule.OldKMDaysThreshold));
             try
             {
-                if(TickManager.IsNoConnection || !Queryables.Any()) return;
+                IsRunning = true;
+                if (TickManager.IsNoConnection || !Queryables.Any()) return;
                 JsonZKill.Killmail entry = null;
 
                 if (Settings.ZKBSettingsModule.UseSocketsForZKillboard)

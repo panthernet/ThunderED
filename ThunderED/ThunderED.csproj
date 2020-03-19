@@ -5,17 +5,16 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RuntimeIdentifiers>win10-x64;centos-x64;debian-x64;ubuntu-x64</RuntimeIdentifiers>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>latest</LangVersion>
-    <DefineConstants>TRACE;DEBUG;NETCOREAPP2_0;THUNDER</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;THUNDER</DefineConstants>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <LangVersion>latest</LangVersion>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
@@ -217,5 +216,9 @@
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\PresentationFramework.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /y &quot;$(SolutionDir)Restarter\$(OutDir)Restarter.dll&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /y &quot;$(SolutionDir)Restarter\$(OutDir)Restarter.exe&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /y &quot;$(SolutionDir)Restarter\$(OutDir)Restarter.deps.json&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /y &quot;$(SolutionDir)Restarter\$(OutDir)Restarter.runtimeconfig.json&quot; &quot;$(TargetDir)&quot;" />
+  </Target>
 
 </Project>

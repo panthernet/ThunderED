@@ -181,5 +181,25 @@ namespace ThunderED.Helpers
         {
             await Log(message, LogSeverity.Debug, cat, logToConsole).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Safely write into console
+        /// </summary>
+        /// <param name="message">Message text</param>
+        public static void WriteConsole(string message)
+        {
+            if (!SettingsManager.Settings.Config.RunAsServiceCompatibility)
+                System.Console.WriteLine(message);
+        }
+
+        /// <summary>
+        /// Safely write into console
+        /// </summary>
+        /// <param name="message">Message text</param>
+        public static void WriteConsole(string message, params object[] prms)
+        {
+            if (!SettingsManager.Settings.Config.RunAsServiceCompatibility)
+                System.Console.WriteLine(message, prms);
+        }
     }
 }

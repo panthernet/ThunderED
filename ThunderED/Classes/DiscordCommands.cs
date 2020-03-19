@@ -803,6 +803,9 @@ namespace ThunderED.Classes
 
                 switch (values[0])
                 {
+                    case "help":
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpSysText"), true);
+                        return;
                     case "cleartable":
                         if (values.Length < 2)
                         {
@@ -814,6 +817,41 @@ namespace ThunderED.Classes
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysClearTableNotFound"), true);
                         else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysOperationComplete"), true);
                         return;
+                    case "esitoken":
+                        if (values.Length < 2)
+                        {
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpSysToken"), true);
+                            return;
+                        }
+                        if (!await SQLHelper.ClearTable(values[1]))
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysClearTableNotFound"), true);
+                        else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysOperationComplete"), true);
+                        return;
+                    case "shutdown":
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysShutdownStarted"), true);
+                        await Program.Shutdown();
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysShutdownComplete"), true);
+                        return;
+                    case "restart":
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysRestartStarted"), true);
+                        await Program.Restart(Context.Channel.Id);
+                        return;
+                    case "flush":
+                    {
+                        var snd = values[1];
+                        switch (snd)
+                        {
+                            case "notifcache":
+                                await SQLHelper.RunCommand("delete from notificationsList");
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysFlushedNotifications"), true);
+                                return;
+                            case "dbcache":
+                                await SQLHelper.RunCommand("delete from cache");
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysFlushedAllCache"), true);
+                                return;
+                        }
+                        return;
+                    }
                     default:
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpSys"), true);
                         return;

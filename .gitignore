@@ -18,3 +18,5 @@
 /TED_ConfigEditor/obj/Release
 /ThunderED.Tests/bin
 /ThunderED.Tests/obj
+/Restarter/bin/Debug/netcoreapp3.1
+/Restarter/obj

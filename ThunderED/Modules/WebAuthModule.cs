@@ -378,7 +378,6 @@ namespace ThunderED.Modules
             }
         }
 
-
         private async Task ProcessPreliminaryAppilicants()
         {
             try
@@ -395,7 +394,6 @@ namespace ThunderED.Modules
                 await LogHelper.LogEx(ex.Message, ex, Category);
             }
         }
-
 
         public static async Task<string[]> GetCharacterIdFromCode(string code, string clientID, string secret)
         {
@@ -439,10 +437,12 @@ namespace ThunderED.Modules
 
             try
             {
-                if (request.Url.LocalPath == "/auth" || request.Url.LocalPath == $"{extPort}/auth"|| request.Url.LocalPath == $"{port}/auth")
+                RunningRequestCount++;
+                if (request.Url.LocalPath == "/auth" || request.Url.LocalPath == $"{extPort}/auth" ||
+                    request.Url.LocalPath == $"{port}/auth")
                 {
                     var prms = request.Url.Query.TrimStart('?').Split('&');
-                    
+
                     if (prms.Length == 0 || prms[0].Split('=').Length == 0 || string.IsNullOrEmpty(prms[0]))
                     {
                         await WebServerModule.WriteResponce(WebServerModule.Get404Page(), response);
@@ -451,8 +451,12 @@ namespace ThunderED.Modules
 
                     var grps = Settings.WebAuthModule.GetEnabledAuthGroups();
 
-                    var groupName = HttpUtility.UrlDecode(prms[0].Split('=')[1]);//string.IsNullOrEmpty(Settings.WebAuthModule.DefaultAuthGroup) || !Settings.WebAuthModule.AuthGroups.ContainsKey(Settings.WebAuthModule.DefaultAuthGroup) ? Settings.WebAuthModule.AuthGroups.Keys.FirstOrDefault() : Settings.WebAuthModule.DefaultAuthGroup;
-                    if (!grps.Keys.ContainsCaseInsensitive(groupName) && !DEF_NOGROUP_NAME.Equals(groupName)&& !DEF_ALTREGGROUP_NAME.Equals(groupName))
+                    var
+                        groupName = HttpUtility.UrlDecode(
+                            prms[0].Split('=')[
+                                1]); //string.IsNullOrEmpty(Settings.WebAuthModule.DefaultAuthGroup) || !Settings.WebAuthModule.AuthGroups.ContainsKey(Settings.WebAuthModule.DefaultAuthGroup) ? Settings.WebAuthModule.AuthGroups.Keys.FirstOrDefault() : Settings.WebAuthModule.DefaultAuthGroup;
+                    if (!grps.Keys.ContainsCaseInsensitive(groupName) && !DEF_NOGROUP_NAME.Equals(groupName) &&
+                        !DEF_ALTREGGROUP_NAME.Equals(groupName))
                     {
                         await WebServerModule.WriteResponce(WebServerModule.Get404Page(), response);
                         return true;
@@ -470,7 +474,8 @@ namespace ThunderED.Modules
                         var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{authUrl}", url)
                             .Replace("{authButtonDiscordText}", LM.Get("authAltRegTemplateHeader"))
                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                            .Replace("{header}", LM.Get("authAltRegTemplateHeader")).Replace("{body}", LM.Get("authAltRegBody")).Replace("{backText}", LM.Get("backText"));
+                            .Replace("{header}", LM.Get("authAltRegTemplateHeader"))
+                            .Replace("{body}", LM.Get("authAltRegBody")).Replace("{backText}", LM.Get("backText"));
                         await WebServerModule.WriteResponce(text, response);
 
                         //await response.RedirectAsync(new Uri(url));
@@ -478,33 +483,38 @@ namespace ThunderED.Modules
                     else
                     {
                         var grp = GetGroupByName(groupName).Value;
-                        var url = grp.MustHaveGroupName || (Settings.WebAuthModule.UseOneAuthButton && grp.ExcludeFromOneButtonMode)
+                        var url = grp.MustHaveGroupName ||
+                                  (Settings.WebAuthModule.UseOneAuthButton && grp.ExcludeFromOneButtonMode)
                             ? WebServerModule.GetCustomAuthUrl(remoteAddress, grp.ESICustomAuthRoles, groupName)
                             : WebServerModule.GetAuthUrl(remoteAddress);
 
                         var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{authUrl}", url)
                             .Replace("{authButtonDiscordText}", LM.Get("authButtonDiscordText"))
                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                            .Replace("{header}", LM.Get("authTemplateHeader")).Replace("{body}", LM.Get("authTemplateInv")).Replace("{backText}", LM.Get("backText"));
+                            .Replace("{header}", LM.Get("authTemplateHeader"))
+                            .Replace("{body}", LM.Get("authTemplateInv")).Replace("{backText}", LM.Get("backText"));
                         await WebServerModule.WriteResponce(text, response);
                     }
 
                     return true;
                 }
 
-                if ((request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" || request.Url.LocalPath == $"{port}/callback")
+                if ((request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" ||
+                     request.Url.LocalPath == $"{port}/callback")
                     && request.Url.Query.Contains("&state=authst"))
                 {
                     var prms = request.Url.Query.TrimStart('?').Split('&');
                     var code = prms[0].Split('=')[1];
-                   // var groupInput = prms.FirstOrDefault(a => a.StartsWith("authst"));
+                    // var groupInput = prms.FirstOrDefault(a => a.StartsWith("authst"));
                     //groupInput = groupInput?.Substring(5, groupInput.Length - 5);
 
-                    var result = await GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    var result = await GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId,
+                        Settings.WebServerModule.CcpAppSecret);
                     if (result == null)
                     {
                         var message = LM.Get("ESIFailure");
-                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
+                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3)
+                            .Replace("{message}", message)
                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{header}", LM.Get("authTemplateHeader"))
                             .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
@@ -519,21 +529,28 @@ namespace ThunderED.Modules
                     {
                         await LogHelper.LogWarning("Bad or outdated stand auth request!");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                            .Replace("{message}", LM.Get("authTokenBadRequest"))
-                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
+                                .Replace("{message}", LM.Get("authTokenBadRequest"))
+                                .Replace("{header}", LM.Get("authTokenHeader"))
+                                .Replace("{body}", LM.Get("authTokenBodyFail"))
+                                .Replace("{backText}", LM.Get("backText")),
+                            response);
                         return true;
                     }
 
                     var grps = Settings.WebAuthModule.GetEnabledAuthGroups();
 
-                    if (grps.Values.All(g => g.StandingsAuth == null || !g.StandingsAuth.CharacterIDs.Contains(numericCharId)))
+                    if (grps.Values.All(g =>
+                        g.StandingsAuth == null || !g.StandingsAuth.CharacterIDs.Contains(numericCharId)))
                     {
                         await LogHelper.LogWarning($"Unauthorized auth stands feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                            .Replace("{message}", LM.Get("authTokenInvalid"))
-                            .Replace("{header}", LM.Get("authTokenHeader")).Replace("{body}", LM.Get("authTokenBodyFail")).Replace("{backText}", LM.Get("backText")), response);
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
+                                .Replace("{message}", LM.Get("authTokenInvalid"))
+                                .Replace("{header}", LM.Get("authTokenHeader"))
+                                .Replace("{body}", LM.Get("authTokenBodyFail"))
+                                .Replace("{backText}", LM.Get("backText")),
+                            response);
                         return true;
                     }
 
@@ -542,24 +559,29 @@ namespace ThunderED.Modules
                     await SQLHelper.DeleteAuthStands(numericCharId);
                     var data = new AuthStandsEntity {CharacterID = numericCharId, Token = result[1]};
 
-                    var tq = await APIHelper.ESIAPI.RefreshToken(data.Token, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    var tq = await APIHelper.ESIAPI.RefreshToken(data.Token, Settings.WebServerModule.CcpAppClientId,
+                        Settings.WebServerModule.CcpAppSecret);
                     var token = tq.Result;
 
-                    if(!tq.Data.IsFailed)
+                    if (!tq.Data.IsFailed)
                         await RefreshStandings(data, token);
                     await SQLHelper.SaveAuthStands(data);
-                    
-                    await LogHelper.LogInfo($"Auth stands feed added for character: {characterID}({rChar.name})", LogCat.AuthWeb);
+
+                    await LogHelper.LogInfo($"Auth stands feed added for character: {characterID}({rChar.name})",
+                        LogCat.AuthWeb);
                     //TODO better screen?
                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                         .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                         .Replace("{body2}", LM.Get("authStandsTokenRcv", rChar.name))
-                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authStandsTokenHeader")).Replace("{backText}", LM.Get("backText")), response);
+                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authStandsTokenHeader"))
+                        .Replace("{backText}", LM.Get("backText")), response);
                     return true;
                 }
-                
-                if ((request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" || request.Url.LocalPath == $"{port}/callback")
-                    && (!request.Url.Query.Contains("&state=") || request.Url.Query.Contains("&state=x") || request.Url.Query.Contains("&state=oneButton") || request.Url.Query.Contains("&state=altReg") ))
+
+                if ((request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" ||
+                     request.Url.LocalPath == $"{port}/callback")
+                    && (!request.Url.Query.Contains("&state=") || request.Url.Query.Contains("&state=x") ||
+                        request.Url.Query.Contains("&state=oneButton") || request.Url.Query.Contains("&state=altReg")))
                 {
                     var assembly = Assembly.GetEntryAssembly();
                     // var temp = assembly.GetManifestResourceNames();
@@ -572,7 +594,7 @@ namespace ThunderED.Modules
                     if (!string.IsNullOrWhiteSpace(request.Url.Query))
                     {
                         var prms = QueryHelpers.ParseQuery(request.Url.Query);
-                       // var prms = request.Url.Query.TrimStart('?').Split('&');
+                        // var prms = request.Url.Query.TrimStart('?').Split('&');
                         var code = prms.ContainsKey("code") ? prms["code"].LastOrDefault() : null;
                         var state = prms.ContainsKey("state") ? prms["state"].LastOrDefault() : null;
                         var mainCharId = 0L;
@@ -584,18 +606,23 @@ namespace ThunderED.Modules
                             state = lst[0];
                             long.TryParse(lst[1], out mainCharId);
                             rawIp = lst.LastOrDefault();
-                            ip = Encoding.UTF8.GetString(Convert.FromBase64String(HttpUtility.UrlDecode(lst.LastOrDefault())));
+                            ip = Encoding.UTF8.GetString(
+                                Convert.FromBase64String(HttpUtility.UrlDecode(lst.LastOrDefault())));
                         }
 
-                        var inputGroupName = state?.Length > 1 ? HttpUtility.UrlDecode(state.Substring(1, state.Length - 1)) : null;
+                        var inputGroupName = state?.Length > 1
+                            ? HttpUtility.UrlDecode(state.Substring(1, state.Length - 1))
+                            : null;
                         var inputGroup = GetGroupByName(inputGroupName).Value;
                         var autoSearchGroup = inputGroup == null && (state?.Equals("oneButton") ?? false);
                         var altCharReg = inputGroup == null && (state?.Equals("altReg") ?? false);
 
-                        var result = await GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                        var result = await GetCharacterIdFromCode(code, Settings.WebServerModule.CcpAppClientId,
+                            Settings.WebServerModule.CcpAppSecret);
                         if (result == null)
                         {
-                            await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", LM.Get("ESIFailure"))
+                            await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3)
+                                .Replace("{message}", LM.Get("ESIFailure"))
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
@@ -608,7 +635,8 @@ namespace ThunderED.Modules
                         var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
                         if (rChar == null)
                         {
-                            await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", LM.Get("ESIFailure"))
+                            await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3)
+                                .Replace("{message}", LM.Get("ESIFailure"))
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
@@ -622,7 +650,8 @@ namespace ThunderED.Modules
                         var rCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar?.corporation_id, true);
                         if (rCorp == null)
                         {
-                            await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", LM.Get("ESIFailure"))
+                            await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3)
+                                .Replace("{message}", LM.Get("ESIFailure"))
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
@@ -645,23 +674,32 @@ namespace ThunderED.Modules
                             //do not allow to bind alt to another alt
                             if (user == null || !user.IsAuthed || user.MainCharacterId.HasValue || user.DiscordId == 0)
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"), LM.Get("authAltRegMainNotFound"), WebServerModule.GetAuthPageUrl()), response);
-                                await LogHelper.LogWarning($"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}", Category);
+                                await WebServerModule.WriteResponce(
+                                    WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"),
+                                        LM.Get("authAltRegMainNotFound"), WebServerModule.GetAuthPageUrl()), response);
+                                await LogHelper.LogWarning(
+                                    $"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}",
+                                    Category);
                                 return true;
                             }
 
                             var pair = grps.FirstOrDefault(a => a.Value.BindToMainCharacter);
                             if (pair.Value == null)
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"), LM.Get("authAltRegGroupNotFound"), WebServerModule.GetAuthPageUrl()), response);
-                                await LogHelper.LogWarning($"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}", Category);
+                                await WebServerModule.WriteResponce(
+                                    WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"),
+                                        LM.Get("authAltRegGroupNotFound"), WebServerModule.GetAuthPageUrl()), response);
+                                await LogHelper.LogWarning(
+                                    $"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}",
+                                    Category);
                                 return true;
                             }
 
                             group = pair.Value;
                             groupName = pair.Key;
                             var url = group.ESICustomAuthRoles.Any()
-                                ? WebServerModule.GetCustomAuthUrl(rawIp, group.ESICustomAuthRoles, user.GroupName, longCharacterId)
+                                ? WebServerModule.GetCustomAuthUrl(rawIp, group.ESICustomAuthRoles, user.GroupName,
+                                    longCharacterId)
                                 : WebServerModule.GetAuthUrl(rawIp, groupName, longCharacterId);
                             await response.RedirectAsync(new Uri(url));
 
@@ -676,22 +714,32 @@ namespace ThunderED.Modules
                             //do not allow to bind alt to another alt
                             if (user == null || !user.IsAuthed || user.MainCharacterId.HasValue || user.DiscordId == 0)
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"), LM.Get("authAltRegMainNotFound"), WebServerModule.GetAuthPageUrl()), response);
-                                await LogHelper.LogWarning($"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}", Category);
+                                await WebServerModule.WriteResponce(
+                                    WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"),
+                                        LM.Get("authAltRegMainNotFound"), WebServerModule.GetAuthPageUrl()), response);
+                                await LogHelper.LogWarning(
+                                    $"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}",
+                                    Category);
                                 return true;
                             }
+
                             var pair = grps.FirstOrDefault(a => a.Value.BindToMainCharacter);
                             if (pair.Value == null)
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"), LM.Get("authAltRegGroupNotFound"), WebServerModule.GetAuthPageUrl()), response);
-                                await LogHelper.LogWarning($"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}", Category);
+                                await WebServerModule.WriteResponce(
+                                    WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"),
+                                        LM.Get("authAltRegGroupNotFound"), WebServerModule.GetAuthPageUrl()), response);
+                                await LogHelper.LogWarning(
+                                    $"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}",
+                                    Category);
                                 return true;
                             }
 
                             group = pair.Value;
                             groupName = pair.Key;
 
-                            var altUser = await AuthUserEntity.CreateAlt(altCharId, refreshToken, group, groupName, mainCharId);
+                            var altUser = await AuthUserEntity.CreateAlt(altCharId, refreshToken, group, groupName,
+                                mainCharId);
                             altUser.Ip = ip;
                             await SQLHelper.SaveAuthUser(altUser);
 
@@ -707,7 +755,8 @@ namespace ThunderED.Modules
                                     .Replace("{image}", image)
                                     .Replace("{uid}", null)
                                     .Replace("{header}", LM.Get("authAltRegTemplateHeader"))
-                                    .Replace("{body}", LM.Get("authAltRegAccepted", rChar.name, user.Data.CharacterName))
+                                    .Replace("{body}",
+                                        LM.Get("authAltRegAccepted", rChar.name, user.Data.CharacterName))
                                     .Replace("{body3}", null)
                                     .Replace("{body2}", null)
                                     .Replace("{backText}", LM.Get("backText")),
@@ -723,10 +772,15 @@ namespace ThunderED.Modules
                             group = inputGroup;
                             if (string.IsNullOrEmpty(result[1]))
                             {
-                                await WebServerModule.WriteResponce(WebServerModule.GetAccessDeniedPage("Auth Module", LM.Get("authNoTokenReceived"), WebServerModule.GetAuthPageUrl()), response);
-                                await LogHelper.LogWarning($"Invalid named group auth attempt (missing token) from charID: {characterID} grp: {inputGroupName}", Category);
+                                await WebServerModule.WriteResponce(
+                                    WebServerModule.GetAccessDeniedPage("Auth Module", LM.Get("authNoTokenReceived"),
+                                        WebServerModule.GetAuthPageUrl()), response);
+                                await LogHelper.LogWarning(
+                                    $"Invalid named group auth attempt (missing token) from charID: {characterID} grp: {inputGroupName}",
+                                    Category);
                                 return true;
                             }
+
                             cFoundList.Add(corpID); //fake reg ;)
                             groupName = inputGroupName;
                             add = true;
@@ -737,7 +791,9 @@ namespace ThunderED.Modules
                             if (inputGroup != null)
                             {
                                 group = inputGroup;
-                                if ((await GetAuthRoleEntityById(new KeyValuePair<string, WebAuthGroup>(inputGroupName, inputGroup), rChar)).RoleEntities.Any())
+                                if ((await GetAuthRoleEntityById(
+                                        new KeyValuePair<string, WebAuthGroup>(inputGroupName, inputGroup), rChar))
+                                    .RoleEntities.Any())
                                 {
                                     groupName = inputGroupName;
                                     add = true;
@@ -750,11 +806,15 @@ namespace ThunderED.Modules
                                 if (Settings.WebAuthModule.UseOneAuthButton)
                                 {
                                     var searchFor = autoSearchGroup
-                                        ? grps.Where(a => !a.Value.ExcludeFromOneButtonMode && !a.Value.BindToMainCharacter)
+                                        ? grps.Where(a =>
+                                            !a.Value.ExcludeFromOneButtonMode && !a.Value.BindToMainCharacter)
                                         : grps.Where(a =>
-                                            !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode && !a.Value.BindToMainCharacter);
+                                            !a.Value.ESICustomAuthRoles.Any() && !a.Value.PreliminaryAuthMode &&
+                                            !a.Value.BindToMainCharacter);
                                     //general auth
-                                    var gResult = await GetAuthRoleEntityById(searchFor.ToDictionary(a=> a.Key, a=> a.Value), rChar);
+                                    var gResult =
+                                        await GetAuthRoleEntityById(searchFor.ToDictionary(a => a.Key, a => a.Value),
+                                            rChar);
                                     if (gResult.RoleEntities.Any())
                                     {
                                         cFoundList.Add(rChar.corporation_id);
@@ -768,9 +828,12 @@ namespace ThunderED.Modules
 
                         if (add)
                         {
-                            if (autoSearchGroup && group.ESICustomAuthRoles.Any()) //for one button with ESI - had to auth twice
+                            if (autoSearchGroup && group.ESICustomAuthRoles.Any()
+                            ) //for one button with ESI - had to auth twice
                             {
-                                await response.RedirectAsync(new Uri(WebServerModule.GetCustomAuthUrl(rawIp ?? remoteAddress, group.ESICustomAuthRoles, groupName)));
+                                await response.RedirectAsync(new Uri(
+                                    WebServerModule.GetCustomAuthUrl(rawIp ?? remoteAddress, group.ESICustomAuthRoles,
+                                        groupName)));
                                 return true;
                             }
 
@@ -782,7 +845,12 @@ namespace ThunderED.Modules
                             var authUser = new AuthUserEntity
                             {
                                 CharacterId = Convert.ToInt64(characterID),
-                                Data = { Permissions = group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null },
+                                Data =
+                                {
+                                    Permissions = group.ESICustomAuthRoles.Count > 0
+                                        ? string.Join(',', group.ESICustomAuthRoles)
+                                        : null
+                                },
                                 DiscordId = 0,
                                 RefreshToken = refreshToken,
                                 GroupName = groupName,
@@ -796,22 +864,31 @@ namespace ThunderED.Modules
 
                             if (!group.PreliminaryAuthMode)
                             {
-                                await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2).Replace("{url}", Settings.WebServerModule.DiscordUrl)
+                                await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
+                                        .Replace("{url}", Settings.WebServerModule.DiscordUrl)
                                         .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                         .Replace("{image}", image)
-                                        .Replace("{uid}",  $"!auth {uid}").Replace("{header}", LM.Get("authTemplateHeader"))
+                                        .Replace("{uid}", $"!auth {uid}")
+                                        .Replace("{header}", LM.Get("authTemplateHeader"))
                                         .Replace("{body}", LM.Get("authTemplateSucc1", rChar.name))
-                                        .Replace("{body2}", LM.Get("authTemplateSucc2")).Replace("{body3}", LM.Get("authTemplateSucc3"))
+                                        .Replace("{body2}", LM.Get("authTemplateSucc2"))
+                                        .Replace("{body3}", LM.Get("authTemplateSucc3"))
                                         .Replace("{backText}", LM.Get("backText")),
                                     response);
                                 if (SettingsManager.Settings.WebAuthModule.AuthReportChannel != 0)
-                                    await APIHelper.DiscordAPI.SendMessageAsync(SettingsManager.Settings.WebAuthModule.AuthReportChannel, $"{group.DefaultMention} {LM.Get("authManualAcceptMessage", rChar.name, characterID, groupName)}").ConfigureAwait(false);
-                                await LogHelper.LogWarning(LM.Get("authManualAcceptMessage", rChar.name, characterID, groupName), LogCat.AuthWeb);
+                                    await APIHelper.DiscordAPI
+                                        .SendMessageAsync(SettingsManager.Settings.WebAuthModule.AuthReportChannel,
+                                            $"{group.DefaultMention} {LM.Get("authManualAcceptMessage", rChar.name, characterID, groupName)}")
+                                        .ConfigureAwait(false);
+                                await LogHelper.LogWarning(
+                                    LM.Get("authManualAcceptMessage", rChar.name, characterID, groupName),
+                                    LogCat.AuthWeb);
                             }
                             else
                             {
                                 if (!group.SkipDiscordAuthPage)
-                                    await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
+                                    await WebServerModule.WriteResponce(File
+                                            .ReadAllText(SettingsManager.FileTemplateAuth2)
                                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                             .Replace("{url}", Settings.WebServerModule.DiscordUrl)
                                             .Replace("{image}", image)
@@ -823,8 +900,9 @@ namespace ThunderED.Modules
                                             .Replace("{backUrl}", WebServerModule.GetWebSiteUrl())
                                             .Replace("{backText}", LM.Get("backText")),
                                         response);
-                                else 
-                                    await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
+                                else
+                                    await WebServerModule.WriteResponce(File
+                                            .ReadAllText(SettingsManager.FileTemplateAuth2)
                                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                             .Replace("{url}", Settings.WebServerModule.DiscordUrl)
                                             .Replace("{image}", image)
@@ -834,7 +912,7 @@ namespace ThunderED.Modules
                                             .Replace("{body3}", LM.Get("authTemplateManualAccept3"))
                                             .Replace("{body2}", null)
                                             .Replace("{backText}", LM.Get("backText")
-                                            .Replace("{backUrl}", WebServerModule.GetWebSiteUrl())),
+                                                .Replace("{backUrl}", WebServerModule.GetWebSiteUrl())),
                                         response);
 
                             }
@@ -842,7 +920,8 @@ namespace ThunderED.Modules
                         else
                         {
                             var message = LM.Get("authNonAlly");
-                            await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3).Replace("{message}", message)
+                            await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3)
+                                .Replace("{message}", message)
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                                 .Replace("{header}", LM.Get("authTemplateHeader"))
                                 .Replace("{backText}", LM.Get("backText"))
@@ -855,10 +934,13 @@ namespace ThunderED.Modules
                     }
                 }
             }
-
             catch (Exception ex)
             {
                 await LogHelper.LogEx($"Error: {ex.Message}", ex, Category);
+            }
+            finally
+            {
+                RunningRequestCount--;
             }
 
             return false;

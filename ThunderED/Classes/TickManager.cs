@@ -195,7 +195,7 @@ namespace ThunderED.Classes
 
                 await Modules.ParallelForEachAsync(async module =>
                 {
-                    await module.Run(null);
+                    await module.RunInternal(null);
                 }, SettingsManager.MaxConcurrentThreads);
                 
             }
@@ -220,7 +220,7 @@ namespace ThunderED.Classes
         public static Task RunModule(Type type, ICommandContext context, object prm = null)
         {
             var module = Modules.FirstOrDefault(a => a.GetType() == type);
-            module?.Run( prm ?? context);
+            module?.RunInternal(prm ?? context);
             return Task.CompletedTask;
         }
 
@@ -230,6 +230,11 @@ namespace ThunderED.Classes
             ZKillLiveFeedModule.Queryables.Clear();
             Modules.ForEach(a=> a.Cleanup());
             _isModulesLoaded = false;
+        }
+
+        public static bool AllModulesReadyToClose()
+        {
+            return Modules.All(a => !a.IsRunning && !a.IsRequestRunning);
         }
     }
 }
