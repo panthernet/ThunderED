@@ -10,6 +10,26 @@ namespace Restarter
         private static string _logPath;
         private static ReaderWriterLock _rwl = new ReaderWriterLock();
 
+        /// <summary>
+        /// Safely write into console
+        /// </summary>
+        /// <param name="message">Message text</param>
+        public static void WriteConsole(string message)
+        {
+            if (!RunAsService)
+                System.Console.WriteLine(message);
+        }
+
+        /// <summary>
+        /// Safely write into console
+        /// </summary>
+        /// <param name="message">Message text</param>
+        public static void WriteConsole(string message, params object[] prms)
+        {
+            if (!RunAsService)
+                System.Console.WriteLine(message, prms);
+        }
+
         public static async Task LogWarning(string message, bool logConsole = true, bool logFile = true)
         {
             await Log(message, "WARNING", logConsole, logFile).ConfigureAwait(false);
@@ -37,7 +57,7 @@ namespace Restarter
                 if (!Directory.Exists(_logPath))
                     Directory.CreateDirectory(_logPath);
 
-                if (logConsole)
+                if (logConsole && !RunAsService)
                 {
                     var time = DateTime.Now.ToString("HH:mm:ss");
                     var msg = $"{time} [{severity,8}]: {message}";
@@ -97,7 +117,7 @@ namespace Restarter
                 var msg = $"{DateTime.Now,-19} [{"EXCEPTION",8}]: {message}";
                 var logConsole = true;
 
-                if (logConsole)
+                if (logConsole && !RunAsService)
                 {
                     try
                     {
@@ -115,6 +135,11 @@ namespace Restarter
                 // ignored
             }
         }
+        private static bool RunAsService;
 
+        public static void SetService(in bool runAsService)
+        {
+            RunAsService = runAsService;
+        }
     }
 }

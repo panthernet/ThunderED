@@ -1,21 +1,19 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
+using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using ThunderED.Classes;
 using ThunderED.Helpers;
-using ThunderED.Modules.Sub;
 
 namespace ThunderED
 {
     internal partial class Program
     {
         private static Timer _timer;
+        private static Timer _restartTimer;
+        private static NamedPipeClientStream pipe;
 
         private static async Task Main(string[] args)
         {
@@ -66,6 +64,23 @@ namespace ThunderED
 
             if (replyChannelId > 0)
                 LogHelper.WriteConsole($"Launch after restart");
+
+            //restart logix
+            _restartTimer = new Timer(async state =>
+            {
+                if (pipe == null)
+                {
+                    pipe = new NamedPipeClientStream(".", "ThunderED.Restart.Pipe", PipeDirection.In);
+                    await pipe.ConnectAsync();
+                }
+
+                if (!pipe.IsConnected || pipe.ReadByte() == 0) return;
+                await LogHelper.LogInfo("SIGTERM received! Shutdown app...");
+
+                _restartTimer.Dispose();
+                await Shutdown();
+
+            }, null, 0, 500);
 
 
             APIHelper.Prepare();
@@ -217,11 +232,11 @@ namespace ThunderED
         private static volatile bool _canClose = false;
         private static volatile bool _confirmClose = false;
 
-        internal static async Task Shutdown()
+        internal static async Task Shutdown(bool isRestart = false)
         {
             try
             {
-                await LogHelper.LogInfo($"Server shutdown requested...");
+                await LogHelper.LogInfo(isRestart ? "Server restart requested..." : $"Server shutdown requested...");
                 APIHelper.DiscordAPI.Stop();
                 IsClosing = true;
                 while (!_canClose || !TickManager.AllModulesReadyToClose())
@@ -229,7 +244,8 @@ namespace ThunderED
                     await Task.Delay(10);
                 }
 
-                await LogHelper.LogInfo($"Server shutdown complete!");
+                await LogHelper.LogInfo(isRestart ? "Server is ready for restart" : "Server shutdown complete");
+                Environment.Exit(isRestart ? 1001 : 1002);
 
             }
             finally
@@ -242,42 +258,43 @@ namespace ThunderED
 
         public static async Task Restart(ulong channelId)
         {
-            try
-            {
-                await LogHelper.LogInfo($"Server restart requested...");
-                APIHelper.DiscordAPI.Stop();
-                IsClosing = true;
-                while (!_canClose || !TickManager.AllModulesReadyToClose())
-                {
-                    await Task.Delay(10);
-                }
-
-                var file = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
-                    $"Restarter{(SettingsManager.IsLinux ? null : ".exe")}");
-
-                var start = new ProcessStartInfo
-                {
-                    UseShellExecute = true,
-                    CreateNoWindow = false,
-                    FileName = file,
-                    //Arguments = channelId.ToString(),
-                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)),
-                };
-                start.ArgumentList.Add(channelId.ToString());
-
-                await LogHelper.LogInfo("Starting restarter...");
-                using var proc = new Process {StartInfo = start};
-                proc.Start();
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx("Restart", ex);
-
-            }
-            finally
-            {
-                _confirmClose = true;
-            }
+            await Shutdown(true);
+            /* try
+             {
+                 await LogHelper.LogInfo($"Server restart requested...");
+                 APIHelper.DiscordAPI.Stop();
+                 IsClosing = true;
+                 while (!_canClose || !TickManager.AllModulesReadyToClose())
+                 {
+                     await Task.Delay(10);
+                 }
+ 
+                 var file = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                     $"Restarter{(SettingsManager.IsLinux ? null : ".exe")}");
+ 
+                 var start = new ProcessStartInfo
+                 {
+                     UseShellExecute = true,
+                     CreateNoWindow = false,
+                     FileName = file,
+                     //Arguments = channelId.ToString(),
+                     WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)),
+                 };
+                 start.ArgumentList.Add(channelId.ToString());
+ 
+                 await LogHelper.LogInfo("Starting restarter...");
+                 using var proc = new Process {StartInfo = start};
+                 proc.Start();
+             }
+             catch (Exception ex)
+             {
+                 await LogHelper.LogEx("Restart", ex);
+ 
+             }
+             finally
+             {
+                 _confirmClose = true;
+             }*/
         }
     }
 }

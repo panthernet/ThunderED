@@ -434,7 +434,7 @@
   "hrmInspectLocation": "Location",
   "hrmInspectShip": "Ship",
   "hrmDumpHeader": "Dumped",
-  "helpSys": "```\nList of available admin commands:\n  shutdown - shutdown server\n  restart - restart server\n  cleartable NAME - clear all data in the DB table with corresponding NAME\n  flush notifcache - clear all notifications cache\n  flush dbcache - clear all cache from database\n  esitoken [ID] - gets character ESI token by specified character ID  \n```",
+  "helpSys": "```\nList of available admin commands:\n  shutdown - shutdown server\n  restart - restart server (if using Restarter) \n  cleartable NAME - clear all data in the DB table with corresponding NAME\n  flush notifcache - clear all notifications cache\n  flush dbcache - clear all cache from database\n  esitoken [ID] - gets character ESI token by specified character ID  \n```",
   "helpSysClear": "Subcommand to clear specified DB table. Use it on your own risk. Example: **!sys cleartable cache**",
   "sysClearTableNotFound": "Specified DB table not found or there is a database error!",
   "sysOperationComplete": ":white_check_mark: Operation completed!",

@@ -45,13 +45,13 @@ namespace ThunderED.API
             Client.Connected += async () =>
             {
                 await AsyncHelper.RedirectToThreadPool();
-                await LogHelper.LogInfo("Connected!", LogCat.Discord);
+               // await LogHelper.LogInfo("Connected!", LogCat.Discord);
             };
             Client.Disconnected += async exception => 
             {
                 await AsyncHelper.RedirectToThreadPool();
-                if(exception == null)
-                    await LogHelper.LogInfo("Disconnected!", LogCat.Discord);
+                if (exception == null)
+                    ; // await LogHelper.LogInfo("Disconnected!", LogCat.Discord);
                 else await LogHelper.LogEx("Disconnected!", exception, LogCat.Discord);
             };
         }

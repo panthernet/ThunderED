@@ -418,7 +418,7 @@
   "hrmInspectLocation": "Локация",
   "hrmInspectShip": "Корабль",
   "hrmDumpHeader": "Cброшенные",
-  "helpSys": "```\nList of available admin commands:\n  shutdown - shutdown server\n  restart - restart server\n  cleartable NAME - clear all data in the DB table with corresponding NAME\n  flush notifcache - clear all notifications cache\n  flush dbcache - clear all cache from database\n  esitoken [ID] - gets character ESI token by specified character ID  \n```",
+  "helpSys": "```\nList of available admin commands:\n  shutdown - shutdown server\n  restart - restart server (if using Restarter)\n  cleartable NAME - clear all data in the DB table with corresponding NAME\n  flush notifcache - clear all notifications cache\n  flush dbcache - clear all cache from database\n  esitoken [ID] - gets character ESI token by specified character ID  \n```",
   "helpSysClear": "Подкоманда очистки указанной таблицы БД. Используйте на свой страх и риск. Пример: **!sys cleartable cache**",
   "sysClearTableNotFound": "Указанная таблица БД не найдена или возникла ошибка работы с БД!",
   "sysOperationComplete": ":white_check_mark: Операция выполнена!",
