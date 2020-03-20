@@ -217,8 +217,4 @@
     </Reference>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y &quot;$(SolutionDir)Restarter\$(OutDir)Restarter.dll&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /y &quot;$(SolutionDir)Restarter\$(OutDir)Restarter.exe&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /y &quot;$(SolutionDir)Restarter\$(OutDir)Restarter.deps.json&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /y &quot;$(SolutionDir)Restarter\$(OutDir)Restarter.runtimeconfig.json&quot; &quot;$(TargetDir)&quot;" />
-  </Target>
-
 </Project>
