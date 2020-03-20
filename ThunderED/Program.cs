@@ -21,6 +21,7 @@ namespace ThunderED
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            AppDomain.CurrentDomain.ProcessExit += CurrentDomainOnProcessExit;
 
             ulong replyChannelId = 0;
             if (args.Length > 0)
@@ -182,6 +183,11 @@ namespace ThunderED
                     await Task.Delay(10);
                 if(_confirmClose) return;
             }
+        }
+
+        private static async void CurrentDomainOnProcessExit(object sender, EventArgs e)
+        {
+            await Shutdown();
         }
 
         private static void TickCallback(object state)
