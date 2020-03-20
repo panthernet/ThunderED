@@ -156,15 +156,24 @@ namespace ThunderED
 
                 if (!SettingsManager.Settings.Config.RunAsServiceCompatibility)
                 {
-                    if (Console.KeyAvailable)
+                    try
                     {
-                        var key = Console.ReadKey();
-                        if (key.Key == ConsoleKey.Escape)
+                        if (Console.KeyAvailable)
                         {
-                            await Shutdown();
-                            return;
+                            var key = Console.ReadKey();
+                            if (key.Key == ConsoleKey.Escape)
+                            {
+                                await Shutdown();
+                                return;
+                            }
                         }
                     }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    await Task.Delay(10);
                 }
 
                     /*if (!SettingsManager.Settings.Config.RunAsServiceCompatibility)
