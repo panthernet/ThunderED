@@ -28,4 +28,4 @@ FROM mcr.microsoft.com/dotnet/core/runtime:3.1 AS runtime
 WORKDIR /app/ThunderED
 COPY --from=build-env /app/ThunderED/out .
 COPY --from=build-res /app/Restarter/out .
-ENTRYPOINT ["dotnet", "Restarter.dll"]
+ENTRYPOINT ["dotnet", "ThunderED.dll"]
