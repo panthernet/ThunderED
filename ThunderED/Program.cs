@@ -12,7 +12,6 @@ namespace ThunderED
     internal partial class Program
     {
         private static Timer _timer;
-        private static Timer _restartTimer;
         private static NamedPipeClientStream pipe;
 
         private static async Task Main(string[] args)
@@ -66,7 +65,7 @@ namespace ThunderED
                 LogHelper.WriteConsole($"Launch after restart");
 
             //restart logix
-            _restartTimer = new Timer(async state =>
+            await Task.Factory.StartNew(async () =>
             {
                 if (pipe == null)
                 {
@@ -77,11 +76,8 @@ namespace ThunderED
                 if (!pipe.IsConnected || pipe.ReadByte() == 0) return;
                 await LogHelper.LogInfo("SIGTERM received! Shutdown app...");
 
-                _restartTimer.Dispose();
                 await Shutdown();
-
-            }, null, 0, 500);
-
+            });
 
             APIHelper.Prepare();
             await LogHelper.LogInfo($"ThunderED v{VERSION} is running!").ConfigureAwait(false);
