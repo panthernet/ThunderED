@@ -111,8 +111,10 @@
           "filter1": {
             "MinimumIskValue": 0,
             "MaximumIskValue": 0,
-            "HasShipEntities": [],
-            "HasNoShipEntities": [],
+            "HasAttackerShipEntities": [],
+            "HasNoAttackerShipEntities": [],
+            "HasVictimShipEntities": [],
+            "HasNoVictimShipEntities": [],
             "HasVictimEntities": [],
             "HasAttackerEntities": [],
             "HasNoVictimEntities": [],
@@ -138,7 +140,7 @@
             "dsc": "This feed will be limited by isk values and report supers killed by TAPI alliance",
             "MinimumIskValue": 10000000,
             "MaximumIskValue": 40000000000,
-            "HasShipEntities": [ "Nyx", "Hel", "Aeon", "Wyvern" ],
+            "HasAttackerShipEntities": [ "Nyx", "Hel", "Aeon", "Wyvern" ],
             "HasAttackerEntities": [ "a:TAPI" ]
           },
           "killFeedExample2": {

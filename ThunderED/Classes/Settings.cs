@@ -898,8 +898,10 @@ namespace ThunderED.Classes
         [Comment("List of Discord channel IDs for KM feed within a filter")]
         public ObservableCollection<ulong> DiscordChannels { get; set; } = new ObservableCollection<ulong>();
 
-        public ObservableCollection<object> HasShipEntities { get; set; } = new ObservableCollection<object>();
-        public ObservableCollection<object> HasNoShipEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasAttackerShipEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasNoAttackerShipEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasVictimShipEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HasNoVictimrShipEntities { get; set; } = new ObservableCollection<object>();
         public ObservableCollection<object> HasVictimEntities { get; set; } = new ObservableCollection<object>();
         public ObservableCollection<object> HasNoVictimEntities { get; set; } = new ObservableCollection<object>();
         public ObservableCollection<object> HasAttackerEntities { get; set; } = new ObservableCollection<object>();
@@ -909,8 +911,10 @@ namespace ThunderED.Classes
 #else
         public List<ulong> DiscordChannels = new List<ulong>();
 
-        public List<object> HasShipEntities = new List<object>();
-        public List<object> HasNoShipEntities = new List<object>();
+        public List<object> HasAttackerShipEntities = new List<object>();
+        public List<object> HasNoAttackerShipEntities = new List<object>();
+        public List<object> HasVictimShipEntities = new List<object>();
+        public List<object> HasNoVictimrShipEntities = new List<object>();
         public List<object> HasVictimEntities = new List<object>();
         public List<object> HasNoVictimEntities = new List<object>();
         public List<object> HasAttackerEntities = new List<object>();

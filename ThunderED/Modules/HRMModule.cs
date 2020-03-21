@@ -756,6 +756,12 @@ namespace ThunderED.Modules
                                             return true;
                                         }
 
+                                        text = text.Replace("{hrmInspectIp}", LM.Get("hrmInspectIp"))
+                                            .Replace("{ipData}",
+                                                string.IsNullOrEmpty(authUserEntity.Ip)
+                                                    ? LM.Get("Unknown")
+                                                    : authUserEntity.Ip);
+
                                         if (SettingsManager.HasReadMailScope(pList))
                                         {
                                             var total = await GetMailPagesCount(token, inspectCharId);

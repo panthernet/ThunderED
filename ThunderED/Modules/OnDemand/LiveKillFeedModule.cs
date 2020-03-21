@@ -22,12 +22,14 @@ namespace ThunderED.Modules.OnDemand
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedVictimsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedAttackersLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedLocationLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
-        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedVictimShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedAttackerShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeVictimsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeAttackersLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeLocationLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
-        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeVictimShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
+        protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedExcludeAttackerShipsLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
 
         public override LogCat Category => LogCat.KillFeed;
 
@@ -84,7 +86,9 @@ namespace ThunderED.Modules.OnDemand
                 var lGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 var exlGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
                 var sGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
+                var sGroupDic2 = new Dictionary<string, Dictionary<string, List<long>>>();
                 var exsGroupDic = new Dictionary<string, Dictionary<string, List<long>>>();
+                var exsGroupDic2 = new Dictionary<string, Dictionary<string, List<long>>>();
                 foreach (var (fKey, fValue) in value.Filters)
                 {
                     var aData = await ParseMemberDataArray(fValue.HasAttackerEntities);
@@ -93,8 +97,10 @@ namespace ThunderED.Modules.OnDemand
                     vGroupDic.Add(fKey, vData);
                     var lData = await ParseLocationDataArray(fValue.HasLocationEntities);
                     lGroupDic.Add(fKey, lData);
-                    var sData = await ParseTypeDataArray(fValue.HasShipEntities);
+                    var sData = await ParseTypeDataArray(fValue.HasAttackerShipEntities);
                     sGroupDic.Add(fKey, sData);
+                    var sData2 = await ParseTypeDataArray(fValue.HasVictimShipEntities);
+                    sGroupDic2.Add(fKey, sData2);
                     //excluded
                     var exaData = await ParseMemberDataArray(fValue.HasNoAttackerEntities);
                     exaGroupDic.Add(fKey, exaData);
@@ -102,8 +108,10 @@ namespace ThunderED.Modules.OnDemand
                     exvGroupDic.Add(fKey, exvData);
                     var exlData = await ParseMemberDataArray(fValue.HasNoLocationEntities);
                     exlGroupDic.Add(fKey, exlData);
-                    var exsData = await ParseMemberDataArray(fValue.HasNoShipEntities);
+                    var exsData = await ParseMemberDataArray(fValue.HasNoAttackerShipEntities);
                     exsGroupDic.Add(fKey, exsData);
+                    var exsData2 = await ParseMemberDataArray(fValue.HasNoVictimrShipEntities);
+                    exsGroupDic2.Add(fKey, exsData2);
                 }
                 ParsedAttackersLists.Add(key, aGroupDic);
                 ParsedExcludeAttackersLists.Add(key, exaGroupDic);
@@ -111,8 +119,10 @@ namespace ThunderED.Modules.OnDemand
                 ParsedExcludeVictimsLists.Add(key, exvGroupDic);
                 ParsedLocationLists.Add(key, lGroupDic);
                 ParsedExcludeLocationLists.Add(key, exlGroupDic);
-                ParsedShipsLists.Add(key, sGroupDic);
-                ParsedExcludeShipsLists.Add(key, exsGroupDic);
+                ParsedAttackerShipsLists.Add(key, sGroupDic);
+                ParsedVictimShipsLists.Add(key, sGroupDic2);
+                ParsedExcludeAttackerShipsLists.Add(key, exsGroupDic);
+                ParsedExcludeVictimShipsLists.Add(key, exsGroupDic2);
             }
 
         }
@@ -183,8 +193,11 @@ namespace ThunderED.Modules.OnDemand
                         exList = GetTier2RegionIds(ParsedExcludeLocationLists, groupName, filterName);
                         if (rSystem?.DB_RegionId != null && exList.Contains(rSystem.DB_RegionId.Value)) continue;
 
-                        exList = GetTier2TypeIds(ParsedExcludeShipsLists, groupName, filterName);
+                        exList = GetTier2TypeIds(ParsedExcludeVictimShipsLists, groupName, filterName);
                         if (exList.Contains(kill.victim.ship_type_id)) continue;
+                        exList = GetTier2TypeIds(ParsedAttackerShipsLists, groupName, filterName);
+                        if(kill.attackers.Select(a=> a.ship_type_id).ContainsAnyFromList(exList)) continue;
+
 
                         #endregion
 
@@ -343,10 +356,25 @@ namespace ThunderED.Modules.OnDemand
 
                         #region Type checks
 
-                        var types = GetTier2TypeIds(ParsedShipsLists, groupName, filterName);
+                        var types = GetTier2TypeIds(ParsedVictimShipsLists, groupName, filterName);
                         if (types.Any() && !isCertifiedToFeed)
                         {
                             if (types.Contains(kill.victim.ship_type_id))
+                            {
+                                if (filter.EnableMatchOnFirstConditionMet)
+                                    isCertifiedToFeed = true;
+                            }
+                            else
+                            {
+                                //type not match
+                                continue;
+                            }
+                        }
+
+                        types = GetTier2TypeIds(ParsedAttackerShipsLists, groupName, filterName);
+                        if (types.Any() && !isCertifiedToFeed)
+                        {
+                            if (types.ContainsAnyFromList(kill.attackers.Select(a=> a.ship_type_id)))
                             {
                                 if (filter.EnableMatchOnFirstConditionMet)
                                     isCertifiedToFeed = true;

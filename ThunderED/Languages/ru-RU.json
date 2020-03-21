@@ -595,6 +595,7 @@
   "sysRestartComplete": "Сервер был успешно перезапущен!",
   "sysFlushedNotifications": "Кэш уведомлений был сброшен!",
   "sysFlushedAllCache": "Весь серверный кэш был сброшен!",
-  "helpSysToken": "esitoken [ID] - возращает токен ESI для персонажа с указанным ID"
+  "helpSysToken": "esitoken [ID] - возращает токен ESI для персонажа с указанным ID",
+  "hrmInspectIp": "Reg IP"
 
 }
