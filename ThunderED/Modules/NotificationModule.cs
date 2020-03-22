@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using ThunderED.Classes;
+using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
@@ -42,6 +43,8 @@ namespace ThunderED.Modules
         {
             LogHelper.LogModule("Initializing Notifications module...", Category).GetAwaiter().GetResult();
             WebServerModule.ModuleConnectors.Add(Reason, Auth);
+            //new connector
+            WebServerModule.WebModuleConnectors.Add(Reason, ProcessRequest);
         }
 
         public async override Task Initialize()
@@ -1376,5 +1379,78 @@ typeID: 2233",
 
         #endregion
 
+
+        #region New web section
+        public async Task<WebQueryResultEnum> ProcessRequest(string query)
+        {
+            if (!Settings.Config.ModuleNotificationFeed) return WebQueryResultEnum.False;
+
+            try
+            {
+              /*  RunningRequestCount++;
+                if (query.Contains("&state=9"))
+                {
+                    var prms = query.TrimStart('?').Split('&');
+                    var code = prms[0].Split('=')[1];
+
+                    var result = await WebAuthModule.GetCharacterIdFromCode(code,
+                        Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                    if (result == null)
+                        return WebQueryResultEnum.EsiFailure;
+
+                    var characterID = result[0];
+                    var numericCharId = Convert.ToInt64(characterID);
+
+                    if (string.IsNullOrEmpty(characterID))
+                    {
+                        await LogHelper.LogWarning("Bad or outdated notify feed request!");
+                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
+                                .Replace("{message}", LM.Get("authTokenBadRequest"))
+                                .Replace("{header}", LM.Get("authTokenHeader"))
+                                .Replace("{body}", LM.Get("authTokenBodyFail"))
+                                .Replace("{backText}", LM.Get("backText")),
+                            response);
+                        return true;
+                    }
+
+                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.GetEnabledGroups()
+                        .Values.All(g => !g.CharacterID.Contains(numericCharId)))
+                    {
+                        await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
+                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
+                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
+                                .Replace("{message}", LM.Get("authTokenInvalid"))
+                                .Replace("{header}", LM.Get("authTokenHeader"))
+                                .Replace("{body}", LM.Get("authTokenBodyFail"))
+                                .Replace("{backText}", LM.Get("backText")),
+                            response);
+                        return true;
+                    }
+
+                    var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
+
+                    await SQLHelper.InsertOrUpdateTokens(result[1] ?? "", characterID, null, "");
+                    await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
+                    await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
+                        .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
+                        .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
+                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader"))
+                        .Replace("{backText}", LM.Get("backText")), response);
+                    return true;
+                }*/
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex.Message, ex, Category);
+            }
+            finally
+            {
+                RunningRequestCount--;
+            }
+
+            return WebQueryResultEnum.False;
+        }
+        #endregion
     }
 }

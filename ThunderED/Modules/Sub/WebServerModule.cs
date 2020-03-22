@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Web;
 using ThunderED.Classes;
+using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using HttpListener = System.Net.Http.HttpListener;
 
@@ -23,9 +24,10 @@ namespace ThunderED.Modules.Sub
         private readonly Timer _statusTimer = new Timer(5000);
         public override LogCat Category => LogCat.WebServer;
 
-        public static string HttpPrefix => SettingsManager.Settings.Config.UseHTTPS ? "https" : "http";
+        public static string HttpPrefix => SettingsManager.Settings.WebServerModule.UseHTTPS ? "https" : "http";
 
         public static Dictionary<string, Func<HttpListenerRequestEventArgs, Task<bool>>> ModuleConnectors { get; } = new Dictionary<string, Func<HttpListenerRequestEventArgs, Task<bool>>>();
+        public static Dictionary<string, Func<string, Task<WebQueryResultEnum>>> WebModuleConnectors { get; } = new Dictionary<string, Func<string, Task<WebQueryResultEnum>>>();
 
 
         public WebServerModule()
@@ -445,7 +447,7 @@ namespace ThunderED.Modules.Sub
             var callbackurl = $"{GetWebSiteUrl()}/callback";
             return callbackurl;
         }
-        internal static string GetWebConfigAuthURL()
+        public static string GetWebConfigAuthURL()
         {
             var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var callbackurl = GetCallBackUrl();
@@ -503,7 +505,7 @@ namespace ThunderED.Modules.Sub
             return $"{GetWebSiteUrl()}/{text}";
         }
 
-        internal static string GetAuthLobbyUrl()
+        public static string GetAuthLobbyUrl()
         {
             return $"{GetWebSiteUrl()}/authPage.html";
         }
@@ -697,6 +699,25 @@ namespace ThunderED.Modules.Sub
         public static string GetWebEditorTimersUrl(string code)
         {
             return $"{GetWebSiteUrl()}/settings?code={code}&state=settings_ti&data=";
+        }
+
+        public static async Task<WebQueryResultEnum> ProcessWebCallbacks(string query)
+        {
+            foreach (var method in WebModuleConnectors.Values)
+            {
+                try
+                {
+                    var result = await method(query);
+                    if (result != WebQueryResultEnum.False)
+                        return result;
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx($"Module method {method.Method.Name} throws ex!", ex);
+                }
+            }
+
+            return WebQueryResultEnum.False;
         }
     }
 }

@@ -152,7 +152,7 @@ namespace ThunderED.Modules
                         }
 
                         var labelsData = await APIHelper.ESIAPI.GetMailLabels(Reason, charId.ToString(), token);
-                        var searchLabels = labelsData?.labels.Where(a => a.name.ToLower() != "sent" && a.name.ToLower() != "received").ToList() ??
+                        var searchLabels = labelsData?.labels.Where(a => a.name?.ToLower() != "sent" && a.name?.ToLower() != "received").ToList() ??
                                            new List<JsonClasses.MailLabel>();
                         var mailLists = await APIHelper.ESIAPI.GetMailLists(Reason, charId, token);
 

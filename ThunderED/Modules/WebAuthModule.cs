@@ -77,11 +77,21 @@ namespace ThunderED.Modules
                     ParsedMembersLists.Add(key, aGroupDic);
             }
 
+            //we can't proceed if there was unresolved entities as this will lead to role stripping failures
+            if (IsEntityInitFailed)
+            {
+                await LogHelper.LogError("WebAuth module has been suspended due to errors in resolving specified char/corp/alliance entities! Please actualize auth config or restart the bot if this is an ESI issue.", Category);
+                if (Settings.WebAuthModule.AuthReportChannel > 0)
+                    await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,
+                        LM.Get("initialEntityParseError"));
+
+            }
+
         }
 
         public override async Task Run(object prm)
         {
-            if (!Settings.Config.ModuleAuthWeb) return;
+            if (!Settings.Config.ModuleAuthWeb || IsEntityInitFailed) return;
 
             if(IsRunning) return;
             IsRunning = true;
@@ -224,6 +234,10 @@ namespace ThunderED.Modules
                                 result.Group = group;
                                 result.GroupName = groupName;
                                 return result;
+                            }
+                            else
+                            {
+                                await AuthInfoLog(chData, $"[GARE] Found pre-match in {groupName}|{entityName}. Continue search...", true);
                             }
                         }
                     }

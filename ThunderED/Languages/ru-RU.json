@@ -596,6 +596,7 @@
   "sysFlushedNotifications": "Кэш уведомлений был сброшен!",
   "sysFlushedAllCache": "Весь серверный кэш был сброшен!",
   "helpSysToken": "esitoken [ID] - возращает токен ESI для персонажа с указанным ID",
-  "hrmInspectIp": "Reg IP"
+  "hrmInspectIp": "Reg IP",
+  "initialEntityParseError": "@here Модуль WebAuth был приостановлен в связи с ошибками определения персонажей/корп/альянсов, указанных в конфиг файле! Актуализируйте данные и/или перезапустите бота, если это ошибка сервиса ESI."
 
 }

@@ -1723,7 +1723,6 @@ namespace ThunderED.Classes
 
         public bool ExtendedESILogging { get; set; } = false;
         public string ESIAddress { get; set; } = "https://esi.evetech.net/";
-        public bool UseHTTPS { get; set; } = false;
         public bool RunAsServiceCompatibility { get; set; } = false;
         public bool DisableLogIntoFiles { get; set; } = false;
         [Comment("Optional path to language files folder. Empty by default and will use default folder")]
@@ -1816,6 +1815,7 @@ namespace ThunderED.Classes
         [Comment("Text client code from the CCP application")]
         [Required]
         public string CcpAppSecret { get; set; }
+        public bool UseHTTPS { get; set; } = false;
 
 #if EDITOR
         public override string this[string columnName]

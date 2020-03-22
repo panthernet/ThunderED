@@ -146,6 +146,11 @@ namespace ThunderED.Modules
             }
         }
 
+        /// <summary>
+        /// Gets or sets if there was errors during the initial entity queries
+        /// </summary>
+        protected volatile bool IsEntityInitFailed;
+
         protected async Task<Dictionary<string, List<long>>> ParseMemberDataArray(List<object> list)
         {
             var result = new Dictionary<string, List<long>> {{"character", new List<long>()}, {"corporation", new List<long>()}, {"alliance", new List<long>()}};
@@ -158,17 +163,17 @@ namespace ThunderED.Modules
                     if (entity == null) continue;
                     if (long.TryParse(entity.ToString(), out var longNumber))
                     {
-                        var rCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, entity);
+                        var rCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, entity, false, false, true);
                         if (rCharacter != null)
                             result["character"].Add(longNumber);
                         else
                         {
-                            var rCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, entity);
+                            var rCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, entity, false, false, true);
                             if (rCorp != null)
                                 result["corporation"].Add(longNumber);
                             else
                             {
-                                var rAlliance = await APIHelper.ESIAPI.GetAllianceData(Reason, entity);
+                                var rAlliance = await APIHelper.ESIAPI.GetAllianceData(Reason, entity, false, false, true);
                                 if (rAlliance != null)
                                     result["alliance"].Add(longNumber);
                                 else failedList.Add(longNumber);
@@ -202,7 +207,10 @@ namespace ThunderED.Modules
             }
 
             if (failedList.Any())
+            {
+                IsEntityInitFailed = true;
                 await LogHelper.LogWarning($"Member entities not found: {string.Join(',', failedList)}!");
+            }
 
             return result;
         }

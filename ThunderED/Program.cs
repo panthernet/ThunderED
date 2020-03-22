@@ -5,7 +5,9 @@ using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 using ThunderED.Classes;
+using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
+using ThunderED.Modules.Sub;
 
 namespace ThunderED
 {
@@ -130,11 +132,10 @@ namespace ThunderED
             //initiate core timer
             _timer = new Timer(TickCallback, new AutoResetEvent(true), 100, 100);
 
-            Console.CancelKeyPress += (sender, e) =>
+            Console.CancelKeyPress += async (sender, e) =>
             {
                 e.Cancel = false;
-                _timer?.Dispose();
-                APIHelper.DiscordAPI.Stop();
+                await Shutdown();
             };
 
             AppDomain.CurrentDomain.UnhandledException += async (sender, eventArgs) =>
@@ -300,6 +301,123 @@ namespace ThunderED
              {
                  _confirmClose = true;
              }*/
+        }
+    }
+
+    public class ExternalAccess
+    {
+        private static Timer _timer;
+
+        public static async Task<bool> Start()
+        {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+            APIHelper.Prepare();
+            await LogHelper.LogInfo($"ThunderED v{Program.VERSION} is running!").ConfigureAwait(false);
+            //load database provider
+            var rs = await SQLHelper.LoadProvider();
+            if (!string.IsNullOrEmpty(rs))
+            {
+                await LogHelper.LogError(rs);
+                try
+                {
+                    Console.ReadKey();
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                return false;
+            }
+
+            await SQLHelper.InitializeBackup();
+
+            //load language
+            await LM.Load();
+            //load injected settings
+            await SettingsManager.UpdateInjectedSettings();
+            //load APIs
+            await APIHelper.DiscordAPI.Start();
+
+            while (!APIHelper.DiscordAPI.IsAvailable)
+            {
+                await Task.Delay(10);
+            }
+
+            if (APIHelper.DiscordAPI.GetGuild() == null)
+            {
+                await LogHelper.LogError("[CRITICAL] DiscordGuildId - Discord guild not found!");
+                try
+                {
+                    Console.ReadKey();
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                return false;
+            }
+
+            //initiate core timer
+            _timer = new Timer(TickCallback, new AutoResetEvent(true), 100, 100);
+
+            return true;
+        }
+
+        internal static volatile bool IsClosing = false;
+        private static volatile bool _canClose = false;
+
+        public static async Task Shutdown(bool isRestart = false)
+        {
+            try
+            {
+                await LogHelper.LogInfo(isRestart ? "Bot restart requested..." : $"Bot shutdown requested...");
+                APIHelper.DiscordAPI.Stop();
+                IsClosing = true;
+                while (!_canClose || !TickManager.AllModulesReadyToClose())
+                {
+                    await Task.Delay(10);
+                }
+
+                await LogHelper.LogInfo(isRestart ? "Bot is ready for restart" : "Bot shutdown complete");
+            }
+            catch
+            { 
+                // ignore
+            }
+
+            return;
+        }
+
+        private static void TickCallback(object state)
+        {
+            _canClose = IsClosing;
+            if (_canClose || IsClosing)
+            {
+                if (_timer != null)
+                {
+                    _timer?.Dispose();
+                    _timer = null;
+                }
+                return;
+            }
+
+            TickManager.Tick(state);
+
+            if (_canClose)
+            {
+                _timer?.Dispose();
+                _timer = null;
+            }
+
+        }
+
+        public static async Task<WebQueryResultEnum> ProcessCallback(string queryStringValue)
+        {
+            return await WebServerModule.ProcessWebCallbacks(queryStringValue);
         }
     }
 }

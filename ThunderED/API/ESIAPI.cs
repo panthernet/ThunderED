@@ -53,25 +53,34 @@ namespace ThunderED.API
             await RemoveDbCache("AllianceData", id);
         }
 
-        internal async Task<JsonClasses.CharacterData> GetCharacterData(string reason, object id, bool forceUpdate = false, bool noCache = false)
+        internal async Task<JsonClasses.CharacterData> GetCharacterData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
         {
-            var result = await GetEntry<JsonClasses.CharacterData>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
-                forceUpdate, noCache);
-            if(result != null)
+            JsonClasses.CharacterData result;
+            if (isAggressive)
+                result = await GetAgressiveESIEntry<JsonClasses.CharacterData>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/?datasource=tranquility&language={_language}", reason, id, 10);
+            else
+                result = await GetEntry<JsonClasses.CharacterData>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
+                    forceUpdate, noCache);
+
+            if (result != null)
                 result.character_id = Convert.ToInt64(id);
             return result;
         }
 
-        internal async Task<JsonClasses.CorporationData> GetCorporationData(string reason, object id, bool forceUpdate = false, bool noCache = false)
+        internal async Task<JsonClasses.CorporationData> GetCorporationData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
         {
             if (id == null) return null;
+            if(isAggressive)
+                return await GetAgressiveESIEntry<JsonClasses.CorporationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/?datasource=tranquility&language={_language}", reason, id,10);
             return await GetEntry<JsonClasses.CorporationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
                 forceUpdate, noCache);
         }
 
-        internal async Task<JsonClasses.AllianceData> GetAllianceData(string reason, object id, bool forceUpdate = false, bool noCache = false)
+        internal async Task<JsonClasses.AllianceData> GetAllianceData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
         {
             if (id == null) return null;
+            if(isAggressive)
+                return await GetAgressiveESIEntry<JsonClasses.AllianceData>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 10);
             return await GetEntry<JsonClasses.AllianceData>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
                 forceUpdate, noCache);
         }
@@ -310,6 +319,26 @@ namespace ThunderED.API
             }
             return data;
         }
+
+
+        private async Task<T> GetAgressiveESIEntry<T>(string url, string reason, object id, int retries)
+            where T : class
+        {
+            if (id == null || id.ToString() == "0") return null;
+            var data = await GetFromDbCache<T>(id, 1);
+            if (data == null)
+            {
+                var result = await APIHelper.AggressiveESIRequestWrapper<T>(url, reason, retries);
+                if (!result.Data.IsFailed)
+                {
+                    data = result.Result;
+                    if (data != null)
+                        await UpdateDbCache(data, id, 1);
+                }
+            }
+            return data;
+        }
+
         #endregion
 
         #region Cache

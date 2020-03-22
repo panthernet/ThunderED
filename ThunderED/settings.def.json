@@ -52,7 +52,6 @@
     "ConcurrentThreadsCount": 4,
     "extendedESILogging": false,
     "ESIAddress": "https://esi.evetech.net/",
-    "UseHTTPS": false,
     "RunAsServiceCompatibility": false,
     "DisableLogIntoFiles": false,
     "LanguageFilesFolder": ""
@@ -66,7 +65,8 @@
     "ccpAppClientId": "REQUIRED",
     "ccpAppSecret": "REQUIRED",
     "ServerStatusPort": 0,
-    "NoStatusResponseOnDiscordDisconnection": true
+    "NoStatusResponseOnDiscordDisconnection": true,
+    "UseHTTPS": false
   },
 
   "Database": {
@@ -87,7 +87,7 @@
     "UseSocketsForZKillboard": true,
     "ZKillboardWebSocketUrl": "wss://zkillboard.com:2096",
     "AvoidDupesAcrossAllFeeds": false,
-    "OldKMDaysThreshold":  2 
+    "OldKMDaysThreshold": 2
   },
 
   "liveKillFeedModule": {
@@ -132,7 +132,7 @@
         "dsc1": "You can safely remove all default entries to reduce config size. They will automatically use default values on app startup.",
         "dsc2": "HasNo' properties are always checked before any 'Has' properties. They are not affected by any modifiers.",
         "dsc3": "Provided config is just an example for the most useful cases. You can mix different filter properties to achieve insane agility with KM feeds.",
-        "IsEnabled": false, 
+        "IsEnabled": false,
         "DiscordChannels": [ 567625555843743754, 567625555843743756 ],
         "MessageTemplateFileName": "Template.killMailGeneral.txt",
         "Filters": {

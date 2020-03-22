@@ -603,5 +603,6 @@
   "sysFlushedNotifications": "Notifications cache has been cleared!",
   "sysFlushedAllCache": "All server cache has been cleared!",
   "helpSysToken": "esitoken [ID] - gets character ESI token by specified character ID",
-  "hrmInspectIp": "Reg IP"
+  "hrmInspectIp": "Reg IP",
+  "initialEntityParseError": "@here WebAuth module has been suspended due to errors in resolving specified char/corp/alliance entities! Please actualize auth config and/or restart the bot if this is an ESI issue."
 }

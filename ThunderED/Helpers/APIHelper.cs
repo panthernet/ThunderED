@@ -137,7 +137,7 @@ namespace ThunderED.Helpers
                 }
                 catch (Exception ex)
                 {
-                    if (TickManager.IsNoConnection && request.StartsWith("https://esi.tech.ccp.is"))
+                    if (TickManager.IsNoConnection && request.StartsWith(SettingsManager.Settings.Config.ESIAddress))
                     {
                         result.Data.Message = "No connection";
                         result.Data.IsNoConnection = true;
@@ -149,6 +149,109 @@ namespace ThunderED.Helpers
                         await LogHelper.LogEx(request, ex, LogCat.ESI);
                         await LogHelper.LogInfo($"[try: {i}][{reason}]{Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONSE: {raw}", LogCat.ESI);
                     }
+                }
+            }
+
+            return result;
+        }
+
+        public static async Task<ESIQueryResult<T>> AggressiveESIRequestWrapper<T>(string request, string reason, int retCount, string auth = null, string etag = null)
+            where T : class
+        {
+            string raw = null;
+            retCount = retCount == 0 ? 1 : retCount;
+
+            var result = new ESIQueryResult<T>();
+
+            for (var i = 0; i < retCount; i++)
+            {
+                try
+                {
+                    await WaitReq.WaitIfNeeded(i);
+                    var handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+                    using (var httpClient = new HttpClient(handler))
+                    {
+                        httpClient.DefaultRequestHeaders.Clear();
+                        httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                        httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+                        if (!string.IsNullOrEmpty(auth))
+                            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", auth);
+                        if (!string.IsNullOrEmpty(etag))
+                            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("if-none-match", etag);
+
+                        using (var responseMessage = await httpClient.GetAsync(request))
+                        {
+                            result.Data.ETag = responseMessage.Headers.FirstOrDefault(a => a.Key == "ETag").Value?.FirstOrDefault().Trim('"');
+
+                            raw = await responseMessage.Content.ReadAsStringAsync();
+                            if (!responseMessage.IsSuccessStatusCode)
+                            {
+                                result.Data.ErrorCode = (int)responseMessage.StatusCode;
+                                result.Data.Message = raw;
+                                if (responseMessage.StatusCode != HttpStatusCode.NotModified && responseMessage.StatusCode != HttpStatusCode.NotFound && responseMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                    (responseMessage.StatusCode != HttpStatusCode.BadGateway && responseMessage.StatusCode != HttpStatusCode.GatewayTimeout))
+                                    await LogHelper.LogError($"[try: {i}][{reason}] AGG Potential {responseMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
+                                if (responseMessage.StatusCode == HttpStatusCode.NotModified)
+                                    return result;
+
+                                var errParsed = JsonConvert.DeserializeObject<JsonClasses.ESIError>(raw);
+                                if (errParsed != null)
+                                {
+                                    if (errParsed.timeout > 0)
+                                        WaitReq.Update(errParsed.timeout);
+                                    if (SettingsManager.Settings.Config.ExtendedESILogging)
+                                        await LogHelper.LogError($"[{reason}] AGG Request failure: {request}\nMessage: {errParsed.error}", LogCat.ESI, false);
+                                    //in aggressive mode we always retry queries
+                                }
+                                continue;
+                            }
+
+                            if (typeof(T) == typeof(string))
+                            {
+                                result.Result = (T)(object)raw;
+                                return result;
+                            }
+
+                            if (!typeof(T).IsClass)
+                            {
+                                result.Data.Message = "Is not a class T!";
+                                return result;
+                            }
+
+                            var data = JsonConvert.DeserializeObject<T>(raw);
+                            if (data == null)
+                            {
+                                result.Data.Message = "Failed to deserialize!";
+                                result.Data.ErrorCode = -100;
+                                await LogHelper.LogError($"[try: {i}][{reason}] AGG Deserialized to null!{Environment.NewLine}Request: {request}", LogCat.ESI, false);
+                            }
+                            else
+                            {
+                                result.Result = data;
+                                return result;
+                            }
+                        }
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    //skip, probably due to timeout
+                    result.Data.Message = "Task has been cancelled";
+                    result.Data.ErrorCode = 1;
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    if (TickManager.IsNoConnection && request.StartsWith(SettingsManager.Settings.Config.ESIAddress))
+                    {
+                        result.Data.Message = "No connection";
+                        result.Data.IsNoConnection = true;
+                        return result;
+                    }
+
+                    await LogHelper.LogEx(request, ex, LogCat.ESI);
+                    await LogHelper.LogInfo($"[try: {i}][{reason}]AGG {Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONSE: {raw}", LogCat.ESI);
                 }
             }
 
@@ -231,7 +334,7 @@ namespace ThunderED.Helpers
                 }
                 catch (Exception ex)
                 {
-                    if (TickManager.IsNoConnection && request.StartsWith("https://esi.tech.ccp.is"))
+                    if (TickManager.IsNoConnection && request.StartsWith(SettingsManager.Settings.Config.ESIAddress))
                         return null;
 
                     if (!silent)
@@ -292,7 +395,7 @@ namespace ThunderED.Helpers
                 }
                 catch (Exception ex)
                 {
-                    if (TickManager.IsNoConnection && request.StartsWith("https://esi.tech.ccp.is"))
+                    if (TickManager.IsNoConnection && request.StartsWith(SettingsManager.Settings.Config.ESIAddress))
                         return false;
 
                     if (!silent)
