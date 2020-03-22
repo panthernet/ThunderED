@@ -1,5 +1,5 @@
 ### V1.4.9
-+ Added !sys shutdown and !sys restart commands. Needs testing on Linux.
++ Added !sys shutdown and !sys restart commands. Restart is currently for Windows only.
 + Added user IP address info on the character panel in HR module
 + Fixed and reworked market price module to work with Fuzzworks data
 + Fixed potential role stripping failure
@@ -8,8 +8,25 @@
 + Improved !sys command set. Use !sys help for more info
 + Made KM template variables case insensitive
 
+### FEATURE HIGHLIGHT - RESTARTER
+This release introduces new executable: Restarter. It is top-level executable which should be started instead of `ThunderED.dll`.
+It provides the following benefits:
+- Support for correct shutdown procedures
+- Support for !sys restart command
+- Automatic restart upon bot app failure. Requires the app/process to close without additional notifications, e.g. under Windows it requires fail window to be disabled in system policies.
+How to enable:
+- Uncomment `ENTRYPOINT ["dotnet", "Restarter.dll"]` in `Dockerfile` and comment the `ENTRYPOINT ["dotnet", "ThunderED.dll"]`
+- In case of manual startup just run the `Restarter.exe`
+
+### FEATURE HIGHLIGHT - SHUTDOWN
+We have new Discord command `!sys shutdown`. It will perform gracefull shutdown procedure with minimal risks to corrupt DB.
+For the Docker users it also provides a possibility to replace shutdown with gracefull restart:
+ - Run container with the `--restart always` flag
+ - Send `!sys shutdown` command from Discord
+ - The bot will terminate the app process and container will be restarted along with the new app process!
+
 ### BREAKING CHANGES
- - WebAuth module will now be suspended if it is unable to resolve all the char/corp/alliance entities in auth groups (no auth checks, existing users will remain intact). Red error message is displayed in the console/logs and Discord message is sent into the `AuthReportChannel` channel (if it is specified) in case of the failure. 
+ - WebAuth module will now be suspended if it is unable to resolve all the char/corp/alliance entities in auth groups on bot startup (no auth checks, existing users will remain intact). Red error message is displayed in the console/logs and Discord message is sent into the `AuthReportChannel` channel (if it is specified) in case of the failure. 
   To fix the problem you must remove/update failing entities and restart the bot. If the case is happened due to very hard ESI failure you must restart the bot and see if it breaks through the problem.
 
  - Removed `HasShipEntities` and `HasNoShipEntities` props
