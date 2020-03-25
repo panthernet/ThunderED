@@ -227,7 +227,10 @@ namespace ThunderED.Modules
                     continue;
                 }
 
-                foreach (var (filterName, filter) in @group.Filters)
+                var filters = group.Filters.Count == 0
+                    ? new Dictionary<string, IndustryJobFilter> {{"default", new IndustryJobFilter()}}
+                    : group.Filters;
+                foreach (var (filterName, filter) in filters)
                 {
                     if(!CheckJobForFilter(filter, job, isCorp)) continue;
 

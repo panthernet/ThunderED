@@ -280,7 +280,7 @@ namespace ThunderED.Modules
             foreach (var characterID in group.StandingsAuth.CharacterIDs)
             {
                 var standings = await SQLHelper.LoadAuthStands(characterID);
-                if (standings == null) return list;
+                if (standings == null) continue;
 
                 await AuthInfoLog(chData, $"[GARE] Checking stands from {characterID}...", true);
 

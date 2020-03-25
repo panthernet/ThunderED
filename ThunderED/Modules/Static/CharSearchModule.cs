@@ -74,9 +74,14 @@ namespace ThunderED.Modules.Static
             var allianceTicker = allianceData != null ? $"[{allianceData?.ticker}]" : "";
             var lastSeenSystem = systemData?.name ?? LM.Get("None");
             var lastSeenShip = lastShip?.name ?? LM.Get("None");
-            var dangerous = characterStats.dangerRatio > 75 ? LM.Get("Dangerous") : LM.Get("Snuggly");
+            var dangerous = characterStats.dangerRatio > 70 ? LM.Get("Dangerous") : LM.Get("Snuggly");
+            var dRatio = characterStats.dangerRatio > 70
+                ? characterStats.dangerRatio
+                : 100 - characterStats.dangerRatio;
             var gang = characterStats.gangRatio > 70 ? LM.Get("fleetChance") : LM.Get("soloChance");
-
+            var gRatio = characterStats.gangRatio > 70
+                ? characterStats.gangRatio
+                : 100 - characterStats.gangRatio;
             var cynoCount = 0;
             var covertCount = 0;
 
@@ -116,8 +121,8 @@ namespace ThunderED.Modules.Static
                 .AddField("\u200b", "\u200b")
                 .AddField(LM.Get("CommonCyno"), $"{cynoCount}", true)
                 .AddField(LM.Get("CovertCyno"), $"{covertCount}", true)
-                .AddField(LM.Get("Dangerous"), $"{text1}{Environment.NewLine}{Environment.NewLine}**{dangerous} {characterStats.dangerRatio}%**", true)
-                .AddField(LM.Get("FleetChance2"), $"{text2}{Environment.NewLine}{Environment.NewLine}**{characterStats.gangRatio}% {gang}**", true);
+                .AddField(LM.Get("Dangerous"), $"{text1}{Environment.NewLine}{Environment.NewLine}**{dangerous} {dRatio}%**", false)
+                .AddField(LM.Get("FleetChance2"), $"{text2}{Environment.NewLine}{Environment.NewLine}**{gRatio}% {gang}**", false);
 
             var embed = builder.Build();
 
