@@ -949,6 +949,8 @@ namespace ThunderED.Classes
         public ulong AnnounceChannel { get; set; }
         [Comment("Auto grant editor roles to Discord admins based on the config section")]
         public bool GrantEditRolesToDiscordAdmins { get; set; } = true;
+        [Comment("Default text for the Discord authentication button")]
+        public string AuthButtonDiscordText { get; set; } = "Timers Auth";
 #if EDITOR
         [Comment("List of entities which has view access to the timers page")]
         [Required]
@@ -1296,6 +1298,9 @@ namespace ThunderED.Classes
     {
         [Comment("Time interval in minutes to run new notifications check. \nDue to natural delay in notifications on CCP side it is not wise to set it lower than 2 minutes")]
         public int CheckIntervalInMinutes { get; set; } = 2;
+
+        [Comment("Default text for the Discord authentication button")]
+        public string AuthButtonDiscordText { get; set; } = "Notifications Auth";
 #if EDITOR
         [Comment("The list of character keys which will be authorized to share their notifications")]
         [Required]
@@ -1870,7 +1875,10 @@ namespace ThunderED.Classes
         public string DefaultAuthGroup { get; set; }
         [Comment("By default each auth group have own auth button. With this option on there wll be only one button and auth will search for first group with matching condition automatically.")]
         public bool UseOneAuthButton { get; set; } = false;
+        [Comment("Produces A LOT of detailed logs. Recommended only for debug purpose")]
         public bool EnableDetailedLogging { get; set; }
+        [Comment("Default text for the Discord authentication button")]
+        public string AuthButtonDiscordText { get; set; } = "Discord Auth";
 
         [Comment("Auto clear !auth commands text from discord channels to reduce clutter")]
         public bool AutoClearAuthCommandsFromDiscord { get; set; }

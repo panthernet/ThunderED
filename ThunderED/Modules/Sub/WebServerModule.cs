@@ -245,7 +245,7 @@ namespace ThunderED.Modules.Sub
                                 if (Settings.Config.ModuleAuthWeb)
                                 {
                                     var url = $"{authUrl}?group={HttpUtility.UrlEncode(WebAuthModule.DEF_NOGROUP_NAME)}";
-                                    authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonDiscordText")}</a>");
+                                    authText.Append($"\n<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText}</a>");
                                 }
                             }
 
@@ -268,7 +268,7 @@ namespace ThunderED.Modules.Sub
                                 {
                                     if(group.Value.Hidden) continue;
                                     var url = $"{authUrl}?group={HttpUtility.UrlEncode(group.Value.BindToMainCharacter ? WebAuthModule.DEF_ALTREGGROUP_NAME : group.Key)}";
-                                    var bText = group.Value.CustomButtonText ?? $"{LM.Get("authButtonDiscordText")} - {group.Key}";
+                                    var bText = group.Value.CustomButtonText ?? SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText;
                                     authText.Append($"<a href=\"{url}\" class=\"btn btn-info btn-block\" role=\"button\">{bText}</a>");
                                 }
                             }

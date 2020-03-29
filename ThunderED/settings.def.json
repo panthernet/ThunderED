@@ -201,6 +201,7 @@
     "enforceCharName": true,
     "UseOneAuthButton": false,
     "EnableDetailedLogging": false,
+    "AuthButtonDiscordText": "Discord Auth",
     "authGroups": {
       "DefaultGroup": {
         "AllowedMembers": {},
@@ -523,6 +524,7 @@
     "announceChannel": 0,
     "TimeInputFormat": "DD.MM.YYYY HH:mm",
     "DefaultMention": "@everyone",
+    "AuthButtonDiscordText": "Timers Page",
     "accessList": {
       "group1": {
         "FilterEntities": [ "Character Name", "a:Alliance Name", "c:Corporation Name", 795045209 ],
@@ -580,6 +582,7 @@
 
   "notificationFeedModule": {
     "checkIntervalInMinutes": 2,
+    "AuthButtonDiscordText": "Notifications Auth",
     "groups": {
       "groupName1": {
         "IsEnabled": true,
@@ -669,6 +672,7 @@
       }
     }
   },
+
   "motd": {
     "motdkeyID": "",
     "motdvCode": "",
@@ -782,6 +786,7 @@
       }
     }
   },
+
   "SovTrackerModule": {
     "CheckIntervalInMinutes": 60,
     "Groups": {

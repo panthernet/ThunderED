@@ -36,7 +36,7 @@ For the Docker users it also provides a possibility to replace shutdown with gra
  - Removed `HasShipEntities` and `HasNoShipEntities` props
  - Added `HasAttackerShipEntities`, `HasNoAttackerShipEntities`, `HasVictimShipEntities` and `HasNoVictimShipEntities` props to track attacking ships also
  - Moved `UseHTTPS` prop to `webServerModule`. It will be used in the next gen server version.
-
+ - Removed `authButtonDiscordText,authButtonNotifyText,authButtonTimersText` lang strings and added `AuthButtonDiscordText` config props to WebAuth, Notifications and Timers modules for default button names
 
 ### V1.4.7
 + Added message to AuthReportChannel upon successfull alt character registration
