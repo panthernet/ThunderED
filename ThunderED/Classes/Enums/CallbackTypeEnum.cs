@@ -4,11 +4,9 @@ using System.Text;
 
 namespace ThunderED.Classes.Enums
 {
-    public enum WebQueryResultEnum
+    public enum CallbackTypeEnum
     {
-        Success,
-        False,
-        EsiFailure,
-
+        Callback,
+        Auth
     }
 }

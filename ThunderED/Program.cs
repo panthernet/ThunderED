@@ -308,6 +308,11 @@ namespace ThunderED
     {
         private static Timer _timer;
 
+        public static string GetVersion()
+        {
+            return Program.VERSION;
+        }
+
         public static async Task<bool> Start()
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
@@ -415,9 +420,9 @@ namespace ThunderED
 
         }
 
-        public static async Task<WebQueryResultEnum> ProcessCallback(string queryStringValue)
+        public static async Task<WebQueryResult> ProcessCallback(string queryStringValue, CallbackTypeEnum type, string ip)
         {
-            return await WebServerModule.ProcessWebCallbacks(queryStringValue);
+            return await WebServerModule.ProcessWebCallbacks(queryStringValue, type, ip);
         }
     }
 }

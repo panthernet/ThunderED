@@ -227,6 +227,7 @@ namespace ThunderED.Classes
         public static void InvalidateModules()
         {
             WebServerModule.ModuleConnectors.Clear();
+            WebServerModule.WebModuleConnectors.Clear();
             ZKillLiveFeedModule.Queryables.Clear();
             Modules.ForEach(a=> a.Cleanup());
             _isModulesLoaded = false;

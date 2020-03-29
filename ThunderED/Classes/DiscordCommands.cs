@@ -968,7 +968,7 @@ namespace ThunderED.Classes
 
             if(!IsAuthAllowed() || IsForbidden()) return;
 
-            if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
+            if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
                 try
                 {
@@ -997,7 +997,7 @@ namespace ThunderED.Classes
         {
             if(!IsAuthAllowed() || IsForbidden()) return;
 
-            if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleNotificationFeed)
+            if (SettingsManager.Settings.Config.ModuleNotificationFeed)
             {
                 try
                 {
@@ -1031,7 +1031,7 @@ namespace ThunderED.Classes
             if(!IsAuthAllowed() || IsForbidden())
                 return;
 
-            if (SettingsManager.Settings.Config.ModuleWebServer && SettingsManager.Settings.Config.ModuleAuthWeb)
+            if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
                 try
                 {

@@ -604,5 +604,18 @@
   "sysFlushedAllCache": "All server cache has been cleared!",
   "helpSysToken": "esitoken [ID] - gets character ESI token by specified character ID",
   "hrmInspectIp": "Reg IP",
-  "initialEntityParseError": "@here WebAuth module has been suspended due to errors in resolving specified char/corp/alliance entities! Please actualize auth config and/or restart the bot if this is an ESI issue."
+  "initialEntityParseError": "@here WebAuth module has been suspended due to errors in resolving specified char/corp/alliance entities! Please actualize auth config and/or restart the bot if this is an ESI issue.",
+  "msgLoading": "Loading...",
+  "msgProcessingQuery": "Processing query...",
+  "404": "404 Not Found!",
+  "nmHome": "Home",
+  "nmAuthPage": "Authentication",
+  "nmAuthFeedPage": "Feeds Auth",
+  "nmHrmPage": "HRM",
+  "nmTimersPage": "Timers",
+  "nmWebSettings": "Settings",
+  "webAbout": "About",
+  "webVisitHomepage": "Visit home page",
+  "webAboutThundered": "About ThunderED",
+  "webUserIsNotAuthenticated":  "Selected character is not present in the system" 
 }

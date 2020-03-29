@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using ThunderED.Classes;
 using ThunderED.Helpers;
 
 namespace ThunderED.Modules
@@ -14,6 +15,7 @@ namespace ThunderED.Modules
         public override async Task Run(object prm)
         {
             if(IsRunning) return;
+            if(Settings.Config.ModuleAuthWeb && TickManager.GetModule<WebAuthModule>().IsEntityInitFailed) return;
             IsRunning = true;
             var manual = (bool?) prm ?? false;
 

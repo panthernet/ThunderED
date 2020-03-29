@@ -317,7 +317,7 @@ namespace ThunderED.Helpers
             return res?.Select(ParseAuthUser).FirstOrDefault();
         }
 
-        internal static async Task<AuthUserEntity> GetAuthUserByCharacterId(long id, bool order = false)
+        public static async Task<AuthUserEntity> GetAuthUserByCharacterId(long id, bool order = false)
         {
             var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object> {{"characterID", id}});
 

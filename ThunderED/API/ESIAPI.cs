@@ -603,9 +603,11 @@ namespace ThunderED.API
         }
 
 
-        public async Task<JsonClasses.SearchResult> SearchMemberEntity(string reason, string value)
+        public async Task<JsonClasses.SearchResult> SearchMemberEntity(string reason, string value, bool isAggressive = false)
         {
             var searchValue = HttpUtility.UrlEncode(value);
+            if(isAggressive)
+                return (await APIHelper.AggressiveESIRequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance,character,corporation&datasource=tranquility&search={searchValue}&strict=true", reason,10))?.Result;
             return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance,character,corporation&datasource=tranquility&search={searchValue}&strict=true", reason);
         }
 

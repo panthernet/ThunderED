@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using ThunderED.Classes;
-using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
@@ -16,12 +13,28 @@ using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
-    public sealed class NotificationModule: AppModuleBase
+    public sealed partial class NotificationModule: AppModuleBase
     {
         private DateTime _nextNotificationCheck = DateTime.FromFileTime(0);
         private long _lastNotification;
 
         public override LogCat Category => LogCat.Notification;
+
+        private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
+        private readonly ConcurrentDictionary<long, List<JsonClasses.Notification>> _passNotifications = new ConcurrentDictionary<long, List<JsonClasses.Notification>>();
+        private long _lastLoggerNotificationId;
+        private DateTime _lastCleanupCheck = DateTime.FromFileTime(0);
+
+        public NotificationModule()
+        {
+            LogHelper.LogModule("Initializing Notifications module...", Category).GetAwaiter().GetResult();
+            WebServerModule.ModuleConnectors.Add(Reason, Auth);
+        }
+
+        public override async Task Initialize()
+        {
+            await WebPartInitialization();
+        }
 
         public override async Task Run(object prm)
         {
@@ -38,53 +51,6 @@ namespace ThunderED.Modules
                 IsRunning = false;
             }
         }
-
-        public NotificationModule()
-        {
-            LogHelper.LogModule("Initializing Notifications module...", Category).GetAwaiter().GetResult();
-            WebServerModule.ModuleConnectors.Add(Reason, Auth);
-            //new connector
-            WebServerModule.WebModuleConnectors.Add(Reason, ProcessRequest);
-        }
-
-        public async override Task Initialize()
-        {
-            
-        }
-
-        private DateTime _lastCleanupCheck = DateTime.FromFileTime(0);
-
-
-        private async Task CleanupNotifyList()
-        {
-            if ((DateTime.Now - _lastCleanupCheck).TotalHours > 8)
-            {
-                _lastCleanupCheck = DateTime.Now;
-                await SQLHelper.CleanupNotificationsList();
-                await LogHelper.LogInfo("Notifications cleanup complete", Category, LogToConsole, false);
-            }
-        }
-
-        private string GetData(string field, Dictionary<string, string> data, bool caseSensitive = false)
-        {
-            if (!caseSensitive)
-            {
-                var lowerField = field.ToLower();
-                var key = data.Keys.FirstOrDefault(a => a.ToLower() == lowerField);
-                return key == null ? null : data[key];
-            }
-            else
-            {
-                var key = data.Keys.FirstOrDefault(a => a == field);
-                return key == null ? null : data[key];
-
-            }
-        }
-
-        private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
-
-        private readonly ConcurrentDictionary<long, List<JsonClasses.Notification>> _passNotifications = new ConcurrentDictionary<long, List<JsonClasses.Notification>>();
-        private long _lastLoggerNotificationId;
 
         #region Notifications
         private async Task NotificationFeed()
@@ -1270,95 +1236,32 @@ typeID: 2233",
             }
         }
 
-        public async Task<bool> Auth(HttpListenerRequestEventArgs context)
+        #endregion
+
+        private async Task CleanupNotifyList()
         {
-            if (!Settings.Config.ModuleNotificationFeed) return false;
-
-            var request = context.Request;
-            var response = context.Response;
-            var extPort = Settings.WebServerModule.WebExternalPort;
-            var port = Settings.WebServerModule.WebExternalPort;
-            try
+            if ((DateTime.Now - _lastCleanupCheck).TotalHours > 8)
             {
-                RunningRequestCount++;
-                if (request.HttpMethod != HttpMethod.Get.ToString())
-                    return false;
-                if ((request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" ||
-                     request.Url.LocalPath == $"{port}/callback")
-                    && request.Url.Query.Contains("&state=9"))
-                {
-                    var prms = request.Url.Query.TrimStart('?').Split('&');
-                    var code = prms[0].Split('=')[1];
-                    // var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
-
-                    var result = await WebAuthModule.GetCharacterIdFromCode(code,
-                        Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
-                    if (result == null)
-                    {
-                        var message = LM.Get("ESIFailure");
-                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth3)
-                            .Replace("{message}", message)
-                            .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                            .Replace("{header}", LM.Get("authTemplateHeader"))
-                            .Replace("{backUrl}", WebServerModule.GetAuthLobbyUrl())
-                            .Replace("{backText}", LM.Get("backText")), response);
-                        return true;
-                    }
-
-                    var characterID = result[0];
-                    var numericCharId = Convert.ToInt64(characterID);
-
-                    if (string.IsNullOrEmpty(characterID))
-                    {
-                        await LogHelper.LogWarning("Bad or outdated notify feed request!");
-                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{message}", LM.Get("authTokenBadRequest"))
-                                .Replace("{header}", LM.Get("authTokenHeader"))
-                                .Replace("{body}", LM.Get("authTokenBodyFail"))
-                                .Replace("{backText}", LM.Get("backText")),
-                            response);
-                        return true;
-                    }
-
-                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.GetEnabledGroups()
-                        .Values.All(g => !g.CharacterID.Contains(numericCharId)))
-                    {
-                        await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
-                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{message}", LM.Get("authTokenInvalid"))
-                                .Replace("{header}", LM.Get("authTokenHeader"))
-                                .Replace("{body}", LM.Get("authTokenBodyFail"))
-                                .Replace("{backText}", LM.Get("backText")),
-                            response);
-                        return true;
-                    }
-
-                    var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
-
-                    await SQLHelper.InsertOrUpdateTokens(result[1] ?? "", characterID, null, "");
-                    await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
-                    await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
-                        .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                        .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
-                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader"))
-                        .Replace("{backText}", LM.Get("backText")), response);
-                    return true;
-                }
+                _lastCleanupCheck = DateTime.Now;
+                await SQLHelper.CleanupNotificationsList();
+                await LogHelper.LogInfo("Notifications cleanup complete", Category, LogToConsole, false);
             }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx(ex.Message, ex, Category);
-            }
-            finally
-            {
-                RunningRequestCount--;
-            }
-
-            return false;
         }
 
+        private string GetData(string field, Dictionary<string, string> data, bool caseSensitive = false)
+        {
+            if (!caseSensitive)
+            {
+                var lowerField = field.ToLower();
+                var key = data.Keys.FirstOrDefault(a => a.ToLower() == lowerField);
+                return key == null ? null : data[key];
+            }
+            else
+            {
+                var key = data.Keys.FirstOrDefault(a => a == field);
+                return key == null ? null : data[key];
+            }
+        }
 
         private async Task UpdateNotificationList(string groupName, string filterName, bool isNew)
         {
@@ -1370,87 +1273,11 @@ typeID: 2233",
 
         private async Task SetLastNotificationId(long id, string groupName = null, string filterName = null)
         {
-            bool isNew = _lastNotification == 0;
+            var isNew = _lastNotification == 0;
             _lastNotification = id;
 
             if (!string.IsNullOrEmpty(groupName) && !string.IsNullOrEmpty(filterName))
                 await UpdateNotificationList(groupName, filterName, isNew);
         }
-
-        #endregion
-
-
-        #region New web section
-        public async Task<WebQueryResultEnum> ProcessRequest(string query)
-        {
-            if (!Settings.Config.ModuleNotificationFeed) return WebQueryResultEnum.False;
-
-            try
-            {
-              /*  RunningRequestCount++;
-                if (query.Contains("&state=9"))
-                {
-                    var prms = query.TrimStart('?').Split('&');
-                    var code = prms[0].Split('=')[1];
-
-                    var result = await WebAuthModule.GetCharacterIdFromCode(code,
-                        Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
-                    if (result == null)
-                        return WebQueryResultEnum.EsiFailure;
-
-                    var characterID = result[0];
-                    var numericCharId = Convert.ToInt64(characterID);
-
-                    if (string.IsNullOrEmpty(characterID))
-                    {
-                        await LogHelper.LogWarning("Bad or outdated notify feed request!");
-                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{message}", LM.Get("authTokenBadRequest"))
-                                .Replace("{header}", LM.Get("authTokenHeader"))
-                                .Replace("{body}", LM.Get("authTokenBodyFail"))
-                                .Replace("{backText}", LM.Get("backText")),
-                            response);
-                        return true;
-                    }
-
-                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.GetEnabledGroups()
-                        .Values.All(g => !g.CharacterID.Contains(numericCharId)))
-                    {
-                        await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
-                        await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)
-                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{message}", LM.Get("authTokenInvalid"))
-                                .Replace("{header}", LM.Get("authTokenHeader"))
-                                .Replace("{body}", LM.Get("authTokenBodyFail"))
-                                .Replace("{backText}", LM.Get("backText")),
-                            response);
-                        return true;
-                    }
-
-                    var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
-
-                    await SQLHelper.InsertOrUpdateTokens(result[1] ?? "", characterID, null, "");
-                    await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
-                    await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
-                        .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                        .Replace("{body2}", LM.Get("authTokenRcv2", rChar.name))
-                        .Replace("{body}", LM.Get("authTokenRcv")).Replace("{header}", LM.Get("authTokenHeader"))
-                        .Replace("{backText}", LM.Get("backText")), response);
-                    return true;
-                }*/
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx(ex.Message, ex, Category);
-            }
-            finally
-            {
-                RunningRequestCount--;
-            }
-
-            return WebQueryResultEnum.False;
-        }
-        #endregion
     }
 }

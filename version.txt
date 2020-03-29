@@ -3,6 +3,9 @@
 + Added user IP address info on the character panel in HR module
 + Fixed and reworked market price module to work with Fuzzworks data
 + Fixed potential role stripping failure
++ Fixed auth standings check from several characters
++ Fixed !char command incorrect values
++ Fixed static command char in web pages
 + Improved KM to track and filter by attacker ships
 + Improved shutdown procedures to avoid possible DB corruption
 + Improved !sys command set. Use !sys help for more info

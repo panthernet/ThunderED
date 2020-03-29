@@ -27,7 +27,6 @@ namespace ThunderED.Modules.Sub
         public static string HttpPrefix => SettingsManager.Settings.WebServerModule.UseHTTPS ? "https" : "http";
 
         public static Dictionary<string, Func<HttpListenerRequestEventArgs, Task<bool>>> ModuleConnectors { get; } = new Dictionary<string, Func<HttpListenerRequestEventArgs, Task<bool>>>();
-        public static Dictionary<string, Func<string, Task<WebQueryResultEnum>>> WebModuleConnectors { get; } = new Dictionary<string, Func<string, Task<WebQueryResultEnum>>>();
 
 
         public WebServerModule()
@@ -701,14 +700,21 @@ namespace ThunderED.Modules.Sub
             return $"{GetWebSiteUrl()}/settings?code={code}&state=settings_ti&data=";
         }
 
-        public static async Task<WebQueryResultEnum> ProcessWebCallbacks(string query)
+
+        #region new web
+        public static Dictionary<string, Func<string, CallbackTypeEnum, string, Task<WebQueryResult>>> WebModuleConnectors { get; } = new Dictionary<string, Func<string, CallbackTypeEnum, string, Task<WebQueryResult>>>();
+
+        /// <summary>
+        /// Iterate between connected handlers to process request
+        /// </summary>
+        public static async Task<WebQueryResult> ProcessWebCallbacks(string query, CallbackTypeEnum type, string ip)
         {
             foreach (var method in WebModuleConnectors.Values)
             {
                 try
                 {
-                    var result = await method(query);
-                    if (result != WebQueryResultEnum.False)
+                    var result = await method(query, type, ip);
+                    if (result.Result != WebQueryResultEnum.False)
                         return result;
                 }
                 catch (Exception ex)
@@ -717,7 +723,11 @@ namespace ThunderED.Modules.Sub
                 }
             }
 
-            return WebQueryResultEnum.False;
+            return WebQueryResult.False;
         }
+
+        
+
+        #endregion
     }
 }

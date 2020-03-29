@@ -32,7 +32,7 @@ namespace ThunderED.API
         {
             Client = new DiscordSocketClient();
             Commands = new CommandService();
-
+            Commands.AddModuleAsync(typeof(DiscordCommands), null).GetAwaiter().GetResult();
             Client.Log += async message =>
             {
                 await AsyncHelper.RedirectToThreadPool();

@@ -149,7 +149,7 @@ namespace ThunderED.Modules
         /// <summary>
         /// Gets or sets if there was errors during the initial entity queries
         /// </summary>
-        protected volatile bool IsEntityInitFailed;
+        public volatile bool IsEntityInitFailed;
 
         protected async Task<Dictionary<string, List<long>>> ParseMemberDataArray(List<object> list)
         {
@@ -187,7 +187,7 @@ namespace ThunderED.Modules
                         var enumMod = mod == "a:" ? MemberSearchModeEnum.Alliance : (mod == "c:" ? MemberSearchModeEnum.Corporation : MemberSearchModeEnum.Character);
                         var searchString = str.StartsWith("c:") || str.StartsWith("a:") ? str.Remove(0, 2) : str;
 
-                        var res = await APIHelper.ESIAPI.SearchMemberEntity(Reason, searchString);
+                        var res = await APIHelper.ESIAPI.SearchMemberEntity(Reason, searchString, true);
                         if (res != null)
                         {
                             if (res.character.Any() && enumMod == MemberSearchModeEnum.Character)
