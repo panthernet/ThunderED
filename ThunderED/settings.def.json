@@ -402,10 +402,12 @@
   "ContractNotificationsModule": {
     "CheckIntervalInMinutes": 1,
     "MaxTrackingCount": 150,
+    "UseOneAuthButton": false,
+    "AuthButtonDiscordText": "Industry Auth",
     "Groups": {
       "group1": {
         "IsEnabled": false,
-        "CharacterIDs": [ 0 ],
+        "CharacterEntities": [],
         "ButtonText": "Default Contracts Auth",
         "DefaultMention": "",
         "FeedPersonalContracts": true,
@@ -488,10 +490,10 @@
 
   "mailModule": {
     "checkIntervalInMinutes": 2,
-    "AuthGroups": {
+    "Groups": {
       "Group1": {
         "IsEnabled": true,
-        "Id": [ 0 ],
+        "CharacterEntities": [ ],
         "IncludePrivateMail": true,
         "DefaultChannel": 0,
         "DefaultMention": "",
@@ -538,7 +540,6 @@
       }
     }
   },
-
 
   "resources": {
     "imgCitLowPower": "https://raw.githubusercontent.com/panthernet/ThunderED/master/ThunderED/Content/Icons/imgCitLowPower.png",
@@ -808,6 +809,8 @@
 
   "IndustrialJobsModule": {
     "CheckIntervalInMinutes": 5,
+    "UseOneAuthButton": false,
+    "AuthButtonDiscordText": "Industry Auth",
     "Groups": {
       "groupName1": {
         "IsEnabled": true,

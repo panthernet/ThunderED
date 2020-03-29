@@ -1,6 +1,8 @@
 ### V1.4.9
 + Added !sys shutdown and !sys restart commands. Restart is currently for Windows only.
 + Added user IP address info on the character panel in HR module
++ Added `UseOneAuthButton` and `AuthButtonDiscordText` props for Industry and Contracts modules
++ Added options to use one auth button for Industry and Contract feed registration. Will require both personal and corp ESI permissions to store in DB.
 + Fixed and reworked market price module to work with Fuzzworks data
 + Fixed potential role stripping failure
 + Fixed auth standings check from several characters
@@ -10,6 +12,7 @@
 + Improved KM to track and filter by attacker ships
 + Improved shutdown procedures to avoid possible DB corruption
 + Improved !sys command set. Use !sys help for more info
++ Moved Mail and Contracts modules to entities system
 + Made KM template variables case insensitive
 
 ### FEATURE HIGHLIGHT - RESTARTER
@@ -32,11 +35,13 @@ For the Docker users it also provides a possibility to replace shutdown with gra
 ### BREAKING CHANGES
  - WebAuth module will now be suspended if it is unable to resolve all the char/corp/alliance entities in auth groups on bot startup (no auth checks, existing users will remain intact). Red error message is displayed in the console/logs and Discord message is sent into the `AuthReportChannel` channel (if it is specified) in case of the failure. 
   To fix the problem you must remove/update failing entities and restart the bot. If the case is happened due to very hard ESI failure you must restart the bot and see if it breaks through the problem.
-
  - Removed `HasShipEntities` and `HasNoShipEntities` props
  - Added `HasAttackerShipEntities`, `HasNoAttackerShipEntities`, `HasVictimShipEntities` and `HasNoVictimShipEntities` props to track attacking ships also
  - Moved `UseHTTPS` prop to `webServerModule`. It will be used in the next gen server version.
  - Removed `authButtonDiscordText,authButtonNotifyText,authButtonTimersText` lang strings and added `AuthButtonDiscordText` config props to WebAuth, Notifications and Timers modules for default button names
+ - Replaced `CharacterIds` prop with `CharacterEntities` in Contracts module Groups. It now support entities.
+ - Replaced `Id` prop with `CharacterEntities` in Mail module Groups. It now support entities.
+ - Replaced `AuthGroups` prop with `Groups` im Mail module for consistency
 
 ### V1.4.7
 + Added message to AuthReportChannel upon successfull alt character registration

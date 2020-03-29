@@ -318,11 +318,22 @@ namespace ThunderED.Modules.Sub
 
                             if (Settings.Config.ModuleIndustrialJobs)
                             {
-                                foreach (var (key, group) in Settings.IndustrialJobsModule.GetEnabledGroups())
+                                if (!Settings.IndustrialJobsModule.UseOneAuthButton)
                                 {
-                                    var authNurl = GetIndustryJobsAuthURL(group.Filters.Any(a=> a.Value.FeedPersonalJobs), group.Filters.Any(a=> a.Value.FeedCorporateJobs), key);
-                                    authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{group.ButtonText ?? key}</a>");
+                                    foreach (var (key, group) in Settings.IndustrialJobsModule.GetEnabledGroups())
+                                    {
+                                        var authNurl = GetIndustryJobsAuthURL(
+                                            group.Filters.Any(a => a.Value.FeedPersonalJobs),
+                                            group.Filters.Any(a => a.Value.FeedCorporateJobs), key);
+                                        authText.Append(
+                                            $"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{group.ButtonText ?? key}</a>");
 
+                                    }
+                                }
+                                else
+                                {
+                                    authText.Append(
+                                        $"< a href = \"{GetIndustryJobsAuthURL(true, true, "OneButtonAuth")}\" class=\"btn btn-info btn-block\" role=\"button\">{SettingsManager.Settings.IndustrialJobsModule.AuthButtonDiscordText}</a>");
                                 }
                                 smth = true;
                             }

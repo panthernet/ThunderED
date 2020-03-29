@@ -68,11 +68,7 @@ namespace ThunderED.Classes
                 Modules.Add(new TimersModule());
 
             if (SettingsManager.Settings.Config.ModuleMail)
-            {
                 Modules.Add(new MailModule());
-                foreach (var id in SettingsManager.Settings.MailModule.GetEnabledGroups().Values.SelectMany(a => a.Id).Distinct())
-                    await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
-            }
 
             if(SettingsManager.Settings.Config.ModuleIRC)
                 Modules.Add(new IRCModule());
@@ -87,11 +83,7 @@ namespace ThunderED.Classes
                 Modules.Add(new NullCampaignModule());
 
             if (SettingsManager.Settings.Config.ModuleContractNotifications)
-            {
                 Modules.Add(new ContractNotificationsModule());
-                foreach (var id in SettingsManager.Settings.ContractNotificationsModule.GetEnabledGroups().SelectMany(a => a.Value.CharacterIDs).Distinct())
-                    await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
-            }
 
             if(SettingsManager.Settings.Config.ModuleSovTracker)
                 Modules.Add(new SovTrackerModule());

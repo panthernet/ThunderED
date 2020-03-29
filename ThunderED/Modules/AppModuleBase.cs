@@ -97,6 +97,14 @@ namespace ThunderED.Modules
             return storage.Where(a=> a.Value.ContainsKey("character")).SelectMany(a=> a.Value["character"]).Distinct().ToList();
         }
 
+        protected virtual Dictionary<string, List<long>> GetAllParsedCharactersWithGroups(Dictionary<string, Dictionary<string, List<long>>> storage = null)
+        {
+            storage = storage ?? ParsedGroups;
+            return storage.Where(a => a.Value.ContainsKey("character"))
+                .SelectMany(a => new Dictionary<string, List<long>> {{a.Key, a.Value["character"]}})
+                .ToDictionary(a => a.Key, a => a.Value);
+        }
+
 
         protected virtual List<long> GetParsedCorporations(string groupName, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {

@@ -34,6 +34,13 @@ namespace ThunderED.Modules
             WebServerModule.ModuleConnectors.Add(Reason, OnAuthRequest);
         }
 
+        public override async Task Initialize()
+        {
+            var data = Settings.IndustrialJobsModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Member);
+        }
+
+
         private async Task<bool> OnAuthRequest(HttpListenerRequestEventArgs context)
         {
             if (!Settings.Config.ModuleMail) return false;
@@ -73,7 +80,18 @@ namespace ThunderED.Modules
 
                         var lCharId = Convert.ToInt64(result[0]);
 
-                        if (Settings.MailModule.GetEnabledGroups().Values.All(a => !a.Id.Contains(lCharId)))
+                        var allowedCharacters = GetAllParsedCharactersWithGroups();
+                        string allowedGroup = null;
+                        foreach (var (group, allowedCharacterIds) in allowedCharacters)
+                        {
+                            if (allowedCharacterIds.Contains(lCharId))
+                            {
+                                allowedGroup = group;
+                                break;
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(allowedGroup))
                         {
                             await WebServerModule.WriteResponce(
                                 WebServerModule.GetAccessDeniedPage("Mail Module", LM.Get("accessDenied"),
@@ -116,14 +134,13 @@ namespace ThunderED.Modules
                 _lastCheckTime = DateTime.Now;
                 await LogHelper.LogModule("Running Mail module check...", Category);
 
-                foreach (var groupPair in Settings.MailModule.GetEnabledGroups())
+                foreach (var (groupName, group) in Settings.MailModule.GetEnabledGroups())
                 {
-                    var group = groupPair.Value;
                     if (group.DefaultChannel == 0)
                         continue;
                     var defaultChannel = group.DefaultChannel;
 
-                    foreach (var charId in group.Id)
+                    foreach (var charId in GetParsedCharacters(groupName))
                     {
                         if (charId == 0) continue;
 
@@ -141,8 +158,7 @@ namespace ThunderED.Modules
                             await LogHelper.LogWarning($"Unable to get contracts token for character {charId}. Refresh token might be outdated or no more valid {tq.Data.ErrorCode}({tq.Data.Message})", Category);
                             continue;
                         }
-
-
+                        
                         var includePrivate = group.IncludePrivateMail;
 
                         if (group.Filters.Values.All(a => a.FilterSenders.Count == 0 && a.FilterLabels.Count == 0 && a.FilterMailList.Count == 0))

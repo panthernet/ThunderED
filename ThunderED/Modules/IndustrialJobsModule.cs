@@ -62,7 +62,7 @@ namespace ThunderED.Modules
                         if (string.IsNullOrEmpty(state)) return false;
 
                         if (!state.StartsWith("ijobsauth")) return false;
-                        var groupName = HttpUtility.UrlDecode(state.Replace("ijobsauth", ""));
+                        //var groupName = HttpUtility.UrlDecode(state.Replace("ijobsauth", ""));
 
                         var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
                         if (result == null)
@@ -75,8 +75,18 @@ namespace ThunderED.Modules
 
                         var lCharId = Convert.ToInt64(result[0]);
                         //var group = Settings.IndustrialJobsModule.Groups[groupName];
-                        var allowedCharacterIds = GetParsedCharacters(groupName);
-                        if (!allowedCharacterIds.Contains(lCharId))
+                        var allowedCharacters = GetAllParsedCharactersWithGroups();
+                        string allowedGroup = null;
+                        foreach (var (group, allowedCharacterIds) in allowedCharacters)
+                        {
+                            if (allowedCharacterIds.Contains(lCharId))
+                            {
+                                allowedGroup = group;
+                                break;
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(allowedGroup))
                         {
                             await WebServerModule.WriteResponce(
                                 WebServerModule.GetAccessDeniedPage("Industry Jobs Module", LM.Get("accessDenied"),

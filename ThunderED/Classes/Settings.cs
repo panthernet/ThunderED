@@ -129,6 +129,10 @@ namespace ThunderED.Classes
     public class IndustrialJobsModuleSettings
     {
         public int CheckIntervalInMinutes { get; set; } = 5;
+        [Comment("Display one auth button for Industry feed auth")]
+        public bool UseOneAuthButton { get; set; }
+        [Comment("Default text for the Discord authentication button")]
+        public string AuthButtonDiscordText { get; set; }
 
 #if EDITOR
         public ObservableDictionary<string, IndustrialJobGroup> Groups { get; set; } = new  ObservableDictionary<string, IndustrialJobGroup>();
@@ -368,6 +372,13 @@ namespace ThunderED.Classes
 
         [Comment("Maximum number of last contracts to check")]
         public int MaxTrackingCount { get; set; } = 150;
+
+        [Comment("Display one auth button for Contracts feed auth")]
+        public bool UseOneAuthButton { get; set; }
+        [Comment("Default text for the Discord authentication button")]
+        public string AuthButtonDiscordText { get; set; }
+
+
 #if EDITOR
         public ObservableDictionary<string, ContractNotifyGroup> Groups { get; set; } = new ObservableDictionary<string, ContractNotifyGroup>();
 #else
@@ -404,10 +415,10 @@ namespace ThunderED.Classes
     public class ContractNotifyGroup: ValidatableSettings
     {
 #if EDITOR
-        public ObservableCollection<long> CharacterIDs { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<object> CharacterEntities { get; set; } = new ObservableCollection<object>();
         public ObservableDictionary<string, ContractNotifyFilter> Filters { get; set; } = new ObservableDictionary<string, ContractNotifyFilter>();
 #else
-        public List<long> CharacterIDs { get; set; } = new List<long>();
+        public List<object> CharacterEntities { get; set; } = new List<object>();
         public Dictionary<string, ContractNotifyFilter> Filters { get; set; } = new Dictionary<string, ContractNotifyFilter>();
 #endif
         public bool FeedPersonalContracts { get; set; } = true;
@@ -427,8 +438,8 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    case nameof(CharacterIDs):
-                        return CharacterIDs.Count == 0? Compose(nameof(CharacterIDs), "CharacterIDs must be set!") : null;
+                    case nameof(CharacterEntities):
+                        return CharacterEntities.Count == 0? Compose(nameof(CharacterEntities), "CharacterEntities must be set!") : null;
                 }
 
                 return null;
@@ -1015,9 +1026,9 @@ namespace ThunderED.Classes
 #if EDITOR
         [Comment("Character groups allowed to auth as mail feeders")]
         [Required]
-        public ObservableDictionary<string, MailAuthGroup> AuthGroups { get; set; } = new ObservableDictionary<string, MailAuthGroup>();
+        public ObservableDictionary<string, MailAuthGroup> Groups { get; set; } = new ObservableDictionary<string, MailAuthGroup>();
 #else
-        public Dictionary<string, MailAuthGroup> AuthGroups { get; set; } = new Dictionary<string, MailAuthGroup>();
+        public Dictionary<string, MailAuthGroup> Groups { get; set; } = new Dictionary<string, MailAuthGroup>();
 #endif
 
         /// <summary>
@@ -1025,7 +1036,7 @@ namespace ThunderED.Classes
         /// </summary>
         public Dictionary<string, MailAuthGroup> GetEnabledGroups()
         {
-            return AuthGroups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+            return Groups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
         }
 
 
@@ -1038,8 +1049,8 @@ namespace ThunderED.Classes
                 {
                     case nameof(CheckIntervalInMinutes):
                         return CheckIntervalInMinutes < 1 ? Compose(nameof(CheckIntervalInMinutes), "Value must be greater than 0 or the bot will blow up!") : null;
-                    case nameof(AuthGroups):
-                        return AuthGroups.Count == 0 ? Compose(nameof(AuthGroups), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(Groups):
+                        return Groups.Count == 0 ? Compose(nameof(Groups), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }
 
                 return null;
@@ -1058,10 +1069,10 @@ namespace ThunderED.Classes
 #if EDITOR
         [Comment("EVE Online character ID")]
         [Required]
-        public ObservableCollection<long> Id { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<object> CharacterEntities { get; set; } = new ObservableCollection<object>();
         public ObservableDictionary<string, MailAuthFilter> Filters { get; set; } = new ObservableDictionary<string, MailAuthFilter>();
 #else
-        public List<long> Id { get; set; } = new List<long>();
+        public List<object> CharacterEntities { get; set; } = new List<object>();
         public Dictionary<string, MailAuthFilter> Filters { get; set; } = new Dictionary<string, MailAuthFilter>();
 #endif
         [Comment("Numeric Discord channel ID to post mail feed")]
@@ -1079,8 +1090,8 @@ namespace ThunderED.Classes
             {
                 switch (columnName)
                 {
-                    case nameof(Id):
-                        return !Id.Any() ? Compose(nameof(Id), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(CharacterEntities):
+                        return !CharacterEntities.Any() ? Compose(nameof(CharacterEntities), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(DefaultChannel):
                         return DefaultChannel == 0 ? Compose(nameof(DefaultChannel), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }

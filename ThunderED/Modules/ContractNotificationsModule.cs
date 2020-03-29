@@ -33,6 +33,12 @@ namespace ThunderED.Modules
             WebServerModule.ModuleConnectors.Add(Reason, OnAuthRequest);
         }
 
+        public override async Task Initialize()
+        {
+            var data = Settings.ContractNotificationsModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Member);
+        }
+
         private async Task<bool> OnAuthRequest(HttpListenerRequestEventArgs context)
         {
             if (!Settings.Config.ModuleContractNotifications) return false;
@@ -85,7 +91,7 @@ namespace ThunderED.Modules
                         }
 
                         if (!state.StartsWith("cauth")) return false;
-                        var groupName = HttpUtility.UrlDecode(state.Replace("cauth", ""));
+                       // var groupName = HttpUtility.UrlDecode(state.Replace("cauth", ""));
 
                         var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
                         if (result == null)
@@ -97,8 +103,19 @@ namespace ThunderED.Modules
                         }
 
                         var lCharId = Convert.ToInt64(result[0]);
-                        var group = Settings.ContractNotificationsModule.GetEnabledGroups()[groupName];
-                        if (!group.CharacterIDs.Contains(lCharId))
+                        //var group = Settings.ContractNotificationsModule.GetEnabledGroups()[groupName];
+                        var chars = GetAllParsedCharactersWithGroups();
+                        string allowedGroup = null;
+                        foreach (var (group, allowedCharacterIds) in chars)
+                        {
+                            if (allowedCharacterIds.Contains(lCharId))
+                            {
+                                allowedGroup = group;
+                                break;
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(allowedGroup))
                         {
                             await WebServerModule.WriteResponce(
                                 WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"),
@@ -145,9 +162,9 @@ namespace ThunderED.Modules
                 _lastCheckTime = DateTime.Now;
                 await LogHelper.LogModule("Running Contracts module check...", Category);
 
-                foreach (var group in Settings.ContractNotificationsModule.GetEnabledGroups().Values)
+                foreach (var (name, group) in Settings.ContractNotificationsModule.GetEnabledGroups())
                 {
-                    foreach (var characterID in group.CharacterIDs)
+                    foreach (var characterID in GetParsedCharacters(name))
                     {
                         if(characterID <=0) continue;
                         try
@@ -734,7 +751,9 @@ namespace ThunderED.Modules
                 var personalContracts = new List<JsonClasses.Contract>();
                 var corpContracts = new List<JsonClasses.Contract>();
 
-                foreach (var characterID in @group.CharacterIDs)
+                var chars = TickManager.GetModule<ContractNotificationsModule>().GetParsedCharacters(groupPair.Key);
+
+                foreach (var characterID in chars)
                 {       
                     if(group.FeedPersonalContracts)
                         personalContracts.AddRange(await SQLHelper.LoadContracts(characterID, false));
