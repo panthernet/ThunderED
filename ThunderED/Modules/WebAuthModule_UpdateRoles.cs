@@ -249,13 +249,19 @@ namespace ThunderED.Modules
 
                     var eveName = characterData.name;
 
-                    if (SettingsManager.Settings.WebAuthModule.EnforceCorpTickers || SettingsManager.Settings.WebAuthModule.EnforceCharName || SettingsManager.Settings.WebAuthModule.EnforceAllianceTickers)
+                    if ((SettingsManager.Settings.WebAuthModule.EnforceCorpTickers || SettingsManager.Settings.WebAuthModule.EnforceCharName || SettingsManager.Settings.WebAuthModule.EnforceAllianceTickers) 
+                        && !TickManager.IsESIUnreachable)
                     {
                         string alliancePart = null;
                         if (SettingsManager.Settings.WebAuthModule.EnforceAllianceTickers && characterData.alliance_id.HasValue)
                         {
                             var ad = await APIHelper.ESIAPI.GetAllianceData("authCheck", characterData.alliance_id.Value, true);
-                            alliancePart = ad != null ? $"[{ad.ticker}] " : null;
+                            if (characterData.alliance_id.HasValue && ad == null)
+                            {
+                                //esi fuckup
+                            }
+                            else alliancePart = ad != null ? $"[{ad.ticker}] " : null;
+
                         }
                         string corpPart = null;
                         if (SettingsManager.Settings.WebAuthModule.EnforceCorpTickers)
@@ -263,7 +269,11 @@ namespace ThunderED.Modules
                             if (!SettingsManager.Settings.WebAuthModule.EnforceSingleTickerPerUser || string.IsNullOrEmpty(alliancePart))
                             {
                                 var ad = await APIHelper.ESIAPI.GetCorporationData("authCheck", characterData.corporation_id, true);
-                                corpPart = ad != null ? $"[{ad.ticker}] " : null;
+                                if (ad == null)
+                                {
+                                    //esi fuckup
+                                }
+                                else corpPart = ad != null ? $"[{ad.ticker}] " : null;
                             }
                         }
 

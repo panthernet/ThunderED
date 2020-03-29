@@ -6,6 +6,7 @@
 + Fixed auth standings check from several characters
 + Fixed !char command incorrect values
 + Fixed static command char in web pages
++ Fixed unexpected tickers removal
 + Improved KM to track and filter by attacker ships
 + Improved shutdown procedures to avoid possible DB corruption
 + Improved !sys command set. Use !sys help for more info
