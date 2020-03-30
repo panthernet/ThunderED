@@ -120,9 +120,10 @@ namespace Restarter
 
                 var start = new ProcessStartInfo
                 {
-                    UseShellExecute = !IsLinux,
+                    UseShellExecute = true,
                     CreateNoWindow = true,
                     FileName = file,
+                    WindowStyle = RunAsService ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
                     WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)),
                 };
 

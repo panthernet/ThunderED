@@ -1,5 +1,5 @@
 ### V1.4.9
-+ Added !sys shutdown and !sys restart commands. Restart is currently for Windows only.
++ Added !sys shutdown and !sys restart commands
 + Added user IP address info on the character panel in HR module
 + Added `UseOneAuthButton` and `AuthButtonDiscordText` props for Industry and Contracts modules
 + Added options to use one auth button for Industry and Contract feed registration. Will require both personal and corp ESI permissions to store in DB.
