@@ -430,9 +430,9 @@ namespace ThunderED.Modules
             {
                 var filterName = accessList.Key;
                 var filter = accessList.Value;
-                var accessChars = GetParsedCharacters(filterName);
-                var accessCorps = GetParsedCorporations(filterName);
-                var accessAlliance = GetParsedAlliances(filterName);
+                var accessChars = GetParsedCharacters(filterName) ?? new List<long>();
+                var accessCorps = GetParsedCorporations(filterName) ?? new List<long>();
+                var accessAlliance = GetParsedAlliances(filterName) ?? new List<long>();
                 if (!accessCorps.Contains(rChar.corporation_id) && (!rChar.alliance_id.HasValue || !(rChar.alliance_id > 0) || (!accessAlliance.Contains(
                                                                         rChar.alliance_id
                                                                             .Value))))

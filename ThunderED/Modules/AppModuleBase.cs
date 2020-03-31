@@ -171,16 +171,23 @@ namespace ThunderED.Modules
                     if (entity == null) continue;
                     if (long.TryParse(entity.ToString(), out var longNumber))
                     {
+                        if(Settings.Config.ExtendedESILogging)
+                            await LogHelper.LogInfo($"Resolving character {entity}...");
+
                         var rCharacter = await APIHelper.ESIAPI.GetCharacterData(Reason, entity, false, false, true);
                         if (rCharacter != null)
                             result["character"].Add(longNumber);
                         else
                         {
+                            if (Settings.Config.ExtendedESILogging)
+                                await LogHelper.LogInfo($"Resolving corp {entity}...");
                             var rCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, entity, false, false, true);
                             if (rCorp != null)
                                 result["corporation"].Add(longNumber);
                             else
                             {
+                                if (Settings.Config.ExtendedESILogging)
+                                    await LogHelper.LogInfo($"Resolving alliance {entity}...");
                                 var rAlliance = await APIHelper.ESIAPI.GetAllianceData(Reason, entity, false, false, true);
                                 if (rAlliance != null)
                                     result["alliance"].Add(longNumber);

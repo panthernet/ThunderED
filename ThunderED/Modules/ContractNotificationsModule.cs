@@ -164,7 +164,8 @@ namespace ThunderED.Modules
 
                 foreach (var (name, group) in Settings.ContractNotificationsModule.GetEnabledGroups())
                 {
-                    foreach (var characterID in GetParsedCharacters(name))
+                    var chars = GetParsedCharacters(name) ?? new List<long>();
+                    foreach (var characterID in chars)
                     {
                         if(characterID <=0) continue;
                         try

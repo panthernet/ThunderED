@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
+using ThunderED.Json;
 using ThunderED.Modules.Sub;
 
 namespace ThunderED
@@ -146,7 +147,6 @@ namespace ThunderED
 
             if (replyChannelId > 0)
                 await APIHelper.DiscordAPI.SendMessageAsync(replyChannelId, LM.Get("sysRestartComplete"));
-
 
             while (true)
             {

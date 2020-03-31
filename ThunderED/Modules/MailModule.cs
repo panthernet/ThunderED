@@ -140,7 +140,8 @@ namespace ThunderED.Modules
                         continue;
                     var defaultChannel = group.DefaultChannel;
 
-                    foreach (var charId in GetParsedCharacters(groupName))
+                    var chars = GetParsedCharacters(groupName) ?? new List<long>();
+                    foreach (var charId in chars)
                     {
                         if (charId == 0) continue;
 

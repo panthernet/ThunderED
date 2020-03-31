@@ -199,12 +199,21 @@ namespace ThunderED.Helpers
                                 if (errParsed != null)
                                 {
                                     if (errParsed.timeout > 0)
+                                    {
                                         WaitReq.Update(errParsed.timeout);
+                                        continue; //got a timeout, should retry
+                                    }
+
                                     if (SettingsManager.Settings.Config.ExtendedESILogging)
                                         await LogHelper.LogError($"[{reason}] AGG Request failure: {request}\nMessage: {errParsed.error}", LogCat.ESI, false);
-                                    //in aggressive mode we always retry queries
+                                    //get out, error is known
+                                    return result;
                                 }
-                                continue;
+                                else
+                                {
+                                    await LogHelper.LogError($"[{reason}] RAW failure: {request}\nMessage: {raw}", LogCat.ESI, false);
+                                    continue;
+                                }
                             }
 
                             if (typeof(T) == typeof(string))

@@ -130,7 +130,8 @@ namespace ThunderED.Modules
 
                 foreach (var (groupName, group) in Settings.IndustrialJobsModule.GetEnabledGroups())
                 {
-                    foreach (var characterID in GetParsedCharacters(groupName))
+                    var chars = GetParsedCharacters(groupName) ?? new List<long>();
+                    foreach (var characterID in chars)
                     {
                         var rtoken = await SQLHelper.GetRefreshTokenForIndustryJobs(characterID);
                         if (rtoken == null)
