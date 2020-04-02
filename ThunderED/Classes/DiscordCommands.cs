@@ -1377,7 +1377,7 @@ namespace ThunderED.Classes
             var allowed = APIHelper.DiscordAPI.GetConfigAllowedPublicChannels();
             if (allowed.Any())
             {
-               return allowed.Any(a => a == Context.Channel.Id);
+               return !allowed.Contains(Context.Channel.Id);
             }
 
             var forbidden = APIHelper.DiscordAPI.GetConfigForbiddenPublicChannels();

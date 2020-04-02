@@ -1672,7 +1672,7 @@ namespace ThunderED.Classes
         [Comment("At least one role name from Discord with admin privilegies")]
         [Required]
         public List<string> DiscordAdminRoles { get; set; } = new List<string>();
-        [Comment("The list of numeric channel IDs in which bot commands will be ignored")]
+        [Comment("The list of numeric channel IDs in which bot commands will be ignored (except auth commands if specified in WebAuth module)")]
         public List<ulong> ComForbiddenChannels { get; set; } = new List<ulong>();
         [Comment("The list of numeric channel IDs in which bot commands can be used. Has higher priority than ComForbiddenChannels. All other channels will be blocked if specified.")]
         public List<ulong> ComAllowedChannels { get; set; } = new List<ulong>();
@@ -1901,7 +1901,7 @@ namespace ThunderED.Classes
         public ObservableCollection<string> ExemptDiscordRoles { get; set; } = new ObservableCollection<string>();
         [Comment("The list of Discord roles which will not be stripped if character is authed. This will allow you to add custom roles manually.")]
         public ObservableCollection<string> AuthCheckIgnoreRoles { get; set; } = new ObservableCollection<string>();
-        [Comment("The list of channels where !auth command is allowed")]
+        [Comment("The list of channels where !auth command is allowed (including the forbidden channels which has lower priority)")]
         [Required]
         public ObservableCollection<ulong> ComAuthChannels { get; set; } = new ObservableCollection<ulong>();
         [Comment("The list of groups to filter auth requests")]
