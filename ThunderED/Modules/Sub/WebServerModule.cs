@@ -196,7 +196,7 @@ namespace ThunderED.Modules.Sub
                             if (Settings.Config.ModuleTimers)
                             {
                                 var authNurl = GetTimersURL();
-                                manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonTimersText")}</a>");
+                                manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{Settings.TimersModule.AuthButtonDiscordText}</a>");
                             }
 
                             if (Settings.Config.ModuleHRM)
@@ -294,7 +294,7 @@ namespace ThunderED.Modules.Sub
                             if (Settings.Config.ModuleNotificationFeed)
                             {
                                 var authNurl = GetAuthNotifyURL();
-                                authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonNotifyText")}</a>");
+                                authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{Settings.NotificationFeedModule.AuthButtonDiscordText}</a>");
                                 smth = true;
                             }
                             //mail
