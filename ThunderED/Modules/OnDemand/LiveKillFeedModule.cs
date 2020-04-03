@@ -331,7 +331,7 @@ namespace ThunderED.Modules.OnDemand
                         #endregion
 
                         #region Location checks (except system radius)
-
+                         
                         if (!isCertifiedToFeed)
                         {
                             var check = CheckLocation(rSystem, kill, filter, groupName, filterName);
