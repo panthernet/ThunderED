@@ -334,7 +334,7 @@ namespace ThunderED.Modules.OnDemand
 
                         if (!isCertifiedToFeed)
                         {
-                            var check = CheckLocation(rSystem, kill, groupName, filterName);
+                            var check = CheckLocation(rSystem, kill, filter, groupName, filterName);
                             //if have some location criteria
                             if (check != null)
                             {
