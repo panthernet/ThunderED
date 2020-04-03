@@ -229,7 +229,7 @@ namespace ThunderED.API
             ssoClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public async Task<ESIQueryResult<string>> RefreshToken(string refreshToken, string clientId, string secret)
+        public async Task<ESIQueryResult<string>> RefreshToken(string refreshToken, string clientId, string secret, string notes = null)
         { 
             var result = new ESIQueryResult<string>();
             try
@@ -248,7 +248,7 @@ namespace ThunderED.API
                         {
                             if (raw.StartsWith("{\"error\""))
                             {
-                                await LogHelper.LogWarning($"[TOKEN] Request failure: {raw}", LogCat.ESI);
+                                await LogHelper.LogWarning($"[TOKEN] Request failure: {raw}\n{notes}", LogCat.ESI);
                                 result.Data.ErrorCode = -99;
                                 result.Data.Message = "Valid ESI request error";
                             }
@@ -267,7 +267,7 @@ namespace ThunderED.API
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx("RefreshToken", ex, LogCat.ESI);
+                await LogHelper.LogEx($"{nameof(RefreshToken)} {notes}", ex, LogCat.ESI);
                 result.Data.ErrorCode = -1;
                 result.Data.Message = "Unexpected exception";
                 return result;

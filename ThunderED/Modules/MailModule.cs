@@ -152,7 +152,8 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        var tq = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                        var tq = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
+                            , $"From {Category} | Char ID: {charId}");
                         var token = tq.Result;
                         if (string.IsNullOrEmpty(token))
                         {
@@ -520,7 +521,7 @@ namespace ThunderED.Modules
                         continue;
 
                     var token = (await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret))?.Result;
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From Mail | Char ID: {user.CharacterId} | Char name: {user.Data.CharacterName}"))?.Result;
 
                     if (string.IsNullOrEmpty(token))
                         continue;
@@ -625,7 +626,7 @@ namespace ThunderED.Modules
                     continue;
 
                 var token = (await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                    SettingsManager.Settings.WebServerModule.CcpAppSecret))?.Result;
+                    SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From Mail | Char ID: {user.CharacterId} | Char name: {user.Data.CharacterName}"))?.Result;
 
                 var mailHeaders = (await APIHelper.ESIAPI.GetMailHeaders(Reason, user.CharacterId.ToString(), token, 0, null))?.Result;
 

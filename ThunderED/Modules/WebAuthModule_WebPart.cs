@@ -132,7 +132,7 @@ namespace ThunderED.Modules
                     var data = new AuthStandsEntity { CharacterID = numericCharId, Token = result[1] };
 
                     var tq = await APIHelper.ESIAPI.RefreshToken(data.Token, Settings.WebServerModule.CcpAppClientId,
-                        Settings.WebServerModule.CcpAppSecret);
+                        Settings.WebServerModule.CcpAppSecret, $"From {Category} | Char ID: {characterID}");
                     var token = tq.Result;
 
                     if (!tq.Data.IsFailed)
@@ -580,7 +580,7 @@ namespace ThunderED.Modules
                     var data = new AuthStandsEntity { CharacterID = numericCharId, Token = result[1] };
 
                     var tq = await APIHelper.ESIAPI.RefreshToken(data.Token, Settings.WebServerModule.CcpAppClientId,
-                        Settings.WebServerModule.CcpAppSecret);
+                        Settings.WebServerModule.CcpAppSecret, $"From {Category} | Char ID: {characterID}");
                     var token = tq.Result;
 
                     if (!tq.Data.IsFailed)

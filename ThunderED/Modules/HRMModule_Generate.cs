@@ -178,7 +178,7 @@ namespace ThunderED.Modules
                         if (item.HasToken && SettingsManager.Settings.HRMModule.ValidateTokensWhileLoading)
                         {
                             var token = await APIHelper.ESIAPI.RefreshToken(item.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                                SettingsManager.Settings.WebServerModule.CcpAppSecret);
+                                SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From HRM | Char ID: {item.CharacterId} | Char name: {item.Data.CharacterName}");
                             invalidToken = token == null;
                         }
                         var charUrl = !inspectCondi ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
@@ -536,7 +536,8 @@ namespace ThunderED.Modules
                 var hrUserInfo = await SQLHelper.GetAuthUserByCharacterId(hrId);
                 if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.Data.PermissionsList))
                 {
-                    var hrToken = (await APIHelper.ESIAPI.RefreshToken(hrUserInfo.RefreshToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret))?.Result;
+                    var hrToken = (await APIHelper.ESIAPI.RefreshToken(hrUserInfo.RefreshToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
+                        , $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.Data.CharacterName}"))?.Result;
                     if(!string.IsNullOrEmpty(hrToken))
                         hrContacts = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, hrId, hrToken)).Result;
                 }

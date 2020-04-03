@@ -182,7 +182,7 @@ namespace ThunderED.Modules.OnDemand
                 await usersToCheck.ParallelForEachAsync(async userEntity =>
                 {
                     var token = (await APIHelper.ESIAPI.RefreshToken(userEntity.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret))?.Result;
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From {Category} | Char ID: {userEntity.CharacterId} | Char name: {userEntity.Data.CharacterName}"))?.Result;
                     if (string.IsNullOrEmpty(token))
                     {
                         await LogHelper.LogWarning($"Character {userEntity.Data.CharacterName}({userEntity.CharacterId}) has invalid token!");

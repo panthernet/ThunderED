@@ -501,7 +501,7 @@ namespace ThunderED.Modules
 
                 //refresh token
                 var tq = string.IsNullOrEmpty(refreshToken) ? null : await APIHelper.ESIAPI.RefreshToken(refreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                    SettingsManager.Settings.WebServerModule.CcpAppSecret);
+                    SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From WebAuth | Char ID: {characterData?.character_id} | Char name: {characterData?.name}");
 
                 var uToken = tq?.Result;
                 if (tq != null)

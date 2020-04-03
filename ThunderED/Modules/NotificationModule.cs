@@ -96,7 +96,8 @@ namespace ThunderED.Modules
                                 continue;
                             }
 
-                            var tq = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret);
+                            var tq = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
+                                , $"From {Category} | Char ID: {charId}");
                             var token = tq.Result;
                             if (tq.Data.IsNoConnection) return;
                             if (string.IsNullOrEmpty(token))

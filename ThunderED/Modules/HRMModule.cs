@@ -744,7 +744,7 @@ namespace ThunderED.Modules
                                     {
                                         var tq = await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken,
                                             Settings.WebServerModule.CcpAppClientId,
-                                            Settings.WebServerModule.CcpAppSecret);
+                                            Settings.WebServerModule.CcpAppSecret, $"From {Category} | Char ID: {authUserEntity.CharacterId} | Char name: {authUserEntity.Data.CharacterName}");
                                         var token = tq.Result;
 
                                         if (string.IsNullOrEmpty(token))
@@ -883,7 +883,8 @@ namespace ThunderED.Modules
                                 {
                                     var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken,
                                         Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret))?.Result;
+                                        Settings.WebServerModule.CcpAppSecret
+                                        , $"From {Category} | Char ID: {authUserEntity.CharacterId} | Char name: {authUserEntity.Data.CharacterName}"))?.Result;
                                     var mailHtml = await GenerateMailHtml(token, inspectCharId, authCode, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -912,7 +913,8 @@ namespace ThunderED.Modules
                                 {
                                     var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken,
                                         Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret))?.Result;
+                                        Settings.WebServerModule.CcpAppSecret
+                                        , $"From {Category} | Char ID: {authUserEntity.CharacterId} | Char name: {authUserEntity.Data.CharacterName}"))?.Result;
                                     var html = await GenerateTransactionsHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -941,7 +943,8 @@ namespace ThunderED.Modules
                                 {
                                     var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken,
                                         Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret))?.Result;
+                                        Settings.WebServerModule.CcpAppSecret
+                                        , $"From {Category} | Char ID: {authUserEntity.CharacterId} | Char name: {authUserEntity.Data.CharacterName}"))?.Result;
                                     var html = await GenerateJournalHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -970,7 +973,8 @@ namespace ThunderED.Modules
                                 {
                                     var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken,
                                         Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret))?.Result;
+                                        Settings.WebServerModule.CcpAppSecret
+                                        , $"From {Category} | Char ID: {authUserEntity.CharacterId} | Char name: {authUserEntity.Data.CharacterName}"))?.Result;
                                     var html = await GenerateContractsHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -999,7 +1003,8 @@ namespace ThunderED.Modules
                                 {
                                     var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken,
                                         Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret))?.Result;
+                                        Settings.WebServerModule.CcpAppSecret
+                                        , $"From {Category} | Char ID: {authUserEntity.CharacterId} | Char name: {authUserEntity.Data.CharacterName}"))?.Result;
                                     var html = await GenerateContactsHtml(token, inspectCharId, page, characterId);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -1028,7 +1033,8 @@ namespace ThunderED.Modules
                                 {
                                     var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken,
                                         Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret))?.Result;
+                                        Settings.WebServerModule.CcpAppSecret
+                                        , $"From {Category} | Char ID: {authUserEntity.CharacterId} | Char name: {authUserEntity.Data.CharacterName}"))?.Result;
                                     var html = await GenerateSkillsHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -1058,7 +1064,8 @@ namespace ThunderED.Modules
                                 {
                                     var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken,
                                         Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret))?.Result;
+                                        Settings.WebServerModule.CcpAppSecret
+                                        , $"From {Category} | Char ID: {authUserEntity.CharacterId} | Char name: {authUserEntity.Data.CharacterName}"))?.Result;
                                     var html = await GenerateLysHtml(token, inspectCharId, page);
 
                                     var text = File.ReadAllText(SettingsManager.FileTemplateHRM_Table)
@@ -1087,7 +1094,8 @@ namespace ThunderED.Modules
 
                                     var token = (await APIHelper.ESIAPI.RefreshToken(authUserEntity.RefreshToken,
                                         Settings.WebServerModule.CcpAppClientId,
-                                        Settings.WebServerModule.CcpAppSecret))?.Result;
+                                        Settings.WebServerModule.CcpAppSecret
+                                        , $"From {Category} | Char ID: {authUserEntity.CharacterId} | Char name: {authUserEntity.Data.CharacterName}"))?.Result;
                                     var mail = await APIHelper.ESIAPI.GetMail(Reason, inspectCharacterId, token,
                                         mailBodyId);
                                     if (mail != null)
