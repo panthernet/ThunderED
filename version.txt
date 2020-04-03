@@ -3,6 +3,7 @@
 + Added user IP address info on the character panel in HR module
 + Added `UseOneAuthButton` and `AuthButtonDiscordText` props for Industry and Contracts modules
 + Added options to use one auth button for Industry and Contract feed registration. Will require both personal and corp ESI permissions to store in DB.
++ Added new KM feed filters `ShowHighsecSystem, ShowLowsecSystem, ShowNullsecSystem, ShowWormholeSystem, ShowAbyssSystem`
 + Fixed and reworked market price module to work with Fuzzworks data
 + Fixed potential role stripping failure
 + Fixed auth standings check from several characters

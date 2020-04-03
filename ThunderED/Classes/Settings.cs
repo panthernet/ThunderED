@@ -902,7 +902,12 @@ namespace ThunderED.Classes
         [Comment("Filter will pass if any specified condition is met when value set to True. Otherwise all conditions must be met.")]
         public bool EnableMatchOnFirstConditionMet { get; set; }
 
-        
+        public bool ShowHighsecSystem { get; set; } = true;
+        public bool ShowLowsecSystem { get; set; } = true;
+        public bool ShowNullsecSystem { get; set; } = true;
+        public bool ShowWormholeSystem { get; set; } = true;
+        public bool ShowAbyssSystem { get; set; } = true;
+
         [Comment("Numeric value of number of jumps around specified system. Leave 0 to disable radius feed. Has no effect on region or constellation.")]
         public int Radius { get; set; }
 #if EDITOR

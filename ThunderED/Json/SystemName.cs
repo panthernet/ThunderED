@@ -21,9 +21,25 @@ namespace ThunderED.Json
 
             public bool IsUnreachable()
             {
-                if (string.IsNullOrEmpty(name)) return false;
-                return system_id == 31000005 || name.StartsWith("AD") || name[0] == 'J';
+                return IsWormhole() || IsAbyss();
             }
+
+            public bool IsWormhole()
+            {
+                return !string.IsNullOrEmpty(name) && (system_id >= 31000000 && system_id <= 32000000);
+            }
+
+            public bool IsThera()
+            {
+                return !string.IsNullOrEmpty(name) && system_id == 31000005;
+            }
+
+            public bool IsAbyss()
+            {
+                return !string.IsNullOrEmpty(name) && (system_id >= 32000000 && system_id <= 33000000);
+            }
+
         }
     }
 }
+ 

@@ -401,8 +401,7 @@ namespace ThunderED.Modules.OnDemand
 
                             //var msgType = MessageTemplateType.KillMailRadius;
                             var isDone = false;
-                            foreach (var radiusSystemId in GetTier2SystemIds(ParsedLocationLists, groupName, filterName)
-                            )
+                            foreach (var radiusSystemId in GetTier2SystemIds(ParsedLocationLists, groupName, filterName))
                             {
                                 if (await ProcessLocation(radiusSystemId, kill, group, filter, groupName))
                                 {
@@ -590,24 +589,31 @@ namespace ThunderED.Modules.OnDemand
             return true;
         }
 
-        private bool? CheckLocation(JsonClasses.SystemName rSystem, JsonZKill.Killmail kill, string groupName, string filterName)
+        private bool? CheckLocation(JsonClasses.SystemName rSystem, JsonZKill.Killmail kill, KillMailFilter filter, string groupName, string filterName)
         {
             if (rSystem == null)
             {
                 LogHelper.LogError($"System not found: {kill.solar_system_id}!", Category).GetAwaiter().GetResult();
                 return false;
             }
-            //System
-            var fSystems = GetTier2SystemIds(ParsedLocationLists, groupName, filterName);
-            if (fSystems.Any() && fSystems.Contains(kill.solar_system_id))
+
+            if (!filter.ShowHighsecSystem && rSystem.security_status >= .5f) return false;
+            if (!filter.ShowLowsecSystem && rSystem.security_status >= .1f) return false;
+            if (!filter.ShowWormholeSystem && rSystem.IsWormhole()) return false;
+            if (!filter.ShowAbyssSystem && rSystem.IsAbyss()) return false;
+            if (!filter.ShowNullsecSystem && rSystem.security_status <= 0f) return false;
+
+            //Region
+            var fRegions = GetTier2RegionIds(ParsedLocationLists, groupName, filterName);
+            if (fRegions.Any() && rSystem.DB_RegionId.HasValue && fRegions.Contains(rSystem.DB_RegionId.Value))
                 return true;
             //Constellation
             var fConsts = GetTier2ConstellationIds(ParsedLocationLists, groupName, filterName);
             if (fConsts.Any() && fConsts.Contains(rSystem.constellation_id))
                 return true;
-            //Region
-            var fRegions = GetTier2RegionIds(ParsedLocationLists, groupName, filterName);
-            if (fRegions.Any() && rSystem.DB_RegionId.HasValue && fRegions.Contains(rSystem.DB_RegionId.Value))
+            //System
+            var fSystems = GetTier2SystemIds(ParsedLocationLists, groupName, filterName);
+            if (fSystems.Any() && fSystems.Contains(kill.solar_system_id))
                 return true;
 
             return fSystems.Any() || fConsts.Any() || fRegions.Any() ? false : (bool?)null;
