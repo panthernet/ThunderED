@@ -1268,15 +1268,13 @@ namespace ThunderED.Classes
         public bool IsEnabled { get; set; } = true;
 
 #if EDITOR
-        public ObservableCollection<long> Regions { get; set; } = new ObservableCollection<long>();
-        public ObservableCollection<long> Constellations { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<object> LocationEntities { get; set; } = new ObservableCollection<object>();
         [Comment("List of time marks in minutes before the event starts to send notifications. E.g. 15, 30 - will send notifications when 15 and 30 minutes left for event start.")]
         public ObservableCollection<int> Announces { get; set; } = new ObservableCollection<int>();
         [Comment("The list of Discord mentions to use for this notifications, default is @everyone")]
         public ObservableCollection<string> Mentions { get; set; } = new ObservableCollection<string>();
 #else
-        public List<long> Regions { get; set; } = new List<long>();
-        public List<long> Constellations { get; set; } = new List<long>();
+        public List<object> LocationEntities { get; set; } = new List<object>();
         public List<int> Announces { get; set; } = new List<int>();
         public List<string> Mentions { get; set; } = new List<string>();
 #endif
@@ -1296,8 +1294,8 @@ namespace ThunderED.Classes
                 {
                     case nameof(DiscordChannelId):
                         return DiscordChannelId == 0 ? Compose(nameof(DiscordChannelId), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                    case nameof(Regions):
-                        return Regions.Count == 0 && Constellations.Count == 0? Compose(nameof(Regions), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(LocationEntities):
+                        return LocationEntities.Count == 0 ? Compose(nameof(LocationEntities), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }
 
                 return null;
@@ -1380,8 +1378,8 @@ namespace ThunderED.Classes
                 {
                     case nameof(Filters):
                         return Filters.Count == 0 ? Compose(nameof(Filters), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                    case nameof(CharacterID):
-                        return !CharacterID.Any() || CharacterID.All(a=> a == 0) ? Compose(nameof(CharacterID), Extensions.ERR_MSG_VALUEEMPTY) : null;
+                    case nameof(CharacterEntities):
+                        return !CharacterEntities.Any() ? Compose(nameof(CharacterEntities), Extensions.ERR_MSG_VALUEEMPTY) : null;
                     case nameof(DefaultDiscordChannelID):
                         return DefaultDiscordChannelID == 0 ? Compose(nameof(DefaultDiscordChannelID), Extensions.ERR_MSG_VALUEEMPTY) : null;
                 }
@@ -1544,13 +1542,10 @@ namespace ThunderED.Classes
         [Comment("Optional default mention for Incursions report. Default: @everyone")]
         public string DefaultMention { get; set; } = "@everyone";
 #if EDITOR
-        [Comment("List of numeric region IDs to filter incursions")]
-        public ObservableCollection<long> Regions { get; set; } = new ObservableCollection<long>();
-        [Comment("List of numeric constellation IDs to filter incursions")]
-        public ObservableCollection<long> Constellations { get; set; } = new ObservableCollection<long>();
+        [Comment("List of numeric location entitites to filter incursions")]
+        public ObservableCollection<object> LocationEntities { get; set; } = new ObservableCollection<object>();
 #else
-        public List<long> Regions { get; set; } = new List<long>();
-        public List<long> Constellations { get; set; } = new List<long>();
+        public List<object> LocationEntities { get; set; } = new List<object>();
 #endif
 #if EDITOR
         public override string this[string columnName]
@@ -1561,8 +1556,8 @@ namespace ThunderED.Classes
                 {
                     case nameof(DiscordChannelId):
                         return DiscordChannelId == 0 ? Compose(nameof(DiscordChannelId), Extensions.ERR_MSG_VALUEEMPTY) : null;
-                    case nameof(Regions):
-                        return Regions.Count == 0 && Constellations.Count == 0 ? Compose(nameof(Regions), "Regions or Constellations must be filled!") : null;
+                    case nameof(LocationEntities):
+                        return LocationEntities.Count == 0 ? Compose(nameof(LocationEntities), "Regions or Constellations must be filled!") : null;
                 }
 
                 return null;

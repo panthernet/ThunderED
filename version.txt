@@ -13,7 +13,7 @@
 + Improved KM to track and filter by attacker ships
 + Improved shutdown procedures to avoid possible DB corruption
 + Improved !sys command set. Use !sys help for more info
-+ Moved Mail, Notifications, SovTracker and Contracts modules to entities system
++ Moved Mail, Notifications, Incursions, SovTracker and Contracts modules to entities system
 + Made KM template variables case insensitive
 
 ### FEATURE HIGHLIGHT - RESTARTER
@@ -46,6 +46,8 @@ For the Docker users it also provides a possibility to replace shutdown with gra
  - Replaced `CharacterId` prop with `CharacterEntities` in Notifications module
  - Replaced `HolderAlliances` prop with `HolderAllianceEntities` in Sov Tracker module
  - Replaced `Regions, Constellations, Systems` props with `LocationEntities` in Sov Tracker module
+ - Replaced `Regions, Constellations` props with `LocationEntities` in Null Campaign module
+ - Replaced `Regions, Constellations` props with `LocationEntities` in IncursionNotifications module
 
 ### V1.4.7
 + Added message to AuthReportChannel upon successfull alt character registration

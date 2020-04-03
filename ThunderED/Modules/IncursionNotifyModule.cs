@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,11 @@ namespace ThunderED.Modules
 
         private DateTime _runAt = DateTime.UtcNow.Date + TimeSpan.FromHours(11) + TimeSpan.FromMinutes(5);
         private bool _isChecked;
+
+        public override async Task Initialize()
+        {
+            await ParseMixedDataArray(new Dictionary<string, List<object>>{{"default", Settings.IncursionNotificationModule.LocationEntities}}, MixedParseModeEnum.Location);
+        }
 
         public override async Task Run(object prm)
         {
@@ -48,31 +54,30 @@ namespace ThunderED.Modules
                     if (incursions == null) return;
                     _isChecked = true;
 
+                    var regionIds = GetParsedRegions("default") ?? new List<long>();
+                    var constIds = GetParsedConstellations("default") ?? new List<long>();
+                    var systemIds = GetParsedSolarSystems("default") ?? new List<long>();
+
+                    var sysIds = constIds.SelectMany(a =>
+                        (SQLHelper.GetSystemsByConstellation(a).GetAwaiter().GetResult())
+                        ?.Select(b => b.system_id)).ToList();
+                    sysIds.AddRange(regionIds.SelectMany(a =>
+                        (SQLHelper.GetSystemsByRegion(a).GetAwaiter().GetResult())
+                        ?.Select(b => b.system_id)));
+                    sysIds.AddRange(systemIds);
+                    sysIds = sysIds.Distinct().ToList();
+
                     foreach (var incursion in incursions)
                     {
-                        if (Settings.IncursionNotificationModule.Constellations.Count == 0 && Settings.IncursionNotificationModule.Regions.Count == 0)
+                        if (constIds.Count == 0 && regionIds.Count == 0 && systemIds.Count == 0)
                         {
                             await ReportIncursion(incursion, null, channel);
                             continue;
                         }
 
-                        var result = false;
-                        JsonClasses.ConstellationData c = null;
-                        if (Settings.IncursionNotificationModule.Constellations.Count > 0)
-                            result = Settings.IncursionNotificationModule.Constellations.Contains(incursion.constellation_id);
-
-                        if (!result)
-                        {
-                            if (Settings.IncursionNotificationModule.Regions.Count > 0)
-                            {
-                                c = await APIHelper.ESIAPI.GetConstellationData(Reason, incursion.constellation_id);
-                                if (Settings.IncursionNotificationModule.Regions.Contains(c.region_id))
-                                    result = true;
-                            }
-                        }
-
+                        var result = incursion.infested_solar_systems.Intersect(sysIds).Any();
                         if (result)
-                            await ReportIncursion(incursion, c, channel);
+                            await ReportIncursion(incursion, null, channel);
                     }
 
                     await SQLHelper.DeleteWhereIn("incursions", "constId", incursions.Select(a => a.constellation_id).ToList(), not:true);

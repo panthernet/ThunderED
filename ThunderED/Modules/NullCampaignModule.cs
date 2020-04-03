@@ -16,6 +16,12 @@ namespace ThunderED.Modules
         private DateTime _nextNotificationCheck = DateTime.FromFileTime(0);
         private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
 
+        public override async Task Initialize()
+        {
+            var data = Settings.NullCampaignModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.LocationEntities);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Location);
+        }
+
         public override async Task Run(object prm)
         {
 
@@ -36,18 +42,18 @@ namespace ThunderED.Modules
 
                 var allCampaigns = result.Result;
                 if(allCampaigns == null) return;
-                foreach (var pair in Settings.NullCampaignModule.GetEnabledGroups())
+                foreach (var (groupName, group) in Settings.NullCampaignModule.GetEnabledGroups())
                 {
-                    var groupName = pair.Key;
-                    var group = pair.Value;
-                    var systems = new List<JsonClasses.SystemName>();
-                    
-                    foreach (var regionId in @group.Regions) 
-                        systems.AddRange(await SQLHelper.GetSystemsByRegion(regionId));
-                    foreach (var cId in @group.Constellations) 
-                        systems.AddRange(await SQLHelper.GetSystemsByConstellation(cId));
+                    var systemIds = new List<long>();
+                    var regionIds = GetParsedRegions(groupName) ?? new List<long>();
+                    var constIds = GetParsedConstellations(groupName) ?? new List<long>();
+                    var sysIds = GetParsedSolarSystems(groupName) ?? new List<long>();
+                    foreach (var regionId in regionIds)
+                        systemIds.AddRange((await SQLHelper.GetSystemsByRegion(regionId))?.Select(a=> a.system_id));
+                    foreach (var cId in constIds)
+                        systemIds.AddRange((await SQLHelper.GetSystemsByConstellation(cId))?.Select(a=> a.system_id));
+                    systemIds.AddRange(sysIds);
 
-                    var systemIds = systems.Select(a => a.system_id);
                     var campaigns = allCampaigns.Where(a => systemIds.Contains(a.solar_system_id));
                     var existIds = await SQLHelper.GetNullsecCampaignIdList(groupName);
                     campaigns = campaigns.Where(a => !existIds.Contains(a.campaign_id));
@@ -63,7 +69,7 @@ namespace ThunderED.Modules
 
                         await SQLHelper.UpdateNullCampaign(groupName, campaign.campaign_id, startTime, campaign.ToJson());
                         if(group.ReportNewCampaign)
-                            await PrepareMessage(campaign, pair.Value, LM.Get("NC_NewCampaign"), 0x00FF00);
+                            await PrepareMessage(campaign, group, LM.Get("NC_NewCampaign"), 0x00FF00);
 
                         await LogHelper.LogInfo($"Nullsec Campaign {campaign.campaign_id} has been registered! [{groupName} - {campaign.campaign_id}]", Category, true, false);
                     }

@@ -50,8 +50,7 @@ namespace ThunderED.Modules
                         return r;
                     }
 
-                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.GetEnabledGroups()
-                        .Values.All(g => !g.CharacterID.Contains(numericCharId)))
+                    if (!TickManager.GetModule<NotificationModule>().IsValidCharacter(numericCharId))
                     {
                         await LogHelper.LogWarning($"Unauthorized notify feed request from {characterId}");
                         var r = WebQueryResult.BadRequestToSystemAuth;
@@ -136,8 +135,7 @@ namespace ThunderED.Modules
                         return true;
                     }
 
-                    if (TickManager.GetModule<NotificationModule>().Settings.NotificationFeedModule.GetEnabledGroups()
-                        .Values.All(g => !g.CharacterID.Contains(numericCharId)))
+                    if (!TickManager.GetModule<NotificationModule>().IsValidCharacter(numericCharId))
                     {
                         await LogHelper.LogWarning($"Unathorized notify feed request from {characterID}");
                         await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifyFail)

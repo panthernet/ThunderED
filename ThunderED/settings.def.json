@@ -772,8 +772,7 @@
   "incursionNotificationModule": {
     "DiscordChannelId": 0,
     "DefaultMention": "@everyone",
-    "Regions": [],
-    "Constellations": [],
+    "LocationEntities": [],
     "ReportIncursionStatusAfterDT": true
   },
 
@@ -782,8 +781,7 @@
     "Groups": {
       "groupName1": {
         "IsEnabled": true,
-        "Regions": [],
-        "Constellations": [],
+        "LocationEntities": [],
         "Announces": [],
         "Mentions": [],
         "DefaultMention": "@everyone",

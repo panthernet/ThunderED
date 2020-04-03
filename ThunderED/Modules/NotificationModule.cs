@@ -1283,5 +1283,11 @@ typeID: 2233",
             if (!string.IsNullOrEmpty(groupName) && !string.IsNullOrEmpty(filterName))
                 await UpdateNotificationList(groupName, filterName, isNew);
         }
+
+        private bool IsValidCharacter(long numericCharId)
+        {
+            return Settings.NotificationFeedModule.GetEnabledGroups().Any(group =>
+                (GetParsedCharacters(group.Key) ?? new List<long>()).Contains(numericCharId));
+        }
     }
 }
