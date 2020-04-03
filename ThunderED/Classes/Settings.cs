@@ -316,17 +316,13 @@ namespace ThunderED.Classes
         public bool IsEnabled { get; set; } = true;
 
 #if EDITOR
-        public ObservableCollection<long> Regions { get; set; } = new ObservableCollection<long>();
-        public ObservableCollection<long> Constellations { get; set; } = new ObservableCollection<long>();
-        public ObservableCollection<long> Systems { get; set; } = new ObservableCollection<long>();
-        public ObservableCollection<long> HolderAlliances { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<object> LocationEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> HolderAllianceEntities { get; set; } = new ObservableCollection<object>();
         [Comment("The list of Discord mentions to use for this notifications, like @everyone")]
         public ObservableCollection<string> DiscordMentions { get; set; } = new ObservableCollection<string>();
 #else
-        public List<long> Regions { get; set; } = new List<long>();
-        public List<long> Constellations { get; set; } = new List<long>();
-        public List<long> Systems { get; set; } = new List<long>();
-        public List<long> HolderAlliances { get; set; } = new List<long>();
+        public List<object> LocationEntities { get; set; } = new List<object>();
+        public List<object> HolderAllianceEntities { get; set; } = new List<object>();
         public List<string> DiscordMentions { get; set; } = new List<string>();
 #endif
         public double WarningThresholdValue { get; set; } = 1;
@@ -1369,11 +1365,11 @@ namespace ThunderED.Classes
         public ObservableDictionary<string, NotificationSettingsFilter> Filters { get; set; } = new ObservableDictionary<string, NotificationSettingsFilter>();
         [Comment("Numeric EVE character ID")]
         [Required]
-        public ObservableCollection<long> CharacterID { get; set; } = new ObservableCollection<long>();
+        public ObservableCollection<object> CharacterEntities { get; set; } = new ObservableCollection<object>();
 
 #else
         public Dictionary<string, NotificationSettingsFilter> Filters { get; set; } = new Dictionary<string, NotificationSettingsFilter>();
-        public List<long> CharacterID { get; set; } = new List<long>();
+        public List<object> CharacterEntities { get; set; } = new List<object>();
 #endif
 #if EDITOR
         public override string this[string columnName]

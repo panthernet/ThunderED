@@ -34,6 +34,9 @@ namespace ThunderED.Modules
         public override async Task Initialize()
         {
             await WebPartInitialization();
+
+            var data = Settings.NotificationFeedModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Member);
         }
 
         public override async Task Run(object prm)
@@ -68,18 +71,18 @@ namespace ThunderED.Modules
 
                     var guildID = Settings.Config.DiscordGuildId;
 
-                    foreach (var groupPair in Settings.NotificationFeedModule.GetEnabledGroups())
+                    foreach (var (groupName, group) in Settings.NotificationFeedModule.GetEnabledGroups())
                     {
-                        var group = groupPair.Value;
-                        if (!group.CharacterID.Any() || group.CharacterID.All(a => a == 0))
+                        var ids = GetParsedCharacters(groupName);
+                        if (ids == null || !ids.Any() || ids.All(a => a == 0))
                         {
-                            await LogHelper.LogError($"[CONFIG] Notification group {groupPair.Key} has no characterID specified!");
+                            await LogHelper.LogError($"[CONFIG] Notification group {groupName} has no character specified!");
                             continue;
                         }
 
                         if (group.DefaultDiscordChannelID == 0)
                         {
-                            await LogHelper.LogError($"[CONFIG] Notification group {groupPair.Key} has no DefaultDiscordChannelID specified!");
+                            await LogHelper.LogError($"[CONFIG] Notification group {groupName} has no DefaultDiscordChannelID specified!");
                             continue;
                         }
 
@@ -87,7 +90,7 @@ namespace ThunderED.Modules
                         if (group.Filters.Values.All(a => a.Notifications.Count == 0)) continue;
 
 
-                        foreach (var charId in group.CharacterID)
+                        foreach (var charId in ids)
                         {
                             var rToken = await SQLHelper.GetRefreshTokenDefault(charId);
                             if (string.IsNullOrEmpty(rToken))
@@ -154,7 +157,7 @@ typeID: 2233",
                             foreach (var filterPair in group.Filters)
                             {
                                 var filter = filterPair.Value;
-                                _lastNotification = await SQLHelper.GetLastNotification(groupPair.Key, filterPair.Key);
+                                _lastNotification = await SQLHelper.GetLastNotification(groupName, filterPair.Key);
 
                                 var fNotifications = new List<JsonClasses.Notification>();
                                 if (_lastNotification == 0)
@@ -171,7 +174,7 @@ typeID: 2233",
                                     else
                                     {
                                         _lastNotification = notifications.Max(a => a.notification_id);
-                                        await UpdateNotificationList(groupPair.Key, filterPair.Key, true);
+                                        await UpdateNotificationList(groupName, filterPair.Key, true);
                                         continue;
                                     }
                                 }
@@ -1211,7 +1214,7 @@ typeID: 2233",
                                             }
 
                                             //await SetLastNotificationId(notification.notification_id, null);                                            
-                                            await SetLastNotificationId(notification.notification_id, groupPair.Key, filterPair.Key);
+                                            await SetLastNotificationId(notification.notification_id, groupName, filterPair.Key);
 
 
                                         }

@@ -592,7 +592,7 @@
     "groups": {
       "groupName1": {
         "IsEnabled": true,
-        "characterID": [ 0 ],
+        "CharacterEntities": [ ],
         "defaultDiscordChannelID": 0,
         "fetchLastNotifDays": 0,
         "filters": {
@@ -798,10 +798,8 @@
     "Groups": {
       "groupName1": {
         "IsEnabled": true,
-        "HolderAlliances": [],
-        "Systems": [],
-        "Regions": [],
-        "Constellations": [],
+        "HolderAllianceEntities": [],
+        "LocationEntities": [],
         "DiscordMentions": [],
         "WarningThresholdValue": 1.0,
         "TrackADMIndexChanges": true,

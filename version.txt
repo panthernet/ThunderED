@@ -13,7 +13,7 @@
 + Improved KM to track and filter by attacker ships
 + Improved shutdown procedures to avoid possible DB corruption
 + Improved !sys command set. Use !sys help for more info
-+ Moved Mail and Contracts modules to entities system
++ Moved Mail, Notifications, SovTracker and Contracts modules to entities system
 + Made KM template variables case insensitive
 
 ### FEATURE HIGHLIGHT - RESTARTER
@@ -42,7 +42,10 @@ For the Docker users it also provides a possibility to replace shutdown with gra
  - Removed `authButtonDiscordText,authButtonNotifyText,authButtonTimersText` lang strings and added `AuthButtonDiscordText` config props to WebAuth, Notifications and Timers modules for default button names
  - Replaced `CharacterIds` prop with `CharacterEntities` in Contracts module Groups. It now support entities.
  - Replaced `Id` prop with `CharacterEntities` in Mail module Groups. It now support entities.
- - Replaced `AuthGroups` prop with `Groups` im Mail module for consistency
+ - Replaced `AuthGroups` prop with `Groups` in Mail module for consistency
+ - Replaced `CharacterId` prop with `CharacterEntities` in Notifications module
+ - Replaced `HolderAlliances` prop with `HolderAllianceEntities` in Sov Tracker module
+ - Replaced `Regions, Constellations, Systems` props with `LocationEntities` in Sov Tracker module
 
 ### V1.4.7
 + Added message to AuthReportChannel upon successfull alt character registration

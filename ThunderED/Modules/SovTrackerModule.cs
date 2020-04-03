@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using ThunderED.Classes;
@@ -26,6 +25,16 @@ namespace ThunderED.Modules
             _checkInterval = Settings.SovTrackerModule.CheckIntervalInMinutes;
         }
 
+        public override async Task Initialize()
+        {
+            var data = Settings.SovTrackerModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.HolderAllianceEntities);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Member);
+
+            data = Settings.SovTrackerModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.LocationEntities);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Location);
+
+        }
+
         public override async Task Run(object prm)
         {
             if (IsRunning) return;
@@ -37,23 +46,23 @@ namespace ThunderED.Modules
                 await LogHelper.LogModule("Running Sov Tracker check...", Category);
 
                 var data = await APIHelper.ESIAPI.GetSovStructuresData(Reason);
-                foreach (var pair in Settings.SovTrackerModule.GetEnabledGroups())
+                foreach (var (groupName, group) in Settings.SovTrackerModule.GetEnabledGroups())
                 {
-                   // var t = Stopwatch.StartNew();
-                    var group = pair.Value;
-                    var groupName = pair.Key;
+                    // var t = Stopwatch.StartNew();
 
                     if (APIHelper.DiscordAPI.GetChannel(group.DiscordChannelId) == null)
                     {
-                        await SendOneTimeWarning(groupName + "ch", $"Group {groupName} has invalid Discord channel ID!");
+                        await SendOneTimeWarning(groupName + "ch",
+                            $"Group {groupName} has invalid Discord channel ID!");
                         continue;
                     }
 
                     var trackerData = await SQLHelper.GetSovIndexTrackerData(groupName);
+                    var holderIds = GetParsedAlliances(groupName) ?? new List<long>();
 
                     if (!trackerData.Any())
                     {
-                        var list = GetUpdatedList(data, group);
+                        var list = GetUpdatedList(data, group, groupName, holderIds);
                         if (!list.Any())
                             await SendOneTimeWarning(groupName, $"No systems found for Sov Tracker group {groupName}!");
                         else
@@ -62,39 +71,45 @@ namespace ThunderED.Modules
                     }
 
                     var idList = trackerData.Select(a => a.solar_system_id).Distinct();
+
                     //expensive check for HolderAlliances
-                    var workingSet = !group.HolderAlliances.Any() ? data.Where(a => idList.Contains(a.solar_system_id)).ToList() : GetUpdatedList(data, group);
+                    var workingSet = !holderIds.Any()
+                        ? data.Where(a => idList.Contains(a.solar_system_id)).ToList()
+                        : GetUpdatedList(data, group, groupName, holderIds);
 
                     //check ADM
-                    if(group.TrackADMIndexChanges)
+                    if (group.TrackADMIndexChanges)
                         foreach (var d in workingSet.Where(a => a.structure_type_id == TCU_TYPEID))
                         {
-                            if (group.WarningThresholdValue > 0 && d.vulnerability_occupancy_level < group.WarningThresholdValue)
+                            if (group.WarningThresholdValue > 0 &&
+                                d.vulnerability_occupancy_level < group.WarningThresholdValue)
                                 await SendIndexWarningMessage(d, group);
                         }
 
                     //check sov
-                    if(group.TrackIHUBHolderChanges || group.TrackTCUHolderChanges)
+                    if (group.TrackIHUBHolderChanges || group.TrackTCUHolderChanges)
                         foreach (var d in workingSet)
                         {
                             if (group.TrackIHUBHolderChanges && d.structure_type_id == IHUB_TYPEID)
                             {
-                                var old = trackerData.FirstOrDefault(a => a.solar_system_id == d.solar_system_id && a.structure_type_id == IHUB_TYPEID);
+                                var old = trackerData.FirstOrDefault(a =>
+                                    a.solar_system_id == d.solar_system_id && a.structure_type_id == IHUB_TYPEID);
                                 if ((old?.alliance_id ?? 0) != (d?.alliance_id ?? 0))
                                     await SendHolderChangedMessage(d, old, group, false);
                             }
 
                             if (group.TrackTCUHolderChanges && d.structure_type_id == TCU_TYPEID)
                             {
-                                var old = trackerData.FirstOrDefault(a => a.solar_system_id == d.solar_system_id && a.structure_type_id == TCU_TYPEID);
+                                var old = trackerData.FirstOrDefault(a =>
+                                    a.solar_system_id == d.solar_system_id && a.structure_type_id == TCU_TYPEID);
                                 if ((old?.alliance_id ?? 0) != (d?.alliance_id ?? 0))
                                     await SendHolderChangedMessage(d, old, group, true);
                             }
                         }
 
                     await SQLHelper.SaveSovIndexTrackerData(groupName, workingSet);
-                   // t.Stop();
-                   // Debug.WriteLine($"Sov check: {t.Elapsed.TotalSeconds}sec");
+                    // t.Stop();
+                    // Debug.WriteLine($"Sov check: {t.Elapsed.TotalSeconds}sec");
                 }
             }
             catch (Exception ex)
@@ -107,29 +122,32 @@ namespace ThunderED.Modules
             }
         }
 
-        private List<JsonClasses.SovStructureData> GetUpdatedList(List<JsonClasses.SovStructureData> data, SovTrackerGroup group)
+        private List<JsonClasses.SovStructureData> GetUpdatedList(List<JsonClasses.SovStructureData> data, SovTrackerGroup group, string groupName, List<long> holderIds)
         {
             var t2 = Stopwatch.StartNew();
             try
             {
                 var list = data.ToList();
-                if (group.Systems.Any())
-                    list = list.Where(a => group.Systems.Contains(a.solar_system_id)).ToList();
-                if (group.HolderAlliances.Any())
-                    list = list.Where(a => group.HolderAlliances.Contains(a.alliance_id)).ToList();
-                if (group.Systems.Any())
-                    list = list.Where(a => group.Systems.Contains(a.solar_system_id)).ToList();
-                var hasRegions = group.Regions.Any();
-                var hasConsts = group.Constellations.Any();
+                var groupSystems = GetParsedSolarSystems(groupName) ?? new List<long>();
+                var groupConstellations = GetParsedConstellations(groupName) ?? new List<long>();
+                var groupRegions = GetParsedRegions(groupName) ?? new List<long>();
+                if (groupSystems.Any())
+                    list = list.Where(a => groupSystems.Contains(a.solar_system_id)).ToList();
+                if (holderIds.Any())
+                    list = list.Where(a => holderIds.Contains(a.alliance_id)).ToList();
+                if (groupSystems.Any())
+                    list = list.Where(a => groupSystems.Contains(a.solar_system_id)).ToList();
+                var hasRegions = groupRegions.Any();
+                var hasConsts = groupConstellations.Any();
                 if (hasRegions || hasConsts)
                     list = list.Where(a =>
                     {
                         var system = APIHelper.ESIAPI.GetSystemData(Reason, a.solar_system_id).GetAwaiter().GetResult();
                         if (!system.DB_RegionId.HasValue) return false;
-                        if (hasRegions && group.Regions.Contains(system.DB_RegionId.Value))
+                        if (hasRegions && groupRegions.Contains(system.DB_RegionId.Value))
                             return true;
 
-                        return hasConsts && @group.Constellations.Contains(system.constellation_id);
+                        return hasConsts && @groupConstellations.Contains(system.constellation_id);
                     }).ToList();
                 return list;
             }
