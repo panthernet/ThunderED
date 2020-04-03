@@ -106,11 +106,11 @@ namespace ThunderED.Modules.OnDemand
                     exaGroupDic.Add(fKey, exaData);
                     var exvData = await ParseMemberDataArray(fValue.HasNoVictimEntities);
                     exvGroupDic.Add(fKey, exvData);
-                    var exlData = await ParseMemberDataArray(fValue.HasNoLocationEntities);
+                    var exlData = await ParseLocationDataArray(fValue.HasNoLocationEntities);
                     exlGroupDic.Add(fKey, exlData);
-                    var exsData = await ParseMemberDataArray(fValue.HasNoAttackerShipEntities);
+                    var exsData = await ParseTypeDataArray(fValue.HasNoAttackerShipEntities);
                     exsGroupDic.Add(fKey, exsData);
-                    var exsData2 = await ParseMemberDataArray(fValue.HasNoVictimrShipEntities);
+                    var exsData2 = await ParseTypeDataArray(fValue.HasNoVictimrShipEntities);
                     exsGroupDic2.Add(fKey, exsData2);
                 }
                 ParsedAttackersLists.Add(key, aGroupDic);
