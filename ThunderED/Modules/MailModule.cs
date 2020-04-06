@@ -254,27 +254,30 @@ namespace ThunderED.Modules
             }
         }
 
-        private static async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string from, string mention, bool displaySummary)
+        private static async Task SendMailNotification(ulong channel, JsonClasses.Mail mail, string from,
+            string mention, bool displaySummary)
         {
-           // var stamp = DateTime.Parse(mail.timestamp).ToString(SettingsManager.Settings.Config.ShortTimeFormat);
+            // var stamp = DateTime.Parse(mail.timestamp).ToString(SettingsManager.Settings.Config.ShortTimeFormat);
+            if (mail == null || channel == 0) return;
+
             var sList = await PrepareBodyMessage(mail.body);
-            var body = sList[0];
-            var fits = sList[1];
-            var urls = sList[2];
+            var body = sList != null && sList.Any() ? sList[0] : (mail?.body ?? "");
+            var fits = sList != null && sList.Any() ? sList[1] : null;
+            var urls = sList != null && sList.Any() ? sList[2] : null;
             var fields = string.IsNullOrWhiteSpace(body) ? new List<string>() : body.SplitToLines(1923);
 
-           /* var embed = new EmbedBuilder()
-                .WithThumbnailUrl(SettingsManager.Settings.Resources.ImgMail);
-            var cnt = 0;
-            foreach (var field in fields)
-            {
-                if (cnt == 0)
-                    embed.AddField($"{LM.Get("mailSubject")} {mail.subject}", string.IsNullOrWhiteSpace(field) ? "---" : field);
-                else
-                    embed.AddField($"-", string.IsNullOrWhiteSpace(field) ? "---" : field);
-                cnt++;
-            }
-            embed.WithFooter($"{LM.Get("mailDate")} {stamp}");*/
+            /* var embed = new EmbedBuilder()
+                 .WithThumbnailUrl(SettingsManager.Settings.Resources.ImgMail);
+             var cnt = 0;
+             foreach (var field in fields)
+             {
+                 if (cnt == 0)
+                     embed.AddField($"{LM.Get("mailSubject")} {mail.subject}", string.IsNullOrWhiteSpace(field) ? "---" : field);
+                 else
+                     embed.AddField($"-", string.IsNullOrWhiteSpace(field) ? "---" : field);
+                 cnt++;
+             }
+             embed.WithFooter($"{LM.Get("mailDate")} {stamp}");*/
             var ch = APIHelper.DiscordAPI.GetChannel(channel);
             await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention} {from}");
             foreach (var field in fields)
@@ -282,10 +285,10 @@ namespace ThunderED.Modules
             if (displaySummary && !string.IsNullOrEmpty(fits))
             {
                 var list = fits.SplitToLines(1950, "</a>", true).ToList();
-                for (var i=0; i< list.Count; i++)
+                for (var i = 0; i < list.Count; i++)
                 {
                     var res = list[i];
-                    if (i != list.Count-1 && !res.EndsWith("```"))
+                    if (i != list.Count - 1 && !res.EndsWith("```"))
                         res += "```";
                     if (!res.StartsWith("```"))
                         res = res.Insert(0, "```");
@@ -308,7 +311,7 @@ namespace ThunderED.Modules
             var doc = new HtmlDocument();
             doc.LoadHtml(input);
             if (doc.ParseErrors.Any())
-                return new [] {input};
+                return new [] {input, null, null, null};
 
             string body;
             if (!forWeb)
