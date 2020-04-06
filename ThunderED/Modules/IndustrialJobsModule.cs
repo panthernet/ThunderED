@@ -35,6 +35,9 @@ namespace ThunderED.Modules
         {
             var data = Settings.IndustrialJobsModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member);
+
+            _etokens.Clear();
+            _corpEtokens.Clear();
         }
 
         private async Task<bool> OnAuthRequest(HttpListenerRequestEventArgs context)
@@ -183,16 +186,16 @@ namespace ThunderED.Modules
             {
                 var etag = _corpEtokens.GetOrNull(characterID);
                 var result = await APIHelper.ESIAPI.GetCorpIndustryJobs(Reason, corpID, token, etag);
-                _corpEtokens.AddOrUpdateEx(characterID, result.Data.ETag);
-                if(result.Data.IsNotModified) return;
+                _corpEtokens.AddOrUpdateEx(characterID, result?.Data?.ETag);
+                if(result?.Data?.IsNotModified ?? true) return;
                 esiJobs = result.Result?.OrderByDescending(a => a.job_id).ToList();
             }
             else
             {
                 var etag = _etokens.GetOrNull(characterID);
                 var result = await APIHelper.ESIAPI.GetCharacterIndustryJobs(Reason, characterID, token, etag);
-                _etokens.AddOrUpdateEx(characterID, result.Data.ETag);
-                if(result.Data.IsNotModified) return;
+                _etokens.AddOrUpdateEx(characterID, result?.Data?.ETag);
+                if(result?.Data?.IsNotModified ?? true) return;
                 esiJobs = result.Result?.OrderByDescending(a => a.job_id).ToList();
             }
 
