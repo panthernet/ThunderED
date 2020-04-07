@@ -55,7 +55,7 @@ namespace ThunderED.Modules
             }
         }
 
-        internal static async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles)
+        internal static async Task UpdateAllUserRoles(List<string> exemptRoles, List<string> authCheckIgnoreRoles, bool manual = false)
         {
             if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands && DiscordRolesManagementModule.AvailableRoleNames.Any())
             {
@@ -64,7 +64,9 @@ namespace ThunderED.Modules
             }
             var minutes = SettingsManager.Settings.WebAuthModule.AuthCheckIntervalMinutes < 10 ? 10 : SettingsManager.Settings.WebAuthModule.AuthCheckIntervalMinutes;
             var users = SettingsManager.Settings.WebAuthModule.AuthTakeNumberOfUsersPerPass < 10 ? 10 : SettingsManager.Settings.WebAuthModule.AuthTakeNumberOfUsersPerPass;
-            var ids = await SQLHelper.GetAuthUserIdsToCheck(minutes, users);
+            var ids = manual ? await SQLHelper.GetAuthUserIdsToCheck() : await SQLHelper.GetAuthUserIdsToCheck(minutes, users);
+
+
             await AuthInfoLog($"Fetched {ids?.Count} users to check within this pass", true);
 
             await ids.ParallelForEachAsync(async id =>

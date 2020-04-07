@@ -1396,6 +1396,9 @@ namespace ThunderED.Classes
         public ulong ChannelID { get; set; }
         [Comment("Default Discord mention command to use for this group")]
         public string DefaultMention { get; set; } = "@everyone";
+
+        public SpecialNotificationSettings SpecialSettings { get; set; } = new SpecialNotificationSettings();
+
 #if EDITOR
         [Comment("List of text notification types this filter has access to")]
         [Required]
@@ -1424,6 +1427,11 @@ namespace ThunderED.Classes
             }
         }
 #endif
+    }
+
+    public class SpecialNotificationSettings
+    {
+        public bool DoNotReportNpcBashForCitadels { get; set; }
     }
 
     public class IRCModuleSettings: ValidatableSettings

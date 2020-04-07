@@ -634,5 +634,27 @@ namespace ThunderED.API
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<List<JsonClasses.CharacterTitle>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/titles/?datasource=tranquility&include_completed=true&language={_language}", reason, authHeader);
         }
+
+        public bool IsNpcCharacter(object id)
+        {
+            if (id == null) return false;
+            if (long.TryParse(id.ToString(), out var result))
+            {
+                return result >= 1000000 && result <= 4000000;
+            }
+
+            return false;
+        }
+
+        public bool IsNpcCorporation(object id)
+        {
+            if (id == null) return false;
+            if (long.TryParse(id.ToString(), out var result))
+            {
+                return result >= 1000000 && result <= 2000000;
+            }
+
+            return false;
+        }
     }
 }

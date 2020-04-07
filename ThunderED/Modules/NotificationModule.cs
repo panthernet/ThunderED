@@ -376,8 +376,16 @@ typeID: 2233",
                                                     //"text": "allianceID: 99007289\nallianceLinkData:\n- showinfo\n- 16159\n- 99007289\nallianceName: Federation Uprising\narmorPercentage: 100.0\ncharID: 96734115\ncorpLinkData:\n- showinfo\n- 2\n- 98502090\ncorpName: Federal Vanguard\nhullPercentage: 100.0\nshieldPercentage: 99.93084364472988\nsolarsystemID: 30003842\nstructureID: &id001 1026660410904\nstructureShowInfoData:\n- showinfo\n- 35832\n- *id001\nstructureTypeID: 35832\n"
 
                                                     var aggCharId = GetData("charID", data);
+
+                                                    //skip NPC bash
+                                                    if (APIHelper.ESIAPI.IsNpcCharacter(aggCharId) && filter.SpecialSettings
+                                                        .DoNotReportNpcBashForCitadels)
+                                                    {
+                                                        break;
+                                                    }
                                                     var agressor = await APIHelper.ESIAPI.GetCharacterData(Reason, aggCharId);
-                                                    var aggName = agressor?.name;
+
+                                                        var aggName = agressor?.name;
                                                     var aggCorp = GetData("corpName", data);
                                                     var aggAllyId = GetData("allianceID", data);
                                                     var aggAlly = string.IsNullOrEmpty(aggAllyId) || aggAllyId == "0"

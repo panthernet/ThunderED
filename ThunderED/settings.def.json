@@ -671,6 +671,9 @@
             ],
             "channelID": 0,
             "defaultMention": "@everyone",
+			"SpecialSettings": {
+				"DoNotReportNpcBashForCitadels": false
+			}
             "charMentions": [],
             "roleMentions": []
           }

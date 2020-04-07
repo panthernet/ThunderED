@@ -240,7 +240,13 @@ namespace ThunderED.Helpers
             return (await Provider.SelectDataWithDateCondi("auth_users", new [] {"discordID"}, "last_check", minutes, limit)).Select(a=> Convert.ToUInt64(a[0])).ToList();
         }
 
-        
+
+        public static async Task<List<ulong>> GetAuthUserIdsToCheck()
+        {
+            if (Provider == null) return new List<ulong>();
+            return (await Provider.SelectData("auth_users", new[] { "discordID" })).Select(a => Convert.ToUInt64(a[0])).ToList();
+        }
+
         public static async Task SetAuthUserLastCheck(ulong id, DateTime date)
         {
             await Update("auth_users", "last_check", date, "discordID", id);
