@@ -673,7 +673,7 @@
             "defaultMention": "@everyone",
 			"SpecialSettings": {
 				"DoNotReportNpcBashForCitadels": false
-			}
+			},
             "charMentions": [],
             "roleMentions": []
           }
