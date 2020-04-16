@@ -88,6 +88,7 @@ namespace ThunderED.Classes
         [ConfigEntryName("ModuleIndustrialJobs")]
         public IndustrialJobsModuleSettings IndustrialJobsModule { get; set; } = new IndustrialJobsModuleSettings();
 
+
 #if EDITOR
         public string Validate(List<string> usedModules)
         {
@@ -212,8 +213,8 @@ namespace ThunderED.Classes
         public Dictionary<string, WCEAccessFilter> AccessList { get; set; } = new  Dictionary<string, WCEAccessFilter>();
 #endif
         public int SessionTimeoutInMinutes { get; set; } = 10;
+        public string AuthButtonDiscordText { get; set; } = "Settings";
 
-        
         /// <summary>
         /// Returns only enabled groups
         /// </summary>
@@ -561,6 +562,8 @@ namespace ThunderED.Classes
 
         [Comment("Validate ESI tokens while loading character lists. Can significantly increase loading times for huge character lists.")]
         public bool ValidateTokensWhileLoading { get; set; } = true;
+
+        public string AuthButtonDiscordText { get; set; } = "HR module";
 #if EDITOR
         public override string this[string columnName]
         {
@@ -1030,6 +1033,7 @@ namespace ThunderED.Classes
         public ObservableDictionary<string, MailAuthGroup> Groups { get; set; } = new ObservableDictionary<string, MailAuthGroup>();
 #else
         public Dictionary<string, MailAuthGroup> Groups { get; set; } = new Dictionary<string, MailAuthGroup>();
+        public string AuthButtonDiscordText { get; set; } = "Mail Auth";
 #endif
 
         /// <summary>

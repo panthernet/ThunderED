@@ -63,7 +63,7 @@ namespace ThunderED.Classes
 
         private static string GetCallBackUrl()
         {
-            var callbackurl = $"{GetWebSiteUrl()}/callback";
+            var callbackurl = $"{GetWebSiteUrl()}/Callback/rcv";
             return callbackurl;
         }
 

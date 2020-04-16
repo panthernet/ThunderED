@@ -476,6 +476,7 @@
         "CanRestoreDumped": true
       }
     },
+    "AuthButtonDiscordText": "HR auth",
     "AuthTimeoutInMinutes": 30,
     "TableEntriesPerPage": 10,
     "TableSkillEntriesPerPage": 20,

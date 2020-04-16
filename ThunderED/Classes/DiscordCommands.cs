@@ -152,7 +152,7 @@ namespace ThunderED.Classes
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTurl")}", true);
                     break;
                 case CMD_TIMERS:
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpTimers", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpTimers", CMD_TIMERS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;
 
                 case "rehash":

@@ -202,13 +202,13 @@ namespace ThunderED.Modules.Sub
                             if (Settings.Config.ModuleHRM)
                             {
                                 var authNurl = GetHRMAuthURL();
-                                manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonHRMText")}</a>");
+                                manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{Settings.HRMModule.AuthButtonDiscordText}</a>");
                             }
 
                             if (Settings.Config.ModuleWebConfigEditor)
                             {
                                 var authNurl = GetWebConfigAuthURL();
-                                manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("buttonSettingsText")}</a>");
+                                manageText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{Settings.WebConfigEditorModule.AuthButtonDiscordText}</a>");
                             }
 
                             text = text.Replace("{manageControls}", manageText.ToString());
@@ -301,7 +301,7 @@ namespace ThunderED.Modules.Sub
                             if (Settings.Config.ModuleMail)
                             {
                                 var authNurl = GetMailAuthURL();
-                                authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{LM.Get("authButtonMailText")}</a>");
+                                authText.Append($"\n<a href=\"{authNurl}\" class=\"btn btn-info btn-block\" role=\"button\">{Settings.MailModule.AuthButtonDiscordText}</a>");
                                 smth = true;
                             }
                             if (Settings.Config.ModuleContractNotifications)
