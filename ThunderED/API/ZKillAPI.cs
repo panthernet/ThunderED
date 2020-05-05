@@ -181,13 +181,12 @@ namespace ThunderED.API
                 while (true)
                 {
                     var res = await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>(string.Format(query, page), _reason);
-
+                    await Task.Delay(1000);
                     if (res != null)
                         killsList.AddRange(res);
                     if (res == null || res.Count == 0 || res.Count < maxPerPage) break;
                     page++;
                 }
-
                 var lossList = new List<JsonZKill.ZkillOnly>();
                 query = $"https://zkillboard.com/api/losses/{txt}/{id}/npc/0/page/{{0}}";
                 if (lastSeconds > 0)
@@ -208,6 +207,7 @@ namespace ThunderED.API
                 {
 
                     var res = await APIHelper.RequestWrapper<List<JsonZKill.ZkillOnly>>(string.Format(query, page), _reason);
+                    await Task.Delay(1000);
 
                     if (res != null)
                         lossList.AddRange(res);
