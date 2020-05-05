@@ -358,11 +358,13 @@ namespace ThunderED.Modules.OnDemand
 
                         #region Type checks
 
+                        bool hasTypesCheck = false;
                         bool hasVictimTypeMatch = false;
                         bool hasAttackerTypeMatch = false;
                         var types = GetTier2TypeIds(ParsedVictimShipsLists, groupName, filterName);
                         if (types.Any() && !isCertifiedToFeed)
                         {
+                            hasTypesCheck = true;
                             if (types.Contains(kill.victim.ship_type_id))
                             {
                                 hasVictimTypeMatch = true;
@@ -374,6 +376,7 @@ namespace ThunderED.Modules.OnDemand
                         types = GetTier2TypeIds(ParsedAttackerShipsLists, groupName, filterName);
                         if (types.Any() && !isCertifiedToFeed)
                         {
+                            hasTypesCheck = true;
                             if (types.ContainsAnyFromList(kill.attackers.Select(a=> a.ship_type_id)))
                             {
                                 hasAttackerTypeMatch = true;
@@ -382,10 +385,14 @@ namespace ThunderED.Modules.OnDemand
                             }
                         }
 
-                        if ((!filter.EnableStrictShipTypesCheck || (!hasVictimTypeMatch || !hasAttackerTypeMatch)) &&
-                            (filter.EnableStrictShipTypesCheck || (!hasAttackerTypeMatch && !hasVictimTypeMatch)))
+                        if (hasTypesCheck)
                         {
-                            continue;
+                            if ((!filter.EnableStrictShipTypesCheck ||
+                                 (!hasVictimTypeMatch || !hasAttackerTypeMatch)) &&
+                                (filter.EnableStrictShipTypesCheck || (!hasAttackerTypeMatch && !hasVictimTypeMatch)))
+                            {
+                                continue;
+                            }
                         }
 
 
