@@ -385,14 +385,14 @@ namespace ThunderED.Modules.OnDemand
                             }
                         }
 
-                        if (hasTypesCheck)
+                        if (hasTypesCheck && !isCertifiedToFeed && filter.EnableStrictShipTypesCheck && (!hasAttackerTypeMatch || !hasVictimTypeMatch))
                         {
-                            if ((!filter.EnableStrictShipTypesCheck ||
-                                 (!hasVictimTypeMatch || !hasAttackerTypeMatch)) &&
-                                (filter.EnableStrictShipTypesCheck || (!hasAttackerTypeMatch && !hasVictimTypeMatch)))
-                            {
-                                continue;
-                            }
+                             continue;
+                        }
+
+                        if (hasTypesCheck && !isCertifiedToFeed && !filter.EnableStrictShipTypesCheck && !hasAttackerTypeMatch && !hasVictimTypeMatch)
+                        {
+                            continue;
                         }
 
 
