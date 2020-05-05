@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
@@ -133,7 +134,8 @@ namespace ThunderED.Modules.OnDemand
             try
             {
                 RunningRequestCount++;
-                // kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm.txt"));
+               // var text = JsonConvert.SerializeObject(kill);
+                //kill = JsonConvert.DeserializeObject<JsonZKill.Killmail>(File.ReadAllText("testkm_pvp.txt"));
 
                 var hasBeenPosted = false;
                 foreach (var (groupName, group) in Settings.LiveKillFeedModule.GetEnabledGroups())
@@ -195,7 +197,7 @@ namespace ThunderED.Modules.OnDemand
 
                         exList = GetTier2TypeIds(ParsedExcludeVictimShipsLists, groupName, filterName);
                         if (exList.Contains(kill.victim.ship_type_id)) continue;
-                        exList = GetTier2TypeIds(ParsedAttackerShipsLists, groupName, filterName);
+                        exList = GetTier2TypeIds(ParsedExcludeAttackerShipsLists, groupName, filterName);
                         if(kill.attackers.Select(a=> a.ship_type_id).ContainsAnyFromList(exList)) continue;
 
 
@@ -356,18 +358,16 @@ namespace ThunderED.Modules.OnDemand
 
                         #region Type checks
 
+                        bool hasVictimTypeMatch = false;
+                        bool hasAttackerTypeMatch = false;
                         var types = GetTier2TypeIds(ParsedVictimShipsLists, groupName, filterName);
                         if (types.Any() && !isCertifiedToFeed)
                         {
                             if (types.Contains(kill.victim.ship_type_id))
                             {
+                                hasVictimTypeMatch = true;
                                 if (filter.EnableMatchOnFirstConditionMet)
                                     isCertifiedToFeed = true;
-                            }
-                            else
-                            {
-                                //type not match
-                                continue;
                             }
                         }
 
@@ -376,15 +376,18 @@ namespace ThunderED.Modules.OnDemand
                         {
                             if (types.ContainsAnyFromList(kill.attackers.Select(a=> a.ship_type_id)))
                             {
+                                hasAttackerTypeMatch = true;
                                 if (filter.EnableMatchOnFirstConditionMet)
                                     isCertifiedToFeed = true;
                             }
-                            else
-                            {
-                                //type not match
-                                continue;
-                            }
                         }
+
+                        if ((!filter.EnableStrictShipTypesCheck || (!hasVictimTypeMatch || !hasAttackerTypeMatch)) &&
+                            (filter.EnableStrictShipTypesCheck || (!hasAttackerTypeMatch && !hasVictimTypeMatch)))
+                        {
+                            continue;
+                        }
+
 
                         #endregion
 

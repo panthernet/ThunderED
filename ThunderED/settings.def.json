@@ -129,7 +129,10 @@
             "HasNoLocationEntities": [],
             "DiscordChannels": [],
             "EnableMatchOnFirstConditionMet": false,
-            "EnableStrictPartiesCheck": false
+            "dsc1": "By default feed looks for HasVictimEntities OR HasAttackerEntities to match, set EnableStrictPartiesCheck to TRUE to enable AND condition for more precise results",
+            "EnableStrictPartiesCheck": false,
+            "dsc2": "By default feed looks for HasAttackerShipEntities OR HasVictimShipEntities to match, set EnableStrictShipTypesCheck to TRUE to enable AND condition for more precise results",
+            "EnableStrictShipTypesCheck": false
           }
         }
       },
