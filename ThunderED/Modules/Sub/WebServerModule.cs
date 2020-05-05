@@ -87,7 +87,7 @@ namespace ThunderED.Modules.Sub
                             value = "NO_ESI";
                         if (TickManager.IsNoConnection)
                             value = "NO_CONNECTION";
-                        if (!APIHelper.DiscordAPI.IsAvailable)
+                        if (!APIHelper.IsDiscordAvailable)
                         {
                             if(Settings.WebServerModule.NoStatusResponseOnDiscordDisconnection)
                                 return;
@@ -713,18 +713,19 @@ namespace ThunderED.Modules.Sub
 
 
         #region new web
-        public static Dictionary<string, Func<string, CallbackTypeEnum, string, Task<WebQueryResult>>> WebModuleConnectors { get; } = new Dictionary<string, Func<string, CallbackTypeEnum, string, Task<WebQueryResult>>>();
+        public static Dictionary<string, Func<string, CallbackTypeEnum, string, WebAuthUserData, Task<WebQueryResult>>> WebModuleConnectors { get; } = new Dictionary<string, Func<string, CallbackTypeEnum, string, WebAuthUserData, Task<WebQueryResult>>>();
 
         /// <summary>
         /// Iterate between connected handlers to process request
         /// </summary>
-        public static async Task<WebQueryResult> ProcessWebCallbacks(string query, CallbackTypeEnum type, string ip)
+        public static async Task<WebQueryResult> ProcessWebCallbacks(string query, CallbackTypeEnum type, string ip,
+            WebAuthUserData data)
         {
             foreach (var method in WebModuleConnectors.Values)
             {
                 try
                 {
-                    var result = await method(query, type, ip);
+                    var result = await method(query, type, ip, data);
                     if (result.Result != WebQueryResultEnum.False)
                         return result;
                 }

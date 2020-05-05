@@ -898,6 +898,9 @@ namespace ThunderED.Classes
 
         [Comment("Enable strict 'AND' check rule for Victims and Attackers if True. Otherwise 'OR' rule will apply where any of Attackers or Victims should match for a filter to pass.")]
         public bool EnableStrictPartiesCheck { get; set; }
+        [Comment("Enable strict 'AND' check rule for Victims and Attackers ship types if True. Otherwise 'OR' rule will apply where any of Attackers or Victimsship type should match for a filter to pass.")]
+        public bool EnableStrictShipTypesCheck { get; set; }
+
         [Comment("Filter will pass if any specified condition is met when value set to True. Otherwise all conditions must be met.")]
         public bool EnableMatchOnFirstConditionMet { get; set; }
 

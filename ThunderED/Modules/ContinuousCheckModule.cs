@@ -127,7 +127,7 @@ namespace ThunderED.Modules
                 try
                 {
                     _isTQOnlineRunning = true;
-                    if (APIHelper.DiscordAPI.IsAvailable)
+                    if (APIHelper.IsDiscordAvailable)
                     {
                         var msg = _IsTQOnline.Value ? $"{LM.Get("autopost_tq")} {LM.Get("Offline")}" : $"{LM.Get("autopost_tq")} {LM.Get("Online")}";
                         var color = _IsTQOnline.Value ? new Discord.Color(0xFF0000) : new Discord.Color(0x00FF00);

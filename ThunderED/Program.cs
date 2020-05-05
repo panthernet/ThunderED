@@ -110,7 +110,7 @@ namespace ThunderED
             //load APIs
             await APIHelper.DiscordAPI.Start();
 
-            while (!APIHelper.DiscordAPI.IsAvailable)
+            while (!APIHelper.IsDiscordAvailable)
             {
                 await Task.Delay(10);
             }
@@ -243,7 +243,7 @@ namespace ThunderED
             try
             {
                 await LogHelper.LogInfo(isRestart ? "Server restart requested..." : $"Server shutdown requested...");
-                APIHelper.DiscordAPI.Stop();
+                APIHelper.StopServices();
                 IsClosing = true;
                 while (!_canClose || !TickManager.AllModulesReadyToClose())
                 {
@@ -346,7 +346,7 @@ namespace ThunderED
             //load APIs
             await APIHelper.DiscordAPI.Start();
 
-            while (!APIHelper.DiscordAPI.IsAvailable)
+            while (!APIHelper.IsDiscordAvailable)
             {
                 await Task.Delay(10);
             }
@@ -380,7 +380,7 @@ namespace ThunderED
             try
             {
                 await LogHelper.LogInfo(isRestart ? "Bot restart requested..." : $"Bot shutdown requested...");
-                APIHelper.DiscordAPI.Stop();
+                APIHelper.StopServices();
                 IsClosing = true;
                 while (!_canClose || !TickManager.AllModulesReadyToClose())
                 {
@@ -420,9 +420,10 @@ namespace ThunderED
 
         }
 
-        public static async Task<WebQueryResult> ProcessCallback(string queryStringValue, CallbackTypeEnum type, string ip)
+        public static async Task<WebQueryResult> ProcessCallback(string queryStringValue, CallbackTypeEnum type,
+            string ip, WebAuthUserData data)
         {
-            return await WebServerModule.ProcessWebCallbacks(queryStringValue, type, ip);
+            return await WebServerModule.ProcessWebCallbacks(queryStringValue, type, ip, data);
         }
     }
 }

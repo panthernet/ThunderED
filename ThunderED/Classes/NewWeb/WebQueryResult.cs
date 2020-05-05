@@ -23,8 +23,11 @@ namespace ThunderED.Classes
         public WebQueryResultEnum Result;
         public Dictionary<string, object> Values = new Dictionary<string, object>();
 
-        public WebQueryResult(WebQueryResultEnum result, string url = null, string returnUrl = null)
+        public bool ForceRedirect { get; }
+
+        public WebQueryResult(WebQueryResultEnum result, string url = null, string returnUrl = null, bool force = false)
         {
+            ForceRedirect = force;
             Result = result;
             if (url != null)
                 AddUrl(url);

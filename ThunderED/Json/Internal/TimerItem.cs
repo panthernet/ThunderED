@@ -8,18 +8,22 @@ namespace ThunderED.Json.Internal
 {
     public class TimerItem
     {
-        public long id;
-        public int timerType;
-        public int timerStage;
-        public string timerLocation;
-        public string timerOwner;
-        public string timerET;
-        public string timerNotes;
-        public string timerChar;
-        public int announce;
+        public long id { get; set; }
+        public int timerType { get; set; }
+        public int timerStage { get; set; }
+        public string timerLocation { get; set; }
+        public string timerOwner { get; set; }
+        public string timerET { get; set; }
+        public string timerNotes { get; set; }
+        public string timerChar { get; set; }
+        public int announce { get; set; }
         public int timerRfDay;
         public int timerRfHour;
         public int timerRfMin;
+
+
+        public string DisplayType => GetModeName();
+        public string DisplayStage => GetStageName();
 
         public string GetModeName()
         {
@@ -93,6 +97,20 @@ namespace ThunderED.Json.Internal
                 {nameof(timerNotes), timerNotes},
                 {nameof(timerChar), timerChar},
                 {nameof(announce), announce},
+            };
+        }
+
+        public static TimerItem FromWebTimerData(WebTimerData data, WebAuthUserData user)
+        {
+            return new TimerItem
+            {
+                timerLocation = data.Location,
+                timerType = data.Type,
+                timerStage = data.Stage,
+                timerOwner = data.Owner,
+                timerET = ((int)(data.Date.Subtract(new DateTime(1970, 1, 1))).TotalSeconds).ToString(),
+                timerNotes = data.Notes,
+                timerChar = user.Name
             };
         }
     }

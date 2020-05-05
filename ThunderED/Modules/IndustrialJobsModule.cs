@@ -454,5 +454,11 @@ namespace ThunderED.Modules
                 await APIHelper.DiscordAPI.SendMessageAsync(channel, sb.ToString());
             }
         }
+
+        public static bool HasAuthAccess(in long id)
+        {
+            if (!SettingsManager.Settings.Config.ModuleIndustrialJobs) return false;
+            return TickManager.GetModule<IndustrialJobsModule>().GetAllParsedCharacters().Contains(id);
+        }
     }
 }

@@ -42,7 +42,7 @@ namespace ThunderED.Modules.OnDemand
 
         private static async Task SendMessage()
         {
-            if(APIHelper.DiscordAPI == null || !APIHelper.DiscordAPI.IsAvailable) return;
+            if(!APIHelper.IsDiscordAvailable) return;
 
             var message = string.Join(Environment.NewLine, Package.ToArray());
             Package.Clear();

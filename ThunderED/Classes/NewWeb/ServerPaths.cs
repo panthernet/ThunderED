@@ -41,7 +41,7 @@ namespace ThunderED.Classes
 
         public static string GetUserAuthCallbackUrl()
         {
-            return "/users/authenticate";
+            return "/auth";
         }
 
         #endregion
@@ -63,7 +63,7 @@ namespace ThunderED.Classes
 
         private static string GetCallBackUrl()
         {
-            var callbackurl = $"{GetWebSiteUrl()}/Callback/rcv";
+            var callbackurl = $"{GetWebSiteUrl()}/callback";
             return callbackurl;
         }
 

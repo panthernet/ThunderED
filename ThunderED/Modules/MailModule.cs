@@ -858,5 +858,11 @@ namespace ThunderED.Modules
                 rcp.Remove(rcp.Length - 1, 1);
             return rcp.ToString();
         }
+
+        public static bool HasAuthAccess(in long id)
+        {
+            if (!SettingsManager.Settings.Config.ModuleMail) return false;
+            return TickManager.GetModule<MailModule>().GetAllParsedCharacters().Contains(id);
+        }
     }
 }

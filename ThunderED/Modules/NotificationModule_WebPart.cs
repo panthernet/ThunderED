@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.WebUtilities;
 using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
@@ -19,7 +18,7 @@ namespace ThunderED.Modules
             await Task.CompletedTask;
         }
 
-        public async Task<WebQueryResult> ProcessRequest(string query, CallbackTypeEnum type, string ip)
+        public async Task<WebQueryResult> ProcessRequest(string query, CallbackTypeEnum type, string ip, WebAuthUserData data)
         {
             if (!Settings.Config.ModuleNotificationFeed)
                 return WebQueryResult.False;
@@ -173,5 +172,11 @@ namespace ThunderED.Modules
         }
 
         #endregion
+
+        public static bool HasAuthAccess(in long id)
+        {
+            if (!SettingsManager.Settings.Config.ModuleNotificationFeed) return false;
+            return TickManager.GetModule<NotificationModule>().GetAllParsedCharacters().Contains(id);
+        }
     }
 }

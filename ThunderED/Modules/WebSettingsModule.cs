@@ -448,5 +448,11 @@ namespace ThunderED.Modules
 
             return null;
         }
+
+        public static bool HasWebAccess(in long id)
+        {
+            if (!SettingsManager.Settings.Config.ModuleWebConfigEditor) return false;
+            return TickManager.GetModule<WebSettingsModule>().GetAllParsedCharacters().Contains(id);
+        }
     }
 }

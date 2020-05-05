@@ -1241,6 +1241,13 @@ namespace ThunderED.Modules
                 AuthCorporationIdFilter = result.SelectMany(a=> a.AuthCorporationIdFilter).Distinct().ToList(),
             };
         }
+
+        public static bool HasWebAccess(in long id)
+        {
+            if (!SettingsManager.Settings.Config.ModuleHRM) return false;
+            return SettingsManager.Settings.HRMModule.GetEnabledGroups().Values.SelectMany(a => a.UsersAccessList)
+                .Contains(id);
+        }
     }
 
     internal enum GenMemType

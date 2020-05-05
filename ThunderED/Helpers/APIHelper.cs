@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ThunderED.API;
@@ -26,9 +27,46 @@ namespace ThunderED.Helpers
             return $"https://everef.net/type/{id}";
         }
 
+        private static CancellationTokenSource _token;
+
+        public static bool IsDiscordAvailable => DiscordAPI != null && DiscordAPI.IsAvailable;
+
+
+        public static void StopServices()
+        {
+            _token.Cancel();
+        }
+
+        private static void RunDiscordThread()
+        {
+            var thread = new Thread(async () =>
+            {
+                try
+                {
+                    DiscordAPI = new DiscordAPI();
+
+                    while (!_token.IsCancellationRequested)
+                    {
+                        await Task.Delay(10);
+                    }
+
+                    DiscordAPI?.Stop();
+                }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx("Discord Thread", ex, LogCat.Discord);
+                    DiscordAPI?.Stop();
+                    if(!_token.IsCancellationRequested)
+                        RunDiscordThread();
+                }
+            });
+            thread.Start();
+        }
+
         public static void Prepare()
         {
-            DiscordAPI = new DiscordAPI();
+            _token = new CancellationTokenSource();
+            RunDiscordThread();
             ESIAPI = new ESIAPI();
             ZKillAPI = new ZKillAPI();
             FleetUpAPI = new FleetUpAPI();
@@ -37,14 +75,14 @@ namespace ThunderED.Helpers
         public static void PurgeCache()
         {
             ESIAPI.PurgeCache();
-            DiscordAPI.PurgeCache();
+            DiscordAPI?.PurgeCache();
             ZKillAPI.PurgeCache();
         }
 
         public static void ResetCache()
         {
             ESIAPI.ResetCache();
-            DiscordAPI.ResetCache();
+            DiscordAPI?.ResetCache();
             ZKillAPI.ResetCache();
         }
 

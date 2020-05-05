@@ -25,7 +25,7 @@ namespace ThunderED.Modules
             await Task.CompletedTask;
         }
 
-        private async Task<WebQueryResult> ProcessAuth(string query, CallbackTypeEnum callbackType, string inputIp)
+        private async Task<WebQueryResult> ProcessAuth(string query, CallbackTypeEnum callbackType, string inputIp, WebAuthUserData webUserData)
         {
             if (!Settings.Config.ModuleAuthWeb)
                 return WebQueryResult.False;
@@ -400,7 +400,7 @@ namespace ThunderED.Modules
                                 var success = WebQueryResult.GeneralAuthSuccess;
                                 success.Message1 = LM.Get("authTemplateHeader");
                                 success.Message2 = LM.Get("authTemplateSucc1", rChar.name);
-                                success.Message3 = $"{LM.Get("authTemplateSucc2")}: <b>{Settings.Config.BotDiscordCommandPrefix}auth {uid}</b>";
+                                success.Message3 = $"{LM.Get("authTemplateSucc2")}<br><b>{Settings.Config.BotDiscordCommandPrefix}auth {uid}</b>";
                                 return success;
                             }
                             else
@@ -409,9 +409,8 @@ namespace ThunderED.Modules
                                 success.Message1 = LM.Get("authTemplateHeader");
                                 success.Message2 = LM.Get("authTemplateManualAccept", rChar.name);
                                 success.Message3 =
-                                    $"{LM.Get("authTemplateManualAccept2")}: <b>{Settings.Config.BotDiscordCommandPrefix}auth confirm {uid}</b>";
+                                    $"{LM.Get("authTemplateManualAccept2")}<br><b>{Settings.Config.BotDiscordCommandPrefix}auth confirm {uid}</b>";
                                 return success;
-
                             }
                         }
                         else
@@ -966,5 +965,13 @@ namespace ThunderED.Modules
             return false;
         }
         #endregion
+
+        public static bool HasAuthAccess(in long id)
+        {
+            if (!SettingsManager.Settings.Config.ModuleAuthWeb) return false;
+            return SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups()
+                .Where(a => a.Value.StandingsAuth != null).SelectMany(a => a.Value.StandingsAuth.CharacterIDs)
+                .Contains(id);
+        }
     }
 }

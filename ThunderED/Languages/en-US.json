@@ -611,5 +611,10 @@
   "webAbout": "About",
   "webVisitHomepage": "Visit home page",
   "webAboutThundered": "About ThunderED",
-  "webUserIsNotAuthenticated":  "Selected character is not present in the system" 
+  "webUserIsNotAuthenticated": "Selected character is not present in the system",
+  "webWelcomeUserName": "Welcome, {0}!",
+  "webButtonLogout": "Log out",
+  "authWebNoFeedsHeader": "No feeds enabled",
+  "webFatalError": "Fatal error! See logs for details",
+  "webAuthenticationExpired": "Authentication expired, please reauth"
 }

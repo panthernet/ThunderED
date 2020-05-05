@@ -919,5 +919,11 @@ namespace ThunderED.Modules
                 await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("WebRequestUnexpected"));
             }
         }
+
+        public static bool HasAuthAccess(in long id)
+        {
+            if (!SettingsManager.Settings.Config.ModuleContractNotifications) return false;
+            return TickManager.GetModule<ContractNotificationsModule>().GetAllParsedCharacters().Contains(id);
+        }
     }
 }

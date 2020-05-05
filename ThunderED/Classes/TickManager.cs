@@ -138,7 +138,7 @@ namespace ThunderED.Classes
 
         public static async void Tick(object stateInfo)
         {
-            if (_running || !APIHelper.DiscordAPI.IsAvailable) return;
+            if (_running || !APIHelper.IsDiscordAvailable) return;
 
             _running = true;
             _asyncNow = DateTime.Now;
