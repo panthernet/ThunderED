@@ -101,7 +101,7 @@ namespace ThunderED.API
 
         public async Task ReplyMessageAsync(ICommandContext context, IMessageChannel channel, string message, bool mentionSender = false)
         {
-            if (context == null || channel == null) return;
+            if (context == null || channel == null || string.IsNullOrEmpty(message)) return;
             if (mentionSender)
             {
                 var mention = await GetMentionedUserString(context);

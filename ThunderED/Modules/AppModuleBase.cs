@@ -367,10 +367,23 @@ namespace ThunderED.Modules
         protected List<long> GetFromTier2Dictionary(Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> dic, string prm, string group = null,
             string filter = null)
         {
-            if(group == null)
-                return dic.SelectMany(a=> a.Value).Where(a => a.Value.ContainsKey(prm)).SelectMany(a => a.Value[prm]).Distinct().Where(a => a > 0).ToList();
-            if(!dic.ContainsKey(group) && !dic.Values.Any(a=> a.ContainsKey(filter))) return new List<long>();
-            return dic[group][filter].Where(a => a.Key.Equals(prm, StringComparison.OrdinalIgnoreCase)).SelectMany(a => a.Value).Distinct().Where(a => a > 0).ToList();
+            try
+            {
+                if (group == null)
+                    return dic.SelectMany(a => a.Value).Where(a => a.Value.ContainsKey(prm))
+                        .SelectMany(a => a.Value[prm]).Distinct().Where(a => a > 0).ToList();
+                if (!dic.ContainsKey(group)) return new List<long>();
+                var item = dic[group];
+                if (!item.ContainsKey(filter)) return new List<long>();
+
+                return item[filter].Where(a => a.Key.Equals(prm, StringComparison.OrdinalIgnoreCase))
+                    .SelectMany(a => a.Value).Distinct().Where(a => a > 0).ToList();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogEx($"{nameof(GetFromTier2Dictionary)} {dic==null} {prm} {group} {filter}", ex, Category).GetAwaiter().GetResult();
+                return new List<long>();
+            }
         }
 
         #endregion

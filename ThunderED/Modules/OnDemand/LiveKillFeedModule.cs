@@ -395,7 +395,6 @@ namespace ThunderED.Modules.OnDemand
                             continue;
                         }
 
-
                         #endregion
 
                         //haven't hit any criteria for 1-hit mode
