@@ -1350,6 +1350,10 @@ namespace ThunderED.Classes
 
         private async Task<bool> IsExecByAdmin()
         {
+            //restrict admin commands on secondary guilds if nesessary
+            if (Context.Guild.Id != SettingsManager.Settings.Config.DiscordGuildId &&
+                !SettingsManager.Settings.Config.DiscordAllowSystemCommandsOnSecondaryGuilds) return false;
+
             var result = await APIHelper.DiscordAPI.IsAdminAccess(Context);
             if (!string.IsNullOrEmpty(result))
             {
@@ -1374,6 +1378,10 @@ namespace ThunderED.Classes
 
         private bool IsForbidden()
         {
+            //restrict admin commands on secondary guilds if nesessary
+            if (Context.Guild.Id != SettingsManager.Settings.Config.DiscordGuildId &&
+                !SettingsManager.Settings.Config.DiscordAllowGeneralCommandsOnSecondaryGuilds) return true;
+
             var allowed = APIHelper.DiscordAPI.GetConfigAllowedPublicChannels();
             if (allowed.Any())
             {

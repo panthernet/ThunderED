@@ -1674,6 +1674,9 @@ namespace ThunderED.Classes
         [Comment("Numeric ID value of your Discord group (guild)")]
         [Required]
         public ulong DiscordGuildId { get; set; }
+
+        public bool DiscordAllowGeneralCommandsOnSecondaryGuilds { get; set; } = true;
+        public bool DiscordAllowSystemCommandsOnSecondaryGuilds { get; set; } = false;
 #if EDITOR
         [Required]
         public ObservableCollection<string> DiscordAdminRoles { get; set; } = new ObservableCollection<string>();

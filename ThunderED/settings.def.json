@@ -6,6 +6,8 @@
     "botDiscordCommandPrefix": "!",
     "discordGuildId": 0,
     "discordAdminRoles": [ "Admins" ],
+    "DiscordAllowGeneralCommandsOnSecondaryGuilds": true,
+    "DiscordAllowSystemCommandsOnSecondaryGuilds": false,
     "comForbiddenChannels": [],
     "comAllowedChannels": [],
     "language": "en-US",
