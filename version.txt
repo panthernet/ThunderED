@@ -20,6 +20,10 @@
 + Moved Mail, Notifications, Incursions, SovTracker and Contracts modules to entities system
 + Made KM template variables case insensitive
 
+### FEATURE HIGHLIGHT - MULTIPLE DISCORD GUILDS
+It is no possible for bot to work with several guilds in a limited manner. Auth always works against single guild Id specified in config for now.
+But now you can feed messages into channels in other guilds where this bot has been added as a user. Just specify them in config, guild will be found automatically.
+
 ### FEATURE HIGHLIGHT - RESTARTER
 This release introduces new executable: Restarter. It is top-level executable which should be started instead of `ThunderED.dll`.
 It provides the following benefits:
