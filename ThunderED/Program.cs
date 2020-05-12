@@ -88,7 +88,7 @@ namespace ThunderED
             var rs = await SQLHelper.LoadProvider();
             if (!string.IsNullOrEmpty(rs))
             {
-                await LogHelper.LogError(result);
+                await LogHelper.LogError(rs);
                 try
                 {
                     Console.ReadKey();
@@ -115,7 +115,7 @@ namespace ThunderED
                 await Task.Delay(10);
             }
 
-            if (APIHelper.DiscordAPI.GetGuild() == null)
+            if (APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId) == null)
             {
                 await LogHelper.LogError("[CRITICAL] DiscordGuildId - Discord guild not found!");
                 try
@@ -351,7 +351,7 @@ namespace ThunderED
                 await Task.Delay(10);
             }
 
-            if (APIHelper.DiscordAPI.GetGuild() == null)
+            if (APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId) == null)
             {
                 await LogHelper.LogError("[CRITICAL] DiscordGuildId - Discord guild not found!");
                 try

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -28,6 +29,8 @@ namespace ThunderED.API
 
         public bool IsAvailable { get; private set; }
 
+        private readonly List<SocketGuild> _cacheGuilds  = new List<SocketGuild>();
+
         public DiscordAPI()
         {
             Client = new DiscordSocketClient();
@@ -45,7 +48,9 @@ namespace ThunderED.API
             Client.Connected += async () =>
             {
                 await AsyncHelper.RedirectToThreadPool();
-               // await LogHelper.LogInfo("Connected!", LogCat.Discord);
+                // await LogHelper.LogInfo("Connected!", LogCat.Discord);
+                if(!_cacheGuilds.Any())
+                    _cacheGuilds.AddRange(Client.Guilds.ToList());
             };
             Client.Disconnected += async exception => 
             {
@@ -78,7 +83,7 @@ namespace ThunderED.API
         {
             try
             {
-                return GetGuild()?.GetUser(userId)?.Mention;
+                return FindUserInGuilds(userId)?.Mention;
             }
             catch (Exception ex)
             {
@@ -86,6 +91,68 @@ namespace ThunderED.API
                 return null;
             }
         }
+
+        #region Find for multiple guilds
+
+
+        private SocketRole FindRoleInGuilds(string roleName, bool caseInsensitive = false)
+        {
+            foreach (var guild in GetPrioritezedGuildsList())
+            {
+                var role = guild.Roles.FirstOrDefault(a => a.Name.Equals(roleName, caseInsensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
+                if (role != null)
+                    return role;
+            }
+
+            return null;
+        }
+
+        private IMessageChannel FindChannelInGuilds(ulong channelId)
+        {
+            foreach (var guild in GetPrioritezedGuildsList())
+            {
+                var channel = guild.Channels.FirstOrDefault(a => a.Id == channelId);
+                if (channel != null)
+                    return guild.GetTextChannel(channelId);
+            }
+
+            return null;
+        }
+
+        private SocketUser FindUserInGuilds(ulong userId)
+        {
+            foreach (var guild in GetPrioritezedGuildsList())
+            {
+                var user = guild.GetUser(userId);
+                if(user != null)
+                    return user;
+            }
+
+            return null;
+        }
+
+        private SocketGuildUser FindGuildUserInGuilds(ulong userId)
+        {
+            foreach (var guild in GetPrioritezedGuildsList())
+            {
+                var user = guild.GetUser(userId);
+                if (user != null)
+                    return user;
+            }
+
+            return null;
+        }
+
+        private List<SocketGuild> GetPrioritezedGuildsList()
+        {
+            var g = _cacheGuilds.FirstOrDefault(a => a.Id == SettingsManager.Settings.Config.DiscordGuildId);
+            if (g == null) return _cacheGuilds;
+            var list = new List<SocketGuild> {g};
+            list.AddRange(_cacheGuilds.Where(a => a.Id != SettingsManager.Settings.Config.DiscordGuildId));
+            return list;
+        }
+
+        #endregion
 
         public async Task ReplyMessageAsync(ICommandContext context, string message, bool mentionSender)
         {
@@ -252,7 +319,6 @@ namespace ThunderED.API
             try
             {
 
-
                 if (SettingsManager.Settings.Config.ModuleIRC)
                 {
                     var module = TickManager.GetModule<IRCModule>();
@@ -262,7 +328,7 @@ namespace ThunderED.API
 
                 if (SettingsManager.Settings.Config.ModuleTelegram)
                 {
-                    var name = APIHelper.DiscordAPI.GetGuild().GetUser(message.Author.Id)?.Nickname ?? message.Author.Username;
+                    var name = GetGuildByChannel(messageParam.Channel.Id).GetUser(message.Author.Id)?.Nickname ?? message.Author.Username;
                     TickManager.GetModule<TelegramModule>()?.SendMessage(message.Channel.Id, message.Author.Id, name, message.Content);
                 }
 
@@ -281,13 +347,18 @@ namespace ThunderED.API
             }
         }
 
+        private SocketGuild GetGuildByChannel(ulong channelId)
+        {
+            return _cacheGuilds.FirstOrDefault(a=>a.Channels.Any(a=> a.Id == channelId));
+        }
+
         private async Task Event_Ready()
         {
             IsAvailable = true;
             var name = SettingsManager.Settings.Config.BotDiscordName.Length > 31
                 ? SettingsManager.Settings.Config.BotDiscordName.Substring(0, 31)
                 : SettingsManager.Settings.Config.BotDiscordName;
-            await GetGuild().CurrentUser.ModifyAsync(x => x.Nickname = name);
+            _cacheGuilds.ForEach(async a=> await a.CurrentUser.ModifyAsync(x => x.Nickname = name));
             await Client.SetGameAsync(SettingsManager.Settings.Config.BotDiscordGame);
         }
 
@@ -296,7 +367,7 @@ namespace ThunderED.API
             await AsyncHelper.RedirectToThreadPool();
             try
             {
-                if (SettingsManager.Settings.Config.WelcomeMessage)
+                if (SettingsManager.Settings.Config.WelcomeMessage && arg.Guild.Id == SettingsManager.Settings.Config.DiscordGuildId)
                 {
                     var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0
                         ? arg.Guild.DefaultChannel
@@ -400,24 +471,11 @@ namespace ThunderED.API
 
         #endregion
 
-        public IMessageChannel GetChannel(ulong guildID, ulong noid)
-        {
-            try
-            {
-                return Client.GetGuild(guildID).GetTextChannel(noid);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.LogEx(nameof(GetChannel), ex, LogCat.Discord).GetAwaiter().GetResult();
-                return null;
-            }
-        }
-
         public IMessageChannel GetChannel(ulong noid)
         {
             try
             {
-                return GetGuild().GetTextChannel(noid);
+                return FindChannelInGuilds(noid);
             }
             catch (Exception ex)
             {
@@ -436,7 +494,7 @@ namespace ThunderED.API
         {
             try
             {
-                var r = GetGuild().Roles.FirstOrDefault(a => a.Name == role);
+                var r = FindRoleInGuilds(role);
                 if (r == null || !r.IsMentionable) return null;
                 return r.Mention;
             }
@@ -447,18 +505,16 @@ namespace ThunderED.API
             }
         }
 
-        public SocketGuild GetGuild()
+        public SocketGuild GetGuild(ulong guildId)
         {
-            return Client.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
+            return _cacheGuilds.FirstOrDefault(a=> a.Id == guildId);
         }
 
         public SocketRole GetGuildRole(string roleName, bool caseInsensitive = false)
         {
             try
             {
-                return caseInsensitive
-                    ? GetGuild().Roles.FirstOrDefault(x => x.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase))
-                    : GetGuild().Roles.FirstOrDefault(x => x.Name == roleName);
+                return FindRoleInGuilds(roleName, caseInsensitive);
             }
             catch (Exception ex)
             {
@@ -468,11 +524,11 @@ namespace ThunderED.API
         }
 
         
-        public List<string> GetGuildRoleNames()
+        public List<string> GetGuildRoleNames(ulong guildId)
         {
             try
             {
-                return GetGuild().Roles.Select(a => a.Name).ToList();
+                return GetGuild(guildId).Roles.Select(a => a.Name).ToList();
             }
             catch (Exception ex)
             {
@@ -498,7 +554,7 @@ namespace ThunderED.API
         {
             try
             {
-                return GetGuild().GetUser(authorId);
+                return FindGuildUserInGuilds(authorId);
             }
             catch (Exception ex)
             {
@@ -563,11 +619,12 @@ namespace ThunderED.API
             return GetUser(id)?.Roles.Select(a => a.Name).ToList();
         }
 
-        public List<SocketGuildUser> GetUsers(ulong channelId, bool onlineOnly)
+        /*public List<SocketGuildUser> GetUsers(ulong channelId, bool onlineOnly)
         {
             try
             {
-                var users = channelId == 0 ? GetGuild().Users.ToList() : GetGuild().GetChannel(channelId).Users.ToList();
+                var g = GetGuildByChannel(channelId);
+                var users = channelId == 0 ? g.Users.ToList() : g.GetChannel(channelId).Users.ToList();
                 return onlineOnly ? users.Where(a => a.Status != UserStatus.Offline).ToList() : users;
             }
             catch (Exception ex)
@@ -575,11 +632,11 @@ namespace ThunderED.API
                 LogHelper.LogEx(nameof(GetUsers), ex, LogCat.Discord).GetAwaiter().GetResult();
                 return new List<SocketGuildUser>();
             }
-        }
+        }*/
 
         public async Task<IList<string>> CheckAndNotifyBadDiscordRoles(IList<string> roles, LogCat category)
         {
-            var discordRoles = GetGuildRoleNames();
+            var discordRoles = GetPrioritezedGuildsList().SelectMany(a=> a.Roles).Select(a=> a.Name).Distinct().ToList();
             if(!discordRoles.Any()) return new List<string>();
             if(!roles.Any()) return new List<string>();
             var missing = roles.Except(discordRoles).ToList();
@@ -603,8 +660,21 @@ namespace ThunderED.API
 
         public int GetUsersCount()
         {
-            return GetGuild()?.Users.Count ?? 0;
+            return _cacheGuilds.Sum(a=> a.Users.Count);
         }
 
+        public List<ulong> GetUserIdsFromGuild(ulong guildId)
+        {
+            return _cacheGuilds.FirstOrDefault(a => a.Id == guildId)?.Users.Select(a=> a.Id).ToList();
+        }
+
+        public List<ulong> GetUserIdsFromChannel(ulong guildId, ulong channelId, bool isOnlineOnly)
+        {
+            if(channelId == 0)
+                return _cacheGuilds.FirstOrDefault(a => a.Id == guildId)?.Users.Where(a => !isOnlineOnly || a.Status != UserStatus.Offline).Select(a => a.Id).ToList();
+
+            return _cacheGuilds.FirstOrDefault(a => a.Id == guildId)?.Channels.FirstOrDefault(a => a.Id == channelId)
+                ?.Users.Where(a => !isOnlineOnly || a.Status != UserStatus.Offline).Select(a => a.Id).ToList();
+        }
     }
 }

@@ -145,9 +145,9 @@ namespace ThunderED.Modules.OnDemand
                 var usersToCheck = new List<AuthUserEntity>();
                 if (!isAll)
                 {
-                    foreach (var user in APIHelper.DiscordAPI.GetUsers(context.Channel.Id, isOnlineOnly))
+                    foreach (var userId in APIHelper.DiscordAPI.GetUserIdsFromChannel(context.Guild.Id, context.Channel.Id, isOnlineOnly))
                     {
-                        var item = await SQLHelper.GetAuthUserByDiscordId(user.Id);
+                        var item = await SQLHelper.GetAuthUserByDiscordId(userId);
                         if (item != null && !string.IsNullOrEmpty(item.Data.Permissions) && SettingsManager.HasCharSkillsScope(item.Data.PermissionsList))
                             usersToCheck.Add(item);
                     }
@@ -156,7 +156,7 @@ namespace ThunderED.Modules.OnDemand
                 {
                     if (isOnlineOnly)
                     {
-                        var dusers = APIHelper.DiscordAPI.GetUsers(0, true).Select(a=> a.Id);
+                        var dusers = APIHelper.DiscordAPI.GetUserIdsFromChannel(context.Guild.Id, 0, true);
                         usersToCheck = (await SQLHelper.GetAuthUsers((int) UserStatusEnum.Authed)).Where(item => dusers.Contains(item.DiscordId) &&
                                 !string.IsNullOrEmpty(item.Data.Permissions) && SettingsManager.HasCharSkillsScope(item.Data.PermissionsList))
                             .ToList();

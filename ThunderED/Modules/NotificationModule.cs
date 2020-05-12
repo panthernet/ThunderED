@@ -195,7 +195,7 @@ typeID: 2233",
                                             if (Settings.Config.LogNewNotifications)
                                                 await LogHelper.LogNotification($"{notification.type} [{notification.notification_id}]", notification.text);
 
-                                            var discordChannel = APIHelper.DiscordAPI.GetChannel(guildID, filter.ChannelID != 0 ? filter.ChannelID : group.DefaultDiscordChannelID);
+                                            var discordChannel = APIHelper.DiscordAPI.GetChannel(filter.ChannelID != 0 ? filter.ChannelID : group.DefaultDiscordChannelID);
                                             var data = HelpersAndExtensions.ParseNotificationText(notification.text);
                                             //var atCorpName = GetData("corpName", data) ?? LM.Get("Unknown");
                                             var systemId = GetData("solarSystemID", data);

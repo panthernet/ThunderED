@@ -30,7 +30,7 @@ namespace ThunderED.Modules.Static
                     $"Bot ID: {botid}{Environment.NewLine}{Environment.NewLine}" +
                     $"Run Time: {runTime.Days} Days {runTime.Hours} Hours {runTime.Minutes} Minutes {runTime.Seconds} Seconds{Environment.NewLine}{Environment.NewLine}" +
                     $"Statistics:{Environment.NewLine}" +
-                    $"Memory Used: {Math.Round(memoryUsed.LargestWholeNumberValue, 2)} {memoryUsed.LargestWholeNumberSymbol}{Environment.NewLine}" +
+                    $"Memory Used: {Math.Round(memoryUsed.LargestWholeNumberDecimalValue, 2)} {memoryUsed.LargestWholeNumberDecimalSymbol}{Environment.NewLine}" +
                     $"Total Users Seen: {totalUsers}```").ConfigureAwait(false);
                 await Task.CompletedTask;
             }catch

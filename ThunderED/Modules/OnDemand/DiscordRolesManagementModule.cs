@@ -46,7 +46,7 @@ namespace ThunderED.Modules.OnDemand
         {
             try
             {
-                var groups = APIHelper.DiscordAPI.GetGuildRoleNames();
+                var groups = APIHelper.DiscordAPI.GetGuildRoleNames(context.Guild.Id);
                 if(!groups.Any()) return;
                 var validGroups = !SettingsManager.Settings.CommandsConfig.RolesCommandDiscordRoles.Any() ? groups : AvailableRoleNames;
 
@@ -80,7 +80,7 @@ namespace ThunderED.Modules.OnDemand
         {
             try
             {
-                var groups = APIHelper.DiscordAPI.GetGuildRoleNames();
+                var groups = APIHelper.DiscordAPI.GetGuildRoleNames(context.Guild.Id);
                 if(!groups.Any()) return;
                 var validGroups = APIHelper.DiscordAPI.GetUserRoleNames(context.Message.Author.Id);
                 if (!validGroups.ContainsCaseInsensitive(role))

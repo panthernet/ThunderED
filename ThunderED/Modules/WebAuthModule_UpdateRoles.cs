@@ -30,7 +30,7 @@ namespace ThunderED.Modules
                 authCheckIgnoreRoles = authCheckIgnoreRoles.ToList();
                 authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
             }
-            var idList = APIHelper.DiscordAPI.GetGuild().Users.Select(a => a.Id).ToList();
+            var idList = APIHelper.DiscordAPI.GetUserIdsFromGuild(SettingsManager.Settings.Config.DiscordGuildId);
 
             if (useParallel)
             {
@@ -81,7 +81,7 @@ namespace ThunderED.Modules
         {
             try
             {
-                var discordGuild = APIHelper.DiscordAPI.GetGuild();
+                var discordGuild = APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
                 var u = discordGuild.GetUser(discordUserId);
                 var currentUser = APIHelper.DiscordAPI.GetCurrentUser();
 
@@ -252,7 +252,7 @@ namespace ThunderED.Modules
                     var eveName = characterData.name;
 
                     if ((SettingsManager.Settings.WebAuthModule.EnforceCorpTickers || SettingsManager.Settings.WebAuthModule.EnforceCharName || SettingsManager.Settings.WebAuthModule.EnforceAllianceTickers) 
-                        && !TickManager.IsESIUnreachable)
+                        && !TickManager.IsESIUnreachable && !u.Roles.Select(a=> a.Name).ContainsAnyFromList(authCheckIgnoreRoles))
                     {
                         string alliancePart = null;
                         if (SettingsManager.Settings.WebAuthModule.EnforceAllianceTickers && characterData.alliance_id.HasValue)
@@ -427,7 +427,7 @@ namespace ThunderED.Modules
         public static async Task<RoleSearchResult> GetRoleGroup(JsonClasses.CharacterData characterData, ulong discordUserId, string refreshToken = null)
         {
             var result = new RoleSearchResult();
-            var discordGuild = APIHelper.DiscordAPI.GetGuild();
+            var discordGuild = APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
             var u = discordGuild.GetUser(discordUserId);
 
             try
