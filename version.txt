@@ -21,7 +21,7 @@
 + Made KM template variables case insensitive
 
 ### FEATURE HIGHLIGHT - MULTIPLE DISCORD GUILDS
-It is no possible for bot to work with several guilds in a limited manner. Auth always works against single guild Id specified in config for now.
+It is now possible for bot to work with several guilds in a limited manner. Auth always works against single guild Id specified in config for now.
 But now you can feed messages into channels in other guilds where this bot has been added as a user. Just specify them in config, guild will be found automatically.
 
 ### FEATURE HIGHLIGHT - RESTARTER
