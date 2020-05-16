@@ -44,6 +44,7 @@ namespace ThunderED.Modules
                     await SQLHelper.ResetAuthUsersLastCheck();
                 }
                 await WebAuthModule.UpdateAllUserRoles(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles, manual);
+                await LogHelper.LogModule("DB users auth check complete!", Category);
             }
 
         }

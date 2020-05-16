@@ -66,24 +66,51 @@ namespace ThunderED.Modules
             var users = SettingsManager.Settings.WebAuthModule.AuthTakeNumberOfUsersPerPass < 10 ? 10 : SettingsManager.Settings.WebAuthModule.AuthTakeNumberOfUsersPerPass;
             var ids = manual ? await SQLHelper.GetAuthUserIdsToCheck() : await SQLHelper.GetAuthUserIdsToCheck(minutes, users);
 
-
             await AuthInfoLog($"Fetched {ids?.Count} users to check within this pass", true);
+            if (ids == null || !ids.Any()) return;
 
-            await ids.ParallelForEachAsync(async id =>
+            var discordGuild = APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
+            if (discordGuild == null)
             {
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
+                await LogHelper.LogWarning($"Discord guild {SettingsManager.Settings.Config.DiscordGuildId} is null!");
+                return;
+            }
+
+            await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache before update");
+            await discordGuild.DownloadUsersAsync();
+            await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache after update");
+
+           /* if (!discordGuild.IsConnected)
+            {
+                await LogHelper.LogInfo($"Restarting Discord connection...");
+                await APIHelper.DiscordAPI.Start();
+                return;
+            }*/
+
+
+           /* foreach (var id in ids)
+            {
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false, discordGuild);
+                await SQLHelper.SetAuthUserLastCheck(id, DateTime.Now);
+            }*/
+             await ids.ParallelForEachAsync(async id =>
+            {
+                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false, discordGuild);
                 await SQLHelper.SetAuthUserLastCheck(id, DateTime.Now);
             },  SettingsManager.MaxConcurrentThreads);
         }
 
         public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles,
-            bool forceRemove = false)
+            bool forceRemove = false, SocketGuild discordGuild = null)
         {
             try
             {
-                var discordGuild = APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
+                discordGuild ??= APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
                 var u = discordGuild.GetUser(discordUserId);
                 var currentUser = APIHelper.DiscordAPI.GetCurrentUser();
+
+                if (u == null)
+                    await AuthInfoLog(discordUserId, $"Discord user is null: {discordUserId} {discordGuild?.Id} {discordGuild?.IsConnected} {discordGuild?.HasAllMembers}");
 
                 if (u != null && (u.Id == currentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name))))
                 {
@@ -520,7 +547,7 @@ namespace ThunderED.Modules
                 }
                 
 
-                await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterData.character_id} DID: {authData.DiscordId} AUTH: {authData.AuthState} GRP: {authData.GroupName}", true);
+                await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterData.character_id} DID: {authData?.DiscordId} AUTH: {authData?.AuthState} GRP: {authData?.GroupName}", true);
                 var foundGroup = await GetAuthGroupByCharacter(groupsToCheck, characterData);
                 if (foundGroup != null)
                 {

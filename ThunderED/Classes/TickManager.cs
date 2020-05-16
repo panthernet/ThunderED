@@ -120,8 +120,9 @@ namespace ThunderED.Classes
                 OnDemandModules.Add(new SystemLogFeeder());
 
             //IMPORTANT - web auth is the last module - to be the last for 404 handling
-            if (SettingsManager.Settings.Config.ModuleAuthWeb)
-                Modules.Add(new WebAuthModule());
+            //it is always loaded but won't run if property is false
+            //if (SettingsManager.Settings.Config.ModuleAuthWeb)
+            Modules.Add(new WebAuthModule());
 
             await Modules.ParallelForEachAsync(async a => await a.Initialize(),  SettingsManager.MaxConcurrentThreads);
             await OnDemandModules.ParallelForEachAsync(async a => await a.Initialize(),  SettingsManager.MaxConcurrentThreads);

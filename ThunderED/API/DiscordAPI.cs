@@ -25,13 +25,18 @@ namespace ThunderED.API
     public partial class DiscordAPI: CacheBase
     {
         private DiscordSocketClient Client { get; set; }
-        private CommandService Commands { get; }
+        private CommandService Commands { get; set; }
 
         public bool IsAvailable { get; private set; }
 
         private readonly List<SocketGuild> _cacheGuilds  = new List<SocketGuild>();
 
         public DiscordAPI()
+        {
+            //Initialize();
+        }
+
+        private void Initialize()
         {
             Client = new DiscordSocketClient();
             Commands = new CommandService();
@@ -49,10 +54,10 @@ namespace ThunderED.API
             {
                 await AsyncHelper.RedirectToThreadPool();
                 // await LogHelper.LogInfo("Connected!", LogCat.Discord);
-                if(!_cacheGuilds.Any())
+                if (!_cacheGuilds.Any())
                     _cacheGuilds.AddRange(Client.Guilds.ToList());
             };
-            Client.Disconnected += async exception => 
+            Client.Disconnected += async exception =>
             {
                 await AsyncHelper.RedirectToThreadPool();
                 if (exception == null)
@@ -271,6 +276,13 @@ namespace ThunderED.API
         {
             try
             {
+                if (Client != null)
+                {
+                    await Client.StopAsync();
+                    Client.Dispose();
+                }
+                Initialize();
+
                 await InstallCommands();
                 await Client.LoginAsync(TokenType.Bot, SettingsManager.Settings.Config.BotDiscordToken);
                 await Client.StartAsync();

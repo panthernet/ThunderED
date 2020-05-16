@@ -182,6 +182,7 @@ namespace ThunderED.Modules
             List<JsonClasses.IndustryJob> esiJobs;
 
             var corpID = isCorp ? (await APIHelper.ESIAPI.GetCharacterData(Reason, characterID))?.corporation_id ?? 0 : 0;
+            
             if (isCorp)
             {
                 var etag = _corpEtokens.GetOrNull(characterID);

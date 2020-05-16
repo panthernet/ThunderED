@@ -613,6 +613,8 @@ namespace ThunderED.Modules
                     //run roles assignment
                     await AuthInfoLog(authUser, $"Running roles update for {characterData.name} {(group.PreliminaryAuthMode ? $"[AUTO-AUTH from {result.GroupName}]" : $"[MANUAL-AUTH {result.GroupName}]")}");
 
+                    await APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId).DownloadUsersAsync();
+
                     await UpdateUserRoles(discordId, SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles,
                         SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles);
 

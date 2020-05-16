@@ -180,7 +180,7 @@ namespace ThunderED.Classes
         {
             path = path ?? Path.Combine(DataDirectory, "_simplifiedAuth.txt");
 
-            if(!File.Exists(path) || !Settings.Config.ModuleAuthWeb) return;
+            if(!File.Exists(path)) return;
             await LogHelper.LogInfo("Injecting Simplified Auth information...", LogCat.SimplAuth);
            
             var lines = await GetSimplifiedAuthData(path);
