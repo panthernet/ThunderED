@@ -25,6 +25,12 @@ namespace ThunderED.Modules
 
         internal static async Task UpdateAuthUserRolesFromDiscord(List<string> exemptRoles, List<string> authCheckIgnoreRoles, bool useParallel)
         {
+
+            var discordGuild = APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
+            await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache before update");
+            await discordGuild.DownloadUsersAsync();
+            await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache after update");
+
             if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands && DiscordRolesManagementModule.AvailableRoleNames.Any())
             {
                 authCheckIgnoreRoles = authCheckIgnoreRoles.ToList();
@@ -110,7 +116,12 @@ namespace ThunderED.Modules
                 var currentUser = APIHelper.DiscordAPI.GetCurrentUser();
 
                 if (u == null)
-                    await AuthInfoLog(discordUserId, $"Discord user is null: {discordUserId} {discordGuild?.Id} {discordGuild?.IsConnected} {discordGuild?.HasAllMembers}");
+                {
+                    //await LogHelper.LogWarning(
+                     //   $"G1: {SettingsManager.Settings.Config.DiscordGuildId} G2: {discordGuild.Id} HasUser: {discordGuild.Users.FirstOrDefault(a => a.Id == discordUserId) != null}");
+                   // await AuthInfoLog(discordUserId,
+                    //    $"Discord user is null: {discordUserId} {discordGuild?.Id} {discordGuild?.IsConnected} {discordGuild?.HasAllMembers}");
+                }
 
                 if (u != null && (u.Id == currentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name))))
                 {
@@ -128,6 +139,14 @@ namespace ThunderED.Modules
                 var authUser = await SQLHelper.GetAuthUserByDiscordId(discordUserId);
                 if (authUser != null)
                 {
+                    if (u == null && !authUser.HasToken && !authUser.IsAuthed)
+                    {
+                        await SQLHelper.DeleteAuthDataByDiscordId(discordUserId);
+                        await LogHelper.LogInfo(
+                            $"User {authUser.Data.CharacterName}[{discordUserId}] has been removed from DB (no token, no auth, not present in discord)");
+                        return null;
+                    }
+
                     if (!string.IsNullOrEmpty(authUser.GroupName) && grps.ContainsKey(authUser.GroupName) &&
                         grps[authUser.GroupName].SkipDiscordAuthPage)
                     {

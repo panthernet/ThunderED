@@ -438,11 +438,11 @@ namespace ThunderED.Modules
             if (rChar != null)
             {
                 stands = await APIHelper.ESIAPI.GetCorpContacts(Reason, rChar.corporation_id, token);
-                data.CorpStands = stands.Data.IsFailed ? data.CorpStands : stands.Result;
+                data.CorpStands = stands == null || stands.Data.IsFailed ? data.CorpStands : stands.Result;
                 if (rChar.alliance_id.HasValue)
                 {
                     stands = await APIHelper.ESIAPI.GetAllianceContacts(Reason, rChar.alliance_id.Value, token);
-                    data.AllianceStands = stands.Data.IsFailed ? data.AllianceStands : stands.Result;
+                    data.AllianceStands = stands == null || stands.Data.IsFailed ? data.AllianceStands : stands.Result;
                 }
                 else data.AllianceStands = new List<JsonClasses.Contact>();
             }

@@ -133,8 +133,8 @@ namespace ThunderED.Helpers
                                     if(errParsed.timeout > 0)
                                         WaitReq.Update(errParsed.timeout);
                                     if(SettingsManager.Settings.Config.ExtendedESILogging)
-                                        await LogHelper.LogError($"[{reason}] Request failure: {request}\nMessage: {errParsed.error}", LogCat.ESI, false);
-                                    return null;
+                                        await LogHelper.LogError($"[{reason}][CODE:{result.Data.ErrorCode}] Request failure: {request}\nMessage: {errParsed.error}", LogCat.ESI, false);
+                                    return result;
                                 }
                                 continue;
                             }

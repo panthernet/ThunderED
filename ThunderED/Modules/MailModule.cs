@@ -396,6 +396,15 @@ namespace ThunderED.Modules
                             data = forWeb ? $"<a href=\"https://zkillboard.com/kill/{id}\">{text}</a>" : text; //$"[{text}](https://zkillboard.com/kill/{id})";
                             urlsList.Add($"{text}: https://zkillboard.com/kill/{id}");
                         }
+                        else if (url.StartsWith("bookmarkFolder"))
+                        {
+                            //var id = url.Substring(15);
+                            data = $"BOOKMARKFOLDER";
+                        }
+                        else if (url.StartsWith("http"))
+                        {
+                            data = url;
+                        }
                         else
                         {
                             var mid1 = url.Split(':');
