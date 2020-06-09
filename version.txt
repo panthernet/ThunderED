@@ -1,4 +1,4 @@
-### V1.4.9
+### V1.5.0
 + Added !sys shutdown and !sys restart commands
 + Added user IP address info on the character panel in HR module
 + Added `UseOneAuthButton` and `AuthButtonDiscordText` props for Industry and Contracts modules
@@ -14,6 +14,7 @@
 + Fixed unexpected tickers removal
 + Fixed LiveKillFeed ship type checks
 + Fixed potential auth problems in large discord guilds
++ Fixed ZKB queries
 + Improved KM to track and filter by attacker ships
 + Improved shutdown procedures to avoid possible DB corruption
 + Improved !sys command set. Use !sys help for more info
@@ -25,6 +26,7 @@
 It is now possible for bot to work with several guilds in a limited manner. Auth always works against single guild Id specified in config for now.
 But now you can feed messages into channels in other guilds where this bot has been added as a user. Just specify them in config, guild will be found automatically.
 Added new properties to restrict commands on secondary guilds: `DiscordAllowGeneralCommandsOnSecondaryGuilds` and `DiscordAllowSystemCommandsOnSecondaryGuilds`
+WARNING: Overlapping Discord role names can give users access to system commands in other guilds. But you must know bots secret number to add it to your group.
 
 ### FEATURE HIGHLIGHT - RESTARTER
 This release introduces new executable: Restarter. It is top-level executable which should be started instead of `ThunderED.dll`.
