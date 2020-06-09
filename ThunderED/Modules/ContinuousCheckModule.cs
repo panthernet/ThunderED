@@ -249,14 +249,13 @@ namespace ThunderED.Modules
                 var channel = isRatingCommand ? context.Channel.Id : SettingsManager.Settings.StatsModule.RatingModeChannelId;
                 var to = (now.Add(TimeSpan.FromHours(1)));
                 to = to.Subtract(TimeSpan.FromMinutes(to.Minute));
-                var startTime = isNewDay ? today.Subtract(TimeSpan.FromDays(1)) : today;
-                var endTime = isNewDay ? startTime.AddHours(24) : to;
+                var last = isNewDay ? (24 * 60 * 60) : (60 * 60);
 
                 var list = new List<ZKillAPI.ZkillEntityStats>();
 
                 foreach (var @group in groups)
                 {
-                    var data = await APIHelper.ZKillAPI.GetKillsLossesStats(@group.DailyStatsAlliance > 0 ? group.DailyStatsAlliance : group.DailyStatsCorp, group.DailyStatsAlliance > 0, startTime, endTime);
+                    var data = await APIHelper.ZKillAPI.GetKillsLossesStats(@group.DailyStatsAlliance > 0 ? group.DailyStatsAlliance : group.DailyStatsCorp, group.DailyStatsAlliance > 0, null, null, last);
                     if (group.DailyStatsAlliance > 0)
                     {
                         var alliance = await APIHelper.ESIAPI.GetAllianceData(LogCat.Stats.ToString(), group.DailyStatsAlliance);
@@ -398,9 +397,10 @@ namespace ThunderED.Modules
 
                 var to = (now.Add(TimeSpan.FromHours(1)));
                 to = to.Subtract(TimeSpan.FromMinutes(to.Minute));
-                var startTime = isNewDay ? today.Subtract(TimeSpan.FromDays(1)) : today;
-                var endTime = isNewDay ? startTime.AddHours(24) : to;
-                var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance,startTime, endTime);
+               // var startTime = isNewDay ? today.Subtract(TimeSpan.FromDays(1)) : today;
+               // var endTime = isNewDay ? startTime.AddHours(24) : to;
+                var diff = isNewDay ? 86400 : (int)(DateTime.UtcNow - DateTime.Today).TotalSeconds;
+                var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance,null, null, diff);
 
                 var date = today;
                 if (isNewDay)
@@ -420,7 +420,8 @@ namespace ThunderED.Modules
             {
                 if (command.Equals("week", stringComparison) || command.Equals("w", stringComparison))
                 {
-                    var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, DateTime.UtcNow.StartOfWeek(DayOfWeek.Monday), DateTime.UtcNow);
+                    var diff = (int)(DateTime.UtcNow - DateTime.UtcNow.StartOfWeek(DayOfWeek.Monday)).TotalSeconds;
+                    var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance, null, null, diff);
                     var msg = GetMsg(LM.Get("statsCalendarWeekly", entity), data.ShipsDestroyed, data.IskDestroyed, data.ShipsLost, data.IskLost);
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, msg);
                     return;

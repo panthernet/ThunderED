@@ -154,7 +154,7 @@ namespace ThunderED.API
             public string EntityName;
         }
 
-        public async Task<ZkillEntityStats> GetKillsLossesStats(long id, bool isAlliance, DateTime? from = null, DateTime? to = null, int lastSeconds = 0)
+        public async Task<ZkillEntityStats> GetKillsLossesStats(long id, bool isAlliance, int? year = null, int? month = null, int lastSeconds = 0)
         {
             try
             {
@@ -166,13 +166,14 @@ namespace ThunderED.API
                 var sysList = new List<long>();
                 if (lastSeconds > 0)
                     query += $"/pastSeconds/{lastSeconds}/";
-                else if (from.HasValue)
+                else if (year.HasValue && month.HasValue)
                 {
-                    from = from.Value.Subtract(TimeSpan.FromMinutes(from.Value.Minute));
-                    query += $"/startTime/{from.Value:yyyyMMddHHmm}/";
-                    to = to ?? DateTime.UtcNow;
-                    to = to.Value.Subtract(TimeSpan.FromMinutes(to.Value.Minute));
-                    query += $"endTime/{to.Value:yyyyMMddHHmm}/";
+                    query += $"/year/{year}/month/{month}/";
+                    /*  from = from.Value.Subtract(TimeSpan.FromMinutes(from.Value.Minute));
+                      query += $"/startTime/{from.Value:yyyyMMddHHmm}/";
+                      to = to ?? DateTime.UtcNow;
+                      to = to.Value.Subtract(TimeSpan.FromMinutes(to.Value.Minute));
+                      query += $"endTime/{to.Value:yyyyMMddHHmm}/";*/
                 }
 
                 if (query.Last() != '/')
@@ -191,13 +192,14 @@ namespace ThunderED.API
                 query = $"https://zkillboard.com/api/losses/{txt}/{id}/npc/0/page/{{0}}";
                 if (lastSeconds > 0)
                     query += $"/pastSeconds/{lastSeconds}/";
-                else if (from.HasValue)
+                else if (year.HasValue && month.HasValue)
                 {
-                    from = from.Value.Subtract(TimeSpan.FromMinutes(from.Value.Minute));
+                    query += $"/year/{year}/month/{month}/";
+                    /*from = from.Value.Subtract(TimeSpan.FromMinutes(from.Value.Minute));
                     query += $"/startTime/{from.Value:yyyyMMddHHmm}/";
                     to = to ?? DateTime.UtcNow;
                     to = to.Value.Subtract(TimeSpan.FromMinutes(to.Value.Minute));
-                    query += $"endTime/{to.Value:yyyyMMddHHmm}/";
+                    query += $"endTime/{to.Value:yyyyMMddHHmm}/";*/
                 }
 
                 if (query.Last() != '/')

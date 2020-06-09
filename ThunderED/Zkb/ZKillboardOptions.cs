@@ -230,10 +230,10 @@ namespace ThunderED.Zkb {
             if (RegionId.Count != 0)
                 queryString += "/regionID/" + string.Join(",", RegionId);
 
-            if (StartTime != null)
+            /*if (StartTime != null)
                 queryString += "/startTime/" + StartTime.Value.ToString("yyyyMMddHHmm");
             if (EndTime != null)
-                queryString += "/endTime/" + EndTime.Value.ToString("yyyyMMddHHmm");
+                queryString += "/endTime/" + EndTime.Value.ToString("yyyyMMddHHmm");*/
             if (Year != 0)
                 queryString += "/year/" + Year;
             if (Month != 0)
@@ -252,8 +252,8 @@ namespace ThunderED.Zkb {
                 queryString += "/killID" + KillId;
 
 
-            if (Limit != 0)
-                queryString += "/limit/" + Limit;
+            //if (Limit != 0)
+           //     queryString += "/limit/" + Limit;
             else if (Page != 0)
                 queryString += "/page/" + Page;
 
@@ -268,8 +268,8 @@ namespace ThunderED.Zkb {
                 queryString += "/no-attackers";
             if (ApiOnly)
                 queryString += "/api-only";
-            if (Format == DataFormat.Xml)
-                queryString += "/xml";
+            //if (Format == DataFormat.Xml)
+            //    queryString += "/xml";
 
             queryString += "/";
             return queryString;
