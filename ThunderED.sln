@@ -24,7 +24,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TED_ConfigEditor", "TED_Con
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThunderED.Tests", "ThunderED.Tests\ThunderED.Tests.csproj", "{51109563-90B0-4103-9DBE-7E81ED5A4CE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Restarter", "Restarter\Restarter.csproj", "{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Restarter", "Restarter\Restarter.csproj", "{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{73AB9671-7CBD-44AE-A942-C1A6B9B32E1D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.Core", "..\Discord.Net-dev\src\Discord.Net.Core\Discord.Net.Core.csproj", "{9F3BA842-8692-46D1-A5CF-19A6585B31A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.Rest", "..\Discord.Net-dev\src\Discord.Net.Rest\Discord.Net.Rest.csproj", "{B1A8766C-CDB5-4409-8ADA-0440E894274E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.WebSocket", "..\Discord.Net-dev\src\Discord.Net.WebSocket\Discord.Net.WebSocket.csproj", "{D26579C0-07AA-4EEC-AF81-132FA15BC07F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.Commands", "..\Discord.Net-dev\src\Discord.Net.Commands\Discord.Net.Commands.csproj", "{77408A85-60CE-46E0-97A1-9B0358A026AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,9 +61,31 @@ Global
 		{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AD8E3BD-14E0-4FFB-AE2F-F2FFC8480488}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F3BA842-8692-46D1-A5CF-19A6585B31A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F3BA842-8692-46D1-A5CF-19A6585B31A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F3BA842-8692-46D1-A5CF-19A6585B31A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F3BA842-8692-46D1-A5CF-19A6585B31A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1A8766C-CDB5-4409-8ADA-0440E894274E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1A8766C-CDB5-4409-8ADA-0440E894274E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1A8766C-CDB5-4409-8ADA-0440E894274E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1A8766C-CDB5-4409-8ADA-0440E894274E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D26579C0-07AA-4EEC-AF81-132FA15BC07F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D26579C0-07AA-4EEC-AF81-132FA15BC07F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D26579C0-07AA-4EEC-AF81-132FA15BC07F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D26579C0-07AA-4EEC-AF81-132FA15BC07F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77408A85-60CE-46E0-97A1-9B0358A026AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77408A85-60CE-46E0-97A1-9B0358A026AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77408A85-60CE-46E0-97A1-9B0358A026AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77408A85-60CE-46E0-97A1-9B0358A026AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9F3BA842-8692-46D1-A5CF-19A6585B31A5} = {73AB9671-7CBD-44AE-A942-C1A6B9B32E1D}
+		{B1A8766C-CDB5-4409-8ADA-0440E894274E} = {73AB9671-7CBD-44AE-A942-C1A6B9B32E1D}
+		{D26579C0-07AA-4EEC-AF81-132FA15BC07F} = {73AB9671-7CBD-44AE-A942-C1A6B9B32E1D}
+		{77408A85-60CE-46E0-97A1-9B0358A026AA} = {73AB9671-7CBD-44AE-A942-C1A6B9B32E1D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B75536A6-C364-4728-8505-9C629049B9E5}

@@ -400,6 +400,8 @@ namespace ThunderED.Modules
                // var startTime = isNewDay ? today.Subtract(TimeSpan.FromDays(1)) : today;
                // var endTime = isNewDay ? startTime.AddHours(24) : to;
                 var diff = isNewDay ? 86400 : (int)(DateTime.UtcNow - DateTime.Today).TotalSeconds;
+                var m = diff / 3600;
+                diff = m * 3600;
                 var data = await APIHelper.ZKillAPI.GetKillsLossesStats(id, isAlliance,null, null, diff);
 
                 var date = today;

@@ -370,7 +370,10 @@ namespace ThunderED.API
             var name = SettingsManager.Settings.Config.BotDiscordName.Length > 31
                 ? SettingsManager.Settings.Config.BotDiscordName.Substring(0, 31)
                 : SettingsManager.Settings.Config.BotDiscordName;
-            _cacheGuilds.ForEach(async a=> await a.CurrentUser.ModifyAsync(x => x.Nickname = name));
+            foreach (var g in _cacheGuilds)
+            {
+                await g.CurrentUser.ModifyAsync(x => x.Nickname = name);
+            }
             await Client.SetGameAsync(SettingsManager.Settings.Config.BotDiscordGame);
         }
 

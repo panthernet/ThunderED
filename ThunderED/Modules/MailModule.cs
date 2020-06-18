@@ -36,7 +36,7 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
-            var data = Settings.IndustrialJobsModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
+            var data = Settings.MailModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member);
         }
 
@@ -383,13 +383,17 @@ namespace ThunderED.Modules
                             data = forWeb ? text : $"***{text}***";
                             fitList.Add(furl);
                         }
-                        else if (url.StartsWith("showinfo") && !url.Contains("//"))
+                        else if (url.StartsWith("showinfo"))
                         {
-                            var value = url.Split(":")[1];
-                            data = forWeb ? $"<a href=\"{APIHelper.GetItemTypeUrl(value)}\">{text}</a>" : $"***{text}***";
-                            fitList.Add(furl);
+                            if (!url.Contains("//"))
+                            {
+                                var value = url.Split(":")[1];
+                                data = forWeb
+                                    ? $"<a href=\"{APIHelper.GetItemTypeUrl(value)}\">{text}</a>"
+                                    : $"***{text}***";
+                                fitList.Add(furl);
+                            }else data = text;
                         }
-
                         else if (url.StartsWith("killReport"))
                         {
                             var id = url.Substring(11, url.Length - 11);
@@ -400,6 +404,18 @@ namespace ThunderED.Modules
                         {
                             //var id = url.Substring(15);
                             data = $"BOOKMARKFOLDER";
+                        }
+                        else if (url.StartsWith("overviewPreset"))
+                        {
+                            data = $"OVERVIEW_PRESET";
+                        }
+                        else if (url.StartsWith("hyperNet"))
+                        {
+                            data = $"HYPERNET_OFFER";
+                        }
+                        else if (url.StartsWith("fleet"))
+                        {
+                            data = $"FLEET";
                         }
                         else if (url.StartsWith("http"))
                         {
