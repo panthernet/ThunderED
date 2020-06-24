@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Sockets;
+using System.Net.WebSockets;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -31,13 +33,17 @@ namespace ThunderED.API
 
         private readonly List<SocketGuild> _cacheGuilds  = new List<SocketGuild>();
 
-        public DiscordAPI()
-        {
-            //Initialize();
-        }
-
         private void Initialize()
         {
+            try
+            {
+                Client?.Dispose();
+            }
+            catch
+            {
+                //ignore
+            }
+
             Client = new DiscordSocketClient();
             Commands = new CommandService();
             Commands.AddModuleAsync(typeof(DiscordCommands), null).GetAwaiter().GetResult();
@@ -59,11 +65,32 @@ namespace ThunderED.API
             };
             Client.Disconnected += async exception =>
             {
+                IsAvailable = false;
                 await AsyncHelper.RedirectToThreadPool();
-                if (exception == null)
-                    ; // await LogHelper.LogInfo("Disconnected!", LogCat.Discord);
-                else await LogHelper.LogEx("Disconnected!", exception, LogCat.Discord);
+                if (exception != null)
+                    await LogHelper.LogEx("Critical disconnection", exception, LogCat.Discord);
+                if(HasBadException(exception))
+                    await Start();
             };
+        }
+
+        private async Task<bool> Throttle()
+        {
+            if (IsAvailable) return true;
+            for (var i = 0; i < 20; i++)
+            {
+                await Task.Delay(250);
+                if (IsAvailable) return true;
+            }
+
+            return false;
+        }
+
+        private bool HasBadException(Exception ex)
+        {
+            if (ex == null) return false;
+            var type = ex.GetType();
+            return type== typeof(SocketException) || type == typeof(OperationCanceledException) || type == typeof(WebSocketException) || type == typeof(TaskCanceledException);
         }
 
         public SocketSelfUser GetCurrentUser()
@@ -81,11 +108,13 @@ namespace ThunderED.API
 
         public async Task ReplyMessageAsync(ICommandContext context, string message)
         {
+            if(!await Throttle()) return;
             await ReplyMessageAsync(context, message, false);
         }
 
         public async Task<string> GetUserMention(ulong userId)
         {
+            if(!await Throttle()) return null;
             try
             {
                 return FindUserInGuilds(userId)?.Mention;
@@ -162,6 +191,7 @@ namespace ThunderED.API
         public async Task ReplyMessageAsync(ICommandContext context, string message, bool mentionSender)
         {
             if (context?.Message == null) return;
+            if(!await Throttle()) return;
             if (mentionSender)
             {
                 var mention = await GetMentionedUserString(context);
@@ -174,6 +204,7 @@ namespace ThunderED.API
         public async Task ReplyMessageAsync(ICommandContext context, IMessageChannel channel, string message, bool mentionSender = false)
         {
             if (context == null || channel == null || string.IsNullOrEmpty(message)) return;
+            if(!await Throttle()) return;
             if (mentionSender)
             {
                 var mention = await GetMentionedUserString(context);
@@ -192,12 +223,15 @@ namespace ThunderED.API
             catch (Exception ex)
             {
                 await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
+                if (HasBadException(ex))
+                    await Start().ConfigureAwait(false);
             }
         }
 
         public async Task ReplyMessageAsync(ICommandContext context, string message, Embed embed)
         {
             if (context?.Message == null) return;
+            if(!await Throttle()) return;
             try
             {
                 await context.Message.Channel.SendMessageAsync(message.TrimLengthOrSpace(MAX_MSG_LENGTH), false, embed).ConfigureAwait(false);
@@ -210,11 +244,14 @@ namespace ThunderED.API
             catch (Exception ex)
             {
                 await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
+                if (HasBadException(ex))
+                    await Start().ConfigureAwait(false);
             }
         }
 
         public async Task<IUserMessage> SendMessageAsync(ulong channel, string message, Embed embed = null)
         {
+            if(!await Throttle()) return null;
             try
             {
                 if (channel == 0 || (string.IsNullOrWhiteSpace(message) && embed == null)) return null;
@@ -238,6 +275,7 @@ namespace ThunderED.API
 
         public async Task<IUserMessage> SendMessageAsync(IMessageChannel channel, string message, Embed embed = null)
         {
+            if(!await Throttle()) return null;
             try
             {
                 return await channel.SendMessageAsync(message.TrimLengthOrSpace(MAX_MSG_LENGTH), false, embed);
@@ -252,6 +290,8 @@ namespace ThunderED.API
             catch (Exception ex)
             {
                 await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
+                if (HasBadException(ex))
+                    await Start().ConfigureAwait(false);
                 return null;
             }
         }
@@ -260,6 +300,7 @@ namespace ThunderED.API
 
         public async Task<string> GetMentionedUserString(ICommandContext context)
         {
+            if(!await Throttle()) return null;
             try
             {
                 var id = context.Message.MentionedUserIds.FirstOrDefault();
@@ -278,7 +319,12 @@ namespace ThunderED.API
             {
                 if (Client != null)
                 {
-                    await Client.StopAsync();
+                    try { await Client.StopAsync(); }
+                    catch
+                    {
+                        // ignored
+                    }
+
                     Client.Dispose();
                 }
                 Initialize();
@@ -290,18 +336,25 @@ namespace ThunderED.API
             catch (HttpRequestException ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, LogCat.Discord);
-                await LogHelper.Log("Probably Discord host is unreachable! Try again later.", LogSeverity.Critical, LogCat.Discord);              
+                await LogHelper.Log("Probably Discord host is unreachable! Will retry soon", LogSeverity.Critical, LogCat.Discord);
+                await Task.Delay(3000);
+                await Start();
             }
             catch (HttpException ex)
             {
                 if (ex.Reason.Contains("401"))
                 {
                     await LogHelper.LogError($"Check your Discord bot Token and make sure it is NOT a Client ID: {ex.Reason}", LogCat.Discord);
+                    return;
                 }
+                await Task.Delay(3000);
+                await Start();
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, LogCat.Discord);
+                await Task.Delay(3000);
+                await Start();
             }
         }
 
@@ -327,6 +380,7 @@ namespace ThunderED.API
         {
             await AsyncHelper.RedirectToThreadPool();
             if (!(messageParam is SocketUserMessage message)) return;
+            if (!await Throttle()) return;
 
             try
             {
@@ -361,7 +415,7 @@ namespace ThunderED.API
 
         private SocketGuild GetGuildByChannel(ulong channelId)
         {
-            return _cacheGuilds.FirstOrDefault(a=>a.Channels.Any(a=> a.Id == channelId));
+            return _cacheGuilds.FirstOrDefault(a=>a.Channels.Any(b=> b.Id == channelId));
         }
 
         private async Task Event_Ready()
@@ -372,14 +426,16 @@ namespace ThunderED.API
                 : SettingsManager.Settings.Config.BotDiscordName;
             foreach (var g in _cacheGuilds)
             {
-                await g.CurrentUser.ModifyAsync(x => x.Nickname = name);
+                if(g.CurrentUser.Nickname != name)
+                    await g.CurrentUser.ModifyAsync(x => x.Nickname = name);
             }
             await Client.SetGameAsync(SettingsManager.Settings.Config.BotDiscordGame);
         }
 
-        private static async Task Event_UserJoined(SocketGuildUser arg)
+        private async Task Event_UserJoined(SocketGuildUser arg)
         {
             await AsyncHelper.RedirectToThreadPool();
+            if (!await Throttle()) return;
             try
             {
                 if (SettingsManager.Settings.Config.WelcomeMessage && arg.Guild.Id == SettingsManager.Settings.Config.DiscordGuildId)
@@ -403,6 +459,7 @@ namespace ThunderED.API
 
         public async Task<string> IsAdminAccess(ICommandContext context)
         {
+            if (!await Throttle()) return null;
             try
             {
                 if (context.Guild != null)
@@ -580,6 +637,8 @@ namespace ThunderED.API
 
         public async Task<bool> AssignRoleToUser(ulong userId, string roleName)
         {
+            if (!await Throttle()) return false;
+
             var discordUser = GetUser(userId);
             if (discordUser == null) return false;
             try
@@ -599,6 +658,7 @@ namespace ThunderED.API
         
         public async Task<bool> StripUserRole(ulong userId, string roleName)
         {
+            if (!await Throttle()) return false;
             try
             {
                 var discordUser = GetUser(userId);
@@ -618,6 +678,7 @@ namespace ThunderED.API
 
         public async Task<bool> IsBotPrivateChannel(IMessageChannel contextChannel)
         {
+            if (!await Throttle()) return false;
             try
             {
                 return contextChannel.GetType() == typeof(SocketDMChannel) && await contextChannel.GetUserAsync(Client.CurrentUser.Id) != null;
@@ -651,6 +712,7 @@ namespace ThunderED.API
 
         public async Task<IList<string>> CheckAndNotifyBadDiscordRoles(IList<string> roles, LogCat category)
         {
+            if (!await Throttle()) return null;
             var discordRoles = GetPrioritezedGuildsList().SelectMany(a=> a.Roles).Select(a=> a.Name).Distinct().ToList();
             if(!discordRoles.Any()) return new List<string>();
             if(!roles.Any()) return new List<string>();
