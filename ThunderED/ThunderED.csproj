@@ -220,9 +220,6 @@
     <Reference Include="Discord.Net.Rest">
       <HintPath>..\ExternalLibraries\Discord.Net.Rest.dll</HintPath>
     </Reference>
-    <Reference Include="Discord.Net.Webhook">
-      <HintPath>..\ExternalLibraries\Discord.Net.Webhook.dll</HintPath>
-    </Reference>
     <Reference Include="Discord.Net.WebSocket">
       <HintPath>..\ExternalLibraries\Discord.Net.WebSocket.dll</HintPath>
     </Reference>
