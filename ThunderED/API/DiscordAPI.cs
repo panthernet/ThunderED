@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -12,10 +11,8 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Modules;
-using ThunderED.Modules.OnDemand;
 using ThunderED.Modules.Sub;
 using LogSeverity = ThunderED.Classes.LogSeverity;
 
@@ -296,6 +293,8 @@ namespace ThunderED.API
         public async Task<IUserMessage> SendMessageAsync(IMessageChannel channel, string message, Embed embed = null)
         {
             if(!await Throttle()) return null;
+            if (message == null && embed == null || channel == null) return null;
+
             try
             {
                 return await channel.SendMessageAsync(message.TrimLengthOrSpace(MAX_MSG_LENGTH), false, embed);
@@ -304,12 +303,12 @@ namespace ThunderED.API
             {
                 if (ex.DiscordCode == 50013)
                     await LogHelper.LogError($"The bot don't have rights to send message to {channel.Id} ({channel.Name}) channel!");
-                else await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
+                else await LogHelper.LogEx(nameof(SendMessageAsync), ex, LogCat.Discord);
                 return null;
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
+                await LogHelper.LogEx(nameof(SendMessageAsync), ex, LogCat.Discord);
                 if (HasBadException(ex))
                 {
                     await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
