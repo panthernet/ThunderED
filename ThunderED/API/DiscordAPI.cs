@@ -49,28 +49,42 @@ namespace ThunderED.API
             Commands.AddModuleAsync(typeof(DiscordCommands), null).GetAwaiter().GetResult();
             Client.Log += async message =>
             {
-                await AsyncHelper.RedirectToThreadPool();
+                //await AsyncHelper.RedirectToThreadPool();
                 await LogHelper.Log(message.Message, message.Severity.ToSeverity(), LogCat.Discord);
                 if (message.Exception != null)
-                    await LogHelper.LogEx("Discord Internal Exception", message.Exception);
+                    await LogHelper.LogEx("Discord Internal Exception", message.Exception, LogCat.Discord);
             };
             Client.UserJoined += Event_UserJoined;
-            Client.Ready += Event_Ready;
+            Client.Ready += async () =>
+            {
+                _cacheGuilds.Clear();
+                _cacheGuilds.AddRange(Client.Guilds.ToList());
+                if (!IsAvailable)
+                    IsAvailable = true;
+                var name = SettingsManager.Settings.Config.BotDiscordName.Length > 31
+                    ? SettingsManager.Settings.Config.BotDiscordName.Substring(0, 31)
+                    : SettingsManager.Settings.Config.BotDiscordName;
+                foreach (var g in _cacheGuilds.Where(g => g.CurrentUser.Nickname != name))
+                    await g.CurrentUser.ModifyAsync(x => x.Nickname = name);
+            };
             Client.Connected += async () =>
             {
-                await AsyncHelper.RedirectToThreadPool();
+                //await AsyncHelper.RedirectToThreadPool();
                 // await LogHelper.LogInfo("Connected!", LogCat.Discord);
-                if (!_cacheGuilds.Any())
-                    _cacheGuilds.AddRange(Client.Guilds.ToList());
+                IsAvailable = _cacheGuilds.Any();
+                await Client.SetGameAsync(SettingsManager.Settings.Config.BotDiscordGame);
             };
             Client.Disconnected += async exception =>
             {
                 IsAvailable = false;
-                await AsyncHelper.RedirectToThreadPool();
+                //await AsyncHelper.RedirectToThreadPool();
                 if (exception != null)
                     await LogHelper.LogEx("Critical disconnection", exception, LogCat.Discord);
-                if(HasBadException(exception))
-                    await Start();
+                if (HasBadException(exception))
+                {
+                    await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
+                    await Start().ConfigureAwait(false);
+                }
             };
         }
 
@@ -224,7 +238,10 @@ namespace ThunderED.API
             {
                 await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
                 if (HasBadException(ex))
+                {
+                    await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
                     await Start().ConfigureAwait(false);
+                }
             }
         }
 
@@ -245,7 +262,10 @@ namespace ThunderED.API
             {
                 await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
                 if (HasBadException(ex))
+                {
+                    await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
                     await Start().ConfigureAwait(false);
+                }
             }
         }
 
@@ -291,7 +311,11 @@ namespace ThunderED.API
             {
                 await LogHelper.LogEx(nameof(ReplyMessageAsync), ex, LogCat.Discord);
                 if (HasBadException(ex))
+                {
+                    await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
                     await Start().ConfigureAwait(false);
+                }
+
                 return null;
             }
         }
@@ -338,7 +362,8 @@ namespace ThunderED.API
                 await LogHelper.LogEx(ex.Message, ex, LogCat.Discord);
                 await LogHelper.Log("Probably Discord host is unreachable! Will retry soon", LogSeverity.Critical, LogCat.Discord);
                 await Task.Delay(3000);
-                await Start();
+                await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
+                await Start().ConfigureAwait(false);
             }
             catch (HttpException ex)
             {
@@ -348,13 +373,15 @@ namespace ThunderED.API
                     return;
                 }
                 await Task.Delay(3000);
-                await Start();
+                await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
+                await Start().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, LogCat.Discord);
                 await Task.Delay(3000);
-                await Start();
+                await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
+                await Start().ConfigureAwait(false);
             }
         }
 
@@ -378,39 +405,43 @@ namespace ThunderED.API
 
         private async Task HandleCommand(SocketMessage messageParam)
         {
-            await AsyncHelper.RedirectToThreadPool();
-            if (!(messageParam is SocketUserMessage message)) return;
-            if (!await Throttle()) return;
-
-            try
+            await Task.Factory.StartNew(async () =>
             {
+                if (!(messageParam is SocketUserMessage message)) return;
+                if (!await Throttle()) return;
 
-                if (SettingsManager.Settings.Config.ModuleIRC)
+                try
                 {
-                    var module = TickManager.GetModule<IRCModule>();
-                    module?.SendMessage(message.Channel.Id, message.Author.Id, message.Author.Username, message.Content);
+                    if (SettingsManager.Settings.Config.ModuleIRC)
+                    {
+                        var module = TickManager.GetModule<IRCModule>();
+                        module?.SendMessage(message.Channel.Id, message.Author.Id, message.Author.Username,
+                            message.Content);
+                    }
+
+                    if (SettingsManager.Settings.Config.ModuleTelegram)
+                    {
+                        var name = GetGuildByChannel(messageParam.Channel.Id).GetUser(message.Author.Id)?.Nickname ??
+                                   message.Author.Username;
+                        TickManager.GetModule<TelegramModule>()
+                            ?.SendMessage(message.Channel.Id, message.Author.Id, name, message.Content);
+                    }
+
+                    var argPos = 0;
+
+                    if (!(message.HasCharPrefix(SettingsManager.Settings.Config.BotDiscordCommandPrefix[0],
+                              ref argPos) ||
+                          message.HasMentionPrefix
+                              (Client.CurrentUser, ref argPos))) return;
+
+                    var context = new CommandContext(Client, message);
+                    await Commands.ExecuteAsync(context, argPos, null);
                 }
-
-
-                if (SettingsManager.Settings.Config.ModuleTelegram)
+                catch (Exception ex)
                 {
-                    var name = GetGuildByChannel(messageParam.Channel.Id).GetUser(message.Author.Id)?.Nickname ?? message.Author.Username;
-                    TickManager.GetModule<TelegramModule>()?.SendMessage(message.Channel.Id, message.Author.Id, name, message.Content);
+                    await LogHelper.LogEx(nameof(HandleCommand), ex, LogCat.Discord);
                 }
-
-                int argPos = 0;
-
-                if (!(message.HasCharPrefix(SettingsManager.Settings.Config.BotDiscordCommandPrefix[0], ref argPos) || message.HasMentionPrefix
-                          (Client.CurrentUser, ref argPos))) return;
-
-                var context = new CommandContext(Client, message);
-
-                await Commands.ExecuteAsync(context, argPos, null);
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx(nameof(HandleCommand), ex, LogCat.Discord);
-            }
+            });
         }
 
         private SocketGuild GetGuildByChannel(ulong channelId)
@@ -418,43 +449,34 @@ namespace ThunderED.API
             return _cacheGuilds.FirstOrDefault(a=>a.Channels.Any(b=> b.Id == channelId));
         }
 
-        private async Task Event_Ready()
-        {
-            IsAvailable = true;
-            var name = SettingsManager.Settings.Config.BotDiscordName.Length > 31
-                ? SettingsManager.Settings.Config.BotDiscordName.Substring(0, 31)
-                : SettingsManager.Settings.Config.BotDiscordName;
-            foreach (var g in _cacheGuilds)
-            {
-                if(g.CurrentUser.Nickname != name)
-                    await g.CurrentUser.ModifyAsync(x => x.Nickname = name);
-            }
-            await Client.SetGameAsync(SettingsManager.Settings.Config.BotDiscordGame);
-        }
-
         private async Task Event_UserJoined(SocketGuildUser arg)
         {
-            await AsyncHelper.RedirectToThreadPool();
-            if (!await Throttle()) return;
-            try
+            //await AsyncHelper.RedirectToThreadPool();
+            await Task.Factory.StartNew(async () =>
             {
-                if (SettingsManager.Settings.Config.WelcomeMessage && arg.Guild.Id == SettingsManager.Settings.Config.DiscordGuildId)
+                if (!await Throttle()) return;
+                try
                 {
-                    var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0
-                        ? arg.Guild.DefaultChannel
-                        : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
-                    var authurl = WebServerModule.GetAuthPageUrl();
-                    if (!string.IsNullOrWhiteSpace(authurl))
-                        await APIHelper.DiscordAPI.SendMessageAsync(channel,
-                            LM.Get("welcomeMessage", arg.Mention, authurl, SettingsManager.Settings.Config.BotDiscordCommandPrefix));
-                    else
-                        await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention));
+                    if (SettingsManager.Settings.Config.WelcomeMessage &&
+                        arg.Guild.Id == SettingsManager.Settings.Config.DiscordGuildId)
+                    {
+                        var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0
+                            ? arg.Guild.DefaultChannel
+                            : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
+                        var authurl = WebServerModule.GetAuthPageUrl();
+                        if (!string.IsNullOrWhiteSpace(authurl))
+                            await APIHelper.DiscordAPI.SendMessageAsync(channel,
+                                LM.Get("welcomeMessage", arg.Mention, authurl,
+                                    SettingsManager.Settings.Config.BotDiscordCommandPrefix));
+                        else
+                            await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention));
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx(nameof(Event_UserJoined), ex, LogCat.Discord);
-            }
+                catch (Exception ex)
+                {
+                    await LogHelper.LogEx(nameof(Event_UserJoined), ex, LogCat.Discord);
+                }
+            });
         }
 
         public async Task<string> IsAdminAccess(ICommandContext context)
