@@ -337,8 +337,12 @@ namespace ThunderED.API
             }
         }
 
+        private volatile bool _isStarting;
+
         public async Task Start()
         {
+            if(_isStarting) return;
+            _isStarting = true;
             try
             {
                 if (Client != null)
@@ -351,6 +355,7 @@ namespace ThunderED.API
 
                     Client.Dispose();
                 }
+
                 Initialize();
 
                 await InstallCommands();
@@ -360,28 +365,39 @@ namespace ThunderED.API
             catch (HttpRequestException ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, LogCat.Discord);
-                await LogHelper.Log("Probably Discord host is unreachable! Will retry soon", LogSeverity.Critical, LogCat.Discord);
+                await LogHelper.Log("Probably Discord host is unreachable! Will retry soon", LogSeverity.Critical,
+                    LogCat.Discord);
                 await Task.Delay(3000);
                 await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
-                await Start().ConfigureAwait(false);
+                _isStarting = false;
+                await Start();
             }
             catch (HttpException ex)
             {
                 if (ex.Reason.Contains("401"))
                 {
-                    await LogHelper.LogError($"Check your Discord bot Token and make sure it is NOT a Client ID: {ex.Reason}", LogCat.Discord);
+                    await LogHelper.LogError(
+                        $"Check your Discord bot Token and make sure it is NOT a Client ID: {ex.Reason}",
+                        LogCat.Discord);
                     return;
                 }
+
                 await Task.Delay(3000);
                 await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
-                await Start().ConfigureAwait(false);
+                _isStarting = false;
+                await Start();
             }
             catch (Exception ex)
             {
                 await LogHelper.LogEx(ex.Message, ex, LogCat.Discord);
                 await Task.Delay(3000);
                 await LogHelper.LogWarning("Restarting Discord service...", LogCat.Discord);
-                await Start().ConfigureAwait(false);
+                _isStarting = false;
+                await Start();
+            }
+            finally
+            {
+                _isStarting = false;
             }
         }
 
