@@ -823,9 +823,23 @@ namespace ThunderED.Classes
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpSysToken"), true);
                             return;
                         }
-                        if (!await SQLHelper.ClearTable(values[1]))
-                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysClearTableNotFound"), true);
-                        else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysOperationComplete"), true);
+
+                        var user = await SQLHelper.GetAuthUserByCharacterId(long.Parse(values[1]));
+                        if (user == null || !user.HasToken)
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysTokenNotFound"), true);
+                        else
+                        {
+                            var t = await APIHelper.ESIAPI.RefreshToken(user.RefreshToken,
+                                SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                                SettingsManager.Settings.WebServerModule.CcpAppSecret);
+                            if(t.Data.IsFailed)
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysTokenNotFound", values[1]), true);
+                            else
+                            {
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysTokenResult", t.Result),
+                                    true);
+                            }
+                        }
                         return;
                     case "shutdown":
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysShutdownStarted"), true);
