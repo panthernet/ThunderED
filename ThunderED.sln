@@ -36,6 +36,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.WebSocket", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.Commands", "..\Discord.Net-dev\src\Discord.Net.Commands\Discord.Net.Commands.csproj", "{77408A85-60CE-46E0-97A1-9B0358A026AA}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExternalLibraries", "ExternalLibraries", "{1C95E683-0E80-4AE2-8CAF-C23816CCAB6A}"
+	ProjectSection(SolutionItems) = preProject
+		ExternalLibraries\Discord.Net.Commands.dll = ExternalLibraries\Discord.Net.Commands.dll
+		ExternalLibraries\Discord.Net.Commands.pdb = ExternalLibraries\Discord.Net.Commands.pdb
+		ExternalLibraries\Discord.Net.Core.dll = ExternalLibraries\Discord.Net.Core.dll
+		ExternalLibraries\Discord.Net.Core.pdb = ExternalLibraries\Discord.Net.Core.pdb
+		ExternalLibraries\Discord.Net.Rest.dll = ExternalLibraries\Discord.Net.Rest.dll
+		ExternalLibraries\Discord.Net.Rest.pdb = ExternalLibraries\Discord.Net.Rest.pdb
+		ExternalLibraries\Discord.Net.WebSocket.dll = ExternalLibraries\Discord.Net.WebSocket.dll
+		ExternalLibraries\Discord.Net.WebSocket.pdb = ExternalLibraries\Discord.Net.WebSocket.pdb
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +98,7 @@ Global
 		{B1A8766C-CDB5-4409-8ADA-0440E894274E} = {73AB9671-7CBD-44AE-A942-C1A6B9B32E1D}
 		{D26579C0-07AA-4EEC-AF81-132FA15BC07F} = {73AB9671-7CBD-44AE-A942-C1A6B9B32E1D}
 		{77408A85-60CE-46E0-97A1-9B0358A026AA} = {73AB9671-7CBD-44AE-A942-C1A6B9B32E1D}
+		{1C95E683-0E80-4AE2-8CAF-C23816CCAB6A} = {5599E2F4-09A2-4585-85ED-829515B56E25}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B75536A6-C364-4728-8505-9C629049B9E5}
