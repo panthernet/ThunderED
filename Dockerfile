@@ -8,6 +8,7 @@ COPY ThunderED/. ./
 COPY Version.cs /app
 COPY version.txt /app
 COPY LICENSE /app
+COPY /app/ExternalLibraries/ ./
 RUN dotnet publish -c Release -r debian-x64 -o out
 
 

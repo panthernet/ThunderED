@@ -212,16 +212,16 @@
 
   <ItemGroup>
     <Reference Include="Discord.Net.Commands">
-      <HintPath>..\Discord.Net.Commands.dll</HintPath>
+      <HintPath>..\ExternalLibraries\Discord.Net.Commands.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Core">
-      <HintPath>..\Discord.Net.Core.dll</HintPath>
+      <HintPath>..\ExternalLibraries\Discord.Net.Core.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Rest">
-      <HintPath>..\Discord.Net.Rest.dll</HintPath>
+      <HintPath>..\ExternalLibraries\Discord.Net.Rest.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.WebSocket">
-      <HintPath>..\Discord.Net.WebSocket.dll</HintPath>
+      <HintPath>..\ExternalLibraries\Discord.Net.WebSocket.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\PresentationFramework.dll</HintPath>
