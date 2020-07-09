@@ -1,3 +1,6 @@
+### V1.5.2
+ + Fixed sov tracking entities recognition
+
 ### V1.5.1
  + Fixed mail auth
  + Fixed !stat command

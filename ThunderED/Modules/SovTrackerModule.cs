@@ -25,10 +25,12 @@ namespace ThunderED.Modules
             _checkInterval = Settings.SovTrackerModule.CheckIntervalInMinutes;
         }
 
+        private readonly Dictionary<string, Dictionary<string, List<long>>> _userStorage = new Dictionary<string, Dictionary<string, List<long>>>();
+
         public override async Task Initialize()
         {
             var data = Settings.SovTrackerModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.HolderAllianceEntities);
-            await ParseMixedDataArray(data, MixedParseModeEnum.Member);
+            await ParseMixedDataArray(data, MixedParseModeEnum.Member, _userStorage);
 
             data = Settings.SovTrackerModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.LocationEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Location);
@@ -58,7 +60,7 @@ namespace ThunderED.Modules
                     }
 
                     var trackerData = await SQLHelper.GetSovIndexTrackerData(groupName);
-                    var holderIds = GetParsedAlliances(groupName) ?? new List<long>();
+                    var holderIds = GetParsedAlliances(groupName, _userStorage) ?? new List<long>();
 
                     if (!trackerData.Any())
                     {
