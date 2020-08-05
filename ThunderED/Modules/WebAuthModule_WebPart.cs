@@ -508,7 +508,7 @@ namespace ThunderED.Modules
                             : WebServerModule.GetAuthUrl(remoteAddress);
 
                         var text = File.ReadAllText(SettingsManager.FileTemplateAuth).Replace("{authUrl}", url)
-                            .Replace("{authButtonDiscordText}", LM.Get("authButtonDiscordText"))
+                            .Replace("{authButtonDiscordText}", Settings.WebAuthModule.AuthButtonDiscordText)
                             .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
                             .Replace("{header}", LM.Get("authTemplateHeader"))
                             .Replace("{body}", LM.Get("authTemplateInv")).Replace("{backText}", LM.Get("backText"));
