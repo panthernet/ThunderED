@@ -198,7 +198,7 @@ namespace ThunderED.Classes
         [Comment("Optional ZKill RedisQ queue name to fetch kills from. Could be any text value but make sure it is not simple and is quite unique")]
         public string ZkillLiveFeedRedisqID { get; set; }
         public bool UseSocketsForZKillboard { get; set; } = true;
-        public string ZKillboardWebSocketUrl { get; set; } = "wss://zkillboard.com:2096";
+        public string ZKillboardWebSocketUrl { get; set; } = "wss://zkillboard.com/websocket/";
         [Comment("Try avoid duplicate killmails across all radius and live kill feeds")]
         public bool AvoidDupesAcrossAllFeeds { get; set; } = false;
         [Comment("Don't feed KMs that are older than this number of days")]
