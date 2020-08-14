@@ -87,7 +87,7 @@
   "ZKBSettingsModule": {
     "zkillLiveFeedRedisqID": "",
     "UseSocketsForZKillboard": true,
-    "ZKillboardWebSocketUrl": "wss://zkillboard.com:2096",
+    "ZKillboardWebSocketUrl": "wss://zkillboard.com/websocket/",
     "AvoidDupesAcrossAllFeeds": false,
     "OldKMDaysThreshold": 2
   },
