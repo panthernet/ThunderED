@@ -123,7 +123,7 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            if (IsRunning || !Settings.Config.ModuleContractNotifications) return;
+            if (IsRunning || !Settings.Config.ModuleIndustrialJobs) return;
             IsRunning = true;
             try
             {
