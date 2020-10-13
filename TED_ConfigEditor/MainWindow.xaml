@@ -20,8 +20,8 @@
 		        <RowDefinition Height="*"/>
 	        </Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="400"/>
-				<ColumnDefinition Width="*"/>
+				<ColumnDefinition MinWidth="400" Width="*"/>
+				<ColumnDefinition Width="Auto" MinWidth="300"/>
 			</Grid.ColumnDefinitions>
 			
 			<StackPanel Orientation="Horizontal">
