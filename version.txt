@@ -2,6 +2,7 @@
  + Fixed sov tracking entities recognition
  + Fixed incorrect dependecy of Industry module checks on Contracts module flag
  + Improved editor layout
+ + Updated Discord library
 
 ### V1.5.1
  + Fixed mail auth
