@@ -37,6 +37,7 @@
     <PackageReference Include="HtmlAgilityPack" Version="1.11.24" />
     <PackageReference Include="MatriX.NetCore" Version="2.0.0.22-beta4" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.5" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.5" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.5" />
@@ -212,16 +213,16 @@
 
   <ItemGroup>
     <Reference Include="Discord.Net.Commands">
-      <HintPath>..\ExternalLibraries\Discord.Net.Commands.dll</HintPath>
+      <HintPath>Discord.Net.Commands.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Core">
-      <HintPath>..\ExternalLibraries\Discord.Net.Core.dll</HintPath>
+      <HintPath>Discord.Net.Core.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Rest">
-      <HintPath>..\ExternalLibraries\Discord.Net.Rest.dll</HintPath>
+      <HintPath>Discord.Net.Rest.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.WebSocket">
-      <HintPath>..\ExternalLibraries\Discord.Net.WebSocket.dll</HintPath>
+      <HintPath>Discord.Net.WebSocket.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\PresentationFramework.dll</HintPath>
