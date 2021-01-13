@@ -26,7 +26,7 @@ namespace ThunderED.API
             _language = SettingsManager.Settings.Config.UseEnglishESIOnly ? "en-us" : SettingsManager.Settings.Config.Language?.ToLower() ?? "en-us";
         }
 
-        internal async Task RemoveAllCharacterDataFromCache(object id)
+        public async Task RemoveAllCharacterDataFromCache(object id)
         {
             if(id == null) return;
             var user = await GetCharacterData("ESIAPI", id);
@@ -38,22 +38,22 @@ namespace ThunderED.API
         }
 
 
-        internal async Task RemoveCharacterFromCache(object id)
+        public async Task RemoveCharacterFromCache(object id)
         {
             await RemoveDbCache("CharacterData", id);
         }
 
-        internal async Task RemoveCorporationFromCache(object id)
+        public async Task RemoveCorporationFromCache(object id)
         {
             await RemoveDbCache("CorporationData", id);
         }
 
-        internal async Task RemoveAllianceFromCache(object id)
+        public async Task RemoveAllianceFromCache(object id)
         {
             await RemoveDbCache("AllianceData", id);
         }
 
-        internal async Task<JsonClasses.CharacterData> GetCharacterData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
+        public async Task<JsonClasses.CharacterData> GetCharacterData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
         {
             JsonClasses.CharacterData result;
             if (isAggressive)
@@ -67,7 +67,7 @@ namespace ThunderED.API
             return result;
         }
 
-        internal async Task<JsonClasses.CorporationData> GetCorporationData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
+        public async Task<JsonClasses.CorporationData> GetCorporationData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
         {
             if (id == null) return null;
             if(isAggressive)
@@ -76,7 +76,7 @@ namespace ThunderED.API
                 forceUpdate, noCache);
         }
 
-        internal async Task<JsonClasses.AllianceData> GetAllianceData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
+        public async Task<JsonClasses.AllianceData> GetAllianceData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
         {
             if (id == null) return null;
             if(isAggressive)
@@ -85,24 +85,24 @@ namespace ThunderED.API
                 forceUpdate, noCache);
         }
 
-        internal async Task<object> GetMemberEntityProperty(string reason, object id, string propertyName)
+        public async Task<object> GetMemberEntityProperty(string reason, object id, string propertyName)
         {
             var ch = await GetCharacterData(reason, id) ?? (object)await GetCorporationData(reason, id) ?? await GetAllianceData(reason, id);
             return ch?.GetType().GetProperty(propertyName)?.GetValue(ch);
         }
 
-        internal async Task<JsonClasses.FactionData> GetFactionData(string reason, long id)
+        public async Task<JsonClasses.FactionData> GetFactionData(string reason, long id)
         {
             var factions = await APIHelper.RequestWrapper<List<JsonClasses.FactionData>>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/factions/?datasource=tranquility&language={_language}", reason);
             return factions?.FirstOrDefault(a => a.faction_id == id);
         }
 
-        internal async Task<List<JsonClasses.CorporationHistoryEntry>> GetCharCorpHistory(string reason, object charId)
+        public async Task<List<JsonClasses.CorporationHistoryEntry>> GetCharCorpHistory(string reason, object charId)
         {
             return await APIHelper.RequestWrapper<List<JsonClasses.CorporationHistoryEntry>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{charId}/corporationhistory/?datasource=tranquility&language={_language}", reason);
         }
 
-        internal async Task<JsonClasses.Type_id> GetTypeId(string reason, object id, bool forceUpdate = false)
+        public async Task<JsonClasses.Type_id> GetTypeId(string reason, object id, bool forceUpdate = false)
         {
             
             var data = await SQLHelper.GetTypeId(Convert.ToInt64(id));
@@ -113,49 +113,49 @@ namespace ThunderED.API
                 forceUpdate);
         }
 
-        internal async Task<JsonClasses.SystemIDSearch> GetRadiusSystems(string reason, object id)
+        public async Task<JsonClasses.SystemIDSearch> GetRadiusSystems(string reason, object id)
         {
             if (id == null || id.ToString() == "0") return null;
             return await APIHelper.RequestWrapper<JsonClasses.SystemIDSearch>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=solar_system&datasource=tranquility&search={id}&strict=true", reason);
         }
 
-        internal async Task<string> GetRawRoute(string reason, object firstId, object secondId)
+        public async Task<string> GetRawRoute(string reason, object firstId, object secondId)
         {
             if (firstId == null || secondId == null || firstId.ToString() == "0" || secondId.ToString() == "0") return null;
             return await APIHelper.RequestWrapper<string>($"{SettingsManager.Settings.Config.ESIAddress}latest/route/{firstId}/{secondId}/?datasource=tranquility&flag=shortest", reason);
         }
 
-        internal async Task<ESIQueryResult<List<JsonClasses.Notification>>> GetNotifications(string reason, object userId, string token, string etag)
+        public async Task<ESIQueryResult<List<JsonClasses.Notification>>> GetNotifications(string reason, object userId, string token, string etag)
         {
             var authHeader = $"Bearer {token}";
             return await APIHelper.ESIRequestWrapper<List<JsonClasses.Notification>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{userId}/notifications/?datasource=tranquility&language={_language}", reason, authHeader, etag);
         }
 
-        internal async Task<JsonClasses.Planet> GetPlanet(string reason, object planetId)
+        public async Task<JsonClasses.Planet> GetPlanet(string reason, object planetId)
         {
             return await APIHelper.RequestWrapper<JsonClasses.Planet>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/planets/{planetId}/?datasource=tranquility&language={_language}", reason);
         }
 
-        internal async Task<JsonClasses.ESIKill> GetKillmail(string reason, object killId, object killHash)
+        public async Task<JsonClasses.ESIKill> GetKillmail(string reason, object killId, object killHash)
         {
             return await APIHelper.RequestWrapper<JsonClasses.ESIKill>($"{SettingsManager.Settings.Config.ESIAddress}latest/killmails/{killId}/{killHash}/?datasource=tranquility&language={_language}", reason);
         }
 
 
-        internal async Task<JsonClasses.StructureData> GetStructureData(string reason, object id, string token)
+        public async Task<JsonClasses.StructureData> GetStructureData(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.StructureData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/structures/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
-        internal async Task<JsonClasses.StationData> GetStationData(string reason, object id, string token)
+        public async Task<JsonClasses.StationData> GetStationData(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.StationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/stations/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
         }
 
 
-        internal async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, object id)
+        public async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, object id)
         {
             var data = await SQLHelper.GetConstellationById(Convert.ToInt64(id));
             if (data != null)
@@ -164,7 +164,7 @@ namespace ThunderED.API
             return await GetEntry<JsonClasses.ConstellationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/constellations/{id}/?datasource=tranquility&language={_language}", reason, id, 180);
         }
 
-        internal async Task<JsonClasses.RegionData> GetRegionData(string reason, object id)
+        public async Task<JsonClasses.RegionData> GetRegionData(string reason, object id)
         {
             var data = await SQLHelper.GetRegionById(Convert.ToInt64(id));
             if (data != null)
@@ -174,14 +174,14 @@ namespace ThunderED.API
         }
 
 
-        internal async Task<JsonClasses.CharacterID> SearchCharacterId(string reason, string name)
+        public async Task<JsonClasses.CharacterID> SearchCharacterId(string reason, string name)
         {
             name = HttpUtility.UrlEncode(name);
             return await APIHelper.RequestWrapper<JsonClasses.CharacterID>(
                 $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=character&datasource=tranquility&search={name}&strict=true", reason);
         }
 
-        internal async Task<bool> OpenContractIngame(string reason, long contractId, string token)
+        public async Task<bool> OpenContractIngame(string reason, long contractId, string token)
         {
            // var authUserEntity = await SQLHelper.GetAuthUserByCharacterId(characterId);
 
@@ -193,27 +193,27 @@ namespace ThunderED.API
             return await APIHelper.PostWrapper($"{SettingsManager.Settings.Config.ESIAddress}latest/ui/openwindow/contract/?contract_id={contractId}&datasource=tranquility", content, reason, authHeader);
         }
 
-        internal async Task<JsonClasses.CorpIDLookup> SearchCorporationId(string reason, string name)
+        public async Task<JsonClasses.CorpIDLookup> SearchCorporationId(string reason, string name)
         {
             name = HttpUtility.UrlEncode(name);
             return await APIHelper.RequestWrapper<JsonClasses.CorpIDLookup>(
                 $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=corporation&datasource=tranquility&search={name}&strict=true", reason);
         }
 
-        internal async Task<JsonClasses.AllianceIDLookup> SearchAllianceId(string reason, string name)
+        public async Task<JsonClasses.AllianceIDLookup> SearchAllianceId(string reason, string name)
         {
             name = HttpUtility.UrlEncode(name);
             return await APIHelper.RequestWrapper<JsonClasses.AllianceIDLookup>(
                 $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance&datasource=tranquility&search={name}&strict=true", reason);
         }
 
-        internal async Task<ESIQueryResult<List<JsonClasses.FWSystemStat>>> GetFWSystemStats(string reason, string etag)
+        public async Task<ESIQueryResult<List<JsonClasses.FWSystemStat>>> GetFWSystemStats(string reason, string etag)
         {
             return await APIHelper.ESIRequestWrapper<List<JsonClasses.FWSystemStat>>(
                 $"{SettingsManager.Settings.Config.ESIAddress}latest/fw/systems/?datasource=tranquility&language={_language}", reason, null, etag);
         }
 
-        internal async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
+        public async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
             var system = await SQLHelper.GetSystemById(Convert.ToInt64(id));
             if (system != null)
@@ -362,7 +362,7 @@ namespace ThunderED.API
         }
         #endregion
 
-        public async Task<ESIQueryResult<List<JsonClasses.MailHeader>>> GetMailHeaders(string reason, string id, string token, long lastMailId, string etag)
+        public async Task<ESIQueryResult<List<JsonClasses.MailHeader>>> GetMailHeaders(string reason, object id, string token, long lastMailId, string etag)
         {
            // if (senders.Count == 0 && labels.Count == 0 && mailListsIds.Count == 0) return null;
             var authHeader = $"Bearer {token}";

@@ -803,7 +803,7 @@ namespace ThunderED.Modules
                                                 LM.Get("hrmInspectLocation"));
                                         }
 
-                                        if (SettingsManager.HasCharLocationScope(pList))
+                                        if (SettingsManager.HasCharShipTypeScope(pList))
                                         {
                                             var stData =
                                                 await APIHelper.ESIAPI.GetCharacterShipType(Reason, inspectCharId,

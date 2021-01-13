@@ -9,31 +9,37 @@ namespace ThunderED.Classes
     {
         public static bool HasReadMailScope(List<string> permissions)
         {
+            if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-mail.read_mail.v1", StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool HasCharStatsScope(List<string> permissions)
         {
+            if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-characterstats.read.v1", StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool HasCharWalletScope(List<string> permissions)
         {
+            if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-wallet.read_character_wallet.v1", StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool HasCharContractsScope(List<string> permissions)
         {
+            if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-contracts.read_character_contracts.v1", StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool HasCharContactsScope(List<string> permissions)
         {
+            if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-characters.read_contacts.v1", StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool HasCharSkillsScope(List<string> permissions)
         {
+            if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-skills.read_skills.v1", StringComparison.OrdinalIgnoreCase));
         }
 
@@ -115,16 +121,19 @@ namespace ThunderED.Classes
 
         public static bool HasCharStandingsScope(List<string> permissions)
         {
+            if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-characters.read_standings.v1", StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool HasCharLocationScope(List<string> permissions)
         {
+            if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-location.read_location.v1", StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool HasCharShipTypeScope(List<string> permissions)
         {
+            if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-location.read_ship_type.v1", StringComparison.OrdinalIgnoreCase));
         }
 

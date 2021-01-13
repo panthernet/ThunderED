@@ -923,7 +923,8 @@ namespace ThunderED.Modules
         public static bool HasAuthAccess(in long id)
         {
             if (!SettingsManager.Settings.Config.ModuleContractNotifications) return false;
-            return TickManager.GetModule<ContractNotificationsModule>().GetAllParsedCharacters().Contains(id);
+            var m = TickManager.GetModule<ContractNotificationsModule>();
+            return m?.GetAllParsedCharacters().Contains(id) ?? false;
         }
     }
 }

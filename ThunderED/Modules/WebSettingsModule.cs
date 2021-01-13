@@ -16,7 +16,7 @@ using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
-    public class WebSettingsModule: AppModuleBase
+    public partial  class WebSettingsModule: AppModuleBase
     {
         public sealed override LogCat Category => LogCat.WebSettings;
 
@@ -344,6 +344,9 @@ namespace ThunderED.Modules
                 Settings.TimersModule.AccessList.Clear();
                 foreach (var data in convData)
                 {
+                    if(data.RolesList.Any())
+                        data.UpdateRolesFromList();
+
                     var group = new TimersAccessGroup();
                     var lst = data.Entities.Split(",");
                     foreach (var item in lst)
@@ -381,12 +384,7 @@ namespace ThunderED.Modules
 #pragma warning restore 649
         }
 
-        private class TiData
-        {
-            public string Name;
-            public string Entities;
-            public string Roles;
-        }
+
 
         private async Task<WCEAccessFilter> CheckAccess(long characterId, JsonClasses.CharacterData rChar)
         {
@@ -452,7 +450,57 @@ namespace ThunderED.Modules
         public static bool HasWebAccess(in long id)
         {
             if (!SettingsManager.Settings.Config.ModuleWebConfigEditor) return false;
-            return TickManager.GetModule<WebSettingsModule>().GetAllParsedCharacters().Contains(id);
+            var m = TickManager.GetModule<WebSettingsModule>();
+            return m?.GetAllParsedCharacters().Contains(id) ?? false;
         }
+    }
+
+    public class TiData: IIdentifiable
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public string Entities { get; set; }
+        public string Roles { get; set; }
+
+        public IEnumerable<string> RolesList { get; set; } = new List<string>();
+
+        public void UpdateRolesFromList()
+        {
+            Roles = string.Join(',', RolesList);
+        }
+        public void UpdateListFromRoles()
+        {
+            RolesList = Roles.Split(",", StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public bool Validate()
+        {
+            return !string.IsNullOrEmpty(Name) && (!string.IsNullOrEmpty(Entities) || Roles.Any());
+        }
+
+        public TiData Clone()
+        {
+            return new TiData
+            {
+                Entities = Entities,
+                RolesList = RolesList,
+                Roles = Roles,
+                Id = Id,
+                Name = Name
+            };
+        }
+
+        public void UpdateFrom(TiData value)
+        {
+            Roles = value.Roles;
+            RolesList = value.RolesList;
+            Name = value.Name;
+            Entities = value.Entities;
+        }
+    }
+
+    public interface IIdentifiable
+    {
+        long Id { get; }
     }
 }

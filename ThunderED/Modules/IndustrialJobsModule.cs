@@ -459,7 +459,8 @@ namespace ThunderED.Modules
         public static bool HasAuthAccess(in long id)
         {
             if (!SettingsManager.Settings.Config.ModuleIndustrialJobs) return false;
-            return TickManager.GetModule<IndustrialJobsModule>().GetAllParsedCharacters().Contains(id);
+            var m = TickManager.GetModule<IndustrialJobsModule>();
+            return m?.GetAllParsedCharacters().Contains(id) ?? false;
         }
     }
 }

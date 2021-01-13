@@ -189,7 +189,7 @@ namespace ThunderED.Classes
             {
                 try
                 {
-                    if (entry.RolesList == null || entry.RolesList.Count == 0)
+                    if (entry.RolesList == null || !entry.RolesList.Any())
                     {
                         await LogHelper.LogWarning($"No Discord roles specified!", LogCat.SimplAuth);
                         continue;
@@ -209,7 +209,7 @@ namespace ThunderED.Classes
                         group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
                         {
                             Entities = new List<object> {result},
-                            DiscordRoles = entry.RolesList
+                            DiscordRoles = entry.RolesList.ToList()
                         });
                     }
                     else
@@ -221,7 +221,7 @@ namespace ThunderED.Classes
                             group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
                             {
                                 Entities = new List<object> {result},
-                                DiscordRoles = entry.RolesList
+                                DiscordRoles = entry.RolesList.ToList()
                             });
                         }
                         else
@@ -233,7 +233,7 @@ namespace ThunderED.Classes
                                 group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
                                 {
                                     Entities = new List<object> {result},
-                                    DiscordRoles = entry.RolesList
+                                    DiscordRoles = entry.RolesList.ToList()
                                 });
                             }
                             else

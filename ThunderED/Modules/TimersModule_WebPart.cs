@@ -17,6 +17,8 @@ namespace ThunderED.Modules
     {
         private async Task WebPartInitialization()
         {
+            if (WebServerModule.WebModuleConnectors.ContainsKey(Reason))
+                WebServerModule.WebModuleConnectors.Remove(Reason);
             WebServerModule.WebModuleConnectors.Add(Reason, ProcessAuth);
             await Task.CompletedTask;
         }
@@ -417,6 +419,7 @@ namespace ThunderED.Modules
         {
             if (!SettingsManager.Settings.Config.ModuleTimers) return false;
             var module = TickManager.GetModule<TimersModule>();
+            if (module == null) return false;
             return module.GetAllCharacterIds().Contains(id) || module.GetAllCorporationIds().Contains(corpId) ||
                    module.GetAllAllianceIds().Contains(allianceId);
         }
@@ -460,6 +463,12 @@ namespace ThunderED.Modules
                 await LogHelper.LogEx(nameof(SaveTimer), ex, LogCat.Timers);
                 return LM.Get("webFatalError");
             }
+        }
+
+        public static async Task<string> SaveTimerRf(WebTimerDataRf data, WebAuthUserData user)
+        {
+            data.PushDate();
+            return await SaveTimer(data, user);
         }
     }
 }

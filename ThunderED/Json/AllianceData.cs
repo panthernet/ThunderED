@@ -16,12 +16,12 @@ namespace ThunderED.Json
             public long? faction_id { get; set; }
         }
 
-        internal class AllianceIDLookup
+        public class AllianceIDLookup
         {
             public long[] alliance;
         }
 
-        internal class FactionData
+        public class FactionData
         {
             public long corporation_id;
             public string description;

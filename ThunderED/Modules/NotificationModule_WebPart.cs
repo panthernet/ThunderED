@@ -14,6 +14,8 @@ namespace ThunderED.Modules
     {
         private async Task WebPartInitialization()
         {
+            if (WebServerModule.WebModuleConnectors.ContainsKey(Reason))
+                WebServerModule.WebModuleConnectors.Remove(Reason); 
             WebServerModule.WebModuleConnectors.Add(Reason, ProcessRequest);
             await Task.CompletedTask;
         }
@@ -176,7 +178,7 @@ namespace ThunderED.Modules
         public static bool HasAuthAccess(in long id)
         {
             if (!SettingsManager.Settings.Config.ModuleNotificationFeed) return false;
-            return TickManager.GetModule<NotificationModule>().GetAllParsedCharacters().Contains(id);
+            return TickManager.GetModule<NotificationModule>()?.GetAllParsedCharacters().Contains(id) ?? false;
         }
     }
 }

@@ -72,12 +72,12 @@ namespace ThunderED.Json
             public bool is_default { get; set; }
         }
 
-        internal class NotificationSearch
+        public class NotificationSearch
         {
             public Notification[] list;
         }
 
-        internal class Notification
+        public class Notification
         {
             public long notification_id;
             public string type;
@@ -88,28 +88,28 @@ namespace ThunderED.Json
             public string text;
         }
 
-        internal class StructureData
+        public class StructureData
         {
             public string name;
             public long solar_system_id;
         }
 
-        
-        internal class StationData
+
+        public class StationData
         {
             public string name;
             public long system_id;
             public long station_id;
         }
 
-        internal class ConstellationData
+        public class ConstellationData
         {
             public long constellation_id;
             public string name;
             public long region_id;
         }
 
-        internal class RegionData
+        public class RegionData
         {
             public string name;
             public long DB_id;
@@ -208,7 +208,7 @@ namespace ThunderED.Json
             [JsonIgnore] public long LastAnnounce;
         }
 
-        internal class FWSystemStat
+        public class FWSystemStat
         {
             public string contested;
             public long occupier_faction_id;

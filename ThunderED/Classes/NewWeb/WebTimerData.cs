@@ -9,8 +9,8 @@ namespace ThunderED.Classes
     {
         private int _type;
         private int _stage;
-        private string _location;
-        private string _owner;
+        private string _location = "-";
+        private string _owner = "-";
         private DateTime _date;
 
         [System.ComponentModel.DataAnnotations.Required]
@@ -25,14 +25,12 @@ namespace ThunderED.Classes
         [Range(1, 4, ErrorMessage = "Invalid value")]
         public int Stage { get; set; }
 
-        [System.ComponentModel.DataAnnotations.Required]
         public string Location
         {
             get => _location;
             set { _location = value; OnPropertyChanged();}
         }
 
-        [System.ComponentModel.DataAnnotations.Required]
         public string Owner
         {
             get => _owner;
@@ -56,5 +54,55 @@ namespace ThunderED.Classes
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
+    }
+
+    public class WebTimerDataRf : WebTimerData
+    {
+        private int _intHour;
+        private int _intMinute;
+        private int _intDay;
+
+        public WebTimerDataRf()
+        {
+            Date = DateTime.MinValue;
+        }
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Invalid value")]
+        public int IntHour
+        {
+            get => _intHour;
+            set
+            {
+                _intHour = value; OnPropertyChanged();
+            }
+        }
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Invalid value")]
+        public int IntMinute
+        {
+            get => _intMinute;
+            set
+            {
+                _intMinute = value; OnPropertyChanged();
+            }
+        }
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Invalid value")]
+        public int IntDay
+        {
+            get => _intDay;
+            set
+            {
+                _intDay = value; OnPropertyChanged();
+            }
+        }
+
+        public void PushDate()
+        {
+            Date = DateTime.UtcNow.AddDays(_intDay).AddHours(_intHour).AddMinutes(_intMinute);
+        }
     }
 }

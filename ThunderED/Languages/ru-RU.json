@@ -611,5 +611,8 @@
   "webFatalError": "Фатальная ошибка! Детали ищите в логах",
   "webAuthenticationExpired": "Аутентификация истекла, пожалуйста перелогинтесь",
   "sysTokenNotFound": "Токен для персонажа с ID {0} не найден!",
-  "sysTokenResult": "Токен для персонажа: `{0}`"
+  "sysTokenResult": "Токен для персонажа: `{0}`",
+  "webYes": "Да",
+  "webNo": "Нет",
+  "webPerformAction": "Выполнить действие?"
 }

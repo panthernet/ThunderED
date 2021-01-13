@@ -887,7 +887,8 @@ namespace ThunderED.Modules
         public static bool HasAuthAccess(in long id)
         {
             if (!SettingsManager.Settings.Config.ModuleMail) return false;
-            return TickManager.GetModule<MailModule>().GetAllParsedCharacters().Contains(id);
+            var m = TickManager.GetModule<MailModule>();
+            return m?.GetAllParsedCharacters().Contains(id) ?? false;
         }
     }
 }

@@ -21,6 +21,8 @@ namespace ThunderED.Modules
     {
         private async Task WebPartInitialization()
         {
+            if (WebServerModule.WebModuleConnectors.ContainsKey(Reason))
+                WebServerModule.WebModuleConnectors.Remove(Reason);
             WebServerModule.WebModuleConnectors.Add(Reason, ProcessAuth);
             await Task.CompletedTask;
         }

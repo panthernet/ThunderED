@@ -17,6 +17,7 @@ namespace ThunderED.Classes.Entities
         public string RefreshToken;
         public int AuthState;
         public AuthUserData Data = new AuthUserData();
+        public MiscUserData MiscData = new MiscUserData();
         public DateTime CreateDate;
         public DateTime? DumpDate;
         public string RegCode;
@@ -83,6 +84,9 @@ namespace ThunderED.Classes.Entities
             var ch = await APIHelper.ESIAPI.GetCharacterData(LogCat.AuthCheck.ToString(), CharacterId, true);
             if(ch == null) return;
             await UpdateData(ch, null, null, permissions);
+
+            MiscData.BirthDate = ch.birthday;
+            MiscData.SecurityStatus = ch.security_status;
         }
 
         public async Task UpdateData(JsonClasses.CharacterData characterData, JsonClasses.CorporationData rCorp = null, JsonClasses.AllianceData rAlliance = null, string permissions = null)
@@ -118,6 +122,12 @@ namespace ThunderED.Classes.Entities
             await authUser.UpdateData(group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null);
             return authUser;
         }
+    }
+
+    public class MiscUserData
+    {
+        public DateTime BirthDate;
+        public float? SecurityStatus;
     }
 
 

@@ -618,5 +618,8 @@
   "webFatalError": "Fatal error! See logs for details",
   "webAuthenticationExpired": "Authentication expired, please reauth",
   "sysTokenNotFound": "Token for character with ID {0} not found!",
-  "sysTokenResult": "Token for character is: `{0}`"
+  "sysTokenResult": "Token for character is: `{0}`",
+  "webYes": "Yes",
+  "webNo": "No",
+  "webPerformAction":  "Perform action?" 
 }
