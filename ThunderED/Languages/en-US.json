@@ -621,5 +621,7 @@
   "sysTokenResult": "Token for character is: `{0}`",
   "webYes": "Yes",
   "webNo": "No",
-  "webPerformAction":  "Perform action?" 
+  "webPerformAction": "Perform action?",
+  "Abandoned": "Abandoned",
+  "NeedCore":  "Need core" 
 }

@@ -614,5 +614,8 @@
   "sysTokenResult": "Токен для персонажа: `{0}`",
   "webYes": "Да",
   "webNo": "Нет",
-  "webPerformAction": "Выполнить действие?"
+  "webPerformAction": "Выполнить действие?",
+  "Abandoned": "Заброшена",
+  "NeedCore": "Требуется ядро"
+
 }

@@ -474,6 +474,16 @@ typeID: 2233",
                                                 case "StructureOnline":
                                                 {
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
+                                                    var d = GetData("isAbandoned", data);
+                                                    var isAbandoned = string.IsNullOrEmpty(d) ? false : Convert.ToBoolean(d);
+                                                    var core = GetData("requiresDeedTypeID", data);
+                                                    if (!string.IsNullOrEmpty(core))
+                                                    {
+                                                        var coreType = await APIHelper.ESIAPI.GetTypeId(Reason, core);
+                                                        if (coreType != null)
+                                                            core = coreType.name;
+                                                    }
+
                                                     var owner = GetData("ownerCorpName", data) ?? LM.Get("Unknown");
                                                     var iUrl = notification.type == "StructureDestroyed"
                                                         ? Settings.Resources.ImgCitDestroyed
@@ -488,6 +498,7 @@ typeID: 2233",
                                                         .WithAuthor(author =>
                                                             author.WithName(text))
                                                         .AddField(LM.Get("System"), systemName, true)
+                                                        .AddField(string.IsNullOrEmpty(core) ? LM.Get("Abandoned") : LM.Get("NeedCore"), string.IsNullOrEmpty(core) ? LM.Get(isAbandoned ? "Yes" : "No") : core, true)
                                                         .AddField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"), true)
                                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);

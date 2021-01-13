@@ -1,3 +1,7 @@
+### V1.5.3
+ + Added core type in the StructureOnline notification
+ + Added abandoned flag to StructureDestroyed notification
+
 ### V1.5.2
  + Fixed sov tracking entities recognition
  + Fixed incorrect dependecy of Industry module checks on Contracts module flag
