@@ -444,7 +444,7 @@ namespace ThunderED.API
 
                     var argPos = 0;
 
-                    if (!(message.HasCharPrefix(SettingsManager.Settings.Config.BotDiscordCommandPrefix[0],
+                    if (!(message.HasStringPrefix(SettingsManager.Settings.Config.BotDiscordCommandPrefix,
                               ref argPos) ||
                           message.HasMentionPrefix
                               (Client.CurrentUser, ref argPos))) return;
