@@ -68,7 +68,9 @@
     "ccpAppSecret": "REQUIRED",
     "ServerStatusPort": 0,
     "NoStatusResponseOnDiscordDisconnection": true,
-    "UseHTTPS": false
+    "UseHTTPS": false,
+    "CertificatePath": "",
+    "CertificatePassword":  "" 
   },
 
   "Database": {

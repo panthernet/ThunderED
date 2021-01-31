@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json;
 using ThunderED.Classes.Enums;
 
@@ -1846,6 +1847,10 @@ namespace ThunderED.Classes
         [Required]
         public string CcpAppSecret { get; set; }
         public bool UseHTTPS { get; set; } = false;
+        [Comment("Optional certificate file path for HTTPS connection")]
+        public string CertificatePath { get; set; }
+        [Comment("Optional certificate password for HTTPS connection")]
+        public string CertificatePassword { get; set; }
 
 #if EDITOR
         public override string this[string columnName]

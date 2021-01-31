@@ -192,87 +192,119 @@ namespace ThunderED.Modules
 
         public async Task<List<WebContact>> WebGetCharContacts(long id, string inspectToken, long hrId)
         {
-            var contacts = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, id, inspectToken)).Result.OrderByDescending(a => a.standing).ToList();
-            List<JsonClasses.Contact> hrContacts = null;
-
-            if (hrId > 0)
+            try
             {
-                var hrUserInfo = await SQLHelper.GetAuthUserByCharacterId(hrId);
-                if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.Data.PermissionsList))
+                var contacts = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, id, inspectToken)).Result
+                    .OrderByDescending(a => a.standing).ToList();
+                List<JsonClasses.Contact> hrContacts = null;
+
+                if (hrId > 0 && hrId != id)
                 {
-                    var hrToken = (await APIHelper.ESIAPI.RefreshToken(hrUserInfo.RefreshToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
-                        , $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.Data.CharacterName}"))?.Result;
-                    if (!string.IsNullOrEmpty(hrToken))
+                    var hrUserInfo = await SQLHelper.GetAuthUserByCharacterId(hrId);
+                    if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.Data.PermissionsList))
                     {
-                        hrContacts = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, hrId, hrToken)).Result;
+                        var hrToken = (await APIHelper.ESIAPI.RefreshToken(hrUserInfo.RefreshToken,
+                                Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
+                                , $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.Data.CharacterName}")
+                            )?.Result;
+                        if (!string.IsNullOrEmpty(hrToken))
+                        {
+                            hrContacts = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, hrId, hrToken)).Result;
+                        }
                     }
                 }
+
+                var list = new List<WebContact>();
+                foreach (var entry in contacts)
+                {
+                    string name;
+                    var color = "transparent";
+                    var fontColor = "black";
+                    switch (entry.contact_type)
+                    {
+                        case "character":
+                            var c = await APIHelper.ESIAPI.GetCharacterData(Reason, entry.contact_id);
+                            name = c?.name;
+                            break;
+                        case "corporation":
+                            var co = await APIHelper.ESIAPI.GetCorporationData(Reason, entry.contact_id);
+                            name = co?.name;
+                            break;
+                        case "alliance":
+                            var al = await APIHelper.ESIAPI.GetAllianceData(Reason, entry.contact_id);
+                            name = al?.name;
+                            break;
+                        case "faction":
+                            var f = await APIHelper.ESIAPI.GetFactionData(Reason, entry.contact_id);
+                            name = f?.name;
+                            break;
+                        default:
+                            name = null;
+                            break;
+                    }
+
+                    var hrc = hrContacts?.FirstOrDefault(a =>
+                        a.contact_type == entry.contact_type && a.contact_id == entry.contact_id)?.standing;
+                    var hrStand = hrc.HasValue ? hrc.Value.ToString() : "-";
+                    if (hrc.HasValue)
+                    {
+                        switch (hrc.Value)
+                        {
+                            case var s when s > 0 && s <= 5:
+                                color = "#2B68C6";
+                                fontColor = "white";
+                                break;
+                            case var s when s > 5 && s <= 10:
+                                color = "#041B5D";
+                                fontColor = "white";
+                                break;
+                            case var s when s < 0 && s >= -5:
+                                color = "#BF4908";
+                                fontColor = "white";
+                                break;
+                            case var s when s < -5 && s >= -10:
+                                color = "#8D0808";
+                                fontColor = "white";
+                                break;
+                        }
+                    }
+
+                    list.Add(new WebContact
+                    {
+                        Name = name,
+                        Type = entry.contact_type,
+                        Blocked = LM.Get(entry.is_blocked ? "webYes" : "webNo"),
+                        Stand = entry.standing.ToString(),
+                        HrStand = hrStand,
+                        ForegroundColor = fontColor,
+                        BackgroundColor = color,
+                        ZkbLink = $"https://zkillboard.com/{entry.contact_type}/{entry.contact_id}/"
+                    });
+                }
+
+                return list;
             }
-
-            var list = new List<WebContact>();
-            foreach (var entry in contacts)
+            catch (Exception ex)
             {
-                string name;
-                var color = "transparent";
-                var fontColor = "black";
-                switch (entry.contact_type)
-                {
-                    case "character":
-                        var c = await APIHelper.ESIAPI.GetCharacterData(Reason, entry.contact_id);
-                        name = c?.name;
-                        break;
-                    case "corporation":
-                        var co = await APIHelper.ESIAPI.GetCorporationData(Reason, entry.contact_id);
-                        name = co?.name;
-                        break;
-                    case "alliance":
-                        var al = await APIHelper.ESIAPI.GetAllianceData(Reason, entry.contact_id);
-                        name = al?.name;
-                        break;
-                    case "faction":
-                        var f = await APIHelper.ESIAPI.GetFactionData(Reason, entry.contact_id);
-                        name = f?.name;
-                        break;
-                    default:
-                        name = null;
-                        break;
-                }
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
+        }
 
-                var hrc = hrContacts?.FirstOrDefault(a => a.contact_type == entry.contact_type && a.contact_id == entry.contact_id)?.standing;
-                var hrStand = hrc.HasValue ? hrc.Value.ToString() : "-";
-                if (hrc.HasValue)
+        public async Task<List<WebWalletJournal>> WebGetWalletJournal(long id, string inspectToken)
+        {
+            var result = await APIHelper.ESIAPI.GetCharacterJournalTransactions(Reason, id, inspectToken);
+            if (result == null) return null;
+            var list = new List<WebWalletJournal>();
+            foreach (var entry in result)
+            {
+                list.Add(new WebWalletJournal
                 {
-                    switch (hrc.Value)
-                    {
-                        case var s when s > 0 && s <= 5:
-                            color = "#2B68C6";
-                            fontColor = "white";
-                            break;
-                        case var s when s > 5 && s <= 10:
-                            color = "#041B5D";
-                            fontColor = "white";
-                            break;
-                        case var s when s < 0 && s >= -5:
-                            color = "#BF4908";
-                            fontColor = "white";
-                            break;
-                        case var s when s < -5 && s >= -10:
-                            color = "#8D0808";
-                            fontColor = "white";
-                            break;
-                    }
-                }
-
-                list.Add(new WebContact
-                {
-                    Name = name,
-                    Type = entry.contact_type,
-                    Blocked = LM.Get(entry.is_blocked? "Yes" : "No"),
-                    Stand = entry.standing.ToString("N1"),
-                    HrStand = hrStand,
-                    ForegroundColor = fontColor,
-                    BackgroundColor = color,
-                    ZkbLink = $"https://zkillboard.com/{entry.contact_type}/{entry.contact_id}/"
+                    Date = entry.DateEntry,
+                    Type = entry.ref_type,
+                    Amount = entry.amount.ToString("N"),
+                    Description = entry.description,
+                    WebClass = entry.amount < 0 ? "hrmNegativeSum" : "hrmPositiveSum"
                 });
             }
 
@@ -280,6 +312,24 @@ namespace ThunderED.Modules
         }
     }
 
+    [Serializable]
+    public class WebWalletJournal
+    {
+        public DateTime Date { get; set; }
+        public string Type { get; set; }
+        public string Amount { get; set; }
+        public string Description { get; set; }
+
+        public string WebClass;
+    }
+
+    [Serializable]
+    public class WebWalletTrans
+    {
+
+    }
+
+    [Serializable]
     public class WebContact
     {
         public string Name;
@@ -292,6 +342,7 @@ namespace ThunderED.Modules
         public string ZkbLink;
     }
 
+    [Serializable]
     public class WebContract
     {
         public long Id;
@@ -307,6 +358,7 @@ namespace ThunderED.Modules
         public string To;
     }
 
+    [Serializable]
     public class WebMailHeader
     {
         public string Subject;

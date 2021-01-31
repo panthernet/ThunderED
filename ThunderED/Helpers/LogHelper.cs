@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ThunderED.Classes;
@@ -129,6 +130,17 @@ namespace ThunderED.Helpers
 
         public static async Task LogEx(string message, Exception exception, LogCat cat = LogCat.Default)
         {
+            await LogExInternal(message, exception, cat, null);
+        }
+
+        public static async Task LogEx(Exception exception, LogCat cat = LogCat.Default, [CallerMemberName]string method = null)
+        {
+            await LogExInternal(null, exception, cat, method);
+        }
+
+
+        private static async Task LogExInternal(string message, Exception exception, LogCat cat, string methodName)
+        {
             try
             {
                 _logPath = _logPath ?? Path.Combine(SettingsManager.DataDirectory, "logs");
@@ -140,7 +152,7 @@ namespace ThunderED.Helpers
                 // if(!SettingsManager.Settings.Config.DisableLogIntoFiles)
                 await WriteToResource(file,  $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}");
 
-                var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat,13}]: {message}";
+                var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat,13}]: {message} {methodName}";
                 var logConsole = !SettingsManager.Settings?.Config.RunAsServiceCompatibility ?? true;
 
                 if (logConsole)

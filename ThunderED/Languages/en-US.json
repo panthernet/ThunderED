@@ -623,5 +623,7 @@
   "webNo": "No",
   "webPerformAction": "Perform action?",
   "Abandoned": "Abandoned",
-  "NeedCore":  "Need core" 
+  "NeedCore": "Need core",
+  "webLoading": "Loading...",
+  "webServerName":  "EVE Online" 
 }

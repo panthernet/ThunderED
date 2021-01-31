@@ -35,12 +35,29 @@ namespace ThunderED
                     throw new FileNotFoundException("Language file not found!");
                 }
 
-                var data = JObject.Parse(File.ReadAllText(file));
+                var data = JObject.Parse(await File.ReadAllTextAsync(file));
                 Translations.Clear();
                 foreach (var pair in data)
                 {
                     Translations.Add(pair.Key, (string) pair.Value);
                 }
+
+                var path = SettingsManager.IsLinux ? Path.Combine(SettingsManager.RootDirectory, "Data", "custom_language.json") : Path.Combine(SettingsManager.RootDirectory, "custom_language.json");
+
+                if (File.Exists(path))
+                {
+                    var d = JObject.Parse(await File.ReadAllTextAsync(path));
+                    if (d.HasValues)
+                    {
+                        foreach (var (key, value) in d)
+                        {
+                            if (Translations.ContainsKey(key))
+                                Translations.Remove(key);
+                            Translations.Add(key, (string)value);
+                        }
+                    }
+                }
+
             }
             catch (Exception ex)
             {

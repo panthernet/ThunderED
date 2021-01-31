@@ -177,5 +177,19 @@ namespace ThunderED.Helpers
             for (var j = 0; j < i; j++) r += s;
             return r;
         }
+
+        public static string RemoveDotValue(this string value)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(value)) return value;
+                var index = value.IndexOf(".", StringComparison.Ordinal);
+                return index < 0 ? value : value.Substring(0, index);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

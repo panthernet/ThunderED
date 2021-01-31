@@ -1,6 +1,9 @@
 ### V1.5.3
  + Added core type in the StructureOnline notification
  + Added abandoned flag to StructureDestroyed notification
+ + Added ability to override language strings using the custom_language.json file in Data or root folder
+ + Fixed wallet balance to decimal
+ + Fixed ability to disable auth checks
 
 ### V1.5.2
  + Fixed sov tracking entities recognition

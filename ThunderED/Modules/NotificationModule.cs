@@ -475,13 +475,21 @@ typeID: 2233",
                                                 {
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                                                     var d = GetData("isAbandoned", data);
-                                                    var isAbandoned = string.IsNullOrEmpty(d) ? false : Convert.ToBoolean(d);
+                                                    var isAbandoned = !string.IsNullOrEmpty(d) && Convert.ToBoolean(d);
                                                     var core = GetData("requiresDeedTypeID", data);
                                                     if (!string.IsNullOrEmpty(core))
                                                     {
-                                                        var coreType = await APIHelper.ESIAPI.GetTypeId(Reason, core);
-                                                        if (coreType != null)
-                                                            core = coreType.name;
+                                                        try
+                                                        {
+                                                            var coreType = await APIHelper.ESIAPI.GetTypeId(Reason,
+                                                                core.RemoveDotValue());
+                                                            if (coreType != null)
+                                                                core = coreType.name;
+                                                        }
+                                                        catch
+                                                        {
+                                                            // ignore
+                                                        }
                                                     }
 
                                                     var owner = GetData("ownerCorpName", data) ?? LM.Get("Unknown");

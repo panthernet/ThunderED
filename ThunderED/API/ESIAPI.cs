@@ -385,12 +385,12 @@ namespace ThunderED.API
             return data ?? new List<JsonClasses.MailList>();
         }
 
-        public async Task<double> GetCharacterWalletBalance(string reason, object id, string token)
+        public async Task<decimal> GetCharacterWalletBalance(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
             var result = await APIHelper.RequestWrapper<string>(
                 $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/wallet/?datasource=tranquility", reason, authHeader);
-            return string.IsNullOrEmpty(result) ? 0 : Convert.ToDouble(result);
+            return string.IsNullOrEmpty(result) ? 0 : Convert.ToDecimal(result.Substring(0,  result.IndexOfAny(new []{',','.'})));
         }
 
         public async Task<List<JsonClasses.WalletJournalEntry>> GetCharacterWalletJournal(string reason, object id, string token)

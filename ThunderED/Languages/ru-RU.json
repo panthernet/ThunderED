@@ -616,6 +616,7 @@
   "webNo": "Нет",
   "webPerformAction": "Выполнить действие?",
   "Abandoned": "Заброшена",
-  "NeedCore": "Требуется ядро"
-
+  "NeedCore": "Требуется ядро",
+  "webLoading": "Загрузка...",
+  "webServerName": "EVE Online"
 }

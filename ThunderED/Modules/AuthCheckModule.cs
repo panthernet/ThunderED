@@ -16,6 +16,8 @@ namespace ThunderED.Modules
         {
             if(IsRunning) return;
             if(Settings.Config.ModuleAuthWeb && TickManager.GetModule<WebAuthModule>().IsEntityInitFailed) return;
+            if(!Settings.Config.ModuleAuthCheck) return;
+
             IsRunning = true;
             var manual = (bool?) prm ?? false;
 
