@@ -1160,6 +1160,10 @@ namespace ThunderED.Classes
         public string ProxyUsername { get; set; }
         [Comment("Optional proxy Password  for Telegram bot")]
         public string ProxyPassword { get; set; }
+        [Comment("Relay messages from Discord")]
+        public bool RelayFromDiscord { get; set; } = true;
+        [Comment("Relay messages from Telegram")]
+        public bool RelayFromTelegram { get; set; } = true;
 
 #if EDITOR
         [Required]
@@ -1197,6 +1201,8 @@ namespace ThunderED.Classes
 #if EDITOR
         [Comment("Discord messages that contain these strings will be filtered from relay")]
         public ObservableCollection<string> DiscordFilters { get; set; } = new ObservableCollection<string>();
+        [Comment("Discord messages that contain these strings will be allowed to relay. Exclusion filters will be apllied afterwards.")]
+        public ObservableCollection<string> DiscordAllowFilters { get; set; } = new ObservableCollection<string>();
         [Comment("Discord messages that start with these strings will be filtered from relay")]
         public ObservableCollection<string> DiscordFiltersStartsWith { get; set; } = new ObservableCollection<string>();
         [Comment("Telegram messages that contain these strings will be filtered from relay")]
@@ -1210,6 +1216,7 @@ namespace ThunderED.Classes
 #else
         public List<string> DiscordFilters { get; set; } = new List<string>();
         public List<string> DiscordFiltersStartsWith { get; set; } = new List<string>();
+        public List<string> DiscordAllowFilters { get; set; } = new List<string>();
         public List<string> TelegramFilters { get; set; } = new List<string>();
         public List<string> TelegramFiltersStartsWith { get; set; } = new List<string>();
         public List<string> TelegramUsers { get; set; } = new List<string>();

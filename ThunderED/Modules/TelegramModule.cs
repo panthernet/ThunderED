@@ -88,6 +88,8 @@ namespace ThunderED.Modules
         {
             if(e.Message.Type != MessageType.Text || e.Message.Chat.Type == ChatType.Private) return;
 
+            if (!Settings.TelegramModule.RelayFromTelegram) return;
+
             var relay = Settings.TelegramModule.RelayChannels.FirstOrDefault(a=> a.Telegram == e.Message.Chat.Id);
             if (relay == null) return;
             if(relay.Discord == 0 || IsMessagePooled(e.Message.Text) || relay.TelegramFilters.Any(e.Message.Text.Contains) || relay.TelegramFiltersStartsWith.Any(e.Message.Text.StartsWith)) return;
@@ -105,9 +107,13 @@ namespace ThunderED.Modules
         public async Task SendMessage(ulong channel, ulong authorId, string user, string message)
         {
             if(_me == null) return;
+            if(!Settings.TelegramModule.RelayFromDiscord) return;
             var relay = Settings.TelegramModule.RelayChannels.FirstOrDefault(a => a.Discord == channel);
             if(relay == null) return;
+            //filter by denial
             if(relay.Telegram == 0 || IsMessagePooled(message) || relay.DiscordFilters.Any(message.Contains) || relay.DiscordFiltersStartsWith.Any(message.StartsWith)) return;
+            //filter by allowance
+            if(relay.DiscordAllowFilters.Any() && !relay.DiscordAllowFilters.Any(a=> message.Contains(a, StringComparison.OrdinalIgnoreCase))) return;
             //check if we relay only bot messages
             if (relay.RelayFromDiscordBotOnly)
             {

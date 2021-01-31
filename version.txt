@@ -2,6 +2,7 @@
  + Added core type in the StructureOnline notification
  + Added abandoned flag to StructureDestroyed notification
  + Added ability to override language strings using the custom_language.json file in Data or root folder
+ + Added several new properties to Telegram relay to allow/disallow messages based on string content and to block T->D or D->T relays separately
  + Fixed wallet balance to decimal
  + Fixed ability to disable auth checks
 

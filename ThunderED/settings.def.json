@@ -756,11 +756,14 @@
     "ProxyPort": 0,
     "ProxyUsername": "",
     "ProxyPassword": "",
+    "RelayFromTelegram": true,
+    "RelayFromDiscord": true,
     "RelayChannels": [
       {
         "telegram": 0,
         "discord": 0,
         "discordFilters": [ "!auth", "/join" ],
+        "discordAllowFilters": [ "@" ],
         "discordFiltersStartsWith": [ "!" ],
         "telegramFilters": [],
         "telegramFiltersStartsWith": [ "/" ],
