@@ -638,6 +638,15 @@ namespace ThunderED.Json
             public string error;
             public int timeout;
         }
+
+        public class AffiliationData
+        {
+            public long Id;
+            public bool IsCharacter;
+            public bool IsCorporation;
+            public bool IsAlliance;
+
+        }
     }
 
     public enum IndustryJobStatusEnum

@@ -85,6 +85,15 @@ namespace ThunderED.API
                 forceUpdate, noCache);
         }
 
+       /* public async Task<JsonClasses.AffiliationData> GetAffiliationeData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
+        {
+            if (id == null) return null;
+            if (isAggressive)
+                return await GetAgressiveESIEntry<JsonClasses.AllianceData>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 10);
+            return await GetEntry<JsonClasses.AllianceData>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
+                forceUpdate, noCache);
+        }*/
+
         public async Task<object> GetMemberEntityProperty(string reason, object id, string propertyName)
         {
             var ch = await GetCharacterData(reason, id) ?? (object)await GetCorporationData(reason, id) ?? await GetAllianceData(reason, id);

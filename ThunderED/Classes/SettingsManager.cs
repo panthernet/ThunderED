@@ -202,7 +202,21 @@ namespace ThunderED.Classes
                         continue;
                     }
 
-                    var result = (await APIHelper.ESIAPI.SearchAllianceId("SimplAuth", entry.Name))?.alliance?[0] ?? 0;
+
+                    var r = await APIHelper.ESIAPI.SearchMemberEntity("SimplAuth", entry.Name, true);
+                    if (r.alliance.Any() || r.character.Any() || r.corporation.Any())
+                    {
+                        var prefix = r.alliance.Any() ? "a:" : (r.corporation.Any() ? "c:" : null);
+                        DeleteIfContainsMemberEntry(group.AllowedMembers, entry.Name);
+                        await LogHelper.LogInfo($"Injecting simple entity: {prefix}{entry.Name}...");
+                        group.AllowedMembers = group.AllowedMembers.Insert(entry.Name, new AuthRoleEntity
+                        {
+                            Entities = new List<object> { $"{prefix}{entry.Name}" },
+                            DiscordRoles = entry.RolesList.ToList()
+                        });
+                    }
+
+                    /*var result = (await APIHelper.ESIAPI.SearchAllianceId("SimplAuth", entry.Name))?.alliance?[0] ?? 0;
                     if (result > 0) //alliance
                     { 
                         DeleteIfContainsMemberEntry(group.AllowedMembers, entry.Name);
@@ -242,7 +256,7 @@ namespace ThunderED.Classes
                                 continue;
                             }
                         }
-                    }
+                    }*/
                 }
                 catch (Exception ex)
                 {
