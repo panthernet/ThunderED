@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using ThunderED.Json.Internal;
 
 namespace ThunderED.Classes
 {
@@ -46,6 +47,8 @@ namespace ThunderED.Classes
 
         public string Notes { get; set; }
 
+        public long Id { get; set; }
+
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -54,6 +57,17 @@ namespace ThunderED.Classes
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
+
+        public void FromItem(TimerItem entry)
+        {
+            Type = entry.timerType;
+            Stage = entry.timerStage;
+            Location = entry.timerLocation;
+            Owner = entry.timerOwner;
+            Date = entry.GetDateTime() ?? DateTime.MinValue;
+            Notes = entry.timerNotes;
+            Id = entry.Id;
+        }
     }
 
     public class WebTimerDataRf : WebTimerData

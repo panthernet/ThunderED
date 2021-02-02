@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using ThunderED.Classes;
+using ThunderED.Modules;
 
 namespace ThunderED.Json.Internal
 {
-    public class TimerItem
+    public class TimerItem: IIdentifiable
     {
-        public long id { get; set; }
+        public long Id { get; set; }
         public int timerType { get; set; }
         public int timerStage { get; set; }
         public string timerLocation { get; set; }
@@ -78,16 +79,15 @@ namespace ThunderED.Json.Internal
 
         public string GetRemains(bool addWord = false)
         {
-            var d = GetDateTime();
-            if(!d.HasValue) return null;
-            var dif = (d.Value - DateTime.UtcNow);
+            if(!Date.HasValue) return null;
+            var dif = (Date.Value - DateTime.UtcNow);
             return $"{(addWord ? $"{LM.Get("Remains")} " : null)}{LM.Get("timerRemains", dif.Days, dif.Hours, dif.Minutes)}";
 
         }
 
         public Dictionary<string, object> GetDictionary()
         {
-            return new Dictionary<string, object>
+            var dic =  new Dictionary<string, object>
             {
                 {nameof(timerType), timerType},
                 {nameof(timerStage), timerStage},
@@ -98,11 +98,14 @@ namespace ThunderED.Json.Internal
                 {nameof(timerChar), timerChar},
                 {nameof(announce), announce},
             };
+            if(Id != 0)
+                dic.Insert(nameof(Id), Id);
+            return dic;
         }
 
         public static TimerItem FromWebTimerData(WebTimerData data, WebAuthUserData user)
         {
-            return new TimerItem
+            var ti =  new TimerItem
             {
                 timerLocation = data.Location,
                 timerType = data.Type,
@@ -110,8 +113,14 @@ namespace ThunderED.Json.Internal
                 timerOwner = data.Owner,
                 timerET = ((int)(data.Date.Subtract(new DateTime(1970, 1, 1))).TotalSeconds).ToString(),
                 timerNotes = data.Notes,
-                timerChar = user.Name
+                timerChar = user.Name,
+                Id = data.Id,
             };
+
+            ti.Date = ti.GetDateTime();
+            return ti;
         }
+
+        public DateTime? Date { get; set; }
     }
 }

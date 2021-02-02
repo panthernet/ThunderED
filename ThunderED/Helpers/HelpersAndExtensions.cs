@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using ThunderED.Classes;
+using ThunderED.Modules;
 
 namespace ThunderED.Helpers
 {
@@ -190,6 +191,25 @@ namespace ThunderED.Helpers
             {
                 return null;
             }
+        }
+
+        public static T Clone<T>(this T source)
+        {
+            var serialized = JsonConvert.SerializeObject(source);
+            return JsonConvert.DeserializeObject<T>(serialized);
+        }
+
+        public static void ReplaceItem<T>(this List<T> list, T value)
+            where T : IIdentifiable
+        {
+            var old = list.FirstOrDefault(a => a.Id == value.Id);
+            if (old != null)
+            {
+                var index = list.IndexOf(old);
+                list.Remove(old);
+                list.Insert(index, value);
+            }
+            else list.Add(value);
         }
     }
 }

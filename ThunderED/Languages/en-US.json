@@ -625,5 +625,9 @@
   "Abandoned": "Abandoned",
   "NeedCore": "Need core",
   "webLoading": "Loading...",
-  "webServerName":  "EVE Online" 
+  "webServerName": "EVE Online",
+  "webDeleteSelectedEntry": "Delete selected entry?",
+  "webTimersEditHeader": "Edit timer",
+  "webTimersConfirmEdit": "Update"
+
 }

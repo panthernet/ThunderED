@@ -424,11 +424,14 @@ namespace ThunderED.Modules
                    module.GetAllAllianceIds().Contains(allianceId);
         }
 
-        public static bool HasWebEditorAccess(in long userId)
+        public static bool HasWebEditorAccess(in long userId, in long corpId, in long allyId)
         {
+            //todo discord roles check
             if (!SettingsManager.Settings.Config.ModuleTimers) return false;
             var module = TickManager.GetModule<TimersModule>();
-            return module.GetAllParsedCharacters(module.ParsedEditLists).Contains(userId);
+            return module.GetAllParsedCharacters(module.ParsedEditLists).Contains(userId) ||
+                   module.GetAllParsedCorporations(module.ParsedEditLists).Contains(corpId) ||
+                   module.GetAllParsedAlliances(module.ParsedEditLists).Contains(allyId);
         }
 
         public static async Task<string> SaveTimer(WebTimerData data, WebAuthUserData user)

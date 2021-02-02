@@ -618,5 +618,8 @@
   "Abandoned": "Заброшена",
   "NeedCore": "Требуется ядро",
   "webLoading": "Загрузка...",
-  "webServerName": "EVE Online"
+  "webServerName": "EVE Online",
+  "webDeleteSelectedEntry": "Удалить выбранную запись?",
+  "webTimersEditHeader": "Редактирование",
+  "webTimersConfirmEdit":  "Обновить" 
 }

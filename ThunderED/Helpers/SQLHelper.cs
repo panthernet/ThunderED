@@ -561,9 +561,9 @@ namespace ThunderED.Helpers
 
         public static async Task<List<TimerItem>> SelectTimers()
         {
-            return (await SelectData("timers", new[] {"*"})).Select(item => new TimerItem
+            var list = (await SelectData("timers", new[] {"*"})).Select(item => new TimerItem
             {
-                id = Convert.ToInt64(item[0]),
+                Id = Convert.ToInt64(item[0]),
                 timerType = Convert.ToInt32(item[1]),
                 timerStage = Convert.ToInt32(item[2]),
                 timerLocation = (string)item[3],
@@ -573,6 +573,8 @@ namespace ThunderED.Helpers
                 timerChar = (string)item[7],
                 announce = Convert.ToInt32(item[8])
             }).ToList();
+            list.ForEach(a=> a.Date = a.GetDateTime());
+            return list;
         }
 
         public static async Task UpdateTimersAuth(long charId)

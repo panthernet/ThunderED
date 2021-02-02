@@ -231,7 +231,7 @@ namespace ThunderED.Modules
                 sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerNotes)}</td>");
                 sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerChar)}</td>");
                 if(isEditor)
-                    sb.AppendLine($"<td><a class=\"btn btn-danger\" href=\"{WebServerModule.GetTimersURL()}?data=delete{timer.id}&id={HttpUtility.UrlEncode(baseCharId)}&state=11\" role=\"button\" data-toggle=\"confirmation\" data-title=\"{LM.Get("ConfirmDelete")}?\">X</a></td>");
+                    sb.AppendLine($"<td><a class=\"btn btn-danger\" href=\"{WebServerModule.GetTimersURL()}?data=delete{timer.Id}&id={HttpUtility.UrlEncode(baseCharId)}&state=11\" role=\"button\" data-toggle=\"confirmation\" data-title=\"{LM.Get("ConfirmDelete")}?\">X</a></td>");
                 sb.AppendLine("</tr>");
             });
             sb.AppendLine("</tbody>");
@@ -271,7 +271,7 @@ namespace ThunderED.Modules
                     {
                         if (channel != 0)
                             await SendNotification(timer, channel);
-                        await SQLHelper.DeleteTimer(timer.id);
+                        await SQLHelper.DeleteTimer(timer.Id);
                         return;
                     }
 
@@ -292,7 +292,7 @@ namespace ThunderED.Modules
                             value = value == 0 ? announces.Min() : value;
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLHelper.SetTimerAnnounce(timer.id, value);
+                            await SQLHelper.SetTimerAnnounce(timer.Id, value);
                         }
                     }
                     else
@@ -305,7 +305,7 @@ namespace ThunderED.Modules
                         {
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLHelper.SetTimerAnnounce(timer.id, an);
+                            await SQLHelper.SetTimerAnnounce(timer.Id, an);
                         }
                     }
                 });
