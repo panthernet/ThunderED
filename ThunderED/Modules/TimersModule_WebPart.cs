@@ -455,7 +455,7 @@ namespace ThunderED.Modules
                 if (iDate == null)
                     return LM.Get("invalidTimeFormat");
 
-                if (iDate < DateTime.Now)
+                if (iDate < DateTime.UtcNow)
                     return LM.Get("passedTimeValue");
 
                 await SQLHelper.UpdateTimer(timer);

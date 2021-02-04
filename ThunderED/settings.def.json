@@ -70,7 +70,8 @@
     "NoStatusResponseOnDiscordDisconnection": true,
     "UseHTTPS": false,
     "CertificatePath": "",
-    "CertificatePassword":  "" 
+    "CertificatePassword": "",
+    "CertificateStorageName": ""
   },
 
   "Database": {

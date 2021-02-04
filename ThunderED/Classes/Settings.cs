@@ -1858,6 +1858,8 @@ namespace ThunderED.Classes
         public string CertificatePath { get; set; }
         [Comment("Optional certificate password for HTTPS connection")]
         public string CertificatePassword { get; set; }
+        [Comment("Optional certificate name to search in the Storage (mutually exclusive with the path)")]
+        public string CertificateStorageName { get; set; }
 
 #if EDITOR
         public override string this[string columnName]

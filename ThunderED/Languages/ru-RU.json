@@ -621,5 +621,7 @@
   "webServerName": "EVE Online",
   "webDeleteSelectedEntry": "Удалить выбранную запись?",
   "webTimersEditHeader": "Редактирование",
-  "webTimersConfirmEdit":  "Обновить" 
+  "webTimersConfirmEdit": "Обновить",
+  "webAuthErrorHeader": "Ошибка аутентификации",
+  "webAuthSuccessHeader": "Аутентификация завершена"
 }

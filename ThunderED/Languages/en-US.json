@@ -628,6 +628,9 @@
   "webServerName": "EVE Online",
   "webDeleteSelectedEntry": "Delete selected entry?",
   "webTimersEditHeader": "Edit timer",
-  "webTimersConfirmEdit": "Update"
+  "webTimersConfirmEdit": "Update",
+  "webAuthErrorHeader": "Authentication error",
+  "webAuthSuccessHeader": "Authentication Successful"
+
 
 }

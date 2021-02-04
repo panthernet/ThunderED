@@ -150,6 +150,9 @@ namespace ThunderED.Json
             public bool read;
             public string subject;
             public string timestamp;
+
+            [JsonIgnore]
+            public DateTime Date => DateTime.Parse(timestamp);
         }
 
         public class MailLabelData
