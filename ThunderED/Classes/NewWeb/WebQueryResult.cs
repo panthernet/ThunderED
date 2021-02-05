@@ -13,6 +13,7 @@ namespace ThunderED.Classes
         public static WebQueryResult BadRequestToGeneralAuth => new WebQueryResult(WebQueryResultEnum.BadRequest, "/badrq", ServerPaths.GetGeneralAuthPageUrl());
         public static WebQueryResult BadRequestToSystemAuth => new WebQueryResult(WebQueryResultEnum.BadRequest, "/badrq", ServerPaths.GetFeedAuthPageUrl());
         public static WebQueryResult RedirectUrl => new WebQueryResult(WebQueryResultEnum.RedirectUrl);
+        public static WebQueryResult ContractsAuthSuccess => new WebQueryResult(WebQueryResultEnum.FeedSuccess);
 
         public string Message1 { get; set; }
         public string Message2 { get; set; }

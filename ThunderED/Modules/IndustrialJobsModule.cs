@@ -14,7 +14,7 @@ using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
-    public class IndustrialJobsModule: AppModuleBase
+    public partial class IndustrialJobsModule: AppModuleBase
     {
         public override LogCat Category => LogCat.IndustryJobs;
         private readonly int _checkInterval;
@@ -33,6 +33,8 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            await WebPartInitialization();
+
             var data = Settings.IndustrialJobsModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member);
 
@@ -462,5 +464,7 @@ namespace ThunderED.Modules
             var m = TickManager.GetModule<IndustrialJobsModule>();
             return m?.GetAllParsedCharacters().Contains(id) ?? false;
         }
+
+
     }
 }

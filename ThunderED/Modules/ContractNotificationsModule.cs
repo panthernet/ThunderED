@@ -16,7 +16,7 @@ using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
-    public class ContractNotificationsModule : AppModuleBase
+    public partial class ContractNotificationsModule : AppModuleBase
     {
         public override LogCat Category => LogCat.ContractNotif;
         private readonly int _checkInterval;
@@ -35,6 +35,8 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            await WebPartInitialization();
+
             var data = Settings.ContractNotificationsModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member);
         }
@@ -926,5 +928,6 @@ namespace ThunderED.Modules
             var m = TickManager.GetModule<ContractNotificationsModule>();
             return m?.GetAllParsedCharacters().Contains(id) ?? false;
         }
+
     }
 }

@@ -17,7 +17,7 @@ using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
-    public class MailModule: AppModuleBase
+    public partial class MailModule: AppModuleBase
     {
         public override LogCat Category => LogCat.Mail;
 
@@ -36,6 +36,8 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            await WebPartInitialization();
+
             var data = Settings.MailModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member);
         }

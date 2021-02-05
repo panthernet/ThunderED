@@ -482,7 +482,7 @@
   "errFileNotFound": "File {0} not found!",
   "errFileContainsInvalidData": "File {0} contains invalid data!",
   "authAltRegTemplateHeader": "Alt Character Registration",
-  "authAltRegBody": "You will have to complete two consequent steps one right after another:</br>1. Authenticate with your main character which is already registered in Discord</br>2. Authenticate with your alt character to bind it to your main</br><b>You can do it with as many characters as you need</b>",
+  "authAltRegBody": "<p>You will have to complete two consequent steps one right after another:</p><p>1. Authenticate with your main character which is already registered in Discord</p><p>2. Authenticate with your alt character to bind it to your main</p><p><b>You can do it with as many characters as you need</b></p>",
   "authAltRegMainNotFound": "Selected main character is not registered in Discord!",
   "authAltRegGroupNotFound": "Alt Character authentication group isn't found!",
   "authAltRegAccepted": "Thank you for applying! Alt character {0} has been successfully bound to main character {1}.",
@@ -630,7 +630,8 @@
   "webTimersEditHeader": "Edit timer",
   "webTimersConfirmEdit": "Update",
   "webAuthErrorHeader": "Authentication error",
-  "webAuthSuccessHeader": "Authentication Successful"
+  "webAuthSuccessHeader": "Authentication Successful",
+  "webAuthFeedHeader": "Feeder Authentication"
 
 
 }

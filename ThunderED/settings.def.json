@@ -504,10 +504,11 @@
 
   "mailModule": {
     "checkIntervalInMinutes": 2,
+    "AuthButtonDiscordText": "Mail Feed Auth",
     "Groups": {
       "Group1": {
         "IsEnabled": true,
-        "CharacterEntities": [ ],
+        "CharacterEntities": [],
         "IncludePrivateMail": true,
         "DefaultChannel": 0,
         "DefaultMention": "",
