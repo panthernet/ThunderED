@@ -22,7 +22,7 @@ namespace ThunderED.Helpers
         public static ZKillAPI ZKillAPI { get; private set; }
         public static FleetUpAPI FleetUpAPI { get; private set; }
 
-        public static string GetItemTypeUrl(object id)
+        public static string GetItemTypeUrl(object id)//
         {
             return $"https://everef.net/type/{id}";
         }
