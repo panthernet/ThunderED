@@ -631,7 +631,10 @@
   "webTimersConfirmEdit": "Update",
   "webAuthErrorHeader": "Authentication error",
   "webAuthSuccessHeader": "Authentication Successful",
-  "webAuthFeedHeader": "Feeder Authentication"
+  "webAuthFeedHeader": "Feeder Authentication",
+  "webTimerDaysShort": "d",
+  "webTimerHoursShort": "h",
+  "webTimerMinutesShort": "m"
 
 
 }

@@ -624,5 +624,8 @@
   "webTimersConfirmEdit": "Обновить",
   "webAuthErrorHeader": "Ошибка аутентификации",
   "webAuthSuccessHeader": "Аутентификация завершена",
-  "webAuthFeedHeader": "Аутентификация поставщика данных" 
+  "webAuthFeedHeader": "Аутентификация поставщика данных",
+  "webTimerDaysShort": "д",
+  "webTimerHoursShort": "ч",
+  "webTimerMinutesShort": "м"
 }
