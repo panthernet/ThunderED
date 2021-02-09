@@ -123,7 +123,7 @@ namespace ThunderED.Modules
                 if (discordRoles.Any())
                 {
                     var authUser = await SQLHelper.GetAuthUserByCharacterId(characterId);
-                    if (authUser != null && authUser.DiscordId > 0)
+                    if (authUser != null && authUser.DiscordId > 0 && APIHelper.IsDiscordAvailable)
                     {
                         if (APIHelper.DiscordAPI.GetUserRoleNames(authUser.DiscordId).Intersect(discordRoles).Any())
                             skip = true;

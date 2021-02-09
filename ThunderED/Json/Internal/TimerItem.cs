@@ -99,7 +99,7 @@ namespace ThunderED.Json.Internal
                 {nameof(announce), announce},
             };
             if(Id != 0)
-                dic.Insert(nameof(Id), Id);
+                dic.Add("id", Id);
             return dic;
         }
 
