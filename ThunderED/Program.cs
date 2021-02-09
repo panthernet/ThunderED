@@ -30,36 +30,8 @@ namespace ThunderED
             // var x = string.IsNullOrWhiteSpace("");
 
             // var ssss = new List<JsonZKill.ZkillOnly>().Count(a => a.killmail_id == 0);
-            if (!File.Exists(SettingsManager.FileSettingsPath))
-            {
-                if (!File.Exists("settings.def.json"))
-                {
-                    await LogHelper.LogError(
-                        "Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
-                    try
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(
-                            "Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
-                        Console.ReadKey();
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                    return;
-                }
-                
-                File.Copy("settings.def.json", SettingsManager.FileSettingsPath);
-                try
-                {
-
-                }
-                catch
-                {
-                    Console.WriteLine($"Default settings file has been created in {SettingsManager.FileSettingsPath}. The app will run now with default settings.");
-                }
-            }
+            if (!await LoadConfig())
+                return;
 
             //load settings
             var result = await SettingsManager.Prepare();
@@ -224,6 +196,26 @@ namespace ThunderED
                     await Task.Delay(10);
                 if(_confirmClose) return;
             }
+        }
+
+        private static async Task<bool> LoadConfig()
+        {
+            if (!File.Exists(SettingsManager.FileSettingsPath))
+            {
+                var defaultFile = "settings.def.json";
+                if (File.Exists(defaultFile))
+                {
+                    File.Copy(defaultFile, Path.Combine(SettingsManager.DataDirectory, "settings.json"));
+                }
+                else
+                {
+                    await LogHelper.LogError(
+                        "Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static async void CurrentDomainOnProcessExit(object sender, EventArgs e)
