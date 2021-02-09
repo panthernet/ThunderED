@@ -106,6 +106,8 @@ namespace ThunderED.API
 
         public SocketSelfUser GetCurrentUser()
         {
+            if (!IsAvailable) return null;
+
             try
             {
                 return Client?.CurrentUser;
@@ -119,13 +121,15 @@ namespace ThunderED.API
 
         public async Task ReplyMessageAsync(ICommandContext context, string message)
         {
-            if(!await Throttle()) return;
+            if (!IsAvailable) return;
+            if (!await Throttle()) return;
             await ReplyMessageAsync(context, message, false);
         }
 
         public async Task<string> GetUserMention(ulong userId)
         {
-            if(!await Throttle()) return null;
+            if (!IsAvailable) return null;
+            if (!await Throttle()) return null;
             try
             {
                 return FindUserInGuilds(userId)?.Mention;
@@ -142,6 +146,7 @@ namespace ThunderED.API
 
         private SocketRole FindRoleInGuilds(string roleName, bool caseInsensitive = false)
         {
+            if (!IsAvailable) return null;
             foreach (var guild in GetPrioritezedGuildsList())
             {
                 var role = guild.Roles.FirstOrDefault(a => a.Name.Equals(roleName, caseInsensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
@@ -154,6 +159,7 @@ namespace ThunderED.API
 
         private IMessageChannel FindChannelInGuilds(ulong channelId)
         {
+            if (!IsAvailable) return null;
             foreach (var guild in GetPrioritezedGuildsList())
             {
                 var channel = guild.Channels.FirstOrDefault(a => a.Id == channelId);
@@ -166,6 +172,7 @@ namespace ThunderED.API
 
         private SocketUser FindUserInGuilds(ulong userId)
         {
+            if (!IsAvailable) return null;
             foreach (var guild in GetPrioritezedGuildsList())
             {
                 var user = guild.GetUser(userId);
@@ -178,6 +185,7 @@ namespace ThunderED.API
 
         private SocketGuildUser FindGuildUserInGuilds(ulong userId)
         {
+            if (!IsAvailable) return null;
             foreach (var guild in GetPrioritezedGuildsList())
             {
                 var user = guild.GetUser(userId);
@@ -190,6 +198,7 @@ namespace ThunderED.API
 
         private List<SocketGuild> GetPrioritezedGuildsList()
         {
+            if (!IsAvailable) return null;
             var g = _cacheGuilds.FirstOrDefault(a => a.Id == SettingsManager.Settings.Config.DiscordGuildId);
             if (g == null) return _cacheGuilds;
             var list = new List<SocketGuild> {g};
@@ -201,6 +210,7 @@ namespace ThunderED.API
 
         public async Task ReplyMessageAsync(ICommandContext context, string message, bool mentionSender)
         {
+            if (!IsAvailable) return;
             if (context?.Message == null) return;
             if(!await Throttle()) return;
             if (mentionSender)
@@ -214,6 +224,7 @@ namespace ThunderED.API
 
         public async Task ReplyMessageAsync(ICommandContext context, IMessageChannel channel, string message, bool mentionSender = false)
         {
+            if (!IsAvailable) return;
             if (context == null || channel == null || string.IsNullOrEmpty(message)) return;
             if(!await Throttle()) return;
             if (mentionSender)
@@ -244,6 +255,7 @@ namespace ThunderED.API
 
         public async Task ReplyMessageAsync(ICommandContext context, string message, Embed embed)
         {
+            if (!IsAvailable) return;
             if (context?.Message == null) return;
             if(!await Throttle()) return;
             try
@@ -268,7 +280,8 @@ namespace ThunderED.API
 
         public async Task<IUserMessage> SendMessageAsync(ulong channel, string message, Embed embed = null)
         {
-            if(!await Throttle()) return null;
+            if (!IsAvailable) return null;
+            if (!await Throttle()) return null;
             try
             {
                 if (channel == 0 || (string.IsNullOrWhiteSpace(message) && embed == null)) return null;
@@ -292,7 +305,8 @@ namespace ThunderED.API
 
         public async Task<IUserMessage> SendMessageAsync(IMessageChannel channel, string message, Embed embed = null)
         {
-            if(!await Throttle()) return null;
+            if (!IsAvailable) return null;
+            if (!await Throttle()) return null;
             if (message == null && embed == null || channel == null) return null;
 
             try
@@ -323,7 +337,8 @@ namespace ThunderED.API
 
         public async Task<string> GetMentionedUserString(ICommandContext context)
         {
-            if(!await Throttle()) return null;
+            if (!IsAvailable) return null;
+            if (!await Throttle()) return null;
             try
             {
                 var id = context.Message.MentionedUserIds.FirstOrDefault();
@@ -404,7 +419,8 @@ namespace ThunderED.API
         {
             try
             {
-                await Client.StopAsync();
+                if(Client != null)
+                    await Client.StopAsync();
             }
             catch (Exception ex)
             {
@@ -461,6 +477,7 @@ namespace ThunderED.API
 
         private SocketGuild GetGuildByChannel(ulong channelId)
         {
+            if (!IsAvailable) return null;
             return _cacheGuilds.FirstOrDefault(a=>a.Channels.Any(b=> b.Id == channelId));
         }
 
@@ -496,6 +513,7 @@ namespace ThunderED.API
 
         public async Task<string> IsAdminAccess(ICommandContext context)
         {
+            if (!IsAvailable) return null;
             if (!await Throttle()) return null;
             try
             {
@@ -566,6 +584,7 @@ namespace ThunderED.API
 
         internal bool IsUserMention(ICommandContext context)
         {
+            if (!IsAvailable) return false;
             try
             {
                 return context.Message.MentionedUserIds.Count != 0;
@@ -582,6 +601,7 @@ namespace ThunderED.API
 
         public IMessageChannel GetChannel(ulong noid)
         {
+            if (!IsAvailable) return null;
             try
             {
                 return FindChannelInGuilds(noid);
@@ -595,12 +615,14 @@ namespace ThunderED.API
 
         public void SubscribeRelay(IDiscordRelayModule m)
         {
-            if(m == null) return;
+            if (!IsAvailable) return;
+            if (m == null) return;
             m.RelayMessage += async (message, channel) => { await SendMessageAsync(GetChannel(channel), message); };
         }
 
         public string GetRoleMention(string role)
         {
+            if (!IsAvailable) return null;
             try
             {
                 var r = FindRoleInGuilds(role);
@@ -616,11 +638,13 @@ namespace ThunderED.API
 
         public SocketGuild GetGuild(ulong guildId)
         {
+            if (!IsAvailable) return null;
             return _cacheGuilds.FirstOrDefault(a=> a.Id == guildId);
         }
 
         public SocketRole GetGuildRole(string roleName, bool caseInsensitive = false)
         {
+            if (!IsAvailable) return null;
             try
             {
                 return FindRoleInGuilds(roleName, caseInsensitive);
@@ -635,6 +659,7 @@ namespace ThunderED.API
         
         public List<string> GetGuildRoleNames(ulong guildId)
         {
+            if (!IsAvailable) return null;
             try
             {
                 return GetGuild(guildId).Roles.Select(a => a.Name).ToList();
@@ -648,6 +673,7 @@ namespace ThunderED.API
 
         public SocketRole GetUserRole(SocketGuildUser user, string roleName)
         {
+            if (!IsAvailable) return null;
             try
             {
                 return user.Roles.FirstOrDefault(x => x.Name == roleName);
@@ -661,6 +687,7 @@ namespace ThunderED.API
 
         public SocketGuildUser GetUser(ulong authorId)
         {
+            if (!IsAvailable) return null;
             try
             {
                 return FindGuildUserInGuilds(authorId);
@@ -674,6 +701,7 @@ namespace ThunderED.API
 
         public async Task<bool> AssignRoleToUser(ulong userId, string roleName)
         {
+            if (!IsAvailable) return false;
             if (!await Throttle()) return false;
 
             var discordUser = GetUser(userId);
@@ -695,6 +723,7 @@ namespace ThunderED.API
         
         public async Task<bool> StripUserRole(ulong userId, string roleName)
         {
+            if (!IsAvailable) return false;
             if (!await Throttle()) return false;
             try
             {
@@ -715,6 +744,7 @@ namespace ThunderED.API
 
         public async Task<bool> IsBotPrivateChannel(IMessageChannel contextChannel)
         {
+            if (!IsAvailable) return false;
             if (!await Throttle()) return false;
             try
             {
@@ -729,6 +759,7 @@ namespace ThunderED.API
 
         public List<string> GetUserRoleNames(ulong id)
         {
+            if (!IsAvailable) return null;
             return GetUser(id)?.Roles.Select(a => a.Name).ToList();
         }
 
@@ -749,6 +780,7 @@ namespace ThunderED.API
 
         public async Task<IList<string>> CheckAndNotifyBadDiscordRoles(IList<string> roles, LogCat category)
         {
+            if (!IsAvailable) return null;
             if (!await Throttle()) return null;
             var discordRoles = GetPrioritezedGuildsList().SelectMany(a=> a.Roles).Select(a=> a.Name).Distinct().ToList();
             if(!discordRoles.Any()) return new List<string>();
@@ -762,6 +794,7 @@ namespace ThunderED.API
 
         public async Task RemoveMessage(IUserMessage message)
         {
+            if (!IsAvailable) return;
             try
             {
                 await message.DeleteAsync();
@@ -774,17 +807,20 @@ namespace ThunderED.API
 
         public int GetUsersCount()
         {
+            if (!IsAvailable) return 0;
             return _cacheGuilds.Sum(a=> a.Users.Count);
         }
 
         public List<ulong> GetUserIdsFromGuild(ulong guildId)
         {
+            if (!IsAvailable) return null;
             return _cacheGuilds.FirstOrDefault(a => a.Id == guildId)?.Users.Select(a=> a.Id).ToList();
         }
 
         public List<ulong> GetUserIdsFromChannel(ulong guildId, ulong channelId, bool isOnlineOnly)
         {
-            if(channelId == 0)
+            if (!IsAvailable) return null;
+            if (channelId == 0)
                 return _cacheGuilds.FirstOrDefault(a => a.Id == guildId)?.Users.Where(a => !isOnlineOnly || a.Status != UserStatus.Offline).Select(a => a.Id).ToList();
 
             return _cacheGuilds.FirstOrDefault(a => a.Id == guildId)?.Channels.FirstOrDefault(a => a.Id == channelId)

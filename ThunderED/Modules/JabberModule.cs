@@ -93,6 +93,7 @@ namespace ThunderED.Modules
 
         internal static async void OnMessage(object sender, MessageEventArgs e)
         {
+            if (!APIHelper.IsDiscordAvailable) return;
             var filtered = false;
             if (e.Message.Chatstate != Chatstate.Composing && !string.IsNullOrWhiteSpace(e.Message.Value))
             {

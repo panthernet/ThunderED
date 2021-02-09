@@ -84,7 +84,7 @@ namespace ThunderED.Modules
         private void IRC_Message(UserInfo userinfo, string channel, string message)
         {
             var relay = Settings.IrcModule.RelayChannels.FirstOrDefault(a => a.IRC == channel);
-            if (relay == null) return;
+            if (relay == null || !APIHelper.IsDiscordAvailable) return;
             if(relay.Discord == 0 || IsMessagePooled(message) || relay.IRCFilters.Any(message.Contains) || relay.IRCFiltersStartsWith.Any(message.StartsWith)) return;
             if(relay.IRCUsers.Count > 0 && !relay.IRCUsers.Contains(userinfo.Nickname)) return;
 

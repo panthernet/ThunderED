@@ -1765,6 +1765,8 @@ namespace ThunderED.Classes
         public bool DisableLogIntoFiles { get; set; } = false;
         [Comment("Optional path to language files folder. Empty by default and will use default folder")]
         public string LanguageFilesFolder { get; set; }
+        [Comment("Enables legacy restart logic when ThunderED runs under the old shell with Restarter")]
+        public bool EnableLegacyRestartLogic { get; set; }
 
 
 #if EDITOR

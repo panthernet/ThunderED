@@ -32,19 +32,33 @@ namespace ThunderED
             // var ssss = new List<JsonZKill.ZkillOnly>().Count(a => a.killmail_id == 0);
             if (!File.Exists(SettingsManager.FileSettingsPath))
             {
-                await LogHelper.LogError("Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
+                if (!File.Exists("settings.def.json"))
+                {
+                    await LogHelper.LogError(
+                        "Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
+                    try
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(
+                            "Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
+                        Console.ReadKey();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                    return;
+                }
+                
+                File.Copy("settings.def.json", SettingsManager.FileSettingsPath);
                 try
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Please make sure you have settings.json file in bot folder! Create it and fill with correct settings.");
-                    Console.ReadKey();
+
                 }
                 catch
                 {
-                    // ignored
+                    Console.WriteLine($"Default settings file has been created in {SettingsManager.FileSettingsPath}. The app will run now with default settings.");
                 }
-
-                return;
             }
 
             //load settings
@@ -68,19 +82,22 @@ namespace ThunderED
                 LogHelper.WriteConsole($"Launch after restart");
 
             //restart logix
-            await Task.Factory.StartNew(async () =>
+            if (SettingsManager.Settings.Config.EnableLegacyRestartLogic)
             {
-                if (pipe == null)
+                await Task.Factory.StartNew(async () =>
                 {
-                    pipe = new NamedPipeClientStream(".", "ThunderED.Restart.Pipe", PipeDirection.In);
-                    await pipe.ConnectAsync();
-                }
+                    if (pipe == null)
+                    {
+                        pipe = new NamedPipeClientStream(".", "ThunderED.Restart.Pipe", PipeDirection.In);
+                        await pipe.ConnectAsync();
+                    }
 
-                if (!pipe.IsConnected || pipe.ReadByte() == 0) return;
-                await LogHelper.LogInfo("SIGTERM received! Shutdown app...");
+                    if (!pipe.IsConnected || pipe.ReadByte() == 0) return;
+                    await LogHelper.LogInfo("SIGTERM received! Shutdown app...");
 
-                await Shutdown();
-            });
+                    await Shutdown();
+                });
+            }
 
             APIHelper.Prepare();
             await LogHelper.LogInfo($"ThunderED v{VERSION} is running!").ConfigureAwait(false);
@@ -108,26 +125,29 @@ namespace ThunderED
             //load injected settings
             await SettingsManager.UpdateInjectedSettings();
             //load APIs
-            await APIHelper.DiscordAPI.Start();
-
-            while (!APIHelper.IsDiscordAvailable)
+            if (SettingsManager.Settings.Config.DiscordGuildId != 0)
             {
-                await Task.Delay(10);
-            }
+                await APIHelper.DiscordAPI.Start();
 
-            if (APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId) == null)
-            {
-                await LogHelper.LogError("[CRITICAL] DiscordGuildId - Discord guild not found!");
-                try
+                while (!APIHelper.IsDiscordAvailable)
                 {
-                    Console.ReadKey();
-                }
-                catch
-                {
-                    // ignored
+                    await Task.Delay(10);
                 }
 
-                return;
+                if (APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId) == null)
+                {
+                    await LogHelper.LogError("[CRITICAL] DiscordGuildId - Discord guild not found!");
+                    try
+                    {
+                        Console.ReadKey();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    return;
+                }
             }
 
             //initiate core timer
@@ -318,6 +338,22 @@ namespace ThunderED
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
+            if (!File.Exists(SettingsManager.FileSettingsPath))
+            {
+                try
+                {
+                    File.Copy("settings.def.json", SettingsManager.FileSettingsPath);
+                    Console.WriteLine($"Default settings file has been created in {SettingsManager.FileSettingsPath}. The app will run now with default settings.");
+                }
+                catch
+                {
+                    var msg = $"Please make sure config file is present in {SettingsManager.FileSettingsPath}";
+                    await LogHelper.Log(msg);
+                    Console.WriteLine(msg);
+                    return false;
+                }
+            }
+
             APIHelper.Prepare();
             await LogHelper.LogInfo($"ThunderED v{Program.VERSION} is running!").ConfigureAwait(false);
             //load database provider
@@ -344,26 +380,29 @@ namespace ThunderED
             //load injected settings
             await SettingsManager.UpdateInjectedSettings();
             //load APIs
-            await APIHelper.DiscordAPI.Start();
-
-            while (!APIHelper.IsDiscordAvailable)
+            if (SettingsManager.Settings.Config.DiscordGuildId != 0)
             {
-                await Task.Delay(10);
-            }
+                await APIHelper.DiscordAPI.Start();
 
-            if (APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId) == null)
-            {
-                await LogHelper.LogError("[CRITICAL] DiscordGuildId - Discord guild not found!");
-                try
+                while (!APIHelper.IsDiscordAvailable)
                 {
-                    Console.ReadKey();
-                }
-                catch
-                {
-                    // ignored
+                    await Task.Delay(10);
                 }
 
-                return false;
+                if (APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId) == null)
+                {
+                    await LogHelper.LogError("[CRITICAL] DiscordGuildId - Discord guild not found!");
+                    try
+                    {
+                        Console.ReadKey();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    return false;
+                }
             }
 
             //initiate core timer

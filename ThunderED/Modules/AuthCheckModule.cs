@@ -23,7 +23,7 @@ namespace ThunderED.Modules
 
             try
             {
-                if(Settings.WebAuthModule.AuthCheckUnregisteredDiscordUsers)
+                if(Settings.WebAuthModule.AuthCheckUnregisteredDiscordUsers && APIHelper.IsDiscordAvailable)
                     await CheckDiscordUsers(manual);
                 await CheckDBUsers(manual);
             }

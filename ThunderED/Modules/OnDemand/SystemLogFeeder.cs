@@ -22,6 +22,7 @@ namespace ThunderED.Modules.OnDemand
                 _timer.Stop();
                 try
                 {
+                    if (!APIHelper.IsDiscordAvailable) return;
                     if (Package.Count > 0)
                         await SendMessage().ConfigureAwait(false);
                 }

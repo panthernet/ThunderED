@@ -411,7 +411,7 @@ namespace ThunderED.Modules
 
             //check for Discord admins
             var discordId = SQLHelper.GetAuthUserDiscordId(characterId).GetAwaiter().GetResult();
-            if (discordId > 0)
+            if (discordId > 0 && APIHelper.IsDiscordAvailable)
             {
                 var roles = string.Join(',', APIHelper.DiscordAPI.GetUserRoleNames(discordId));
                 if (!string.IsNullOrEmpty(roles))

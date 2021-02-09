@@ -25,7 +25,7 @@ namespace ThunderED.Modules
         public override async Task Run(object prm)
         {
 
-            if (IsRunning) return;
+            if (IsRunning || !APIHelper.IsDiscordAvailable) return;
             IsRunning = true;
 
             await ProcessExistingCampaigns();

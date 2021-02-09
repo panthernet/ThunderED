@@ -56,7 +56,8 @@
     "ESIAddress": "https://esi.evetech.net/",
     "RunAsServiceCompatibility": false,
     "DisableLogIntoFiles": false,
-    "LanguageFilesFolder": ""
+    "LanguageFilesFolder": "",
+    "EnableLegacyRestartLogic": false 
   },
 
   "webServerModule": {

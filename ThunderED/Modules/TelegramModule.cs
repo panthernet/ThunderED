@@ -86,7 +86,7 @@ namespace ThunderED.Modules
 
         private void BotClient_OnMessage(object sender, Telegram.Bot.Args.MessageEventArgs e)
         {
-            if(e.Message.Type != MessageType.Text || e.Message.Chat.Type == ChatType.Private) return;
+            if(e.Message.Type != MessageType.Text || e.Message.Chat.Type == ChatType.Private || !APIHelper.IsDiscordAvailable) return;
 
             if (!Settings.TelegramModule.RelayFromTelegram) return;
 
@@ -106,7 +106,7 @@ namespace ThunderED.Modules
 
         public async Task SendMessage(ulong channel, ulong authorId, string user, string message)
         {
-            if(_me == null) return;
+            if(_me == null || !APIHelper.IsDiscordAvailable) return;
             if(!Settings.TelegramModule.RelayFromDiscord) return;
             var relay = Settings.TelegramModule.RelayChannels.FirstOrDefault(a => a.Discord == channel);
             if(relay == null) return;
