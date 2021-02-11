@@ -327,6 +327,34 @@ namespace ThunderED.Modules
             return list;
         }
 
+
+        public async Task<List<WebWalletTrans>> WebGetWalletTrans(long id, string inspectToken)
+        {
+            var result = await APIHelper.ESIAPI.GetCharacterWalletTransactions(Reason, id, inspectToken);
+            if (result == null) return null;
+            var list = new List<WebWalletTrans>();
+            foreach (var entry in result)
+            {
+                var type = await APIHelper.ESIAPI.GetTypeId(Reason, entry.type_id);
+                var amount = entry.quantity * entry.unit_price * (entry.is_buy ? -1 : 1);
+                var fromChar = await APIHelper.ESIAPI.GetCharacterData(Reason, entry.client_id);
+                var from = fromChar?.name ?? (await APIHelper.ESIAPI.GetCorporationData(Reason, entry.client_id))?.name;
+                var urlSection = fromChar == null ? "corporation" : "character";
+
+                list.Add(new WebWalletTrans
+                {
+                    Date = entry.DateEntry,
+                    Type = type?.name,
+                    Credit = amount,
+                    Client = from,
+                    ClientZkbLink = $"https://zkillboard.com/{urlSection}/{entry.client_id}/",
+                    Where = entry.location_id.ToString()
+                });
+            }
+
+            return list;
+        }
+
         public async Task<object[]> WebGetSkills(long id, string inspectToken)
         {
             var skills =
@@ -409,8 +437,9 @@ namespace ThunderED.Modules
                 await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId);
                 return UserStatusEnum.Authed;
             }
-            else return UserStatusEnum.Awaiting;
+            return UserStatusEnum.Awaiting;
         }
+
     }
 
     [Serializable]
@@ -427,7 +456,12 @@ namespace ThunderED.Modules
     [Serializable]
     public class WebWalletTrans
     {
-
+        public DateTime Date { get; set; }
+        public string Type { get; set; }
+        public double Credit { get; set; }
+        public string Client { get; set; }
+        public string Where { get; set; }
+        public string ClientZkbLink { get; set; }
     }
 
     [Serializable]
