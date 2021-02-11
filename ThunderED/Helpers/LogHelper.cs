@@ -114,18 +114,24 @@ namespace ThunderED.Helpers
 
         private static async Task WriteToResource(string filename, string message)
         {
-            _rwl.AcquireWriterLock(1000);
+            lock (filename)
+            {
+                File.AppendAllTextAsync(filename, message).GetAwaiter().GetResult();
+            }
+
+            await Task.CompletedTask;
+
+            //_rwl.AcquireWriterLock(1000);
             try
             {
-                File.AppendAllText(filename, message);
             }
             finally
             {
                 // Ensure that the lock is released.
-                _rwl.ReleaseWriterLock();
+                //_rwl.ReleaseWriterLock();
             }
 
-            await Task.Delay(1);
+            //await Task.Delay(1);
         }
 
         public static async Task LogEx(string message, Exception exception, LogCat cat = LogCat.Default)

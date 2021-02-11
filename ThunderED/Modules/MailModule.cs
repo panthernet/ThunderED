@@ -306,13 +306,13 @@ namespace ThunderED.Modules
             }
         }
 
-        public static async Task<string[]> PrepareBodyMessage(string input, bool forWeb = false)
+        public static async Task<string[]> PrepareBodyMessage(string input, bool forWeb = false, bool skipValidation = false)
         {
             if (string.IsNullOrEmpty(input)) return new [] {" ", null, null, null};
 
             var doc = new HtmlDocument();
             doc.LoadHtml(input);
-            if (doc.ParseErrors.Any())
+            if (!skipValidation && doc.ParseErrors.Any())
                 return new [] {input, null, null, null};
 
             string body;

@@ -5,4 +5,4 @@
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("panthernet software")]
 [assembly: AssemblyProduct("ThunderED")]
-[assembly: AssemblyCopyright("Copyright © panthernet software 2018")]
+[assembly: AssemblyCopyright("Copyright © panthernet software 2021")]

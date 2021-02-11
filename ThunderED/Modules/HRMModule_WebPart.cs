@@ -53,19 +53,35 @@ namespace ThunderED.Modules
                     throw new ArgumentOutOfRangeException(nameof(userType), userType, null);
             }
 
+            var result = new List<WebUserItem>();
 
-            return list.Select(a => new WebUserItem
+            foreach(var a in list)
             {
-                Id = a.CharacterId,
-                CharacterName = a.Data.CharacterName,
-                CorporationName = a.Data.CorporationName,
-                AllianceName = a.Data.AllianceName,
-                CorporationTicker = a.Data.CorporationTicker,
-                AllianceTicker = a.Data.AllianceTicker,
-                RegDate = a.CreateDate,
-                IconUrl = $"https://imageserver.eveonline.com/Character/{a.CharacterId}_64.jpg"
-            }).ToList();
 
+                bool invalidToken = false;
+                if (a.HasToken && SettingsManager.Settings.HRMModule.ValidateTokensWhileLoading)
+                {
+                    var token = await APIHelper.ESIAPI.RefreshToken(a.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From HRM | Char ID: {a.CharacterId} | Char name: {a.Data.CharacterName}");
+                    invalidToken = token.Result == null;
+                }
+
+                result.Add(new WebUserItem
+                {
+                    Id = a.CharacterId,
+                    CharacterName = a.Data.CharacterName,
+                    CorporationName = a.Data.CorporationName,
+                    AllianceName = a.Data.AllianceName,
+                    CorporationTicker = a.Data.CorporationTicker,
+                    AllianceTicker = a.Data.AllianceTicker,
+                    RegDate = a.CreateDate,
+                    IconUrl = $"https://imageserver.eveonline.com/Character/{a.CharacterId}_64.jpg",
+                    HasNoToken = !a.HasToken,
+                    HasInvalidToken = invalidToken
+                });
+            }
+
+            return result;
         }
 
         public async Task<bool> WebDeleteUser(WebUserItem order)
@@ -309,6 +325,91 @@ namespace ThunderED.Modules
             }
 
             return list;
+        }
+
+        public async Task<object[]> WebGetSkills(long id, string inspectToken)
+        {
+            var skills =
+                await APIHelper.ESIAPI.GetCharSkills(Reason, id, inspectToken);
+
+            var list = new List<WebSkillItem>();
+            if (skills != null)
+            {
+                foreach (var skill in skills.skills)
+                {
+                    var t = await SQLHelper.GetTypeId(skill.skill_id);
+                    if (t != null)
+                    {
+                        skill.DB_Name = t.name;
+                        //skill.DB_Description = t.description;
+                        skill.DB_Group = t.group_id;
+                        var g = await SQLHelper.GetInvGroup(skill.DB_Group);
+                        if (g != null)
+                            skill.DB_GroupName = g.groupName;
+                    }
+                }
+
+                var skillGroups = skills.skills.GroupBy(a => a.DB_Group,
+                    (key, value) => new {ID = key, Value = value.ToList()});
+                var skillsFinal = new List<JsonClasses.SkillEntry>();
+                foreach (var skillGroup in skillGroups)
+                {
+                    skillsFinal.Add(new JsonClasses.SkillEntry { DB_Name = skillGroup.Value[0].DB_GroupName });
+                    skillsFinal.AddRange(skillGroup.Value.OrderBy(a => a.DB_Name));
+                }
+
+                foreach (var skill in skillsFinal)
+                {
+                    var item = new WebSkillItem
+                    {
+                        Name = skill.DB_Name,
+                        ValueTrained = skill.trained_skill_level,
+                        ValueActive = skill.active_skill_level,
+                        IsCategory = skill.skill_id==0
+                    };
+
+                    item.UpdateVisual();
+                    list.Add(item);
+                }
+            }
+
+            return new object[] {skills?.total_sp ?? 0, list};
+        }
+
+        public async Task<bool> WebMoveToSpies(WebUserItem order)
+        {
+            var charId = order.Id;
+            if (charId == 0) return false;
+            var user = await SQLHelper.GetAuthUserByCharacterId(charId);
+            if (user == null) return false;
+            user.SetStateSpying();
+            await SQLHelper.SaveAuthUser(user);
+            return true;
+        }
+
+        public async Task<UserStatusEnum> WebRestoreAuth(WebUserItem order)
+        {
+            var sUser = await SQLHelper.GetAuthUserByCharacterId(order.Id);
+
+            if (sUser == null) return UserStatusEnum.Initial;
+
+            //restore alt
+            if (sUser.MainCharacterId > 0)
+            {
+                sUser.AuthState = (int)UserStatusEnum.Authed;
+                await SQLHelper.SaveAuthUser(sUser);
+                return UserStatusEnum.Authed;
+            }
+
+            sUser.AuthState = (int)UserStatusEnum.Awaiting;
+            sUser.RegCode = Guid.NewGuid().ToString("N");
+            await SQLHelper.SaveAuthUser(sUser);
+            if (sUser.DiscordId > 0)
+            {
+                await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId);
+                return UserStatusEnum.Authed;
+            }
+            else return UserStatusEnum.Awaiting;
         }
     }
 

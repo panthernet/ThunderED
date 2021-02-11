@@ -218,7 +218,8 @@ namespace ThunderED.Helpers
                         if (!string.IsNullOrEmpty(etag))
                             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("if-none-match", etag);
 
-                        using (var responseMessage = await httpClient.GetAsync(request))
+                        var ct = new CancellationTokenSource(5000);
+                        using (var responseMessage = await httpClient.GetAsync(request, ct.Token))
                         {
                             result.Data.ETag = responseMessage.Headers.FirstOrDefault(a => a.Key == "ETag").Value?.FirstOrDefault().Trim('"');
 
@@ -330,9 +331,11 @@ namespace ThunderED.Helpers
                         if (!string.IsNullOrEmpty(auth))
                             httpClient.DefaultRequestHeaders.Add("Authorization", auth);
                         if(!string.IsNullOrEmpty(eToken))
-                            httpClient.DefaultRequestHeaders.Add("Etoken", eToken);                        
+                            httpClient.DefaultRequestHeaders.Add("Etoken", eToken);
 
-                        using (var responseMessage = await httpClient.GetAsync(request))
+                        var ct = new CancellationTokenSource(5000);
+
+                        using (var responseMessage = await httpClient.GetAsync(request, ct.Token))
                         {
                             raw = await responseMessage.Content.ReadAsStringAsync();
                             if (responseMessage.Content.Headers.ContentEncoding.Any(a=> "br".Equals(a, StringComparison.OrdinalIgnoreCase)))
@@ -414,7 +417,8 @@ namespace ThunderED.Helpers
                         httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
                         httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
 
-                        using (var responceMessage = await httpClient.PostAsync(request, content))
+                        var ct = new CancellationTokenSource(5000);
+                        using (var responceMessage = await httpClient.PostAsync(request, content, ct.Token))
                         {
                             raw = await responceMessage.Content.ReadAsStringAsync();
                             if (!responceMessage.IsSuccessStatusCode)

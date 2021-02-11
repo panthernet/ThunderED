@@ -179,7 +179,7 @@ namespace ThunderED.Modules
                         {
                             var token = await APIHelper.ESIAPI.RefreshToken(item.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
                                 SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From HRM | Char ID: {item.CharacterId} | Char name: {item.Data.CharacterName}");
-                            invalidToken = token == null;
+                            invalidToken = token.Result == null;
                         }
                         var charUrl = !inspectCondi ? "#" : WebServerModule.GetHRMInspectURL(item.CharacterId, authCode);
                         sb.Append($"<div class=\"row-fluid\" style=\"margin-top: 5px;align-items:center;\">");

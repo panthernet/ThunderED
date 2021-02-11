@@ -627,5 +627,9 @@
   "webAuthFeedHeader": "Аутентификация поставщика данных",
   "webTimerDaysShort": "д",
   "webTimerHoursShort": "ч",
-  "webTimerMinutesShort": "м"
+  "webTimerMinutesShort": "м",
+  "webHrmDumpUserQuestion": "Переместить персонажа в группу Сброшенные?",
+  "webWarning": "Внимание"
+
+
 }

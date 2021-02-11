@@ -13,5 +13,9 @@ namespace ThunderED.Classes
         public string AllianceTicker { get; set; }
         public string IconUrl { get; set; }
         public DateTime RegDate { get; set; }
+        public bool HasNoToken { get; set; }
+        public bool HasInvalidToken { get; set; }
+
+        public bool HasGoodToken => !HasNoToken && !HasInvalidToken;
     }
 }

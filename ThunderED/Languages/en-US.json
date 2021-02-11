@@ -634,7 +634,9 @@
   "webAuthFeedHeader": "Feeder Authentication",
   "webTimerDaysShort": "d",
   "webTimerHoursShort": "h",
-  "webTimerMinutesShort": "m"
+  "webTimerMinutesShort": "m",
+  "webHrmDumpUserQuestion": "Move character to Dump?",
+  "webWarning":  "Warning" 
 
 
 }
