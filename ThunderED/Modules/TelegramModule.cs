@@ -18,6 +18,13 @@ namespace ThunderED.Modules
         private readonly List<string> _messagePool = new List<string>();
         public event Action<string, ulong> RelayMessage;
 
+        public override void Cleanup()
+        {
+            _client?.StopReceiving();
+            _client = null;
+            _me = null;
+        }
+
         public override async Task Run(object prm)
         {
             if (IsRunning || _me != null) return;
