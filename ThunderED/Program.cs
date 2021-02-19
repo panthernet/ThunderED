@@ -371,6 +371,10 @@ namespace ThunderED
             await LM.Load();
             //load injected settings
             await SettingsManager.UpdateInjectedSettings();
+
+            //do not enable old web server for the new shell
+            SettingsManager.Settings.Config.ModuleWebServer = false;
+
             //load APIs
             if (SettingsManager.Settings.Config.DiscordGuildId != 0)
             {
