@@ -81,6 +81,16 @@ namespace ThunderED.Modules
                 {
                     _lastSpyMailUpdateDate = DateTime.Now;
                     var spies = await SQLHelper.GetAuthUsers((int) UserStatusEnum.Spying);
+                    foreach (var entity in spies.ToList())
+                    {
+                        if (!await CheckMailToken(entity))
+                        {
+                            await LogHelper.LogWarning(
+                                $"Mail token for {entity.Data.CharacterName} is invalid and will be deleted", Category);
+                            await SQLHelper.DeleteTokens(entity.CharacterId, null, "1");
+                            spies.Remove(entity);
+                        }
+                    }
                     await MailModule.FeedSpyMail(spies, Settings.HRMModule.DefaultSpiesMailFeedChannelId);
                 }
 
@@ -105,6 +115,16 @@ namespace ThunderED.Modules
                 IsRunning = false;
             }
 
+        }
+
+        private async Task<bool> CheckMailToken(AuthUserEntity entity)
+        {
+            var token = await SQLHelper.GetRefreshTokenMail(entity.CharacterId);
+            var result = await APIHelper.ESIAPI.RefreshToken(token, Settings.WebServerModule.CcpAppClientId,
+                Settings.WebServerModule.CcpAppSecret);
+            if (result.Data.IsNotValid && !result.Data.IsNoConnection)
+                return false;
+            return !string.IsNullOrEmpty(result.Result);
         }
 
         private async Task<bool> OnRequestReceived(HttpListenerRequestEventArgs context)
