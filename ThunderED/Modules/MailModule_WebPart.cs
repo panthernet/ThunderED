@@ -83,10 +83,9 @@ namespace ThunderED.Modules
                 await SQLHelper.InsertOrUpdateTokens("", characterId, "", result[1]);
                 await LogHelper.LogInfo($"Mail feed added for character: {characterId}", LogCat.AuthWeb);
 
-                var res = WebQueryResult.ContractsAuthSuccess;
+                var res = WebQueryResult.FeedAuthSuccess;
                 res.Message1 = LM.Get("mailAuthSuccessHeader");
                 res.Message2 = LM.Get("mailAuthSuccessBody");
-                res.AddValue("url", ServerPaths.GetFeedSuccessUrl());
                 return res;
             }
             catch (Exception ex)

@@ -49,6 +49,17 @@ namespace ThunderED.Classes
             return "/feedsuccess";
         }
 
+        public static string GetAuthSuccessUrl()
+        {
+            return "/authsuccess";
+        }
+
+
+        public static string GetBadRequestUrl()
+        {
+            return "/badrq";
+        }
+
         #endregion
 
 

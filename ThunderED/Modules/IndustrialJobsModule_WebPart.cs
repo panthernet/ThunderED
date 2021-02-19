@@ -81,10 +81,9 @@ namespace ThunderED.Modules
                 await SQLHelper.InsertOrUpdateTokens("", characterId, null, null, result[1]);
                 await LogHelper.LogInfo($"Industry feed added for character: {characterId}", LogCat.AuthWeb);
 
-                var res = WebQueryResult.ContractsAuthSuccess;
+                var res = WebQueryResult.FeedAuthSuccess;
                 res.Message1 = LM.Get("industryJobsAuthSuccessHeader");
                 res.Message2 = LM.Get("industryJobsAuthSuccessBody");
-                res.AddValue("url", ServerPaths.GetFeedSuccessUrl());
                 return res;
             }
             catch (Exception ex)

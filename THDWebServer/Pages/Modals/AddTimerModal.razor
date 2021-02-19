@@ -14,6 +14,12 @@
     else
     {
         <RadzenTemplateForm Data="@WtData" Submit="@(async (WebTimerData args) => await Submit(args))">
+            @if (IsErrorVisible)
+            {
+                <div class="row">
+                    <p style="color: white; background-color: red; font-weight: bold; font-size: 1em; text-align: center; width: 100%;">@ErrorText</p>
+                </div>
+            }
             <div class="row">
                 <div class="col-md">
                     <RadzenFieldset Text="@Header">
@@ -73,8 +79,8 @@
             </div>
             <div class="row justify-content-center">
                 <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
-                    <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="@(LM.Get(Entry == null ? "Add" : "webTimersConfirmEdit"))" />
-                    <RadzenButton ButtonStyle="ButtonStyle.Light" style="display: inline-block; margin-left: 10px;" Text="@LM.Get("Cancel")" Click="@OnClose" />
+                    <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="@(LM.Get(Entry == null ? "Add" : "webTimersConfirmEdit"))"/>
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" style="display: inline-block; margin-left: 10px;" Text="@LM.Get("Cancel")" Click="@OnClose"/>
                 </div>
             </div>
         </RadzenTemplateForm>

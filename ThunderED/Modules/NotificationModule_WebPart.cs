@@ -64,10 +64,9 @@ namespace ThunderED.Modules
                     await SQLHelper.InsertOrUpdateTokens(result[1] ?? "", characterId, null, null);
                     await LogHelper.LogInfo($"Notification feed added for character: {characterId}", LogCat.AuthWeb);
 
-                    var res = WebQueryResult.GeneralAuthSuccess;
+                    var res = WebQueryResult.FeedAuthSuccess;
                     res.Message1 = LM.Get("authTokenRcv");
                     res.Message2 = LM.Get("authTokenRcv2", rChar.name);
-                    res.AddUrl(ServerPaths.GetFeedSuccessUrl());
                     return res;
                 }
             }

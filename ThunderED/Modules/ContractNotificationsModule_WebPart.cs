@@ -78,15 +78,14 @@ namespace ThunderED.Modules
                         return r;
                     }
 
-                    var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
+                    // var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
 
                     await SQLHelper.InsertOrUpdateTokens("", characterId, "", result[1]);
                     await LogHelper.LogInfo($"Contracts feed added for character: {characterId}", LogCat.AuthWeb);
 
-                    var res = WebQueryResult.ContractsAuthSuccess;
+                    var res = WebQueryResult.FeedAuthSuccess;
                     res.Message1 = LM.Get("contractAuthSuccessHeader");
                     res.Message2 = LM.Get("contractAuthSuccessBody");
-                    res.AddValue("url", ServerPaths.GetFeedSuccessUrl());
                     return res;
                 }
             }

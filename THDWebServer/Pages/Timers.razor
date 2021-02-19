@@ -25,8 +25,8 @@
     }
 
     <div>
-        <RadzenGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowPaging="true" PageSize="10"
-                    AllowSorting="true" Data="@_timers" TItem="TimerItem" ColumnWidth="200px" @ref="_ordersGrid"
+        <RadzenGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowPaging="true" PageSize="30"
+                    AllowSorting="true" Data="@_timers" TItem="TimerItem" ColumnWidth="200px" @ref="_ordersGrid" AllowColumnResize="true"
                     >
             <Columns>
                 <RadzenGridColumn TItem="TimerItem" Property="DisplayType" Title="@LM.Get("timersType")" Width="100px">

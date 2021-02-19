@@ -1,5 +1,4 @@
 ﻿@using ThunderED.Modules
-@using ThunderED.Json.Internal
 @using ThunderED.Helpers
 
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_TIMERS)]
@@ -14,12 +13,18 @@
         else
         {
             <RadzenTemplateForm Data="@WtData" Submit="@(async (WebTimerData args) => await HandleValidSubmit(args))">
+                @if (IsErrorVisible)
+                {
+                    <div class="row">
+                        <p style="color: white; background-color: red; font-weight: bold; font-size: 1em; text-align: center; width: 100%;">@ErrorText</p>
+                    </div>
+                }
                 <div class="row">
                     <div class="col-md">
                         <RadzenFieldset Text="@Header">
                             <div class="row">
                                 <div class="col-md-4 align-items-center d-flex">
-                                    <RadzenLabel Text="@LM.Get("timersType")" />
+                                    <RadzenLabel Text="@LM.Get("timersType")"/>
                                 </div>
                                 <div class="col-md-8">
                                     <RadzenDropDown @bind-Value="WtData.Type" AllowClear="true" Placeholder="" Data="@_timerTypes" style="width: 100%;" TextProperty="Name" ValueProperty="Id" Name="TypeId">
@@ -28,7 +33,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-4 align-items-center d-flex">
-                                    <RadzenLabel Text="@LM.Get("timersStage")" />
+                                    <RadzenLabel Text="@LM.Get("timersStage")"/>
                                 </div>
                                 <div class="col-md-8">
                                     <RadzenDropDown @bind-Value="WtData.Stage" AllowClear="true" Placeholder="" Data="@_timerStages" style="width: 100%;" TextProperty="Name" ValueProperty="Id" Name="TypeId">
@@ -37,39 +42,39 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-4 align-items-center d-flex">
-                                    <RadzenLabel Text="@LM.Get("timersLocation")" />
+                                    <RadzenLabel Text="@LM.Get("timersLocation")"/>
                                 </div>
                                 <div class="col-md-8">
-                                    <RadzenTextBox style="width: 100%;" @bind-Value="WtData.Location" Name="Location" Placeholder="@LM.Get("timerTooltipLocation")" />
+                                    <RadzenTextBox style="width: 100%;" @bind-Value="WtData.Location" Name="Location" Placeholder="@LM.Get("timerTooltipLocation")"/>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-4 align-items-center d-flex">
-                                    <RadzenLabel Text="@LM.Get("timersOwner")" />
+                                    <RadzenLabel Text="@LM.Get("timersOwner")"/>
                                 </div>
                                 <div class="col-md-8">
-                                    <RadzenTextBox style="width: 100%;" @bind-Value="WtData.Owner" Name="Owner" Placeholder="@LM.Get("timerTooltipOwner")" />
+                                    <RadzenTextBox style="width: 100%;" @bind-Value="WtData.Owner" Name="Owner" Placeholder="@LM.Get("timerTooltipOwner")"/>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-4 align-items-center d-flex">
-                                    <RadzenLabel Text="@LM.Get("timersRfET")" />
+                                    <RadzenLabel Text="@LM.Get("timersRfET")"/>
                                 </div>
                                 <div class="col-md-8">
-                                    <RadzenNumeric TValue="int" Min="0" Max="int.MaxValue" Step="1" @bind-Value="WtData.IntDay" />
-                                    <RadzenLabel Text="@LM.Get("webTimerDaysShort")" />
-                                    <RadzenNumeric TValue="int" Min="0" Max="24" Step="1" @bind-Value="WtData.IntHour" />
-                                    <RadzenLabel Text="@LM.Get("webTimerHoursShort")" />
-                                    <RadzenNumeric TValue="int" Min="0" Max="60" Step="1" @bind-Value="WtData.IntMinute" />
-                                    <RadzenLabel Text="@LM.Get("webTimerMinutesShort")" />
+                                    <RadzenNumeric TValue="int" Min="0" Max="int.MaxValue" Step="1" @bind-Value="WtData.IntDay"/>
+                                    <RadzenLabel Text="@LM.Get("webTimerDaysShort")"/>
+                                    <RadzenNumeric TValue="int" Min="0" Max="24" Step="1" @bind-Value="WtData.IntHour"/>
+                                    <RadzenLabel Text="@LM.Get("webTimerHoursShort")"/>
+                                    <RadzenNumeric TValue="int" Min="0" Max="60" Step="1" @bind-Value="WtData.IntMinute"/>
+                                    <RadzenLabel Text="@LM.Get("webTimerMinutesShort")"/>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-4 align-items-center d-flex">
-                                    <RadzenLabel Text="@LM.Get("timersNotes")" />
+                                    <RadzenLabel Text="@LM.Get("timersNotes")"/>
                                 </div>
                                 <div class="col-md-8">
-                                    <RadzenTextBox style="width: 100%;" @bind-Value="WtData.Notes" Name="Notes" Placeholder="" />
+                                    <RadzenTextBox style="width: 100%;" @bind-Value="WtData.Notes" Name="Notes" Placeholder=""/>
                                 </div>
                             </div>
                         </RadzenFieldset>
@@ -77,8 +82,8 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
-                        <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="@(LM.Get("Add"))" />
-                        <RadzenButton ButtonStyle="ButtonStyle.Light" style="display: inline-block; margin-left: 10px;" Text="@LM.Get("Cancel")" Click="@OnClose" />
+                        <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="@(LM.Get("Add"))"/>
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" style="display: inline-block; margin-left: 10px;" Text="@LM.Get("Cancel")" Click="@OnClose"/>
                     </div>
                 </div>
             </RadzenTemplateForm>
