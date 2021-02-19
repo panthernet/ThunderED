@@ -6,12 +6,12 @@
     <NavMenu />
 </div>
 
-<div class="main" style="background-image: url('/Assets/auth_bg.jpg');">
+<div class="main" style="background-image: url('@WebUiHelper.GetAsset("auth_bg.jpg")');">
     <div class="colorifier_blue top-row px-4">
         <LoginDisplay />
         <button @onclick="ShowAbout" class="btn btn-info" role="button" style="height: 30px; padding-top: .2rem;">@LM.Get("webAbout")</button>
     </div>
-    
+
     <div class="content px-4" style="height: 80%">
         @Body
     </div>

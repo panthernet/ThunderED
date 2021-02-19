@@ -11,7 +11,12 @@
     <div class="centralizer">
         <div class="text-center">
             <p class="lead frontcolor">@((MarkupString)LM.Get("authAltRegBody"))</p>
-            <p><a href="@ServerPaths.GetAuthUrlAltRegButton(Ip)"><img src="/Assets/eve_login.png" /></a></p>
+            <p><a href="@ServerPaths.GetAuthUrlAltRegButton(Ip)">
+                @if (WebUiHelper.GetAsset("eve_login.png") != null)
+                {
+                    <img src="@WebUiHelper.GetAsset("eve_login.png")"/>
+                }
+            </a></p>
             <br>
             <br>
             <p><a class="btn btn-info" href="@ServerPaths.GetGeneralAuthPageUrl()" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>

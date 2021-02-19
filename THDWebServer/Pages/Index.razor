@@ -13,10 +13,10 @@
     <div class="centralizer">
         <div class="text-center">
         
-            @if (ImageExists("logo.png"))
+            @if (WebUiHelper.GetAsset("logo.png") != null)
             {
                 <p>
-                    <RadzenImage Path="/Assets/logo.png"></RadzenImage>
+                    <RadzenImage Path="@WebUiHelper.GetAsset("logo.png")"></RadzenImage>
                 </p>
             }
             <p><a class="btn btn-info btn-block" href="@ServerPaths.GetGeneralAuthPageUrl()" role="button" style="min-width: 150px; max-width: 250px;display: inline-block">@LM.Get("butGeneralAuthPage")</a></p>
@@ -24,10 +24,3 @@
     </div>
 </div>
 
-@functions{
-    private bool ImageExists(string name)
-    {
-        var absolutePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot", "Assets");
-        return File.Exists(Path.Combine(absolutePath, name));
-    }
-}

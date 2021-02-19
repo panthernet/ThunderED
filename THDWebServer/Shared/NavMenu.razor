@@ -1,7 +1,13 @@
 ﻿@using THDWebServer.Authentication
 <div class="top-row pl-4 navbar navbar-dark">
     
-    <a class="navbar-brand" href="" style="vertical-align: center"><RadzenImage Path="/Assets/nav_logo.png" Style="width: 32px; height: 32px;"></RadzenImage> @LM.Get("webServerName")</a>
+    <a class="navbar-brand" href="" style="vertical-align: center">
+        @if (WebUiHelper.GetAsset("nav_logo.png") != null)
+        {
+            <RadzenImage Path="@WebUiHelper.GetAsset("nav_logo.png")" Style="width: 32px; height: 32px;"></RadzenImage>
+        }
+        @LM.Get("webServerName")
+    </a>
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">

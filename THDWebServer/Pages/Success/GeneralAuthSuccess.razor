@@ -9,25 +9,37 @@
     </div>
     <div class="centralizer">
         <div class="text-center">
-            <h1>
-                <img src="/Assets/eve_logo_light.png" width="250" />
-            </h1>
-            <p class="lead frontcolor">@((MarkupString)Message1)</p>
+            @if (WebUiHelper.GetAsset("eve_logo_light.png") != null)
+            {
+                <h1>
+                    <img src="@WebUiHelper.GetAsset("eve_logo_light.png")" width="250" />
+                </h1>
+            }
+            <p class="lead frontcolor">@((MarkupString) Message1)</p>
             @if (!string.IsNullOrEmpty(Message2))
             {
-                <p class="frontcolor">@((MarkupString)Message2)</p>
+                <p class="frontcolor">@((MarkupString) Message2)</p>
             }
             @if (!string.IsNullOrEmpty(Message3))
             {
-                <p class="frontcolor">@((MarkupString)Message3)</p>
+                <p class="frontcolor">@((MarkupString) Message3)</p>
             }
             @if (!string.IsNullOrEmpty(SettingsManager.Settings.WebServerModule.DiscordUrl))
             {
-                <p><a href="@SettingsManager.Settings.WebServerModule.DiscordUrl" target="_blank"><img src="/Assets/discord.png" width="200" /></a></p>
+                <p>
+                    <a href="@SettingsManager.Settings.WebServerModule.DiscordUrl" target="_blank">
+                        @if (WebUiHelper.GetAsset("discord.png") != null)
+                        {
+                            <img src="@WebUiHelper.GetAsset("discord.png")" width="200"/>
+                        }
+                    </a></p>
             }
             else
             {
-                <p><img src="/Assets/success.png" width="150" /></p>
+                @if (WebUiHelper.GetAsset("success.png") != null)
+                {
+                    <p><img src="@WebUiHelper.GetAsset("success.png")" width="150"/></p>
+                }
             }
             <p><a class="btn btn-info" href="@ReturnUrl" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
         </div>

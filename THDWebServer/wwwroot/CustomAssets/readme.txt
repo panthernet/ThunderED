@@ -1,0 +1,1 @@
+﻿You can place here resources under the names from the Assets folder to override them in the web shell.
