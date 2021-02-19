@@ -1,0 +1,54 @@
+﻿@page "/badrq"
+@using Microsoft.AspNetCore.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
+<div class="container" style="height: 100%">
+    <div class="colorifier text-center">
+        <h2>@((MarkupString)LM.Get("webAuthErrorHeader"))</h2>
+    </div>
+
+    <div class="centralizer">
+        <div class="text-center">
+            <h1>
+                <img src="/Assets/eve_logo_light.png" width="250" />
+            </h1>
+            
+            <p class="lead frontcolor">@((MarkupString)Message1)</p>
+            @if (!string.IsNullOrEmpty(Message2))
+            {
+                <p class="frontcolor">@((MarkupString)Message2)</p>
+            }
+            @if (!string.IsNullOrEmpty(Message3))
+            {
+                <p class="frontcolor">@((MarkupString)Message3)</p>
+            }
+            <p><img src="/Assets/fail.png" width="90" /></p>
+            <p><a class="btn btn-info" href="@ReturnUrl" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    public string ReturnUrl { get; set; }
+    public string Message1 { get; set; }
+    public string Message2 { get; set; }
+    public string Message3 { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ReturnUrl = await ProtectedSessionStore.GetAndClear<string>("returnUrl") ?? "/";
+        Message1 = await ProtectedSessionStore.GetAndClear<string>("message1");
+        Message2 = await ProtectedSessionStore.GetAndClear<string>("message2");
+        Message3 = await ProtectedSessionStore.GetAndClear<string>("message3");
+
+        if(string.IsNullOrEmpty(Message1) && string.IsNullOrEmpty(Message2) && string.IsNullOrEmpty(Message3))
+        {
+            //default answer
+            Message1 = LM.Get("404");
+            Message2 = LM.Get("WebRequestUnexpected");
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+}

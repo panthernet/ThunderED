@@ -1,0 +1,165 @@
+﻿@using ThunderED.Modules
+@using ThunderED.Helpers
+@using System.Linq.Dynamic.Core
+@inject IModalService Modal
+
+<style type="text/css">
+    .rz-html-editor-content {
+        background-color: #252526 !important;
+        text-align: initial;
+        color: white !important;
+    }
+
+    .rz-html-editor-toolbar {
+        display: none !important;
+    }
+
+    .modal-footer {
+        padding: .5rem !important;
+    }
+</style>
+
+<div class="modal-content text-center">
+    <!--Body-->
+    <div class="modal-body">
+        <div class="row">
+            <RadzenFieldset Style="width: 600px; height: 500px;" Text="@(LM.Get("hrmSearchMailHeader"))">
+                <div class="row">
+                    <div class="col-md-4 align-items-center d-flex">
+                        <RadzenLabel Text="@LM.Get("hrmSearchMailSearchFor")" />
+                    </div>
+                    <div class="col-md-8 text-left">
+                        <RadzenDropDown Data="@_searchTypeList" TValue="string" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 align-items-center d-flex">
+                        <RadzenLabel Text="@LM.Get("hrmSearchMailTerm")" />
+                    </div>
+                    <div class="col-md-8 text-left">
+                        <RadzenTextBox @bind-Value="@_searchValue" />
+                    </div>
+                </div>
+            </RadzenFieldset>
+        </div>
+        <div class="row">
+            <RadzenLabel Text="@LM.Get("hrmSearchMailResultsHeader")" />
+        </div>
+        <div class="row">
+            <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countMail" AllowSorting="true" Data="@_mailList" TItem="WebMailHeader" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        Style="height: 640px;" RowDoubleClick="async args=> await OnMailRowClick(args)">
+                <Columns>
+                    <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailSubjectHeader")">
+                        <Template Context="order">
+                            <RadzenLabel Text="@order.Subject" />
+                        </Template>
+                    </RadzenGridColumn>
+                    <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailFromHeader")">
+                        <Template Context="order">
+                            <RadzenLabel Text="@order.FromName" />
+                        </Template>
+                    </RadzenGridColumn>
+                    <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailToHeader")">
+                        <Template Context="order">
+                            <RadzenLabel Text="@order.ToName" />
+                        </Template>
+                    </RadzenGridColumn>
+                    <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailDateHeader")">
+                        <Template Context="order">
+                            <RadzenLabel Text="@(order.Date.ToShortDateString())" />
+                        </Template>
+                    </RadzenGridColumn>
+                </Columns>
+            </RadzenGrid>
+        </div>
+    </div>
+
+    <!--Footer-->
+    <div class="modal-footer flex-center">
+        <div class="row">
+            <button class="btn btn-primary" @onclick="OnSearch">@LM.Get("hrmSearchMailSearchButton")</button>
+            <button class="btn btn-outline-info" @onclick="OnClose">@LM.Get("close")</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter]
+    public long UserId { get; set; }
+    [Parameter]
+    public string Token { get; set; }
+
+    private List<WebMailHeader> _mailList;
+    private List<WebMailHeader> _cacheMailList;
+    private bool _isMailLoading = false;
+    private int _countMail;
+
+    private readonly List<string> _searchTypeList = new List<string>
+{
+        LM.Get("hrmSearchMailSearchForChar"),
+        LM.Get("hrmSearchMailSearchForCorp"),
+        LM.Get("hrmSearchMailSearchForAlliance"),
+        LM.Get("hrmSearchMailSearchForSubject")
+    };
+    private string _searchValue { get; set; }
+    private HRMModule _module;
+
+    async Task OnClose() => await BlazoredModal.CancelAsync();
+
+    private async Task OnMailRowClick(WebMailHeader args)
+    {
+        var prms = new ModalParameters();
+        prms.Add("MailId", args.MailId);
+        prms.Add("UserId", UserId);
+        prms.Add("Token", Token);
+        var o = new ModalOptions { DisableBackgroundCancel = false, Animation = ModalAnimation.FadeIn(1), HideHeader = true, ContentScrollable = true };
+        await Modal.Show<MailViewer>("null", prms, o).Result;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _module = TickManager.GetModule<HRMModule>();
+        }
+        catch (Exception ex)
+        {
+            await LogHelper.LogEx(ex, LogCat.Mail);
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnSearch()
+    {
+        if(string.IsNullOrEmpty(_searchValue)) return;
+        _isMailLoading = true;
+        await InvokeAsync(StateHasChanged);
+
+        _cacheMailList ??= await _module.WebGetMailHeaders(UserId, Token);
+        _mailList = _cacheMailList;
+        _countMail = _mailList?.Count ?? 0;
+        //_mailList = ApplyAjaxFilters(_cacheMailList, args, out _countMail);
+        _isMailLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private List<T> ApplyAjaxFilters<T>(IEnumerable<T> list, LoadDataArgs args, out int count)
+    {
+        var query = list.AsQueryable();
+        if (!string.IsNullOrEmpty(args.Filter))
+            query = query.Where(args.Filter);
+        count = query.Count();
+
+        if (!string.IsNullOrEmpty(args.OrderBy))
+            query = query.OrderBy(args.OrderBy);
+        if (args.Skip.HasValue)
+            query = query.Skip(args.Skip.Value);
+        if (args.Top.HasValue)
+            query = query.Take(args.Top.Value);
+        return query.ToList();
+    }
+
+}

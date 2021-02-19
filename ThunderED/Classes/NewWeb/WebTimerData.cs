@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using ThunderED.Helpers;
 using ThunderED.Json.Internal;
 
 namespace ThunderED.Classes

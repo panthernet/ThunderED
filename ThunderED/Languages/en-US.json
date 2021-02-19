@@ -636,7 +636,8 @@
   "webTimerHoursShort": "h",
   "webTimerMinutesShort": "m",
   "webHrmDumpUserQuestion": "Move character to Dump?",
-  "webWarning":  "Warning" 
+  "webWarning": "Warning",
+  "hrmTabCharAssets":  "Assets" 
 
 
 }

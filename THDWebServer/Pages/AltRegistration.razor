@@ -1,0 +1,32 @@
+﻿@page "/altreg"
+@using Microsoft.AspNetCore.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
+
+<div class="container" style="height: 100%">
+    <div class="colorifier">
+        <p style="text-align: center" class="frontcolor">
+            <h2>@LM.Get("authAltRegTemplateHeader")</h2>
+        </p>
+    </div>
+    <div class="centralizer">
+        <div class="text-center">
+            <p class="lead frontcolor">@((MarkupString)LM.Get("authAltRegBody"))</p>
+            <p><a href="@ServerPaths.GetAuthUrlAltRegButton(Ip)"><img src="/Assets/eve_login.png" /></a></p>
+            <br>
+            <br>
+            <p><a class="btn btn-info" href="@ServerPaths.GetGeneralAuthPageUrl()" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    public string Ip { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Ip = await ProtectedSessionStore.GetAsync<string>("ip");
+        await base.OnInitializedAsync();
+    }
+
+}

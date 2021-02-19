@@ -665,5 +665,61 @@ namespace ThunderED.API
 
             return false;
         }
+
+        public async Task<ESIQueryResult<List<AssetData>>> GetCharacterAssets(object id, string token, string etag = null, bool onePage = false)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<AssetData>();
+            while (true)
+            {
+                var result = await APIHelper.ESIRequestWrapper<List<AssetData>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/assets/?datasource=tranquility&page={page}&language={_language}",
+                    authHeader, etag);
+                if (result?.Result == null)
+                    break;
+                etag = result.Data.ETag;
+                list.AddRange(result.Result);
+                if (result.Result.Count < 1000)
+                    break;
+                page++;
+                if (onePage)
+                    break;
+            }
+
+            return new ESIQueryResult<List<AssetData>>
+            {
+                Data = new QueryData { ETag = etag },
+                Result = list
+            };
+        }
+
+        public async Task<ESIQueryResult<List<AssetData>>> GetCorpAssets(object id, string token, string etag = null, bool onePage = false)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<AssetData>();
+            while (true)
+            {
+                var result = await APIHelper.ESIRequestWrapper<List<AssetData>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/assets/?datasource=tranquility&page={page}&language={_language}",
+                    authHeader, etag);
+                if (result?.Result == null)
+                    break;
+                etag = result.Data.ETag;
+                list.AddRange(result.Result);
+                if (result.Result.Count < 1000)
+                    break;
+                page++;
+                if (onePage)
+                    break;
+            }
+
+            return new ESIQueryResult<List<AssetData>>
+            {
+                Data = new QueryData { ETag = etag },
+                Result = list
+            };
+        }
     }
 }

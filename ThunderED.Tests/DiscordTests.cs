@@ -21,13 +21,13 @@ namespace ThunderED.Tests
         [Fact]
         public async void GetGuildTest()
         {
-            _fix.API.GetGuild().Should().NotBeNull();
+            _fix.API.GetGuild(TEST_GUILD).Should().NotBeNull();
         }
 
         [Fact]
         public async void GetChannelTest()
         {
-            _fix.API.GetChannel(TEST_GUILD, TEST_CHANNEL).Should().NotBeNull();
+            _fix.API.GetChannel(TEST_CHANNEL).Should().NotBeNull();
             _fix.API.GetChannel(TEST_CHANNEL).Should().NotBeNull();
         }
 

@@ -1,0 +1,34 @@
+﻿<div class="modal-content text-center">
+
+    <!--Body-->
+    <div class="modal-body">
+
+        <p class="frontcolor">@Message</p>
+        <p class="frontcolor">@Message2</p>
+        <a href="https://github.com/panthernet/ThunderED">@LM.Get("webVisitHomepage")</a>
+
+    </div>
+
+    <!--Footer-->
+    <div class="modal-footer flex-center">
+        <button class="btn btn-outline-info" style="width: 100px;height: 30px; padding-top: .2rem;" @onclick="OnClose">@LM.Get("close")</button>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    public string Message { get; set; }
+    public string Message2 { get; set; }
+
+    async Task OnClose() => await BlazoredModal.CancelAsync();
+
+    protected override void OnInitialized()
+    {
+        Message = $"ThunderED v{ExternalAccess.GetVersion()} coded by Alexander Smirnov (Captain Panther)";
+        Message2 = $"Web shell is boosted with ASP.NET Core + Blazor (THDWebServer)";
+
+        base.OnInitialized();
+    }
+
+}

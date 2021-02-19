@@ -137,5 +137,16 @@ namespace ThunderED.Classes
             return permissions.Any(a => a.Equals("esi-location.read_ship_type.v1", StringComparison.OrdinalIgnoreCase));
         }
 
+        public static bool HasCharAssetsScope(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-assets.read_assets.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool HasCorpAssetsScope(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-assets.read_corporation_assets.v1", StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

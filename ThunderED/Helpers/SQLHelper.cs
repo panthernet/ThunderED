@@ -142,6 +142,29 @@ namespace ThunderED.Helpers
             });
         }
 
+        internal static async Task DeleteTokens(long userId, string notifyToken = null, string mailToken = null, string contractsToken = null, string industryToken = null)
+        {
+            if(userId == 0) return;
+
+            if (string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) &&
+                string.IsNullOrEmpty(contractsToken) && string.IsNullOrEmpty(industryToken))
+                return;
+
+            var mail = string.IsNullOrEmpty(mailToken) ? await Query<string>("refresh_tokens", "mail", "id", userId) : "";
+            var token = string.IsNullOrEmpty(notifyToken) ? await Query<string>("refresh_tokens", "token", "id", userId) : "";
+            var ctoken = string.IsNullOrEmpty(contractsToken) ? await Query<string>("refresh_tokens", "ctoken", "id", userId) : "";
+            var itoken = string.IsNullOrEmpty(industryToken) ? await Query<string>("refresh_tokens", "indtoken", "id", userId) : "";
+
+            await Provider.InsertOrUpdate("refresh_tokens", new Dictionary<string, object>
+            {
+                {"id", userId.ToString()},
+                {"token", token},
+                {"mail", mail},
+                {"ctoken", ctoken},
+                {"indtoken", itoken},
+            });
+        }
+
         #endregion
 
         #region AuthUsers

@@ -1,13 +1,20 @@
-### V1.5.3
+### V2.0.0
+ + New flexible web shell called THDWebServer
  + Added core type in the StructureOnline notification
  + Added abandoned flag to StructureDestroyed notification
  + Added ability to override language strings using the custom_language.json file in Data or root folder
  + Added several new properties to Telegram relay to allow/disallow messages based on string content and to block T->D or D->T relays separately
+ + Added timeout to ESI queries
  + Improved simple auth entity injection (less queries and faster loading)
+ + Improved invalid tokens handling
+ + Default config file will be created on startup
+ + Discord setup is now not necessary to run the web shell and modules though modules that require sensitive posting to Discord will be suspended
  + Fixed command symbol to accept string values (thanks to secondfry)
  + Fixed wallet balance to decimal
  + Fixed ability to disable auth checks
- + Fixed ability to disable ZKB module
+ + Fixed ability to disable ZKB module 
+ + Fixed invalid token check in HRM
+ + Fixed telegram module restart
 
 ### V1.5.2
  + Fixed sov tracking entities recognition

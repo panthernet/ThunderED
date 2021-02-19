@@ -173,7 +173,7 @@ namespace ThunderED.Modules
                         try
                         {
                             var rtoken = await SQLHelper.GetRefreshTokenForContracts(characterID);
-                            if (rtoken == null)
+                            if (string.IsNullOrEmpty(rtoken))
                             {
                                 await SendOneTimeWarning(characterID, $"Contracts feed token for character {characterID} not found! User is not authenticated.");
                                 continue;
@@ -183,8 +183,15 @@ namespace ThunderED.Modules
                             var token = tq.Result;
                             if (string.IsNullOrEmpty(token))
                             {
-                                if (tq.Data.IsNotValid)
-                                    await LogHelper.LogWarning($"Contracts token for character {characterID} is outdated or no more valid!", Category);
+                                if (tq.Data.IsNotValid && !tq.Data.IsNoConnection)
+                                {
+                                    await LogHelper.LogWarning(
+                                        $"Contracts token for character {characterID} is outdated or no more valid!",
+                                        Category);
+
+                                    await LogHelper.LogWarning($"Deleting invalid mail refresh token for {characterID}", Category);
+                                    await SQLHelper.DeleteTokens(characterID, null, null, "1");
+                                }
                                 else
                                     await LogHelper.LogWarning($"Unable to get contracts token for character {characterID}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})", Category);
 

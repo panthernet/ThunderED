@@ -139,7 +139,7 @@ namespace ThunderED.Modules
                     foreach (var characterID in chars)
                     {
                         var rtoken = await SQLHelper.GetRefreshTokenForIndustryJobs(characterID);
-                        if (rtoken == null)
+                        if (string.IsNullOrEmpty(rtoken))
                         {
                             await SendOneTimeWarning(characterID, $"Industry jobs feed token for character {characterID} not found! User is not authenticated.");
                             continue;
@@ -149,8 +149,13 @@ namespace ThunderED.Modules
                         var token = tq.Result;
                         if (string.IsNullOrEmpty(token))
                         {
-                            if (tq.Data.IsNotValid)
-                                await LogHelper.LogWarning($"Industry token for character {characterID} is outdated or no more valid!");
+                            if (tq.Data.IsNotValid && !tq.Data.IsNoConnection)
+                            {
+                                await LogHelper.LogWarning(
+                                    $"Industry token for character {characterID} is outdated or no more valid!");
+                                await LogHelper.LogWarning($"Deleting invalid industry refresh token for {characterID}", Category);
+                                await SQLHelper.DeleteTokens(characterID, null, null, null, "1");
+                            }
                             else
                                 await LogHelper.LogWarning($"Unable to get industry token for character {characterID}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})");
 

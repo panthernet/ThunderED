@@ -1645,6 +1645,7 @@ namespace ThunderED.Classes
 #endif
     }
 
+    //REMINDER: Update DbSettingsManager as well
     public class Database
     {
         [Comment("Database provider. Values: sqlite, mysql. Default value is 'sqlite'")]
@@ -1767,6 +1768,8 @@ namespace ThunderED.Classes
         public string LanguageFilesFolder { get; set; }
         [Comment("Enables legacy restart logic when ThunderED runs under the old shell with Restarter")]
         public bool EnableLegacyRestartLogic { get; set; }
+        [Comment("Enables stopwatch measures for some backend functions. Debug purpose only.")]
+        public bool EnableSwatch { get; set; }
 
 
 #if EDITOR

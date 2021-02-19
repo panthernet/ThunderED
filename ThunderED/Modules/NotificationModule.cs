@@ -105,8 +105,13 @@ namespace ThunderED.Modules
                             if (tq.Data.IsNoConnection) return;
                             if (string.IsNullOrEmpty(token))
                             {
-                                if (tq.Data.IsNotValid)
-                                    await SendOneTimeWarning(charId, $"Notifications token for character {charId} is outdated or no more valid!");
+                                if (tq.Data.IsNotValid && !tq.Data.IsNoConnection)
+                                {
+                                    await SendOneTimeWarning(charId,
+                                        $"Notifications token for character {charId} is outdated or no more valid!");
+                                    await LogHelper.LogWarning($"Deleting invalid notification refresh token for {charId}", Category);
+                                    await SQLHelper.DeleteTokens(charId, "1");
+                                }
                                 else
                                     await LogHelper.LogWarning(
                                         $"Unable to get notifications token for character {charId}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})");

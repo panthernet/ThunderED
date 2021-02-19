@@ -168,6 +168,21 @@ namespace ThunderED.Modules
                         await authUser.UpdateData(characterData);
                         await SQLHelper.SaveAuthUser(authUser);
                     }
+
+                    var invalidToken = false;
+                    if (authUser.HasToken)
+                    {
+                        var token = await APIHelper.ESIAPI.RefreshToken(authUser.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                            SettingsManager.Settings.WebServerModule.CcpAppSecret, $"Token check | Char ID: {authUser.CharacterId} | Char name: {authUser.Data.CharacterName}");
+                        if (token.Data.IsNotValid && !token.Data.IsNoConnection && string.IsNullOrEmpty(token.Result))
+                        {
+                            await LogHelper.LogWarning(
+                                $"Invalid token detected for {authUser.Data.CharacterName}. It will be removed.");
+                            authUser.RefreshToken = null;
+                            await SQLHelper.SaveAuthUser(authUser);
+                        }
+                    }
+
                     var remroles = new List<SocketRole>();
 
                     await AuthInfoLog(characterData, $"[RUPD] PRE CHARID: {authUser.CharacterId} DID: {discordUserId} AUTH: {authUser.AuthState} GRP: {authUser.GroupName} TOKEN: {!string.IsNullOrEmpty(authUser.RefreshToken)}", true);

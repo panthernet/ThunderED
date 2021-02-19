@@ -532,10 +532,10 @@ namespace ThunderED.Modules
 
                 if (authUser.Data.PermissionsList.Any())
                 {
-                    var token = (await APIHelper.ESIAPI.RefreshToken(authUser.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From WebAuth | Char ID: {authUser.CharacterId} | Char name: {authUser.Data.CharacterName}"))?.Result;
+                    var token = string.IsNullOrEmpty(authUser.RefreshToken) ? null : (await APIHelper.ESIAPI.RefreshToken(authUser.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From WebAuth | Char ID: {authUser.CharacterId} | Char name: {authUser.Data.CharacterName}"));
                     //delete char if token is invalid
-                    if (string.IsNullOrEmpty(token))
+                    if (string.IsNullOrEmpty(token?.Result) && token!= null && token.Data.IsFailed && !token.Data.IsNoConnection)
                     {
                         //just reauth... if happens
                         await AuthWarningLog(authUser, $"Character has invalid token and will be deleted from DB.");

@@ -173,6 +173,8 @@ namespace ThunderED.Modules
                             state = lst[0];
                             long.TryParse(lst[1], out mainCharId);
                             rawIp = lst.LastOrDefault();
+                            rawIp = rawIp?.Split(':')
+                                .FirstOrDefault(a => !string.IsNullOrEmpty(a) && char.IsDigit(a[0]));
                         }
 
                         var inputGroupName = state?.Length > 1
@@ -272,7 +274,7 @@ namespace ThunderED.Modules
                             group = pair.Value;
                             groupName = pair.Key;
 
-                            var altUser = await AuthUserEntity.CreateAlt(altCharId, refreshToken, group, groupName,
+                            var altUser = await user.CreateAlt(altCharId, refreshToken, group, groupName,
                                 mainCharId);
                             altUser.Ip = rawIp;
                             await SQLHelper.SaveAuthUser(altUser);
@@ -759,7 +761,7 @@ namespace ThunderED.Modules
                             group = pair.Value;
                             groupName = pair.Key;
 
-                            var altUser = await AuthUserEntity.CreateAlt(altCharId, refreshToken, group, groupName,
+                            var altUser = await user.CreateAlt(altCharId, refreshToken, group, groupName,
                                 mainCharId);
                             altUser.Ip = ip;
                             await SQLHelper.SaveAuthUser(altUser);

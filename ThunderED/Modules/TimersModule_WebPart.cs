@@ -449,7 +449,7 @@ namespace ThunderED.Modules
                 if (!checkResult[0] || !checkResult[1])
                     return LM.Get("webAuthenticationExpired");
 
-                var timer = TimerItem.FromWebTimerData(data, user);
+                var timer = data.FromWebTimerData(data, user);
 
                 var iDate = timer.GetDateTime();
                 if (iDate == null)

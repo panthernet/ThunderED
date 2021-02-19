@@ -150,7 +150,7 @@ namespace ThunderED.Modules
                         var rToken = await SQLHelper.GetRefreshTokenMail(charId);
                         if (string.IsNullOrEmpty(rToken))
                         {
-                            await SendOneTimeWarning(charId, $"Mail feed token for character {charId} not found! User is not authenticated.");
+                            await SendOneTimeWarning(charId, $"Mail feed token for character {charId} not found! User is not authenticated or missing refresh token.");
                             continue;
                         }
 
@@ -160,6 +160,11 @@ namespace ThunderED.Modules
                         if (string.IsNullOrEmpty(token))
                         {
                             await LogHelper.LogWarning($"Unable to get contracts token for character {charId}. Refresh token might be outdated or no more valid {tq.Data.ErrorCode}({tq.Data.Message})", Category);
+                            if (tq.Data.IsNotValid && !tq.Data.IsNoConnection)
+                            {
+                                await LogHelper.LogWarning($"Deleting invalid mail refresh token for {charId}", Category);
+                                await SQLHelper.DeleteTokens(charId, null, "1");
+                            }
                             continue;
                         }
                         

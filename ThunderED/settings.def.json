@@ -57,7 +57,8 @@
     "RunAsServiceCompatibility": false,
     "DisableLogIntoFiles": false,
     "LanguageFilesFolder": "",
-    "EnableLegacyRestartLogic": false 
+    "EnableLegacyRestartLogic": false,
+    "EnableSwatch": false
   },
 
   "webServerModule": {

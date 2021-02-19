@@ -498,9 +498,4 @@ namespace ThunderED.Modules
             Entities = value.Entities;
         }
     }
-
-    public interface IIdentifiable
-    {
-        long Id { get; }
-    }
 }

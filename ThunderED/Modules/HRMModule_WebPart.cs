@@ -9,6 +9,7 @@ using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules
 {
@@ -19,68 +20,29 @@ namespace ThunderED.Modules
             return await CheckAccess(characterId);
         }
 
-        public async Task<List<WebUserItem>> WebGetUsers(UserStatusEnum userType, HRMAccessFilter filter)
+        public async Task<List<WebUserItem>> WebGetUsers(List<ThdAuthUser> users, HRMAccessFilter filter)
         {
-            IOrderedEnumerable<AuthUserEntity> list;
-            switch (userType)
-            {
-                //case UserStatusEnum.Initial:
-                //break;
-                case UserStatusEnum.Awaiting:
-                    list = (await SQLHelper.GetAuthUsers())
-                        .Where(a => a.IsPending && IsValidUserForInteraction(filter, a))
-                        .OrderBy(a => a.Data.CharacterName);
-                    break;
-                case UserStatusEnum.Authed:
-                    list = (await SQLHelper.GetAuthUsers((int)userType))
-                        .Where(a => !a.IsAltChar && IsValidUserForInteraction(filter, a))
-                        .OrderBy(a => a.Data.CharacterName);
-                    break;
-                case UserStatusEnum.Dumped:
-                    list = (await SQLHelper.GetAuthUsers((int)userType))
-                        .Where(a => IsValidUserForInteraction(filter, a)).OrderBy(a => a.Data.CharacterName);
-                    break;
-                case UserStatusEnum.Spying:
-                    list = (await SQLHelper.GetAuthUsers((int)userType))
-                        .Where(a => IsValidUserForInteraction(filter, a)).OrderBy(a => a.Data.CharacterName);
-                    break;
-                case UserStatusEnum.Alts:
-                    list = (await SQLHelper.GetAuthUsers((int)userType))
-                        .Where(a => a.IsAltChar && IsValidUserForInteraction(filter, a))
-                        .OrderBy(a => a.Data.CharacterName);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(userType), userType, null);
-            }
-
             var result = new List<WebUserItem>();
-
-            foreach(var a in list)
+            foreach (var a in users)
             {
-
-                bool invalidToken = false;
-                if (a.HasToken && SettingsManager.Settings.HRMModule.ValidateTokensWhileLoading)
-                {
-                    var token = await APIHelper.ESIAPI.RefreshToken(a.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From HRM | Char ID: {a.CharacterId} | Char name: {a.Data.CharacterName}");
-                    invalidToken = token.Result == null;
-                }
+                //await a.UpdateData();
 
                 result.Add(new WebUserItem
                 {
                     Id = a.CharacterId,
-                    CharacterName = a.Data.CharacterName,
-                    CorporationName = a.Data.CorporationName,
-                    AllianceName = a.Data.AllianceName,
-                    CorporationTicker = a.Data.CorporationTicker,
-                    AllianceTicker = a.Data.AllianceTicker,
+                    CharacterName = a.DataView.CharacterName,
+                    CorporationName = a.DataView.CorporationName,
+                    AllianceName = a.DataView.AllianceName,
+                    CorporationTicker = a.DataView.CorporationTicker,
+                    AllianceTicker = a.DataView.AllianceTicker,
                     RegDate = a.CreateDate,
                     IconUrl = $"https://imageserver.eveonline.com/Character/{a.CharacterId}_64.jpg",
                     HasNoToken = !a.HasToken,
-                    HasInvalidToken = invalidToken
+                    HasInvalidToken = false
                 });
             }
 
+            await Task.CompletedTask;
             return result;
         }
 
@@ -440,6 +402,104 @@ namespace ThunderED.Modules
             return UserStatusEnum.Awaiting;
         }
 
+       /* public async Task<List<WebLysItem>> WebGetLysList(long characterId, string inspectToken)
+        {
+            var result = new List<WebLysItem>();
+            var list = await APIHelper.ESIAPI.GetCharYearlyStats(Reason, characterId, inspectToken);
+            var item = list.FirstOrDefault();
+            if (item == null) return null;
+
+            var totalMsg = item.social == null ? 0 : (item.social.chat_messages_alliance + item.social.chat_messages_corporation + item.social.chat_messages_fleet +
+                                                      item.social.chat_messages_solarsystem + item.social.chat_messages_warfaction);
+            var totalAu = item.travel == null ? 0 : (item.travel.distance_warped_high_sec + item.travel.distance_warped_low_sec + item.travel.distance_warped_null_sec +
+                                                     item.travel.distance_warped_wormhole);
+
+            var percHigh = item.travel == null ? 0 : Math.Round(100 / (totalAu / (double)item.travel.distance_warped_high_sec));
+            var percLow = item.travel == null ? 0 : Math.Round(100 / (totalAu / (double)item.travel.distance_warped_low_sec));
+            var percNull = item.travel == null ? 0 : Math.Round(100 / (totalAu / (double)item.travel.distance_warped_null_sec));
+            var percWh = item.travel == null ? 0 : Math.Round(100 / (totalAu / (double)item.travel.distance_warped_wormhole));
+
+
+            result.Add(new WebLysItem(LM.Get("hrmLysCategory"), $"<b>{LM.Get("hrmLysCategoryChar")}</b>", true));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharActivity"), (item.character?.days_of_activity ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharSessions"), (item.character?.sessions_started ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharIskIn"), (item.isk?.@in ?? 0).ToString("N")));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharIskOut"), (item.isk?.@out ?? 0).ToString("N")));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharAccContr"), (item.market?.accept_contracts_item_exchange ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharBuyOrders"), (item.market?.buy_orders_placed ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharCouriers"), (item.market?.create_contracts_courier ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharCrContr"), (item.market?.create_contracts_item_exchange ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharSellOrders"), (item.market?.sell_orders_placed ?? 0).ToString()));
+            result.Add(new WebLysItem());
+            result.Add(new WebLysItem(LM.Get("hrmLysCategory"), $"<b>{LM.Get("hrmLysCategoryCombat")}</b>", true));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatCriminal"), (item.combat?.criminal_flag_set ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatDeaths"), $"{item.combat?.deaths_high_sec ?? 0}/{item.combat?.deaths_low_sec ?? 0}"));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatDuels"), (item.combat?.duel_requested ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatKillAss"), (item.combat?.kills_assists ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatKills"), $"{item.combat?.kills_high_sec ?? 0}/{item.combat?.kills_low_sec ?? 0}/{item.combat?.kills_null_sec ?? 0}"));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatPvpFlags"), (item.combat?.pvp_flag_set ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatDictor"), (item.module?.activations_interdiction_sphere_launcher ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatMissions"), (item.pve?.missions_succeeded ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatAgents"), (item.pve?.dungeons_completed_distribution ?? 0).ToString()));
+            result.Add(new WebLysItem());
+            result.Add(new WebLysItem(LM.Get("hrmLysCategory"), $"<b>{LM.Get("hrmLysCategorySocial")}</b>", true));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialAddedAs"), $"{item.social?.added_as_contact_high ?? 0}/{item.social?.added_as_contact_good ?? 0}/{item.social?.added_as_contact_neutral ?? 0}/{item.social?.added_as_contact_bad ?? 0}/{item.social?.added_as_contact_horrible ?? 0}"));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialTotalMsg"), totalMsg.ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialDirectTrades"), (item.social?.direct_trades ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialFleetJoins"), (item.social?.fleet_joins ?? 0).ToString()));
+            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialTotalMsg"), $"{percHigh}%/{percLow}%/{percNull}%/{percWh}%"));
+
+            await Task.CompletedTask;
+            return result;
+        }*/
+
+        public async Task<List<WebAssetData>> WebGetCharAssetsList(long characterId, string inspectToken)
+        {
+            try
+            {
+                var assets = await APIHelper.ESIAPI.GetCharacterAssets(characterId, inspectToken);
+                if (assets.Result == null) return null;
+                var result = new List<WebAssetData>();
+
+                foreach (var asset in assets.Result)
+                {
+                    var item = new WebAssetData
+                    {
+                        IsBlueprintCopy = asset.is_blueprint_copy,
+                        ItemTypeId = asset.type_id ?? 0,
+                        LocationId = asset.location_id,
+                        Quantity = asset.quantity,
+                        ItemTypeName = (await APIHelper.ESIAPI.GetTypeId(Reason, asset.type_id ?? 0))?.name ??
+                                       "Unknown"
+                    };
+                    switch (asset.location_type)
+                    {
+                        case AssetLocationType.station:
+                            item.LocationName =
+                                (await APIHelper.ESIAPI.GetStationData(Reason, asset.location_id, inspectToken))?.name;
+                            break;
+                        case AssetLocationType.solar_system:
+                            item.LocationName = (await APIHelper.ESIAPI.GetSystemData(Reason, asset.location_id))?.name;
+                            break;
+                        case AssetLocationType.item:
+                            item.LocationName = (await APIHelper.ESIAPI.GetTypeId(Reason, asset.location_id))?.name;
+                            break;
+                        case AssetLocationType.other:
+                            item.LocationName = "Unknown";
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
+        }
     }
 
     [Serializable]
@@ -491,6 +551,8 @@ namespace ThunderED.Modules
         public string AskingItems;
         public string From;
         public string To;
+
+        public string AllItems => $"{IncludedItems},{AskingItems}";
     }
 
     [Serializable]

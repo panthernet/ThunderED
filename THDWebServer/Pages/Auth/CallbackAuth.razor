@@ -1,0 +1,43 @@
+﻿@page "/auth"
+@using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.Logging
+@using ThunderED.Classes.Enums
+@inject ILogger<Callback> Logger
+@inject ProtectedSessionStorage Store
+@inject NavigationManager NavigationManager
+@inject IHttpContextAccessor HttpContextAccessor
+@inject AuthenticationStateProvider Auth
+
+<div class="colorifier container text-center">
+    @if (IsLoading)
+    {
+        <h4>@LM.Get("msgProcessingQuery")</h4>
+    }
+</div>
+
+@code
+{
+    public bool IsLoading { get; set; } = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ip = HttpContextAccessor.HttpContext.Connection?.RemoteIpAddress.ToString();
+        //save ip
+        await Store.SafeSet("ip", ip);
+
+        await base.OnInitializedAsync();
+        await ProcessRequest(NavigationManager.Uri, ip);
+    }
+
+    private async Task ProcessRequest(string query, string ip)
+    {
+        if (!string.IsNullOrEmpty(query) && query.Contains('?'))
+        {
+            var request = query.Split('?')[1];
+            await CallbackHelper.ProcessCallbackReply(NavigationManager, Store, (CustomAuthenticationStateProvider)Auth, request, ip, CallbackTypeEnum.Auth);
+
+        }
+        else NavigationManager.NavigateTo("/badrq");
+    }
+}

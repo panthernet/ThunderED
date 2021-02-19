@@ -1,0 +1,107 @@
+﻿@page "/feedauthpage"
+@using ThunderED.Modules
+@using ThunderED.Modules.Sub
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_FEED_AUTH)]
+@inject ProtectedSessionStorage Store
+
+<div class="container" style="height: 100%">
+    <div class="colorifier text-center">
+        <h2>@LM.Get("authWebSystemHeader")</h2>
+    </div>
+
+    <div class="centralizer">
+        <div class="text-center">
+            <!-- MANAGEMENT-->
+            <!-- HEADER -->
+            @if (DisplayManagerHeader)
+            {
+
+                <p class="colorifier" style="opacity: .5">@((MarkupString) LM.Get("authPageSystemAuthHeader"))</p>
+            }
+            else
+            {
+                <p class="colorifier">
+                    <h2 style='text-align: center'>@LM.Get("authWebNoFeedsHeader")</h2>
+                </p>
+            }
+
+            @if (UserId > 0 && ContractNotificationsModule.HasAuthAccess(UserId))
+            {
+                <a href="@GetContractsAuthURL()" class="btn btn-info btn-block" role="button">@GetContractsAuthText()</a>
+            }
+            <!-- NOTIFICATIONS BUTTON -->
+            @if (UserId > 0 && NotificationModule.HasAuthAccess(UserId))
+            {
+                <a href="@ServerPaths.GetAuthNotifyURL()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.NotificationFeedModule.AuthButtonDiscordText</a>
+            }
+            <!-- MAIL BUTTON -->
+            @if (MailModule.HasAuthAccess(UserId))
+            {
+                <a href="@ServerPaths.GetMailAuthURL()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.MailModule.AuthButtonDiscordText</a>
+            }
+
+            <!-- INDUSTRIAL BUTTON -->
+            @if (IndustrialJobsModule.HasAuthAccess(UserId))
+            {
+                <a href="@GetIndustryAuthURL()" class="btn btn-info btn-block" role="button">@GetIndustryAuthText()</a>
+            }
+            <br>
+            <br>
+            <p class="text-center"><a class="btn btn-info" href="/" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+
+        </div>
+    </div>
+</div>
+
+@code
+{
+    public IEnumerable<KeyValuePair<string, WebAuthGroup>> GroupsForCycle { get; set; }
+
+    public bool DisplayManagerHeader => SettingsManager.Settings.Config.ModuleAuthWeb ||
+                                        SettingsManager.Settings.Config.ModuleNotificationFeed ||
+                                        SettingsManager.Settings.Config.ModuleMail ||
+                                        SettingsManager.Settings.Config.ModuleContractNotifications ||
+                                        SettingsManager.Settings.Config.ModuleIndustrialJobs;
+
+    protected long UserId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var usr = await Store.GetAsync<WebAuthUserData>("user");
+        UserId = usr?.Id ?? 0;
+        await base.OnInitializedAsync();
+    }
+
+    private string GetContractsAuthURL()
+    {
+        string groupName = null;
+        var group = TickManager.GetModule<ContractNotificationsModule>()?.WebGetAuthGroup(UserId, out groupName);
+        if (group == null) return null;
+
+        return WebServerModule.GetContractsAuthURL(group.FeedPersonalContracts, group.FeedCorporateContracts, groupName);
+    }
+
+    private string GetContractsAuthText()
+    {
+        string groupName = null;
+        var group = TickManager.GetModule<ContractNotificationsModule>()?.WebGetAuthGroup(UserId, out groupName);
+        return @group?.ButtonText ?? @SettingsManager.Settings.ContractNotificationsModule.AuthButtonDiscordText;
+    }
+
+    private string GetIndustryAuthURL()
+    {
+        string groupName = null;
+        var group = TickManager.GetModule<IndustrialJobsModule>()?.WebGetAuthGroup(UserId, out groupName);
+        if (group == null) return null;
+        
+        return WebServerModule.GetIndustryJobsAuthURL(group.Filters.Any(a => a.Value.FeedPersonalJobs),
+            group.Filters.Any(a => a.Value.FeedCorporateJobs), groupName);
+    }
+
+    private string GetIndustryAuthText()
+    {
+        string groupName = null;
+        var group = TickManager.GetModule<IndustrialJobsModule>()?.WebGetAuthGroup(UserId, out groupName);
+        return @group?.ButtonText ?? @SettingsManager.Settings.IndustrialJobsModule.AuthButtonDiscordText;
+    }
+}

@@ -1,0 +1,70 @@
+﻿@using THDWebServer.Authentication
+<div class="top-row pl-4 navbar navbar-dark">
+    
+    <a class="navbar-brand" href="" style="vertical-align: center"><RadzenImage Path="/Assets/nav_logo.png" Style="width: 32px; height: 32px;"></RadzenImage> @LM.Get("webServerName")</a>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> @LM.Get("nmHome")
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="@ServerPaths.GetGeneralAuthPageUrl()">
+                <span class="oi oi-account-login" aria-hidden="true"></span> @LM.Get("nmAuthPage")
+            </NavLink>
+        </li>
+
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_FEED_AUTH">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="@ServerPaths.GetFeedAuthPageUrl()">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> @LM.Get("nmAuthFeedPage")
+                </NavLink>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_HRM">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="@ServerPaths.GetHrmPageUrl()">
+                    <span class="oi oi-person" aria-hidden="true"></span> @LM.Get("nmHrmPage")
+                </NavLink>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_TIMERS">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="@ServerPaths.GetTimersPageUrl()">
+                    <span class="oi oi-clock" aria-hidden="true"></span> @LM.Get("nmTimersPage")
+                </NavLink>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_WEB_SETTINGS">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="@ServerPaths.GetWebSettingsPageUrl()">
+                    <span class="oi oi-cog" aria-hidden="true"></span> @LM.Get("nmWebSettings")
+                </NavLink>
+            </li>
+        </AuthorizeView>
+    </ul>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private bool _noReg = false;
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    protected override async  Task OnInitializedAsync()
+    {
+#if NOREG
+        _noReg = true;
+#endif
+
+        await base.OnInitializedAsync();
+    }
+
+}

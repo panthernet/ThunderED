@@ -1,0 +1,138 @@
+﻿@using ThunderED.Modules
+@using ThunderED.Json.Internal
+@using ThunderED.Helpers
+
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_TIMERS)]
+@inject ProtectedSessionStorage Store
+
+<div class="modal-content" style="width: 500px;">
+    <div class="modal-body">
+        @if (WtData == null)
+        {
+            <p><em>@LM.Get("webLoading")</em></p>
+        }
+        else
+        {
+            <RadzenTemplateForm Data="@WtData" Submit="@(async (WebTimerData args) => await HandleValidSubmit(args))">
+                <div class="row">
+                    <div class="col-md">
+                        <RadzenFieldset Text="@Header">
+                            <div class="row">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="@LM.Get("timersType")" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenDropDown @bind-Value="WtData.Type" AllowClear="true" Placeholder="" Data="@_timerTypes" style="width: 100%;" TextProperty="Name" ValueProperty="Id" Name="TypeId">
+                                    </RadzenDropDown>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="@LM.Get("timersStage")" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenDropDown @bind-Value="WtData.Stage" AllowClear="true" Placeholder="" Data="@_timerStages" style="width: 100%;" TextProperty="Name" ValueProperty="Id" Name="TypeId">
+                                    </RadzenDropDown>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="@LM.Get("timersLocation")" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenTextBox style="width: 100%;" @bind-Value="WtData.Location" Name="Location" Placeholder="@LM.Get("timerTooltipLocation")" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="@LM.Get("timersOwner")" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenTextBox style="width: 100%;" @bind-Value="WtData.Owner" Name="Owner" Placeholder="@LM.Get("timerTooltipOwner")" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="@LM.Get("timersRfET")" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenNumeric TValue="int" Min="0" Max="int.MaxValue" Step="1" @bind-Value="WtData.IntDay" />
+                                    <RadzenLabel Text="@LM.Get("webTimerDaysShort")" />
+                                    <RadzenNumeric TValue="int" Min="0" Max="24" Step="1" @bind-Value="WtData.IntHour" />
+                                    <RadzenLabel Text="@LM.Get("webTimerHoursShort")" />
+                                    <RadzenNumeric TValue="int" Min="0" Max="60" Step="1" @bind-Value="WtData.IntMinute" />
+                                    <RadzenLabel Text="@LM.Get("webTimerMinutesShort")" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="@LM.Get("timersNotes")" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenTextBox style="width: 100%;" @bind-Value="WtData.Notes" Name="Notes" Placeholder="" />
+                                </div>
+                            </div>
+                        </RadzenFieldset>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+                        <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="@(LM.Get("Add"))" />
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" style="display: inline-block; margin-left: 10px;" Text="@LM.Get("Cancel")" Click="@OnClose" />
+                    </div>
+                </div>
+            </RadzenTemplateForm>
+        }
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public string Header { get; set; }
+
+    private WebTimerDataRf WtData { get; set; } = new WebTimerDataRf();
+    private string ErrorText { get; set; }
+    private bool IsErrorVisible => !string.IsNullOrEmpty(ErrorText);
+
+    private List<WebTimerType> _timerTypes = new List<WebTimerType>
+    {
+        new WebTimerType { Id = 1, Name = LM.Get("timerOffensive")},
+        new WebTimerType { Id = 2, Name = LM.Get("timerDefensive")}
+    };
+
+    private List<WebTimerStage> _timerStages = new List<WebTimerStage>
+    {
+        new WebTimerStage { Id = 1, Name = LM.Get("timerHull")},
+        new WebTimerStage { Id = 2, Name = LM.Get("timerArmor")},
+        new WebTimerStage { Id = 3, Name = LM.Get("timerShield")},
+        new WebTimerStage { Id = 4, Name = LM.Get("timerOther")}
+    };
+
+    async Task OnClose() => await BlazoredModal.CancelAsync();
+
+    private async Task HandleValidSubmit(WebTimerData t)
+    {
+        try
+        {
+            ErrorText = null;
+
+            var user = await Store.GetAsync<WebAuthUserData>("user");
+            ErrorText = await TimersModule.SaveTimerRf(WtData, user);
+            if (!IsErrorVisible)
+            {
+                WtData.PushDate();
+                await BlazoredModal.CloseAsync(ModalResult.Ok(t.FromWebTimerData(WtData, user)));
+            }
+            else
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            await LogHelper.LogEx(ex, LogCat.Timers);
+        }
+    }
+
+
+}
