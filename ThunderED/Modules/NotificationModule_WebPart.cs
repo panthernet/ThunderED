@@ -44,7 +44,7 @@ namespace ThunderED.Modules
 
                     if (string.IsNullOrEmpty(characterId))
                     {
-                        await LogHelper.LogWarning("Bad or outdated notify feed request!");
+                        await LogHelper.LogWarning("Bad or outdated notify feed request!", Category);
                         var r = WebQueryResult.BadRequestToSystemAuth;
                         r.Message1 = LM.Get("authTokenBodyFail");
                         r.Message2 = LM.Get("authTokenBadRequest");
@@ -53,7 +53,7 @@ namespace ThunderED.Modules
 
                     if (!TickManager.GetModule<NotificationModule>().IsValidCharacter(numericCharId))
                     {
-                        await LogHelper.LogWarning($"Unauthorized notify feed request from {characterId}");
+                        await LogHelper.LogWarning($"Unauthorized notify feed request from {characterId}", Category);
                         var r = WebQueryResult.BadRequestToSystemAuth;
                         r.Message1 = LM.Get("authTokenBodyFail");
                         return r;
@@ -62,7 +62,7 @@ namespace ThunderED.Modules
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
 
                     await SQLHelper.InsertOrUpdateTokens(result[1] ?? "", characterId, null, null);
-                    await LogHelper.LogInfo($"Notification feed added for character: {characterId}", LogCat.AuthWeb);
+                    await LogHelper.LogInfo($"Notification feed added for character: {characterId}", Category);
 
                     var res = WebQueryResult.FeedAuthSuccess;
                     res.Message1 = LM.Get("authTokenRcv");

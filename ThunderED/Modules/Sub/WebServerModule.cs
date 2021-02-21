@@ -611,6 +611,20 @@ namespace ThunderED.Modules.Sub
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=ijobsauth{HttpUtility.UrlEncode(groupName)}";
         }
 
+
+        public static string GetMiningScheduleAuthURL()
+        {
+            var clientID = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var callbackurl = GetCallBackUrl();
+            var list = new List<string>
+            {
+                "esi-industry.read_corporation_mining.v1",
+                "esi-corporations.read_structures.v1"
+            };
+            var pString = string.Join('+', list);
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=ms";
+        }
+
         public static string GetHRMInspectURL(long id, string authCode)
         {
             return $"{GetWebSiteUrl()}/hrm?data=inspect{id}&id={authCode}&state=matahari";
@@ -712,6 +726,7 @@ namespace ThunderED.Modules.Sub
         }
 
 
+
         #region new web
         public static Dictionary<string, Func<string, CallbackTypeEnum, string, WebAuthUserData, Task<WebQueryResult>>> WebModuleConnectors { get; } = new Dictionary<string, Func<string, CallbackTypeEnum, string, WebAuthUserData, Task<WebQueryResult>>>();
 
@@ -741,5 +756,7 @@ namespace ThunderED.Modules.Sub
         
 
         #endregion
+
+
     }
 }

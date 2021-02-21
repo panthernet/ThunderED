@@ -43,6 +43,7 @@
         Caps,
         WebSettings,
         DiscordRoles,
-        IndustryJobs
+        IndustryJobs,
+        MiningSchedule
     }
 }

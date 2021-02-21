@@ -51,7 +51,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Pages\MiningSchedule.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Watch Remove="Pages\HRM.razor" />
+    <Watch Remove="Pages\MiningSchedule.razor" />
     <Watch Remove="Pages\Modals\AddRFTimerModal.razor" />
     <Watch Remove="Pages\Modals\AddTimerModal.razor" />
     <Watch Remove="Pages\Modals\Confirm.razor" />
@@ -65,6 +70,10 @@
 
   <ItemGroup>
     <Compile Include="..\Version.cs" Link="Properties\Version.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Pages\MiningSchedule.razor" />
   </ItemGroup>
 
   <ItemGroup>

@@ -25,7 +25,6 @@ namespace ThunderED.Modules
 
         internal static async Task UpdateAuthUserRolesFromDiscord(List<string> exemptRoles, List<string> authCheckIgnoreRoles, bool useParallel)
         {
-
             var discordGuild = APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
             await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache before update");
             await discordGuild.DownloadUsersAsync();
@@ -37,6 +36,10 @@ namespace ThunderED.Modules
                 authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
             }
             var idList = APIHelper.DiscordAPI.GetUserIdsFromGuild(SettingsManager.Settings.Config.DiscordGuildId);
+
+            //get only discord users which are not present in DB
+            var idFromDb = await DbHelper.GetUserDiscordIdsForAuthCheck(int.MaxValue);
+            idList = idList.Except(idFromDb).ToList();
 
             if (useParallel)
             {
@@ -68,9 +71,8 @@ namespace ThunderED.Modules
                 authCheckIgnoreRoles = authCheckIgnoreRoles.ToList();
                 authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
             }
-            var minutes = SettingsManager.Settings.WebAuthModule.AuthCheckIntervalMinutes < 10 ? 10 : SettingsManager.Settings.WebAuthModule.AuthCheckIntervalMinutes;
-            var users = SettingsManager.Settings.WebAuthModule.AuthTakeNumberOfUsersPerPass < 10 ? 10 : SettingsManager.Settings.WebAuthModule.AuthTakeNumberOfUsersPerPass;
-            var ids = manual ? await SQLHelper.GetAuthUserIdsToCheck() : await SQLHelper.GetAuthUserIdsToCheck(minutes, users);
+            
+            var ids = await SQLHelper.GetAuthUserIdsToCheck(manual ? int.MaxValue : 100);
 
             await AuthInfoLog($"Fetched {ids?.Count} users to check within this pass", true);
             if (ids == null || !ids.Any()) return;
@@ -86,24 +88,11 @@ namespace ThunderED.Modules
             await discordGuild.DownloadUsersAsync();
             await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache after update");
 
-           /* if (!discordGuild.IsConnected)
-            {
-                await LogHelper.LogInfo($"Restarting Discord connection...");
-                await APIHelper.DiscordAPI.Start();
-                return;
-            }*/
-
-
-           /* foreach (var id in ids)
-            {
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false, discordGuild);
-                await SQLHelper.SetAuthUserLastCheck(id, DateTime.Now);
-            }*/
              await ids.ParallelForEachAsync(async id =>
             {
                 await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false, discordGuild);
                 await SQLHelper.SetAuthUserLastCheck(id, DateTime.Now);
-            },  SettingsManager.MaxConcurrentThreads);
+            }, SettingsManager.MaxConcurrentThreads);
         }
 
         public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles,
@@ -114,14 +103,6 @@ namespace ThunderED.Modules
                 discordGuild ??= APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
                 var u = discordGuild.GetUser(discordUserId);
                 var currentUser = APIHelper.DiscordAPI.GetCurrentUser();
-
-                if (u == null)
-                {
-                    //await LogHelper.LogWarning(
-                     //   $"G1: {SettingsManager.Settings.Config.DiscordGuildId} G2: {discordGuild.Id} HasUser: {discordGuild.Users.FirstOrDefault(a => a.Id == discordUserId) != null}");
-                   // await AuthInfoLog(discordUserId,
-                    //    $"Discord user is null: {discordUserId} {discordGuild?.Id} {discordGuild?.IsConnected} {discordGuild?.HasAllMembers}");
-                }
 
                 if (u != null && (u.Id == currentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name))))
                 {

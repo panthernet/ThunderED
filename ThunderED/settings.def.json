@@ -39,6 +39,7 @@
     "ModuleSovTracker": false,
     "ModuleWebConfigEditor": false,
     "ModuleIndustrialJobs": false,
+    "ModuleMiningSchedule": false,
 
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
@@ -604,7 +605,7 @@
     "groups": {
       "groupName1": {
         "IsEnabled": true,
-        "CharacterEntities": [ ],
+        "CharacterEntities": [],
         "defaultDiscordChannelID": 0,
         "fetchLastNotifDays": 0,
         "filters": {
@@ -683,9 +684,9 @@
             ],
             "channelID": 0,
             "defaultMention": "@everyone",
-			"SpecialSettings": {
-				"DoNotReportNpcBashForCitadels": false
-			},
+            "SpecialSettings": {
+              "DoNotReportNpcBashForCitadels": false
+            },
             "charMentions": [],
             "roleMentions": []
           }
@@ -859,6 +860,15 @@
         "ButtonText": "Industry Auth"
       }
     }
-  }
+  },
+
+  "ModuleMiningSchedule": {
+    "AuthButtonDiscordText": "Mining Schedule Auth",
+    "AccessEntities": {
+    },
+    "FeedEntities": {
+
+    }
+  } 
 
 }

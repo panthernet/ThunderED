@@ -158,10 +158,10 @@ namespace ThunderED.Helpers
             await Provider.InsertOrUpdate("refresh_tokens", new Dictionary<string, object>
             {
                 {"id", userId.ToString()},
-                {"token", token},
-                {"mail", mail},
-                {"ctoken", ctoken},
-                {"indtoken", itoken},
+                {"token", token ?? ""},
+                {"mail", mail ?? ""},
+                {"ctoken", ctoken ?? ""},
+                {"indtoken", itoken ?? ""},
             });
         }
 
@@ -257,17 +257,21 @@ namespace ThunderED.Helpers
             return res?.Select(ParseAuthUser).Where(a=> !string.IsNullOrEmpty(a.Data.Permissions)).ToList();
         }
 
-        public static async Task<List<ulong>> GetAuthUserIdsToCheck(int minutes, int limit)
+        /*public static async Task<List<ulong>> GetAuthUserIdsToCheck(int minutes, int limit)
         {
             if(Provider == null) return new List<ulong>();
             return (await Provider.SelectDataWithDateCondi("auth_users", new [] {"discordID"}, "last_check", minutes, limit)).Select(a=> Convert.ToUInt64(a[0])).ToList();
-        }
+        }*/
 
 
-        public static async Task<List<ulong>> GetAuthUserIdsToCheck()
+        public static async Task<List<ulong>> GetAuthUserIdsToCheck(int count = 100)
         {
             if (Provider == null) return new List<ulong>();
-            return (await Provider.SelectData("auth_users", new[] { "discordID" })).Select(a => Convert.ToUInt64(a[0])).ToList();
+
+            var list = await DbHelper.GetUserDiscordIdsForAuthCheck(count);
+
+            return list; 
+            //(await Provider.SelectData("auth_users", new[] { "discordID" })).Select(a => Convert.ToUInt64(a[0])).ToList();
         }
 
         public static async Task SetAuthUserLastCheck(ulong id, DateTime date)

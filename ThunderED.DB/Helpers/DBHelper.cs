@@ -63,5 +63,26 @@ namespace ThunderED
 
             return new object[] {list, db.Users.Count()};
         }
+
+        public static async Task<List<ulong>> GetUserDiscordIdsForAuthCheck(int count = 100)
+        {
+            await using var db = new ThunderedDbContext();
+            var compareDate = DateTime.Now.AddHours(-1);
+            return await db.Users.Where(a => !a.LastCheck.HasValue || a.LastCheck.Value <= compareDate).OrderBy(a => a.LastCheck)
+                .Take(count).Select(a => a.DiscordId).ToListAsync();
+        }
+
+        public static async Task<List<long>> GetUserIdsForAuthCheck(int count = 100)
+        {
+            await using var db = new ThunderedDbContext();
+            var compareDate = DateTime.Now.AddHours(-1);
+            return await db.Users.Where(a => !a.LastCheck.HasValue || a.LastCheck.Value <= compareDate).OrderBy(a => a.LastCheck)
+                .Take(count).Select(a => a.CharacterId).ToListAsync();
+        }
+
+        public static async Task UpdateToken(string token, long characterId, TokenEnum type)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

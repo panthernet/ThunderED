@@ -511,7 +511,7 @@ typeID: 2233",
                                                         .WithAuthor(author =>
                                                             author.WithName(text))
                                                         .AddField(LM.Get("System"), systemName, true)
-                                                        .AddField(string.IsNullOrEmpty(core) ? LM.Get("Abandoned") : LM.Get("NeedCore"), string.IsNullOrEmpty(core) ? LM.Get(isAbandoned ? "Yes" : "No") : core, true)
+                                                        .AddField(string.IsNullOrEmpty(core) ? LM.Get("Abandoned") : LM.Get("NeedCore"), string.IsNullOrEmpty(core) ? LM.Get(isAbandoned ? "webYes" : "webNo") : core, true)
                                                         .AddField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"), true)
                                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);

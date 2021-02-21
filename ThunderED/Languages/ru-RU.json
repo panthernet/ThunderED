@@ -630,7 +630,10 @@
   "webTimerMinutesShort": "м",
   "webHrmDumpUserQuestion": "Переместить персонажа в группу Сброшенные?",
   "webWarning": "Внимание",
-  "hrmTabCharAssets": "Ассеты"
+  "hrmTabCharAssets": "Ассеты",
+  "msAuthSuccessHeader": "Аутентификация выполнена",
+  "msAuthSuccessBody": "Теперь вы можете поставлять данные по добыче ресурсов",
+  "nmMiningSchedulePage": "Расписание добычи"
 
 
 }

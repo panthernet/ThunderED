@@ -1,6 +1,7 @@
 ﻿@page "/feedauthpage"
 @using ThunderED.Modules
 @using ThunderED.Modules.Sub
+@using ThunderED.Json
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_FEED_AUTH)]
 @inject ProtectedSessionStorage Store
 
@@ -45,6 +46,12 @@
             {
                 <a href="@GetIndustryAuthURL()" class="btn btn-info btn-block" role="button">@GetIndustryAuthText()</a>
             }
+            <!-- MINING SCHEDULE BUTTON -->
+            @if (MiningScheduleModule.HasAuthAccess(UserData))
+            {
+                <a href="@GetMiningScheduleAuthURL()" class="btn btn-info btn-block" role="button">@GetMiningScheduleAuthText()</a>
+            }
+
             <br>
             <br>
             <p class="text-center"><a class="btn btn-info" href="/" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
@@ -64,11 +71,14 @@
                                         SettingsManager.Settings.Config.ModuleIndustrialJobs;
 
     protected long UserId { get; set; }
+    private WebAuthUserData UserData { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         var usr = await Store.GetAsync<WebAuthUserData>("user");
+        UserData = usr;
         UserId = usr?.Id ?? 0;
+
         await base.OnInitializedAsync();
     }
 
@@ -93,7 +103,7 @@
         string groupName = null;
         var group = TickManager.GetModule<IndustrialJobsModule>()?.WebGetAuthGroup(UserId, out groupName);
         if (group == null) return null;
-        
+
         return WebServerModule.GetIndustryJobsAuthURL(group.Filters.Any(a => a.Value.FeedPersonalJobs),
             group.Filters.Any(a => a.Value.FeedCorporateJobs), groupName);
     }
@@ -103,5 +113,15 @@
         string groupName = null;
         var group = TickManager.GetModule<IndustrialJobsModule>()?.WebGetAuthGroup(UserId, out groupName);
         return @group?.ButtonText ?? @SettingsManager.Settings.IndustrialJobsModule.AuthButtonDiscordText;
+    }
+
+    private string GetMiningScheduleAuthURL()
+    {
+        return WebServerModule.GetMiningScheduleAuthURL();
+    }
+
+    private string GetMiningScheduleAuthText()
+    {
+        return SettingsManager.Settings.MiningScheduleModule.AuthButtonDiscordText;
     }
 }

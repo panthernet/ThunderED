@@ -1,0 +1,28 @@
+﻿@page "/ms"
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_MINING_SCHEDULE)]
+
+@using ThunderED.Helpers
+@using ThunderED.Json.Internal
+@using ThunderED.Modules
+@using THDWebServer.Pages.Modals
+@inject ProtectedSessionStorage Store
+@inject IModalService Modal
+@inject NavigationManager Nav
+
+<h3>MiningSchedule</h3>
+
+@functions {
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _timers = await SQLHelper.SelectTimers();
+
+        await base.OnInitializedAsync();
+    }
+}

@@ -64,6 +64,8 @@ namespace ThunderED.Classes
         public SystemLogFeederSettings SystemLogFeederModule { get; set; } = new SystemLogFeederSettings();
         [ConfigEntryName("ModuleStats")]
         public StatsModuleSettings StatsModule { get; set; } = new StatsModuleSettings();
+        [ConfigEntryName("ModuleMiningSchedule")]
+        public MiningScheduleSettings MiningScheduleModule { get; set; } = new MiningScheduleSettings();
 
         [ConfigEntryName("Database")]
         [StaticConfigEntry]
@@ -1737,6 +1739,7 @@ namespace ThunderED.Classes
         public bool ModuleSovTracker { get; set; } = false;
         public bool ModuleWebConfigEditor { get; set; } = false;
         public bool ModuleIndustrialJobs { get; set; } = false;
+        public bool ModuleMiningSchedule { get; set; } = false;
 
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";
@@ -1772,6 +1775,7 @@ namespace ThunderED.Classes
         public bool EnableSwatch { get; set; }
 
 
+
 #if EDITOR
         public override string this[string columnName]
         {
@@ -1798,6 +1802,23 @@ namespace ThunderED.Classes
                 return null;
             }
         }
+#endif
+    }
+
+    public class MiningScheduleSettings : ValidatableSettings
+    {
+        [Comment("Default text for the Discord authentication button")]
+        public string AuthButtonDiscordText { get; set; } = "Mining Schedule Auth";
+#if EDITOR
+        [Comment("List of names and Ids of entities (char/corp/alliance) with access to the module")]
+        [Required]
+        public ObservableCollection<object> AccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of names and Ids of entities (char/corp/alliance) who can register as feeders")]
+        [Required]
+        public ObservableCollection<object> FeedEntities { get; set; } = new ObservableCollection<object>();
+#else
+        public List<object> AccessEntities { get; set; } = new List<object>();
+        public List<object> FeedEntities { get; set; } = new List<object>();
 #endif
     }
 

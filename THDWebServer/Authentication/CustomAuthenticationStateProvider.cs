@@ -19,6 +19,7 @@ namespace THDWebServer.Authentication
         public const string ROLE_TIMERS = "timers";
         public const string ROLE_HRM = "hrm";
         public const string ROLE_FEED_AUTH = "feed_auth";
+        public const string ROLE_MINING_SCHEDULE = "ms";
 
         public ProtectedSessionStorage ProtectedSessionStore { get; set; }
 
@@ -67,9 +68,14 @@ namespace THDWebServer.Authentication
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_TIMERS));
             }
+            if (MiningScheduleModule.HasViewAccess(usr))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, ROLE_MINING_SCHEDULE));
+            }
 
             if (ContractNotificationsModule.HasAuthAccess(usr.Id) || IndustrialJobsModule.HasAuthAccess(usr.Id) ||
-                MailModule.HasAuthAccess(usr.Id) || NotificationModule.HasAuthAccess(usr.Id) || WebAuthModule.HasAuthAccess(usr.Id))
+                MailModule.HasAuthAccess(usr.Id) || NotificationModule.HasAuthAccess(usr.Id) || WebAuthModule.HasAuthAccess(usr.Id)
+                || MiningScheduleModule.HasAuthAccess(usr))
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_FEED_AUTH));
             }

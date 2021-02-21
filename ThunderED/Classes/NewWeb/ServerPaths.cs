@@ -34,6 +34,11 @@ namespace ThunderED.Classes
             return "/timers";
         }
 
+        public static string GetMiningSchedulePageUrl()
+        {
+            return "/ms";
+        }
+
         public static string GetAuthUrl()
         {
             return "/auth";

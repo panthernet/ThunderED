@@ -53,7 +53,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThunderED.DB", "ThunderED.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "THDWebServer", "THDWebServer\THDWebServer.csproj", "{C519BC1A-6488-4763-ACD0-E2FF5771C48E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThunderED.Shared", "ThunderED.Shared\ThunderED.Shared.csproj", "{62F687C1-159B-4209-9352-43EA76716521}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThunderED.Shared", "ThunderED.Shared\ThunderED.Shared.csproj", "{62F687C1-159B-4209-9352-43EA76716521}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

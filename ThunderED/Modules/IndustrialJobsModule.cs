@@ -153,7 +153,7 @@ namespace ThunderED.Modules
                             {
                                 await LogHelper.LogWarning(
                                     $"Industry token for character {characterID} is outdated or no more valid!");
-                                await LogHelper.LogWarning($"Deleting invalid industry refresh token for {characterID}", Category);
+                                await LogHelper.LogWarning($"Deleting invalid industry refresh token for {characterID}: {tq.Data.Message}", Category);
                                 await SQLHelper.DeleteTokens(characterID, null, null, null, "1");
                             }
                             else

@@ -637,7 +637,10 @@
   "webTimerMinutesShort": "m",
   "webHrmDumpUserQuestion": "Move character to Dump?",
   "webWarning": "Warning",
-  "hrmTabCharAssets":  "Assets" 
+  "hrmTabCharAssets": "Assets",
+  "msAuthSuccessHeader": "Authentication complete",
+  "msAuthSuccessBody": "Now you can supply mining ledger data",
+  "nmMiningSchedulePage": "Mining Schedule"
 
 
 }
