@@ -105,20 +105,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="..\ThunderED\Classes\CommentAttribute.cs">
-      <Link>Classes\CommentAttribute.cs</Link>
+    <Compile Include="..\ThunderED.Shared\Classes\CommentAttribute.cs">
+      <Link>Classes\Shared\CommentAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\ThunderED\Classes\Enums\UserStatusEnum.cs">
+    <Compile Include="..\ThunderED.Shared\Enums\UserStatusEnum.cs">
       <Link>Classes\Shared\UserStatusEnum.cs</Link>
+    </Compile>
+    <Compile Include="..\ThunderED.Shared\Settings\Settings.cs">
+      <Link>Classes\Shared\Settings.cs</Link>
+    </Compile>
+    <Compile Include="..\ThunderED.Shared\Settings\ValidatableSettings.cs">
+      <Link>Classes\Shared\ValidatableSettings.cs</Link>
     </Compile>
     <Compile Include="..\ThunderED\Classes\MixedListAttribute.cs">
       <Link>Classes\MixedListAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ThunderED\Classes\Settings.cs">
-      <Link>Classes\Settings.cs</Link>
-    </Compile>
-    <Compile Include="..\ThunderED\Classes\SettingsManager_Scopes.cs">
-      <Link>Classes\SettingsManager_Scopes.cs</Link>
     </Compile>
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
@@ -197,7 +197,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>
@@ -205,5 +204,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

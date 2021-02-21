@@ -77,7 +77,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ThunderED.DB\ThunderED.DB.csproj" />
     <ProjectReference Include="..\ThunderED\ThunderED.csproj" />
   </ItemGroup>
 

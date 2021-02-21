@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace ThunderED.Classes
+namespace ThunderED
 {
     public static partial class SettingsManager
     {

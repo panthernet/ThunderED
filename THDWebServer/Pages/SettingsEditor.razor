@@ -187,7 +187,7 @@
 
         if (_access.CanEditSimplifiedAuth)
         {
-            _authList = await SettingsManager.GetSimplifiedAuthData() ?? new List<SimplifiedAuthEntity>();
+            _authList = await SimplifiedAuth.GetData() ?? new List<SimplifiedAuthEntity>();
             _countAuths = _authList?.Count ?? 0;
             _authGroupsList = _module.WebGetAuthGroupsList();
             //_authRolesList = .ToList();

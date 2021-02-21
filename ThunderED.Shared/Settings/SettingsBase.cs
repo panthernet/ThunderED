@@ -34,7 +34,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using ThunderED.Helpers;
 
-namespace ThunderED.Classes
+namespace ThunderED
 {
     public abstract class SettingsBase<T> where T : SettingsBase<T>, new()
     {

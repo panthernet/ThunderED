@@ -11,14 +11,12 @@ using ThunderED.Classes.Enums;
 namespace TED_ConfigEditor.Classes
 #else
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json;
+using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 
-namespace ThunderED.Classes
+namespace ThunderED
 #endif
 {
     public class ThunderSettings: SettingsBase<ThunderSettings>
@@ -1805,7 +1803,7 @@ namespace ThunderED.Classes
 #endif
     }
 
-    public class MiningScheduleSettings : ValidatableSettings
+    public class MiningScheduleSettings
     {
         [Comment("Default text for the Discord authentication button")]
         public string AuthButtonDiscordText { get; set; } = "Mining Schedule Auth";
@@ -2093,9 +2091,9 @@ namespace ThunderED.Classes
                 {
                     case nameof(PreliminaryAuthMode):
                         return ESICustomAuthRoles.Count == 0 ? Compose(nameof(ESICustomAuthRoles), "ESICustomAuthRoles must contain at least one value when PreliminaryAuthMode is true!") : null;
-                    case nameof(ESICustomAuthRoles):
-                        var wrong = ESICustomAuthRoles.Where(a => !SettingsManager.ESIScopes.Contains(a)).ToList();
-                        return wrong.Count > 0 ? Compose(nameof(ESICustomAuthRoles), $"ESICustomAuthRoles contains unidentified ESI scopes: {string.Join(", ", wrong)}") : null;
+                    //case nameof(ESICustomAuthRoles):
+                     //   var wrong = ESICustomAuthRoles.Where(a => !SettingsManager.ESIScopes.Contains(a)).ToList();
+                     //   return wrong.Count > 0 ? Compose(nameof(ESICustomAuthRoles), $"ESICustomAuthRoles contains unidentified ESI scopes: {string.Join(", ", wrong)}") : null;
                 }
 
                 return null;

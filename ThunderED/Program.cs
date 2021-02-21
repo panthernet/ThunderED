@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ThunderED.Classes;
@@ -90,12 +91,14 @@ namespace ThunderED
                 return;
             }
 
+            await CheckAuthIntegrity();
+
             await SQLHelper.InitializeBackup();
 
             //load language
             await LM.Load();
             //load injected settings
-            await SettingsManager.UpdateInjectedSettings();
+            await SimplifiedAuth.UpdateInjectedSettings();
             //load APIs
             if (SettingsManager.Settings.Config.DiscordGuildId != 0)
             {
@@ -195,6 +198,19 @@ namespace ThunderED
                     else                 */
                     await Task.Delay(10);
                 if(_confirmClose) return;
+            }
+        }
+
+        private static async Task CheckAuthIntegrity()
+        {
+            //check integrity
+            var users = await SQLHelper.GetAuthUsers();
+            var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.ToList();
+            var problem = string.Join(',', users.Where(a => !groups.Contains(a.GroupName)).Select(a => a.GroupName ?? "null").Distinct());
+            if (!string.IsNullOrEmpty(problem))
+            {
+                await LogHelper.LogWarning(
+                    $"Database table auth_users contains entries with invalid groupName fields! It means that these groups hasn't been found in your config file and this can lead to problems in auth validation. Either tell those users to reauth or fix group names manually!\nUnknown groups: {problem}");
             }
         }
 
@@ -365,12 +381,14 @@ namespace ThunderED
                 return false;
             }
 
+            await CheckAuthIntegrity();
+
             await SQLHelper.InitializeBackup();
 
             //load language
             await LM.Load();
             //load injected settings
-            await SettingsManager.UpdateInjectedSettings();
+            await SimplifiedAuth.UpdateInjectedSettings();
 
             //do not enable old web server for the new shell
             SettingsManager.Settings.Config.ModuleWebServer = false;
@@ -405,6 +423,19 @@ namespace ThunderED
             _timer = new Timer(TickCallback, new AutoResetEvent(true), 100, 100);
 
             return true;
+        }
+
+        private static async Task CheckAuthIntegrity()
+        {
+            //check integrity
+            var users = await SQLHelper.GetAuthUsers();
+            var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.ToList();
+            var problem = string.Join(',', users.Where(a => !groups.Contains(a.GroupName)).Select(a => a.GroupName ?? "null").Distinct());
+            if (!string.IsNullOrEmpty(problem))
+            {
+                await LogHelper.LogWarning(
+                    $"Database table auth_users contains entries with invalid groupName fields! It means that these groups hasn't been found in your config file and this can lead to problems in auth validation. Either tell those users to reauth or fix group names manually!\nUnknown groups: {problem}");
+            }
         }
 
         internal static volatile bool IsClosing = false;

@@ -367,7 +367,7 @@ namespace ThunderED.API
         {
             await SQLHelper.DeleteCache(type);
             await SettingsManager.UpdateSettings();
-            await SettingsManager.UpdateInjectedSettings();
+            await SimplifiedAuth.UpdateInjectedSettings();
         }
         #endregion
 

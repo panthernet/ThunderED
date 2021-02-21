@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using ThunderED.Classes;
-using ThunderED.Modules;
 
 namespace ThunderED.Helpers
 {
@@ -65,42 +64,9 @@ namespace ThunderED.Helpers
             }
         }
 
-        public static LogSeverity ToSeverity(this Discord.LogSeverity severity)
-        {
-            switch (severity)
-            {
-                case Discord.LogSeverity.Info:
-                    return LogSeverity.Info;
-                case Discord.LogSeverity.Debug:
-                    return LogSeverity.Debug;
-                case Discord.LogSeverity.Warning:
-                    return LogSeverity.Warning;
-                case Discord.LogSeverity.Critical:
-                    return LogSeverity.Critical;
-                case Discord.LogSeverity.Error:
-                    return LogSeverity.Error;
-                case Discord.LogSeverity.Verbose:
-                    return LogSeverity.Verbose;
-                default:
-                    return LogSeverity.Info;
-            }
-        }
 
-        public static string ToFormattedString(this TimeSpan ts, string separator = ", ")
-        {
-            if (ts.TotalMilliseconds < 1) { return "No time"; }
 
-            return string.Join(separator, new string[]
-            {
-                ts.Days > 0 ? $"{ts.Days}{LM.Get("dateD")} " : null,
-                ts.Hours > 0 ? $"{ts.Hours}{LM.Get("dateH")} " : null,
-                ts.Minutes > 0 ? $"{ts.Minutes}{LM.Get("dateM")}" : null
-                //ts.Seconds > 0 ? ts.Seconds + (ts.Seconds > 1 ? " seconds" : " second") : null,
-                //ts.Milliseconds > 0 ? ts.Milliseconds + (ts.Milliseconds > 1 ? " milliseconds" : " millisecond") : null,
-            }.Where(t => t != null));
-        }
-
-        internal static Dictionary<string, string> ParseNotificationText(string text)
+        public static Dictionary<string, string> ParseNotificationText(string text)
         {
             var dic = new Dictionary<string, string>();
             text.Split('\n', StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(a =>
@@ -123,8 +89,8 @@ namespace ThunderED.Helpers
             return dic;
         }
 
-	
-        internal static string GenerateUnicodePercentage(double percentage)
+
+        public static string GenerateUnicodePercentage(double percentage)
         {
             string styles = "░▒▓█";
 

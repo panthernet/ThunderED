@@ -162,10 +162,10 @@ namespace ThunderED.Modules
                             convData = convData.Where(a =>
                                 !string.IsNullOrEmpty(a.Name?.Trim()) && !string.IsNullOrEmpty(a.Group?.Trim()) &&
                                 !string.IsNullOrEmpty(a.Roles?.Trim())).ToList();
-                            await SettingsManager.SaveSimplifiedAuthData(convData
+                            await SimplifiedAuth.SaveData(convData
                                 .Select(a => $"{a.Name}|{a.Group}|{a.Roles}").ToList());
                             //inject updated simplified auth data
-                            await SettingsManager.LoadSimplifiedAuth();
+                            await SimplifiedAuth.LoadData();
                             //rebuild auth cache
                             if (Settings.Config.ModuleAuthWeb)
                                 await TickManager.GetModule<WebAuthModule>().Initialize();
@@ -173,7 +173,7 @@ namespace ThunderED.Modules
                         }
                         else
                         {
-                            var simplifiedAuthEntities = await SettingsManager.GetSimplifiedAuthData();
+                            var simplifiedAuthEntities = await SimplifiedAuth.GetData();
                             var x = new
                             {
                                 total = simplifiedAuthEntities.Count,

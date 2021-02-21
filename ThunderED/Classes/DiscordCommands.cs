@@ -947,7 +947,7 @@ namespace ThunderED.Classes
                 if(!await IsExecByAdmin()) return;
 
                 await SettingsManager.UpdateSettings();
-                await SettingsManager.UpdateInjectedSettings();
+                await SimplifiedAuth.UpdateInjectedSettings();
                 TickManager.InvalidateModules();
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ":white_check_mark: REHASH COMPLETED", true);
             }

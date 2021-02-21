@@ -116,7 +116,7 @@ namespace ThunderED.Helpers
             return await Query<string>("refresh_tokens", "indtoken", "id", charId);
         }
 
-        internal static async Task InsertOrUpdateTokens(string notifyToken, string userId, string mailToken = null, string contractsToken = null, string industryToken = null)
+        public static async Task InsertOrUpdateTokens(string notifyToken, string userId, string mailToken = null, string contractsToken = null, string industryToken = null)
         {   
             if (string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) || string.IsNullOrEmpty(userId))
             {
@@ -142,7 +142,7 @@ namespace ThunderED.Helpers
             });
         }
 
-        internal static async Task DeleteTokens(long userId, string notifyToken = null, string mailToken = null, string contractsToken = null, string industryToken = null)
+        public static async Task DeleteTokens(long userId, string notifyToken = null, string mailToken = null, string contractsToken = null, string industryToken = null)
         {
             if(userId == 0) return;
 
@@ -223,12 +223,12 @@ namespace ThunderED.Helpers
             return res?.Select(ParseAuthUser).ToList();
         }
 
-        internal static async Task<List<AuthUserEntity>> GetAuthUsers()
+        public static async Task<List<AuthUserEntity>> GetAuthUsers()
         {
             return await GetAuthUsers(null);
         }
 
-        internal static async Task<List<AuthUserEntity>> GetAuthUsers(int authState)
+        public static async Task<List<AuthUserEntity>> GetAuthUsers(int authState)
         {
             return await GetAuthUsers(new Dictionary<string, object>
             {
@@ -236,21 +236,21 @@ namespace ThunderED.Helpers
             });
         }
 
-        internal static async Task<List<AuthUserEntity>> GetOutdatedAwaitingAuthUsers()
+        public static async Task<List<AuthUserEntity>> GetOutdatedAwaitingAuthUsers()
         {
             var res = await SelectData("auth_users", new[] {"*"});
 
             return res?.Select(ParseAuthUser).Where(a=> a.IsPending || string.IsNullOrEmpty(a.GroupName)).ToList();
         }
 
-        internal static async Task<List<AuthUserEntity>> GetAuthUsersWithPerms(Dictionary<string,object> where = null)
+        public static async Task<List<AuthUserEntity>> GetAuthUsersWithPerms(Dictionary<string,object> where = null)
         {
             var res = await SelectData("auth_users", new[] {"*"}, where);
 
             return res?.Select(ParseAuthUser).Where(a=> !string.IsNullOrEmpty(a.Data.Permissions)).ToList();
         }
 
-        internal static async Task<List<AuthUserEntity>> GetAuthUsersWithPerms(int state)
+        public static async Task<List<AuthUserEntity>> GetAuthUsersWithPerms(int state)
         {
             var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object>{{"authState", state}});
 
@@ -343,7 +343,7 @@ namespace ThunderED.Helpers
             else await InsertOrUpdate("authUsers", dic);
         }*/
 
-        internal static async Task<AuthUserEntity> GetAuthUserByDiscordId(ulong discordId, bool order = false)
+        public static async Task<AuthUserEntity> GetAuthUserByDiscordId(ulong discordId, bool order = false)
         {
             var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object> {{"discordID", discordId}});
 
@@ -363,22 +363,22 @@ namespace ThunderED.Helpers
             return result != null && result.Count > 0;
         }
 
-       /* [Obsolete("Maintained for upgrade")]
-        internal static async Task<List<PendingUserEntity>> GetPendingUsersEx()
-        {
-            return (await SelectData("pending_users", new[] {"*"})).Select(item => new PendingUserEntity
-            {
-                Id = Convert.ToInt64(item[0]),
-                CharacterId = Convert.ToInt64(item[1]),
-                CorporationId = Convert.ToInt64(item[2]),
-                AllianceId = Convert.ToInt64(item[3]),
-                Groups = Convert.ToString(item[4]),
-                AuthString = Convert.ToString(item[5]),
-                Active = (string) item[6] == "1",
-                CreateDate = Convert.ToDateTime(item[7]),
-                DiscordId = Convert.ToInt64(item[8]),
-            }).ToList();
-        }*/
+        /* [Obsolete("Maintained for upgrade")]
+         public static async Task<List<PendingUserEntity>> GetPendingUsersEx()
+         {
+             return (await SelectData("pending_users", new[] {"*"})).Select(item => new PendingUserEntity
+             {
+                 Id = Convert.ToInt64(item[0]),
+                 CharacterId = Convert.ToInt64(item[1]),
+                 CorporationId = Convert.ToInt64(item[2]),
+                 AllianceId = Convert.ToInt64(item[3]),
+                 Groups = Convert.ToString(item[4]),
+                 AuthString = Convert.ToString(item[5]),
+                 Active = (string) item[6] == "1",
+                 CreateDate = Convert.ToDateTime(item[7]),
+                 DiscordId = Convert.ToInt64(item[8]),
+             }).ToList();
+         }*/
 
         public static async Task<AuthUserEntity> GetAuthUserByRegCode(string code)
         {
@@ -437,7 +437,7 @@ namespace ThunderED.Helpers
             return await Provider?.RunScript(file);
         }
 
-        internal static async Task RunCommand(string query2, bool silent = false)
+        public static async Task RunCommand(string query2, bool silent = false)
         {
             await Provider?.RunCommand(query2, silent);
         }
@@ -446,7 +446,7 @@ namespace ThunderED.Helpers
         {
             try
             {
-                var prov = SettingsManager.Settings.Database.DatabaseProvider;
+                var prov = DbSettingsManager.Settings.Database.DatabaseProvider;
                 switch (prov)
                 {
                     case "sqlite":
@@ -474,22 +474,11 @@ namespace ThunderED.Helpers
                     return "[CRITICAL] Failed to upgrade DB to latest version!";
                 }
 
-                //check integrity
-                var users = GetAuthUsers().GetAwaiter().GetResult();
-                var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.ToList();
-                var problem = string.Join(',', users.Where(a => !groups.Contains(a.GroupName)).Select(a => a.GroupName ?? "null").Distinct());
-                if (!string.IsNullOrEmpty(problem))
-                {
-                    LogHelper.LogWarning(
-                            $"Database table auth_users contains entries with invalid groupName fields! It means that these groups hasn't been found in your config file and this can lead to problems in auth validation. Either tell those users to reauth or fix group names manually!\nUnknown groups: {problem}")
-                        .GetAwaiter().GetResult();
-                }
-
                 return null;
             }
             catch (Exception ex)
             {
-                LogHelper.LogEx(nameof(LoadProvider), ex).GetAwaiter().GetResult();
+                await LogHelper.LogEx(nameof(LoadProvider), ex);
                 return "Unexpected error while loading DB provider!";
             }
         }
@@ -551,19 +540,19 @@ namespace ThunderED.Helpers
             await SQLHelper.Update("cache_data", "data", id.ToString(), "name", "fleetUpLastPostedOperation");
         }
 
-        internal static async Task<T> SelectCache<T>(object whereValue, int maxDays)
+        public static async Task<T> SelectCache<T>(object whereValue, int maxDays)
             where T: class
         {
             return await Provider?.SelectCache<T>(whereValue, maxDays);
         }
 
-        internal static async Task UpdateCache<T>(T data, object id, int days = 1) 
+        public static async Task UpdateCache<T>(T data, object id, int days = 1) 
             where T : class
         {
             await Provider?.UpdateCache(data, id, days);
         }
 
-        internal static async Task PurgeCache()
+        public static async Task PurgeCache()
         {
             await Provider?.PurgeCache();
         }
@@ -699,7 +688,7 @@ namespace ThunderED.Helpers
             }).FirstOrDefault();
         }
 
-        internal static async Task<JsonClasses.RegionData> GetRegionById(long id)
+        public static async Task<JsonClasses.RegionData> GetRegionById(long id)
         {
             return (await SelectData("map_regions", new[] {"regionID", "regionName"}, new Dictionary<string, object>
             {
@@ -711,7 +700,7 @@ namespace ThunderED.Helpers
             }).FirstOrDefault();
         }
 
-        internal static async Task<JsonClasses.ConstellationData> GetConstellationById(long id)
+        public static async Task<JsonClasses.ConstellationData> GetConstellationById(long id)
         {
             return (await SelectData("map_constellations", new[] {"regionID", "constellationID","constellationName"}, new Dictionary<string, object>
             {
@@ -725,7 +714,7 @@ namespace ThunderED.Helpers
         }
 
         
-        internal static async Task<JsonClasses.Type_id> GetTypeId(long id)
+        public static async Task<JsonClasses.Type_id> GetTypeId(long id)
         {
             return (await SelectData("inv_types", new[] {"typeID", "groupID","typeName", "description", "mass", "volume"}, new Dictionary<string, object>
             {
@@ -741,8 +730,8 @@ namespace ThunderED.Helpers
             }).FirstOrDefault();
         }
 
-        
-        internal static async Task<JsonClasses.invGroup> GetInvGroup(long id)
+
+        public static async Task<JsonClasses.invGroup> GetInvGroup(long id)
         {
             return (await SelectData("inv_groups", new[] {"groupID", "categoryID","groupName"}, new Dictionary<string, object>
             {

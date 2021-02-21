@@ -35,8 +35,12 @@ namespace ThunderED.Modules.OnDemand
                     _timer.Start();
                 }
             };
+
+            try{LogHelper.OnLogMessage -= FeedMessage;} catch {}
+            LogHelper.OnLogMessage += FeedMessage;
+
             _timer.Start();
-            await Task.Delay(1);
+            await Task.CompletedTask;
         }
 
         private static readonly ConcurrentQueue<string> Package = new ConcurrentQueue<string>();

@@ -1,45 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
+using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
 using ThunderED.Json.ZKill;
 using ThunderED.Thd;
 
-namespace ThunderED.Helpers
+namespace ThunderED
 {
-    public static class EntityExtensions
+    public static class Extensions
     {
-        public static async Task UpdateData(this AuthUserEntity user, string permissions = null)
-        {
-            var ch = await APIHelper.ESIAPI.GetCharacterData(LogCat.AuthCheck.ToString(), user.CharacterId, true);
-            if (ch == null) return;
-            await UpdateData(user, ch, null, null, permissions);
-
-            user.MiscData.BirthDate = ch.birthday;
-            user.MiscData.SecurityStatus = ch.security_status;
-        }
-
-        public static async Task UpdateData(this ThdAuthUser user, bool forceUpdate = false)
-        {
-            var ch = await APIHelper.ESIAPI.GetCharacterData(LogCat.AuthCheck.ToString(), user.CharacterId, forceUpdate);
-            if (ch == null) return;
-            await UpdateData(user, ch, null, null, null, forceUpdate);
-            user.PackData();
-            user.MiscData.BirthDate = ch.birthday;
-            user.MiscData.SecurityStatus = ch.security_status;
-        }
-
-        public static void PackData(this ThdAuthUser user)
-        {
-            user.Data = JsonConvert.SerializeObject(user.DataView);
-        }
-
         public static async Task UpdateData(this AuthUserEntity user, JsonClasses.CharacterData characterData, JsonClasses.CorporationData rCorp = null, JsonClasses.AllianceData rAlliance = null, string permissions = null)
         {
             rCorp ??= await APIHelper.ESIAPI.GetCorporationData(LogCat.AuthCheck.ToString(), characterData.corporation_id, true);
@@ -291,40 +265,6 @@ namespace ThunderED.Helpers
             }
         }
 
-        public static string GetModeName(this TimerItem entry)
-        {
-            switch (entry.timerType)
-            {
-                case 1:
-                    return LM.Get("timerOffensive");
-                case 2:
-                    return LM.Get("timerDefensive");
-                default:
-                    return null;
-            }
-        }
-
-        public static DateTime? GetDateTime(this TimerItem entry)
-        {
-            if (int.TryParse(entry.timerET, out var iValue))
-            {
-                var x = DateTimeOffset.FromUnixTimeSeconds(iValue).UtcDateTime;
-                return x;
-            }
-
-            if (DateTime.TryParse(entry.timerET, out var result)) return result;
-            if (!string.IsNullOrEmpty(SettingsManager.Settings.TimersModule.TimeInputFormat))
-            {
-                var format = SettingsManager.Settings.TimersModule.TimeInputFormat.Replace("D", "d").Replace("Y", "y");
-                if (DateTime.TryParseExact(entry.timerET, format, null, DateTimeStyles.None, out result))
-                    return result;
-            }
-
-            if (entry.timerRfDay == 0 && entry.timerRfHour == 0 && entry.timerRfMin == 0) return null;
-            var now = DateTime.UtcNow;
-            return now.AddDays(entry.timerRfDay).AddHours(entry.timerRfHour).AddMinutes(entry.timerRfMin);
-        }
-
         public static string GetStageName(this TimerItem entry)
         {
             switch (entry.timerStage)
@@ -349,24 +289,38 @@ namespace ThunderED.Helpers
             return $"{(addWord ? $"{LM.Get("Remains")} " : null)}{LM.Get("timerRemains", dif.Days, dif.Hours, dif.Minutes)}";
         }
 
-        public static Dictionary<string, object> GetDictionary(this TimerItem entry)
+        public static string GetModeName(this TimerItem entry)
         {
-            var dic = new Dictionary<string, object>
+            switch (entry.timerType)
             {
-                {nameof(entry.timerType), entry.timerType},
-                {nameof(entry.timerStage), entry.timerStage},
-                {nameof(entry.timerLocation), entry.timerLocation},
-                {nameof(entry.timerOwner), entry.timerOwner},
-                {nameof(entry.timerET), entry.GetDateTime()},
-                {nameof(entry.timerNotes), entry.timerNotes},
-                {nameof(entry.timerChar), entry.timerChar},
-                {nameof(entry.announce), entry.announce},
-            };
-            if (entry.Id != 0)
-                dic.Add("id", entry.Id);
-            return dic;
+                case 1:
+                    return LM.Get("timerOffensive");
+                case 2:
+                    return LM.Get("timerDefensive");
+                default:
+                    return null;
+            }
         }
 
+        public static async Task UpdateData(this AuthUserEntity user, string permissions = null)
+        {
+            var ch = await APIHelper.ESIAPI.GetCharacterData(LogCat.AuthCheck.ToString(), user.CharacterId, true);
+            if (ch == null) return;
+            await UpdateData(user, ch, null, null, permissions);
+
+            user.MiscData.BirthDate = ch.birthday;
+            user.MiscData.SecurityStatus = ch.security_status;
+        }
+
+        public static async Task UpdateData(this ThdAuthUser user, bool forceUpdate = false)
+        {
+            var ch = await APIHelper.ESIAPI.GetCharacterData(LogCat.AuthCheck.ToString(), user.CharacterId, forceUpdate);
+            if (ch == null) return;
+            await UpdateData(user, ch, null, null, null, forceUpdate);
+            user.PackData();
+            user.MiscData.BirthDate = ch.birthday;
+            user.MiscData.SecurityStatus = ch.security_status;
+        }
         public static TimerItem FromWebTimerData(this WebTimerData entry, WebTimerData data, WebAuthUserData user)
         {
             var ti = new TimerItem
@@ -398,6 +352,41 @@ namespace ThunderED.Helpers
                 if (g == null) continue;
                 skill.DB_GroupName = g.groupName;
             }
+        }
+
+        public static LogSeverity ToSeverity(this Discord.LogSeverity severity)
+        {
+            switch (severity)
+            {
+                case Discord.LogSeverity.Info:
+                    return LogSeverity.Info;
+                case Discord.LogSeverity.Debug:
+                    return LogSeverity.Debug;
+                case Discord.LogSeverity.Warning:
+                    return LogSeverity.Warning;
+                case Discord.LogSeverity.Critical:
+                    return LogSeverity.Critical;
+                case Discord.LogSeverity.Error:
+                    return LogSeverity.Error;
+                case Discord.LogSeverity.Verbose:
+                    return LogSeverity.Verbose;
+                default:
+                    return LogSeverity.Info;
+            }
+        }
+
+        public static string ToFormattedString(this TimeSpan ts, string separator = ", ")
+        {
+            if (ts.TotalMilliseconds < 1) { return "No time"; }
+
+            return string.Join(separator, new string[]
+            {
+                ts.Days > 0 ? $"{ts.Days}{LM.Get("dateD")} " : null,
+                ts.Hours > 0 ? $"{ts.Hours}{LM.Get("dateH")} " : null,
+                ts.Minutes > 0 ? $"{ts.Minutes}{LM.Get("dateM")}" : null
+                //ts.Seconds > 0 ? ts.Seconds + (ts.Seconds > 1 ? " seconds" : " second") : null,
+                //ts.Milliseconds > 0 ? ts.Milliseconds + (ts.Milliseconds > 1 ? " milliseconds" : " millisecond") : null,
+            }.Where(t => t != null));
         }
     }
 }

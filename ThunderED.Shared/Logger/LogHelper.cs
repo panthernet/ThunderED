@@ -4,15 +4,17 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ThunderED.Classes;
-using ThunderED.Modules.OnDemand;
+using ThunderED.Helpers;
 
-namespace ThunderED.Helpers
+namespace ThunderED
 {
     public static class LogHelper
     {
         private static string _logPath;
         private static LogSeverity? _logSeverity;
-        private static ReaderWriterLock _rwl = new ReaderWriterLock();
+        private static readonly ReaderWriterLock Rwl = new ReaderWriterLock();
+
+        public static event Func<string, LogSeverity, Task> OnLogMessage;
 
         public static async Task LogWarning(string message, LogCat cat = LogCat.Default, bool logConsole = true, bool logFile = true)
         {
@@ -56,11 +58,11 @@ namespace ThunderED.Helpers
                     var time = DateTime.Now.ToString("HH:mm:ss");
                     var msg = $"{time} [{severity,8}] [{cat,13}]: {message}";
                     if(severity == LogSeverity.Critical || severity == LogSeverity.Error)
-                        await SystemLogFeeder.FeedMessage($"```diff\n-{msg}\n```", severity);
+                        await LogMessage($"```diff\n-{msg}\n```", severity);
                     else if(severity == LogSeverity.Warning)
-                        await SystemLogFeeder.FeedMessage($"```diff\n+{msg}\n```", severity);
-                    else 
-                        await SystemLogFeeder.FeedMessage(msg, severity);
+                        await LogMessage($"```diff\n+{msg}\n```", severity);
+                    else
+                        await LogMessage(msg, severity);
 
                     if (!SettingsManager.Settings?.Config.RunAsServiceCompatibility ?? true)
                     {
@@ -115,7 +117,7 @@ namespace ThunderED.Helpers
         private static async Task WriteToResource(string filename, string message)
         {
 
-            _rwl.AcquireWriterLock(2000);
+            Rwl.AcquireWriterLock(2000);
             try
             {
                 File.AppendAllTextAsync(filename, message).GetAwaiter().GetResult();
@@ -123,7 +125,7 @@ namespace ThunderED.Helpers
             finally
             {
                 // Ensure that the lock is released.
-                _rwl.ReleaseWriterLock();
+                Rwl.ReleaseWriterLock();
             }
 
             await Task.CompletedTask;
@@ -137,6 +139,12 @@ namespace ThunderED.Helpers
         public static async Task LogEx(Exception exception, LogCat cat = LogCat.Default, [CallerMemberName]string method = null)
         {
             await LogExInternal(null, exception, cat, method);
+        }
+
+        private static async Task LogMessage(string message, LogSeverity severity)
+        {
+            if(OnLogMessage == null) return;
+            await OnLogMessage?.Invoke(message, severity);
         }
 
 
@@ -169,7 +177,7 @@ namespace ThunderED.Helpers
                     }
                 }
 
-                await SystemLogFeeder.FeedMessage($"```\n{msg}\n```", LogSeverity.Error);
+                await LogMessage($"```\n{msg}\n```", LogSeverity.Error);
 
             }
             catch

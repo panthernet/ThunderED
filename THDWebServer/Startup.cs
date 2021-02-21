@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using THDWebServer.Authentication;
 using THDWebServer.Classes;
+using ThunderED;
 using ThunderED.Classes;
 
 namespace THDWebServer
