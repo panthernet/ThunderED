@@ -648,7 +648,7 @@ typeID: 2233",
                                                         {
                                                             DateTime.TryParse(data["autoTime"], out var autoTime);
                                                             await MiningScheduleModule.UpdateNotificationFromFeed(
-                                                                compText.ToString(), Convert.ToInt64(structureId), autoTime.ToUniversalTime(), startedBy ?? LM.Get("Unknown"));
+                                                                compText.ToString().Replace("|", "\n"), Convert.ToInt64(structureId), autoTime.ToUniversalTime(), startedBy ?? LM.Get("Unknown"));
                                                         }
                                                         catch (Exception ex)
                                                         {
