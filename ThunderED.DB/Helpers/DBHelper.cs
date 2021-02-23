@@ -318,15 +318,25 @@ namespace ThunderED
         public static async Task<ThdMiningNotification> GetMiningNotification(long citadelId, DateTime extractionDate)
         {
             await using var db = new ThunderedDbContext();
+            var x = db.MiningNotifications.ToList();
+            
             return await db.MiningNotifications.AsNoTracking()
-                .FirstOrDefaultAsync(a => a.CitadelId == citadelId && a.Date >= extractionDate);
+                .FirstOrDefaultAsync(a => a.CitadelId == citadelId && a.Date <= extractionDate);
         }
         public static async Task UpdateMiningNotification(ThdMiningNotification notify)
         {
             await using var db = new ThunderedDbContext();
-            db.Attach(notify);
-            if (db.Entry(notify).State == EntityState.Unchanged)
+            if (db.MiningNotifications.Any(a => a.CitadelId == notify.CitadelId))
+            {
+                db.Attach(notify);
                 db.Entry(notify).State = EntityState.Modified;
+            }
+            else
+            {
+                await db.MiningNotifications.AddAsync(notify);
+                db.Entry(notify).State = EntityState.Added;
+            }
+
             await db.SaveChangesAsync();
         }
     }

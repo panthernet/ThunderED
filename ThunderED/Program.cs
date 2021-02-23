@@ -10,6 +10,7 @@ using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.Sub;
+using ThunderED.Thd;
 
 namespace ThunderED
 {
@@ -380,6 +381,14 @@ namespace ThunderED
 
                 return false;
             }
+
+           /* await DbHelper.UpdateMiningNotification(new ThdMiningNotification
+            {
+                CitadelId = 1031727644630,
+                Date = DateTime.Parse("03.04.2020 16:01"),
+                Operator = "Ves Na",
+                OreComposition = "ORE!!!"
+            });*/
 
             await CheckAuthIntegrity();
 
