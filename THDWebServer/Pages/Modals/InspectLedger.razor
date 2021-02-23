@@ -1,0 +1,138 @@
+﻿@using ThunderED.Modules
+@using System.Linq.Dynamic.Core
+@using ThunderED.Thd
+
+@inject AuthenticationStateProvider Auth
+@inject ProtectedSessionStorage Store
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_MINING_SCHEDULE)]
+@inject NavigationManager Nav
+@inject IModalService Modal
+
+<div class="modal-content hrm-inspect">
+    <div class="modal-header">
+        <h5 class="modal-title">@LM.Get("msInspectingLedgerHeader", Ledger?.StructureName)</h5>
+        <button type="button" class="close" @onclick="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <RadzenGrid AllowFiltering="true" AllowPaging="false" Count="@_countLedger" AllowSorting="true" Data="@_ledgerList" TItem="WebMiningLedgerEntry"
+                    LoadData="@LoadLedgerData" Style="height: 580px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    AllowColumnResize="true">
+            <Columns>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="200px" FilterProperty="NameFilter" SortProperty="NameFilter"
+                                  Title="@LM.Get("msLedgerColumnCharacter")">
+                    <Template Context="order">
+                        <RadzenLabel Text="@($"{order.CharacterName} [{order.CorporationTicker}]")" />
+                    </Template>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="100px" FilterProperty="OreName" SortProperty="OreName"
+                                  Title="@LM.Get("msLedgerColumnOre")">
+                    <Template Context="order">
+                        <RadzenLabel Text="@order.OreName" />
+                    </Template>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="80px" FilterProperty="Quantity" SortProperty="Quantity"
+                                  Title="@LM.Get("msLedgerColumnQuantity")">
+                    <Template Context="order">
+                        <RadzenLabel Text="@(order.Quantity.ToString())" />
+                    </Template>
+                    <FooterTemplate>
+                        @LM.Get("msTotalVolume"): <b>@($"{(_ledgerList?.Sum(o => o.Quantity)*10):N0} m3")</b>
+                    </FooterTemplate>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="80px" FilterProperty="Price" SortProperty="Price"
+                                  Title="@LM.Get("msLedgerColumnPrice")">
+                    <Template Context="order">
+                        <RadzenLabel Text="@($"{order.Price:N0} ISK")" />
+                    </Template>
+                    <FooterTemplate>
+                        @LM.Get("msTotalIsk"): <b>@($"{_ledgerList?.Sum(o => o.Price):N0} ISK")</b>
+                    </FooterTemplate>
+                </RadzenGridColumn>
+            </Columns>
+        </RadzenGrid>
+        @if (_isLedgerLoading)
+        {
+            <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+        }
+    </div>
+</div>
+
+@functions {
+
+    private MiningScheduleModule _module;
+    [Parameter] public WebMiningLedger Ledger { get; set; }
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    private ThdAuthUser _inspector;
+
+    private bool _isLedgerLoading = true;
+    private int _countLedger;
+    private List<WebMiningLedgerEntry> _ledgerEntriesCache;
+    private List<WebMiningLedgerEntry> _ledgerList;
+
+    async Task Close() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        if (!MiningScheduleModule.HasViewAccess(user))
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+        _module = TickManager.GetModule<MiningScheduleModule>();
+        if (_module == null || !SettingsManager.Settings.Config.ModuleMiningSchedule)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _inspector = await DbHelper.GetAuthUser(user.Id, true);
+        if (_inspector == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        await Task.Factory.StartNew(async () =>
+        {
+            _ledgerEntriesCache = await _module.GetLedgerEntries(Ledger.StructureId, Ledger.FeederId);
+            _isLedgerLoading = false;
+        });
+
+        await base.OnInitializedAsync();
+    }
+
+    private List<T> ApplyAjaxFilters<T>(IEnumerable<T> list, LoadDataArgs args, out int count)
+    {
+        var query = list.AsQueryable();
+        if (!string.IsNullOrEmpty(args.Filter))
+            query = query.Where(args.Filter);
+        count = query.Count();
+
+        if (!string.IsNullOrEmpty(args.OrderBy))
+            query = query.OrderBy(args.OrderBy);
+        //if (args.Skip.HasValue)
+         //   query = query.Skip(args.Skip.Value);
+       // if (args.Top.HasValue)
+        //    query = query.Take(args.Top.Value);
+        return query.ToList();
+    }
+
+    private async Task LoadLedgerData(LoadDataArgs args)
+    {
+        while (_isLedgerLoading)
+            await Task.Delay(100);
+
+        _ledgerList = ApplyAjaxFilters(_ledgerEntriesCache, args, out _countLedger);
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

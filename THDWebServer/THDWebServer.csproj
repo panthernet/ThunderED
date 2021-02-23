@@ -57,6 +57,7 @@
     <Watch Remove="Pages\Modals\AddTimerModal.razor" />
     <Watch Remove="Pages\Modals\Confirm.razor" />
     <Watch Remove="Pages\Modals\InspectChar.razor" />
+    <Watch Remove="Pages\Modals\InspectLedger.razor" />
     <Watch Remove="Pages\Modals\MailSearch.razor" />
     <Watch Remove="Pages\Modals\MailViewer.razor" />
     <Watch Remove="Pages\SettingsEditor.razor" />

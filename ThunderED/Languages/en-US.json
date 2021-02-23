@@ -648,6 +648,14 @@
   "msExtractionsColumnExplode": "Chunk Explode",
   "msExtractionsColumnRemains": "Remains",
   "msExtractionsColumnOre": "Ore",
-  "msExtractionsColumnOperator": "Operator"
-
+  "msExtractionsColumnOperator": "Operator",
+  "msLedgerHeader": "Mining Ledger",
+  "msLedgerColumnDate": "Last Update",
+  "msInspectingLedgerHeader": "Ledger from {0}",
+  "msLedgerColumnCharacter": "Character",
+  "msLedgerColumnOre": "Ore",
+  "msLedgerColumnQuantity": "Quantity",
+  "msLedgerColumnPrice": "Price",
+  "msTotalIsk": "Total",
+  "msTotalVolume": "Volume"
 }

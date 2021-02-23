@@ -620,7 +620,8 @@ namespace ThunderED.Modules.Sub
             {
                 "esi-industry.read_corporation_mining.v1",
                 "esi-corporations.read_structures.v1",
-                "esi-universe.read_structures.v1"
+                "esi-universe.read_structures.v1",
+                "esi-industry.read_corporation_mining.v1"
             };
             var pString = string.Join('+', list);
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=ms";

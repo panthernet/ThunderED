@@ -11,6 +11,7 @@ using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
+using ThunderED.Json.EveCentral;
 
 namespace ThunderED.API
 {
@@ -24,6 +25,12 @@ namespace ThunderED.API
         public ESIAPI()
         {
             _language = SettingsManager.Settings.Config.UseEnglishESIOnly ? "en-us" : SettingsManager.Settings.Config.Language?.ToLower() ?? "en-us";
+        }
+
+        public async Task<List<FuzzPrice>> GetFuzzPrice(string reason, List<long> ids)
+        {
+            var result = await APIHelper.RequestWrapper<Dictionary<string, JsonEveCentral.FuzzItems>>($"https://market.fuzzwork.co.uk/aggregates/?station=60003760&types={string.Join(",", ids)}", reason);
+            return result.Select(a=> new FuzzPrice{ Id = Convert.ToInt64(a.Key), Sell = a.Value.sell.min, Buy = a.Value.buy.max }).ToList();
         }
 
         public async Task RemoveAllCharacterDataFromCache(object id)
@@ -665,6 +672,48 @@ namespace ThunderED.API
             return list;
         }
 
+        public async Task<List<MiningLedgerJson>> GetCorpMiningLedgers(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<MiningLedgerJson>();
+            while (true)
+            {
+                var result = await APIHelper.RequestWrapper<List<MiningLedgerJson>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporation/{id}/mining/observers/?datasource=tranquility&page={page}&language={_language}",
+                    reason, authHeader);
+                if (result == null || !result.Any())
+                    break;
+                list.AddRange(result);
+                if (result.Count < 1000)
+                    break;
+                page++;
+            }
+
+            return list;
+        }
+
+        public async Task<List<MiningLedgerEntryJson>> GetCorpMiningLedgerEntries(string reason, long corporationId, long observerId, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<MiningLedgerEntryJson>();
+            while (true)
+            {
+                var result = await APIHelper.RequestWrapper<List<MiningLedgerEntryJson>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporation/{corporationId}/mining/observers/{observerId}/?datasource=tranquility&page={page}&language={_language}",
+                    reason, authHeader);
+                if (result == null || !result.Any())
+                    break;
+                list.AddRange(result);
+                if (result.Count < 1000)
+                    break;
+                page++;
+            }
+
+            return list;
+        }
+
         public async Task<List<CorporationStructureJson>> GetCorpStructures(string reason, object corporationId, string token)
         {
             var authHeader = $"Bearer {token}";
@@ -765,5 +814,6 @@ namespace ThunderED.API
         }
 
         //public async Task<ESIQueryResult<List<>>>
+
     }
 }
