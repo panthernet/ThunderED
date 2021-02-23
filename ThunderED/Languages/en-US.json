@@ -646,6 +646,8 @@
   "msExtractionsColumnOwner": "Owner",
   "msExtractionsColumnFinishDate": "Finish",
   "msExtractionsColumnExplode": "Chunk Explode",
-  "msExtractionsColumnRemains": "Remains"
+  "msExtractionsColumnRemains": "Remains",
+  "msExtractionsColumnOre": "Ore",
+  "msExtractionsColumnOperator": "Operator"
 
 }

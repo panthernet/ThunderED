@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Radzen;
-using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Thd;
@@ -316,6 +313,21 @@ namespace ThunderED
         {
             await using var db = new ThunderedDbContext();
             return await db.Tokens.AsNoTracking().Where(a => a.Type == type).ToListAsync();
+        }
+
+        public static async Task<ThdMiningNotification> GetMiningNotification(long citadelId, DateTime extractionDate)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.MiningNotifications.AsNoTracking()
+                .FirstOrDefaultAsync(a => a.CitadelId == citadelId && a.Date >= extractionDate);
+        }
+        public static async Task UpdateMiningNotification(ThdMiningNotification notify)
+        {
+            await using var db = new ThunderedDbContext();
+            db.Attach(notify);
+            if (db.Entry(notify).State == EntityState.Unchanged)
+                db.Entry(notify).State = EntityState.Modified;
+            await db.SaveChangesAsync();
         }
     }
 }

@@ -608,6 +608,7 @@ typeID: 2233",
 
                                                     //"text": "autoTime: 131632776620000000\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 1003894.7944164276\n  46676: 3861704.652392864\n  46681: 1934338.7763798237\n  46687: 5183861.7768108845\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
+
                                                     var compText = new StringBuilder();
                                                     if (oreComposition != null)
                                                         foreach (var pair in oreComposition)
@@ -619,6 +620,7 @@ typeID: 2233",
                                                         compText.Remove(compText.Length - 3, 3);
                                                     else compText.Append(LM.Get("Unknown"));
 
+
                                                     builder = new EmbedBuilder()
                                                         .WithColor(new Color(0xb386f7))
                                                         .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
@@ -629,12 +631,29 @@ typeID: 2233",
                                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
 
+                                                    string startedBy = null;
                                                     if (notification.type == "MoonminingExtractionStarted")
                                                     {
-                                                        var startedBy = data.ContainsKey("startedBy")
+                                                        startedBy = data.ContainsKey("startedBy")
                                                             ? ((await APIHelper.ESIAPI.GetCharacterData(Reason, data["startedBy"]))?.name ?? LM.Get("Auto"))
                                                             : null;
                                                         builder.AddField(LM.Get("moonminingStartedBy"), startedBy ?? LM.Get("Unknown"));
+                                                    }
+
+
+                                                    if (notification.type.Equals("MoonminingExtractionStarted",
+                                                        StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        try
+                                                        {
+                                                            DateTime.TryParse(data["autoTime"], out var autoTime);
+                                                            await MiningScheduleModule.UpdateNotificationFromFeed(
+                                                                compText.ToString(), Convert.ToInt64(structureId), autoTime.ToUniversalTime(), startedBy ?? LM.Get("Unknown"));
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            await LogHelper.LogEx(ex, Category);
+                                                        }
                                                     }
 
                                                     embed = builder.Build();

@@ -30,13 +30,26 @@
                                 <RadzenLabel Text="@order.StructureName"/>
                             </Template>
                         </RadzenGridColumn>
-                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="100px" FilterProperty="ChunkArrivalTime" SortProperty="ChunkArrivalTime"
+                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="100px" FilterProperty="OreComposition" SortProperty="OreComposition"
+                                          Title="@LM.Get("msExtractionsColumnOre")" >
+                            <Template Context="order">
+                                <RadzenLabel Text="@order.OreComposition"/>
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="80px" FilterProperty="Operator" SortProperty="Operator"
+                                          Title="@LM.Get("msExtractionsColumnOperator")" >
+                            <Template Context="order">
+                                <RadzenLabel Text="@order.Operator"/>
+                            </Template>
+                        </RadzenGridColumn>
+
+                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="80px" FilterProperty="ChunkArrivalTime" SortProperty="ChunkArrivalTime"
                                           Title="@LM.Get("msExtractionsColumnFinishDate")">
                             <Template Context="order">
                                 <RadzenLabel Text="@(order.ChunkArrivalTime.ToString(SettingsManager.Settings.Config.ShortTimeFormat))"/>
                             </Template>
                         </RadzenGridColumn>
-                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="100px" FilterProperty="NaturalDecayTime" SortProperty="NaturalDecayTime"
+                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="80px" FilterProperty="NaturalDecayTime" SortProperty="NaturalDecayTime"
                                           Title="@LM.Get("msExtractionsColumnExplode")">
                             <Template Context="order">
                                 <RadzenLabel Text="@(order.NaturalDecayTime.ToString(SettingsManager.Settings.Config.ShortTimeFormat))"/>

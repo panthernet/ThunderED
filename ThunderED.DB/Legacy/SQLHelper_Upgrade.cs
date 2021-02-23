@@ -14,7 +14,7 @@ namespace ThunderED.Helpers
         //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19",
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4", "2.0.1"
+            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4", "2.0.1", "2.0.2"
         };
 
         public static async Task<bool> Upgrade()
@@ -447,6 +447,24 @@ namespace ThunderED.Helpers
 
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
+                        case "2.0.2":
+                            await BackupDatabase();
+                            if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                await RunCommand(
+                                    @"create table mining_notifications(citadel_id int not null constraint mining_notifications_pk primary key, ore_composition text not null, operator text not null,date timestamp not null);");
+                                await RunCommand("create unique index mining_notifications_citadel_id_uindex on mining_notifications(citadel_id);");
+                            }
+                            else
+                            {
+                                await RunCommand(
+                                    @"create table mining_notifications(citadel_id int key, ore_composition text not null, operator text not null,date timestamp not null);");
+                                await RunCommand("create unique index mining_notifications_citadel_id_uindex on mining_notifications(citadel_id);");
+
+                            }
+                            break;
+                            
                         default:
                             continue;
                     }

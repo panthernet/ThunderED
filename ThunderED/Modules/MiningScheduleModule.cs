@@ -9,6 +9,7 @@ using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.Sub;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules
 {
@@ -150,7 +151,8 @@ namespace ThunderED.Modules
                 foreach (var e in extr)
                 {
                     var structure =
-                        await APIHelper.ESIAPI.GetUniverseStructureData(Reason, e.structure_id, r.Result); //structures.FirstOrDefault(a => a.structure_id == e.structure_id);
+                        await APIHelper.ESIAPI.GetUniverseStructureData(Reason, e.structure_id, r.Result);
+
                     //var moon = await APIHelper.ESIAPI.GetMoon(Reason, e.moon_id);
                     var item = new WebMiningExtraction
                     {
@@ -162,8 +164,17 @@ namespace ThunderED.Modules
                         StructureName = structure?.name ?? LM.Get("Unknown"),
                         //MoonName = moon?.name ?? LM.Get("Unknown"),
                         CorporationName = corp.name,
+                        
                     };
                     item.Remains = item.ChunkArrivalTime.GetRemains(LM.Get("timerRemains"));
+
+                    var notify = await DbHelper.GetMiningNotification(e.structure_id, item.NaturalDecayTime);
+                    if (notify != null)
+                    {
+                        item.OreComposition = notify.OreComposition;
+                        item.Operator = notify.Operator;
+                    }
+
                     innerList.Add(item);
                 }
                 result.Extractions.AddRange(innerList);
@@ -178,6 +189,17 @@ namespace ThunderED.Modules
         {
             public List<WebMiningExtraction> Extractions { get; set; } = new List<WebMiningExtraction>();
             public List<string> Corporations { get; set; } = new List<string>();
+        }
+
+        public static async Task UpdateNotificationFromFeed(string composition, long structureId, DateTime date, string op)
+        {
+            if(!SettingsManager.Settings.Config.ModuleMiningSchedule) return;
+
+            await DbHelper.UpdateMiningNotification(new ThdMiningNotification
+            {
+                CitadelId = structureId, Operator = op, OreComposition = composition, Date = date
+            });
+
         }
 
         #region Access checks

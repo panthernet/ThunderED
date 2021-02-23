@@ -639,6 +639,8 @@
   "msExtractionsColumnOwner": "Владелец",
   "msExtractionsColumnFinishDate": "Окончание",
   "msExtractionsColumnExplode": "Взрыв куска",
-  "msExtractionsColumnRemains": "Осталось"
+  "msExtractionsColumnRemains": "Осталось",
+  "msExtractionsColumnOre": "Руда",
+  "msExtractionsColumnOperator": "Оператор"
 
 }
