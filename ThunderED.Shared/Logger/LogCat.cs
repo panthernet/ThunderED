@@ -44,6 +44,7 @@
         WebSettings,
         DiscordRoles,
         IndustryJobs,
-        MiningSchedule
+        MiningSchedule,
+        ESIWarnings
     }
 }

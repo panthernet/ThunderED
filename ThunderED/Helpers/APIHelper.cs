@@ -119,6 +119,10 @@ namespace ThunderED.Helpers
                             raw = await responseMessage.Content.ReadAsStringAsync();
                             if (!responseMessage.IsSuccessStatusCode)
                             {
+                                if (responseMessage.StatusCode == HttpStatusCode.NotFound && !request.Contains("/route/"))
+                                    await LogHelper.LogWarning($"Query address is invalid: {request}", LogCat.ESI);
+                                if (responseMessage.StatusCode == HttpStatusCode.Forbidden)
+                                    await LogHelper.LogWarning($"Query address is forbidden: {request}", LogCat.ESIWarnings);
                                 result.Data.ErrorCode = (int)responseMessage.StatusCode;
                                 result.Data.Message = raw;
                                 if (responseMessage.StatusCode != HttpStatusCode.NotModified && responseMessage.StatusCode != HttpStatusCode.NotFound && responseMessage.StatusCode != HttpStatusCode.Forbidden &&
@@ -226,6 +230,10 @@ namespace ThunderED.Helpers
                             raw = await responseMessage.Content.ReadAsStringAsync();
                             if (!responseMessage.IsSuccessStatusCode)
                             {
+                                if (responseMessage.StatusCode == HttpStatusCode.NotFound && !request.Contains("/route/"))
+                                    await LogHelper.LogWarning($"Query address is invalid: {request}", LogCat.ESI);
+                                if (responseMessage.StatusCode == HttpStatusCode.Forbidden)
+                                    await LogHelper.LogWarning($"Query address is forbidden: {request}", LogCat.ESIWarnings);
                                 result.Data.ErrorCode = (int)responseMessage.StatusCode;
                                 result.Data.Message = raw;
                                 if (responseMessage.StatusCode != HttpStatusCode.NotModified && responseMessage.StatusCode != HttpStatusCode.NotFound && responseMessage.StatusCode != HttpStatusCode.Forbidden &&
@@ -338,6 +346,10 @@ namespace ThunderED.Helpers
                         using (var responseMessage = await httpClient.GetAsync(request, ct.Token))
                         {
                             raw = await responseMessage.Content.ReadAsStringAsync();
+                            if (responseMessage.StatusCode == HttpStatusCode.NotFound && !request.Contains("/route/"))
+                                await LogHelper.LogWarning($"Query address is invalid: {request}", LogCat.ESIWarnings);
+                            if (responseMessage.StatusCode == HttpStatusCode.Forbidden)
+                                await LogHelper.LogWarning($"Query address is forbidden: {request}", LogCat.ESIWarnings);
                             if (responseMessage.Content.Headers.ContentEncoding.Any(a=> "br".Equals(a, StringComparison.OrdinalIgnoreCase)))
                             {
                                 using (var b = new BrotliStream(await responseMessage.Content.ReadAsStreamAsync(), CompressionMode.Decompress, true))

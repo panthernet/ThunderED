@@ -76,13 +76,15 @@ namespace ThunderED.Modules
                     var spies = await DbHelper.GetAuthUsers(UserStatusEnum.Spying, true);
                     foreach (var entity in spies.ToList())
                     {
-                        if (!await CheckMailToken(entity))
+                        var r = await CheckMailToken(entity);
+                        if (r == false)
                         {
                             await LogHelper.LogWarning(
                                 $"Mail token for {entity.DataView.CharacterName} is invalid and will be deleted", Category);
                             await DbHelper.DeleteToken(entity.CharacterId, TokenEnum.Mail);
                             spies.Remove(entity);
-                        }
+                        }else if (r == null)
+                            spies.Remove(entity);
                     }
                     await MailModule.FeedSpyMail(spies, Settings.HRMModule.DefaultSpiesMailFeedChannelId);
                 }
@@ -110,9 +112,11 @@ namespace ThunderED.Modules
 
         }
 
-        private async Task<bool> CheckMailToken(ThdAuthUser entity)
+        private async Task<bool?> CheckMailToken(ThdAuthUser entity)
         {
             var token = await DbHelper.GetToken(entity.CharacterId, TokenEnum.Mail);
+            if (string.IsNullOrEmpty(token))
+                return null;
             var result = await APIHelper.ESIAPI.RefreshToken(token, Settings.WebServerModule.CcpAppClientId,
                 Settings.WebServerModule.CcpAppSecret);
             if (result.Data.IsNotValid && !result.Data.IsNoConnection)
@@ -806,7 +810,7 @@ namespace ThunderED.Modules
                                                     token)
                                                 : null;
                                             var citadel = locationData.structure_id > 0
-                                                ? await APIHelper.ESIAPI.GetStructureData(Reason,
+                                                ? await APIHelper.ESIAPI.GetUniverseStructureData(Reason,
                                                     locationData.structure_id, token)
                                                 : null;
                                             var loc = station != null ? station.name : citadel?.name;

@@ -47,7 +47,7 @@ namespace ThunderED.Modules
             try
             {
                 RunningRequestCount++;
-                if (!query.Contains("&state=ml"))
+                if (!query.Contains("&state=ms"))
                     return WebQueryResult.False;
 
                 var prms = query.TrimStart('?').Split('&');
@@ -108,6 +108,8 @@ namespace ThunderED.Modules
             var result = new WebMiningExtractionResult();
             var tokens = await DbHelper.GetTokens(TokenEnum.MiningSchedule);
 
+            var processedCorps = new List<long>();
+
             foreach (var token in tokens)
             {
                 var r = await APIHelper.ESIAPI.RefreshToken(token.Token, Settings.WebServerModule.CcpAppClientId,
@@ -135,31 +137,40 @@ namespace ThunderED.Modules
                     await LogHelper.LogWarning($"Failed to refresh corp {rChar.corporation_id}");
                     continue;
                 }
+                if(processedCorps.Contains(rChar.corporation_id))
+                    continue;
+
+                processedCorps.Add(rChar.corporation_id);
                 result.Corporations.Add(corp.name);
+
                 var extr = await APIHelper.ESIAPI.GetCorpMiningExtractions(Reason, rChar.corporation_id, r.Result);
                 var innerList = new List<WebMiningExtraction>();
+               // var structures = await APIHelper.ESIAPI.GetCorpStructures(Reason, rChar.corporation_id, token.Token);
+
                 foreach (var e in extr)
                 {
-                    var structure = await APIHelper.ESIAPI.GetStructureData(Reason, e.structure_id, token.Token);
-                    var moon = await APIHelper.ESIAPI.GetMoon(Reason, e.moon_id);
+                    var structure =
+                        await APIHelper.ESIAPI.GetUniverseStructureData(Reason, e.structure_id, r.Result); //structures.FirstOrDefault(a => a.structure_id == e.structure_id);
+                    //var moon = await APIHelper.ESIAPI.GetMoon(Reason, e.moon_id);
                     var item = new WebMiningExtraction
                     {
                         ExtractionStartTime = e.extraction_start_time.ToEveTime(),
                         ChunkArrivalTime = e.chunk_arrival_time.ToEveTime(),
                         NaturalDecayTime = e.natural_decay_time.ToEveTime(),
-                        MoonId = e.moon_id,
+                        //MoonId = e.moon_id,
                         StructureId = e.structure_id,
                         StructureName = structure?.name ?? LM.Get("Unknown"),
-                        MoonName = moon?.name ?? LM.Get("Unknown"),
-                        CorporationName = corp.name
+                        //MoonName = moon?.name ?? LM.Get("Unknown"),
+                        CorporationName = corp.name,
                     };
+                    item.Remains = item.ChunkArrivalTime.GetRemains(LM.Get("timerRemains"));
                     innerList.Add(item);
                 }
                 result.Extractions.AddRange(innerList);
             }
 
             result.Corporations = result.Corporations.OrderBy(a => a).ToList();
-            result.Extractions = result.Extractions.OrderByDescending(a => a.ExtractionStartTime).ToList();
+            result.Extractions = result.Extractions.OrderBy(a => a.ChunkArrivalTime).ToList();
             return result;
         }
 

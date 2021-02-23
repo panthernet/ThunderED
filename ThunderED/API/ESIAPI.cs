@@ -151,7 +151,7 @@ namespace ThunderED.API
         }
 
 
-        public async Task<JsonClasses.StructureData> GetStructureData(string reason, object id, string token)
+        public async Task<JsonClasses.StructureData> GetUniverseStructureData(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.StructureData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/structures/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
@@ -652,7 +652,28 @@ namespace ThunderED.API
             while (true)
             {
                 var result = await APIHelper.RequestWrapper<List<MiningExtractionJson>>(
-                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporation/{id}//mining/extractions/?datasource=tranquility&page={page}&language={_language}",
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporation/{id}/mining/extractions/?datasource=tranquility&page={page}&language={_language}",
+                    reason, authHeader);
+                if (result == null || !result.Any())
+                    break;
+                list.AddRange(result);
+                if (result.Count < 1000)
+                    break;
+                page++;
+            }
+
+            return list;
+        }
+
+        public async Task<List<CorporationStructureJson>> GetCorpStructures(string reason, object corporationId, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<CorporationStructureJson>();
+            while (true)
+            {
+                var result = await APIHelper.RequestWrapper<List<CorporationStructureJson>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{corporationId}/structures/?datasource=tranquility&page={page}&language={_language}",
                     reason, authHeader);
                 if (result == null || !result.Any())
                     break;

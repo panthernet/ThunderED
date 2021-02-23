@@ -862,13 +862,13 @@
     }
   },
 
-  "ModuleMiningSchedule": {
+  "MiningScheduleModule": {
     "AuthButtonDiscordText": "Mining Schedule Auth",
-    "AccessEntities": {
-    },
-    "FeedEntities": {
+    "AccessEntities": [
+    ],
+    "FeedEntities": [
 
-    }
-  } 
+    ]
+  }
 
 }

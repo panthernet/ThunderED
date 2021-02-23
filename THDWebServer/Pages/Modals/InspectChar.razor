@@ -543,7 +543,7 @@
                         await APIHelper.ESIAPI.GetSystemData(_reason, locationData?.solar_system_id ?? 0);
                     var station = locationData.station_id > 0 ? await APIHelper.ESIAPI.GetStationData(_reason, locationData.station_id, _inspectToken)
                         : null;
-                    var citadel = locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetStructureData(_reason, locationData.structure_id, _inspectToken)
+                    var citadel = locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetUniverseStructureData(_reason, locationData.structure_id, _inspectToken)
                         : null;
                     var loc = station != null ? station.name : citadel?.name;
 

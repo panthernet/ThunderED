@@ -640,7 +640,12 @@
   "hrmTabCharAssets": "Assets",
   "msAuthSuccessHeader": "Authentication complete",
   "msAuthSuccessBody": "Now you can supply mining ledger data",
-  "nmMiningSchedulePage": "Mining Schedule"
-
+  "nmMiningSchedulePage": "Mining Schedule",
+  "msExtractionsHeader": "Moon Extractions",
+  "msExtractionsColumnName": "Structure",
+  "msExtractionsColumnOwner": "Owner",
+  "msExtractionsColumnFinishDate": "Finish",
+  "msExtractionsColumnExplode": "Chunk Explode",
+  "msExtractionsColumnRemains": "Remains"
 
 }

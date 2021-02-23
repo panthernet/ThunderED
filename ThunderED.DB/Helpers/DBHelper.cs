@@ -168,7 +168,8 @@ namespace ThunderED
             await using var db = new ThunderedDbContext();
             user.PackData();
             db.Attach(user);
-            db.Entry(user).State = EntityState.Modified;
+            if(db.Entry(user).State == EntityState.Unchanged)
+                db.Entry(user).State = EntityState.Modified;
             if (!string.IsNullOrEmpty(token))
                 await db.Tokens.AddAsync(new ThdToken
                     {Type = TokenEnum.General, CharacterId = user.CharacterId, Token = token});
@@ -302,7 +303,11 @@ namespace ThunderED
             await using var db = new ThunderedDbContext();
             db.AttachRange(users);
             foreach (var entity in users)
-                db.Entry(entity).State = EntityState.Modified;
+            {
+                if (db.Entry(entity).State == EntityState.Unchanged)
+                    db.Entry(entity).State = EntityState.Modified;
+            }
+
             await db.SaveChangesAsync();
         }
         #endregion

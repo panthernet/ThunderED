@@ -518,7 +518,7 @@ namespace ThunderED.Modules
                     typeName = LM.Get("contractTypeCourier");
                     days = contract.days_to_complete;
                     expire = (int) (contract.DateExpired - contract.DateIssued).Value.TotalDays;
-                    endLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.end_location_id, token))?.name ??
+                    endLocation = (await APIHelper.ESIAPI.GetUniverseStructureData(Reason, contract.end_location_id, token))?.name ??
                                   (await APIHelper.ESIAPI.GetStationData(Reason, contract.end_location_id, token))?.name;
                     endLocation = string.IsNullOrEmpty(endLocation) ? LM.Get("contractSomeCitadel") : endLocation;
                     break;
@@ -556,7 +556,7 @@ namespace ThunderED.Modules
 
             //location
 
-            var startLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.start_location_id, token))?.name ??
+            var startLocation = (await APIHelper.ESIAPI.GetUniverseStructureData(Reason, contract.start_location_id, token))?.name ??
                                 (await APIHelper.ESIAPI.GetStationData(Reason, contract.start_location_id, token))?.name;
             startLocation = string.IsNullOrEmpty(startLocation) ? LM.Get("contractSomeCitadel") : startLocation;
             var locationText = LM.Get("contractMsgIssued");

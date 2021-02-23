@@ -31,6 +31,19 @@ namespace ThunderED.Helpers
             else dic.TryAdd(id, data);
         }
 
+        public static string GetRemains(this DateTime? entry, string template)
+        {
+            if (!entry.HasValue) return null;
+            var dif = (entry.Value - DateTime.UtcNow);
+            return string.Format(template, dif.Days, dif.Hours, dif.Minutes);
+        }
+
+        public static string GetRemains(this DateTime entry, string template)
+        {
+            var dif = (entry - DateTime.UtcNow);
+            return string.Format(template, dif.Days, dif.Hours, dif.Minutes);
+        }
+
         public static T2 Get<T, T2>(this ConcurrentDictionary<T, T2> dic, T id)
             where T2: class
         {

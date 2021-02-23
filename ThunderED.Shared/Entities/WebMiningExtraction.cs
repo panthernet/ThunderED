@@ -13,5 +13,6 @@ namespace ThunderED
         public string MoonName { get; set; }
         public string StructureName { get; set; }
         public string CorporationName { get; set; }
+        public string Remains { get; set; }
     }
 }

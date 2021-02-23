@@ -207,7 +207,7 @@ typeID: 2233",
                                             var system = string.IsNullOrEmpty(systemId) ? null : await APIHelper.ESIAPI.GetSystemData(Reason, systemId);
                                             var systemName = system == null ? LM.Get("Unknown") : (system.name == system.system_id.ToString() ? "Abyss" : system.name);
                                             var structureId = GetData("structureID", data);
-                                            var structure = string.IsNullOrEmpty(structureId) ? null : await APIHelper.ESIAPI.GetStructureData(Reason, structureId, token);
+                                            var structure = string.IsNullOrEmpty(structureId) ? null : await APIHelper.ESIAPI.GetUniverseStructureData(Reason, structureId, token);
                                             var structureNameDirect = GetData("structureName", data);
 
                                             var structureTypeId = GetData("structureTypeID", data);

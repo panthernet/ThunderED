@@ -1,17 +1,79 @@
 ﻿@page "/ms"
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_MINING_SCHEDULE)]
-
-@using ThunderED.Helpers
-@using ThunderED.Json.Internal
 @using ThunderED.Modules
-@using THDWebServer.Pages.Modals
+@using System.Linq.Dynamic.Core
 @inject ProtectedSessionStorage Store
 @inject IModalService Modal
 @inject NavigationManager Nav
 
-<h3>MiningSchedule</h3>
+<div class="container">
+    <RadzenTabs Style="padding: 0;">
+        <Tabs>
+            <RadzenTabsItem Text="@LM.Get("msExtractionsHeader")" Style="padding: 0;">
+                <RadzenDropDown TValue="string" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                Data="@_extractions?.Corporations" Style="width: 400px;" @bind-Value="_exFilterCorp"
+                                Change="@OnExtractionFilterChange" AllowFiltering="true" AllowClear="true"/>
+
+                <RadzenGrid PageSize="20" Count="@_countExtractions" Data="@_filteredExtrList" TItem="WebMiningExtraction"
+                            LoadData="@LoadExtractionsGrid" @ref="_extrGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" AllowColumnResize="true"
+                            Style="height: 640px;">
+                    <Columns>
+                        <RadzenGridColumn TItem="WebMiningExtraction" Property="CorporationName" Filterable="true" Sortable="true" Width="200px" FilterProperty="CorporationName" SortProperty="CorporationName"
+                                          Title="@LM.Get("msExtractionsColumnOwner")">
+                            <Template Context="order">
+                                <RadzenLabel Text="@order.CorporationName"/>
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="200px" FilterProperty="StructureName" SortProperty="StructureName"
+                                          Title="@LM.Get("msExtractionsColumnName")">
+                            <Template Context="order">
+                                <RadzenLabel Text="@order.StructureName"/>
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="100px" FilterProperty="ChunkArrivalTime" SortProperty="ChunkArrivalTime"
+                                          Title="@LM.Get("msExtractionsColumnFinishDate")">
+                            <Template Context="order">
+                                <RadzenLabel Text="@(order.ChunkArrivalTime.ToString(SettingsManager.Settings.Config.ShortTimeFormat))"/>
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="100px" FilterProperty="NaturalDecayTime" SortProperty="NaturalDecayTime"
+                                          Title="@LM.Get("msExtractionsColumnExplode")">
+                            <Template Context="order">
+                                <RadzenLabel Text="@(order.NaturalDecayTime.ToString(SettingsManager.Settings.Config.ShortTimeFormat))"/>
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="60px" FilterProperty="NaturalDecayTime" SortProperty="NaturalDecayTime"
+                                          Title="@LM.Get("msExtractionsColumnRemains")">
+                            <Template Context="order">
+                                <RadzenLabel Text="@(order.Remains)"/>
+                            </Template>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+
+                @if (!_isExtractionsLoaded)
+                {
+                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+                }
+
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</div>
+
 
 @functions {
+
+    private MiningScheduleModule _module;
+    private MiningScheduleModule.WebMiningExtractionResult _extractions;
+    private string _exFilterCorp;
+    private bool _isExtractionsLoaded = false;
+    private RadzenGrid<WebMiningExtraction> _extrGrid;
+
+    private int _countExtractions;
+    private List<WebMiningExtraction> _filteredExtrList;
+
+
     protected override async Task OnInitializedAsync()
     {
         var user = await Store.GetAsync<WebAuthUserData>("user");
@@ -21,8 +83,50 @@
             return;
         }
 
-        _timers = await SQLHelper.SelectTimers();
+        _module = TickManager.GetModule<MiningScheduleModule>();
+
+        await Task.Factory.StartNew(async () =>
+        {
+            _extractions = await _module.GetExtractions();
+            _isExtractionsLoaded = true;
+        });
 
         await base.OnInitializedAsync();
     }
+
+    private async Task OnExtractionFilterChange()
+    {
+        await _extrGrid.Reload();
+    }
+
+    private async Task LoadExtractionsGrid(LoadDataArgs arg)
+    {
+        while (!_isExtractionsLoaded)
+            await Task.Delay(100);
+
+        var innerList = !string.IsNullOrEmpty(_exFilterCorp) ? 
+            _extractions.Extractions.Where(a => a.CorporationName.Equals(_exFilterCorp, StringComparison.OrdinalIgnoreCase)).ToList() : 
+            _extractions.Extractions;
+
+        _filteredExtrList = ApplyAjaxFilters(innerList, arg, out _countExtractions);
+        _isExtractionsLoaded = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private List<T> ApplyAjaxFilters<T>(IEnumerable<T> list, LoadDataArgs args, out int count)
+    {
+        var query = list.AsQueryable();
+        if (!string.IsNullOrEmpty(args.Filter))
+            query = query.Where(args.Filter);
+        count = query.Count();
+
+        if (!string.IsNullOrEmpty(args.OrderBy))
+            query = query.OrderBy(args.OrderBy);
+        if (args.Skip.HasValue)
+            query = query.Skip(args.Skip.Value);
+        if (args.Top.HasValue)
+            query = query.Take(args.Top.Value);
+        return query.ToList();
+    }
+
 }

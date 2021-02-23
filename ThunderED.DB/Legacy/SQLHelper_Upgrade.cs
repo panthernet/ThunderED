@@ -375,11 +375,24 @@ namespace ThunderED.Helpers
                             break;
                         case "2.0.1":
                             await BackupDatabase();
-                            await RunCommand(
-                                @"create table tokens (id integer not null constraint tokens_pk primary key autoincrement,	token text not null,	type int not null,	character_id integer not null);");
-                            await RunCommand(@"create index tokens_character_id_index on tokens (character_id);");
-                            await RunCommand(@"create unique index tokens_character_id_type_uindex on tokens (character_id, type);");
-                            await RunCommand(@"create unique index tokens_id_uindex on tokens (id);");
+                            if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                await RunCommand(
+                                    @"create table tokens (id integer not null constraint tokens_pk primary key autoincrement,	token text not null,	type int not null,	character_id integer not null);");
+                                await RunCommand(@"create index tokens_character_id_index on tokens (character_id);");
+                                await RunCommand(
+                                    @"create unique index tokens_character_id_type_uindex on tokens (character_id, type);");
+                                await RunCommand(@"create unique index tokens_id_uindex on tokens (id);");
+                            }
+                            else
+                            {
+                                await RunCommand(@"create table tokens(id int key auto_increment,	token text not null, type int not null,	character_id int not null);");
+                                await RunCommand(@"create index tokens_character_id_index on tokens (character_id);");
+                                await RunCommand(@"create unique index tokens_character_id_type_uindex on tokens (character_id, type);");
+                                await RunCommand(@"create unique index tokens_id_uindex on tokens (id);");
+                            }
+
                             await LogHelper.LogWarning("Step 1 finished...");
 
                             //notifications

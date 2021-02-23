@@ -412,7 +412,7 @@ namespace ThunderED.Modules
             var unk = LM.Get("Unknown");
             var installer = job.installer_id > 0 ? await APIHelper.ESIAPI.GetCharacterData(Reason, job.installer_id) : null;
 
-            var station = (await APIHelper.ESIAPI.GetStationData(Reason, job.facility_id, token))?.name ?? (await APIHelper.ESIAPI.GetStructureData(Reason, job.facility_id, token))?.name;
+            var station = (await APIHelper.ESIAPI.GetStationData(Reason, job.facility_id, token))?.name ?? (await APIHelper.ESIAPI.GetUniverseStructureData(Reason, job.facility_id, token))?.name;
 
             var header = isStatusChange ? LM.Get("industryJobsStatusHeader") : LM.Get("industryJobsNewHeader");
             var sb = new StringBuilder();
