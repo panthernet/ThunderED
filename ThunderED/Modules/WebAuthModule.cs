@@ -589,13 +589,13 @@ namespace ThunderED.Modules
                                 .ConfigureAwait(false);
                     }
 
-                    //remove all prevoius users associated with discordID or charID
-                    /*List<long> altCharIds = null;
+                    //remove all previous users associated with discordID or charID
+                    List<long> altCharIds = null; //remember alts
                     if (discordId > 0)
                     {
                         altCharIds = await DbHelper.DeleteAuthDataByDiscordId(discordId);
                         await DbHelper.DeleteAuthUser(authUser.CharacterId);
-                    }*/
+                    }
 
                     // authUser.CharacterId = authUser.CharacterId;
                     authUser.DiscordId = discordId > 0 ? discordId : authUser.DiscordId;
@@ -607,9 +607,12 @@ namespace ThunderED.Modules
 
                     await authUser.UpdateData(characterData, null, null, group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null);
 
+                    authUser.Id = 0; //we clean up prev regs so new user here
                     await DbHelper.SaveAuthUser(authUser);
-                    /*if(altCharIds?.Any() ?? false)
-                        altCharIds.ForEach(async a=> await DbHelper.UpdateMainCharacter(a, authUser.CharacterId));*/
+
+                    //restore alts binding
+                    if(altCharIds?.Any() ?? false)
+                        altCharIds.ForEach(async a=> await DbHelper.UpdateMainCharacter(a, authUser.CharacterId));
 
                     //run roles assignment
                     await AuthInfoLog(authUser, $"Running roles update for {characterData.name} {(group.PreliminaryAuthMode ? $"[AUTO-AUTH from {result.GroupName}]" : $"[MANUAL-AUTH {result.GroupName}]")}");
