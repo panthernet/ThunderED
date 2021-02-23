@@ -201,7 +201,10 @@ namespace ThunderED
                     optionsBuilder.UseSqlite($"Data Source={Path.Combine(DbSettingsManager.DataDirectory, DbSettingsManager.Settings.Database.DatabaseFile)}");
                     break;
                 case "mysql":
-                    optionsBuilder.UseMySQL($"server={DbSettingsManager.Settings.Database.ServerAddress};UserId={DbSettingsManager.Settings.Database.UserId};Password={DbSettingsManager.Settings.Database.Password};database={DbSettingsManager.Settings.Database.DatabaseName};");
+                    var cstring =
+                        $"server={DbSettingsManager.Settings.Database.ServerAddress};UserId={DbSettingsManager.Settings.Database.UserId};Password={DbSettingsManager.Settings.Database.Password};database={DbSettingsManager.Settings.Database.DatabaseName};";
+                    var v = ServerVersion.AutoDetect(cstring);
+                    optionsBuilder.UseMySql(cstring, v);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
