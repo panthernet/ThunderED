@@ -177,5 +177,16 @@ namespace ThunderED.Helpers
             }
             else list.Add(value);
         }
+
+        public static DateTime ToEveTime(this string value)
+        {
+            return DateTime.TryParse(value, out var localTimestamp) ? localTimestamp.ToUniversalTime() : DateTime.MinValue;
+        }
+
+        public static string ToEveTimeString(this string value)
+        {
+            var t = value.ToEveTime();
+            return $"{t.ToShortDateString()} {t.ToShortTimeString()}";
+        }
     }
 }

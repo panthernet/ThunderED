@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
@@ -102,7 +103,71 @@ namespace ThunderED.Modules
 
         }
 
+        public async Task<WebMiningExtractionResult> GetExtractions()
+        {
+            var result = new WebMiningExtractionResult();
+            var tokens = await DbHelper.GetTokens(TokenEnum.MiningSchedule);
 
+            foreach (var token in tokens)
+            {
+                var r = await APIHelper.ESIAPI.RefreshToken(token.Token, Settings.WebServerModule.CcpAppClientId,
+                    Settings.WebServerModule.CcpAppSecret);
+                if (r == null || r.Data.IsFailed)
+                {
+                    await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}");
+                    if (r?.Data.IsNotValid ?? false)
+                    {
+                        await DbHelper.DeleteToken(token.CharacterId, TokenEnum.MiningSchedule);
+                        await LogHelper.LogWarning($"Mining token from {token.CharacterId} is no longer valid and will be deleted!");
+                    }
+                    continue;
+                }
+
+                var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, token.CharacterId, true);
+                if (rChar == null)
+                {
+                    await LogHelper.LogWarning($"Failed to refresh character {token.CharacterId}");
+                    continue;
+                }
+                var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
+                if (corp == null)
+                {
+                    await LogHelper.LogWarning($"Failed to refresh corp {rChar.corporation_id}");
+                    continue;
+                }
+                result.Corporations.Add(corp.name);
+                var extr = await APIHelper.ESIAPI.GetCorpMiningExtractions(Reason, rChar.corporation_id, r.Result);
+                var innerList = new List<WebMiningExtraction>();
+                foreach (var e in extr)
+                {
+                    var structure = await APIHelper.ESIAPI.GetStructureData(Reason, e.structure_id, token.Token);
+                    var moon = await APIHelper.ESIAPI.GetMoon(Reason, e.moon_id);
+                    var item = new WebMiningExtraction
+                    {
+                        ExtractionStartTime = e.extraction_start_time.ToEveTime(),
+                        ChunkArrivalTime = e.chunk_arrival_time.ToEveTime(),
+                        NaturalDecayTime = e.natural_decay_time.ToEveTime(),
+                        MoonId = e.moon_id,
+                        StructureId = e.structure_id,
+                        StructureName = structure?.name ?? LM.Get("Unknown"),
+                        MoonName = moon?.name ?? LM.Get("Unknown"),
+                        CorporationName = corp.name
+                    };
+                    innerList.Add(item);
+                }
+                result.Extractions.AddRange(innerList);
+            }
+
+            result.Corporations = result.Corporations.OrderBy(a => a).ToList();
+            result.Extractions = result.Extractions.OrderByDescending(a => a.ExtractionStartTime).ToList();
+            return result;
+        }
+
+        public class WebMiningExtractionResult
+        {
+            public List<WebMiningExtraction> Extractions { get; set; } = new List<WebMiningExtraction>();
+            public List<string> Corporations { get; set; } = new List<string>();
+        }
 
         #region Access checks
 

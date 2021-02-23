@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
-using Matrix.Xmpp.Auth;
-using Newtonsoft.Json;
-using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
-using ThunderED.Modules.Sub;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules
 {
@@ -22,7 +15,7 @@ namespace ThunderED.Modules
         public HRMModule()
         {
             LogHelper.LogModule("Initializing HRM module...", Category).GetAwaiter().GetResult();
-            WebServerModule.ModuleConnectors.Add(Reason, OnRequestReceived);
+            //WebServerModule.ModuleConnectors.Add(Reason, OnRequestReceived);
 
             foreach (var pair in Settings.HRMModule.SpyFilters)
             {
@@ -65,13 +58,13 @@ namespace ThunderED.Modules
                     _lastUpdateDate = DateTime.Now;
                     if (Settings.HRMModule.DumpInvalidationInHours > 0)
                     {
-                        var list = await SQLHelper.GetAuthUsers((int) UserStatusEnum.Dumped);
+                        var list = await DbHelper.GetAuthUsers(UserStatusEnum.Dumped);
                         foreach (var user in list)
                         {
                             if (user.DumpDate.HasValue && (DateTime.Now - user.DumpDate.Value).TotalHours >= Settings.HRMModule.DumpInvalidationInHours)
                             {
-                                await LogHelper.LogInfo($"Disposing dumped member {user.Data.CharacterName}({user.CharacterId})...");
-                                await SQLHelper.DeleteAuthDataByCharId(user.CharacterId, true);
+                                await LogHelper.LogInfo($"Disposing dumped member {user.DataView.CharacterName}({user.CharacterId})...");
+                                await DbHelper.DeleteAuthUser(user.CharacterId, true);
                             }
                         }
                     }
@@ -80,14 +73,14 @@ namespace ThunderED.Modules
                 if ((DateTime.Now - _lastSpyMailUpdateDate).TotalMinutes >= 10)
                 {
                     _lastSpyMailUpdateDate = DateTime.Now;
-                    var spies = await SQLHelper.GetAuthUsers((int) UserStatusEnum.Spying);
+                    var spies = await DbHelper.GetAuthUsers(UserStatusEnum.Spying, true);
                     foreach (var entity in spies.ToList())
                     {
                         if (!await CheckMailToken(entity))
                         {
                             await LogHelper.LogWarning(
-                                $"Mail token for {entity.Data.CharacterName} is invalid and will be deleted", Category);
-                            await SQLHelper.DeleteTokens(entity.CharacterId, null, "1");
+                                $"Mail token for {entity.DataView.CharacterName} is invalid and will be deleted", Category);
+                            await DbHelper.DeleteToken(entity.CharacterId, TokenEnum.Mail);
                             spies.Remove(entity);
                         }
                     }
@@ -98,12 +91,12 @@ namespace ThunderED.Modules
                 {
                     _lastSpyNameUpdateDate = DateTime.Now;
                     
-                    var spies = await SQLHelper.GetAuthUsers((int) UserStatusEnum.Spying);
+                    var spies = await DbHelper.GetAuthUsers(UserStatusEnum.Spying);
                     foreach (var spy in spies)
                     {
                         await spy.UpdateData();
-                        await SQLHelper.SaveAuthUser(spy);
                     }
+                    await DbHelper.SaveAuthUsers(spies);
                 }
             }
             catch (Exception ex)
@@ -117,9 +110,9 @@ namespace ThunderED.Modules
 
         }
 
-        private async Task<bool> CheckMailToken(AuthUserEntity entity)
+        private async Task<bool> CheckMailToken(ThdAuthUser entity)
         {
-            var token = await SQLHelper.GetRefreshTokenMail(entity.CharacterId);
+            var token = await DbHelper.GetToken(entity.CharacterId, TokenEnum.Mail);
             var result = await APIHelper.ESIAPI.RefreshToken(token, Settings.WebServerModule.CcpAppClientId,
                 Settings.WebServerModule.CcpAppSecret);
             if (result.Data.IsNotValid && !result.Data.IsNoConnection)
@@ -127,7 +120,7 @@ namespace ThunderED.Modules
             return !string.IsNullOrEmpty(result.Result);
         }
 
-        private async Task<bool> OnRequestReceived(HttpListenerRequestEventArgs context)
+        /*private async Task<bool> OnRequestReceived(HttpListenerRequestEventArgs context)
         {
             if (!Settings.Config.ModuleHRM) return false;
 
@@ -1183,8 +1176,8 @@ namespace ThunderED.Modules
 
             return false;
         }
-
-        private async Task<bool> IsValidUserForInteraction(HRMAccessFilter filter, long characterId)
+        */
+        /*private async Task<bool> IsValidUserForInteraction(HRMAccessFilter filter, long characterId)
         {
             var user = await SQLHelper.GetAuthUserByCharacterId(characterId);
             return IsValidUserForInteraction(filter, user);
@@ -1215,7 +1208,7 @@ namespace ThunderED.Modules
                 return false;
 
             return true;
-        }
+        }*/
 
         public class SearchMailItem
         {
@@ -1229,7 +1222,7 @@ namespace ThunderED.Modules
             var result = Settings.HRMModule.GetEnabledGroups().Values.Where(a=> a.UsersAccessList.Contains(characterId)).ToList();
 
             if (result.Count > 0) return MergeHRMFilters(result);
-            var discordId = await SQLHelper.GetAuthUserDiscordId(characterId);
+            var discordId = (await DbHelper.GetAuthUser(characterId))?.DiscordId ?? 0;
             if (discordId <= 0) return null;
             var discordRoles = APIHelper.DiscordAPI.GetUserRoleNames(discordId);
 

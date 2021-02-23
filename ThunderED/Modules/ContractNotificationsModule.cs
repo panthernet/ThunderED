@@ -125,7 +125,7 @@ namespace ThunderED.Modules
                             return true;
                         }
 
-                        await SQLHelper.InsertOrUpdateTokens("", result[0], "", result[1]);
+                        await DbHelper.UpdateToken(result[1], lCharId, TokenEnum.Notification);
                         await WebServerModule.WriteResponce(File
                                 .ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
@@ -172,7 +172,7 @@ namespace ThunderED.Modules
                         if(characterID <=0) continue;
                         try
                         {
-                            var rtoken = await SQLHelper.GetRefreshTokenForContracts(characterID);
+                            var rtoken = await DbHelper.GetToken(characterID, TokenEnum.Contract);
                             if (string.IsNullOrEmpty(rtoken))
                             {
                                 await SendOneTimeWarning(characterID, $"Contracts feed token for character {characterID} not found! User is not authenticated.");
@@ -190,7 +190,7 @@ namespace ThunderED.Modules
                                         Category);
 
                                     await LogHelper.LogWarning($"Deleting invalid mail refresh token for {characterID}", Category);
-                                    await SQLHelper.DeleteTokens(characterID, null, null, "1");
+                                    await DbHelper.DeleteToken(characterID, TokenEnum.Contract);
                                 }
                                 else
                                     await LogHelper.LogWarning($"Unable to get contracts token for character {characterID}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})", Category);

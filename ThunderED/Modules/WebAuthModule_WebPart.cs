@@ -14,6 +14,7 @@ using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Modules.Sub;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules
 {
@@ -213,9 +214,9 @@ namespace ThunderED.Modules
                         //alt character registration check
                         if (altCharReg)
                         {
-                            var user = await SQLHelper.GetAuthUserByCharacterId(longCharacterId);
+                            var user = await DbHelper.GetAuthUser(longCharacterId, true);
                             //do not allow to bind alt to another alt
-                            if (user == null || !user.IsAuthed || user.MainCharacterId.HasValue || user.DiscordId == 0)
+                            if (user == null || user.AuthState != (int)UserStatusEnum.Authed || user.MainCharacterId.HasValue || user.DiscordId == 0)
                             {
                                 await LogHelper.LogWarning($"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}", Category);
                                 var result2 = WebQueryResult.BadRequestToGeneralAuth;
@@ -250,9 +251,9 @@ namespace ThunderED.Modules
                         {
                             var refreshToken = result[1];
                             var altCharId = longCharacterId;
-                            var user = await SQLHelper.GetAuthUserByCharacterId(mainCharId);
+                            var user = await DbHelper.GetAuthUser(mainCharId, true);
                             //do not allow to bind alt to another alt
-                            if (user == null || !user.IsAuthed || user.MainCharacterId.HasValue || user.DiscordId == 0)
+                            if (user == null || user.AuthState != (int)UserStatusEnum.Authed || user.MainCharacterId.HasValue || user.DiscordId == 0)
                             {
                                 await LogHelper.LogWarning($"{LM.Get("authAltRegMainNotFound")} {characterID} grp: {inputGroupName}", Category);
                                 var result2 = WebQueryResult.BadRequestToGeneralAuth;
@@ -277,17 +278,17 @@ namespace ThunderED.Modules
                             var altUser = await user.CreateAlt(altCharId, refreshToken, group, groupName,
                                 mainCharId);
                             altUser.Ip = rawIp;
-                            await SQLHelper.SaveAuthUser(altUser);
+                            await DbHelper.SaveAuthUser(altUser);
 
 
 
                             if (Settings.WebAuthModule.AuthReportChannel > 0)
                                 await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,
-                                    LM.Get("authReportCreateAlt", altUser.Data.CharacterName, user.Data.CharacterName));
+                                    LM.Get("authReportCreateAlt", altUser.DataView.CharacterName, user.DataView.CharacterName));
 
                             var success = WebQueryResult.GeneralAuthSuccess;
                             success.Message1 = LM.Get("authAltRegTemplateHeader");
-                            success.Message2 = LM.Get("authAltRegAccepted", rChar.name, user.Data.CharacterName);
+                            success.Message2 = LM.Get("authAltRegAccepted", rChar.name, user.DataView.CharacterName);
                             return success;
                         }
 
@@ -361,21 +362,20 @@ namespace ThunderED.Modules
                             }
 
                             //cleanup prev auth
-                            await SQLHelper.DeleteAuthDataByCharId(Convert.ToInt64(characterID));
+                            await DbHelper.DeleteAuthUser(Convert.ToInt64(characterID));
                             var refreshToken = result[1];
 
                             var uid = GetUniqID();
-                            var authUser = new AuthUserEntity
+                            var authUser = new ThdAuthUser()
                             {
                                 CharacterId = Convert.ToInt64(characterID),
-                                Data =
+                                DataView = 
                                 {
                                     Permissions = group.ESICustomAuthRoles.Count > 0
                                         ? string.Join(',', group.ESICustomAuthRoles)
                                         : null
                                 },
                                 DiscordId = 0,
-                                RefreshToken = refreshToken,
                                 GroupName = groupName,
                                 AuthState = inputGroup != null && inputGroup.PreliminaryAuthMode ? 0 : 1,
                                 RegCode = uid,
@@ -383,7 +383,7 @@ namespace ThunderED.Modules
                                 Ip = rawIp
                             };
                             await authUser.UpdateData();
-                            await SQLHelper.SaveAuthUser(authUser);
+                            await DbHelper.SaveAuthUser(authUser, refreshToken);
 
                             if (group.SkipDiscordAuthPage)
                             {
@@ -441,7 +441,7 @@ namespace ThunderED.Modules
         }
 
         #region OLD AUTH
-        public async Task<bool> Auth(HttpListenerRequestEventArgs context)
+        /*public async Task<bool> Auth(HttpListenerRequestEventArgs context)
         {
             if (!Settings.Config.ModuleAuthWeb) return false;
 
@@ -693,9 +693,9 @@ namespace ThunderED.Modules
                         //alt character registration check
                         if (altCharReg)
                         {
-                            var user = await SQLHelper.GetAuthUserByCharacterId(longCharacterId);
+                            var user = await DbHelper.GetAuthUser(longCharacterId, true);
                             //do not allow to bind alt to another alt
-                            if (user == null || !user.IsAuthed || user.MainCharacterId.HasValue || user.DiscordId == 0)
+                            if (user == null || user.AuthState != (int)UserStatusEnum.Authed || user.MainCharacterId.HasValue || user.DiscordId == 0)
                             {
                                 await WebServerModule.WriteResponce(
                                     WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"),
@@ -733,9 +733,9 @@ namespace ThunderED.Modules
                         {
                             var refreshToken = result[1];
                             var altCharId = longCharacterId;
-                            var user = await SQLHelper.GetAuthUserByCharacterId(mainCharId);
+                            var user = await DbHelper.GetAuthUser(mainCharId, true);
                             //do not allow to bind alt to another alt
-                            if (user == null || !user.IsAuthed || user.MainCharacterId.HasValue || user.DiscordId == 0)
+                            if (user == null || user.AuthState != (int)UserStatusEnum.Authed || user.MainCharacterId.HasValue || user.DiscordId == 0)
                             {
                                 await WebServerModule.WriteResponce(
                                     WebServerModule.GetAccessDeniedPage(LM.Get("authAltRegTemplateHeader"),
@@ -764,13 +764,11 @@ namespace ThunderED.Modules
                             var altUser = await user.CreateAlt(altCharId, refreshToken, group, groupName,
                                 mainCharId);
                             altUser.Ip = ip;
-                            await SQLHelper.SaveAuthUser(altUser);
-
-
+                            await DbHelper.SaveAuthUser(altUser);
 
                             if (Settings.WebAuthModule.AuthReportChannel > 0)
                                 await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,
-                                    LM.Get("authReportCreateAlt", altUser.Data.CharacterName, user.Data.CharacterName));
+                                    LM.Get("authReportCreateAlt", altUser.DataView.CharacterName, user.DataView.CharacterName));
 
                             await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuth2)
                                     .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
@@ -779,7 +777,7 @@ namespace ThunderED.Modules
                                     .Replace("{uid}", null)
                                     .Replace("{header}", LM.Get("authAltRegTemplateHeader"))
                                     .Replace("{body}",
-                                        LM.Get("authAltRegAccepted", rChar.name, user.Data.CharacterName))
+                                        LM.Get("authAltRegAccepted", rChar.name, user.DataView.CharacterName))
                                     .Replace("{body3}", null)
                                     .Replace("{body2}", null)
                                     .Replace("{backText}", LM.Get("backText")),
@@ -861,21 +859,20 @@ namespace ThunderED.Modules
                             }
 
                             //cleanup prev auth
-                            await SQLHelper.DeleteAuthDataByCharId(Convert.ToInt64(characterID));
+                            await DbHelper.DeleteAuthUser(Convert.ToInt64(characterID));
                             var refreshToken = result[1];
 
                             var uid = GetUniqID();
-                            var authUser = new AuthUserEntity
+                            var authUser = new ThdAuthUser()
                             {
                                 CharacterId = Convert.ToInt64(characterID),
-                                Data =
+                                DataView = 
                                 {
                                     Permissions = group.ESICustomAuthRoles.Count > 0
                                         ? string.Join(',', group.ESICustomAuthRoles)
                                         : null
                                 },
                                 DiscordId = 0,
-                                RefreshToken = refreshToken,
                                 GroupName = groupName,
                                 AuthState = inputGroup != null && inputGroup.PreliminaryAuthMode ? 0 : 1,
                                 RegCode = uid,
@@ -883,7 +880,7 @@ namespace ThunderED.Modules
                                 Ip = ip
                             };
                             await authUser.UpdateData();
-                            await SQLHelper.SaveAuthUser(authUser);
+                            await DbHelper.SaveAuthUser(authUser, refreshToken);
 
                             if (!group.PreliminaryAuthMode)
                             {
@@ -967,7 +964,7 @@ namespace ThunderED.Modules
             }
 
             return false;
-        }
+        }*/
         #endregion
 
         public static bool HasAuthAccess(in long id)

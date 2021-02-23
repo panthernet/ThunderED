@@ -42,7 +42,7 @@ namespace THDWebServer.Classes
                         }
                         else
                         {
-                            var authUser = await SQLHelper.GetAuthUserByCharacterId(charId);
+                            var authUser = await DbHelper.GetAuthUser(charId);
                             if (authUser == null)
                             {
                                 result = WebQueryResult.BadRequestToRoot;

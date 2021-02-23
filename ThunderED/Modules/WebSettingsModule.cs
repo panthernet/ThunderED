@@ -400,7 +400,7 @@ namespace ThunderED.Modules
             {
                 if (filter.AllowedDiscordRoles.Any())
                 {
-                    var authUser = await SQLHelper.GetAuthUserByCharacterId(characterId);
+                    var authUser = await DbHelper.GetAuthUser(characterId);
                     if (authUser != null && authUser.DiscordId > 0)
                     {
                         if (APIHelper.DiscordAPI.GetUserRoleNames(authUser.DiscordId).Intersect(filter.AllowedDiscordRoles).Any())
@@ -410,7 +410,7 @@ namespace ThunderED.Modules
             }
 
             //check for Discord admins
-            var discordId = SQLHelper.GetAuthUserDiscordId(characterId).GetAwaiter().GetResult();
+            var discordId = (await DbHelper.GetAuthUser(characterId))?.DiscordId ?? 0;
             if (discordId > 0 && APIHelper.IsDiscordAvailable)
             {
                 var roles = string.Join(',', APIHelper.DiscordAPI.GetUserRoleNames(discordId));

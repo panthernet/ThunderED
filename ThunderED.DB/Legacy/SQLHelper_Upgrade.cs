@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using ThunderED.Classes;
@@ -12,7 +14,7 @@ namespace ThunderED.Helpers
         //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19",
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4"
+            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4", "2.0.1"
         };
 
         public static async Task<bool> Upgrade()
@@ -369,6 +371,67 @@ namespace ThunderED.Helpers
                             break;
                         case "1.5.4":
                             await RunCommand("create unique index timers_id_uindex on timers(id);");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
+                        case "2.0.1":
+                            await BackupDatabase();
+                            await RunCommand(
+                                @"create table tokens (id integer not null constraint tokens_pk primary key autoincrement,	token text not null,	type int not null,	character_id integer not null);");
+                            await RunCommand(@"create index tokens_character_id_index on tokens (character_id);");
+                            await RunCommand(@"create unique index tokens_character_id_type_uindex on tokens (character_id, type);");
+                            await RunCommand(@"create unique index tokens_id_uindex on tokens (id);");
+                            await LogHelper.LogWarning("Step 1 finished...");
+
+                            //notifications
+                            var tokens = (await SelectData("select id,token from refresh_tokens"))
+                                .Where(a => !string.IsNullOrEmpty((string) a[1]))
+                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string) a[1]);
+                            foreach (var (key, value) in tokens)
+                            {
+                                await DbHelper.UpdateToken(value, key, TokenEnum.Notification);
+                            }
+                            //contracts
+                            tokens.Clear();
+                            tokens = (await SelectData("select id,ctoken from refresh_tokens"))
+                                .Where(a => !string.IsNullOrEmpty((string)a[1]))
+                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string)a[1]);
+                            foreach (var (key, value) in tokens)
+                            {
+                                await DbHelper.UpdateToken(value, key, TokenEnum.Contract);
+                            }
+                            //mail
+                            tokens.Clear();
+                            tokens = (await SelectData("select id,mail from refresh_tokens"))
+                                .Where(a => !string.IsNullOrEmpty((string)a[1]))
+                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string)a[1]);
+                            foreach (var (key, value) in tokens)
+                            {
+                                await DbHelper.UpdateToken(value, key, TokenEnum.Mail);
+                            }
+                            //industry
+                            tokens.Clear();
+                            tokens = (await SelectData("select id,indtoken from refresh_tokens"))
+                                .Where(a => !string.IsNullOrEmpty((string)a[1]))
+                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string)a[1]);
+                            foreach (var (key, value) in tokens)
+                            {
+                                await DbHelper.UpdateToken(value, key, TokenEnum.Industry);
+                            }
+                            //general
+                            tokens.Clear();
+                            var data = (await SelectData("select characterID,refreshToken from auth_users"))
+                                .Where(a => !string.IsNullOrEmpty((string) a[1]));
+                            foreach (var d in data)
+                            {
+                                var key = Convert.ToInt64(d[0]);
+                                var value = (string) d[1];
+                                await DbHelper.UpdateToken(value, key, TokenEnum.General);
+                            }
+                            await LogHelper.LogWarning("Step 2 finished...");
+                            await RunCommand(@"drop table refresh_tokens;");
+                            await LogHelper.LogWarning("Step 3 finished...");
+
+
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:

@@ -1,5 +1,6 @@
 ﻿using System;
 using ThunderED.Classes.Entities;
+using ThunderED.Thd;
 
 namespace ThunderED.Classes
 {
@@ -14,12 +15,12 @@ namespace ThunderED.Classes
 
         public WebAuthUserData() { }
 
-        public WebAuthUserData(AuthUserEntity user, string code)
+        public WebAuthUserData(ThdAuthUser user, string code)
         {
             Id = user.CharacterId;
-            Name = user.Data.CharacterName;
-            CorpId = user.Data.CorporationId;
-            AllianceId = user.Data.AllianceId;
+            Name = user.DataView.CharacterName;
+            CorpId = user.DataView.CorporationId;
+            AllianceId = user.DataView.AllianceId;
             Code = code;
         }
 

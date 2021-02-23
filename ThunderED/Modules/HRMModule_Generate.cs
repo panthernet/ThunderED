@@ -20,7 +20,7 @@ namespace ThunderED.Modules
             return data.StartsWith("mail");
         }
 
-        private async Task<int> GetMailPagesCount(string token, long inspectCharId)
+        /*private async Task<int> GetMailPagesCount(string token, long inspectCharId)
         {
             var mailHeaders = await APIHelper.ESIAPI.GetMailHeaders(Reason, inspectCharId.ToString(), token, 0, null);
             return  (mailHeaders?.Result?.Count ?? 0) / Settings.HRMModule.TableEntriesPerPage;        
@@ -791,6 +791,6 @@ namespace ThunderED.Modules
             sb.AppendLine("</tbody>");
 
             return file.Replace("{table}", sb.ToString());
-        }
+        }*/
     }
 }

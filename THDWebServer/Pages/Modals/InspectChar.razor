@@ -3,6 +3,7 @@
 @using ThunderED.Json
 @using ThunderED.Classes.Entities
 @using System.Linq.Dynamic.Core
+@using ThunderED.Thd
 
 @inject AuthenticationStateProvider Auth
 @inject ProtectedSessionStorage Store
@@ -55,12 +56,12 @@
                         @LM.Get("hrmInspectChar"):&nbsp; <a href="@($"https://zkillboard.com/character/{_character?.CharacterId}")">@MemberData.CharacterName</a>
                     </div>
                     <div class="row-fluid">
-                        @LM.Get("hrmInspectCorp"):&nbsp; <a href="@($"https://zkillboard.com/corporation/{_character?.Data.CorporationId}")">@($"{_character?.Data.CorporationName} [{_character?.Data.CorporationTicker}]")</a>
+                        @LM.Get("hrmInspectCorp"):&nbsp; <a href="@($"https://zkillboard.com/corporation/{_character?.DataView.CorporationId}")">@($"{_character?.DataView.CorporationName} [{_character?.DataView.CorporationTicker}]")</a>
                     </div>
                     @if (_hasAlliance)
                     {
                         <div class="row-fluid">
-                            @LM.Get("hrmInspectAlly"):&nbsp; <a href="@($"https://zkillboard.com/alliance/{_character?.Data.AllianceId}")">@($"{_character?.Data.AllianceName} [{_character?.Data.AllianceTicker}]")</a>
+                            @LM.Get("hrmInspectAlly"):&nbsp; <a href="@($"https://zkillboard.com/alliance/{_character?.DataView.AllianceId}")">@($"{_character?.DataView.AllianceName} [{_character?.DataView.AllianceTicker}]")</a>
                         </div>
                     }
                     <div class="row-fluid">
@@ -69,25 +70,25 @@
                     <div class="row-fluid">
                         @LM.Get("hrmInspectBirth"):&nbsp; @_character?.MiscData.BirthDate.ToString(_module.Settings.Config.ShortTimeFormat)
                     </div>
-                    @if (SettingsManager.HasCharSkillsScope(_character?.Data.PermissionsList) && _hasToken)
+                    @if (SettingsManager.HasCharSkillsScope(_character?.DataView.PermissionsList) && _hasToken)
                     {
                         <div class="row-fluid">
                             SP:&nbsp; @_totalSp
                         </div>
                     }
-                    @if (SettingsManager.HasCharWalletScope(_character?.Data.PermissionsList) && _hasToken)
+                    @if (SettingsManager.HasCharWalletScope(_character?.DataView.PermissionsList) && _hasToken)
                     {
                         <div class="row-fluid">
                             ISK:&nbsp; @_totalIskBalance
                         </div>
                     }
-                    @if (SettingsManager.HasCharLocationScope(_character?.Data.PermissionsList) && _hasToken)
+                    @if (SettingsManager.HasCharLocationScope(_character?.DataView.PermissionsList) && _hasToken)
                     {
                         <div class="row-fluid">
                             @LM.Get("hrmInspectLocation"):&nbsp; @_locationData
                         </div>
                     }
-                    @if (SettingsManager.HasCharShipTypeScope(_character?.Data.PermissionsList) && _hasToken)
+                    @if (SettingsManager.HasCharShipTypeScope(_character?.DataView.PermissionsList) && _hasToken)
                     {
                         <div class="row-fluid">
                             @LM.Get("hrmInspectShip"):&nbsp; @_shipData
@@ -135,7 +136,7 @@
                                 <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
                             }
                         </RadzenTabsItem>
-                        @if (SettingsManager.HasReadMailScope(_character?.Data.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasReadMailScope(_character?.DataView.PermissionsList) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabMail")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countMail" AllowSorting="true" Data="@_mailList" TItem="WebMailHeader"
@@ -170,7 +171,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharContractsScope(_character?.Data.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharContractsScope(_character?.DataView.PermissionsList) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabContracts")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countContracts" AllowSorting="true" Data="@_contractsList" TItem="WebContract"
@@ -227,7 +228,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharContactsScope(_character?.Data.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharContactsScope(_character?.DataView.PermissionsList) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabContacts")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countContacts" AllowSorting="true" Data="@_contactsList" TItem="WebContact"
@@ -267,7 +268,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharWalletScope(_character?.Data.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharWalletScope(_character?.DataView.PermissionsList) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabJournal")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countWalletJournal" AllowSorting="true" Data="@_walletJournalList" TItem="WebWalletJournal"
@@ -302,7 +303,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharWalletScope(_character?.Data.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharWalletScope(_character?.DataView.PermissionsList) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabTransfers")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countWalletTrans" AllowSorting="true" Data="@_walletTransList" TItem="WebWalletTrans"
@@ -342,7 +343,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharSkillsScope(_character?.Data.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharSkillsScope(_character?.DataView.PermissionsList) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabSkills")">
                                 <RadzenGrid LoadData="@LoadSkillzData" TItem="WebSkillItem" Count="@_countSkillsList" PageSize="30" AllowFiltering="true" AllowPaging="true"
@@ -416,8 +417,8 @@
     //[CascadingParameter] IModalService Modal { get; set; }
 
     private bool _hasAlliance;
-    private AuthUserEntity _character;
-    private AuthUserEntity _inspector;
+    private ThdAuthUser _character;
+    private ThdAuthUser _inspector;
     private string _reason = "HRM";
     private bool _hasToken;
     private string _inspectToken;
@@ -496,7 +497,7 @@
             return;
         }
 
-        _inspector = await SQLHelper.GetAuthUserByCharacterId(user.Id);
+        _inspector = await DbHelper.GetAuthUser(user.Id, true);
         if (_inspector == null)
         {
             Nav.NavigateTo("/", true);
@@ -510,31 +511,31 @@
 
     private async Task LoadCharacterData()
     {
-        _character = await SQLHelper.GetAuthUserByCharacterId(MemberData.Id);
+        _character = await DbHelper.GetAuthUser(MemberData.Id, true);
         if (_character == null)
         {
             Nav.NavigateTo("/", true);
             return;
         }
         await _character.UpdateData();
-        await SQLHelper.SaveAuthUser(_character);
+        await DbHelper.SaveAuthUser(_character);
 
-        _hasAlliance = _character.Data.AllianceId > 0;
-        _corpImage = $"https://images.evetech.net/corporations/{_character.Data.CorporationId}/logo?tenant=tranquility&size=64";
-        _allianceImage = $"https://images.evetech.net/alliances/{_character.Data.AllianceId}/logo?tenant=tranquility&size=64";
+        _hasAlliance = _character.DataView.AllianceId > 0;
+        _corpImage = $"https://images.evetech.net/corporations/{_character.DataView.CorporationId}/logo?tenant=tranquility&size=64";
+        _allianceImage = $"https://images.evetech.net/alliances/{_character.DataView.AllianceId}/logo?tenant=tranquility&size=64";
         _charImage = $"https://image.eveonline.com/Character/{_character.CharacterId}_256.png";
 
         _hasToken = _character.HasToken;
         if (_hasToken)
         {
-            var tq = await APIHelper.ESIAPI.RefreshToken(_character.RefreshToken,
+            var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralToken(),
                 _module.Settings.WebServerModule.CcpAppClientId,
-                _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.Data.CharacterName}");
+                _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
             _inspectToken = tq.Result;
             if (!string.IsNullOrEmpty(_inspectToken))
             {
 
-                if (SettingsManager.HasCharLocationScope(_character.Data.PermissionsList))
+                if (SettingsManager.HasCharLocationScope(_character.DataView.PermissionsList))
                 {
                     var locationData =
                         await APIHelper.ESIAPI.GetCharacterLocation(_reason, _character.CharacterId, _inspectToken);
@@ -548,14 +549,14 @@
 
                     _locationData = $"{system.name} {loc}";
                 }
-                if (SettingsManager.HasCharShipTypeScope(_character.Data.PermissionsList))
+                if (SettingsManager.HasCharShipTypeScope(_character.DataView.PermissionsList))
                 {
                     var stData =
                         await APIHelper.ESIAPI.GetCharacterShipType(_reason, _character.CharacterId, _inspectToken);
                     var tType = await APIHelper.ESIAPI.GetTypeId(_reason, stData.ship_type_id);
                     _shipData = tType.name;
                 }
-                if (SettingsManager.HasCharSkillsScope(_character.Data.PermissionsList))
+                if (SettingsManager.HasCharSkillsScope(_character.DataView.PermissionsList))
                 {
                     await Task.Factory.StartNew(async () =>
                     {
@@ -566,7 +567,7 @@
                         await InvokeAsync(StateHasChanged);
                     });
                 }
-                if (SettingsManager.HasCharAssetsScope(_character.Data.PermissionsList))
+                if (SettingsManager.HasCharAssetsScope(_character.DataView.PermissionsList))
                 {
                     await Task.Factory.StartNew(async () =>
                     {
@@ -579,7 +580,7 @@
             else
             {
                 _hasToken = false;
-                _character.RefreshToken = null;
+                _character.Tokens.Clear();
             }
         }
     }
@@ -610,7 +611,7 @@
 
     private async Task LoadWalletData()
     {
-        if (_hasToken && SettingsManager.HasCharWalletScope(_character.Data.PermissionsList))
+        if (_hasToken && SettingsManager.HasCharWalletScope(_character.DataView.PermissionsList))
         {
             var value = await APIHelper.ESIAPI.GetCharacterWalletBalance(_reason, _character.CharacterId, _inspectToken);
             _totalIskBalance = value.ToString("N");

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Newtonsoft.Json;
 using ThunderED.Classes.Entities;
 
@@ -11,7 +13,6 @@ namespace ThunderED.Thd
         public long CharacterId;
         public ulong DiscordId;
         public string GroupName;
-        public string RefreshToken;
         public int AuthState;
         public string Data;
         public string RegCode;
@@ -25,12 +26,43 @@ namespace ThunderED.Thd
         [NotMapped] public MiscUserData MiscData = new MiscUserData();
         [NotMapped] public string CharacterName => DataView?.CharacterName;
 
-        [NotMapped] public bool HasToken => !string.IsNullOrEmpty(RefreshToken);
+        [NotMapped] public bool HasToken => Tokens?.FirstOrDefault(a => a.Type == TokenEnum.General) != null;
 
         public void UnpackData()
         {
             if(string.IsNullOrEmpty(Data)) return;
             DataView = JsonConvert.DeserializeObject<AuthUserData>(Data);
+        }
+
+        public List<ThdToken> Tokens { get; set; }
+
+        public string GetGeneralToken()
+        {
+            return Tokens?.FirstOrDefault(a => a.Type == TokenEnum.General)?.Token;
+        }
+
+        public void SetStateDumpster()
+        {
+            AuthState = 3;
+            DumpDate = DateTime.Now;
+        }
+
+        public void SetStateSpying()
+        {
+            AuthState = 4;
+            DumpDate = null;
+        }
+
+        public void SetStateAwaiting()
+        {
+            AuthState = 1;
+            DumpDate = null;
+        }
+
+        public void SetStateAuthed()
+        {
+            AuthState = 2;
+            DumpDate = null;
         }
     }
 }

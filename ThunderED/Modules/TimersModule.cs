@@ -122,7 +122,7 @@ namespace ThunderED.Modules
                 var discordRoles = authgroups.Values.SelectMany(a => a.FilterDiscordRoles).Distinct().ToList();
                 if (discordRoles.Any())
                 {
-                    var authUser = await SQLHelper.GetAuthUserByCharacterId(characterId);
+                    var authUser = await DbHelper.GetAuthUser(characterId);
                     if (authUser != null && authUser.DiscordId > 0 && APIHelper.IsDiscordAvailable)
                     {
                         if (APIHelper.DiscordAPI.GetUserRoleNames(authUser.DiscordId).Intersect(discordRoles).Any())
@@ -150,7 +150,7 @@ namespace ThunderED.Modules
                 var discordRoles = authgroups.Values.SelectMany(a => a.FilterDiscordRoles).Distinct().ToList();
                 if (discordRoles.Any())
                 {
-                    var authUser = await SQLHelper.GetAuthUserByCharacterId(characterId);
+                    var authUser = await DbHelper.GetAuthUser(characterId);
                     if (authUser != null && authUser.DiscordId > 0)
                     {
                         if (APIHelper.DiscordAPI.GetUserRoleNames(authUser.DiscordId).Intersect(discordRoles).Any())
@@ -165,7 +165,7 @@ namespace ThunderED.Modules
             //check for Discord admins
             if (!skip2 && Settings.TimersModule.GrantEditRolesToDiscordAdmins)
             {
-                var discordId = await SQLHelper.GetAuthUserDiscordId(characterId);
+                var discordId = (await DbHelper.GetAuthUser(characterId))?.DiscordId ?? 0;
                 if (discordId > 0)
                 {
                     var roles = string.Join(',', APIHelper.DiscordAPI.GetUserRoleNames(discordId));

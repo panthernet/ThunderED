@@ -48,25 +48,25 @@ namespace ThunderED.Modules
 
         public async Task<bool> WebDeleteUser(WebUserItem order)
         {
-            var sUser = await SQLHelper.GetAuthUserByCharacterId(order.Id);
+            var sUser = await DbHelper.GetAuthUser(order.Id);
             if (sUser == null)
             {
                 await LogHelper.LogError($"User {order.Id} not found for delete op");
                 return false;
             }
 
-            if (Settings.HRMModule.UseDumpForMembers && !sUser.IsDumped)
+            if (Settings.HRMModule.UseDumpForMembers && sUser.AuthState != (int)UserStatusEnum.Dumped)
             {
                 sUser.SetStateDumpster();
                 await LogHelper.LogInfo(
-                    $"HR moving character {sUser.Data.CharacterName} to dumpster...");
-                await SQLHelper.SaveAuthUser(sUser);
+                    $"HR moving character {sUser.DataView.CharacterName} to dumpster...");
+                await DbHelper.SaveAuthUser(sUser);
             }
             else
             {
                 await LogHelper.LogInfo(
-                    $"HR deleting character {sUser.Data.CharacterName} auth...");
-                await SQLHelper.DeleteAuthDataByCharId(order.Id, true);
+                    $"HR deleting character {sUser.DataView.CharacterName} auth...");
+                await DbHelper.DeleteAuthUser(order.Id, true);
             }
 
             if (sUser.DiscordId > 0)
@@ -178,12 +178,12 @@ namespace ThunderED.Modules
 
                 if (hrId > 0 && hrId != id)
                 {
-                    var hrUserInfo = await SQLHelper.GetAuthUserByCharacterId(hrId);
-                    if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.Data.PermissionsList))
+                    var hrUserInfo = await DbHelper.GetAuthUser(hrId, true);
+                    if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.DataView.PermissionsList))
                     {
-                        var hrToken = (await APIHelper.ESIAPI.RefreshToken(hrUserInfo.RefreshToken,
+                        var hrToken = (await APIHelper.ESIAPI.RefreshToken(hrUserInfo.GetGeneralToken(),
                                 Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
-                                , $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.Data.CharacterName}")
+                                , $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.DataView.CharacterName}")
                             )?.Result;
                         if (!string.IsNullOrEmpty(hrToken))
                         {
@@ -370,30 +370,30 @@ namespace ThunderED.Modules
         {
             var charId = order.Id;
             if (charId == 0) return false;
-            var user = await SQLHelper.GetAuthUserByCharacterId(charId);
+            var user = await DbHelper.GetAuthUser(charId);
             if (user == null) return false;
             user.SetStateSpying();
-            await SQLHelper.SaveAuthUser(user);
+            await DbHelper.SaveAuthUser(user);
             return true;
         }
 
         public async Task<UserStatusEnum> WebRestoreAuth(WebUserItem order)
         {
-            var sUser = await SQLHelper.GetAuthUserByCharacterId(order.Id);
+            var sUser = await DbHelper.GetAuthUser(order.Id);
 
             if (sUser == null) return UserStatusEnum.Initial;
 
             //restore alt
             if (sUser.MainCharacterId > 0)
             {
-                sUser.AuthState = (int)UserStatusEnum.Authed;
-                await SQLHelper.SaveAuthUser(sUser);
+                sUser.SetStateAuthed();
+                await DbHelper.SaveAuthUser(sUser);
                 return UserStatusEnum.Authed;
             }
 
-            sUser.AuthState = (int)UserStatusEnum.Awaiting;
+            sUser.SetStateAwaiting();
             sUser.RegCode = Guid.NewGuid().ToString("N");
-            await SQLHelper.SaveAuthUser(sUser);
+            await DbHelper.SaveAuthUser(sUser);
             if (sUser.DiscordId > 0)
             {
                 await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId);

@@ -204,7 +204,7 @@ namespace ThunderED
         private static async Task CheckAuthIntegrity()
         {
             //check integrity
-            var users = await SQLHelper.GetAuthUsers();
+            var users = await DbHelper.GetAuthUsers();
             var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.ToList();
             var problem = string.Join(',', users.Where(a => !groups.Contains(a.GroupName)).Select(a => a.GroupName ?? "null").Distinct());
             if (!string.IsNullOrEmpty(problem))
@@ -428,7 +428,7 @@ namespace ThunderED
         private static async Task CheckAuthIntegrity()
         {
             //check integrity
-            var users = await SQLHelper.GetAuthUsers();
+            var users = await DbHelper.GetAuthUsers();
             var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.ToList();
             var problem = string.Join(',', users.Where(a => !groups.Contains(a.GroupName)).Select(a => a.GroupName ?? "null").Distinct());
             if (!string.IsNullOrEmpty(problem))

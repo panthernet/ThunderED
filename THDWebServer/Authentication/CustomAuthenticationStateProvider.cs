@@ -10,6 +10,7 @@ using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Modules;
+using ThunderED.Thd;
 
 namespace THDWebServer.Authentication
 {
@@ -87,7 +88,7 @@ namespace THDWebServer.Authentication
             return new AuthenticationState(user);
         }
 
-        public async Task SaveAuth(AuthUserEntity user)
+        public async Task SaveAuth(ThdAuthUser user)
         {
             var auth = new AuthState();
             Auth.AddOrUpdate(user.CharacterId,auth);

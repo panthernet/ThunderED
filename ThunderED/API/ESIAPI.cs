@@ -644,6 +644,27 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<List<JsonClasses.CharacterTitle>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/titles/?datasource=tranquility&include_completed=true&language={_language}", reason, authHeader);
         }
 
+        public async Task<List<MiningExtractionJson>> GetCorpMiningExtractions(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<MiningExtractionJson>();
+            while (true)
+            {
+                var result = await APIHelper.RequestWrapper<List<MiningExtractionJson>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporation/{id}//mining/extractions/?datasource=tranquility&page={page}&language={_language}",
+                    reason, authHeader);
+                if (result == null || !result.Any())
+                    break;
+                list.AddRange(result);
+                if (result.Count < 1000)
+                    break;
+                page++;
+            }
+
+            return list;
+        }
+
         public bool IsNpcCharacter(object id)
         {
             if (id == null) return false;

@@ -95,81 +95,10 @@ namespace ThunderED.Helpers
         }
         #endregion
 
-        #region Tokens
-        public static async Task<string> GetRefreshTokenMail(long charId)
-        {
-            return await Query<string>("refresh_tokens", "mail", "id", charId);
-        }
-
-        public static async Task<string> GetRefreshTokenDefault(long charId)
-        {
-            return await Query<string>("refresh_tokens", "token", "id", charId);
-        }
-        
-        public static async Task<string> GetRefreshTokenForContracts(long charId)
-        {
-            return await Query<string>("refresh_tokens", "ctoken", "id", charId);
-        }
-
-        public static async Task<string> GetRefreshTokenForIndustryJobs(long charId)
-        {
-            return await Query<string>("refresh_tokens", "indtoken", "id", charId);
-        }
-
-        public static async Task InsertOrUpdateTokens(string notifyToken, string userId, string mailToken = null, string contractsToken = null, string industryToken = null)
-        {   
-            if (string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) || string.IsNullOrEmpty(userId))
-            {
-                if(string.IsNullOrEmpty(contractsToken) && string.IsNullOrEmpty(industryToken))
-                    return;
-            }
-
-            var mail = string.IsNullOrEmpty(mailToken) ? await Query<string>("refresh_tokens", "mail", "id", userId) : mailToken;
-            var token = string.IsNullOrEmpty(notifyToken) ? await Query<string>("refresh_tokens", "token", "id", userId) : notifyToken;
-            var ctoken = string.IsNullOrEmpty(contractsToken) ? await Query<string>("refresh_tokens", "ctoken", "id", userId) : contractsToken;
-            var itoken = string.IsNullOrEmpty(industryToken) ? await Query<string>("refresh_tokens", "indtoken", "id", userId) : industryToken;
-            token = token ?? "";
-            mail = mail ?? "";
-            ctoken = ctoken ?? "";
-
-            await Provider.InsertOrUpdate("refresh_tokens", new Dictionary<string, object>
-            {
-                {"id", userId},
-                {"token", token},
-                {"mail", mail},
-                {"ctoken", ctoken},
-                {"indtoken", itoken},
-            });
-        }
-
-        public static async Task DeleteTokens(long userId, string notifyToken = null, string mailToken = null, string contractsToken = null, string industryToken = null)
-        {
-            if(userId == 0) return;
-
-            if (string.IsNullOrEmpty(notifyToken) && string.IsNullOrEmpty(mailToken) &&
-                string.IsNullOrEmpty(contractsToken) && string.IsNullOrEmpty(industryToken))
-                return;
-
-            var mail = string.IsNullOrEmpty(mailToken) ? await Query<string>("refresh_tokens", "mail", "id", userId) : "";
-            var token = string.IsNullOrEmpty(notifyToken) ? await Query<string>("refresh_tokens", "token", "id", userId) : "";
-            var ctoken = string.IsNullOrEmpty(contractsToken) ? await Query<string>("refresh_tokens", "ctoken", "id", userId) : "";
-            var itoken = string.IsNullOrEmpty(industryToken) ? await Query<string>("refresh_tokens", "indtoken", "id", userId) : "";
-
-            await Provider.InsertOrUpdate("refresh_tokens", new Dictionary<string, object>
-            {
-                {"id", userId.ToString()},
-                {"token", token ?? ""},
-                {"mail", mail ?? ""},
-                {"ctoken", ctoken ?? ""},
-                {"indtoken", itoken ?? ""},
-            });
-        }
-
-        #endregion
 
         #region AuthUsers
 
-        public static async Task RenameAuthGroup(string @from, string to)
+       /* public static async Task RenameAuthGroup(string @from, string to)
         {
             await Update("auth_users", "groupName", to, "groupName", from);
         }
@@ -199,22 +128,6 @@ namespace ThunderED.Helpers
             if(deleteAlts)
                 await Delete("auth_users", "main_character_id", characterID);
         }
-
-      /*  [Obsolete("Maintained for upgrade possibility")]
-        private static async Task<List<AuthUserEntity>> GetAuthUsersEx()
-        {
-            var res = await SelectData("authUsers", new[] {"*"});
-
-            return res?.Select(item => new AuthUserEntity
-            {
-                Id = Convert.ToInt64(item[0]),
-                EveName = Convert.ToString(item[1]),
-                CharacterId = Convert.ToInt64(item[2]),
-                DiscordId = Convert.ToUInt64(item[3]),
-                Group = Convert.ToString(item[4]),
-                IsActive = (string) item[5] == "yes"
-            }).ToList();
-        }*/
 
         private static async Task<List<AuthUserEntity>> GetAuthUsers(Dictionary<string,object> where)
         {
@@ -257,11 +170,6 @@ namespace ThunderED.Helpers
             return res?.Select(ParseAuthUser).Where(a=> !string.IsNullOrEmpty(a.Data.Permissions)).ToList();
         }
 
-        /*public static async Task<List<ulong>> GetAuthUserIdsToCheck(int minutes, int limit)
-        {
-            if(Provider == null) return new List<ulong>();
-            return (await Provider.SelectDataWithDateCondi("auth_users", new [] {"discordID"}, "last_check", minutes, limit)).Select(a=> Convert.ToUInt64(a[0])).ToList();
-        }*/
 
 
         public static async Task<List<ulong>> GetAuthUserIdsToCheck(int count = 100)
@@ -326,22 +234,6 @@ namespace ThunderED.Helpers
             else await InsertOrUpdate("auth_users", dic);
         }
 
-      /*  [Obsolete("Maintained for upgrade possibility")]
-        public static async Task SaveAuthUserEx(AuthUserEntity user, bool insertOnly = false)
-        {
-            var dic = new Dictionary<string, object>();
-            if(user.Id > 0)
-                dic.Add("Id", user.Id);
-            dic.Add("characterID", user.CharacterId);
-            dic.Add("discordID", user.DiscordId);
-            dic.Add("groupName", user.GroupName);
-            dic.Add("refreshToken", user.RefreshToken);
-            dic.Add("authState", user.AuthState);
-            dic.Add("data", JsonConvert.SerializeObject(user.Data));
-            if (insertOnly)
-                await Insert("authUsers", dic);
-            else await InsertOrUpdate("authUsers", dic);
-        }*/
 
         public static async Task<AuthUserEntity> GetAuthUserByDiscordId(ulong discordId, bool order = false)
         {
@@ -363,22 +255,6 @@ namespace ThunderED.Helpers
             return result != null && result.Count > 0;
         }
 
-        /* [Obsolete("Maintained for upgrade")]
-         public static async Task<List<PendingUserEntity>> GetPendingUsersEx()
-         {
-             return (await SelectData("pending_users", new[] {"*"})).Select(item => new PendingUserEntity
-             {
-                 Id = Convert.ToInt64(item[0]),
-                 CharacterId = Convert.ToInt64(item[1]),
-                 CorporationId = Convert.ToInt64(item[2]),
-                 AllianceId = Convert.ToInt64(item[3]),
-                 Groups = Convert.ToString(item[4]),
-                 AuthString = Convert.ToString(item[5]),
-                 Active = (string) item[6] == "1",
-                 CreateDate = Convert.ToDateTime(item[7]),
-                 DiscordId = Convert.ToInt64(item[8]),
-             }).ToList();
-         }*/
 
         public static async Task<AuthUserEntity> GetAuthUserByRegCode(string code)
         {
@@ -398,26 +274,7 @@ namespace ThunderED.Helpers
             return res?.Select(ParseAuthUser).ToList();
         }
 
-      /*  [Obsolete("Maintained for upgrade possibility")]
-        private static async Task<List<UserTokenEntity>> UserTokensGetAllEntriesEx(Dictionary<string, object> where = null)
-        {
-            var data = await SelectData("userTokens", new[] {"characterID", "characterName", "discordUserId", "refreshToken", "groupName", "permissions", "authState"}, where);
-            var list = new List<UserTokenEntity>();
-            data.ForEach(d =>
-            {
-                list.Add(new UserTokenEntity
-                {
-                    CharacterId = Convert.ToInt64(d[0]),
-                    CharacterName = d[1].ToString(),
-                    DiscordUserId = Convert.ToUInt64(d[2]),
-                    RefreshToken = d[3].ToString(),
-                    GroupName = d[4].ToString(),
-                    Permissions = d[5].ToString(),
-                    AuthState = Convert.ToInt32(d[6]),
-                });
-            });
-            return list;
-        }*/
+        */
         #endregion
 
         #region System
@@ -469,7 +326,7 @@ namespace ThunderED.Helpers
                 }
 
                 //upgrade database
-                if (!Upgrade().GetAwaiter().GetResult())
+                if (!await Upgrade())
                 {
                     return "[CRITICAL] Failed to upgrade DB to latest version!";
                 }

@@ -10,6 +10,7 @@ namespace ThunderED
     public class ThunderedDbContext : DbContext
     {
         public DbSet<ThdAuthUser> Users { get; set; }
+        public DbSet<ThdToken> Tokens { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
         //public DbSet<JsonClasses.RegionData> Regions { get; set; }
@@ -37,11 +38,11 @@ namespace ThunderED
             modelBuilder.Entity<ThdAuthUser>().HasKey(u => u.Id);
             modelBuilder.Entity<ThdAuthUser>().ToTable("auth_users");
 
-            modelBuilder.Entity<ThdAuthUser>().Property(a => a.Id).HasField("Id").ValueGeneratedOnAdd();
+            modelBuilder.Entity<ThdAuthUser>().Property(a => a.Id).HasColumnName("Id").ValueGeneratedOnAdd();
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.CharacterId).HasColumnName("characterID");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.DiscordId).HasColumnName("discordID");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.GroupName).HasColumnName("groupName");
-            modelBuilder.Entity<ThdAuthUser>().Property(a => a.RefreshToken).HasColumnName("refreshToken");
+            //delBuilder.Entity<ThdAuthUser>().Property(a => a.RefreshToken).HasColumnName("refreshToken");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.AuthState).HasColumnName("authState");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.Data).HasColumnName("data");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.RegCode).HasColumnName("reg_code");
@@ -51,8 +52,19 @@ namespace ThunderED
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.LastCheck).HasColumnName("last_check");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.Ip).HasColumnName("ip");
 
+            modelBuilder.Entity<ThdToken>().HasIndex(u => u.Id).IsUnique();
+            modelBuilder.Entity<ThdToken>().HasKey(u => u.Id);
+            modelBuilder.Entity<ThdToken>().HasIndex(u => u.CharacterId);
+            modelBuilder.Entity<ThdToken>().ToTable("tokens");
 
+            modelBuilder.Entity<ThdToken>().Property(a => a.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            modelBuilder.Entity<ThdToken>().Property(a => a.CharacterId).HasColumnName("character_id");
+            modelBuilder.Entity<ThdToken>().Property(a => a.Token).HasColumnName("token");
+            modelBuilder.Entity<ThdToken>().Property(a => a.Type).HasColumnName("type");
+            modelBuilder.Entity<ThdToken>().HasOne(a => a.User).WithMany(a => a.Tokens)
+                .HasForeignKey(a => a.CharacterId).HasPrincipalKey(a => a.CharacterId);
 
+            //modelBuilder.Entity<ThdToken>().HasIndex(new string[] { "character_id", "type" }, "tokens_character_id_type_uindex").IsUnique();
             //modelBuilder.Entity<JsonClasses.SystemName>().HasIndex(u => u.system_id );
             //modelBuilder.Entity<JsonClasses.ConstellationData>().HasIndex(u => u.constellation_id );
             //modelBuilder.Entity<JsonClasses.RegionData>().HasIndex(u => u.DB_id);
@@ -210,4 +222,6 @@ namespace ThunderED
             return sb.ToString();
         }*/
     }
+
+
 }

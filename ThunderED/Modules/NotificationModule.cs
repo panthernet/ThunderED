@@ -92,7 +92,7 @@ namespace ThunderED.Modules
 
                         foreach (var charId in ids)
                         {
-                            var rToken = await SQLHelper.GetRefreshTokenDefault(charId);
+                            var rToken = await DbHelper.GetToken(charId, TokenEnum.Notification);
                             if (string.IsNullOrEmpty(rToken))
                             {
                                 await SendOneTimeWarning(charId + 100, $"Failed to get notifications refresh token for character {charId}! User is not authenticated.");
@@ -110,7 +110,7 @@ namespace ThunderED.Modules
                                     await SendOneTimeWarning(charId,
                                         $"Notifications token for character {charId} is outdated or no more valid!");
                                     await LogHelper.LogWarning($"Deleting invalid notification refresh token for {charId}", Category);
-                                    await SQLHelper.DeleteTokens(charId, "1");
+                                    await DbHelper.DeleteToken(charId, TokenEnum.Notification);
                                 }
                                 else
                                     await LogHelper.LogWarning(
@@ -275,7 +275,7 @@ typeID: 2233",
                                             if (filter.CharMentions.Count > 0)
                                             {
                                                 var list = filter.CharMentions.Select(a =>
-                                                        SQLHelper.GetAuthUserDiscordId(a).GetAwaiter().GetResult()).Where(a => a != 0)
+                                                        DbHelper.GetAuthUser(a).GetAwaiter().GetResult()?.DiscordId ?? 0).Where(a => a != 0)
                                                     .ToList();
                                                 if (list.Count > 0)
                                                 {

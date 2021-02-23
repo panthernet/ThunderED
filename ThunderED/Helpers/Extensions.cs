@@ -14,26 +14,6 @@ namespace ThunderED
 {
     public static class Extensions
     {
-        public static async Task UpdateData(this AuthUserEntity user, JsonClasses.CharacterData characterData, JsonClasses.CorporationData rCorp = null, JsonClasses.AllianceData rAlliance = null, string permissions = null)
-        {
-            rCorp ??= await APIHelper.ESIAPI.GetCorporationData(LogCat.AuthCheck.ToString(), characterData.corporation_id, true);
-            user.Data.CharacterName = characterData.name;
-            user.Data.CorporationId = characterData.corporation_id;
-            user.Data.CorporationName = rCorp?.name;
-            user.Data.CorporationTicker = rCorp?.ticker;
-            user.Data.AllianceId = characterData.alliance_id ?? 0;
-            user.Data.AllianceName = null;
-            user.Data.AllianceTicker = null;
-            if (user.Data.AllianceId > 0)
-            {
-                rAlliance ??= await APIHelper.ESIAPI.GetAllianceData(LogCat.AuthCheck.ToString(), characterData.alliance_id, true);
-                user.Data.AllianceName = rAlliance?.name;
-                user.Data.AllianceTicker = rAlliance?.ticker;
-            }
-            if (permissions != null)
-                user.Data.Permissions = permissions;
-        }
-
         public static async Task UpdateData(this ThdAuthUser user, JsonClasses.CharacterData characterData, JsonClasses.CorporationData rCorp = null, JsonClasses.AllianceData rAlliance = null, string permissions = null, bool forceUpdate = false)
         {
             rCorp ??= await APIHelper.ESIAPI.GetCorporationData(LogCat.AuthCheck.ToString(), characterData.corporation_id, forceUpdate);
@@ -52,21 +32,25 @@ namespace ThunderED
             }
             if (permissions != null)
                 user.DataView.Permissions = permissions;
+
+            user.MiscData.BirthDate = characterData.birthday;
+            user.MiscData.SecurityStatus = characterData.security_status;
         }
 
-        public static async Task<AuthUserEntity> CreateAlt(this AuthUserEntity user, long characterId, string refreshToken, WebAuthGroup @group, string groupName, long mainCharId)
+        public static async Task<ThdAuthUser> CreateAlt(this ThdAuthUser user, long characterId, string refreshToken, WebAuthGroup @group, string groupName, long mainCharId)
         {
-            var authUser = new AuthUserEntity
+            var authUser = new ThdAuthUser
             {
                 CharacterId = characterId,
                 DiscordId = 0,
-                RefreshToken = refreshToken,
+                Tokens = new List<ThdToken> { new ThdToken() { Token = refreshToken, CharacterId = characterId, Type = TokenEnum.General}},
                 GroupName = groupName,
                 AuthState = 2,
                 CreateDate = DateTime.Now,
                 MainCharacterId = mainCharId
             };
-            await authUser.UpdateData(group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null);
+            var characterData = await APIHelper.ESIAPI.GetCharacterData(LogCat.AuthWeb.ToString(), characterId);
+            await authUser.UpdateData(characterData, null, null, group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null);
             return authUser;
         }
 
@@ -300,16 +284,6 @@ namespace ThunderED
                 default:
                     return null;
             }
-        }
-
-        public static async Task UpdateData(this AuthUserEntity user, string permissions = null)
-        {
-            var ch = await APIHelper.ESIAPI.GetCharacterData(LogCat.AuthCheck.ToString(), user.CharacterId, true);
-            if (ch == null) return;
-            await UpdateData(user, ch, null, null, permissions);
-
-            user.MiscData.BirthDate = ch.birthday;
-            user.MiscData.SecurityStatus = ch.security_status;
         }
 
         public static async Task UpdateData(this ThdAuthUser user, bool forceUpdate = false)

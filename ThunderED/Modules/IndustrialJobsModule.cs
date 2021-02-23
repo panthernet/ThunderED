@@ -99,7 +99,7 @@ namespace ThunderED.Modules
                             return true;
                         }
 
-                        await SQLHelper.InsertOrUpdateTokens("", result[0], null, null, result[1]);
+                        await DbHelper.UpdateToken(result[1], lCharId, TokenEnum.Industry);
                         await WebServerModule.WriteResponce(File
                                 .ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
                                 .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
@@ -138,7 +138,7 @@ namespace ThunderED.Modules
                     var chars = GetParsedCharacters(groupName) ?? new List<long>();
                     foreach (var characterID in chars)
                     {
-                        var rtoken = await SQLHelper.GetRefreshTokenForIndustryJobs(characterID);
+                        var rtoken = await DbHelper.GetToken(characterID, TokenEnum.Industry);
                         if (string.IsNullOrEmpty(rtoken))
                         {
                             await SendOneTimeWarning(characterID, $"Industry jobs feed token for character {characterID} not found! User is not authenticated.");
@@ -154,7 +154,7 @@ namespace ThunderED.Modules
                                 await LogHelper.LogWarning(
                                     $"Industry token for character {characterID} is outdated or no more valid!");
                                 await LogHelper.LogWarning($"Deleting invalid industry refresh token for {characterID}: {tq.Data.Message}", Category);
-                                await SQLHelper.DeleteTokens(characterID, null, null, null, "1");
+                                await DbHelper.DeleteToken(characterID, TokenEnum.Industry);
                             }
                             else
                                 await LogHelper.LogWarning($"Unable to get industry token for character {characterID}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})");

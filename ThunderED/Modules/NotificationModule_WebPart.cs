@@ -61,7 +61,7 @@ namespace ThunderED.Modules
 
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
 
-                    await SQLHelper.InsertOrUpdateTokens(result[1] ?? "", characterId, null, null);
+                    await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Notification);
                     await LogHelper.LogInfo($"Notification feed added for character: {characterId}", Category);
 
                     var res = WebQueryResult.FeedAuthSuccess;
@@ -151,7 +151,7 @@ namespace ThunderED.Modules
 
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterID, true);
 
-                    await SQLHelper.InsertOrUpdateTokens(result[1] ?? "", characterID, null, "");
+                    await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Notification);
                     await LogHelper.LogInfo($"Notification feed added for character: {characterID}", LogCat.AuthWeb);
                     await WebServerModule.WriteResponce(File.ReadAllText(SettingsManager.FileTemplateAuthNotifySuccess)
                         .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
