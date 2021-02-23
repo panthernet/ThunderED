@@ -35,7 +35,7 @@ namespace ThunderED.Modules
                     AllianceName = a.DataView.AllianceName,
                     CorporationTicker = a.DataView.CorporationTicker,
                     AllianceTicker = a.DataView.AllianceTicker,
-                    RegDate = a.CreateDate,
+                    RegDate = a.CreateDate ?? DateTime.MinValue,
                     IconUrl = $"https://imageserver.eveonline.com/Character/{a.CharacterId}_64.jpg",
                     HasNoToken = !a.HasToken,
                     HasInvalidToken = false
@@ -70,7 +70,7 @@ namespace ThunderED.Modules
             }
 
             if (sUser.DiscordId > 0)
-                await WebAuthModule.UpdateUserRoles(sUser.DiscordId,
+                await WebAuthModule.UpdateUserRoles(sUser.DiscordId ?? 0,
                     Settings.WebAuthModule.ExemptDiscordRoles,
                     Settings.WebAuthModule.AuthCheckIgnoreRoles, true);
             return true;
@@ -396,7 +396,7 @@ namespace ThunderED.Modules
             await DbHelper.SaveAuthUser(sUser);
             if (sUser.DiscordId > 0)
             {
-                await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId);
+                await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId ?? 0);
                 return UserStatusEnum.Authed;
             }
             return UserStatusEnum.Awaiting;

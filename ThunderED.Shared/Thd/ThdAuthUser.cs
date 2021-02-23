@@ -11,16 +11,18 @@ namespace ThunderED.Thd
     {
         public long Id;
         public long CharacterId;
-        public ulong DiscordId;
+        public ulong? DiscordId;
         public string GroupName;
         public int AuthState;
         public string Data;
         public string RegCode;
-        public DateTime CreateDate;
+        public DateTime? CreateDate;
         public DateTime? DumpDate;
         public long? MainCharacterId;
         public DateTime? LastCheck;
         public string Ip;
+        [Obsolete]
+        public string RefreshToken { get; set; }
 
         [NotMapped] public AuthUserData DataView = new AuthUserData();
         [NotMapped] public MiscUserData MiscData = new MiscUserData();
@@ -35,6 +37,7 @@ namespace ThunderED.Thd
         }
 
         public List<ThdToken> Tokens { get; set; }
+
 
         public string GetGeneralToken()
         {

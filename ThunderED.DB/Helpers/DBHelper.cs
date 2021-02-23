@@ -72,7 +72,7 @@ namespace ThunderED
             await using var db = new ThunderedDbContext();
             var compareDate = DateTime.Now.AddHours(-1);
             return await db.Users.Where(a => !a.LastCheck.HasValue || a.LastCheck.Value <= compareDate).OrderBy(a => a.LastCheck)
-                .Take(count).Select(a => a.DiscordId).ToListAsync();
+                .Take(count).Select(a => a.DiscordId ?? 0).ToListAsync();
         }
 
         public static async Task<List<long>> GetUserIdsForAuthCheck(int count = 100)

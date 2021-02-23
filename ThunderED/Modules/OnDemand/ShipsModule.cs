@@ -158,7 +158,7 @@ namespace ThunderED.Modules.OnDemand
                     if (isOnlineOnly)
                     {
                         var dusers = APIHelper.DiscordAPI.GetUserIdsFromChannel(context.Guild.Id, 0, true);
-                        usersToCheck = (await DbHelper.GetAuthUsers(UserStatusEnum.Authed, true)).Where(item => dusers.Contains(item.DiscordId) &&
+                        usersToCheck = (await DbHelper.GetAuthUsers(UserStatusEnum.Authed, true)).Where(item => dusers.Contains(item.DiscordId ?? 0) &&
                                 !string.IsNullOrEmpty(item.DataView.Permissions) && SettingsManager.HasCharSkillsScope(item.DataView.PermissionsList))
                             .ToList();
                     }

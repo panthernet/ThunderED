@@ -622,7 +622,7 @@ namespace ThunderED.Classes
                             //authed for action!
                             if (authUser.DiscordId > 0)
                             {
-                                await WebAuthModule.AuthUser(Context, code, authUser.DiscordId);
+                                await WebAuthModule.AuthUser(Context, code, authUser.DiscordId ?? 0);
                             }
                             else
                             {

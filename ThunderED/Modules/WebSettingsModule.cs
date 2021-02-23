@@ -403,7 +403,7 @@ namespace ThunderED.Modules
                     var authUser = await DbHelper.GetAuthUser(characterId);
                     if (authUser != null && authUser.DiscordId > 0)
                     {
-                        if (APIHelper.DiscordAPI.GetUserRoleNames(authUser.DiscordId).Intersect(filter.AllowedDiscordRoles).Any())
+                        if (APIHelper.DiscordAPI.GetUserRoleNames(authUser.DiscordId ?? 0).Intersect(filter.AllowedDiscordRoles).Any())
                             return filter;
                     }
                 }

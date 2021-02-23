@@ -33,8 +33,8 @@ namespace ThunderED
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
-            modelBuilder.Entity<ThdAuthUser>().HasIndex(u => u.CharacterId ).IsUnique();
+
+            modelBuilder.Entity<ThdAuthUser>().HasIndex(u => u.CharacterId).IsUnique();
             modelBuilder.Entity<ThdAuthUser>().HasKey(u => u.Id);
             modelBuilder.Entity<ThdAuthUser>().ToTable("auth_users");
 
@@ -42,7 +42,7 @@ namespace ThunderED
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.CharacterId).HasColumnName("characterID");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.DiscordId).HasColumnName("discordID");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.GroupName).HasColumnName("groupName");
-            //delBuilder.Entity<ThdAuthUser>().Property(a => a.RefreshToken).HasColumnName("refreshToken");
+            modelBuilder.Entity<ThdAuthUser>().Property(a => a.RefreshToken).HasColumnName("refreshToken");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.AuthState).HasColumnName("authState");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.Data).HasColumnName("data");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.RegCode).HasColumnName("reg_code");

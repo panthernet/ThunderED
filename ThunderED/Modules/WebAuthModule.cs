@@ -168,7 +168,7 @@ namespace ThunderED.Modules
                     continue;
                 }
 
-                if (group.AppInvalidationInHours > 0 && (DateTime.Now - user.CreateDate).TotalHours >= group.AppInvalidationInHours)
+                if (group.AppInvalidationInHours > 0 && (DateTime.Now - (user.CreateDate ?? DateTime.MinValue)).TotalHours >= group.AppInvalidationInHours)
                 {
                     if (Settings.Config.ModuleHRM && Settings.HRMModule.UseDumpForMembers)
                     {
@@ -382,7 +382,7 @@ namespace ThunderED.Modules
                     }
 
                     //auth
-                    await AuthUser(context, user.RegCode, user.DiscordId);
+                    await AuthUser(context, user.RegCode, user.DiscordId ?? 0);
                 }
             }
             catch (Exception ex)
