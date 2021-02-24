@@ -1,6 +1,8 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
 WORKDIR /app/ThunderED
 
+RUN mkdir "/opt/thundered"
+
 COPY ThunderED/*.csproj ./
 RUN dotnet restore
 
