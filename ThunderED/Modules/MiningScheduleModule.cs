@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Text;
 using System.Threading.Tasks;
+using Matrix.Xmpp.MessageArchiving;
 using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Classes.Enums;
@@ -18,8 +19,13 @@ namespace ThunderED.Modules
     {
         public override LogCat Category => LogCat.MiningSchedule;
 
-        protected readonly Dictionary<string, Dictionary<string, List<long>>> ParsedFeedMembersLists = new Dictionary<string, Dictionary<string, List<long>>>();
-        protected readonly Dictionary<string, Dictionary<string, List<long>>> ParsedAccessMembersLists = new Dictionary<string, Dictionary<string, List<long>>>();
+        protected Dictionary<string, List<long>> ParsedAuthAccessMembersLists = new Dictionary<string,List<long>>();
+        protected Dictionary<string, List<long>> ParsedExtrViewAccessMembersLists = new Dictionary<string, List<long>>();
+        protected Dictionary<string, List<long>> ParsedLedgerViewAccessMembersLists = new Dictionary<string, List<long>>();
+        
+        protected Dictionary<string, Dictionary<string, List<long>>> ParsedExtrEntitiesLists = new Dictionary<string, Dictionary<string, List<long>>>();
+        protected Dictionary<string, Dictionary<string, List<long>>> ParsedLedgerEntitiesLists = new Dictionary<string, Dictionary<string, List<long>>>();
+        private static readonly object UpdateLock = new object();
 
         public override async Task Initialize()
         {
@@ -27,13 +33,42 @@ namespace ThunderED.Modules
                 WebServerModule.WebModuleConnectors.Remove(Reason);
             WebServerModule.WebModuleConnectors.Add(Reason, ProcessRequest);
 
-            ParsedFeedMembersLists.Clear();
-            ParsedAccessMembersLists.Clear();
+            ParsedAuthAccessMembersLists.Clear();
+            ParsedExtrViewAccessMembersLists.Clear();
+            ParsedLedgerViewAccessMembersLists.Clear();
 
-            var data = new Dictionary<string, List<object>> { { "general", Settings.MiningScheduleModule.AccessEntities } };
-            await ParseMixedDataArray(data, MixedParseModeEnum.Member, ParsedAccessMembersLists);
-            data = new Dictionary<string, List<object>> { { "general", Settings.MiningScheduleModule.FeedEntities } };
-            await ParseMixedDataArray(data, MixedParseModeEnum.Member, ParsedFeedMembersLists);
+            //auth access
+            ParsedAuthAccessMembersLists = await ParseMixedDataArray(Settings.MiningScheduleModule.AuthAccessEntities, MixedParseModeEnum.Member);
+
+            //extractions
+            //view access
+            ParsedExtrViewAccessMembersLists = await ParseMixedDataArray(Settings.MiningScheduleModule.Extractions.ViewAccessEntities, MixedParseModeEnum.Member);
+            
+            lock (UpdateLock)
+                ParsedExtrEntitiesLists.Clear();
+            //parse data
+            foreach (var (key, value) in Settings.MiningScheduleModule.Extractions.ComplexAccess)
+            {
+                var aData = await ParseMemberDataArray(value.Entities
+                    .Where(a => (a is long i && i != 0) || (a is string s && s != string.Empty)).ToList());
+                lock (UpdateLock)
+                    ParsedExtrEntitiesLists.Add(key, aData);
+            }
+
+            //ledger
+            //view access
+            ParsedLedgerViewAccessMembersLists = await ParseMixedDataArray(Settings.MiningScheduleModule.Ledger.ViewAccessEntities, MixedParseModeEnum.Member);
+            lock (UpdateLock)
+                ParsedLedgerEntitiesLists.Clear();
+            //parse data
+            foreach (var (key, value) in Settings.MiningScheduleModule.Ledger.ComplexAccess)
+            {
+                var aData = await ParseMemberDataArray(value.Entities
+                    .Where(a => (a is long i && i != 0) || (a is string s && s != string.Empty)).ToList());
+                lock (UpdateLock)
+                    ParsedLedgerEntitiesLists.Add(key, aData);
+            }
+
         }
 
         public override Task Run(object prm)
@@ -105,7 +140,7 @@ namespace ThunderED.Modules
 
         }
 
-        public async Task<WebMiningExtractionResult> GetExtractions()
+        public async Task<WebMiningExtractionResult> GetExtractions(MiningComplexAccessGroup accessGroup, WebAuthUserData user)
         {
             var result = new WebMiningExtractionResult();
             var tokens = await DbHelper.GetTokens(TokenEnum.MiningSchedule);
@@ -139,6 +174,11 @@ namespace ThunderED.Modules
                     await LogHelper.LogWarning($"Failed to refresh corp {rChar.corporation_id}");
                     continue;
                 }
+
+                //check access to only own corp
+                if(accessGroup != null && accessGroup.CanManageOwnCorporation && rChar.corporation_id != user.CorpId)
+                    continue;
+
                 if(processedCorps.Contains(rChar.corporation_id))
                     continue;
 
@@ -147,12 +187,24 @@ namespace ThunderED.Modules
 
                 var extr = await APIHelper.ESIAPI.GetCorpMiningExtractions(Reason, rChar.corporation_id, r.Result);
                 var innerList = new List<WebMiningExtraction>();
-               // var structures = await APIHelper.ESIAPI.GetCorpStructures(Reason, rChar.corporation_id, token.Token);
 
                 foreach (var e in extr)
                 {
                     var structure =
                         await APIHelper.ESIAPI.GetUniverseStructureData(Reason, e.structure_id, r.Result);
+
+                    //check structures from access list
+                    if (accessGroup != null && !accessGroup.CanManageOwnCorporation && accessGroup.StructureNames.Any())
+                    {
+                        if (structure == null)
+                        {
+                            await LogHelper.LogWarning(
+                                $"Has accessGroup for user {user.Name} and can't identify structure. It will be skipped.", Category);
+                            continue;
+                        }
+                        if(!accessGroup.StructureNames.Any(a=> structure.name.StartsWith(a, StringComparison.OrdinalIgnoreCase)))
+                            continue;
+                    }
 
                     //var moon = await APIHelper.ESIAPI.GetMoon(Reason, e.moon_id);
                     var item = new WebMiningExtraction
@@ -203,7 +255,7 @@ namespace ThunderED.Modules
 
         }
 
-        public async Task<List<WebMiningLedger>> GetLedgers()
+        public async Task<List<WebMiningLedger>> GetLedgers(MiningComplexAccessGroup accessGroup, WebAuthUserData user)
         {
             var tokens = await DbHelper.GetTokens(TokenEnum.MiningSchedule);
 
@@ -240,6 +292,10 @@ namespace ThunderED.Modules
                 if (processedCorps.Contains(rChar.corporation_id))
                     continue;
 
+                //check access to only own corp
+                if (accessGroup != null && accessGroup.CanManageOwnCorporation && rChar.corporation_id != user.CorpId)
+                    continue;
+
                 processedCorps.Add(rChar.corporation_id);
 
                 var ledgers = await APIHelper.ESIAPI.GetCorpMiningLedgers(Reason, rChar.corporation_id, r.Result);
@@ -249,6 +305,19 @@ namespace ThunderED.Modules
                 {
                     var structure =
                         await APIHelper.ESIAPI.GetUniverseStructureData(Reason, ledger.observer_id, r.Result);
+
+                    //check structures from access list
+                    if (accessGroup != null && !accessGroup.CanManageOwnCorporation && accessGroup.StructureNames.Any())
+                    {
+                        if (structure == null)
+                        {
+                            await LogHelper.LogWarning(
+                                $"Has accessGroup for user {user.Name} and can't identify structure. It will be skipped.", Category);
+                            continue;
+                        }
+                        if (!accessGroup.StructureNames.Any(a => structure.name.StartsWith(a, StringComparison.OrdinalIgnoreCase)))
+                            continue;
+                    }
 
                     var item = new WebMiningLedger
                     {
@@ -268,46 +337,116 @@ namespace ThunderED.Modules
             return list;
         }
 
-        #region Access checks
-
-        public static bool HasViewAccess(in JsonClasses.CharacterData data)
+        #region Extractions Access checks
+        /// <summary>
+        /// Admin access to observer all extractions operations
+        /// </summary>
+        public static bool HasObserverExtrViewAccess(in JsonClasses.CharacterData data)
         {
             if (data == null) return false;
-            return HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0);
-        }
-
-        public static bool HasViewAccess(WebAuthUserData data)
-        {
-            if (data == null) return false;
-            return HasViewAccess(data.Id, data.CorpId, data.AllianceId);
-        }
-
-        private static bool HasViewAccess(long id, long corpId, long allianceId)
-        {
-            if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
-
-            return module.GetAccessAllCharacterIds().Contains(id) ||
-                   module.GetAccessAllCorporationIds().Contains(corpId) || (allianceId > 0 &&
-                                                                            module.GetAccessAllAllianceIds().Contains(allianceId));
+            return HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedExtrViewAccessMembersLists);
+        }
+        /// <summary>
+        /// Admin access to observer all extractions operations
+        /// </summary>
+        public static bool HasObserverExtrViewAccess(WebAuthUserData data)
+        {
+            if (data == null) return false;
+            var module = TickManager.GetModule<MiningScheduleModule>();
+            return HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedExtrViewAccessMembersLists);
         }
 
-        public List<long> GetAccessAllCharacterIds()
+        public static bool HasExtrEditAccess(in JsonClasses.CharacterData data, out string groupName)
         {
-            return ParsedAccessMembersLists.Where(a => a.Value.ContainsKey("character")).SelectMany(a => a.Value["character"]).Distinct().Where(a => a > 0).ToList();
-        }
-        public List<long> GetAccessAllCorporationIds()
-        {
-            return ParsedAccessMembersLists.Where(a => a.Value.ContainsKey("corporation")).SelectMany(a => a.Value["corporation"]).Distinct().Where(a => a > 0).ToList();
+            groupName = null;
+            if (data == null) return false;
+            var module = TickManager.GetModule<MiningScheduleModule>();
+            return HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedExtrEntitiesLists, out groupName);
         }
 
-        public List<long> GetAccessAllAllianceIds()
+        public static bool HasExtrEditAccess(WebAuthUserData data, out string groupName)
         {
-            return ParsedAccessMembersLists.Where(a => a.Value.ContainsKey("alliance")).SelectMany(a => a.Value["alliance"]).Distinct().Where(a => a > 0).ToList();
+            groupName = null;
+            if (data == null) return false;
+            var module = TickManager.GetModule<MiningScheduleModule>();
+            return HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedExtrEntitiesLists, out groupName);
+        }
+
+        /// <summary>
+        /// Global access flag to extractions operations
+        /// </summary>
+        public static bool HasCommonExtrViewAccess(in JsonClasses.CharacterData data)
+        {
+            if (data == null) return false;
+            return HasObserverExtrViewAccess(data) || HasExtrEditAccess(data, out _);
+        }
+        /// <summary>
+        /// Global access flag to extractions operations
+        /// </summary>
+        public static bool HasCommonExtrViewAccess(in WebAuthUserData data)
+        {
+            if (data == null) return false;
+            return HasObserverExtrViewAccess(data) || HasExtrEditAccess(data, out _);
         }
         #endregion
 
-        #region Feed/Auth checks
+        #region Ledger Access checks
+
+        /// <summary>
+        /// Admin access to observer all ledger operations
+        /// </summary>
+        public static bool HasObserverLedgerViewAccess(in JsonClasses.CharacterData data)
+        {
+            if (data == null) return false;
+            var module = TickManager.GetModule<MiningScheduleModule>();
+            return HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedLedgerViewAccessMembersLists);
+        }
+
+        /// <summary>
+        /// Admin access to observer all ledger operations
+        /// </summary>
+        public static bool HasObserverLedgerViewAccess(WebAuthUserData data)
+        {
+            if (data == null) return false;
+            var module = TickManager.GetModule<MiningScheduleModule>();
+            return HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedLedgerViewAccessMembersLists);
+        }
+
+        public static bool HasLedgerEditAccess(in JsonClasses.CharacterData data, out string groupName)
+        {
+            groupName = null;
+            if (data == null) return false;
+            var module = TickManager.GetModule<MiningScheduleModule>();
+            return HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedLedgerEntitiesLists, out groupName);
+        }
+
+        public static bool HasLedgerEditAccess(WebAuthUserData data, out string groupName)
+        {
+            groupName = null;
+            if (data == null) return false;
+            var module = TickManager.GetModule<MiningScheduleModule>();
+            return HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedLedgerEntitiesLists, out groupName);
+        }
+        /// <summary>
+        /// Global access flag to ledger operations
+        /// </summary>
+        public static bool HasCommonLedgerViewAccess(in JsonClasses.CharacterData data)
+        {
+            if (data == null) return false;
+            return HasObserverLedgerViewAccess(data) || HasLedgerEditAccess(data, out _);
+        }
+        /// <summary>
+        /// Global access flag to ledger operations
+        /// </summary>
+        public static bool HasCommonLedgerViewAccess(in WebAuthUserData data)
+        {
+            if (data == null) return false;
+            return HasObserverLedgerViewAccess(data) || HasLedgerEditAccess(data, out _);
+        }
+        #endregion
+
+        #region Auth checks
 
         public static bool HasAuthAccess(in JsonClasses.CharacterData data)
         {
@@ -326,26 +465,75 @@ namespace ThunderED.Modules
             if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
 
-            return module.GetFeedAllCharacterIds().Contains(id) ||
-                   module.GetFeedAllCorporationIds().Contains(corpId) || (allianceId > 0 &&
-                                                                            module.GetFeedAllAllianceIds().Contains(allianceId));
+            return module.GetAccessAllCharacterIds(module.ParsedAuthAccessMembersLists).Contains(id) ||
+                   module.GetAccessAllCorporationIds(module.ParsedAuthAccessMembersLists).Contains(corpId) || (allianceId > 0 &&
+                                                                            module.GetAccessAllAllianceIds(module.ParsedAuthAccessMembersLists).Contains(allianceId));
         }
 
-        public List<long> GetFeedAllCharacterIds()
+        /// <summary>
+        /// Security check for access
+        /// </summary>
+        public static bool HasViewAccess(in JsonClasses.CharacterData data)
         {
-            return ParsedFeedMembersLists.Where(a => a.Value.ContainsKey("character")).SelectMany(a => a.Value["character"]).Distinct().Where(a => a > 0).ToList();
-        }
-        public List<long> GetFeedAllCorporationIds()
-        {
-            return ParsedFeedMembersLists.Where(a => a.Value.ContainsKey("corporation")).SelectMany(a => a.Value["corporation"]).Distinct().Where(a => a > 0).ToList();
+            if (data == null) return false;
+            return HasObserverExtrViewAccess(data) || HasObserverLedgerViewAccess(data) || HasExtrEditAccess(data, out _) || HasLedgerEditAccess(data, out _);
         }
 
-        public List<long> GetFeedAllAllianceIds()
+        /// <summary>
+        /// Security check for access
+        /// </summary>
+        public static bool HasViewAccess(WebAuthUserData data)
         {
-            return ParsedFeedMembersLists.Where(a => a.Value.ContainsKey("alliance")).SelectMany(a => a.Value["alliance"]).Distinct().Where(a => a > 0).ToList();
+            if (data == null) return false;
+            return HasObserverExtrViewAccess(data) || HasObserverLedgerViewAccess(data) || HasExtrEditAccess(data, out _) || HasLedgerEditAccess(data, out _);
         }
+
         #endregion
 
+        #region General access functions
+
+        private static bool HasViewAccess(long id, long corpId, long allianceId, Dictionary<string, List<long>> dic)
+        {
+            if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
+            return dic["character"].Contains(id) || dic["corporation"].Contains(corpId) || (allianceId > 0 && dic["alliance"].Contains(corpId));
+        }
+
+        private static bool HasViewAccess(long id, long corpId, long allianceId, Dictionary<string, Dictionary<string, List<long>>> dic, out string groupName)
+        {
+            groupName = null;
+            if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
+            //var module = TickManager.GetModule<MiningScheduleModule>();
+
+            groupName = dic.FirstOrDefault(a => a.Value.FirstOrDefault(b=> b.Key == "character" && b.Value.Contains(id)).Key != null).Key;
+            if (!string.IsNullOrEmpty(groupName))
+                return true;
+            groupName = dic.FirstOrDefault(a => a.Value.FirstOrDefault(b => b.Key == "corporation" && b.Value.Contains(corpId)).Key != null).Key;
+            if (!string.IsNullOrEmpty(groupName))
+                return true;
+            if (allianceId > 0)
+            {
+                groupName = dic.FirstOrDefault(a => a.Value.FirstOrDefault(b => b.Key == "alliance" && b.Value.Contains(allianceId)).Key != null).Key;
+                if (!string.IsNullOrEmpty(groupName))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public List<long> GetAccessAllCharacterIds(Dictionary<string, List<long>> dic)
+        {
+            return dic.FirstOrDefault(a => a.Key == "character").Value.Distinct().Where(a => a > 0).ToList();
+        }
+        public List<long> GetAccessAllCorporationIds(Dictionary<string, List<long>> dic)
+        {
+            return dic.FirstOrDefault(a => a.Key == "corporation").Value.Distinct().Where(a => a > 0).ToList();
+        }
+
+        public List<long> GetAccessAllAllianceIds(Dictionary<string, List<long>> dic)
+        {
+            return dic.FirstOrDefault(a => a.Key == "alliance").Value.Distinct().Where(a => a > 0).ToList();
+        }
+        #endregion
 
         public async Task<List<WebMiningLedgerEntry>> GetLedgerEntries(long ledgerStructureId, long charId)
         {
@@ -422,5 +610,6 @@ namespace ThunderED.Modules
 
             return list.OrderByDescending(a=> a.Quantity).ToList();
         }
+
     }
 }

@@ -154,6 +154,19 @@ namespace ThunderED.Modules
             }
         }
 
+        protected virtual async Task<Dictionary<string, List<long>>> ParseMixedDataArray(List<object> data, MixedParseModeEnum mode)
+        {
+            switch (mode)
+            {
+                case MixedParseModeEnum.Location:
+                    return await ParseLocationDataArray(data);
+                case MixedParseModeEnum.Member:
+                    return await ParseMemberDataArray(data);
+                default:
+                    return null;
+            }
+        }
+
         /// <summary>
         /// Gets or sets if there was errors during the initial entity queries
         /// </summary>

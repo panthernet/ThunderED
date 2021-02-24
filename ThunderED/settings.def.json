@@ -864,11 +864,27 @@
 
   "MiningScheduleModule": {
     "AuthButtonDiscordText": "Mining Schedule Auth",
-    "AccessEntities": [
-    ],
-    "FeedEntities": [
-
-    ]
+    "AuthAccessEntities": [],
+    "Extractions": {
+      "ViewAccessEntities": [],
+      "ComplexAccess": {
+        "AccessEntry1": {
+          "Entities": [],
+          "CanManageOwnCorporation": false,
+          "StructureNames": []
+        }
+      }
+    },
+    "Ledger": {
+      "ViewAccessEntities": [],
+      "ComplexAccess": {
+        "AccessEntry1": {
+          "Entities": [],
+          "CanManageOwnCorporation": false,
+          "StructureNames": []
+        }
+      }
+    }
   }
 
 }

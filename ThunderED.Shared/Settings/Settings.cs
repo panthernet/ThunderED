@@ -1808,15 +1808,60 @@ namespace ThunderED
         [Comment("Default text for the Discord authentication button")]
         public string AuthButtonDiscordText { get; set; } = "Mining Schedule Auth";
 #if EDITOR
-        [Comment("List of names and Ids of entities (char/corp/alliance) with access to the module")]
-        [Required]
-        public ObservableCollection<object> AccessEntities { get; set; } = new ObservableCollection<object>();
+
         [Comment("List of names and Ids of entities (char/corp/alliance) who can register as feeders")]
         [Required]
-        public ObservableCollection<object> FeedEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> AuthAccessEntities { get; set; } = new ObservableCollection<object>();
 #else
-        public List<object> AccessEntities { get; set; } = new List<object>();
-        public List<object> FeedEntities { get; set; } = new List<object>();
+        public List<object> AuthAccessEntities { get; set; } = new List<object>();
+#endif
+        public MiningScheduleExtractionsSection Extractions { get; set; } = new MiningScheduleExtractionsSection();
+        public MiningScheduleLedgersSection Ledger { get; set; } = new MiningScheduleLedgersSection();
+    }
+
+    public class MiningScheduleLedgersSection
+    {
+#if EDITOR
+        [Comment("List of names and Ids of entities (char/corp/alliance) with access to the ledger")]
+        [Required]
+        public ObservableCollection<object> ViewAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("The list of groups to control access to the Ledger")]
+        public ObservableDictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new ObservableDictionary<string, MiningComplexAccessGroup>();        
+#else
+        public List<object> ViewAccessEntities { get; set; } = new List<object>();
+        public Dictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new Dictionary<string, MiningComplexAccessGroup>();
+#endif
+    }
+
+    public class MiningComplexAccessGroup
+    {
+#if EDITOR
+
+        [Comment("List of names and Ids of entities (char/corp/alliance) who can have access to this group")]
+        [Required]
+        public ObservableCollection<object> Entities { get; set; } = new ObservableCollection<object>();
+        [Required]
+        [Comment("List of structure names that group can manage. Case insensitive.")]
+        public ObservableCollection<string> StructureNames { get; set; } = new ObservableCollection<string>();
+#else
+        public List<object> Entities { get; set; } = new List<object>();
+        public List<string> StructureNames { get; set; } = new List<string>();
+#endif
+        [Comment("Set to True to allow all specified entities manage any accessible structures that belong to their corporations")]
+        public bool CanManageOwnCorporation { get; set; }
+    }
+
+    public class MiningScheduleExtractionsSection
+    {
+#if EDITOR
+        [Comment("List of names and Ids of entities (char/corp/alliance) with access to the extractions list")]
+        [Required]
+        public ObservableCollection<object> ViewAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("The list of groups to control access to the moon extractions")]
+        public ObservableDictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new ObservableDictionary<string, MiningComplexAccessGroup>();        
+#else
+        public List<object> ViewAccessEntities { get; set; } = new List<object>();
+        public Dictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new Dictionary<string, MiningComplexAccessGroup>();
 #endif
     }
 

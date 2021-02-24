@@ -161,15 +161,14 @@ namespace ThunderED.API
         public async Task<JsonClasses.StructureData> GetUniverseStructureData(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<JsonClasses.StructureData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/structures/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await GetEntry<JsonClasses.StructureData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/structures/{id}/?datasource=tranquility&language={_language}", reason, id, 1, false, false, authHeader);
         }
 
         public async Task<JsonClasses.StationData> GetStationData(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<JsonClasses.StationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/stations/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await GetEntry<JsonClasses.StationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/stations/{id}/?datasource=tranquility&language={_language}", reason, id, 30, false, false, authHeader);
         }
-
 
         public async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, object id)
         {
@@ -322,14 +321,14 @@ namespace ThunderED.API
 
  
         
-        private async Task<T> GetEntry<T>(string url, string reason, object id, int days, bool forceUpdate = false, bool noCache = false) 
+        private async Task<T> GetEntry<T>(string url, string reason, object id, int days, bool forceUpdate = false, bool noCache = false, string authHeader = null) 
             where T : class
         {
             if (id == null || id.ToString() == "0") return null;
             var data = await GetFromDbCache<T>(id, days);
             if(data == null || forceUpdate)
             {
-                data = await APIHelper.RequestWrapper<T>(url, reason);
+                data = await APIHelper.RequestWrapper<T>(url, reason, authHeader);
                 if(data != null && !noCache)
                     await UpdateDbCache(data, id, days);
             }
