@@ -650,6 +650,6 @@
   "msLedgerColumnQuantity": "Кол-во",
   "msLedgerColumnPrice": "Цена",
   "msTotalIsk": "Итого",
-  "msTotalVolume":  "Объем" 
-
+  "msTotalVolume": "Объем",
+  "msMergeAltsCheck": "Слияние с альтами"
 }

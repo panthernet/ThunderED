@@ -16,14 +16,21 @@
         </button>
     </div>
     <div class="modal-body">
+        <div class="row" style="margin-left: 20px; margin-bottom: 5px;">
+            <RadzenCheckBox @bind-Value=@_isMergeAltsOption TValue="bool" Change="async (args)=> await MergeAltsChanged(args)" /> @LM.Get("msMergeAltsCheck")
+        </div>
         <RadzenGrid AllowFiltering="true" AllowPaging="false" Count="@_countLedger" AllowSorting="true" Data="@_ledgerList" TItem="WebMiningLedgerEntry"
                     LoadData="@LoadLedgerData" Style="height: 580px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                    AllowColumnResize="true">
+                    AllowColumnResize="true" @ref="@_ledgerGrid">
             <Columns>
                 <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="200px" FilterProperty="NameFilter" SortProperty="NameFilter"
                                   Title="@LM.Get("msLedgerColumnCharacter")">
                     <Template Context="order">
-                        <RadzenLabel Text="@($"{order.CharacterName} [{order.CorporationTicker}]")" />
+                        @($"{order.CharacterName} [{order.CorporationTicker}]")
+                        @if (_isMergeAltsOption && order.Alts.Any())
+                        {
+                            <img src="@WebUiHelper.GetAsset("alt_ser_small.png")" class="text-center" title="@order.AltData" style="width: 16px; height: 16px;" />
+                        }
                     </Template>
                 </RadzenGridColumn>
                 <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="100px" FilterProperty="OreName" SortProperty="OreName"
@@ -38,7 +45,7 @@
                         <RadzenLabel Text="@(order.Quantity.ToString())" />
                     </Template>
                     <FooterTemplate>
-                        @LM.Get("msTotalVolume"): <b>@($"{(_ledgerList?.Sum(o => o.Quantity)*10):N0} m3")</b>
+                        @LM.Get("msTotalVolume"): <b>@($"{(_ledgerList?.Sum(o => o.Quantity) * 10):N0} m3")</b>
                     </FooterTemplate>
                 </RadzenGridColumn>
                 <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="80px" FilterProperty="Price" SortProperty="Price"
@@ -65,10 +72,13 @@
     [Parameter] public WebMiningLedger Ledger { get; set; }
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     private ThdAuthUser _inspector;
+    private RadzenGrid<WebMiningLedgerEntry> _ledgerGrid;
 
+    private bool _isMergeAltsOption = true;
     private bool _isLedgerLoading = true;
     private int _countLedger;
     private List<WebMiningLedgerEntry> _ledgerEntriesCache;
+    private List<WebMiningLedgerEntry> _ledgerEntriesMergedCache;
     private List<WebMiningLedgerEntry> _ledgerList;
 
     async Task Close() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
@@ -104,6 +114,7 @@
         await Task.Factory.StartNew(async () =>
         {
             _ledgerEntriesCache = await _module.GetLedgerEntries(Ledger.StructureId, Ledger.FeederId);
+            _ledgerEntriesMergedCache = await _module.MergeLedgerEntries(_ledgerEntriesCache);
             _isLedgerLoading = false;
         });
 
@@ -120,8 +131,8 @@
         if (!string.IsNullOrEmpty(args.OrderBy))
             query = query.OrderBy(args.OrderBy);
         //if (args.Skip.HasValue)
-         //   query = query.Skip(args.Skip.Value);
-       // if (args.Top.HasValue)
+        //   query = query.Skip(args.Skip.Value);
+        // if (args.Top.HasValue)
         //    query = query.Take(args.Top.Value);
         return query.ToList();
     }
@@ -131,7 +142,14 @@
         while (_isLedgerLoading)
             await Task.Delay(100);
 
-        _ledgerList = ApplyAjaxFilters(_ledgerEntriesCache, args, out _countLedger);
+        _ledgerList = ApplyAjaxFilters(_isMergeAltsOption ? _ledgerEntriesMergedCache : _ledgerEntriesCache, args, out _countLedger);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task MergeAltsChanged(bool value)
+    {
+        await _ledgerGrid.Reload();
         await InvokeAsync(StateHasChanged);
     }
 

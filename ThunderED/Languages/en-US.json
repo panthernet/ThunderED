@@ -657,5 +657,6 @@
   "msLedgerColumnQuantity": "Quantity",
   "msLedgerColumnPrice": "Price",
   "msTotalIsk": "Total",
-  "msTotalVolume": "Volume"
+  "msTotalVolume": "Volume",
+  "msMergeAltsCheck":  "Merge alts" 
 }

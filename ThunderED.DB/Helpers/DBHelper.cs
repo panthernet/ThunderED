@@ -161,15 +161,20 @@ namespace ThunderED
 
         public static async Task SaveAuthUser(ThdAuthUser user, string token = null)
         {
-            //todo check
             await using var db = new ThunderedDbContext();
             user.PackData();
             db.Attach(user);
             if(db.Entry(user).State == EntityState.Unchanged)
                 db.Entry(user).State = EntityState.Modified;
             if (!string.IsNullOrEmpty(token))
+            {
+                var old = db.Tokens.FirstOrDefault(a => a.CharacterId == user.CharacterId && a.Type == TokenEnum.General);
+                if (old != null)
+                    db.Tokens.Remove(old);
                 await db.Tokens.AddAsync(new ThdToken
                     {Type = TokenEnum.General, CharacterId = user.CharacterId, Token = token});
+            }
+
             await db.SaveChangesAsync();
         }
 
@@ -199,7 +204,7 @@ namespace ThunderED
             if (item != null)
             {
                 db.Users.Remove(item);
-                var tokens = db.Tokens.Where(a => a.CharacterId == characterId);
+                var tokens = db.Tokens.Where(a => a.CharacterId == characterId && a.Type == TokenEnum.General);
                 db.Tokens.RemoveRange(tokens);
 
                 var alts = await db.Users.Where(a => a.MainCharacterId == characterId).ToListAsync();
@@ -338,6 +343,14 @@ namespace ThunderED
             }
 
             await db.SaveChangesAsync();
+        }
+
+        public static async Task<List<long>> GetAltUserIds(long entryCharacterId)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Users.AsNoTracking().Where(a => a.MainCharacterId == entryCharacterId)
+                .Select(a => a.CharacterId)
+                .ToListAsync();
         }
     }
 }

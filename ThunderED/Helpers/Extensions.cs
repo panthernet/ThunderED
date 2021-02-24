@@ -37,13 +37,13 @@ namespace ThunderED
             user.MiscData.SecurityStatus = characterData.security_status;
         }
 
-        public static async Task<ThdAuthUser> CreateAlt(this ThdAuthUser user, long characterId, string refreshToken, WebAuthGroup @group, string groupName, long mainCharId)
+        public static async Task<ThdAuthUser> CreateAlt(this ThdAuthUser user, long characterId, WebAuthGroup @group, string groupName, long mainCharId)
         {
             var authUser = new ThdAuthUser
             {
                 CharacterId = characterId,
                 DiscordId = 0,
-                Tokens = new List<ThdToken> { new ThdToken() { Token = refreshToken, CharacterId = characterId, Type = TokenEnum.General}},
+                //Tokens = new List<ThdToken> { new ThdToken() { Token = refreshToken, CharacterId = characterId, Type = TokenEnum.General}},
                 GroupName = groupName,
                 AuthState = 2,
                 CreateDate = DateTime.Now,

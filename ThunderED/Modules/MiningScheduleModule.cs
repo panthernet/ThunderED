@@ -142,100 +142,116 @@ namespace ThunderED.Modules
 
         public async Task<WebMiningExtractionResult> GetExtractions(MiningComplexAccessGroup accessGroup, WebAuthUserData user)
         {
-            var result = new WebMiningExtractionResult();
-            var tokens = await DbHelper.GetTokens(TokenEnum.MiningSchedule);
-
-            var processedCorps = new List<long>();
-
-            foreach (var token in tokens)
+            try
             {
-                var r = await APIHelper.ESIAPI.RefreshToken(token.Token, Settings.WebServerModule.CcpAppClientId,
-                    Settings.WebServerModule.CcpAppSecret);
-                if (r == null || r.Data.IsFailed)
+                var result = new WebMiningExtractionResult();
+                var tokens = await DbHelper.GetTokens(TokenEnum.MiningSchedule);
+
+                var processedCorps = new List<long>();
+
+                foreach (var token in tokens)
                 {
-                    await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}");
-                    if (r?.Data.IsNotValid ?? false)
+                    var r = await APIHelper.ESIAPI.RefreshToken(token.Token, Settings.WebServerModule.CcpAppClientId,
+                        Settings.WebServerModule.CcpAppSecret);
+                    if (r == null || r.Data.IsFailed)
                     {
-                        await DbHelper.DeleteToken(token.CharacterId, TokenEnum.MiningSchedule);
-                        await LogHelper.LogWarning($"Mining token from {token.CharacterId} is no longer valid and will be deleted!");
-                    }
-                    continue;
-                }
-
-                var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, token.CharacterId, true);
-                if (rChar == null)
-                {
-                    await LogHelper.LogWarning($"Failed to refresh character {token.CharacterId}");
-                    continue;
-                }
-                var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
-                if (corp == null)
-                {
-                    await LogHelper.LogWarning($"Failed to refresh corp {rChar.corporation_id}");
-                    continue;
-                }
-
-                //check access to only own corp
-                if(accessGroup != null && accessGroup.CanManageOwnCorporation && rChar.corporation_id != user.CorpId)
-                    continue;
-
-                if(processedCorps.Contains(rChar.corporation_id))
-                    continue;
-
-                processedCorps.Add(rChar.corporation_id);
-                result.Corporations.Add(corp.name);
-
-                var extr = await APIHelper.ESIAPI.GetCorpMiningExtractions(Reason, rChar.corporation_id, r.Result);
-                var innerList = new List<WebMiningExtraction>();
-
-                foreach (var e in extr)
-                {
-                    var structure =
-                        await APIHelper.ESIAPI.GetUniverseStructureData(Reason, e.structure_id, r.Result);
-
-                    //check structures from access list
-                    if (accessGroup != null && !accessGroup.CanManageOwnCorporation && accessGroup.StructureNames.Any())
-                    {
-                        if (structure == null)
+                        await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}");
+                        if (r?.Data.IsNotValid ?? false)
                         {
+                            await DbHelper.DeleteToken(token.CharacterId, TokenEnum.MiningSchedule);
                             await LogHelper.LogWarning(
-                                $"Has accessGroup for user {user.Name} and can't identify structure. It will be skipped.", Category);
-                            continue;
+                                $"Mining token from {token.CharacterId} is no longer valid and will be deleted!");
                         }
-                        if(!accessGroup.StructureNames.Any(a=> structure.name.StartsWith(a, StringComparison.OrdinalIgnoreCase)))
-                            continue;
+
+                        continue;
                     }
 
-                    //var moon = await APIHelper.ESIAPI.GetMoon(Reason, e.moon_id);
-                    var item = new WebMiningExtraction
+                    var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, token.CharacterId, true);
+                    if (rChar == null)
                     {
-                        ExtractionStartTime = e.extraction_start_time.ToEveTime(),
-                        ChunkArrivalTime = e.chunk_arrival_time.ToEveTime(),
-                        NaturalDecayTime = e.natural_decay_time.ToEveTime(),
-                        //MoonId = e.moon_id,
-                        StructureId = e.structure_id,
-                        StructureName = structure?.name ?? LM.Get("Unknown"),
-                        //MoonName = moon?.name ?? LM.Get("Unknown"),
-                        CorporationName = corp.name,
-                        
-                    };
-                    item.Remains = item.ChunkArrivalTime.GetRemains(LM.Get("timerRemains"));
-
-                    var notify = await DbHelper.GetMiningNotification(e.structure_id, item.NaturalDecayTime);
-                    if (notify != null)
-                    {
-                        item.OreComposition = notify.OreComposition;
-                        item.Operator = notify.Operator;
+                        await LogHelper.LogWarning($"Failed to refresh character {token.CharacterId}");
+                        continue;
                     }
 
-                    innerList.Add(item);
+                    var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
+                    if (corp == null)
+                    {
+                        await LogHelper.LogWarning($"Failed to refresh corp {rChar.corporation_id}");
+                        continue;
+                    }
+
+                    //check access to only own corp
+                    if (accessGroup != null && accessGroup.CanManageOwnCorporation &&
+                        rChar.corporation_id != user.CorpId)
+                        continue;
+
+                    if (processedCorps.Contains(rChar.corporation_id))
+                        continue;
+
+                    processedCorps.Add(rChar.corporation_id);
+                    result.Corporations.Add(corp.name);
+
+                    var extr = await APIHelper.ESIAPI.GetCorpMiningExtractions(Reason, rChar.corporation_id, r.Result);
+                    var innerList = new List<WebMiningExtraction>();
+
+                    foreach (var e in extr)
+                    {
+                        var structure =
+                            await APIHelper.ESIAPI.GetUniverseStructureData(Reason, e.structure_id, r.Result);
+
+                        //check structures from access list
+                        if (accessGroup != null && !accessGroup.CanManageOwnCorporation &&
+                            accessGroup.StructureNames.Any())
+                        {
+                            if (structure == null)
+                            {
+                                await LogHelper.LogWarning(
+                                    $"Has accessGroup for user {user.Name} and can't identify structure. It will be skipped.",
+                                    Category);
+                                continue;
+                            }
+
+                            if (!accessGroup.StructureNames.Any(a =>
+                                structure.name.StartsWith(a, StringComparison.OrdinalIgnoreCase)))
+                                continue;
+                        }
+
+                        //var moon = await APIHelper.ESIAPI.GetMoon(Reason, e.moon_id);
+                        var item = new WebMiningExtraction
+                        {
+                            ExtractionStartTime = e.extraction_start_time.ToEveTime(),
+                            ChunkArrivalTime = e.chunk_arrival_time.ToEveTime(),
+                            NaturalDecayTime = e.natural_decay_time.ToEveTime(),
+                            //MoonId = e.moon_id,
+                            StructureId = e.structure_id,
+                            StructureName = structure?.name ?? LM.Get("Unknown"),
+                            //MoonName = moon?.name ?? LM.Get("Unknown"),
+                            CorporationName = corp.name,
+                        };
+                        item.Remains = item.ChunkArrivalTime.GetRemains(LM.Get("timerRemains"));
+
+                        var notify = await DbHelper.GetMiningNotification(e.structure_id, item.NaturalDecayTime);
+                        if (notify != null)
+                        {
+                            item.OreComposition = notify.OreComposition;
+                            item.Operator = notify.Operator;
+                        }
+
+                        innerList.Add(item);
+                    }
+
+                    result.Extractions.AddRange(innerList);
                 }
-                result.Extractions.AddRange(innerList);
-            }
 
-            result.Corporations = result.Corporations.OrderBy(a => a).ToList();
-            result.Extractions = result.Extractions.OrderBy(a => a.ChunkArrivalTime).ToList();
-            return result;
+                result.Corporations = result.Corporations.OrderBy(a => a).ToList();
+                result.Extractions = result.Extractions.OrderBy(a => a.ChunkArrivalTime).ToList();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
         }
 
         public class WebMiningExtractionResult
@@ -257,84 +273,104 @@ namespace ThunderED.Modules
 
         public async Task<List<WebMiningLedger>> GetLedgers(MiningComplexAccessGroup accessGroup, WebAuthUserData user)
         {
-            var tokens = await DbHelper.GetTokens(TokenEnum.MiningSchedule);
-
-            var processedCorps = new List<long>();
-            var list = new List<WebMiningLedger>();
-
-            foreach (var token in tokens)
+            try
             {
-                var r = await APIHelper.ESIAPI.RefreshToken(token.Token, Settings.WebServerModule.CcpAppClientId,
-                    Settings.WebServerModule.CcpAppSecret);
-                if (r == null || r.Data.IsFailed)
+                var tokens = await DbHelper.GetTokens(TokenEnum.MiningSchedule);
+
+                var processedCorps = new List<long>();
+                var list = new List<WebMiningLedger>();
+
+                foreach (var token in tokens)
                 {
-                    await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}", Category);
-                    if (r?.Data.IsNotValid ?? false)
+                    var r = await APIHelper.ESIAPI.RefreshToken(token.Token, Settings.WebServerModule.CcpAppClientId,
+                        Settings.WebServerModule.CcpAppSecret);
+                    if (r == null || r.Data.IsFailed)
                     {
-                        await DbHelper.DeleteToken(token.CharacterId, TokenEnum.MiningSchedule);
-                        await LogHelper.LogWarning($"Mining token from {token.CharacterId} is no longer valid and will be deleted!", Category);
-                    }
-                    continue;
-                }
-
-                var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, token.CharacterId, true);
-                if (rChar == null)
-                {
-                    await LogHelper.LogWarning($"Failed to refresh character {token.CharacterId}", Category);
-                    continue;
-                }
-                var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
-                if (corp == null)
-                {
-                    await LogHelper.LogWarning($"Failed to refresh corp {rChar.corporation_id}", Category);
-                    continue;
-                }
-                if (processedCorps.Contains(rChar.corporation_id))
-                    continue;
-
-                //check access to only own corp
-                if (accessGroup != null && accessGroup.CanManageOwnCorporation && rChar.corporation_id != user.CorpId)
-                    continue;
-
-                processedCorps.Add(rChar.corporation_id);
-
-                var ledgers = await APIHelper.ESIAPI.GetCorpMiningLedgers(Reason, rChar.corporation_id, r.Result);
-                var innerList = new List<WebMiningLedger>();
-
-                foreach (var ledger in ledgers)
-                {
-                    var structure =
-                        await APIHelper.ESIAPI.GetUniverseStructureData(Reason, ledger.observer_id, r.Result);
-
-                    //check structures from access list
-                    if (accessGroup != null && !accessGroup.CanManageOwnCorporation && accessGroup.StructureNames.Any())
-                    {
-                        if (structure == null)
+                        await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}",
+                            Category);
+                        if (r?.Data.IsNotValid ?? false)
                         {
+                            await DbHelper.DeleteToken(token.CharacterId, TokenEnum.MiningSchedule);
                             await LogHelper.LogWarning(
-                                $"Has accessGroup for user {user.Name} and can't identify structure. It will be skipped.", Category);
-                            continue;
+                                $"Mining token from {token.CharacterId} is no longer valid and will be deleted!",
+                                Category);
                         }
-                        if (!accessGroup.StructureNames.Any(a => structure.name.StartsWith(a, StringComparison.OrdinalIgnoreCase)))
-                            continue;
+
+                        continue;
                     }
 
-                    var item = new WebMiningLedger
+                    var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, token.CharacterId, true);
+                    if (rChar == null)
                     {
-                        CorporationName = corp.name,
-                        CorporationId = rChar.corporation_id,
-                        StructureName = structure?.name ?? LM.Get("Unknown"),
-                        StructureId = ledger.observer_id,
-                        Date = ledger.last_updated,
-                        FeederId = token.CharacterId
-                    };
+                        await LogHelper.LogWarning($"Failed to refresh character {token.CharacterId}", Category);
+                        continue;
+                    }
 
-                    innerList.Add(item);
+                    var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
+                    if (corp == null)
+                    {
+                        await LogHelper.LogWarning($"Failed to refresh corp {rChar.corporation_id}", Category);
+                        continue;
+                    }
+
+                    if (processedCorps.Contains(rChar.corporation_id))
+                        continue;
+
+                    //check access to only own corp
+                    if (accessGroup != null && accessGroup.CanManageOwnCorporation &&
+                        rChar.corporation_id != user.CorpId)
+                        continue;
+
+                    processedCorps.Add(rChar.corporation_id);
+
+                    var ledgers = await APIHelper.ESIAPI.GetCorpMiningLedgers(Reason, rChar.corporation_id, r.Result);
+                    var innerList = new List<WebMiningLedger>();
+
+                    foreach (var ledger in ledgers)
+                    {
+                        var structure =
+                            await APIHelper.ESIAPI.GetUniverseStructureData(Reason, ledger.observer_id, r.Result);
+
+                        //check structures from access list
+                        if (accessGroup != null && !accessGroup.CanManageOwnCorporation &&
+                            accessGroup.StructureNames.Any())
+                        {
+                            if (structure == null)
+                            {
+                                await LogHelper.LogWarning(
+                                    $"Has accessGroup for user {user.Name} and can't identify structure. It will be skipped.",
+                                    Category);
+                                continue;
+                            }
+
+                            if (!accessGroup.StructureNames.Any(a =>
+                                structure.name.StartsWith(a, StringComparison.OrdinalIgnoreCase)))
+                                continue;
+                        }
+
+                        var item = new WebMiningLedger
+                        {
+                            CorporationName = corp.name,
+                            CorporationId = rChar.corporation_id,
+                            StructureName = structure?.name ?? LM.Get("Unknown"),
+                            StructureId = ledger.observer_id,
+                            Date = ledger.last_updated,
+                            FeederId = token.CharacterId
+                        };
+
+                        innerList.Add(item);
+                    }
+
+                    list.AddRange(innerList);
                 }
-                list.AddRange(innerList);
-            }
 
-            return list;
+                return list;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
         }
 
         #region Extractions Access checks
@@ -537,79 +573,132 @@ namespace ThunderED.Modules
 
         public async Task<List<WebMiningLedgerEntry>> GetLedgerEntries(long ledgerStructureId, long charId)
         {
-            var token = await DbHelper.GetToken(charId, TokenEnum.MiningSchedule);
-
-            var r = await APIHelper.ESIAPI.RefreshToken(token, Settings.WebServerModule.CcpAppClientId,
-                Settings.WebServerModule.CcpAppSecret);
-            if (r == null || r.Data.IsFailed)
+            try
             {
-                await LogHelper.LogWarning($"Failed to refresh mining token from {charId}", Category);
-                if (r?.Data.IsNotValid ?? false)
+                var token = await DbHelper.GetToken(charId, TokenEnum.MiningSchedule);
+
+                var r = await APIHelper.ESIAPI.RefreshToken(token, Settings.WebServerModule.CcpAppClientId,
+                    Settings.WebServerModule.CcpAppSecret);
+                if (r == null || r.Data.IsFailed)
                 {
-                    await DbHelper.DeleteToken(charId, TokenEnum.MiningSchedule);
-                    await LogHelper.LogWarning($"Mining token from {charId} is no longer valid and will be deleted!", Category);
-                }
-                return null;
-            }
-
-            var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId, true);
-            if (rChar == null)
-            {
-                await LogHelper.LogWarning($"Failed to refresh character {charId}", Category);
-                return null;
-            }
-            var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
-            if (corp == null)
-            {
-                await LogHelper.LogWarning($"Failed to refresh corp {rChar.corporation_id}", Category);
-                return null;
-            }
-
-            var entries = await APIHelper.ESIAPI.GetCorpMiningLedgerEntries(Reason, rChar.corporation_id, ledgerStructureId, r.Result);
-            var list = new List<WebMiningLedgerEntry>();
-
-            var maxDate = entries.Max(a => a.last_updated);
-            var lowDate = maxDate.AddDays(-3);
-            entries = entries.Where(a => a.last_updated <= maxDate && a.last_updated >= lowDate).ToList();
-
-            //group by character and ore type
-            entries = entries.GroupByMany(new [] { "character_id", "type_id" }).Select(
-                g =>
-                {
-                    var list = g.Items.Cast<MiningLedgerEntryJson>();
-                    return new MiningLedgerEntryJson
+                    await LogHelper.LogWarning($"Failed to refresh mining token from {charId}", Category);
+                    if (r?.Data.IsNotValid ?? false)
                     {
-                        character_id = list.First().character_id,
-                        quantity = list.Sum(s => s.quantity),
-                        last_updated = list.First().last_updated,
-                        recorded_corporation_id = list.First().recorded_corporation_id,
-                        type_id = list.First().type_id
-                    };
-                }).ToList();
+                        await DbHelper.DeleteToken(charId, TokenEnum.MiningSchedule);
+                        await LogHelper.LogWarning(
+                            $"Mining token from {charId} is no longer valid and will be deleted!", Category);
+                    }
 
-            var oreIds = entries.Select(a => a.type_id).Distinct().ToList();
-            var prices = await APIHelper.ESIAPI.GetFuzzPrice(Reason, oreIds);
+                    return null;
+                }
 
-            foreach (var entry in entries)
-            {
-                var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, entry.character_id);
-                var c = await APIHelper.ESIAPI.GetCorporationData(Reason, entry.recorded_corporation_id);
-                var ore = await APIHelper.ESIAPI.GetTypeId(Reason, entry.type_id);
-                var price = prices.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0;
-
-                list.Add(new WebMiningLedgerEntry
+                var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId, true);
+                if (rChar == null)
                 {
-                    CharacterName = ch?.name ?? LM.Get("Unknown"),
-                    CorporationTicker = c?.ticker,
-                    OreName = ore?.name ?? LM.Get("Unknown"),
-                    OreId = entry.type_id,
-                    Quantity = entry.quantity,
-                    Price = price * entry.quantity,
-                });
-            }
+                    await LogHelper.LogWarning($"Failed to refresh character {charId}", Category);
+                    return null;
+                }
 
-            return list.OrderByDescending(a=> a.Quantity).ToList();
+                var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
+                if (corp == null)
+                {
+                    await LogHelper.LogWarning($"Failed to refresh corp {rChar.corporation_id}", Category);
+                    return null;
+                }
+
+                var entries =
+                    await APIHelper.ESIAPI.GetCorpMiningLedgerEntries(Reason, rChar.corporation_id, ledgerStructureId,
+                        r.Result);
+                var list = new List<WebMiningLedgerEntry>();
+
+                var maxDate = entries.Max(a => a.last_updated);
+                var lowDate = maxDate.AddDays(-4);
+                entries = entries.Where(a => a.last_updated <= maxDate && a.last_updated >= lowDate).ToList();
+
+                //group by character and ore type
+                entries = entries.GroupByMany(new[] {"character_id", "type_id"}).Select(
+                    g =>
+                    {
+                        var list = g.Items.Cast<MiningLedgerEntryJson>();
+                        return new MiningLedgerEntryJson
+                        {
+                            character_id = list.First().character_id,
+                            quantity = list.Sum(s => s.quantity),
+                            last_updated = list.First().last_updated,
+                            recorded_corporation_id = list.First().recorded_corporation_id,
+                            type_id = list.First().type_id
+                        };
+                    }).ToList();
+
+                var oreIds = entries.Select(a => a.type_id).Distinct().ToList();
+                var prices = await APIHelper.ESIAPI.GetFuzzPrice(Reason, oreIds);
+
+                foreach (var entry in entries)
+                {
+                    var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, entry.character_id);
+                    var c = await APIHelper.ESIAPI.GetCorporationData(Reason, entry.recorded_corporation_id);
+                    var ore = await APIHelper.ESIAPI.GetTypeId(Reason, entry.type_id);
+                    var price = prices.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0;
+
+                    list.Add(new WebMiningLedgerEntry
+                    {
+                        CharacterName = ch?.name ?? LM.Get("Unknown"),
+                        CharacterId = ch?.character_id ?? 0,
+                        CorporationTicker = c?.ticker,
+                        OreName = ore?.name ?? LM.Get("Unknown"),
+                        OreId = entry.type_id,
+                        Quantity = entry.quantity,
+                        Price = price * entry.quantity,
+                    });
+                }
+
+                return list.OrderByDescending(a => a.Quantity).ToList();
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
         }
 
+        public async Task<List<WebMiningLedgerEntry>> MergeLedgerEntries(List<WebMiningLedgerEntry> entries)
+        {
+            try
+            {
+                var result = entries.ToList();
+                var found = new List<long>();
+
+                foreach (var entry in entries)
+                {
+                    if (entry.CharacterId == 0 || found.Contains(entry.CharacterId)) continue;
+
+                    var alts = await DbHelper.GetAltUserIds(entry.CharacterId);
+                    if (alts.Any())
+                    {
+                        //alts by char and ore id
+                        var altEntries = result.Where(a => alts.Contains(a.CharacterId) && a.OreId == entry.OreId)
+                            .ToList();
+                        var resultEntry = result.FirstOrDefault(a =>
+                            a.CharacterId == entry.CharacterId && a.OreId == entry.OreId);
+
+                        resultEntry.Alts.AddRange(altEntries);
+                        foreach (var altEntry in altEntries)
+                        {
+                            result.Remove(altEntry);
+                            //skip found alts for perf reason
+                            found.Add(altEntry.CharacterId);
+                        }
+                    }
+                }
+
+                result.ForEach(a => a.Recalculate());
+                return result;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
+        }
     }
 }

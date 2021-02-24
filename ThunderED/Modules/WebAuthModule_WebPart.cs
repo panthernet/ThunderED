@@ -275,12 +275,13 @@ namespace ThunderED.Modules
                             group = pair.Value;
                             groupName = pair.Key;
 
-                            var altUser = await user.CreateAlt(altCharId, refreshToken, group, groupName,
+                            var altUser = await user.CreateAlt(altCharId, group, groupName,
                                 mainCharId);
                             altUser.Ip = rawIp;
-                            await DbHelper.SaveAuthUser(altUser);
-
-
+                            //remove old reg if any
+                            await DbHelper.DeleteAuthUser(altCharId);
+                            //save alt
+                            await DbHelper.SaveAuthUser(altUser, refreshToken);
 
                             if (Settings.WebAuthModule.AuthReportChannel > 0)
                                 await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,

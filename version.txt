@@ -1,10 +1,12 @@
-### V2.0.0
+### V2.0.2
  + New flexible web shell called THDWebServer
+ + New Mining Schedule module with extraction timers and ledger
  + Added core type in the StructureOnline notification
  + Added abandoned flag to StructureDestroyed notification
  + Added ability to override language strings using the custom_language.json file in Data or root folder
  + Added several new properties to Telegram relay to allow/disallow messages based on string content and to block T->D or D->T relays separately
  + Added timeout to ESI queries
+ + Added citadels to cache
  + Improved simple auth entity injection (less queries and faster loading)
  + Improved invalid tokens handling
  + Default config file will be created on startup
