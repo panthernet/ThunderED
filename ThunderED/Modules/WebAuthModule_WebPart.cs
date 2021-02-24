@@ -178,6 +178,8 @@ namespace ThunderED.Modules
                                 .FirstOrDefault(a => !string.IsNullOrEmpty(a) && char.IsDigit(a[0]));
                         }
 
+                        mainCharId = webUserData.Id;
+
                         var inputGroupName = state?.Length > 1
                             ? HttpUtility.UrlDecode(state.Substring(1, state.Length - 1))
                             : null;
@@ -212,7 +214,7 @@ namespace ThunderED.Modules
                         var grps = Settings.WebAuthModule.GetEnabledAuthGroups();
 
                         //alt character registration check
-                        if (altCharReg)
+                       /* if (altCharReg)
                         {
                             var user = await DbHelper.GetAuthUser(longCharacterId, true);
                             //do not allow to bind alt to another alt
@@ -245,9 +247,9 @@ namespace ThunderED.Modules
                             var redirect = WebQueryResult.RedirectUrl;
                             redirect.AddValue("url", url);
                             return redirect;
-                        }
+                        }*/
 
-                        if (mainCharId > 0)
+                        if (altCharReg && mainCharId > 0)
                         {
                             var refreshToken = result[1];
                             var altCharId = longCharacterId;

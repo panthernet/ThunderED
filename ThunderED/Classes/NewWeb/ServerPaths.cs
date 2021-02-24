@@ -179,23 +179,23 @@ namespace ThunderED.Classes
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}&state=ijobsauth{HttpUtility.UrlEncode(groupName)}";
         }
 
-        internal static string GetCustomAuthUrl(string ip, List<string> permissions, string group = null, long mainCharacterId = 0)
+        public static string GetCustomAuthUrl(string ip, List<string> permissions, string group = null, long mainCharacterId = 0, bool nox = false)
         {
             var clientId = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var callbackurl = GetCallBackUrl();
 
-            var grp = string.IsNullOrEmpty(group) ? null : $"&state=x{HttpUtility.UrlEncode(group)}";
+            var grp = string.IsNullOrEmpty(group) ? null : $"&state={(nox?null:"x")}{HttpUtility.UrlEncode(group)}";
             var mc = mainCharacterId == 0 ? null : $"|{mainCharacterId}";
 
             var pString = string.Join('+', permissions);
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}{grp}{mc}|{ip}";
         }
 
-        internal static string GetAuthUrl(string ip, string groupName = null, long mainCharacterId = 0)
+        public static string GetAuthUrl(string ip, string groupName = null, long mainCharacterId = 0, bool nox = false)
         {
             var clientId = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var callbackurl = GetCallBackUrl();
-            var grp = string.IsNullOrEmpty(groupName) ? null : $"&state=x{HttpUtility.UrlEncode(groupName)}";
+            var grp = string.IsNullOrEmpty(groupName) ? null : $"&state={(nox ? null : "x")}{HttpUtility.UrlEncode(groupName)}";
             var mc = mainCharacterId == 0 ? null : $"|{mainCharacterId}";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&amp;redirect_uri={callbackurl}&amp;client_id={clientId}{grp}{mc}|{ip}";
         }

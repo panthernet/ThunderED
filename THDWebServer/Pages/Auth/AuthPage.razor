@@ -1,5 +1,9 @@
 ﻿@page "/authpage"
 @using ThunderED.Modules
+@using ThunderED.Classes.Enums
+
+@inject ProtectedSessionStorage Store
+@inject AuthenticationStateProvider Auth
 
 <div class="container" style="height: 100%">
     <div class="colorifier text-center">
@@ -7,7 +11,7 @@
             <h2>@LM.Get("authWebDiscordHeader")</h2>
         </p>
     </div>
-    
+
     <div class="centralizer">
         <div class="text-center">
             <!-- HEADER -->
@@ -40,6 +44,7 @@
                 @foreach (var (key, group) in GroupsForCycle.Where(a => a.Value.StandingsAuth == null))
                 {
                     @if (group.Hidden) { continue; }
+                    @if (group.BindToMainCharacter && !_hasReg) continue;
 
                     <a href="@ServerPaths.GetAuthUrl()?group=@HttpUtility.UrlEncode(group.BindToMainCharacter ? WebAuthModule.DEF_ALTREGGROUP_NAME : key)" class="btn btn-info btn-block" role="button">@(group.CustomButtonText ?? SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText)</a>
                 }
@@ -65,14 +70,26 @@
                                         SettingsManager.Settings.Config.ModuleContractNotifications ||
                                         SettingsManager.Settings.Config.ModuleIndustrialJobs;
 
+    private bool _hasReg = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         Groups = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
         GroupsForCycle = SettingsManager.Settings.WebAuthModule.UseOneAuthButton
             ? Groups.Where(a => a.Value.ExcludeFromOneButtonMode || a.Value.BindToMainCharacter)
             : Groups;
 
-        base.OnInitialized();
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user != null)
+        {
+            if (await CustomAuthenticationStateProvider.HasAuth(Auth))
+            {
+
+                var auth = await DbHelper.GetAuthUser(user.Id);
+                if (auth != null && !auth.MainCharacterId.HasValue)
+                    _hasReg = auth.AuthState == (int) UserStatusEnum.Authed;
+            }
+        }
+        await base.OnInitializedAsync();
     }
 }

@@ -24,6 +24,12 @@ namespace THDWebServer.Authentication
 
         public ProtectedSessionStorage ProtectedSessionStore { get; set; }
 
+        public static async Task<bool> HasAuth(AuthenticationStateProvider provider)
+        {
+            var u = (await ((CustomAuthenticationStateProvider)provider).GetAuthenticationStateAsync())?.User;
+            return u?.Identity != null;
+        }
+
         public CustomAuthenticationStateProvider(ProtectedSessionStorage storage)
         {
             ProtectedSessionStore = storage;

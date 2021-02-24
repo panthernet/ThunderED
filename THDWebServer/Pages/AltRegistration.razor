@@ -1,6 +1,7 @@
 ﻿@page "/altreg"
-@using Microsoft.AspNetCore.ProtectedBrowserStorage
-@inject ProtectedSessionStorage ProtectedSessionStore
+
+@inject ProtectedSessionStorage Store
+@inject AuthenticationStateProvider Auth
 
 <div class="container" style="height: 100%">
     <div class="colorifier">
@@ -10,16 +11,25 @@
     </div>
     <div class="centralizer">
         <div class="text-center">
-            <p class="lead frontcolor">@((MarkupString)LM.Get("authAltRegBody"))</p>
-            <p><a href="@ServerPaths.GetAuthUrlAltRegButton(Ip)">
-                @if (WebUiHelper.GetAsset("eve_login.png") != null)
-                {
-                    <img src="@WebUiHelper.GetAsset("eve_login.png")"/>
-                }
-            </a></p>
-            <br>
-            <br>
-            <p><a class="btn btn-info" href="@ServerPaths.GetGeneralAuthPageUrl()" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+            @if (_hasAuth)
+            {
+                <p class="lead frontcolor">@((MarkupString) LM.Get("authAltRegBody"))</p>
+                <p>
+                    <a href="@_altUrl">
+                        @if (WebUiHelper.GetAsset("eve_login.png") != null)
+                        {
+                            <img src="@WebUiHelper.GetAsset("eve_login.png")"/>
+                        }
+                    </a>
+                </p>
+                <br>
+                <br>
+                <p><a class="btn btn-info" href="@ServerPaths.GetGeneralAuthPageUrl()" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+            }
+            else
+            {
+                @("Authenticate to proceed")
+            }
         </div>
     </div>
 </div>
@@ -27,10 +37,32 @@
 @code
 {
     public string Ip { get; set; }
+    private string _altUrl;
+    private bool _hasAuth;
 
     protected override async Task OnInitializedAsync()
     {
-        Ip = await ProtectedSessionStore.GetAsync<string>("ip");
+        Ip = await Store.GetAsync<string>("ip");
+
+        _hasAuth = await CustomAuthenticationStateProvider.HasAuth(Auth);
+
+        var u = await Store.GetAsync<WebAuthUserData>("user");
+        if (u != null)
+        {
+            var user = await DbHelper.GetAuthUser(u.Id);
+            var grps = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
+            var pair = grps.FirstOrDefault(a => a.Value.BindToMainCharacter);
+            if (pair.Value != null)
+            {
+                var group = pair.Value;
+                _altUrl = group.ESICustomAuthRoles.Any()
+                    ? ServerPaths.GetCustomAuthUrl(Ip, group.ESICustomAuthRoles, "altReg",
+                        user.CharacterId, true)
+                    : ServerPaths.GetAuthUrl(Ip, "altReg", user.CharacterId, true);
+
+            }
+        }
+
         await base.OnInitializedAsync();
     }
 
