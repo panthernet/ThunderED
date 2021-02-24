@@ -34,6 +34,18 @@ namespace THDWebServer
                 return;
             }
 
+            try
+            {
+                var fp = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot", "CustomAssets", "favicon.ico");
+                var fp2 = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot", "favicon.ico");
+                if (File.Exists(fp))
+                    File.Copy(fp, fp2, true);
+            }
+            catch
+            {
+                // ignore
+            }
+
             CreateHostBuilder(args).Build().Run();
             
         }
