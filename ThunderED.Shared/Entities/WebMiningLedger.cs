@@ -10,5 +10,7 @@ namespace ThunderED
         public string CorporationName { get; set; }
         public long StructureId { get; set; }
         public long FeederId { get; set; }
+        public long TypeId { get; set; }
+        public string Stats { get; set; }
     }
 }

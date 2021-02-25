@@ -4,8 +4,6 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Text;
 using System.Threading.Tasks;
-using Matrix.Xmpp.MessageArchiving;
-using ThunderED.API;
 using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
@@ -222,10 +220,9 @@ namespace ThunderED.Modules
                             ExtractionStartTime = e.extraction_start_time.ToEveTime(),
                             ChunkArrivalTime = e.chunk_arrival_time.ToEveTime(),
                             NaturalDecayTime = e.natural_decay_time.ToEveTime(),
-                            //MoonId = e.moon_id,
+                            TypeId = structure?.type_id ?? 0,
                             StructureId = e.structure_id,
                             StructureName = structure?.name ?? LM.Get("Unknown"),
-                            //MoonName = moon?.name ?? LM.Get("Unknown"),
                             CorporationName = corp.name,
                         };
                         item.Remains = item.ChunkArrivalTime.GetRemains(LM.Get("timerRemains"));
@@ -268,7 +265,19 @@ namespace ThunderED.Modules
             {
                 CitadelId = structureId, Operator = op, OreComposition = composition, Date = date
             });
+            //new ledger for upcoming extraction - empty date
+            await DbHelper.UpdateMiningLedger(new ThdMiningLedger {CitadelId = structureId});
+        }
 
+
+        public static async Task UpdateOreVolumeFromFeed(long structureId, string json)
+        {
+            if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return;
+            var mn = await DbHelper.GetMiningLedger(structureId, false) ??
+                      new ThdMiningLedger {CitadelId = structureId};
+            mn.OreJson = json;
+            mn.Date = DateTime.Now;
+            await DbHelper.UpdateMiningLedger(mn);
         }
 
         public async Task<List<WebMiningLedger>> GetLedgers(MiningComplexAccessGroup accessGroup, WebAuthUserData user)
@@ -326,6 +335,8 @@ namespace ThunderED.Modules
                     var ledgers = await APIHelper.ESIAPI.GetCorpMiningLedgers(Reason, rChar.corporation_id, r.Result);
                     var innerList = new List<WebMiningLedger>();
 
+                    var loading = LM.Get("webLoading");
+
                     foreach (var ledger in ledgers)
                     {
                         var structure =
@@ -355,7 +366,9 @@ namespace ThunderED.Modules
                             StructureName = structure?.name ?? LM.Get("Unknown"),
                             StructureId = ledger.observer_id,
                             Date = ledger.last_updated,
-                            FeederId = token.CharacterId
+                            FeederId = token.CharacterId,
+                            TypeId = structure?.type_id ?? 0,
+                            Stats = loading
                         };
 
                         innerList.Add(item);
@@ -700,5 +713,66 @@ namespace ThunderED.Modules
                 return null;
             }
         }
+
+        public async Task<List<WebMiningLedger>> WebUpdateLedgerStats(List<WebMiningLedger> ledgers)
+        {
+            foreach (var ledger in ledgers)
+            {
+                var completeLedger = await DbHelper.GetMiningLedger(ledger.StructureId, true);
+
+                if (completeLedger != null && !string.IsNullOrEmpty(completeLedger.OreJson))
+                {
+                    var entries = await GetLedgerEntries(ledger.StructureId, ledger.FeederId);
+                    var list = entries.GroupBy(a => a.OreId).ToDictionary(a => a.Key, a => a.Sum(b => b.Quantity * 10));
+                    var totalMinedVolume = list.Values.Sum(a => a);
+                    var initialVolume = completeLedger.RawOre.Values.Sum();
+                    var percTotal = 100 / (initialVolume / (double)totalMinedVolume);
+
+                    int r64 = 0;
+                    int r32 = 0;
+                    int r = 0;
+                    foreach (var (key, value) in list)
+                    {
+                        if (r64list.Contains(key))
+                            r64 += value;
+                        else if (r32list.Contains(key))
+                            r32 += value;
+                        else r += value;
+                    }
+
+                    int r64input = 0;
+                    int r32input = 0;
+                    int rInput = 0;
+
+                    foreach (var (key, value) in completeLedger.RawOre)
+                    {
+                        if (r64list.Contains(key))
+                            r64input += value;
+                        else if (r32list.Contains(key))
+                            r32input += value;
+                        else rInput += value;
+                    }
+
+                    var perc64 = 100 / (r64input / (double)r64);
+                    var perc32 = 100 / (r32input / (double)r32);
+                    var percOther = 100 / (rInput / (double)r);
+
+                    var sb = new StringBuilder();
+                    if (r64 > 0) sb.Append($"R64: {perc64:N0}%<br>");
+                    if (r32 > 0) sb.Append($"R32: {perc32:N0}%<br>");
+                    if (r > 0) sb.Append($"GOO: {percOther:N0}%<br>");
+                    sb.Append($"{LM.Get("msTotalIsk")}: {percTotal:N0}%");
+
+                    ledger.Stats = sb.ToString();
+                }
+                else ledger.Stats = "-";
+
+            }
+
+            return ledgers;
+        }
+
+        private List<long> r64list = new List<long> { 45510, 45513, 45511, 45512, 46312, 46313, 46314, 46315, 46316, 46317, 46318, 46319 };
+        private List<long> r32list = new List<long> { 45502, 45503, 45504, 45506, 46304, 46305, 46306, 46307, 46308, 46309, 46310, 46311 };
     }
 }

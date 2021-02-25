@@ -10,6 +10,20 @@ namespace ThunderED.Classes
 
         #region Simple Urls
 
+        /// <summary>
+        /// Get EVE type image 64x64
+        /// </summary>
+        /// <param name="typeId">Type ID</param>
+        public static string GetTypeImageUrl(long typeId)
+        {
+            return $"https://images.evetech.net/types/{typeId}/icon";
+        }
+
+        public static string GetCharacterImageUrl(long typeId, int size=64)
+        {
+            return $"https://images.evetech.net/characters/{typeId}/portrait?size={size}";
+        }
+
         public static string GetGeneralAuthPageUrl()
         {
             return "/authpage";

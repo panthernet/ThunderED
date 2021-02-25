@@ -80,7 +80,22 @@ namespace ThunderED
                 .Take(count).Select(a => a.CharacterId).ToListAsync();
         }
 
+
+        public static async Task<List<long>> GetAltUserIds(long entryCharacterId)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Users.AsNoTracking().Where(a => a.MainCharacterId == entryCharacterId)
+                .Select(a => a.CharacterId)
+                .ToListAsync();
+        }
+
         #region Tokens
+
+        public static async Task<List<ThdToken>> GetTokens(TokenEnum type)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Tokens.AsNoTracking().Where(a => a.Type == type).ToListAsync();
+        }
 
         public static async Task DeleteToken(long userId, TokenEnum type)
         {
@@ -314,20 +329,16 @@ namespace ThunderED
         }
         #endregion
 
-        public static async Task<List<ThdToken>> GetTokens(TokenEnum type)
-        {
-            await using var db = new ThunderedDbContext();
-            return await db.Tokens.AsNoTracking().Where(a => a.Type == type).ToListAsync();
-        }
+        #region Mining
 
         public static async Task<ThdMiningNotification> GetMiningNotification(long citadelId, DateTime extractionDate)
         {
             await using var db = new ThunderedDbContext();
-            var x = db.MiningNotifications.ToList();
-            
+
             return await db.MiningNotifications.AsNoTracking()
                 .FirstOrDefaultAsync(a => a.CitadelId == citadelId && a.Date <= extractionDate);
         }
+
         public static async Task UpdateMiningNotification(ThdMiningNotification notify)
         {
             await using var db = new ThunderedDbContext();
@@ -345,12 +356,40 @@ namespace ThunderED
             await db.SaveChangesAsync();
         }
 
-        public static async Task<List<long>> GetAltUserIds(long entryCharacterId)
+        public static async Task UpdateMiningLedger(ThdMiningLedger entry)
         {
             await using var db = new ThunderedDbContext();
-            return await db.Users.AsNoTracking().Where(a => a.MainCharacterId == entryCharacterId)
-                .Select(a => a.CharacterId)
-                .ToListAsync();
+            if (entry.Id > 0)
+            {
+                db.Attach(entry);
+                db.Entry(entry).State = EntityState.Modified;
+            }
+            else
+            {
+                await db.MiningLedgers.AddAsync(entry);
+                db.Entry(entry).State = EntityState.Added;
+            }
+
+            await db.SaveChangesAsync();
         }
+
+        public static async Task<ThdMiningLedger> GetMiningLedger(long citadelId, bool lastComplete)
+        {
+            await using var db = new ThunderedDbContext();
+
+            ThdMiningLedger result;
+            if (lastComplete)
+                result = await db.MiningLedgers.AsNoTracking().Where(a=> a.CitadelId == citadelId)
+                    .OrderByDescending(a => a.Date).FirstOrDefaultAsync();
+            else result = await db.MiningLedgers.AsNoTracking()
+                .FirstOrDefaultAsync(a => a.CitadelId == citadelId && a.Date == null);
+            result?.Unpack();
+
+            return result;
+        }
+
+        #endregion
+
+
     }
 }

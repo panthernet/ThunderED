@@ -20,38 +20,43 @@
             <RadzenCheckBox @bind-Value=@_isMergeAltsOption TValue="bool" Change="async (args)=> await MergeAltsChanged(args)" /> @LM.Get("msMergeAltsCheck")
         </div>
         <RadzenGrid AllowFiltering="true" AllowPaging="false" Count="@_countLedger" AllowSorting="true" Data="@_ledgerList" TItem="WebMiningLedgerEntry"
-                    LoadData="@LoadLedgerData" Style="height: 580px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    LoadData="@LoadLedgerData" Style="height: 97%;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                     AllowColumnResize="true" @ref="@_ledgerGrid">
             <Columns>
-                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="200px" FilterProperty="NameFilter" SortProperty="NameFilter"
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="false" Sortable="false" Width="90px">
+                    <Template Context="order">
+                        <RadzenImage Path="@ServerPaths.GetCharacterImageUrl(order.CharacterId)" Style="width: 64px; height: 64px; display: block" />
+                    </Template>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" FilterProperty="NameFilter" SortProperty="NameFilter"
                                   Title="@LM.Get("msLedgerColumnCharacter")">
                     <Template Context="order">
                         @($"{order.CharacterName} [{order.CorporationTicker}]")
                         @if (_isMergeAltsOption && order.Alts.Any())
                         {
-                            <img src="@WebUiHelper.GetAsset("alt_ser_small.png")" class="text-center" title="@order.AltData" style="width: 16px; height: 16px;" />
+                            <img src="@WebUiHelper.GetAsset("alt_ser_small.png")" class="text-center" title="@order.AltData" style="width: 16px; height: 16px;"/>
                         }
                     </Template>
                 </RadzenGridColumn>
-                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="100px" FilterProperty="OreName" SortProperty="OreName"
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="150px" FilterProperty="OreName" SortProperty="OreName"
                                   Title="@LM.Get("msLedgerColumnOre")">
                     <Template Context="order">
-                        <RadzenLabel Text="@order.OreName" />
+                        <RadzenLabel Text="@order.OreName"/>
                     </Template>
                 </RadzenGridColumn>
-                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="80px" FilterProperty="Quantity" SortProperty="Quantity"
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="200px" FilterProperty="Quantity" SortProperty="Quantity"
                                   Title="@LM.Get("msLedgerColumnQuantity")">
                     <Template Context="order">
-                        <RadzenLabel Text="@(order.Quantity.ToString())" />
+                        <RadzenLabel Text="@(order.Quantity.ToString())"/>
                     </Template>
                     <FooterTemplate>
                         @LM.Get("msTotalVolume"): <b>@($"{(_ledgerList?.Sum(o => o.Quantity) * 10):N0} m3")</b>
                     </FooterTemplate>
                 </RadzenGridColumn>
-                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="80px" FilterProperty="Price" SortProperty="Price"
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="200px" FilterProperty="Price" SortProperty="Price"
                                   Title="@LM.Get("msLedgerColumnPrice")">
                     <Template Context="order">
-                        <RadzenLabel Text="@($"{order.Price:N0} ISK")" />
+                        <RadzenLabel Text="@($"{order.Price:N0} ISK")"/>
                     </Template>
                     <FooterTemplate>
                         @LM.Get("msTotalIsk"): <b>@($"{_ledgerList?.Sum(o => o.Price):N0} ISK")</b>

@@ -649,6 +649,7 @@
   "msLedgerColumnOre": "Руда",
   "msLedgerColumnQuantity": "Кол-во",
   "msLedgerColumnPrice": "Цена",
+  "msLedgerColumnStats": "Добыча",
   "msTotalIsk": "Итого",
   "msTotalVolume": "Объем",
   "msMergeAltsCheck": "Слияние с альтами"

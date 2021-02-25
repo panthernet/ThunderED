@@ -21,44 +21,49 @@
                                 LoadData="@LoadExtractionsGrid" @ref="_extrGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" AllowColumnResize="true"
                                 Style="height: 640px;">
                         <Columns>
-                            <RadzenGridColumn TItem="WebMiningExtraction" Property="CorporationName" Filterable="true" Sortable="true" Width="200px" FilterProperty="CorporationName" SortProperty="CorporationName"
+                            <RadzenGridColumn TItem="WebMiningExtraction" Property="IconUrl" Filterable="false" Sortable="false" Width="90px">
+                                <Template Context="order">
+                                    <RadzenImage Path="@ServerPaths.GetTypeImageUrl(order.TypeId)" Style="width: 64px; height: 64px; display: block" />
+                                </Template>
+                            </RadzenGridColumn>
+                            <RadzenGridColumn TItem="WebMiningExtraction" Property="CorporationName" Filterable="true" Sortable="true" FilterProperty="CorporationName" SortProperty="CorporationName"
                                               Title="@LM.Get("msExtractionsColumnOwner")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.CorporationName"/>
                                 </Template>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="200px" FilterProperty="StructureName" SortProperty="StructureName"
+                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true"  FilterProperty="StructureName" SortProperty="StructureName"
                                               Title="@LM.Get("msExtractionsColumnName")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.StructureName"/>
                                 </Template>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="100px" FilterProperty="OreComposition" SortProperty="OreComposition"
+                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="170px" FilterProperty="OreComposition" SortProperty="OreComposition"
                                               Title="@LM.Get("msExtractionsColumnOre")">
                                 <Template Context="order">
-                                    <RadzenLabel Text="@order.OreComposition"/>
+                                    @((MarkupString)order.OreComposition)
                                 </Template>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="80px" FilterProperty="Operator" SortProperty="Operator"
+                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="130px" FilterProperty="Operator" SortProperty="Operator"
                                               Title="@LM.Get("msExtractionsColumnOperator")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.Operator"/>
                                 </Template>
                             </RadzenGridColumn>
 
-                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="80px" FilterProperty="ChunkArrivalTime" SortProperty="ChunkArrivalTime"
+                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="140px" FilterProperty="ChunkArrivalTime" SortProperty="ChunkArrivalTime"
                                               Title="@LM.Get("msExtractionsColumnFinishDate")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@(order.ChunkArrivalTime.ToString(SettingsManager.Settings.Config.ShortTimeFormat))"/>
                                 </Template>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="80px" FilterProperty="NaturalDecayTime" SortProperty="NaturalDecayTime"
+                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="140px" FilterProperty="NaturalDecayTime" SortProperty="NaturalDecayTime"
                                               Title="@LM.Get("msExtractionsColumnExplode")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@(order.NaturalDecayTime.ToString(SettingsManager.Settings.Config.ShortTimeFormat))"/>
                                 </Template>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="60px" FilterProperty="NaturalDecayTime" SortProperty="NaturalDecayTime"
+                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="100px" FilterProperty="NaturalDecayTime" SortProperty="NaturalDecayTime"
                                               Title="@LM.Get("msExtractionsColumnRemains")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@(order.Remains)"/>
@@ -81,25 +86,36 @@
                                     Data="@_extractions?.Corporations" Style="width: 400px;" @bind-Value="_ledgerFilterCorp"
                                     Change="@OnLedgerFilterChange" AllowFiltering="true" AllowClear="true"/>
                     <RadzenGrid PageSize="20" Count="@_countLedgers" Data="@_filteredLedgerList" TItem="WebMiningLedger"
-                                LoadData="@LoadLedgersGrid" @ref="_ledgersGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" AllowColumnResize="true"
+                                LoadData="@LoadLedgersGrid" @ref="_ledgersGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" AllowColumnResize="false"
                                 Style="height: 640px;" RowDoubleClick="async args => await InspectLedger(args)">
                         <Columns>
-                            <RadzenGridColumn TItem="WebMiningLedger" Property="CorporationName" Filterable="true" Sortable="true" Width="200px" FilterProperty="CorporationName" SortProperty="CorporationName"
+                            <RadzenGridColumn TItem="WebMiningLedger" Property="IconUrl" Filterable="false" Sortable="false" Width="90px">
+                                <Template Context="order">
+                                    <RadzenImage Path="@ServerPaths.GetTypeImageUrl(order.TypeId)" Style="width: 64px; height: 64px; display: block" />
+                                </Template>
+                            </RadzenGridColumn>
+                            <RadzenGridColumn TItem="WebMiningLedger" Property="CorporationName" Filterable="true" Sortable="true" FilterProperty="CorporationName" SortProperty="CorporationName"
                                               Title="@LM.Get("msExtractionsColumnOwner")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.CorporationName"/>
                                 </Template>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="WebMiningLedger" Filterable="true" Width="200px" Sortable="true" FilterProperty="StructureName" SortProperty="StructureName"
+                            <RadzenGridColumn TItem="WebMiningLedger" Filterable="true" Sortable="true" FilterProperty="StructureName" SortProperty="StructureName"
                                               Title="@LM.Get("msExtractionsColumnName")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.StructureName"/>
                                 </Template>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="WebMiningLedger" Filterable="true" Sortable="true" Width="120px" FilterProperty="ChunkArrivalTime" SortProperty="ChunkArrivalTime"
+                            <RadzenGridColumn TItem="WebMiningLedger" Filterable="true" Sortable="true" Width="100px" FilterProperty="ChunkArrivalTime" SortProperty="ChunkArrivalTime"
                                               Title="@LM.Get("msLedgerColumnDate")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@(order.Date.ToString(SettingsManager.Settings.Config.DateFormat))"/>
+                                </Template>
+                            </RadzenGridColumn>
+                            <RadzenGridColumn TItem="WebMiningLedger" Filterable="true" Sortable="true" Width="160px"
+                                              Title="@LM.Get("msLedgerColumnStats")">
+                                <Template Context="order">
+                                    @((MarkupString)order.Stats)
                                 </Template>
                             </RadzenGridColumn>
                         </Columns>
@@ -239,6 +255,14 @@
             _ledgers;
 
         _filteredLedgerList = ApplyAjaxFilters(innerList.OrderByDescending(a => a.Date), arg, out _countLedgers);
+
+
+        await Task.Factory.StartNew(async () =>
+        {
+            _filteredLedgerList = await _module.WebUpdateLedgerStats(_filteredLedgerList);
+            await InvokeAsync(StateHasChanged);
+        });
+
         await InvokeAsync(StateHasChanged);
     }
 

@@ -91,6 +91,8 @@ namespace ThunderED.Json
         {
             public string name;
             public long solar_system_id;
+            public long type_id;
+            public long owner_id;
         }
 
 

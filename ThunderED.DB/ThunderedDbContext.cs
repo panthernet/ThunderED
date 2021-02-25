@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
-using ThunderED.Json;
 using ThunderED.Thd;
 
 namespace ThunderED
@@ -11,6 +10,7 @@ namespace ThunderED
         public DbSet<ThdAuthUser> Users { get; set; }
         public DbSet<ThdToken> Tokens { get; set; }
         public DbSet<ThdMiningNotification> MiningNotifications { get; set; }
+        public DbSet<ThdMiningLedger> MiningLedgers { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
         //public DbSet<JsonClasses.RegionData> Regions { get; set; }
@@ -70,6 +70,16 @@ namespace ThunderED
 
             #endregion
 
+            #region ThdMiningLedger
+            modelBuilder.Entity<ThdMiningLedger>().HasIndex(u => u.Id).IsUnique();
+            modelBuilder.Entity<ThdMiningLedger>().HasKey(u => u.Id);
+            modelBuilder.Entity<ThdMiningLedger>().ToTable("mining_ledger");
+          
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.CitadelId).HasColumnName("citadel_id");
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.Date).HasColumnName("date");
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.OreJson).HasColumnName("ore_json");
+            #endregion
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

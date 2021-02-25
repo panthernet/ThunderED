@@ -14,7 +14,7 @@ namespace ThunderED.Helpers
         //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19",
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4", "2.0.1", "2.0.2"
+            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3"
         };
 
         public static async Task<bool> Upgrade()
@@ -463,8 +463,28 @@ namespace ThunderED.Helpers
                                 await RunCommand("create unique index mining_notifications_citadel_id_uindex on mining_notifications(citadel_id);");
 
                             }
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
-                            
+                        case "2.0.3":
+                            await BackupDatabase();
+                            if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                await RunCommand(
+                                    "create table mining_ledger(id integer not null constraint mining_ledger_pk primary key autoincrement, citadel_id integer not null, date timestamp,ore_json text);");
+                            }
+                            else
+                            {
+                                await RunCommand(
+                                    "create table mining_ledger(bigint int not null key auto_increment,citadel_id bigint not null, date timestamp,ore_json text);");
+                                await RunCommand(
+                                    "ALTER TABLE `mining_notifications` CHANGE COLUMN `citadel_id` `citadel_id` BIGINT NOT NULL;");
+                                await RunCommand(
+                                    "ALTER TABLE `tokens` CHANGE COLUMN `id` `id` BIGINT NOT NULL;");
+                            }
+
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
                         default:
                             continue;
                     }

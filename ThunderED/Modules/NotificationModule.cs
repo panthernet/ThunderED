@@ -136,22 +136,26 @@ namespace ThunderED.Modules
 
                             var notifications = result.Result;
 
-                         /*   notifications.Add(new JsonClasses.Notification
-                            {
-                                text = @"aggressorAllianceID: 99008425
-aggressorCorpID: 98278226
-aggressorID: 95494038
-planetID: 40212927
-planetTypeID: 2016
-reinforceExitTime: 132147728200000000
-solarSystemID: 30003358
-typeID: 2233",
+                              /* notifications.Add(new JsonClasses.Notification
+                               {
+                                   text = @"firedBy: 1723125545
+   firedByLink: 
+   moonID: 40208153
+   oreVolumeByType:
+     45496: 4789716.712817478
+     45498: 3050697.396077991
+     45512: 6573391.23187997
+   solarSystemID: 30003280
+   structureID: 1030932825175
+   structureLink: 
+   structureName: 6-CZ49 - VIP Floor
+   structureTypeID: 35835",
 
 
-                                notification_id = 999990000,
-                                type = "OrbitalReinforced",
-                                timestamp = "2019-06-29T17:20:00Z"
-                            });*/
+                                   notification_id = 1386092327,
+                                   type = "MoonminingLaserFired",
+                                   timestamp = "2021-02-25T11:20:00Z"
+                               });*/
 
                             var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId);
                             var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
@@ -233,6 +237,8 @@ typeID: 2233",
                                             }
 
                                             Dictionary<string, string> oreComposition = null;
+                                            Dictionary<long, int> oreCompositionRaw = null;
+                                            
                                             if (data.ContainsKey("oreVolumeByType"))
                                             {
                                                 try
@@ -246,12 +252,14 @@ typeID: 2233",
                                                     if (pass > 0)
                                                     {
                                                         oreComposition = new Dictionary<string, string>();
+                                                        oreCompositionRaw = new Dictionary<long, int>();
                                                         for (int i = ltqIndex + 1; i < endIndex; i++)
                                                         {
                                                             if (!keys[i].All(char.IsDigit)) continue;
                                                             var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, keys[i])).name;
                                                             var value = double.Parse(data[keys[i]].Split('.')[0]).ToString("N");
                                                             oreComposition.Add(typeName, value);
+                                                            oreCompositionRaw.Add(Convert.ToInt64(keys[i]), Convert.ToInt32(value.Split('.')[0].Replace(",", "")));
                                                         }
                                                     }
                                                 }
@@ -648,7 +656,7 @@ typeID: 2233",
                                                         {
                                                             DateTime.TryParse(data["autoTime"], out var autoTime);
                                                             await MiningScheduleModule.UpdateNotificationFromFeed(
-                                                                compText.ToString().Replace("|", "\n"), Convert.ToInt64(structureId), autoTime.ToUniversalTime(), startedBy ?? LM.Get("Unknown"));
+                                                                compText.ToString().Replace("|", "<br>").Replace(".00",""), Convert.ToInt64(structureId), autoTime.ToUniversalTime(), startedBy ?? LM.Get("Unknown"));
                                                         }
                                                         catch (Exception ex)
                                                         {
@@ -679,6 +687,12 @@ typeID: 2233",
                                                     builder.WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
+
+                                                    if (!string.IsNullOrEmpty(structureId))
+                                                    {
+                                                        await MiningScheduleModule.UpdateOreVolumeFromFeed(Convert.ToInt64(structureId),
+                                                            oreCompositionRaw.ToJson());
+                                                    }
 
                                                     await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
                                                     break;

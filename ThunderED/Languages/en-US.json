@@ -656,6 +656,7 @@
   "msLedgerColumnOre": "Ore",
   "msLedgerColumnQuantity": "Quantity",
   "msLedgerColumnPrice": "Price",
+  "msLedgerColumnStats": "Mining Stats",
   "msTotalIsk": "Total",
   "msTotalVolume": "Volume",
   "msMergeAltsCheck": "Merge alts"
