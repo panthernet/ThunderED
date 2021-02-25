@@ -262,6 +262,14 @@ app {
     font-size: x-large;
 }
 
+.generalLoadingTabText {
+    position: fixed;
+    z-index: 10;
+    top: 50%;
+    left: 50%;
+    font-size: x-large;
+}
+
 .hrmNegativeSum {
     background-color: orangered;
     color: white;

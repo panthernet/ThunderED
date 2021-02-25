@@ -53,6 +53,11 @@ namespace ThunderED.Classes
             return "/ms";
         }
 
+        public static string GetStructureManagementPageUrl()
+        {
+            return "/struct";
+        }
+
         public static string GetAuthUrl()
         {
             return "/auth";

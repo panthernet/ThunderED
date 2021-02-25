@@ -525,6 +525,7 @@ namespace ThunderED.Modules
         public static bool HasViewAccess(in JsonClasses.CharacterData data)
         {
             if (data == null) return false;
+            if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
             return HasObserverExtrViewAccess(data) || HasObserverLedgerViewAccess(data) || HasExtrEditAccess(data, out _) || HasLedgerEditAccess(data, out _);
         }
 
@@ -534,6 +535,7 @@ namespace ThunderED.Modules
         public static bool HasViewAccess(WebAuthUserData data)
         {
             if (data == null) return false;
+            if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
             return HasObserverExtrViewAccess(data) || HasObserverLedgerViewAccess(data) || HasExtrEditAccess(data, out _) || HasLedgerEditAccess(data, out _);
         }
 

@@ -40,6 +40,7 @@
     "ModuleWebConfigEditor": false,
     "ModuleIndustrialJobs": false,
     "ModuleMiningSchedule": false,
+    "ModuleStructureManagement": false,
 
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
@@ -883,6 +884,18 @@
           "CanManageOwnCorporation": false,
           "StructureNames": []
         }
+      }
+    }
+  },
+
+  "StructureManagementModule": {
+    "AuthButtonDiscordText": "Structure Management Auth",
+    "AuthAccessEntities": [ ],
+    "ViewAccessEntities": [ ],
+    "ComplexAccess": {
+      "AccessEntry1": {
+        "Entities": [ ],
+        "StructureNames": [ ]
       }
     }
   }

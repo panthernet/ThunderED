@@ -7,6 +7,7 @@
         Notification,
         Industry,
         Contract,
-        MiningSchedule
+        MiningSchedule,
+        Structures
     }
 }

@@ -89,6 +89,9 @@ namespace ThunderED
         [ConfigEntryName("ModuleIndustrialJobs")]
         public IndustrialJobsModuleSettings IndustrialJobsModule { get; set; } = new IndustrialJobsModuleSettings();
 
+        [ConfigEntryName("ModuleStructureManagement")]
+        public StructureManagementModuleSettings StructureManagementModule { get; set; } = new StructureManagementModuleSettings();
+
 
 #if EDITOR
         public string Validate(List<string> usedModules)
@@ -1738,6 +1741,7 @@ namespace ThunderED
         public bool ModuleWebConfigEditor { get; set; } = false;
         public bool ModuleIndustrialJobs { get; set; } = false;
         public bool ModuleMiningSchedule { get; set; } = false;
+        public bool ModuleStructureManagement { get; set; } = false;
 
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";
@@ -1800,6 +1804,26 @@ namespace ThunderED
                 return null;
             }
         }
+#endif
+    }
+
+    public class StructureManagementModuleSettings
+    {
+        [Comment("Default text for the Discord authentication button")]
+        public string AuthButtonDiscordText { get; set; } = "Structure Management Auth";
+#if EDITOR
+        [Comment("List of names and Ids of entities (char/corp/alliance) with access to the ledger")]
+        [Required]
+        public ObservableCollection<object> ViewAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of names and Ids of entities (char/corp/alliance) who can register as feeders")]
+        [Required]
+        public ObservableCollection<object> AuthAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("The list of groups to control access to the structure management")]
+        public ObservableDictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new ObservableDictionary<string, MiningComplexAccessGroup>();        
+#else
+        public List<object> ViewAccessEntities { get; set; } = new List<object>();
+        public List<object> AuthAccessEntities { get; set; } = new List<object>();
+        public Dictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new Dictionary<string, MiningComplexAccessGroup>();
 #endif
     }
 

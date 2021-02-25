@@ -94,6 +94,9 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleMiningSchedule)
                 Modules.Add(new MiningScheduleModule());
 
+            if (SettingsManager.Settings.Config.ModuleStructureManagement)
+                Modules.Add(new StructureManagementModule());
+
             if (SettingsManager.Settings.Config.ModuleHRM)
             {
                 Modules.Add(new HRMModule());

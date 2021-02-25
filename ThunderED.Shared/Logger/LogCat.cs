@@ -45,6 +45,7 @@
         DiscordRoles,
         IndustryJobs,
         MiningSchedule,
-        ESIWarnings
+        ESIWarnings,
+        StructureManagement
     }
 }

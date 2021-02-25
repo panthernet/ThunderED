@@ -222,7 +222,7 @@ namespace ThunderED.Helpers
                         if (!string.IsNullOrEmpty(etag))
                             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("if-none-match", etag);
 
-                        var ct = new CancellationTokenSource(5000);
+                        var ct = new CancellationTokenSource(10000);
                         using (var responseMessage = await httpClient.GetAsync(request, ct.Token))
                         {
                             result.Data.ETag = responseMessage.Headers.FirstOrDefault(a => a.Key == "ETag").Value?.FirstOrDefault().Trim('"');

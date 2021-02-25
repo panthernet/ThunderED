@@ -1,0 +1,123 @@
+﻿@page "/struct"
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_STRUCTURES)]
+@using ThunderED.Modules
+@using ThunderED.Thd
+@inject ProtectedSessionStorage Store
+@inject IModalService Modal
+@inject NavigationManager Nav
+
+<div class="container">
+    <RadzenTabs Style="padding: 0;">
+        <Tabs>
+            <RadzenTabsItem Text="@LM.Get("smStructuresHeader")" Style="padding: 0;">
+                <RadzenDropDown TValue="string" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                Data="@_corpsList" Style="width: 400px;" @bind-Value="_structFilterCorp"
+                                Change="@OnStructFilterChange" AllowFiltering="true" AllowClear="true"/>
+                <RadzenGrid PageSize="20" Count="@_countStructures" Data="@_filteredStructList" TItem="ThdStructureInfo"
+                            LoadData="@LoadStructuresGrid" @ref="_structGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" AllowColumnResize="true"
+                            Style="height: 640px;">
+                    <Columns>
+                        <RadzenGridColumn TItem="ThdStructureInfo" Filterable="false" Sortable="false" Width="90px">
+                            <Template Context="order">
+                                <RadzenImage Path="@ServerPaths.GetTypeImageUrl(order.StructureTypeId)" Style="width: 64px; height: 64px; display: block" />
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="ThdStructureInfo" Property="CorporationName" Filterable="true" Sortable="true" FilterProperty="CorporationName" SortProperty="CorporationName"
+                                          Title="@LM.Get("smColumnOwner")">
+                            <Template Context="order">
+                                <RadzenLabel Text="@order.CorporationName"/>
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="ThdStructureInfo" Filterable="true" Sortable="true" FilterProperty="StructureName" SortProperty="StructureName"
+                                          Title="@LM.Get("smColumnName")">
+                            <Template Context="order">
+                                <RadzenLabel Text="@order.StructureName"/>
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="ThdStructureInfo" Filterable="true" Sortable="true" Width="160px" FilterProperty="State" SortProperty="State"
+                                          Title="@LM.Get("smrColumnState")">
+                            <Template Context="order">
+                                @((MarkupString)order.State)
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="ThdStructureInfo" Filterable="true" Sortable="true" Width="120px" FilterProperty="FuelTime" SortProperty="FuelTime"
+                                          Title="@LM.Get("smrColumnFuel")">
+                            <Template Context="order">
+                                @((MarkupString)order.FuelTimeLeft)
+                            </Template>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+                @if (!_isStructLoaded)
+                {
+                    <RadzenLabel Text="@LM.Get("webLoading")" Class="generalLoadingTabText"/>
+                }
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</div>
+
+@code {
+    private StructureManagementModule _module;
+    private bool _hasEditAccess;
+    private MiningComplexAccessGroup _group;
+    private List<ThdStructureInfo> _structures;
+    private bool _isStructLoaded;
+    private string _structFilterCorp;
+    private int _countStructures;
+    private List<ThdStructureInfo> _filteredStructList;
+    private RadzenGrid<ThdStructureInfo> _structGrid;
+    private List<string> _corpsList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _module = TickManager.GetModule<StructureManagementModule>();
+        string groupName = null;
+        _hasEditAccess = StructureManagementModule.HasManageAccess(user, out groupName);
+        if (_hasEditAccess && !string.IsNullOrEmpty(groupName))
+            _group = SettingsManager.Settings.StructureManagementModule.ComplexAccess.FirstOrDefault(a => a.Key.Equals(groupName, StringComparison.OrdinalIgnoreCase)).Value;
+
+        await Task.Factory.StartNew(async ()=>
+        {
+            var res = await _module.GetStructures(_group, user);
+            if (res != null)
+            {
+                _corpsList = res.Item1;
+                _structures = res.Item2;
+            }
+            _isStructLoaded = true;
+        });
+
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnStructFilterChange()
+    {
+        await _structGrid.Reload();
+    }
+
+    private async Task LoadStructuresGrid(LoadDataArgs arg)
+    {
+        while (!_isStructLoaded)
+            await Task.Delay(100);
+
+        var innerList = !string.IsNullOrEmpty(_structFilterCorp) ?
+            _structures.Where(a => a.CorporationName.Equals(_structFilterCorp, StringComparison.OrdinalIgnoreCase)).ToList() :
+            _structures;
+
+        _filteredStructList = innerList.ApplyAjaxFilters(arg, out _countStructures);
+        _isStructLoaded = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+
+}

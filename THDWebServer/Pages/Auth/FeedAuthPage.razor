@@ -51,6 +51,11 @@
             {
                 <a href="@GetMiningScheduleAuthURL()" class="btn btn-info btn-block" role="button">@GetMiningScheduleAuthText()</a>
             }
+            <!-- STRUCTURES BUTTON -->
+            @if (StructureManagementModule.HasAuthAccess(UserData))
+            {
+                <a href="@GetStructuresAuthURL()" class="btn btn-info btn-block" role="button">@GetStructuresAuthText()</a>
+            }
 
             <br>
             <br>
@@ -123,5 +128,15 @@
     private string GetMiningScheduleAuthText()
     {
         return SettingsManager.Settings.MiningScheduleModule.AuthButtonDiscordText;
+    }
+
+    private string GetStructuresAuthURL()
+    {
+        return WebServerModule.GetStructuresAuthURL();
+    }
+
+    private string GetStructuresAuthText()
+    {
+        return SettingsManager.Settings.StructureManagementModule.AuthButtonDiscordText;
     }
 }
