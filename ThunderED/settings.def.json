@@ -421,7 +421,7 @@
     "CheckIntervalInMinutes": 1,
     "MaxTrackingCount": 150,
     "UseOneAuthButton": false,
-    "AuthButtonDiscordText": "Industry Auth",
+    "AuthButtonDiscordText": "Contracts Auth",
     "Groups": {
       "group1": {
         "IsEnabled": false,
