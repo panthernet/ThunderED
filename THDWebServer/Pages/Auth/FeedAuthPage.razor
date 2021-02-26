@@ -28,33 +28,33 @@
                 </p>
             }
 
-            @if (UserId > 0 && ContractNotificationsModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
+            @if ((UserId > 0 && ContractNotificationsModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleContractNotifications)
             {
                 <a href="@GetContractsAuthURL()" class="btn btn-info btn-block" role="button">@GetContractsAuthText()</a>
             }
             <!-- NOTIFICATIONS BUTTON -->
-            @if (UserId > 0 && NotificationModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
+            @if ((UserId > 0 && NotificationModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleNotificationFeed)
             {
                 <a href="@ServerPaths.GetAuthNotifyURL()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.NotificationFeedModule.AuthButtonDiscordText</a>
             }
             <!-- MAIL BUTTON -->
-            @if (MailModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
+            @if ((MailModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleMail)
             {
                 <a href="@ServerPaths.GetMailAuthURL()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.MailModule.AuthButtonDiscordText</a>
             }
 
             <!-- INDUSTRIAL BUTTON -->
-            @if (IndustrialJobsModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
+            @if ((IndustrialJobsModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleIndustrialJobs)
             {
                 <a href="@GetIndustryAuthURL()" class="btn btn-info btn-block" role="button">@GetIndustryAuthText()</a>
             }
             <!-- MINING SCHEDULE BUTTON -->
-            @if (MiningScheduleModule.HasAuthAccess(UserData) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
+            @if ((MiningScheduleModule.HasAuthAccess(UserData) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleMiningSchedule)
             {
                 <a href="@GetMiningScheduleAuthURL()" class="btn btn-info btn-block" role="button">@GetMiningScheduleAuthText()</a>
             }
             <!-- STRUCTURES BUTTON -->
-            @if (StructureManagementModule.HasAuthAccess(UserData) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
+            @if ((StructureManagementModule.HasAuthAccess(UserData) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleStructureManagement)
             {
                 <a href="@GetStructuresAuthURL()" class="btn btn-info btn-block" role="button">@GetStructuresAuthText()</a>
             }
