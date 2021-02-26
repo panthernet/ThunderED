@@ -15,7 +15,7 @@
 
     "moduleWebServer": false,
     "moduleAuthCheck": false,
-    "moduleAuthWeb": false,
+    "moduleAuthWeb": true,
     "moduleCharCorp": false,
     "moduleLiveKillFeed": false,
     "modulePriceCheck": false,
@@ -202,7 +202,7 @@
   "WebAuthModule": {
     "authCheckIntervalMinutes": 60,
     "AuthTakeNumberOfUsersPerPass": 100,
-
+    "DisplayFeedAuthWithoutRegistration": false,
     "StandingsRefreshIntervalInMinutes": 60,
     "exemptDiscordRoles": [ "Admins" ],
     "AuthCheckIgnoreRoles": [ "CustomDiscordRoleToSkipOnAuthCheck" ],
@@ -221,6 +221,7 @@
     "AuthButtonDiscordText": "Discord Auth",
     "authGroups": {
       "DefaultGroup": {
+        "IsEnabled": true,
         "AllowedMembers": {},
         "ManualAssignmentRoles": [],
         "CustomButtonText": "General Auth"

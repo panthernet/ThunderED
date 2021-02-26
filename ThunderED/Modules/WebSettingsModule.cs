@@ -340,30 +340,34 @@ namespace ThunderED.Modules
         {
             try
             {
-                var groups = new Dictionary<string, TimersAccessGroup>();
-                Settings.TimersModule.AccessList.Clear();
-                foreach (var data in convData)
+                lock (SettingsManager.UpdateLock)
                 {
-                    if(data.RolesList.Any())
-                        data.UpdateRolesFromList();
-
-                    var group = new TimersAccessGroup();
-                    var lst = data.Entities.Split(",");
-                    foreach (var item in lst)
+                    var groups = new Dictionary<string, TimersAccessGroup>();
+                    Settings.TimersModule.AccessList.Clear();
+                    foreach (var data in convData)
                     {
-                        if (long.TryParse(item, out var value))
-                            group.FilterEntities.Add(value);
-                        else group.FilterEntities.Add(item);
+                        if (data.RolesList.Any())
+                            data.UpdateRolesFromList();
+
+                        var group = new TimersAccessGroup();
+                        var lst = data.Entities.Split(",");
+                        foreach (var item in lst)
+                        {
+                            if (long.TryParse(item, out var value))
+                                group.FilterEntities.Add(value);
+                            else group.FilterEntities.Add(item);
+                        }
+
+                        group.FilterDiscordRoles = data.Roles.Split(",", StringSplitOptions.RemoveEmptyEntries)
+                            .Select(a => a.Trim()).ToList();
+                        groups.Add(data.Name, group);
                     }
 
-                    group.FilterDiscordRoles = data.Roles.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(a => a.Trim()).ToList();
-                    groups.Add(data.Name, group);
+                    foreach (var @group in groups)
+                        Settings.TimersModule.AccessList.Add(group.Key, group.Value);
+
+                    Settings.Save();
                 }
-
-                foreach (var @group in groups)
-                    Settings.TimersModule.AccessList.Add(group.Key, group.Value);
-
-                await Settings.SaveAsync();
             }
             catch (Exception ex)
             {

@@ -23,13 +23,24 @@
             </NavLink>
         </li>
 
-        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_FEED_AUTH">
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="@ServerPaths.GetFeedAuthPageUrl()">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> @LM.Get("nmAuthFeedPage")
-                </NavLink>
-            </li>
-        </AuthorizeView>
+        @if (SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
+        {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="@ServerPaths.GetFeedAuthPageUrl()">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> @LM.Get("nmAuthFeedPage")
+                    </NavLink>
+                </li>
+        }
+        else
+        {
+            <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_FEED_AUTH">
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="@ServerPaths.GetFeedAuthPageUrl()">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> @LM.Get("nmAuthFeedPage")
+                    </NavLink>
+                </li>
+            </AuthorizeView>
+        }
         <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_HRM">
             <li class="nav-item px-3">
                 <NavLink class="nav-link" href="@ServerPaths.GetHrmPageUrl()">

@@ -11,6 +11,7 @@ namespace ThunderED
         public DbSet<ThdToken> Tokens { get; set; }
         public DbSet<ThdMiningNotification> MiningNotifications { get; set; }
         public DbSet<ThdMiningLedger> MiningLedgers { get; set; }
+        public DbSet<ThdCacheEntry> Cache { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
         //public DbSet<JsonClasses.RegionData> Regions { get; set; }
@@ -79,6 +80,18 @@ namespace ThunderED
             modelBuilder.Entity<ThdMiningLedger>().Property(a => a.CitadelId).HasColumnName("citadel_id");
             modelBuilder.Entity<ThdMiningLedger>().Property(a => a.Date).HasColumnName("date");
             modelBuilder.Entity<ThdMiningLedger>().Property(a => a.OreJson).HasColumnName("ore_json");
+            #endregion
+
+            #region Cache
+            modelBuilder.Entity<ThdCacheEntry>().HasIndex(u => u.Id);
+            modelBuilder.Entity<ThdCacheEntry>().ToTable("cache");
+
+            modelBuilder.Entity<ThdCacheEntry>().Property(a => a.Id).HasColumnName("id");
+            modelBuilder.Entity<ThdCacheEntry>().Property(a => a.Type).HasColumnName("type");
+            modelBuilder.Entity<ThdCacheEntry>().Property(a => a.LastAccess).HasColumnName("lastAccess");
+            modelBuilder.Entity<ThdCacheEntry>().Property(a => a.LastUpdate).HasColumnName("lastUpdate");
+            modelBuilder.Entity<ThdCacheEntry>().Property(a => a.Content).HasColumnName("text");
+            modelBuilder.Entity<ThdCacheEntry>().Property(a => a.Days).HasColumnName("days");
             #endregion
         }
 

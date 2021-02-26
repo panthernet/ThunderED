@@ -1823,7 +1823,37 @@ namespace ThunderED
 #else
         public List<object> ViewAccessEntities { get; set; } = new List<object>();
         public List<object> AuthAccessEntities { get; set; } = new List<object>();
-        public Dictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new Dictionary<string, MiningComplexAccessGroup>();
+        public Dictionary<string, StructureAccessGroup> ComplexAccess { get; set; } = new Dictionary<string, StructureAccessGroup>();
+#endif
+    }
+
+    public class StructureAccessGroup
+    {
+#if EDITOR
+
+        [Comment("List of names and Ids of entities (char/corp/alliance) who can have access to this group")]
+        [Required]
+        public ObservableCollection<object> Entities { get; set; } = new ObservableCollection<object>();
+        [Required]
+        [Comment("List of structure names that group can manage. Case insensitive.")]
+        public ObservableCollection<string> StructureNames { get; set; } = new ObservableCollection<string>();
+#else
+        public List<object> Entities { get; set; } = new List<object>();
+        public List<string> StructureNames { get; set; } = new List<string>();
+#endif
+        [Comment("Set to True to allow all specified entities manage any accessible structures that belong to their corporations")]
+        public bool CanManageOwnCorporation { get; set; }
+        public StructureCustomNotifications CustomNotifications { get; set; } = new StructureCustomNotifications();
+    }
+
+    public class StructureCustomNotifications
+    {
+#if EDITOR
+
+        [Comment("List of hours for notification before time is out for structure unanchoring event")]
+        public ObservableCollection<int> UnanchoringHours { get; set; } = new ObservableCollection<int>();
+#else
+        public List<int> UnanchoringHours { get; set; } = new List<int>();
 #endif
     }
 
@@ -1992,6 +2022,9 @@ namespace ThunderED
         
         [Comment("Numeric time interval in minutes to run standings update for feed users")]
         public int StandingsRefreshIntervalInMinutes { get; set; } = 60;
+
+        [Comment("Display feed auth menu without require to register on the site")]
+        public bool DisplayFeedAuthWithoutRegistration { get; set; }
 
         [Comment("Numeric ID of the Discord channel to report bot auth actions. Preferably for admins only. Leave 0 to disable")]
         public ulong AuthReportChannel { get; set; }

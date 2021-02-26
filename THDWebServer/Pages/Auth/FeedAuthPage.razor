@@ -2,8 +2,10 @@
 @using ThunderED.Modules
 @using ThunderED.Modules.Sub
 @using ThunderED.Json
-@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_FEED_AUTH)]
+
 @inject ProtectedSessionStorage Store
+@inject AuthenticationStateProvider Auth
+@inject NavigationManager Nav
 
 <div class="container" style="height: 100%">
     <div class="colorifier text-center">
@@ -26,33 +28,33 @@
                 </p>
             }
 
-            @if (UserId > 0 && ContractNotificationsModule.HasAuthAccess(UserId))
+            @if (UserId > 0 && ContractNotificationsModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
             {
                 <a href="@GetContractsAuthURL()" class="btn btn-info btn-block" role="button">@GetContractsAuthText()</a>
             }
             <!-- NOTIFICATIONS BUTTON -->
-            @if (UserId > 0 && NotificationModule.HasAuthAccess(UserId))
+            @if (UserId > 0 && NotificationModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
             {
                 <a href="@ServerPaths.GetAuthNotifyURL()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.NotificationFeedModule.AuthButtonDiscordText</a>
             }
             <!-- MAIL BUTTON -->
-            @if (MailModule.HasAuthAccess(UserId))
+            @if (MailModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
             {
                 <a href="@ServerPaths.GetMailAuthURL()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.MailModule.AuthButtonDiscordText</a>
             }
 
             <!-- INDUSTRIAL BUTTON -->
-            @if (IndustrialJobsModule.HasAuthAccess(UserId))
+            @if (IndustrialJobsModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
             {
                 <a href="@GetIndustryAuthURL()" class="btn btn-info btn-block" role="button">@GetIndustryAuthText()</a>
             }
             <!-- MINING SCHEDULE BUTTON -->
-            @if (MiningScheduleModule.HasAuthAccess(UserData))
+            @if (MiningScheduleModule.HasAuthAccess(UserData) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
             {
                 <a href="@GetMiningScheduleAuthURL()" class="btn btn-info btn-block" role="button">@GetMiningScheduleAuthText()</a>
             }
             <!-- STRUCTURES BUTTON -->
-            @if (StructureManagementModule.HasAuthAccess(UserData))
+            @if (StructureManagementModule.HasAuthAccess(UserData) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
             {
                 <a href="@GetStructuresAuthURL()" class="btn btn-info btn-block" role="button">@GetStructuresAuthText()</a>
             }
@@ -83,6 +85,12 @@
         var usr = await Store.GetAsync<WebAuthUserData>("user");
         UserData = usr;
         UserId = usr?.Id ?? 0;
+
+        if (!await CustomAuthenticationStateProvider.HasAuth(Auth) && !SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
 
         await base.OnInitializedAsync();
     }

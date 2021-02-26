@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -47,7 +48,7 @@ namespace ThunderED
         public static ThunderSettings Settings { get; private set; }
 
         public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-
+        public static readonly object UpdateLock = new object();
 
 
         public static async Task<string> Prepare(string settingsPath = null)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Radzen;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
@@ -390,6 +391,37 @@ namespace ThunderED
 
         #endregion
 
+        #region Cache
+        public static async Task<T> GetCache<T>(string cacheId, int minutes)
+        {
+            await using var db = new ThunderedDbContext();
+            var now = DateTime.Now;
+            var content =  (await db.Cache.AsNoTracking().FirstOrDefaultAsync(a => a.Id == cacheId && (now - a.LastUpdate).Minutes <= minutes))?.Content;
+            return string.IsNullOrEmpty(content) ? (T)(object)null : JsonConvert.DeserializeObject<T>(content);
+        }
 
+        public static async Task UpdateCache(string cacheId, string content)
+        {
+            try
+            {
+                await using var db = new ThunderedDbContext();
+                var entry = await db.Cache.FirstOrDefaultAsync(a => a.Id == cacheId);
+                if (entry == null)
+                    await db.Cache.AddAsync(new ThdCacheEntry {Id = cacheId, Content = content});
+                else
+                {
+                    entry.Content = content;
+                    entry.LastUpdate = DateTime.Now;
+                    entry.LastAccess = DateTime.Now;
+                }
+
+                await db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, LogCat.Database);
+            }
+        }
+        #endregion
     }
 }

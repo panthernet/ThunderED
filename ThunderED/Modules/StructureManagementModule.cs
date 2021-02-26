@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
@@ -43,6 +44,84 @@ namespace ThunderED.Modules
                     ParsedManageAccessMembersLists.Add(key, aData);
             }
         }
+
+
+        private DateTime? _lastCheck;
+        private volatile bool _isRunning;
+
+        public override async Task Run(object prm)
+        {
+            return;
+            if(!Settings.Config.ModuleStructureManagement || _isRunning) return;
+            _isRunning = true;
+            try
+            {
+                if (_lastCheck == null || (DateTime.Now - _lastCheck.Value).Minutes >= 2)
+                {
+                    foreach (var token in await DbHelper.GetTokens(TokenEnum.Structures))
+                    {
+                        var r = await APIHelper.ESIAPI.RefreshToken(token.Token,
+                            Settings.WebServerModule.CcpAppClientId,
+                            Settings.WebServerModule.CcpAppSecret);
+                        if (r == null || r.Data.IsFailed)
+                        {
+                            await LogHelper.LogWarning($"Failed to refresh structure token from {token.CharacterId}",
+                                Category);
+                            if (r?.Data.IsNotValid ?? false)
+                            {
+                                await DbHelper.DeleteToken(token.CharacterId, TokenEnum.Structures);
+                                await LogHelper.LogWarning(
+                                    $"Structures token from {token.CharacterId} is no longer valid and will be deleted!",
+                                    Category);
+                            }
+
+                            continue;
+                        }
+
+                        var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, token.CharacterId, true);
+                        if (rChar == null)
+                        {
+                            await LogHelper.LogError($"Failed to refresh character {token.CharacterId}", Category);
+                            continue;
+                        }
+
+                        var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, rChar.corporation_id);
+                        if (corp == null)
+                        {
+                            await LogHelper.LogError($"Failed to refresh corp {rChar.corporation_id}", Category);
+                            continue;
+                        }
+
+                        var cacheId = $"sm{rChar.corporation_id}";
+                        var structures = await DbHelper.GetCache<List<CorporationStructureJson>>(cacheId, 5);
+                        if (structures == null)
+                        {
+                            structures = await APIHelper.ESIAPI.GetCorpStructures(Reason, rChar.corporation_id,
+                                r.Result);
+                            if(structures != null)
+                                await DbHelper.UpdateCache(cacheId, JsonConvert.SerializeObject(structures));
+                        }
+                        if (structures == null)
+                        {
+                            await LogHelper.LogError($"Unable to get the structures info from {rChar.name}");
+                            continue;
+                        }
+
+                        //var gorups = Settings.StructureManagementModule.ComplexAccess.Where(a=> a.Value.)
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+            }
+            finally
+            {
+                _isRunning = false;
+            }
+        }
+
 
         public async Task<WebQueryResult> ProcessRequest(string query, CallbackTypeEnum type, string ip, WebAuthUserData data)
         {
@@ -222,7 +301,7 @@ namespace ThunderED.Modules
         }*/
         #endregion
 
-        public async Task<Tuple<List<string>, List<ThdStructureInfo>>> GetStructures(MiningComplexAccessGroup accessGroup, WebAuthUserData user)
+        public async Task<Tuple<List<string>, List<ThdStructureInfo>>> GetStructures(StructureAccessGroup accessGroup, WebAuthUserData user)
         {
             var tokens = await DbHelper.GetTokens(TokenEnum.Structures);
             var result = new List<ThdStructureInfo>();

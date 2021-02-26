@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_STRUCTURES)]
 @using ThunderED.Modules
 @using ThunderED.Thd
+@using THDWebServer.Pages.Modals
 @inject ProtectedSessionStorage Store
 @inject IModalService Modal
 @inject NavigationManager Nav
@@ -13,6 +14,9 @@
                 <RadzenDropDown TValue="string" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                 Data="@_corpsList" Style="width: 400px;" @bind-Value="_structFilterCorp"
                                 Change="@OnStructFilterChange" AllowFiltering="true" AllowClear="true"/>
+                <div class="align-content-end" style="display: none">
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="alarm" Size="ButtonSize.Small" Click="async () => await AlarmSettingsClick()"/>
+                </div>
                 <RadzenGrid PageSize="20" Count="@_countStructures" Data="@_filteredStructList" TItem="ThdStructureInfo"
                             LoadData="@LoadStructuresGrid" @ref="_structGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" AllowColumnResize="true"
                             Style="height: 640px;">
@@ -60,7 +64,7 @@
 @code {
     private StructureManagementModule _module;
     private bool _hasEditAccess;
-    private MiningComplexAccessGroup _group;
+    private StructureAccessGroup _group;
     private List<ThdStructureInfo> _structures;
     private bool _isStructLoaded;
     private string _structFilterCorp;
@@ -119,5 +123,10 @@
     }
 
 
+    private async Task AlarmSettingsClick()
+    {
+        var o = new ModalOptions { DisableBackgroundCancel = true, HideHeader = true, ContentScrollable = true };
+        await Modal.Show<StructureAlarmSettings>("Inspection", o).Result;
+    }
 
 }
