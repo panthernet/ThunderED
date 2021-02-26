@@ -9,18 +9,14 @@
   "LowPower": "Low Power",
   "StructureWentLowPower": "Allied {0} is on {1}!",
   "helpHelp": "don't tcp my ip!",
-  "helpAuth":
-    "*auth* command helps to authenticate you by EVE Online character. Send *{0}auth* command to the bot for additional details.",
-  "helpAuthNotify":
-    "*authnotify* command provides you with a link to auth you by EVE Online character as notifications feeder. Send *{0}authnotify* command to the bot for additional details.",
+  "helpAuth": "*auth* command helps to authenticate you by EVE Online character. Send *{0}auth* command to the bot for additional details.",
+  "helpAuthNotify": "*authnotify* command provides you with a link to auth you by EVE Online character as notifications feeder. Send *{0}authnotify* command to the bot for additional details.",
   "helpTime": "*evetime* command displays current EVE Online time",
-  "helpStat":
-    "*stat* or *stats* command displays corp or alliance stats by time interval\nAvailable mods: d, w, m, ld, lw, y, r. The **r** modifier displays stats rating table.\nExamples: {0}stat m United Fleet | {0}stat d Goonswarm Federation | {0}stat y Perkone | {0}stat 2018 Nebula Alba| {0}stat 2018/03 Nebula Alba",
+  "helpStat": "*stat* or *stats* command displays corp or alliance stats by time interval\nAvailable mods: d, w, m, ld, lw, y, r. The **r** modifier displays stats rating table.\nExamples: {0}stat m United Fleet | {0}stat d Goonswarm Federation | {0}stat y Perkone | {0}stat 2018 Nebula Alba| {0}stat 2018/03 Nebula Alba",
   "helpAbout": "*about* command displays information about the bot",
   "helpChar": "*char* command displays information about in game character by name\nExample: *{0}char Don Chack*",
   "helpCorp": "*corp* command displays information about corporation by name\nExample: *{0}corp Nebula Alba*",
-  "helpJita":
-    "this command displays information about the item price in a specified trade hub\nExample: *{0}jita Robotics*",
+  "helpJita": "this command displays information about the item price in a specified trade hub\nExample: *{0}jita Robotics*",
   "helpPc": "this command displays information about the global item price\nExample: *{0}pc Robotics*",
   "helpWeb": "Displays the main page of the web site",
   "helpTQ": "Displays Tranquility server status",
@@ -124,8 +120,7 @@
   "grantRolesPrelMessage": "Granting roles for {0} [AUTO-AUTH from {1}]",
   "msgAuthSuccess": "{0},:white_check_mark: **Success**: {1} successfully authenticated.",
   "authTemplateHeader": "Discord Authentication",
-  "authTemplateInv":
-    "Press button below to login into your EVE Online account through official web site. This operation will allow us to receive your character ID for Discord link. We CAN'T get your personal data through this process.",
+  "authTemplateInv": "Press button below to login into your EVE Online account through official web site. This operation will allow us to receive your character ID for Discord link. We CAN'T get your personal data through this process.",
   "authTemplateSucc1": "SSO successful! Welcome on board {0}!",
   "authTemplateSucc2": "<b>!!!WARNING!!!</b> Enter following command in Discord chat to complete registration process!",
   "authTemplateSucc3": "If you're not in Discord yet, please click image below.",
@@ -142,8 +137,7 @@
   "killFeedDetails": "Time: {0}\nValue: {1}",
   "killFeedDetailsSystem": "System: {0}",
   "radiusInfoHeader": "Radius Info",
-  "fuNeedSetup":
-    "FleetUp module setup is incomplete! Please check your settings.json file and make sure bot have access to specified Discord channel!",
+  "fuNeedSetup": "FleetUp module setup is incomplete! Please check your settings.json file and make sure bot have access to specified Discord channel!",
   "fuNotification": "FleetUp Notification",
   "fuFormUpTime": "Form Up Time",
   "fuFormUpSystem": "Form Up System",
@@ -222,11 +216,9 @@
   "fwstats_tier": "Minimum Tier",
   "fwstats_tip": "Tip of the Day",
   "fwstats_notip": "There is no tip available",
-  "fwstats_gosell":
-    "Faction owns {0}% of systems, probably it is a good idea to check LP sell value and start withdrawing your actives!",
+  "fwstats_gosell": "Faction owns {0}% of systems, probably it is a good idea to check LP sell value and start withdrawing your actives!",
   "fwstats_gofarm": "Faction owns {0}% of systems, probably it has high Tier worth of LP farm!",
-  "fwstats_goselllp":
-    "Average LP sell ratio is {0}! Might worth checking LP stock and start selling your LP (http://www.lpstock.ru/corp.php?corpid={1})\nTop Items:\n{2}",
+  "fwstats_goselllp": "Average LP sell ratio is {0}! Might worth checking LP stock and start selling your LP (http://www.lpstock.ru/corp.php?corpid={1})\nTop Items:\n{2}",
   "commandInProgress": "Already processing this command for another request. Please try again later.",
   "timersUrlText": "Timers URL: {0}",
   "helpTurl": "Display Timers page web URL",
@@ -238,18 +230,15 @@
   "accessDenied": "Access Denied",
   "autopost_tq": "Tranquility Server is",
   "authTemplateManualAccept": "Thank you for applying {0}! Your application has to be verified by our executives.",
-  "authTemplateManualAccept2":
-    "Please enter following command into Discord chat to bind your character to Discord account:",
+  "authTemplateManualAccept2": "Please enter following command into Discord chat to bind your character to Discord account:",
   "authTemplateManualAccept3": "Visit our Discord group using the link below",
   "authManualAcceptMessage": "{0}(ID: {1}) has applied under a manual approval group {2}",
   "invalidCommandSyntax": "Invalid command syntax",
   "entryNotFound": "Entry not found",
   "authUserNotConfirmed": "User {0} has not yet confirmed application!",
-  "authGroupNameNotFound":
-    "Auth group named {0} not found! If you renamed your groups in settings then users must restart auth process.",
+  "authGroupNameNotFound": "Auth group named {0} not found! If you renamed your groups in settings then users must restart auth process.",
   "authNoAccessRights": "You don't have sufficient access rights to complete this command",
-  "authUnableToProcessUserGroup":
-    "Unable to auth *{0}({1})* as his auth group *{2}* do not exist in the settings file!",
+  "authUnableToProcessUserGroup": "Unable to auth *{0}({1})* as his auth group *{2}* do not exist in the settings file!",
   "authNoTokenReceived": "Unable to fetch refresh token from your auth. Please try again or contact administrator.",
   "authDiscordUserConfirmed": "Character {0} is successfully bound to your Discord account!",
   "authDiscordUserDeclined": "Character {0} application has been declined!",
@@ -416,38 +405,31 @@
   "lpStock_DataHeader": "Data",
   "lpStock_AverageLp": "Avg LP rate: {0}",
   "lpStock_ItemsHeader": "Top goods",
-  "helpLp":
-    "Displays LP goods rating for specified NPC corporation or faction. Examples: {0}{1} Caldari Navy | {0}{1} caldari | {0}{1} c",
+  "helpLp": "Displays LP goods rating for specified NPC corporation or faction. Examples: {0}{1} Caldari Navy | {0}{1} caldari | {0}{1} c",
   "lpStock_PageText": "Visit LPStock Page",
   "hrmContractHrStand": "HR stand",
   "badstandTitle": "Lowest standings to {0}",
   "badstandTopTenTitle": "Top 10 baddies",
   "badstandNoUsers": "No characters found",
-  "badstandHelp":
-    "This command displays top 10 members with lowest standing to specified NPC corp or faction. Usage: {0}{1} TEXT or {0}bs TEXT\nExample: {0}{1} c | {0}bs caldari | {0}{1} state protectorate",
+  "badstandHelp": "This command displays top 10 members with lowest standing to specified NPC corp or faction. Usage: {0}{1} TEXT or {0}bs TEXT\nExample: {0}{1} c | {0}bs caldari | {0}{1} state protectorate",
   "badstandNoNegative": "No characters with negative standings found",
   "badstandBusy": "Unable to execute command. Please try again in a few seconds",
   "rngroupInitialNotFound": "Source group not found in DB. Please check if the name is correct.",
   "rngroupNotFound": "Target group not found. Please check if the name is correct.",
   "rngroupSyntax": "Can't parse the command. Please check syntax.",
-  "helpRnGroup":
-    "Rename auth group for users in DB. Syntax: **{0}{1} \"FROM\" \"TO\"** - note the quotes! Example: {0}{1} \"MyGroup\" \"New Group\"",
+  "helpRnGroup": "Rename auth group for users in DB. Syntax: **{0}{1} \"FROM\" \"TO\"** - note the quotes! Example: {0}{1} \"MyGroup\" \"New Group\"",
   "rngroupComplete": ":white_check_mark: Operation completed!",
   "authPageHeaderText": "",
-  "authPageGeneralAuthHeader":
-    "<p style='text-align: center;font-size: 18px;'>This section designated for common members authentication</p>",
-  "authPageSystemAuthHeader":
-    "<p style='text-align: center;font-size: 18px;'>This section designated for special authentication</p>",
+  "authPageGeneralAuthHeader": "<p style='text-align: center;font-size: 18px;'>This section designated for common members authentication</p>",
+  "authPageSystemAuthHeader": "<p style='text-align: center;font-size: 18px;'>This section designated for special authentication</p>",
   "contractFailedToOpen": "There was an error while trying to open contract in your game client",
   "contractOpenIngame": "Open Contract Ingame",
   "contractOpened": "Request has been sent successfully. You can close this window.",
-  "hrmInvalidUserToken":
-    "Unable to get valid character token. Refresh token might be expired, deleted by user or belongs to another CCP app!",
+  "hrmInvalidUserToken": "Unable to get valid character token. Refresh token might be expired, deleted by user or belongs to another CCP app!",
   "hrmInspectLocation": "Location",
   "hrmInspectShip": "Ship",
   "hrmDumpHeader": "Dumped",
-  "helpSys":
-    "```\nList of available admin commands:\n  shutdown - shutdown server\n  restart - restart server (if using Restarter) \n  cleartable NAME - clear all data in the DB table with corresponding NAME\n  flush notifcache - clear all notifications cache\n  flush dbcache - clear all cache from database\n  esitoken [ID] - gets character ESI token by specified character ID  \n```",
+  "helpSys": "```\nList of available admin commands:\n  shutdown - shutdown server\n  restart - restart server (if using Restarter) \n  cleartable NAME - clear all data in the DB table with corresponding NAME\n  flush notifcache - clear all notifications cache\n  flush dbcache - clear all cache from database\n  esitoken [ID] - gets character ESI token by specified character ID  \n```",
   "helpSysClear": "Subcommand to clear specified DB table. Use it on your own risk. Example: **!sys cleartable cache**",
   "sysClearTableNotFound": "Specified DB table not found or there is a database error!",
   "sysOperationComplete": ":white_check_mark: Operation completed!",
@@ -458,8 +440,7 @@
   "hrmSpyButtonTooltip": "Move member to Spies section",
   "hrmDeleteAuthButtonTooltip": "Delete member authentication",
   "hrmDumpAuthButtonTooltip": "Move member to Dumped section",
-  "helpClist":
-    "Lists all contracts for specified group. Syntax:  {0}{1} {{STATUS}}{{TYPE}}{{AVAILABILITY}} GROUP_NAME. \nStatuses are: A - all, O - opened, C - closed, F - finished, R - rejected. \nTypes are: C - courier, E - exchange, A - auction, 0 - ALL (omit if not specifying availability). \nAvailability is: A - alliance, C - corp, P - public, 0 - all (can be omitted). \nExamples: {0}{1} AC my_group  {0}{1} FAP group 4",
+  "helpClist": "Lists all contracts for specified group. Syntax:  {0}{1} {{STATUS}}{{TYPE}}{{AVAILABILITY}} GROUP_NAME. \nStatuses are: A - all, O - opened, C - closed, F - finished, R - rejected. \nTypes are: C - courier, E - exchange, A - auction, 0 - ALL (omit if not specifying availability). \nAvailability is: A - alliance, C - corp, P - public, 0 - all (can be omitted). \nExamples: {0}{1} AC my_group  {0}{1} FAP group 4",
   "clistPersonalTitle": "Personal Contracts",
   "clistCorpTitle": "Corporation Contracts",
   "clistExpired": "expired",
@@ -501,8 +482,7 @@
   "errFileNotFound": "File {0} not found!",
   "errFileContainsInvalidData": "File {0} contains invalid data!",
   "authAltRegTemplateHeader": "Alt Character Registration",
-  "authAltRegBody":
-    "<p>Auth with alt who will be bound to current character</p><p><b>You can do it with as many characters as you need</b></p>",
+  "authAltRegBody": "<p>Auth with alt who will be bound to current character</p><p><b>You can do it with as many characters as you need</b></p>",
   "authAltRegMainNotFound": "Selected main character is not registered in Discord!",
   "authAltRegGroupNotFound": "Alt Character authentication group isn't found!",
   "authAltRegAccepted": "Thank you for applying! Alt character {0} has been successfully bound to main character {1}.",
@@ -531,8 +511,7 @@
   "webSettingsSaColumnName": "Name",
   "webSettingsSaColumnGroup": "Group",
   "webSettingsSaColumnRoles": "Roles",
-  "helpShips":
-    "Ships command displays information about members who can pilot ship fits.\nModifiers: who - check members in current channel, who online - online members in current channel, all - all registered members, all online - all registered members who are online.\nExamples: {0}{1} who , {0}{1} who online, {0}{1} all\nYou can also add group or ship name as the last param: {0}{1} all dreads  {0}{1} who online moros",
+  "helpShips": "Ships command displays information about members who can pilot ship fits.\nModifiers: who - check members in current channel, who online - online members in current channel, all - all registered members, all online - all registered members who are online.\nExamples: {0}{1} who , {0}{1} who online, {0}{1} all\nYou can also add group or ship name as the last param: {0}{1} all dreads  {0}{1} who online moros",
   "errShipsNameNotFound": "Ship or group name '{0}' not found!",
   "hrmTooltipNoESI": "Character has no ESI permissions",
   "hrmTooltipInvalidESIToken": "Character has invalid ESI token",
@@ -550,10 +529,8 @@
   "roleCommandsDontHaveRole": "User don't have `{0}` role!",
   "roleCommandsRoleRemoved": ":white_check_mark: Role `{0}` has been removed successfully!",
   "roleCommandsRoleNotRemoved": ":no_entry_sign: Unable to remove `{0}` role!",
-  "roleCommandsListRoles":
-    "Available roles for manual assignment: `{0}`\nUse `{1}{2} roleName` command to add selected role",
-  "helpAddRoleCommand":
-    "Assigns selected Discord role to the command author. List available roles using `{0}{2}` command. Syntax: `{0}{1} roleName`",
+  "roleCommandsListRoles": "Available roles for manual assignment: `{0}`\nUse `{1}{2} roleName` command to add selected role",
+  "helpAddRoleCommand": "Assigns selected Discord role to the command author. List available roles using `{0}{2}` command. Syntax: `{0}{1} roleName`",
   "helpRemoveRoleCommand": "Removes selected manual Discord role from the command author. Syntax: `{0}{1} roleName`",
   "roleCommandsAccessDenied": "You do not have access to use this command!",
   "Victim": "Victim",
@@ -587,8 +564,7 @@
   "industryJobsRowBPO": "BPO",
   "industryJobsRowInstaller": "Installer",
   "industryJobsRowStation": "Location",
-  "helpTest":
-    "Commands available:\nkm test TEMPLATE - generate test KM where TEMPLATE is the name of the KM template file from Templates/Messages folder",
+  "helpTest": "Commands available:\nkm test TEMPLATE - generate test KM where TEMPLATE is the name of the KM template file from Templates/Messages folder",
   "notifCorpWarEligible": "Corporation {0} has become war eligible!",
   "notifCorpNotWarEligible": "Corporation {0} is no longer war eligible!",
   "notifMutualWarExpired": "Mutual war between {0} and {1} has expired!",
@@ -622,8 +598,7 @@
   "sysFlushedAllCache": "All server cache has been cleared!",
   "helpSysToken": "esitoken [ID] - gets character ESI token by specified character ID",
   "hrmInspectIp": "Reg IP",
-  "initialEntityParseError":
-    "@here WebAuth module has been suspended due to errors in resolving specified char/corp/alliance entities! Please actualize auth config and/or restart the bot if this is an ESI issue.",
+  "initialEntityParseError": "@here WebAuth module has been suspended due to errors in resolving specified char/corp/alliance entities! Please actualize auth config and/or restart the bot if this is an ESI issue.",
   "msgLoading": "Loading...",
   "msgProcessingQuery": "Processing query...",
   "404": "404 Not Found!",
@@ -706,5 +681,7 @@
   "smColumnOwner": "Owner",
   "smColumnName": "Name",
   "smrColumnState": "Status",
-  "smrColumnFuel": "Fuel"
+  "smrColumnFuel": "Fuel",
+  "smNotifyUnanchoringMessage": "@here {0} citadel wil unanchor in less than {0} hour(s)",
+  "smNotifyUnanchoredMessage": "@here {0} citadel has unanchored!"
 }

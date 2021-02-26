@@ -340,8 +340,11 @@ namespace ThunderED.Helpers
                             httpClient.DefaultRequestHeaders.Add("Authorization", auth);
                         if(!string.IsNullOrEmpty(eToken))
                             httpClient.DefaultRequestHeaders.Add("Etoken", eToken);
-
+#if DEBUG
+                        var ct = new CancellationTokenSource(50000);
+#else
                         var ct = new CancellationTokenSource(5000);
+#endif
 
                         using (var responseMessage = await httpClient.GetAsync(request, ct.Token))
                         {

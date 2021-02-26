@@ -1852,8 +1852,11 @@ namespace ThunderED
 
         [Comment("List of hours for notification before time is out for structure unanchoring event")]
         public ObservableCollection<int> UnanchoringHours { get; set; } = new ObservableCollection<int>();
+        [Comment("List of Discord channel IDs where to post notifications")]
+        public ObservableCollection<int> UnanchoringDiscordChannelIds { get; set; } = new ObservableCollection<int>();
 #else
         public List<int> UnanchoringHours { get; set; } = new List<int>();
+        public List<ulong> UnanchoringDiscordChannelIds { get; set; } = new List<ulong>();
 #endif
     }
 

@@ -51,13 +51,15 @@ namespace ThunderED.Modules
 
         public override async Task Run(object prm)
         {
-            return;
+          
             if(!Settings.Config.ModuleStructureManagement || _isRunning) return;
             _isRunning = true;
             try
             {
-                if (_lastCheck == null || (DateTime.Now - _lastCheck.Value).Minutes >= 2)
+                if ((_lastCheck == null || (DateTime.Now - _lastCheck.Value).Minutes >= 2) && ParsedManageAccessMembersLists.Any())
                 {
+                    var result = new List<NotifyItem>();
+                    var processedCorps = new List<long>();
                     foreach (var token in await DbHelper.GetTokens(TokenEnum.Structures))
                     {
                         var r = await APIHelper.ESIAPI.RefreshToken(token.Token,
@@ -92,6 +94,10 @@ namespace ThunderED.Modules
                             continue;
                         }
 
+                        if (processedCorps.Contains(rChar.corporation_id))
+                            continue;
+                        processedCorps.Add(rChar.corporation_id);
+
                         var cacheId = $"sm{rChar.corporation_id}";
                         var structures = await DbHelper.GetCache<List<CorporationStructureJson>>(cacheId, 5);
                         if (structures == null)
@@ -107,8 +113,130 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        //var gorups = Settings.StructureManagementModule.ComplexAccess.Where(a=> a.Value.)
+                        var groups = new List<StructureAccessGroup>();
+                        foreach (var (groupName, groupValue) in ParsedManageAccessMembersLists)
+                        {
+                            if (groupValue["character"].Contains(rChar.character_id) ||
+                                groupValue["corporation"].Contains(rChar.corporation_id) ||
+                                (rChar.alliance_id.HasValue &&
+                                 groupValue["alliance"].Contains(rChar.alliance_id.Value)))
+                            {
+                                groups.Add(Settings.StructureManagementModule.ComplexAccess[groupName]);
+                            }
+                        }
 
+                        if (groups.Any())
+                        {
+                            //select all unanchoring structures
+                            var unanchoring = structures.Where(a => a.state != CorpStructureStateEnum.unanchored || a.unanchors_at.HasValue)
+                                .ToList();
+                            var unanchored = structures.Where(a =>
+                                a.state == CorpStructureStateEnum.unanchored);
+
+                            foreach (var @group in groups)
+                            {
+                                try
+                                {
+                                    //unanchor notifications
+                                    if (group.CustomNotifications.UnanchoringHours.Any() &&
+                                        group.CustomNotifications.UnanchoringDiscordChannelIds.Any() &&
+                                        unanchoring.Any())
+                                    {
+
+
+                                        var announces = group.CustomNotifications.UnanchoringHours
+                                            .OrderByDescending(a => a).ToList();
+                                        if (announces.Count == 0) continue;
+
+                                        foreach (var s in unanchored)
+                                        {
+                                            var lastNotify =
+                                                await DbHelper.GetNotificationListEntry("structures",
+                                                    s.structure_id);
+                                            if(lastNotify != null && lastNotify.FilterName == "check")
+                                                continue;
+                                            await DbHelper.UpdateNotificationListEntry("structures", s.structure_id,
+                                                "check");
+                                            result.Add(new NotifyItem
+                                            {
+                                                Token = r.Result,
+                                                Hours = 0,
+                                                Structure = s,
+                                                Channels = group.CustomNotifications.UnanchoringDiscordChannelIds
+                                            });
+                                        }
+
+                                        foreach (var s in unanchoring)
+                                        {
+                                            var lastNotify =
+                                                await DbHelper.GetNotificationListEntryDate("structures",
+                                                    s.structure_id);
+                                            //don;t have announces
+                                            if (lastNotify.HasValue &&
+                                                (s.unanchors_at.Value - lastNotify.Value).TotalHours < announces.Min())
+                                                continue;
+                                            //new announce
+                                            var left = (s.unanchors_at.Value - DateTime.UtcNow).TotalHours;
+                                            if (!lastNotify.HasValue)
+                                            {
+                                                //have some announces
+                                                if (left <= announces.Max())
+                                                {
+                                                    var value = announces.Where(a => a < left).OrderByDescending(a => a)
+                                                        .FirstOrDefault();
+                                                    value = value == 0 ? announces.Min() : value;
+                                                    result.Add(new NotifyItem
+                                                    {
+                                                        Token = r.Result, Hours = value, Structure = s,
+                                                        Channels = group.CustomNotifications.UnanchoringDiscordChannelIds
+                                                    });
+                                                    await DbHelper.UpdateNotificationListEntry("structures", s.structure_id);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var sinceAnnounce =
+                                                    (s.unanchors_at.Value - lastNotify.Value).TotalHours;
+                                                //existing announce
+                                                var aList = announces.Where(a => a < sinceAnnounce && a >= left)
+                                                    .OrderByDescending(a => a).ToList();
+                                                if (aList.Count == 0) return;
+
+                                                result.Add(new NotifyItem
+                                                {
+                                                    Token = r.Result, Hours = aList.First(), Structure = s, Channels = group.CustomNotifications.UnanchoringDiscordChannelIds
+                                                });
+                                                await DbHelper.UpdateNotificationListEntry("structures", s.structure_id);
+                                            }
+
+                                        }
+
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    await LogHelper.LogEx(ex, Category);
+                                }
+                            }
+                        }
+                    }
+
+                    foreach (var r in result)
+                    {
+                        var s = await APIHelper.ESIAPI.GetUniverseStructureData(Reason, r.Structure.structure_id,
+                            r.Token);
+                        foreach (var channel in r.Channels)
+                        {
+                            try
+                            {
+                                await APIHelper.DiscordAPI.SendMessageAsync(channel,
+                                    LM.Get(r.Hours == 0 ? "smNotifyUnanchoredMessage" : "smNotifyUnanchoringMessage", s?.name, r.Hours));
+                            }
+                            catch (Exception ex)
+                            {
+                                await LogHelper.LogEx(ex, Category);
+                            }
+                        }
                     }
                 }
             }
@@ -438,5 +566,13 @@ namespace ThunderED.Modules
 
             return new Tuple<List<string>, List<ThdStructureInfo>>(corps, result.OrderBy(a=>a.FuelTime).ToList());
         }
+    }
+
+    public class NotifyItem
+    {
+        public string Token { get; set; }
+        public int Hours { get; set; }
+        public CorporationStructureJson Structure { get; set; }
+        public List<ulong> Channels { get; set; }
     }
 }

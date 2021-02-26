@@ -396,7 +396,7 @@ namespace ThunderED
         {
             await using var db = new ThunderedDbContext();
             var now = DateTime.Now;
-            var content =  (await db.Cache.AsNoTracking().FirstOrDefaultAsync(a => a.Id == cacheId && (now - a.LastUpdate).Minutes <= minutes))?.Content;
+            var content =  db.Cache.AsNoTracking().Where(a => a.Id == cacheId).ToList().FirstOrDefault(a=>(now - a.LastUpdate).Minutes <= minutes)?.Content;
             return string.IsNullOrEmpty(content) ? (T)(object)null : JsonConvert.DeserializeObject<T>(content);
         }
 
@@ -423,5 +423,45 @@ namespace ThunderED
             }
         }
         #endregion
+
+        public static async Task<DateTime?> GetNotificationListEntryDate(string group, long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return (await db.NotificationsList.AsNoTracking().FirstOrDefaultAsync(a =>
+                a.GroupName.Equals(group, StringComparison.OrdinalIgnoreCase) && a.Id == id))?.Time;
+        }
+
+        public static async Task<ThdNotificationListEntry> GetNotificationListEntry(string group, long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return (await db.NotificationsList.AsNoTracking().FirstOrDefaultAsync(a =>
+                a.GroupName.Equals(group, StringComparison.OrdinalIgnoreCase) && a.Id == id));
+        }
+
+        public static async Task UpdateNotificationListEntry(string group, long id, string filter = "-")
+        {
+            try
+            {
+                await using var db = new ThunderedDbContext();
+                var item = await db.NotificationsList.FirstOrDefaultAsync(a =>
+                    a.GroupName.Equals(group, StringComparison.OrdinalIgnoreCase) && a.Id == id);
+                if (item != null)
+                {
+                    item.Time = DateTime.Now;
+                    item.FilterName = filter;
+                }
+                else
+                {
+                    await db.NotificationsList.AddAsync(new ThdNotificationListEntry
+                        {Id = id, GroupName = group, Time = DateTime.Now, FilterName = filter});
+                }
+
+                await db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, LogCat.Database);
+            }
+        }
     }
 }

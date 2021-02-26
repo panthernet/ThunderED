@@ -12,6 +12,7 @@ namespace ThunderED
         public DbSet<ThdMiningNotification> MiningNotifications { get; set; }
         public DbSet<ThdMiningLedger> MiningLedgers { get; set; }
         public DbSet<ThdCacheEntry> Cache { get; set; }
+        public DbSet<ThdNotificationListEntry> NotificationsList { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
         //public DbSet<JsonClasses.RegionData> Regions { get; set; }
@@ -92,6 +93,16 @@ namespace ThunderED
             modelBuilder.Entity<ThdCacheEntry>().Property(a => a.LastUpdate).HasColumnName("lastUpdate");
             modelBuilder.Entity<ThdCacheEntry>().Property(a => a.Content).HasColumnName("text");
             modelBuilder.Entity<ThdCacheEntry>().Property(a => a.Days).HasColumnName("days");
+            #endregion
+
+            #region ThdNotificationListEntry
+            modelBuilder.Entity<ThdNotificationListEntry>().HasIndex(u => u.GroupName);
+            modelBuilder.Entity<ThdNotificationListEntry>().ToTable("notifications_list");
+
+            modelBuilder.Entity<ThdNotificationListEntry>().Property(a => a.Id).HasColumnName("id");
+            modelBuilder.Entity<ThdNotificationListEntry>().Property(a => a.GroupName).HasColumnName("groupName");
+            modelBuilder.Entity<ThdNotificationListEntry>().Property(a => a.FilterName).HasColumnName("filterName");
+            modelBuilder.Entity<ThdNotificationListEntry>().Property(a => a.Time).HasColumnName("time");
             #endregion
         }
 

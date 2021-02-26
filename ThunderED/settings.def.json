@@ -895,8 +895,12 @@
     "ViewAccessEntities": [ ],
     "ComplexAccess": {
       "AccessEntry1": {
-        "Entities": [ ],
-        "StructureNames": [ ]
+        "Entities": [],
+        "StructureNames": [],
+        "CustomNotifications": {
+          "UnanchoringHours": [ 1, 24 ],
+          "UnanchoringDiscordChannelIds": []
+        }
       }
     }
   }
