@@ -178,7 +178,7 @@ namespace ThunderED.Modules
                                 .FirstOrDefault(a => !string.IsNullOrEmpty(a) && char.IsDigit(a[0]));
                         }
 
-                        mainCharId = webUserData.Id;
+                        mainCharId = webUserData?.Id ?? 0;
 
                         var inputGroupName = state?.Length > 1
                             ? HttpUtility.UrlDecode(state.Substring(1, state.Length - 1))
