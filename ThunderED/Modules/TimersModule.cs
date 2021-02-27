@@ -44,6 +44,8 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            ParsedAccessLists.Clear();
+            ParsedEditLists.Clear();
             var data = Settings.TimersModule.AccessList.ToDictionary(pair => pair.Key, pair => pair.Value.FilterEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member, ParsedAccessLists);
             data = Settings.TimersModule.EditList.ToDictionary(pair => pair.Key, pair => pair.Value.FilterEntities);

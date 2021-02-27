@@ -683,5 +683,16 @@
   "smrColumnState": "Status",
   "smrColumnFuel": "Fuel",
   "smNotifyUnanchoringMessage": "@here {0} citadel wil unanchor in less than {0} hour(s)",
-  "smNotifyUnanchoredMessage": "@here {0} citadel has unanchored!"
+  "smNotifyUnanchoredMessage": "@here {0} citadel has unanchored!",
+  "nmMoonTablePage": "Moons",
+  "mtMoonsHeader": "Moons",
+  "mtAvailabilityHeader": "Report",
+  "mtColumnMoonName": "Name",
+  "mtColumnOreName": "Ore",
+  "mtColumnOreQuantity": "Quantity",
+  "mtPasteHeader": "Import",
+  "mtPasteMessage": "Paste data from the clipboard",
+  "webUploadButton": "Upload",
+  "webInputIsEmpty": "Invalid input format",
+  "webInvalidInputFormat": "Invalid input format"
 }

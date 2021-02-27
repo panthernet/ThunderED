@@ -22,6 +22,7 @@ namespace THDWebServer.Authentication
         public const string ROLE_FEED_AUTH = "feed_auth";
         public const string ROLE_MINING_SCHEDULE = "ms";
         public const string ROLE_STRUCTURES = "struct";
+        public const string ROLE_MOON_TABLE = "moon_table";
 
         public ProtectedSessionStorage ProtectedSessionStore { get; set; }
 
@@ -84,6 +85,11 @@ namespace THDWebServer.Authentication
             if (StructureManagementModule.HasViewAccess(usr) || StructureManagementModule.HasManageAccess(usr, out _))
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_STRUCTURES));
+            }
+
+            if (MoonInfoModule.HasAccess(usr))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, ROLE_MOON_TABLE));
             }
 
             if (ContractNotificationsModule.HasAuthAccess(usr.Id) || IndustrialJobsModule.HasAuthAccess(usr.Id) ||

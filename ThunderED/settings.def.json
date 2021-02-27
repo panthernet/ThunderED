@@ -41,6 +41,7 @@
     "ModuleIndustrialJobs": false,
     "ModuleMiningSchedule": false,
     "ModuleStructureManagement": false,
+    "ModuleMoonTable": false,
 
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
@@ -891,8 +892,8 @@
 
   "StructureManagementModule": {
     "AuthButtonDiscordText": "Structure Management Auth",
-    "AuthAccessEntities": [ ],
-    "ViewAccessEntities": [ ],
+    "AuthAccessEntities": [],
+    "ViewAccessEntities": [],
     "ComplexAccess": {
       "AccessEntry1": {
         "Entities": [],
@@ -903,6 +904,11 @@
         }
       }
     }
-  }
+  },
+
+  "MoonTableModule": {
+    "ViewAccessEntities": [],
+    "LimitedAccessEntities":  [] 
+  } 
 
 }

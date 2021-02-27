@@ -60,7 +60,9 @@
     <Watch Remove="Pages\Modals\InspectLedger.razor" />
     <Watch Remove="Pages\Modals\MailSearch.razor" />
     <Watch Remove="Pages\Modals\MailViewer.razor" />
+    <Watch Remove="Pages\Modals\PasteDIalog.razor" />
     <Watch Remove="Pages\Modals\StructureAlarmSettings.razor" />
+    <Watch Remove="Pages\MoonTable.razor" />
     <Watch Remove="Pages\SettingsEditor.razor" />
     <Watch Remove="Pages\StructureManagement.razor" />
     <Watch Remove="Pages\Success\FeedSuccess.razor" />

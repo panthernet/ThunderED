@@ -1,0 +1,183 @@
+﻿@page "/moontable"
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_MOON_TABLE)]
+@using ThunderED.Modules
+@using ThunderED.Helpers
+@using ThunderED.Thd
+@using THDWebServer.Pages.Modals
+@inject ProtectedSessionStorage Store
+@inject IModalService Modal
+@inject NavigationManager Nav
+
+<div class="container">
+    <RadzenTabs Style="padding: 0;">
+        <Tabs>
+            @if (_hasViewAccess)
+            {
+                <RadzenTabsItem Text="@LM.Get("mtMoonsHeader")" Style="padding: 0;">
+                    <div class="row">
+                        <div>
+                            <RadzenDropDown TValue="WebStellarRegionEntry" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            Data="@_regions" Style="width: 400px;" @bind-Value="_selectedRegion" TextProperty="Name"
+                                            Change="@OnRegion1FilterChange" AllowFiltering="true" AllowClear="true" />
+                        </div>
+                        <div style="margin-left: 10px;">
+                            <RadzenButton ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Icon="system_update_alt" Click="ImportMoonDataClick"/>
+                        </div>
+                    </div>
+                    <RadzenGrid PageSize="30" Count="@_countMoons" Data="@_filteredMoonList" TItem="ThdMoonTableEntry"
+                                LoadData="@LoadMoonsGrid" @ref="_moonsGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" AllowColumnResize="false"
+                                Style="height: 640px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                        <Columns>
+                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="MoonName" Filterable="true" Sortable="true" FilterProperty="MoonName" SortProperty="MoonName"
+                                              Title="@LM.Get("mtColumnMoonName")">
+                                <Template Context="order">
+                                    <RadzenLabel Text="@order.MoonName" />
+                                </Template>
+                            </RadzenGridColumn>
+                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="OreName" Filterable="true" Sortable="true" FilterProperty="OreName" SortProperty="OreName"
+                                              Title="@LM.Get("mtColumnOreName")">
+                                <Template Context="order">
+                                    <RadzenLabel Text="@order.OreName" />
+                                </Template>
+                            </RadzenGridColumn>
+                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="OreQuantity" Filterable="true" Sortable="true" FilterProperty="OreQuantity" SortProperty="OreQuantity"
+                                              Title="@LM.Get("mtColumnOreQuantity")">
+                                <Template Context="order">
+                                    <RadzenLabel Text="@($"{order.OreQuantity:N2}")" />
+                                </Template>
+                            </RadzenGridColumn>
+
+                        </Columns>
+                    </RadzenGrid>
+                    @if (_isLoading)
+                    {
+                        <RadzenLabel Text="@LM.Get("webLoading")" Class="generalLoadingTabText" />
+                    }
+                </RadzenTabsItem>
+            }
+            @if (_hasViewAccess || _hasLimitedAccess)
+            {
+                <RadzenTabsItem Text="@LM.Get("mtAvailabilityHeader")" Style="padding: 0;">
+                </RadzenTabsItem>
+            }
+        </Tabs>
+    </RadzenTabs>
+</div>
+
+@code {
+    private RadzenGrid<ThdMoonTableEntry> _moonsGrid;
+    private MoonInfoModule _module;
+    private bool _hasViewAccess;
+    private bool _hasLimitedAccess;
+    private bool _isLoading = true;
+    private List<ThdMoonTableEntry> _moonCacheList;
+    private List<ThdMoonTableEntry> _filteredMoonList;
+    private List<WebStellarRegionEntry> _regions;
+    private WebStellarRegionEntry _selectedRegion;
+
+    private int _countMoons;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _module = TickManager.GetModule<MoonInfoModule>();
+
+        _hasViewAccess = MoonInfoModule.HasViewAccess(user);
+        _hasLimitedAccess = MoonInfoModule.HasLimitedAccess(user);
+
+        if (!_hasViewAccess && !_hasLimitedAccess)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        await Task.Factory.StartNew(async () =>
+        {
+            var ids = await DbHelper.GetMoonTableRegions();
+            _regions = new List<WebStellarRegionEntry>();
+            foreach (var id in ids)
+            {
+                var name = (await APIHelper.ESIAPI.GetRegionData("MoonInfo", id))?.name;
+                _regions.Add(new WebStellarRegionEntry {Id = id, Name = name});
+            }
+            _selectedRegion = _regions.FirstOrDefault();
+            _moonCacheList = _selectedRegion == null ? null : await DbHelper.GetMoonTableByRegion(_selectedRegion.Id);
+            _isLoading = false;
+
+        });
+
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnRegion1FilterChange()
+    {
+        await _moonsGrid.Reload();
+
+    }
+
+    private async Task LoadMoonsGrid(LoadDataArgs arg)
+    {
+        while (_isLoading)
+            await Task.Delay(100);
+
+
+        var innerList = _selectedRegion != null ?
+            _moonCacheList.Where(a => a.RegionId == (_selectedRegion?.Id ?? 0)).ToList() :
+            _moonCacheList;
+
+        _filteredMoonList = innerList.OrderByDescending(a => a.MoonName).ApplyAjaxFilters(arg, out _countMoons);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ImportMoonDataClick()
+    {
+        var prms = new ModalParameters();
+        prms.Add("Header", LM.Get("mtPasteHeader"));
+        prms.Add("Message", LM.Get("mtPasteMessage"));
+        prms.Add("ValidationType", WebInputValidateEnum.MoonInput);
+
+        var o = new ModalOptions {DisableBackgroundCancel = true, HideHeader = true, ContentScrollable = true};
+        var r = await Modal.Show<PasteDialog>("Inspection", prms, o).Result;
+        if (!r.Cancelled)
+        {
+            var list = await _module.UpdateMoonTable(((MoonUploadResult) r.Data).List);
+            await UpdateLoadedList(list);
+            await _moonsGrid.Reload();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task UpdateLoadedList(List<ThdMoonTableEntry> list)
+    {
+        var regions = list.Select(a => a.RegionId).Distinct().ToList();
+        var newRegions = regions.Except(_regions.Select(a => a.Id));
+        if (newRegions.Any())
+        {
+            foreach (var region in newRegions)
+            {
+                var r = await APIHelper.ESIAPI.GetRegionData("MoonInfo", region);
+                _regions.Add(new WebStellarRegionEntry {Id = region, Name = r?.name ?? LM.Get("Unknown")});
+
+            }
+        }
+
+        foreach (var entry in list)
+        {
+            var old = _moonCacheList.FirstOrDefault(a => a.Id == entry.Id);
+            if (old != null)
+                _moonCacheList.Remove(old);
+            _moonCacheList.Add(entry);
+        }
+
+        await _moonsGrid.Reload();
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

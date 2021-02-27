@@ -676,5 +676,16 @@
   "smrColumnState": "Статус",
   "smrColumnFuel": "Топливо",
   "smNotifyUnanchoringMessage": "@here Цитадель {0} снимется с якоря менее чем через {0} часов",
-  "smNotifyUnanchoredMessage": "@here Цитадель {0} снялась с якоря!"
+  "smNotifyUnanchoredMessage": "@here Цитадель {0} снялась с якоря!",
+  "nmMoonTablePage": "Луны",
+  "mtMoonsHeader": "Луны",
+  "mtAvailabilityHeader": "Сводка",
+  "mtColumnMoonName": "Название",
+  "mtColumnOreName": "Руда",
+  "mtColumnOreQuantity": "Количество",
+  "mtPasteHeader": "Импорт",
+  "mtPasteMessage": "Вставьте данные из буфера обмена",
+  "webUploadButton": "Загрузить",
+  "webInputIsEmpty": "Неверный формат ввода",
+  "webInvalidInputFormat": "Неверный формат ввода"
 }

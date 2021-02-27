@@ -46,6 +46,7 @@
         IndustryJobs,
         MiningSchedule,
         ESIWarnings,
-        StructureManagement
+        StructureManagement,
+        MoonInfo
     }
 }

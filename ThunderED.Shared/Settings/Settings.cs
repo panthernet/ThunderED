@@ -64,6 +64,8 @@ namespace ThunderED
         public StatsModuleSettings StatsModule { get; set; } = new StatsModuleSettings();
         [ConfigEntryName("ModuleMiningSchedule")]
         public MiningScheduleSettings MiningScheduleModule { get; set; } = new MiningScheduleSettings();
+        [ConfigEntryName("ModuleMoonTable")]
+        public MoonTableSettings MoonTableModule { get; set; } = new MoonTableSettings();
 
         [ConfigEntryName("Database")]
         [StaticConfigEntry]
@@ -128,6 +130,17 @@ namespace ThunderED
                 value.OnEditorSave();
             }
         }
+#endif
+    }
+
+    public class MoonTableSettings
+    {
+#if EDITOR
+        public ObservableCollection<object> ViewAccessEntities { get; set; } = new ObservableCollection<object>();
+        public ObservableCollection<object> LimitedAccessEntities { get; set; } = new ObservableCollection<object>();
+#else
+        public List<object> ViewAccessEntities { get; set; } = new List<object>();
+        public List<object> LimitedAccessEntities { get; set; } = new List<object>();
 #endif
     }
 
@@ -1742,6 +1755,7 @@ namespace ThunderED
         public bool ModuleIndustrialJobs { get; set; } = false;
         public bool ModuleMiningSchedule { get; set; } = false;
         public bool ModuleStructureManagement { get; set; } = false;
+        public bool ModuleMoonTable { get; set; } = false;
 
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";

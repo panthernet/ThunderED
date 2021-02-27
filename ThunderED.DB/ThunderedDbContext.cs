@@ -13,6 +13,7 @@ namespace ThunderED
         public DbSet<ThdMiningLedger> MiningLedgers { get; set; }
         public DbSet<ThdCacheEntry> Cache { get; set; }
         public DbSet<ThdNotificationListEntry> NotificationsList { get; set; }
+        public DbSet<ThdMoonTableEntry> MoonTable { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
         //public DbSet<JsonClasses.RegionData> Regions { get; set; }
@@ -104,6 +105,23 @@ namespace ThunderED
             modelBuilder.Entity<ThdNotificationListEntry>().Property(a => a.FilterName).HasColumnName("filterName");
             modelBuilder.Entity<ThdNotificationListEntry>().Property(a => a.Time).HasColumnName("time");
             #endregion
+
+            #region ThdMoonTableEntry
+            modelBuilder.Entity<ThdMoonTableEntry>().HasIndex(u => u.Id).IsUnique();
+            modelBuilder.Entity<ThdMoonTableEntry>().HasIndex(u => u.SystemId);
+            modelBuilder.Entity<ThdMoonTableEntry>().HasIndex(u => u.OreId);
+            modelBuilder.Entity<ThdMoonTableEntry>().ToTable("moon_table");
+
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.Id).HasColumnName("id");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.MoonId).HasColumnName("moon_id");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.OreId).HasColumnName("ore_id");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.OreQuantity).HasColumnName("ore_quantity");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.PlanetId).HasColumnName("planet_id");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.SystemId).HasColumnName("system_id");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.RegionId).HasColumnName("region_id");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.OreName).HasColumnName("ore_name");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.MoonName).HasColumnName("moon_name");
+            #endregion
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -124,4 +142,5 @@ namespace ThunderED
             }
         }
     }
+
 }

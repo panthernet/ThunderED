@@ -21,7 +21,7 @@ namespace ThunderED
             switch (type)
             {
                 case UserStatusEnum.Awaiting:
-                    q = db.Users.OrderBy(a=> a.Data).AsNoTracking().Where(a=> a.AuthState < 2);
+                    q = db.Users.OrderBy(a => a.Data).AsNoTracking().Where(a => a.AuthState < 2);
                     break;
                 case UserStatusEnum.Authed:
                     q = db.Users.OrderBy(a => a.Data).AsNoTracking().Where(a => a.AuthState == 2);
@@ -59,8 +59,8 @@ namespace ThunderED
                 q = q.Take(args.Top.Value);
             }
 
-            var list =  await q.ToListAsync();
-            list?.ForEach(a=> a.UnpackData());
+            var list = await q.ToListAsync();
+            list?.ForEach(a => a.UnpackData());
 
             return new object[] {list, db.Users.Count()};
         }
@@ -69,7 +69,8 @@ namespace ThunderED
         {
             await using var db = new ThunderedDbContext();
             var compareDate = DateTime.Now.AddHours(-1);
-            return await db.Users.Where(a => !a.LastCheck.HasValue || a.LastCheck.Value <= compareDate).OrderBy(a => a.LastCheck)
+            return await db.Users.Where(a => !a.LastCheck.HasValue || a.LastCheck.Value <= compareDate)
+                .OrderBy(a => a.LastCheck)
                 .Take(count).Select(a => a.DiscordId ?? 0).ToListAsync();
         }
 
@@ -77,7 +78,8 @@ namespace ThunderED
         {
             await using var db = new ThunderedDbContext();
             var compareDate = DateTime.Now.AddHours(-1);
-            return await db.Users.Where(a => !a.LastCheck.HasValue || a.LastCheck.Value <= compareDate).OrderBy(a => a.LastCheck)
+            return await db.Users.Where(a => !a.LastCheck.HasValue || a.LastCheck.Value <= compareDate)
+                .OrderBy(a => a.LastCheck)
                 .Take(count).Select(a => a.CharacterId).ToListAsync();
         }
 
@@ -143,33 +145,30 @@ namespace ThunderED
         #endregion
 
         #region AuthUsers
-        public static async Task<List<ThdAuthUser>> GetAuthUsers(UserStatusEnum type, bool includeToken = false, bool checkPermissions = false)
+
+        public static async Task<List<ThdAuthUser>> GetAuthUsers(UserStatusEnum type, bool includeToken = false,
+            bool checkPermissions = false)
         {
             await using var db = new ThunderedDbContext();
             var req = db.Users.AsNoTracking().Where(a => a.AuthState == (int) type);
             if (includeToken)
                 req = req.Include(a => a.Tokens);
             var list = await req.ToListAsync();
-            list.ForEach(a=>
-            {
-                a?.UnpackData();
-            });
+            list.ForEach(a => { a?.UnpackData(); });
             if (checkPermissions)
                 list = list.Where(a => a.DataView.PermissionsList.Any()).ToList();
             return list;
         }
 
-        public static async Task<List<ThdAuthUser>> GetAuthUsers(bool includeToken = false, bool checkPermissions = false)
+        public static async Task<List<ThdAuthUser>> GetAuthUsers(bool includeToken = false,
+            bool checkPermissions = false)
         {
             await using var db = new ThunderedDbContext();
             var req = db.Users.AsNoTracking();
             if (includeToken)
                 req = req.Include(a => a.Tokens);
             var list = await req.ToListAsync();
-            list.ForEach(a =>
-            {
-                a?.UnpackData();
-            });
+            list.ForEach(a => { a?.UnpackData(); });
             if (checkPermissions)
                 list = list.Where(a => a.DataView.PermissionsList.Any()).ToList();
             return list;
@@ -180,11 +179,12 @@ namespace ThunderED
             await using var db = new ThunderedDbContext();
             user.PackData();
             db.Attach(user);
-            if(db.Entry(user).State == EntityState.Unchanged)
+            if (db.Entry(user).State == EntityState.Unchanged)
                 db.Entry(user).State = EntityState.Modified;
             if (!string.IsNullOrEmpty(token))
             {
-                var old = db.Tokens.FirstOrDefault(a => a.CharacterId == user.CharacterId && a.Type == TokenEnum.General);
+                var old = db.Tokens.FirstOrDefault(
+                    a => a.CharacterId == user.CharacterId && a.Type == TokenEnum.General);
                 if (old != null)
                     db.Tokens.Remove(old);
                 await db.Tokens.AddAsync(new ThdToken
@@ -208,8 +208,9 @@ namespace ThunderED
         public static async Task<List<ThdAuthUser>> GetOutdatedAwaitingAuthUsers()
         {
             await using var db = new ThunderedDbContext();
-            var list = await db.Users.AsNoTracking().Where(a => string.IsNullOrEmpty(a.GroupName) || a.AuthState < 2).ToListAsync();
-            list.ForEach(a=> a.UnpackData());
+            var list = await db.Users.AsNoTracking().Where(a => string.IsNullOrEmpty(a.GroupName) || a.AuthState < 2)
+                .ToListAsync();
+            list.ForEach(a => a.UnpackData());
             return list;
         }
 
@@ -224,7 +225,7 @@ namespace ThunderED
                 db.Tokens.RemoveRange(tokens);
 
                 var alts = await db.Users.Where(a => a.MainCharacterId == characterId).ToListAsync();
-                if(alts.Any())
+                if (alts.Any())
                     db.Users.RemoveRange(alts);
                 await db.SaveChangesAsync();
             }
@@ -247,8 +248,9 @@ namespace ThunderED
             if (user != null)
             {
                 db.Users.Remove(user);
-                var users = await db.Users.Where(a => a.MainCharacterId > 0 && a.MainCharacterId == user.CharacterId).ToListAsync();
-                if(users.Any())
+                var users = await db.Users.Where(a => a.MainCharacterId > 0 && a.MainCharacterId == user.CharacterId)
+                    .ToListAsync();
+                if (users.Any())
                     db.Users.RemoveRange(users);
                 await db.SaveChangesAsync();
                 return users.Select(a => a.CharacterId).ToList();
@@ -328,6 +330,7 @@ namespace ThunderED
 
             await db.SaveChangesAsync();
         }
+
         #endregion
 
         #region Mining
@@ -380,10 +383,11 @@ namespace ThunderED
 
             ThdMiningLedger result;
             if (lastComplete)
-                result = await db.MiningLedgers.AsNoTracking().Where(a=> a.CitadelId == citadelId)
+                result = await db.MiningLedgers.AsNoTracking().Where(a => a.CitadelId == citadelId)
                     .OrderByDescending(a => a.Date).FirstOrDefaultAsync();
-            else result = await db.MiningLedgers.AsNoTracking()
-                .FirstOrDefaultAsync(a => a.CitadelId == citadelId && a.Date == null);
+            else
+                result = await db.MiningLedgers.AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.CitadelId == citadelId && a.Date == null);
             result?.Unpack();
 
             return result;
@@ -392,12 +396,14 @@ namespace ThunderED
         #endregion
 
         #region Cache
+
         public static async Task<T> GetCache<T>(string cacheId, int minutes)
         {
             await using var db = new ThunderedDbContext();
             var now = DateTime.Now;
-            var content =  db.Cache.AsNoTracking().Where(a => a.Id == cacheId).ToList().FirstOrDefault(a=>(now - a.LastUpdate).Minutes <= minutes)?.Content;
-            return string.IsNullOrEmpty(content) ? (T)(object)null : JsonConvert.DeserializeObject<T>(content);
+            var content = db.Cache.AsNoTracking().Where(a => a.Id == cacheId).ToList()
+                .FirstOrDefault(a => (now - a.LastUpdate).Minutes <= minutes)?.Content;
+            return string.IsNullOrEmpty(content) ? (T) (object) null : JsonConvert.DeserializeObject<T>(content);
         }
 
         public static async Task UpdateCache(string cacheId, string content)
@@ -422,7 +428,10 @@ namespace ThunderED
                 await LogHelper.LogEx(ex, LogCat.Database);
             }
         }
+
         #endregion
+
+        #region NotificationList
 
         public static async Task<DateTime?> GetNotificationListEntryDate(string group, long id)
         {
@@ -463,5 +472,79 @@ namespace ThunderED
                 await LogHelper.LogEx(ex, LogCat.Database);
             }
         }
+
+        #endregion
+
+        #region Moon table
+
+        public static async Task UpdateMoonTable(ThdMoonTableEntry entry)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.MoonTable.FirstOrDefaultAsync(
+                a => a.SystemId == entry.SystemId && entry.MoonId == a.MoonId && entry.OreId == a.OreId);
+            if (old != null)
+                entry.Id = old.Id;
+
+            if (entry.Id == 0)
+            {
+                await db.MoonTable.AddAsync(entry);
+            }
+            else
+            {
+                db.Attach(entry);
+                db.Entry(entry).State = EntityState.Modified;
+            }
+
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task<List<ThdMoonTableEntry>> UpdateMoonTable(List<ThdMoonTableEntry> list)
+        {
+            await using var db = new ThunderedDbContext();
+            foreach (var entry in list)
+            {
+                var old = await db.MoonTable.FirstOrDefaultAsync(
+                    a => a.SystemId == entry.SystemId && entry.MoonId == a.MoonId && entry.OreId == a.OreId);
+                if (old != null)
+                    entry.Id = old.Id;
+
+                if (entry.Id == 0)
+                {
+                    await db.MoonTable.AddAsync(entry);
+                }
+                else
+                {
+                    db.Attach(entry);
+                    db.Entry(entry).State = EntityState.Modified;
+                }
+            }
+
+            await db.SaveChangesAsync();
+            return list;
+        }
+
+        public static async Task<List<ThdMoonTableEntry>> GetMoonTable(long systemId = 0)
+        {
+            await using var db = new ThunderedDbContext();
+            return systemId != 0
+                ? await db.MoonTable.AsNoTracking().Where(a => a.SystemId == systemId).ToListAsync()
+                : await db.MoonTable.AsNoTracking().ToListAsync();
+        }
+
+        public static async Task<List<ThdMoonTableEntry>> GetMoonTableByRegion(long regionId)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.MoonTable.AsNoTracking().Where(a => a.RegionId == regionId).ToListAsync();
+        }
+
+        public static async Task<List<long>> GetMoonTableRegions()
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.MoonTable.Select(a => a.RegionId).Distinct().ToListAsync();
+        }
+
+        #endregion
+
+
     }
 }

@@ -58,6 +58,11 @@ namespace ThunderED.Classes
             return "/struct";
         }
 
+        public static string GetMoonTablePageUrl()
+        {
+            return "/moontable";
+        }
+
         public static string GetAuthUrl()
         {
             return "/auth";

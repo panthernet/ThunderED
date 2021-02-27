@@ -156,6 +156,11 @@ app {
     margin: 0;
 }
 
+
+.hrm-table {
+
+}
+
 @media (min-width: 800px) {
     .hrm-inspect {
         width: 700px;
@@ -178,11 +183,17 @@ app {
     .hrm-inspect {
         height: 760px;
     }
+    .hrm-table {
+        height: 390px;
+    }
 }
 
 @media (min-height: 1024px) {
     .hrm-inspect {
         height: 900px;
+    }
+    .hrm-table {
+        height: 550px;
     }
 }
 

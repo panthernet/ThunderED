@@ -118,6 +118,7 @@ namespace ThunderED.Modules
                 {
                     MailId = h.mail_id,
                     FromName = from?.name ?? LM.Get("Unknown"),
+                    FromLink = from == null ? null : $"https://zkillboard.com/character/{from.character_id}",
                     ToName = rcp.Length > 0 ? rcp : LM.Get("Unknown"),
                     Subject = h.subject,
                     Date = h.Date
@@ -563,5 +564,6 @@ namespace ThunderED.Modules
         public string FromName;
         public long MailId;
         public DateTime Date;
+        public string FromLink { get; set; }
     }
 }

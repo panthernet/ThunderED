@@ -97,6 +97,10 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleStructureManagement)
                 Modules.Add(new StructureManagementModule());
 
+            if (SettingsManager.Settings.Config.ModuleMoonTable)
+                Modules.Add(new MoonInfoModule());
+
+
             if (SettingsManager.Settings.Config.ModuleHRM)
             {
                 Modules.Add(new HRMModule());

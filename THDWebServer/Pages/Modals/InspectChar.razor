@@ -14,21 +14,18 @@
 <div class="modal-content hrm-inspect">
     <div class="modal-header">
         <h5 class="modal-title">@LM.Get("hrmInspectingHeader", MemberData?.CharacterName)</h5>
-        <button type="button" class="close" @onclick="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
+        <div class="row">
+        @if (_access.CanKickUsers)
+        {
+            <RadzenButton ButtonType="ButtonType.Button" Icon="voice_over_off" ButtonStyle="ButtonStyle.Danger" Style="margin-right: 10px;"
+                          Click="ExecuteKickUser" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmButDeleteUserAuth")}})"/>
+        }
+            <RadzenButton ButtonType="ButtonType.Button" Icon="close" ButtonStyle="ButtonStyle.Secondary"
+                          Click="Close"/>
+        </div>
     </div>
     <div class="modal-body">
         <div>
-            @if (false)//_access.CanSearchMail
-            {
-                <button class="btn btn-primary" @onclick="ExecuteSearchMail" style="margin: 10px; min-width: 100px;">@LM.Get("hrmButSearchMail")</button>
-            }
-            @if (_access.CanKickUsers)
-            {
-                <button class="btn btn-danger" @onclick="ExecuteKickUser" style="margin: 10px; min-width: 100px;">@LM.Get("hrmButDeleteUserAuth")</button>
-            }
-
             <div class="row" style="padding: .3rem 1rem;">
                 <!-- Images column-->
                 <div class="col-auto">
@@ -104,7 +101,7 @@
                     <Tabs>
                         <RadzenTabsItem Text="@LM.Get("hrmTabCorpHistory")" Style="padding: 0;">
                             <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@(_corpHistoryList?.Count ?? 0)" AllowSorting="true" Data="@_corpHistoryList" TItem="JsonClasses.CorporationHistoryEntry"
-                                        LoadData="@LoadCorpHistoryData" Style="height: 320px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        LoadData="@LoadCorpHistoryData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                         AllowColumnResize="true">
                                 <Columns>
                                     <RadzenGridColumn TItem="JsonClasses.CorporationHistoryEntry" Filterable="false" Sortable="false" Width="50px">
@@ -114,7 +111,7 @@
                                     </RadzenGridColumn>
                                     <RadzenGridColumn TItem="JsonClasses.CorporationHistoryEntry" Title="@LM.Get("hrmCVCorpName")" FilterProperty="CorpName">
                                         <Template Context="order">
-                                            <a href="@($"https://zkillboard.com/corporation/{order.corporation_id}")">
+                                            <a target="_blank" rel="noopener noreferrer" href="@($"https://zkillboard.com/corporation/{order.corporation_id}")">
                                                 @($"{order.CorpName} [{order.CorpTicker}] {(order.IsNpcCorp ? " (npc)" : null)}{(order.is_deleted ? " (closed)" : null)}")
                                             </a>
                                         </Template>
@@ -140,7 +137,7 @@
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabMail")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countMail" AllowSorting="true" Data="@_mailList" TItem="WebMailHeader"
-                                            LoadData="@LoadMailData" Style="height: 320px;" RowDoubleClick="async args=> await OnMailRowClick(args)" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            LoadData="@LoadMailData" Class="hrm-table" RowDoubleClick="async args=> await OnMailRowClick(args)" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                             AllowColumnResize="true">
                                     <Columns>
                                         <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailSubjectHeader")" FilterProperty="Subject">
@@ -150,7 +147,14 @@
                                         </RadzenGridColumn>
                                         <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailFromHeader")" FilterProperty="FromName">
                                             <Template Context="order">
-                                                <RadzenLabel Text="@order.FromName" />
+                                                @if (!string.IsNullOrEmpty(order.FromLink))
+                                                {
+                                                    <a target="_blank" rel="noopener noreferrer" href="@order.FromLink">@order.FromName</a>
+                                                }
+                                                else
+                                                {
+                                                    @order.FromName
+                                                }
                                             </Template>
                                         </RadzenGridColumn>
                                         <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailToHeader")" FilterProperty="ToName">
@@ -158,7 +162,7 @@
                                                 <RadzenLabel Text="@order.ToName" />
                                             </Template>
                                         </RadzenGridColumn>
-                                        <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailDateHeader")">
+                                        <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailDateHeader")" Width="100px">
                                             <Template Context="order">
                                                 <RadzenLabel Text="@(order.Date.ToShortDateString())" />
                                             </Template>
@@ -175,7 +179,7 @@
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabContracts")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countContracts" AllowSorting="true" Data="@_contractsList" TItem="WebContract"
-                                            LoadData="@LoadContractsData" Style="height: 320px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            LoadData="@LoadContractsData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                             AllowColumnResize="true">
                                     <Columns>
                                         <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractType")" FilterProperty="Type">
@@ -185,12 +189,12 @@
                                         </RadzenGridColumn>
                                         <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractFrom")" FilterProperty="From">
                                             <Template Context="order">
-                                                <RadzenLabel Text="@order.From" />
+                                                <a target="_blank" rel="noopener noreferrer" href="@order.FromLink">@order.From</a>
                                             </Template>
                                         </RadzenGridColumn>
                                         <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractTo")" FilterProperty="To">
                                             <Template Context="order">
-                                                <RadzenLabel Text="@order.To" />
+                                                <a target="_blank" rel="noopener noreferrer" href="@order.ToLink">@order.To</a>
                                             </Template>
                                         </RadzenGridColumn>
                                         <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractStatus")" FilterProperty="Status">
@@ -208,7 +212,7 @@
                                                 <RadzenLabel Text="@order.Title" />
                                             </Template>
                                         </RadzenGridColumn>
-                                        <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractItems")" FilterProperty="AllItems">
+                                        <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractItems")" FilterProperty="AllItems" Width="50px">
                                             <Template Context="order">
                                                 @if (!string.IsNullOrEmpty(order.IncludedItems))
                                                 {
@@ -232,12 +236,12 @@
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabContacts")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countContacts" AllowSorting="true" Data="@_contactsList" TItem="WebContact"
-                                            LoadData="@LoadContactsData" Style="height: 320px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            LoadData="@LoadContactsData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                             AllowColumnResize="true">
                                     <Columns>
                                         <RadzenGridColumn TItem="WebContact" Title="@LM.Get("hrmContactName")" FilterProperty="Name">
                                             <Template Context="order">
-                                                <RadzenLink Text="@order.Name" Path="@order.ZkbLink" />
+                                                <a target="_blank" rel="noopener noreferrer" href="@order.ZkbLink">@order.Name</a>
                                             </Template>
                                         </RadzenGridColumn>
                                         <RadzenGridColumn TItem="WebContact" Title="@LM.Get("hrmContactType")" FilterProperty="Type">
@@ -272,20 +276,20 @@
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabJournal")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countWalletJournal" AllowSorting="true" Data="@_walletJournalList" TItem="WebWalletJournal"
-                                            LoadData="@LoadWalletJournalData" Style="height: 320px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            LoadData="@LoadWalletJournalData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                             AllowColumnResize="true">
                                     <Columns>
-                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalDate")">
+                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalDate")" Width="140px">
                                             <Template Context="order">
                                                 <RadzenLabel Text="@order.Date.ToString(SettingsManager.Settings.Config.ShortTimeFormat)" />
                                             </Template>
                                         </RadzenGridColumn>
-                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalType")" FilterProperty="Type">
+                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalType")" FilterProperty="Type" Width="250px">
                                             <Template Context="order">
                                                 <RadzenLabel Text="@order.Type" />
                                             </Template>
                                         </RadzenGridColumn>
-                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalAmount")" FilterProperty="Amount">
+                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalAmount")" FilterProperty="Amount" Width="180px">
                                             <Template Context="order">
                                                 <RadzenLabel Text="@order.Amount" Class="@order.WebClass" />
                                             </Template>
@@ -307,7 +311,7 @@
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabTransfers")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countWalletTrans" AllowSorting="true" Data="@_walletTransList" TItem="WebWalletTrans"
-                                            LoadData="@LoadWalletTransData" Style="height: 320px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            LoadData="@LoadWalletTransData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                             AllowColumnResize="true">
                                     <Columns>
                                         <RadzenGridColumn TItem="WebWalletTrans" Title="@LM.Get("hrmTransDateHeader")" FilterProperty="Date">
@@ -327,7 +331,7 @@
                                         </RadzenGridColumn>
                                         <RadzenGridColumn TItem="WebWalletTrans" Title="@LM.Get("hrmTransClientHeader")" FilterProperty="Client">
                                             <Template Context="order">
-                                                <RadzenLabel Text="@(order.Client)" />
+                                                <a target="_blank" rel="noopener noreferrer" href="@order.ClientZkbLink">@order.Client</a>
                                             </Template>
                                         </RadzenGridColumn>
                                         <RadzenGridColumn TItem="WebWalletTrans" Title="@LM.Get("hrmTransWhereHeader")" FilterProperty="Where">
@@ -346,7 +350,7 @@
                         @if (SettingsManager.HasCharSkillsScope(_character?.DataView.PermissionsList) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabSkills")">
-                                <RadzenGrid LoadData="@LoadSkillzData" TItem="WebSkillItem" Count="@_countSkillsList" PageSize="30" AllowFiltering="true" AllowPaging="true"
+                                <RadzenGrid LoadData="@LoadSkillzData" TItem="WebSkillItem" Count="@_countSkillsList" PageSize="30" AllowFiltering="true" AllowPaging="true" Class="hrm-table"
                                             FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowColumnResize="true" Data="@_skillsList" CellRender="@SkillCellRender">
                                     <Columns>
                                         <RadzenGridColumn TItem="WebSkillItem" Title="@LM.Get("hrmSkillName")" FilterProperty="Name">
