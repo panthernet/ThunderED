@@ -41,7 +41,10 @@ namespace ThunderED
 
             if (!string.IsNullOrEmpty(args.Filter))
             {
-                q = q.Where(args.Filter);
+                var index = args.Filter.IndexOf("Contains(")+10;
+                var end = args.Filter.IndexOf('"', index+1);
+                var value = args.Filter.Substring(index, end - index).ToLower();
+                q = q.Where(a=> a.Data.ToLower().Contains(value));
             }
 
             if (!string.IsNullOrEmpty(args.OrderBy))

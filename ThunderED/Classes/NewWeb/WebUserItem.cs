@@ -17,5 +17,8 @@ namespace ThunderED.Classes
         public bool HasInvalidToken { get; set; }
 
         public bool HasGoodToken => !HasNoToken && !HasInvalidToken;
+
+        public string FilterString =>
+            $"{CharacterName}|{CorporationName}|{AllianceName}|{CorporationTicker}|{AllianceTicker}";
     }
 }

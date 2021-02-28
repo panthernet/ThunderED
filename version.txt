@@ -1,7 +1,8 @@
-### V2.0.2
+### V2.0.4
  + New flexible web shell called THDWebServer
  + New Mining Schedule module with extraction timers and ledger
  + New structure manager module with fuel and status info
+ + New Moon Table module to keep tracking of moon ore composition data
  + Added core type in the StructureOnline notification
  + Added abandoned flag to StructureDestroyed notification
  + Added ability to override language strings using the custom_language.json file in Data or root folder
