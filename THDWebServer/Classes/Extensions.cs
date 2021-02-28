@@ -34,6 +34,22 @@ namespace THDWebServer.Classes
             return query.ToList();
         }
 
+        public static List<T> ApplyAjaxFilters<T>(this IQueryable<T> list, LoadDataArgs args, out int count)
+        {
+            var query = list.AsQueryable();
+            if (!string.IsNullOrEmpty(args.Filter))
+                query = query.Where(args.Filter);
+            count = query.Count();
+
+            if (!string.IsNullOrEmpty(args.OrderBy))
+                query = query.OrderBy(args.OrderBy);
+            if (args.Skip.HasValue)
+                query = query.Skip(args.Skip.Value);
+            if (args.Top.HasValue)
+                query = query.Take(args.Top.Value);
+            return query.ToList();
+        }
+
         public static async Task<T> GetAndClear<T>(this ProtectedSessionStorage storage, string name)
         {
             if (string.IsNullOrEmpty(name)) return default;
@@ -60,6 +76,15 @@ namespace THDWebServer.Classes
             var parameters = new ModalParameters();
             parameters.Add("Message", message);
             return !(await modal.Show<Confirm>(header ?? LM.Get("webConfirmation"), parameters, options).Result).Cancelled;
+        }
+
+        public static async Task ShowError(this IModalService modal, string header = null, string message = null)
+        {
+            var options = new ModalOptions() { HideCloseButton = true, HideHeader = true};
+            var parameters = new ModalParameters();
+            parameters.Add("Header", header ?? LM.Get("webErrorHeader"));
+            parameters.Add("Message", message ?? LM.Get("webGenericErrorMessage"));
+            await modal.Show<ErrorDialog>(header ?? LM.Get("webConfirmation"), parameters, options).Result;
         }
     }
 }

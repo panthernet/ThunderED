@@ -735,9 +735,9 @@ namespace ThunderED.Modules
                     int r = 0;
                     foreach (var (key, value) in list)
                     {
-                        if (r64list.Contains(key))
+                        if (R64List.Contains(key))
                             r64 += value;
-                        else if (r32list.Contains(key))
+                        else if (R32List.Contains(key))
                             r32 += value;
                         else r += value;
                     }
@@ -748,9 +748,9 @@ namespace ThunderED.Modules
 
                     foreach (var (key, value) in completeLedger.RawOre)
                     {
-                        if (r64list.Contains(key))
+                        if (R64List.Contains(key))
                             r64input += value;
-                        else if (r32list.Contains(key))
+                        else if (R32List.Contains(key))
                             r32input += value;
                         else rInput += value;
                     }
@@ -774,7 +774,7 @@ namespace ThunderED.Modules
             return ledgers;
         }
 
-        private List<long> r64list = new List<long> { 45510, 45513, 45511, 45512, 46312, 46313, 46314, 46315, 46316, 46317, 46318, 46319 };
-        private List<long> r32list = new List<long> { 45502, 45503, 45504, 45506, 46304, 46305, 46306, 46307, 46308, 46309, 46310, 46311 };
+        public static readonly List<long> R64List = new List<long> { 45510, 45513, 45511, 45512, 46312, 46313, 46314, 46315, 46316, 46317, 46318, 46319 };
+        public static readonly List<long> R32List = new List<long> { 45502, 45503, 45504, 45506, 46304, 46305, 46306, 46307, 46308, 46309, 46310, 46311 };
     }
 }

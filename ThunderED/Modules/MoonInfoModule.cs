@@ -123,6 +123,8 @@ namespace ThunderED.Modules
                 foreach (var line in lines)
                 {
                     var data = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
+                    if(data == null || data.Length == 0) continue;
+
                     if (data.Length == 1)
                     {
                         currentMoonName = data[0];

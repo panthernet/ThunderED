@@ -1,0 +1,27 @@
+﻿@using ThunderED.Modules
+<div class="modal-content" style="width: 510px;">
+    <div class="modal-header">
+        <h5 class="modal-title">@Header</h5>
+        <RadzenButton ButtonType="ButtonType.Button" Icon="close" ButtonStyle="ButtonStyle.Secondary"
+                      Click="Close" />
+    </div>
+    <div class="modal-body">
+        <div style="word-wrap: normal;">@Message</div>
+    </div>
+    <div class="row justify-content-center" style="margin: 10px;">
+        <div>
+            <RadzenButton ButtonType="ButtonType.Button" Icon="close" Text="@(LM.Get("Close"))"
+                          Click="Close" />
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public string Message { get; set; }
+    [Parameter] public string Header { get; set; }
+
+    async Task Close() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+
+}

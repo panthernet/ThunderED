@@ -683,9 +683,15 @@
   "mtColumnMoonName": "Название",
   "mtColumnOreName": "Руда",
   "mtColumnOreQuantity": "Количество",
+  "mtColumnSystemName": "Система",
+  "mtColumnPlanetName": "Планета",
+  "mtColumnRegionName": "Регион",
   "mtPasteHeader": "Импорт",
   "mtPasteMessage": "Вставьте данные из буфера обмена",
   "webUploadButton": "Загрузить",
   "webInputIsEmpty": "Неверный формат ввода",
-  "webInvalidInputFormat": "Неверный формат ввода"
+  "webInvalidInputFormat": "Неверный формат ввода",
+  "webErrorHeader": "Ошибка",
+  "webGenericErrorMessage": "Произошла ошибка. Дополнительная информация доступна в логах."
+
 }

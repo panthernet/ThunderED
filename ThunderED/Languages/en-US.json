@@ -690,9 +690,14 @@
   "mtColumnMoonName": "Name",
   "mtColumnOreName": "Ore",
   "mtColumnOreQuantity": "Quantity",
+  "mtColumnSystemName": "System",
+  "mtColumnPlanetName": "Planet",
+  "mtColumnRegionName": "Region",
   "mtPasteHeader": "Import",
   "mtPasteMessage": "Paste data from the clipboard",
   "webUploadButton": "Upload",
   "webInputIsEmpty": "Invalid input format",
-  "webInvalidInputFormat": "Invalid input format"
+  "webInvalidInputFormat": "Invalid input format",
+  "webErrorHeader": "Error",
+  "webGenericErrorMessage": "There was an error. You can find additional info in the log files."
 }

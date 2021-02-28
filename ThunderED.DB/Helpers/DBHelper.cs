@@ -506,7 +506,10 @@ namespace ThunderED
                 var old = await db.MoonTable.FirstOrDefaultAsync(
                     a => a.SystemId == entry.SystemId && entry.MoonId == a.MoonId && entry.OreId == a.OreId);
                 if (old != null)
+                {
                     entry.Id = old.Id;
+                    db.Entry(old).State = EntityState.Detached;
+                }
 
                 if (entry.Id == 0)
                 {
