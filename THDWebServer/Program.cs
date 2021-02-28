@@ -134,6 +134,9 @@ namespace THDWebServer
                 {
                     services.AddHostedService<ThunderedHostedService>();
                     services.AddDbContext<ThunderedDbContext>();
+                    services.AddSignalR(e => {
+                        e.MaximumReceiveMessageSize = 102400000;
+                    });
                 })
                 ;
 

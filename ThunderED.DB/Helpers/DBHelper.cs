@@ -437,7 +437,7 @@ namespace ThunderED
         {
             await using var db = new ThunderedDbContext();
             return (await db.NotificationsList.AsNoTracking().FirstOrDefaultAsync(a =>
-                a.GroupName.Equals(group, StringComparison.OrdinalIgnoreCase) && a.Id == id))?.Time;
+                EF.Functions.Like(a.GroupName,group) && a.Id == id))?.Time;
         }
 
         public static async Task<ThdNotificationListEntry> GetNotificationListEntry(string group, long id)

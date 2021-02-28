@@ -128,7 +128,7 @@ namespace ThunderED.Modules
                         if (groups.Any())
                         {
                             //select all unanchoring structures
-                            var unanchoring = structures.Where(a => a.state != CorpStructureStateEnum.unanchored || a.unanchors_at.HasValue)
+                            var unanchoring = structures.Where(a => a.state != CorpStructureStateEnum.unanchored && a.unanchors_at.HasValue)
                                 .ToList();
                             var unanchored = structures.Where(a =>
                                 a.state == CorpStructureStateEnum.unanchored);

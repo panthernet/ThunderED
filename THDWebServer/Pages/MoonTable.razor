@@ -30,7 +30,7 @@
                                 Style="height: 640px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                 CellRender="@MoonCellRender">
                         <Columns>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="RegionName" Filterable="true" Sortable="true" FilterProperty="RegionName" SortProperty="RegionName"
+                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="RegionName" Filterable="false" Sortable="true" FilterProperty="RegionName" SortProperty="RegionName"
                                               Title="@LM.Get("mtColumnRegionName")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.RegionName" />
