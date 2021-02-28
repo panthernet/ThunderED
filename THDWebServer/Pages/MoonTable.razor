@@ -48,7 +48,7 @@
                                     <RadzenLabel Text="@order.OreName"/>
                                 </Template>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="OreQuantity" Filterable="true" Sortable="true" FilterProperty="OreQuantity" SortProperty="OreQuantity"
+                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="OreQuantity" Filterable="false" Sortable="true" FilterProperty="OreQuantity" SortProperty="OreQuantity"
                                               Title="@LM.Get("mtColumnOreQuantity")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@($"{order.OreQuantity:N2}")"/>
