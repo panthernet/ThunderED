@@ -66,6 +66,8 @@ namespace ThunderED
         public MiningScheduleSettings MiningScheduleModule { get; set; } = new MiningScheduleSettings();
         [ConfigEntryName("ModuleMoonTable")]
         public MoonTableSettings MoonTableModule { get; set; } = new MoonTableSettings();
+        [ConfigEntryName("ModuleStorageConsole")]
+        public StorageConsoleModuleSettings StorageConsoleModule { get; set; } = new StorageConsoleModuleSettings();
 
         [ConfigEntryName("Database")]
         [StaticConfigEntry]
@@ -130,6 +132,19 @@ namespace ThunderED
                 value.OnEditorSave();
             }
         }
+#endif
+    }
+
+    public class StorageConsoleModuleSettings
+    {
+        [Comment("The length of the reserved space for item names in a list command result")]
+        public int NameFormattingLength { get; set; } = 20;
+#if EDITOR
+        public ObservableCollection<string> ListAccessRoles { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> EditAccessRoles { get; set; } = new ObservableCollection<string>();
+#else
+        public List<string> ListAccessRoles { get; set; } = new List<string>();
+        public List<string> EditAccessRoles { get; set; } = new List<string>();
 #endif
     }
 
@@ -1756,6 +1771,7 @@ namespace ThunderED
         public bool ModuleMiningSchedule { get; set; } = false;
         public bool ModuleStructureManagement { get; set; } = false;
         public bool ModuleMoonTable { get; set; } = false;
+        public bool ModuleStorageConsole { get; set; } = false;
 
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";
@@ -1789,7 +1805,7 @@ namespace ThunderED
         public bool EnableLegacyRestartLogic { get; set; }
         [Comment("Enables stopwatch measures for some backend functions. Debug purpose only.")]
         public bool EnableSwatch { get; set; }
-
+        
 
 
 #if EDITOR

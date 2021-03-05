@@ -67,10 +67,6 @@ namespace ThunderED.Classes
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}lp ");
             }
 
-           /* if (SettingsManager.Settings.Config.ModuleFleetup)
-            {
-                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}ops ");
-            }*/
             if (SettingsManager.Settings.Config.ModuleContractNotifications)
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}clist ");
@@ -82,6 +78,10 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands)
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}{CMD_LISTROLES} | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}{CMD_ADDROLE} | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}{CMD_REMROLE} ");
+            }
+            if (SettingsManager.Settings.Config.ModuleStorageConsole)
+            {
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}storage");
             }
 
 
@@ -183,6 +183,11 @@ namespace ThunderED.Classes
                 case CMD_REMROLE:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpRemoveRoleCommand", SettingsManager.Settings.Config.BotDiscordCommandPrefix, CMD_REMROLE), true);
                     break;
+                case "storage":
+                case "st":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
+                        LM.Get("helpSc", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
+                    break;
             }
         }
 
@@ -247,6 +252,86 @@ namespace ThunderED.Classes
                 return;
 
             await DiscordRolesManagementModule.ListRoles(Context);
+        }
+
+        #endregion
+
+
+        #region StorageConsole
+
+        [Command("storage", RunMode = RunMode.Async)]
+        public async Task StorageCommand()
+        {
+            if (!SettingsManager.Settings.Config.ModuleStorageConsole) return;
+            if (IsForbidden()) return;
+
+            if (!await IsAllowedByRoles(SettingsManager.Settings.StorageConsoleModule.ListAccessRoles, Context.User.Id))
+                return;
+
+            var r = await StorageConsoleModule.GetListCommandResult("list");
+            if (r != null)
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, r, true);
+        }
+
+        [Command("st", RunMode = RunMode.Async)]
+        public async Task StCommand()
+        {
+            await StorageCommand();
+        }
+
+        [Command("st", RunMode = RunMode.Async)]
+        public async Task StCommand([Remainder] string command)
+        {
+            await StorageCommand(command);
+        }
+
+        [Command("storage", RunMode = RunMode.Async)]
+        public async Task StorageCommand([Remainder] string command)
+        {
+            if (!SettingsManager.Settings.Config.ModuleStorageConsole) return;
+            if (IsForbidden()) return;
+
+            var showHelp = true;
+
+            var lCommand = command?.ToLower();
+            if (!string.IsNullOrEmpty(lCommand) && (lCommand.StartsWith("list") || lCommand.StartsWith("add") ||
+                                                    lCommand.StartsWith("sub") || lCommand.StartsWith("set") ||
+                                                    lCommand.StartsWith("del")))
+            {
+                if (lCommand.StartsWith("list"))
+                {
+                    if (!await IsAllowedByRoles(SettingsManager.Settings.StorageConsoleModule.ListAccessRoles, Context.User.Id))
+                        return;
+                    var r = await StorageConsoleModule.GetListCommandResult(command);
+                    if (r == null)
+                    {
+                    }
+                    else
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, r, true);
+                        showHelp = false;
+                    }
+                }
+                else
+                {
+                    if (!await IsAllowedByRoles(SettingsManager.Settings.StorageConsoleModule.EditAccessRoles, Context.User.Id))
+                        return;
+                    var r = await StorageConsoleModule.UpdateStorage(command);
+                    if (r == null)
+                    {
+                        showHelp = false;
+                    }
+                    else
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, r, true);
+                        showHelp = false;
+                    }
+                }
+            }
+
+            if (showHelp)
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
+                    LM.Get("helpSc", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
         }
 
         #endregion
@@ -1381,6 +1466,8 @@ namespace ThunderED.Classes
 
         private async Task<bool> IsAllowedByRoles(List<string> roles, ulong userId)
         {
+            if (roles == null || !roles.Any()) return true;
+
             var result = APIHelper.DiscordAPI.GetUserRoleNames(userId);
             if (!result.Any(roles.Contains))
             {

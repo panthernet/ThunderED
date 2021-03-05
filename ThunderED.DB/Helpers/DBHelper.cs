@@ -551,6 +551,67 @@ namespace ThunderED
 
         #endregion
 
+        #region ThdStorageConsole
 
+        public static async Task<List<ThdStorageConsoleEntry>> GetStorageConsoleEntries()
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.StorageConsole.AsNoTracking().ToListAsync();
+        }
+
+        public static async Task<ThdStorageConsoleEntry> GetStorageConsoleEntry(string name)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.StorageConsole.AsNoTracking().FirstOrDefaultAsync(a=> EF.Functions.Like(a.Name, name));
+        }
+
+
+        public static async Task SetStorageConsoleEntry(string name, double value)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.StorageConsole.FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
+            if (old != null)
+            {
+                old.Value = value;
+                db.Entry(old).State = EntityState.Modified;
+            }
+            else
+            {
+                await db.StorageConsole.AddAsync(new ThdStorageConsoleEntry {Name = name, Value = value});
+
+            }
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task<bool> ModStorageConsoleEntry(string name, double value)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.StorageConsole.FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
+            if (old != null)
+            {
+                old.Value += value;
+                db.Entry(old).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
+        }
+
+        public static async Task<bool> RemoveStorageConsoleEntry(string name)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.StorageConsole.FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
+            if (old != null)
+            {
+                db.StorageConsole.Remove(old);
+                await db.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
     }
 }

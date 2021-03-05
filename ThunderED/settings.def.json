@@ -42,6 +42,7 @@
     "ModuleMiningSchedule": false,
     "ModuleStructureManagement": false,
     "ModuleMoonTable": false,
+    "ModuleStorageConsole": false,
 
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
@@ -908,7 +909,13 @@
 
   "MoonTableModule": {
     "ViewAccessEntities": [],
-    "LimitedAccessEntities":  [] 
+    "LimitedAccessEntities": []
+  },
+
+  "StorageConsoleModule": {
+    "NameFormattingLength": 20,
+    "ListAccessRoles": [],
+    "EditAccessRoles": []
   } 
 
 }

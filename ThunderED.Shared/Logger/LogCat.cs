@@ -47,6 +47,7 @@
         MiningSchedule,
         ESIWarnings,
         StructureManagement,
-        MoonInfo
+        MoonInfo,
+        StorageConsole
     }
 }

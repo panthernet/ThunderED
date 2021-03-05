@@ -699,5 +699,11 @@
   "webInputIsEmpty": "Invalid input format",
   "webInvalidInputFormat": "Invalid input format",
   "webErrorHeader": "Error",
-  "webGenericErrorMessage": "There was an error. You can find additional info in the log files."
+  "webGenericErrorMessage": "There was an error. You can find additional info in the log files.",
+  "scInvalidCommand": "Invalid storage command. Please check syntax and try again.",
+  "helpSc": "Use `{0}storage list` to get items. Use `{0}storage set NAME` or `{0}storage set NAME 100` to add new item with or without quantity. Use `add`,`sub` in a similar format to modify quantity. Use `del` to delete entry from storage. You can also use `\"` to wrap names which contain spaces. ",
+  "scEmpty": "Storage is empty",
+  "scItemNotFound": "Item not found",
+  "scItemDeleted": "Item {0} has been deleted",
+  "scItemAdded": "Item {0} has been added!"
 }

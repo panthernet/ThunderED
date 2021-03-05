@@ -14,7 +14,7 @@ namespace ThunderED.Helpers
         //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19",
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4"
+            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5"
         };
 
         public static async Task<bool> Upgrade()
@@ -499,6 +499,26 @@ namespace ThunderED.Helpers
                             await RunCommand("create unique index moon_table_id_uindex on moon_table(id);");
                             await RunCommand("create index moon_table_ore_id_index on moon_table(ore_id);");
                             await RunCommand("create index moon_table_system_id_index on moon_table(system_id);");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+
+                            break;
+                        case "2.0.5":
+                            await BackupDatabase();
+
+                            if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                await RunCommand("create table storage_console(id integer not null constraint storage_console_pk primary key autoincrement, name text not null,value numeric not null);");
+                                await RunCommand("create unique index storage_console_id_uindex on storage_console(id);");
+                                await RunCommand("create unique index storage_console_name_uindex on storage_console(name);");
+                            }
+                            else
+                            {
+                                await RunCommand("create table storage_console(id bigint not null key auto_increment, name text not null,value numeric not null);");
+                                await RunCommand("create unique index storage_console_id_uindex on storage_console(id);");
+                                await RunCommand("create unique index storage_console_name_uindex on storage_console(name(255) ASC);");
+                            }
+
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
 
                             break;

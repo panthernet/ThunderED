@@ -681,11 +681,11 @@ namespace ThunderED.Modules
             try
             {
                 var result = entries.ToList();
-                var found = new List<long>();
+                var found = new Dictionary<long, long>();
 
                 foreach (var entry in entries)
                 {
-                    if (entry.CharacterId == 0 || found.Contains(entry.CharacterId)) continue;
+                    if (entry.CharacterId == 0 || found.FirstOrDefault(a=> a.Key == entry.CharacterId && a.Value == entry.OreId).Value != 0) continue;
 
                     var alts = await DbHelper.GetAltUserIds(entry.CharacterId);
                     if (alts.Any())
@@ -701,7 +701,7 @@ namespace ThunderED.Modules
                         {
                             result.Remove(altEntry);
                             //skip found alts for perf reason
-                            found.Add(altEntry.CharacterId);
+                            found.Add(altEntry.CharacterId, entry.OreId);
                         }
                     }
                 }

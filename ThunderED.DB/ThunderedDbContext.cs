@@ -14,6 +14,7 @@ namespace ThunderED
         public DbSet<ThdCacheEntry> Cache { get; set; }
         public DbSet<ThdNotificationListEntry> NotificationsList { get; set; }
         public DbSet<ThdMoonTableEntry> MoonTable { get; set; }
+        public DbSet<ThdStorageConsoleEntry> StorageConsole { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
         //public DbSet<JsonClasses.RegionData> Regions { get; set; }
@@ -121,6 +122,17 @@ namespace ThunderED
             modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.RegionId).HasColumnName("region_id");
             modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.OreName).HasColumnName("ore_name");
             modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.MoonName).HasColumnName("moon_name");
+            #endregion
+
+            #region ThdStorageConsoleEntry
+            modelBuilder.Entity<ThdStorageConsoleEntry>().HasIndex(u => u.Id).IsUnique();
+            modelBuilder.Entity<ThdStorageConsoleEntry>().HasIndex(u => u.Name).IsUnique();
+            modelBuilder.Entity<ThdStorageConsoleEntry>().HasKey(u => u.Id);
+            modelBuilder.Entity<ThdStorageConsoleEntry>().ToTable("storage_console");
+
+            modelBuilder.Entity<ThdStorageConsoleEntry>().Property(a => a.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            modelBuilder.Entity<ThdStorageConsoleEntry>().Property(a => a.Name).HasColumnName("name");
+            modelBuilder.Entity<ThdStorageConsoleEntry>().Property(a => a.Value).HasColumnName("value");
             #endregion
         }
 
