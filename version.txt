@@ -1,3 +1,6 @@
+### V2.0.6
+ - Added ability to calculate mining ISK by refine materials price i possible (improvements will follow)
+
 ### V2.0.5
  + New flexible web shell called THDWebServer
  + New Mining Schedule module with extraction timers and ledger
