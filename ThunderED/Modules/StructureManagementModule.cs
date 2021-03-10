@@ -365,7 +365,7 @@ namespace ThunderED.Modules
 
         private static bool HasAccess(long id, long corpId, long allianceId, Dictionary<string, List<long>> dic)
         {
-            if (!SettingsManager.Settings.Config.ModuleStructureManagement) return false;
+            if (!SettingsManager.Settings.Config.ModuleStructureManagement || !dic.Any()) return false;
             return dic["character"].Contains(id) || dic["corporation"].Contains(corpId) || (allianceId > 0 && dic["alliance"].Contains(corpId));
         }
 

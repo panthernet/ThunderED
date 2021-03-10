@@ -125,8 +125,9 @@ namespace ThunderED.API
             if (data != null)
                 return data;
 
-            return await GetEntry<JsonClasses.Type_id>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/types/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
+            var result =  await GetEntry<JsonClasses.Type_id>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/types/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
                 forceUpdate);
+            return result;
         }
 
         public async Task<JsonClasses.SystemIDSearch> GetRadiusSystems(string reason, object id)

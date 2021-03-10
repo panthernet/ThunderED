@@ -15,6 +15,8 @@ namespace ThunderED
         public DbSet<ThdNotificationListEntry> NotificationsList { get; set; }
         public DbSet<ThdMoonTableEntry> MoonTable { get; set; }
         public DbSet<ThdStorageConsoleEntry> StorageConsole { get; set; }
+        public DbSet<ThdInvCustomScheme> CustomSchemes { get; set; }
+        //public DbSet<ThdType> Types { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
         //public DbSet<JsonClasses.RegionData> Regions { get; set; }
@@ -133,6 +135,40 @@ namespace ThunderED
             modelBuilder.Entity<ThdStorageConsoleEntry>().Property(a => a.Id).HasColumnName("id").ValueGeneratedOnAdd();
             modelBuilder.Entity<ThdStorageConsoleEntry>().Property(a => a.Name).HasColumnName("name");
             modelBuilder.Entity<ThdStorageConsoleEntry>().Property(a => a.Value).HasColumnName("value");
+            #endregion
+
+            #region ThdInvCustomScheme
+            modelBuilder.Entity<ThdInvCustomScheme>().HasIndex(u => u.Id);
+            modelBuilder.Entity<ThdInvCustomScheme>().ToTable("inv_custom_scheme");
+
+            modelBuilder.Entity<ThdInvCustomScheme>().Property(a => a.Id).HasColumnName("id").ValueGeneratedNever();
+            modelBuilder.Entity<ThdInvCustomScheme>().Property(a => a.ItemId).HasColumnName("item_id");
+            modelBuilder.Entity<ThdInvCustomScheme>().Property(a => a.Quantity).HasColumnName("quantity");
+            //modelBuilder.Entity<ThdInvCustomScheme>().HasOne(a => a.Type).WithMany(a => a.Schemes)
+            //    .HasPrincipalKey(a => a.Id);
+
+            #endregion
+
+            #region ThdType
+           /* modelBuilder.Entity<ThdType>().HasIndex(u => u.Id).IsUnique();
+            modelBuilder.Entity<ThdType>().ToTable("inv_types");
+
+            modelBuilder.Entity<ThdType>().Property(a => a.Id).HasColumnName("typeID").ValueGeneratedNever();
+            modelBuilder.Entity<ThdType>().Property(a => a.GroupId).HasColumnName("groupID");
+            modelBuilder.Entity<ThdType>().Property(a => a.Name).HasColumnName("typeName");
+            modelBuilder.Entity<ThdType>().Property(a => a.Description).HasColumnName("description");
+            modelBuilder.Entity<ThdType>().Property(a => a.Mass).HasColumnName("mass");
+            modelBuilder.Entity<ThdType>().Property(a => a.Volume).HasColumnName("volume");
+            modelBuilder.Entity<ThdType>().Property(a => a.Capacity).HasColumnName("capacity");
+            modelBuilder.Entity<ThdType>().Property(a => a.PortionSize).HasColumnName("portionSize");
+            modelBuilder.Entity<ThdType>().Property(a => a.RaceId).HasColumnName("raceID");
+            modelBuilder.Entity<ThdType>().Property(a => a.BasePrice).HasColumnName("basePrice");
+            modelBuilder.Entity<ThdType>().Property(a => a.Published).HasColumnName("published");
+            modelBuilder.Entity<ThdType>().Property(a => a.MarketGroupId).HasColumnName("marketGroupID");
+            modelBuilder.Entity<ThdType>().Property(a => a.IconId).HasColumnName("iconID");
+            modelBuilder.Entity<ThdType>().Property(a => a.SoundId).HasColumnName("soundID");
+            modelBuilder.Entity<ThdType>().Property(a => a.GraphicId).HasColumnName("graphicID");*/
+
             #endregion
         }
 

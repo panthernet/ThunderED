@@ -14,7 +14,7 @@ namespace ThunderED.Helpers
         //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19",
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5"
+            "1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5", "2.0.6"
         };
 
         public static async Task<bool> Upgrade()
@@ -521,6 +521,135 @@ namespace ThunderED.Helpers
 
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
 
+                            break;
+                        case "2.0.6":
+                            await BackupDatabase();
+                            if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                await RunCommand("create table inv_custom_scheme(id integer not null, item_id integer not null,quantity int default 0 not null);");
+                                await RunCommand("create unique index inv_custom_scheme_id_item_id_uindex on inv_custom_scheme(id, item_id);");
+                                await RunCommand("create index inv_custom_scheme_item_id_index on inv_custom_scheme(item_id);");
+                            }
+                            else
+                            {
+                                await RunCommand("create table inv_custom_scheme(id bigint not null, item_id bigint not null,quantity int default 0 not null);");
+                                await RunCommand("create unique index inv_custom_scheme_id_item_id_uindex on inv_custom_scheme(id, item_id);");
+                                await RunCommand("create index inv_custom_scheme_item_id_index on inv_custom_scheme(item_id);");
+                            }
+
+                            await RunCommand(@"
+insert into inv_custom_scheme (id, item_id, quantity) values (45510, 16634, 20);
+insert into inv_custom_scheme (id, item_id, quantity) values (45510, 16640, 20);
+insert into inv_custom_scheme (id, item_id, quantity) values (45510, 16642, 10);
+insert into inv_custom_scheme (id, item_id, quantity) values (45510, 16650, 22);
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46312, 16634, 23);
+insert into inv_custom_scheme (id, item_id, quantity) values (46312, 16640, 23);
+insert into inv_custom_scheme (id, item_id, quantity) values (46312, 16642, 12);
+insert into inv_custom_scheme (id, item_id, quantity) values (46312, 16650, 25);
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46313, 16634, 40);
+insert into inv_custom_scheme (id, item_id, quantity) values (46313, 16640, 40);
+insert into inv_custom_scheme (id, item_id, quantity) values (46313, 16642, 20);
+insert into inv_custom_scheme (id, item_id, quantity) values (46313, 16650, 44);
+
+insert into inv_custom_scheme (id, item_id, quantity) values (45513, 16636, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45513, 16638, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45513, 16643, 10); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45513, 16653, 22); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46318, 16636, 23); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46318, 16638, 23); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46318, 16643, 12); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46318, 16653, 25); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46319, 16636, 40); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46319, 16638, 40); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46319, 16643, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46319, 16653, 44); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (45511, 16635, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45511, 16637, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45511, 16641, 10); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45511, 16651, 22); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46314, 16635, 23); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46314, 16637, 23); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46314, 16641, 12); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46314, 16651, 25); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46315, 16635, 40); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46315, 16637, 40); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46315, 16641, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46315, 16651, 44); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (45512, 16633, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45512, 16639, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45512, 16644, 10); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45512, 16652, 22); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46316, 16633, 23); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46316, 16639, 23); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46316, 16644, 12); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46316, 16652, 25); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46317, 16633, 40); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46317, 16639, 40); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46317, 16644, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46317, 16652, 44); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (45502, 16634, 15); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45502, 16640, 10); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45502, 16649, 50); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46304, 16634, 17); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46304, 16640, 12); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46304, 16649, 58); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46305, 16634, 30); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46305, 16640, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46305, 16649, 100);
+
+insert into inv_custom_scheme (id, item_id, quantity) values (45503, 16636, 15); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45503, 16638, 10); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45503, 16648, 50); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46306, 16636, 17); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46306, 16638, 12); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46306, 16648, 58); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46307, 16636, 30); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46307, 16638, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46307, 16648, 100);
+
+insert into inv_custom_scheme (id, item_id, quantity) values (45504, 16633, 15); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45504, 16639, 10); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45504, 16647, 50); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46308, 16633, 17); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46308, 16639, 12); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46308, 16647, 58); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46309, 16633, 30); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46309, 16639, 20); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46309, 16647, 100);
+
+insert into inv_custom_scheme (id, item_id, quantity) values (45506, 16635, 15); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45506, 16637, 10); 
+insert into inv_custom_scheme (id, item_id, quantity) values (45506, 16646, 50); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46310, 16635, 15); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46310, 16637, 10); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46310, 16646, 50); 
+
+insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16635, 15); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16637, 10); 
+insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50); 
+
+");
+
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         default:
                             continue;

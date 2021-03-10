@@ -545,7 +545,7 @@ namespace ThunderED.Modules
 
         private static bool HasViewAccess(long id, long corpId, long allianceId, Dictionary<string, List<long>> dic)
         {
-            if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
+            if (!SettingsManager.Settings.Config.ModuleMiningSchedule || !dic.Any()) return false;
             return dic["character"].Contains(id) || dic["corporation"].Contains(corpId) || (allianceId > 0 && dic["alliance"].Contains(corpId));
         }
 
@@ -631,29 +631,33 @@ namespace ThunderED.Modules
                 entries = entries.Where(a => a.last_updated <= maxDate && a.last_updated >= lowDate).ToList();
 
                 //group by character and ore type
-                entries = entries.GroupByMany(new[] {"character_id", "type_id"}).Select(
+                entries = entries.GroupBy(a=> new {a.character_id, a.type_id}).Select(
                     g =>
                     {
-                        var list = g.Items.Cast<MiningLedgerEntryJson>();
+                        var list = g.ToList();
                         return new MiningLedgerEntryJson
                         {
-                            character_id = list.First().character_id,
+                            character_id = g.Key.character_id,
                             quantity = list.Sum(s => s.quantity),
                             last_updated = list.First().last_updated,
                             recorded_corporation_id = list.First().recorded_corporation_id,
-                            type_id = list.First().type_id
+                            type_id = g.Key.type_id
                         };
                     }).ToList();
 
                 var oreIds = entries.Select(a => a.type_id).Distinct().ToList();
                 var prices = await APIHelper.ESIAPI.GetFuzzPrice(Reason, oreIds);
+                var componentPrices = await DecompositionHelper.GetPrices(70d, oreIds);
 
                 foreach (var entry in entries)
                 {
                     var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, entry.character_id);
                     var c = await APIHelper.ESIAPI.GetCorporationData(Reason, entry.recorded_corporation_id);
                     var ore = await APIHelper.ESIAPI.GetTypeId(Reason, entry.type_id);
-                    var price = prices.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0;
+                    var price = componentPrices.ContainsKey(entry.type_id)
+                        ? (componentPrices.FirstOrDefault(a => a.Key == entry.type_id).Value * Math.Round(entry.quantity / 100d, MidpointRounding.ToZero))
+                        : (prices.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0);
+                    //var price = prices.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0;
 
                     list.Add(new WebMiningLedgerEntry
                     {
@@ -663,7 +667,7 @@ namespace ThunderED.Modules
                         OreName = ore?.name ?? LM.Get("Unknown"),
                         OreId = entry.type_id,
                         Quantity = entry.quantity,
-                        Price = price * entry.quantity,
+                        Price = price ,
                     });
                 }
 

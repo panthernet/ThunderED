@@ -613,5 +613,16 @@ namespace ThunderED
         }
 
         #endregion
+
+        #region inv_custom_scheme
+
+        public static async Task<List<ThdInvCustomScheme>> GetCustomSchemeValues(List<long> ids)
+        {
+            await using var db = new ThunderedDbContext();
+
+            return await db.CustomSchemes.AsNoTracking().Where(a=> ids.Contains(a.Id)).ToListAsync();
+        }
+
+        #endregion
     }
 }
