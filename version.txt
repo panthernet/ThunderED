@@ -1,5 +1,6 @@
 ### V2.0.6
- - Added ability to calculate mining ISK by refine materials price i possible (improvements will follow)
+ - Added ability to calculate mining ISK by refine materials price if possible (improvements will follow)
+ - Fixed moon data import to support localizations
 
 ### V2.0.5
  + New flexible web shell called THDWebServer

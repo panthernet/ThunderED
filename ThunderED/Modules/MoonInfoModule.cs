@@ -110,24 +110,25 @@ namespace ThunderED.Modules
                 }
 
                 var lines = inputText.Split("\n").ToList();
-                if (!lines[0].StartsWith("Moon"))
+                var chk = lines.Count > 0 && lines[0].Split('\t', StringSplitOptions.RemoveEmptyEntries).Length == 7;
+                if(!chk)
                 {
                     r.Error = LM.Get("webInvalidInputFormat");
                     return r;
                 }
                 //skip headers
                 lines.RemoveAt(0);
-                var body = false;
+                //var body = false;
                 var currentMoonName = string.Empty;
 
                 foreach (var line in lines)
                 {
                     var data = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
-                    if(data == null || data.Length == 0) continue;
+                    if(data.Length == 0) continue;
 
                     if (data.Length == 1)
                     {
-                        currentMoonName = data[0];
+                        currentMoonName = data[0].RemoveLocalizedTag();
                         continue;
                     }
 
@@ -145,7 +146,7 @@ namespace ThunderED.Modules
                         SystemId = Convert.ToInt64(data[3]),
                         OreId = Convert.ToInt64(data[2]),
                         OreQuantity = double.Parse(data[1], NumberStyles.Any, ci),
-                        OreName = data[0],
+                        OreName = data[0].RemoveLocalizedTag(),
                         MoonName = currentMoonName
                     };
                     r.List.Add(entry);
