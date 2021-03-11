@@ -893,6 +893,8 @@ namespace ThunderED
         public bool FeedUrlsOnly { get; set; } = false;
         [Comment("Do not process KM in other filters if KM has been posted within a filter")]
         public bool StopOnFirstFilterMatch { get; set; } = true;
+        [Comment("Feed only kills with characters registered in the Auth system")]
+        public bool FeedOnlyKillsWithRegisteredUsers { get; set; }
         [Comment("Optional template file name from Templates/Messages folder")]
         public string MessageTemplateFileName { get; set; }
 

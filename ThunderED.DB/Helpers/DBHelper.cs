@@ -163,6 +163,14 @@ namespace ThunderED
             return list;
         }
 
+        public static async Task<List<long>> GetAuthUsersId(UserStatusEnum type)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Users.AsNoTracking().Where(a => a.AuthState == (int)type).Select(a=> a.CharacterId).ToListAsync();
+        }
+
+        
+
         public static async Task<List<ThdAuthUser>> GetAuthUsers(bool includeToken = false,
             bool checkPermissions = false)
         {
