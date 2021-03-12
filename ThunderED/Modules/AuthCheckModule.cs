@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -11,6 +10,11 @@ namespace ThunderED.Modules
         private DateTime _lastAuthCheck = DateTime.MinValue;
         private DateTime _lastDiscordAuthCheck = DateTime.MinValue;
         public override LogCat Category => LogCat.AuthCheck;
+
+        public override async Task Initialize()
+        {
+            await LogHelper.LogModule("Initializing Auth Check module...", Category);
+        }
 
         public override async Task Run(object prm)
         {

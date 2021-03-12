@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ThunderED.Json;
 
-namespace ThunderED.Classes.Entities
+namespace ThunderED
 {
     public class AuthStandsEntity
     {

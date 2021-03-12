@@ -3,10 +3,8 @@ using System.Threading.Tasks;
 using System.Web;
 using Discord;
 using Discord.Commands;
-using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Json.ZKill;
 
 namespace ThunderED.Modules.Static
 {

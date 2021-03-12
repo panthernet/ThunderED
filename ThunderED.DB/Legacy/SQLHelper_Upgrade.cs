@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
-using ThunderED.Classes;
+using ThunderED.Helpers;
 
-namespace ThunderED.Helpers
+namespace ThunderED
 {
     public static partial class SQLHelper
     {
@@ -659,6 +658,15 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                                 await RunCommand("alter table `tokens` modify `id` BIGINT AUTO_INCREMENT;");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
+                        case "2.0.8":
+                            await BackupDatabase();
+                            await RunCommand("drop table `timers_auth`;");
+                            await RunCommand("drop table `web_editor_auth`;");
+                            await RunCommand("drop table `hrm_auth`;");
+                            await RunCommand("drop table `fleetup`;");
+
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
                         #endregion
 
                         default:
@@ -692,7 +700,7 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
             if(SettingsManager.Settings.Database.DatabaseProvider != "sqlite") return;
             try
             {
-                bkFile = bkFile ?? $"{SettingsManager.DatabaseFilePath}.bk";
+                bkFile ??= $"{SettingsManager.DatabaseFilePath}.bk";
                 if (File.Exists(bkFile))
                     File.Delete(bkFile);
                 using (var source = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))

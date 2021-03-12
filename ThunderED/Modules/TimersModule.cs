@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using Discord;
-using Newtonsoft.Json;
-using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
-using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
@@ -20,11 +14,6 @@ namespace ThunderED.Modules
     {
         public override LogCat Category => LogCat.Timers;
 
-        public TimersModule()
-        {
-            LogHelper.LogModule("Initializing Timers module...", Category).GetAwaiter().GetResult();
-            WebServerModule.ModuleConnectors.Add(Reason, OnDisplayTimers);
-        }
         protected readonly Dictionary<string, Dictionary<string, List<long>>> ParsedAccessLists = new Dictionary<string, Dictionary<string, List<long>>>();
         protected readonly Dictionary<string, Dictionary<string, List<long>>> ParsedEditLists = new Dictionary<string, Dictionary<string, List<long>>>();
 
@@ -44,6 +33,8 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Timers module...", Category);
+
             ParsedAccessLists.Clear();
             ParsedEditLists.Clear();
             var data = Settings.TimersModule.AccessList.ToDictionary(pair => pair.Key, pair => pair.Value.FilterEntities);
@@ -58,52 +49,6 @@ namespace ThunderED.Modules
             await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(Settings.TimersModule.EditList.Values.SelectMany(a=> a.FilterDiscordRoles).Distinct().ToList(), Category);
 
             await WebPartInitialization();
-        }
-
-        private async Task WriteCorrectResponce(HttpListenerResponse response, bool isEditor, long characterId)
-        {
-            var baseCharId = Convert.ToBase64String(Encoding.UTF8.GetBytes(characterId.ToString()));
-            var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
-
-            if (rChar == null)
-            {
-                await response.WriteContentAsync("ERROR: Probably EVE ESI is shut down at the moment. Please try again later.");
-                return;
-            }
-
-            var text = File.ReadAllText(SettingsManager.FileTemplateTimersPage).Replace("{header}", LM.Get("timersTemplateHeader"))
-                    .Replace("{headerContent}",
-                        WebServerModule.GetHtmlResourceDefault(true) + WebServerModule.GetHtmlResourceDatetime() + WebServerModule.GetHtmlResourceConfirmation())
-                    .Replace("{loggedInAs}", LM.Get("loggedInAs", rChar.name))
-                    .Replace("{charId}", baseCharId)
-                    .Replace("{body}", await GenerateTimersHtml(isEditor, baseCharId))
-                    .Replace("{isEditorElement}", isEditor ? null : "d-none")
-                    .Replace("{addNewTimerHeader}", LM.Get("timersAddHeader"))
-                    .Replace("{addNewRfTimerHeader}", LM.Get("timersAddRfHeader"))
-                    .Replace("{timersType}", LM.Get("timersType"))
-                    .Replace("{timersStage}", LM.Get("timersStage"))
-                    .Replace("{timersLocation}", LM.Get("timersLocation"))
-                    .Replace("{timersOwner}", LM.Get("timersOwner"))
-                    .Replace("{timersET}", LM.Get("timersET"))
-                    .Replace("{timersRfET}", LM.Get("timersRfET"))
-                    .Replace("{timersNotes}", LM.Get("timersNotes"))
-                    .Replace("{Add}", LM.Get("Add"))
-                    .Replace("{Cancel}", LM.Get("Cancel"))
-                    .Replace("{timerOffensive}", LM.Get("timerOffensive"))
-                    .Replace("{timerDefensive}", LM.Get("timerDefensive"))
-                    .Replace("{timerHull}", LM.Get("timerHull"))
-                    .Replace("{timerArmor}", LM.Get("timerArmor"))
-                    .Replace("{timerShield}", LM.Get("timerShield"))
-                    .Replace("{timerOther}", LM.Get("timerOther"))
-                    .Replace("{LogOutUrl}", WebServerModule.GetWebSiteUrl())
-                    .Replace("{LogOut}", LM.Get("LogOut"))
-                    .Replace("{timerTooltipLocation}", LM.Get("timerTooltipLocation"))
-                    .Replace("{timerTooltipOwner}", LM.Get("timerTooltipOwner"))
-                    .Replace("{timerTooltipET}", LM.Get("timerTooltipET"))
-                    .Replace("{locale}", LM.Locale)
-                    .Replace("{dateformat}", Settings.TimersModule.TimeInputFormat)
-                ;
-            await WebServerModule.WriteResponce(text, response);
         }
 
         private async Task<bool[]> CheckAccess(long characterId, JsonClasses.CharacterData rChar)
@@ -195,49 +140,6 @@ namespace ThunderED.Modules
                 || editChars.Contains(characterId);
 
             return new [] {true, isEditor};
-        }
-
-        public async Task<string> GenerateTimersHtml(bool isEditor, string baseCharId)
-        {
-            var timers = await SQLHelper.SelectTimers();
-            int counter = 1;
-            var sb = new StringBuilder();
-
-            sb.AppendLine("<thead>");
-            sb.AppendLine("<tr>");
-            sb.AppendLine($"<th scope=\"col-md-auto\">#</th>");
-            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("timersType")}</th>");
-            sb.AppendLine($"<th scope=\"col-md-auto\">{LM.Get("timersStage")}</th>");
-            sb.AppendLine($"<th scope=\"col\">{LM.Get("timersLocation")}</th>");
-            sb.AppendLine($"<th scope=\"col\">{LM.Get("timersOwner")}</th>");
-            sb.AppendLine($"<th scope=\"col\" class=\"fixed150\">{LM.Get("timersET")}</th>");
-            sb.AppendLine($"<th scope=\"col\" class=\"fixed150\">{LM.Get("timersRemaining")}</th>");
-            sb.AppendLine($"<th scope=\"col\">{LM.Get("timersNotes")}</th>");
-            sb.AppendLine($"<th scope=\"col\">{LM.Get("timersUser")}</th>");
-            sb.AppendLine($"<th scope=\"col-md-auto\" class=\"{(isEditor ? null : "d-none")}\"></th");
-            sb.AppendLine("</tr>");
-            sb.AppendLine("</thead>");
-            sb.AppendLine("<tbody>");
-
-            var timeFormat = Settings.Config.ShortTimeFormat;
-            timers.OrderBy(a=> a.GetDateTime()).ToList().ForEach(timer =>
-            {
-                sb.AppendLine("<tr>");
-                sb.AppendLine($"  <th scope=\"row\">{counter++}</th>");
-                sb.AppendLine($"  <td>{timer.GetModeName()}</td>");
-                sb.AppendLine($"  <td>{timer.GetStageName()}</td>");
-                sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerLocation)}</td>");
-                sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerOwner)}</td>");
-                sb.AppendLine($"  <td>{timer.GetDateTime()?.ToString(timeFormat)}</td>");
-                sb.AppendLine($"  <td>{timer.GetRemains()}</td>");
-                sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerNotes)}</td>");
-                sb.AppendLine($"  <td>{HttpUtility.HtmlEncode(timer.timerChar)}</td>");
-                if(isEditor)
-                    sb.AppendLine($"<td><a class=\"btn btn-danger\" href=\"{WebServerModule.GetTimersURL()}?data=delete{timer.Id}&id={HttpUtility.UrlEncode(baseCharId)}&state=11\" role=\"button\" data-toggle=\"confirmation\" data-title=\"{LM.Get("ConfirmDelete")}?\">X</a></td>");
-                sb.AppendLine("</tr>");
-            });
-            sb.AppendLine("</tbody>");
-            return sb.ToString();
         }
 
         private DateTime? _lastTimersCheck;

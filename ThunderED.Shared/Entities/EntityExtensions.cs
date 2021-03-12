@@ -1,28 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using ThunderED.Classes;
-using ThunderED.Classes.Entities;
-using ThunderED.Json;
 using ThunderED.Json.Internal;
-using ThunderED.Json.ZKill;
 using ThunderED.Thd;
 
-namespace ThunderED.Helpers
+namespace ThunderED
 {
     public static class EntityExtensions
     {
-        
-
         public static void PackData(this ThdAuthUser user)
         {
             user.Data = JsonConvert.SerializeObject(user.DataView);
         }
-
-        
 
         public static DateTime? GetDateTime(this TimerItem entry)
         {
@@ -45,8 +35,6 @@ namespace ThunderED.Helpers
             return now.AddDays(entry.timerRfDay).AddHours(entry.timerRfHour).AddMinutes(entry.timerRfMin);
         }
 
-       
-
         public static Dictionary<string, object> GetDictionary(this TimerItem entry)
         {
             var dic = new Dictionary<string, object>
@@ -64,7 +52,5 @@ namespace ThunderED.Helpers
                 dic.Add("id", entry.Id);
             return dic;
         }
-
-        
     }
 }

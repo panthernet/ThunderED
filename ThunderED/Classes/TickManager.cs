@@ -39,12 +39,10 @@ namespace ThunderED.Classes
 
             //sub modules - core modules that are called in each tick and can supply other modules with some data
             Modules.Add(new ContinuousCheckModule());
+            Modules.Add(new WebServerModule());
 
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
                 Modules.Add(new ZKillLiveFeedModule());
-
-            if (SettingsManager.Settings.Config.ModuleWebServer)
-                Modules.Add(new WebServerModule());
 
 
             //dynamic modules - called in each tick
@@ -229,7 +227,6 @@ namespace ThunderED.Classes
 
         public static void InvalidateModules()
         {
-            WebServerModule.ModuleConnectors.Clear();
             WebServerModule.WebModuleConnectors.Clear();
             ZKillLiveFeedModule.Queryables.Clear();
             Modules.ForEach(a=> a.Cleanup());

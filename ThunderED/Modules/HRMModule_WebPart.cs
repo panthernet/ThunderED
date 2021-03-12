@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Matrix.Xmpp.MessageArchiving;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
@@ -48,125 +45,161 @@ namespace ThunderED.Modules
 
         public async Task<bool> WebDeleteUser(WebUserItem order)
         {
-            var sUser = await DbHelper.GetAuthUser(order.Id);
-            if (sUser == null)
+            try
             {
-                await LogHelper.LogError($"User {order.Id} not found for delete op");
+                var sUser = await DbHelper.GetAuthUser(order.Id);
+                if (sUser == null)
+                {
+                    await LogHelper.LogError($"User {order.Id} not found for delete op");
+                    return false;
+                }
+
+                if (Settings.HRMModule.UseDumpForMembers && sUser.AuthState != (int)UserStatusEnum.Dumped)
+                {
+                    sUser.SetStateDumpster();
+                    await LogHelper.LogInfo(
+                        $"HR moving character {sUser.DataView.CharacterName} to dumpster...");
+                    await DbHelper.SaveAuthUser(sUser);
+                }
+                else
+                {
+                    await LogHelper.LogInfo(
+                        $"HR deleting character {sUser.DataView.CharacterName} auth...");
+                    await DbHelper.DeleteAuthUser(order.Id, true);
+                }
+
+                if (sUser.DiscordId > 0)
+                    await WebAuthModule.UpdateUserRoles(sUser.DiscordId ?? 0,
+                        Settings.WebAuthModule.ExemptDiscordRoles,
+                        Settings.WebAuthModule.AuthCheckIgnoreRoles, true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
                 return false;
             }
-
-            if (Settings.HRMModule.UseDumpForMembers && sUser.AuthState != (int)UserStatusEnum.Dumped)
-            {
-                sUser.SetStateDumpster();
-                await LogHelper.LogInfo(
-                    $"HR moving character {sUser.DataView.CharacterName} to dumpster...");
-                await DbHelper.SaveAuthUser(sUser);
-            }
-            else
-            {
-                await LogHelper.LogInfo(
-                    $"HR deleting character {sUser.DataView.CharacterName} auth...");
-                await DbHelper.DeleteAuthUser(order.Id, true);
-            }
-
-            if (sUser.DiscordId > 0)
-                await WebAuthModule.UpdateUserRoles(sUser.DiscordId ?? 0,
-                    Settings.WebAuthModule.ExemptDiscordRoles,
-                    Settings.WebAuthModule.AuthCheckIgnoreRoles, true);
-            return true;
         }
 
         public async Task<List<JsonClasses.CorporationHistoryEntry>> WebGenerateCorpHistory(long charId)
         {
-            var history = (await APIHelper.ESIAPI.GetCharCorpHistory(Reason, charId))
-                ?.OrderByDescending(a => a.record_id).ToList();
-            if (history == null || history.Count == 0) return null;
-
-            JsonClasses.CorporationHistoryEntry last = null;
-            foreach (var entry in history)
+            try
             {
-                var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, entry.corporation_id);
-                entry.CorpName = corp.name;
-                entry.IsNpcCorp = corp.creator_id == 1;
-                if (last != null)
+                var history = (await APIHelper.ESIAPI.GetCharCorpHistory(Reason, charId))
+                    ?.OrderByDescending(a => a.record_id).ToList();
+                if (history == null || history.Count == 0) return null;
+
+                JsonClasses.CorporationHistoryEntry last = null;
+                foreach (var entry in history)
                 {
-                    entry.Days = (int)(last.Date - entry.Date).TotalDays;
+                    var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, entry.corporation_id);
+                    if (corp == null) continue;
+                    entry.CorpName = corp.name;
+                    entry.IsNpcCorp = corp.creator_id == 1;
+                    if (last != null)
+                    {
+                        entry.Days = (int)(last.Date - entry.Date).TotalDays;
+                    }
+
+                    entry.CorpTicker = corp.ticker;
+                    last = entry;
                 }
 
-                entry.CorpTicker = corp.ticker;
-                last = entry;
+                var l = history.FirstOrDefault();
+                if (l != null)
+                    l.Days = (int)(DateTime.UtcNow - l.Date).TotalDays;
+                return history.Where(a => a.Days > 0).ToList();
             }
-
-            var l = history.FirstOrDefault();
-            if (l != null)
-                l.Days = (int)(DateTime.UtcNow - l.Date).TotalDays;
-            return history.Where(a=> a.Days > 0).ToList();
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
         }
 
         public async Task<List<WebMailHeader>> WebGetMailHeaders(long id, string token)
         {
-            var mailHeaders = (await APIHelper.ESIAPI.GetMailHeaders(Reason, id, token, 0, null))?.Result;
-            if (mailHeaders == null)
-                return null;
-            var list = new List<WebMailHeader>();
-            foreach (var h in mailHeaders)
+            try
             {
-                var from = await APIHelper.ESIAPI.GetCharacterData(Reason, h.@from);
-                var rcp = await MailModule.GetRecepientNames(Reason, h.recipients, id, token);
-
-                list.Add(new WebMailHeader
+                var mailHeaders = (await APIHelper.ESIAPI.GetMailHeaders(Reason, id, token, 0, null))?.Result;
+                if (mailHeaders == null)
+                    return null;
+                var list = new List<WebMailHeader>();
+                foreach (var h in mailHeaders)
                 {
-                    MailId = h.mail_id,
-                    FromName = from?.name ?? LM.Get("Unknown"),
-                    FromLink = from == null ? null : $"https://zkillboard.com/character/{from.character_id}",
-                    ToName = rcp.Length > 0 ? rcp : LM.Get("Unknown"),
-                    Subject = h.subject,
-                    Date = h.Date
-                });
-            }
+                    var from = await APIHelper.ESIAPI.GetCharacterData(Reason, h.@from);
+                    var rcp = await MailModule.GetRecepientNames(Reason, h.recipients, id, token);
 
-            return list;
+                    list.Add(new WebMailHeader
+                    {
+                        MailId = h.mail_id,
+                        FromName = from?.name ?? LM.Get("Unknown"),
+                        FromLink = from == null ? null : $"https://zkillboard.com/character/{from.character_id}",
+                        ToName = rcp.Length > 0 ? rcp : LM.Get("Unknown"),
+                        Subject = h.subject,
+                        Date = h.Date
+                    });
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
         }
 
         public async Task<List<WebContract>> WebGetCharContracts(long id, string inspectToken)
         {
-            var contracts = (await APIHelper.ESIAPI.GetCharacterContracts(Reason, id, inspectToken, null)).Result;
-            if (contracts == null) return null;
-
-            var list = new List<WebContract>();
-            foreach (var entry in contracts)
+            try
             {
-                var fromPlace = entry.issuer_id != 0 ? "character" : "corporation";
-                var toPlace = !entry.for_corporation ? "character" : "corporation";
-                var fromId = entry.issuer_id != 0 ? entry.issuer_id : entry.issuer_corporation_id;
-                var toId = entry.acceptor_id;
-                var from = entry.issuer_id != 0
-                    ? (await APIHelper.ESIAPI.GetCharacterData(Reason, entry.issuer_id))?.name
-                    : (await APIHelper.ESIAPI.GetCorporationData(Reason, entry.issuer_corporation_id))?.name;
-                var to = entry.for_corporation
-                    ? (await APIHelper.ESIAPI.GetCorporationData(Reason, entry.acceptor_id))?.name
-                    : (await APIHelper.ESIAPI.GetCharacterData(Reason, entry.acceptor_id))?.name;
+                var contracts = (await APIHelper.ESIAPI.GetCharacterContracts(Reason, id, inspectToken, null)).Result;
+                if (contracts == null) return null;
 
-                var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, id);
-                var itemList = await ContractNotificationsModule.GetContractItemsString(Reason, entry.for_corporation, ch.corporation_id, id, entry.contract_id, inspectToken);
-
-                list.Add(new WebContract
+                var list = new List<WebContract>();
+                foreach (var entry in contracts)
                 {
-                    Id = entry.contract_id,
-                    Type = entry.type,
-                    From = from,
-                    To = to,
-                    FromLink = $"https://zkillboard.com/{fromPlace}/{fromId}/",
-                    ToLink = toId > 0 ? $"https://zkillboard.com/{toPlace}/{toId}/" : "-",
-                    Status = entry.status,
-                    CompleteDate = entry.DateCompleted?.ToString(Settings.Config.ShortTimeFormat) ?? LM.Get("hrmContractInProgress"),
-                    Title = entry.title,
-                    IncludedItems = itemList[0],
-                    AskingItems = itemList[1]
-                });
-            }
+                    var fromPlace = entry.issuer_id != 0 ? "character" : "corporation";
+                    var toPlace = !entry.for_corporation ? "character" : "corporation";
+                    var fromId = entry.issuer_id != 0 ? entry.issuer_id : entry.issuer_corporation_id;
+                    var toId = entry.acceptor_id;
+                    var from = entry.issuer_id != 0
+                        ? (await APIHelper.ESIAPI.GetCharacterData(Reason, entry.issuer_id))?.name
+                        : (await APIHelper.ESIAPI.GetCorporationData(Reason, entry.issuer_corporation_id))?.name;
+                    var to = entry.for_corporation
+                        ? (await APIHelper.ESIAPI.GetCorporationData(Reason, entry.acceptor_id))?.name
+                        : (await APIHelper.ESIAPI.GetCharacterData(Reason, entry.acceptor_id))?.name;
 
-            return list;
+                    var ch = await APIHelper.ESIAPI.GetCharacterData(Reason, id);
+                    var itemList = await ContractNotificationsModule.GetContractItemsString(Reason,
+                        entry.for_corporation, ch.corporation_id, id, entry.contract_id, inspectToken);
+
+                    list.Add(new WebContract
+                    {
+                        Id = entry.contract_id,
+                        Type = entry.type,
+                        From = from,
+                        To = to,
+                        FromLink = $"https://zkillboard.com/{fromPlace}/{fromId}/",
+                        ToLink = toId > 0 ? $"https://zkillboard.com/{toPlace}/{toId}/" : "-",
+                        Status = entry.status,
+                        CompleteDate =
+                            entry.DateCompleted?.ToString(Settings.Config.ShortTimeFormat) ??
+                            LM.Get("hrmContractInProgress"),
+                        Title = entry.title,
+                        IncludedItems = itemList[0],
+                        AskingItems = itemList[1]
+                    });
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
         }
 
         public async Task<List<WebContact>> WebGetCharContacts(long id, string inspectToken, long hrId)
@@ -272,99 +305,123 @@ namespace ThunderED.Modules
 
         public async Task<List<WebWalletJournal>> WebGetWalletJournal(long id, string inspectToken)
         {
-            var result = await APIHelper.ESIAPI.GetCharacterJournalTransactions(Reason, id, inspectToken);
-            if (result == null) return null;
-            var list = new List<WebWalletJournal>();
-            foreach (var entry in result)
+            try
             {
-                list.Add(new WebWalletJournal
+                var result = await APIHelper.ESIAPI.GetCharacterJournalTransactions(Reason, id, inspectToken);
+                if (result == null) return null;
+                var list = new List<WebWalletJournal>();
+                foreach (var entry in result)
                 {
-                    Date = entry.DateEntry,
-                    Type = entry.ref_type,
-                    Amount = entry.amount.ToString("N"),
-                    Description = entry.description,
-                    WebClass = entry.amount < 0 ? "hrmNegativeSum" : "hrmPositiveSum"
-                });
+                    list.Add(new WebWalletJournal
+                    {
+                        Date = entry.DateEntry,
+                        Type = entry.ref_type,
+                        Amount = entry.amount.ToString("N"),
+                        Description = entry.description,
+                        WebClass = entry.amount < 0 ? "hrmNegativeSum" : "hrmPositiveSum"
+                    });
+                }
+
+                return list;
             }
-
-            return list;
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
         }
-
 
         public async Task<List<WebWalletTrans>> WebGetWalletTrans(long id, string inspectToken)
         {
-            var result = await APIHelper.ESIAPI.GetCharacterWalletTransactions(Reason, id, inspectToken);
-            if (result == null) return null;
-            var list = new List<WebWalletTrans>();
-            foreach (var entry in result)
+            try
             {
-                var type = await APIHelper.ESIAPI.GetTypeId(Reason, entry.type_id);
-                var amount = entry.quantity * entry.unit_price * (entry.is_buy ? -1 : 1);
-                var fromChar = await APIHelper.ESIAPI.GetCharacterData(Reason, entry.client_id);
-                var from = fromChar?.name ?? (await APIHelper.ESIAPI.GetCorporationData(Reason, entry.client_id))?.name;
-                var urlSection = fromChar == null ? "corporation" : "character";
-
-                list.Add(new WebWalletTrans
+                var result = await APIHelper.ESIAPI.GetCharacterWalletTransactions(Reason, id, inspectToken);
+                if (result == null) return null;
+                var list = new List<WebWalletTrans>();
+                foreach (var entry in result)
                 {
-                    Date = entry.DateEntry,
-                    Type = type?.name,
-                    Credit = amount,
-                    Client = from,
-                    ClientZkbLink = $"https://zkillboard.com/{urlSection}/{entry.client_id}/",
-                    Where = entry.location_id.ToString()
-                });
-            }
+                    var type = await APIHelper.ESIAPI.GetTypeId(Reason, entry.type_id);
+                    var amount = entry.quantity * entry.unit_price * (entry.is_buy ? -1 : 1);
+                    var fromChar = await APIHelper.ESIAPI.GetCharacterData(Reason, entry.client_id);
+                    var from = fromChar?.name ??
+                               (await APIHelper.ESIAPI.GetCorporationData(Reason, entry.client_id))?.name;
+                    var urlSection = fromChar == null ? "corporation" : "character";
 
-            return list;
+                    list.Add(new WebWalletTrans
+                    {
+                        Date = entry.DateEntry,
+                        Type = type?.name,
+                        Credit = amount,
+                        Client = from,
+                        ClientZkbLink = $"https://zkillboard.com/{urlSection}/{entry.client_id}/",
+                        Where = entry.location_id.ToString()
+                    });
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
         }
 
         public async Task<object[]> WebGetSkills(long id, string inspectToken)
         {
-            var skills =
-                await APIHelper.ESIAPI.GetCharSkills(Reason, id, inspectToken);
-
-            var list = new List<WebSkillItem>();
-            if (skills != null)
+            try
             {
-                foreach (var skill in skills.skills)
+                var skills =
+                    await APIHelper.ESIAPI.GetCharSkills(Reason, id, inspectToken);
+
+                var list = new List<WebSkillItem>();
+                if (skills != null)
                 {
-                    var t = await SQLHelper.GetTypeId(skill.skill_id);
-                    if (t != null)
+                    foreach (var skill in skills.skills)
                     {
-                        skill.DB_Name = t.name;
-                        //skill.DB_Description = t.description;
-                        skill.DB_Group = t.group_id;
-                        var g = await SQLHelper.GetInvGroup(skill.DB_Group);
-                        if (g != null)
-                            skill.DB_GroupName = g.groupName;
+                        var t = await SQLHelper.GetTypeId(skill.skill_id);
+                        if (t != null)
+                        {
+                            skill.DB_Name = t.name;
+                            //skill.DB_Description = t.description;
+                            skill.DB_Group = t.group_id;
+                            var g = await SQLHelper.GetInvGroup(skill.DB_Group);
+                            if (g != null)
+                                skill.DB_GroupName = g.groupName;
+                        }
+                    }
+
+                    var skillGroups = skills.skills.GroupBy(a => a.DB_Group,
+                        (key, value) => new {ID = key, Value = value.ToList()});
+                    var skillsFinal = new List<JsonClasses.SkillEntry>();
+                    foreach (var skillGroup in skillGroups)
+                    {
+                        skillsFinal.Add(new JsonClasses.SkillEntry {DB_Name = skillGroup.Value[0].DB_GroupName});
+                        skillsFinal.AddRange(skillGroup.Value.OrderBy(a => a.DB_Name));
+                    }
+
+                    foreach (var skill in skillsFinal)
+                    {
+                        var item = new WebSkillItem
+                        {
+                            Name = skill.DB_Name,
+                            ValueTrained = skill.trained_skill_level,
+                            ValueActive = skill.active_skill_level,
+                            IsCategory = skill.skill_id == 0
+                        };
+
+                        item.UpdateVisual();
+                        list.Add(item);
                     }
                 }
 
-                var skillGroups = skills.skills.GroupBy(a => a.DB_Group,
-                    (key, value) => new {ID = key, Value = value.ToList()});
-                var skillsFinal = new List<JsonClasses.SkillEntry>();
-                foreach (var skillGroup in skillGroups)
-                {
-                    skillsFinal.Add(new JsonClasses.SkillEntry { DB_Name = skillGroup.Value[0].DB_GroupName });
-                    skillsFinal.AddRange(skillGroup.Value.OrderBy(a => a.DB_Name));
-                }
-
-                foreach (var skill in skillsFinal)
-                {
-                    var item = new WebSkillItem
-                    {
-                        Name = skill.DB_Name,
-                        ValueTrained = skill.trained_skill_level,
-                        ValueActive = skill.active_skill_level,
-                        IsCategory = skill.skill_id==0
-                    };
-
-                    item.UpdateVisual();
-                    list.Add(item);
-                }
+                return new object[] {skills?.total_sp ?? 0, list};
             }
-
-            return new object[] {skills?.total_sp ?? 0, list};
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, Category);
+                return null;
+            }
         }
 
         public async Task<bool> WebMoveToSpies(WebUserItem order)
@@ -402,57 +459,6 @@ namespace ThunderED.Modules
             }
             return UserStatusEnum.Awaiting;
         }
-
-       /* public async Task<List<WebLysItem>> WebGetLysList(long characterId, string inspectToken)
-        {
-            var result = new List<WebLysItem>();
-            var list = await APIHelper.ESIAPI.GetCharYearlyStats(Reason, characterId, inspectToken);
-            var item = list.FirstOrDefault();
-            if (item == null) return null;
-
-            var totalMsg = item.social == null ? 0 : (item.social.chat_messages_alliance + item.social.chat_messages_corporation + item.social.chat_messages_fleet +
-                                                      item.social.chat_messages_solarsystem + item.social.chat_messages_warfaction);
-            var totalAu = item.travel == null ? 0 : (item.travel.distance_warped_high_sec + item.travel.distance_warped_low_sec + item.travel.distance_warped_null_sec +
-                                                     item.travel.distance_warped_wormhole);
-
-            var percHigh = item.travel == null ? 0 : Math.Round(100 / (totalAu / (double)item.travel.distance_warped_high_sec));
-            var percLow = item.travel == null ? 0 : Math.Round(100 / (totalAu / (double)item.travel.distance_warped_low_sec));
-            var percNull = item.travel == null ? 0 : Math.Round(100 / (totalAu / (double)item.travel.distance_warped_null_sec));
-            var percWh = item.travel == null ? 0 : Math.Round(100 / (totalAu / (double)item.travel.distance_warped_wormhole));
-
-
-            result.Add(new WebLysItem(LM.Get("hrmLysCategory"), $"<b>{LM.Get("hrmLysCategoryChar")}</b>", true));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharActivity"), (item.character?.days_of_activity ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharSessions"), (item.character?.sessions_started ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharIskIn"), (item.isk?.@in ?? 0).ToString("N")));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharIskOut"), (item.isk?.@out ?? 0).ToString("N")));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharAccContr"), (item.market?.accept_contracts_item_exchange ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharBuyOrders"), (item.market?.buy_orders_placed ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharCouriers"), (item.market?.create_contracts_courier ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharCrContr"), (item.market?.create_contracts_item_exchange ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCharSellOrders"), (item.market?.sell_orders_placed ?? 0).ToString()));
-            result.Add(new WebLysItem());
-            result.Add(new WebLysItem(LM.Get("hrmLysCategory"), $"<b>{LM.Get("hrmLysCategoryCombat")}</b>", true));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatCriminal"), (item.combat?.criminal_flag_set ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatDeaths"), $"{item.combat?.deaths_high_sec ?? 0}/{item.combat?.deaths_low_sec ?? 0}"));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatDuels"), (item.combat?.duel_requested ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatKillAss"), (item.combat?.kills_assists ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatKills"), $"{item.combat?.kills_high_sec ?? 0}/{item.combat?.kills_low_sec ?? 0}/{item.combat?.kills_null_sec ?? 0}"));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatPvpFlags"), (item.combat?.pvp_flag_set ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatDictor"), (item.module?.activations_interdiction_sphere_launcher ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatMissions"), (item.pve?.missions_succeeded ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategoryCombatAgents"), (item.pve?.dungeons_completed_distribution ?? 0).ToString()));
-            result.Add(new WebLysItem());
-            result.Add(new WebLysItem(LM.Get("hrmLysCategory"), $"<b>{LM.Get("hrmLysCategorySocial")}</b>", true));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialAddedAs"), $"{item.social?.added_as_contact_high ?? 0}/{item.social?.added_as_contact_good ?? 0}/{item.social?.added_as_contact_neutral ?? 0}/{item.social?.added_as_contact_bad ?? 0}/{item.social?.added_as_contact_horrible ?? 0}"));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialTotalMsg"), totalMsg.ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialDirectTrades"), (item.social?.direct_trades ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialFleetJoins"), (item.social?.fleet_joins ?? 0).ToString()));
-            result.Add(new WebLysItem(LM.Get("hrmLysCategorySocialTotalMsg"), $"{percHigh}%/{percLow}%/{percNull}%/{percWh}%"));
-
-            await Task.CompletedTask;
-            return result;
-        }*/
 
         public async Task<List<WebAssetData>> WebGetCharAssetsList(long characterId, string inspectToken)
         {

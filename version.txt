@@ -1,8 +1,13 @@
-### V2.0.7
+### V2.0.8
  + Added ability to calculate mining ISK by refine materials price if possible (improvements will follow)
  + Added new ZKill group property `FeedOnlyKillsWithRegisteredUsers` to filter out kills by characters authed with this bot
  + Fixed moon data import to support localizations
  + Fixed MySQL error with tokens table (thanks to Aaron Static)
+ + Fixed alt registration
+ + Fixed standings feed auth
+
+ - Removed old web server and associated code for better maintainability
+ - Removed ModuleWebServer property from settings file
 
 ### V2.0.5
  + New flexible web shell called THDWebServer

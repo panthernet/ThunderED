@@ -137,8 +137,6 @@ namespace ThunderED.Classes
         }
 
 
-
-
         public static void AddOnlyNew<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
         {
             if (!dic.ContainsKey(key))
@@ -153,7 +151,7 @@ namespace ThunderED.Classes
 
         public static IEnumerable<string> Split(this string str, int chunkSize)
         {
-            IEnumerable<string> retVal = Enumerable.Range(0, str.Length / chunkSize)
+            var retVal = Enumerable.Range(0, str.Length / chunkSize)
                 .Select(i => str.Substring(i * chunkSize, chunkSize));
 
             if (str.Length % chunkSize > 0)

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Newtonsoft.Json;
-using ThunderED.Classes.Entities;
 
 namespace ThunderED.Thd
 {

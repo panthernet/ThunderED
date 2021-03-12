@@ -1,5 +1,4 @@
 ﻿using System;
-using ThunderED.Classes.Entities;
 using ThunderED.Thd;
 
 namespace ThunderED.Classes

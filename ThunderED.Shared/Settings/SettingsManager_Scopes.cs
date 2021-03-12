@@ -12,12 +12,6 @@ namespace ThunderED
             return permissions.Any(a => a.Equals("esi-mail.read_mail.v1", StringComparison.OrdinalIgnoreCase));
         }
 
-        public static bool HasCharStatsScope(List<string> permissions)
-        {
-            if (permissions == null) return false;
-            return permissions.Any(a => a.Equals("esi-characterstats.read.v1", StringComparison.OrdinalIgnoreCase));
-        }
-
         public static bool HasCharWalletScope(List<string> permissions)
         {
             if (permissions == null) return false;
@@ -41,6 +35,37 @@ namespace ThunderED
             if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-skills.read_skills.v1", StringComparison.OrdinalIgnoreCase));
         }
+
+        public static bool HasCharStandingsScope(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-characters.read_standings.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool HasCharLocationScope(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-location.read_location.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool HasCharShipTypeScope(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-location.read_ship_type.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool HasCharAssetsScope(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-assets.read_assets.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool HasCorpAssetsScope(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-assets.read_corporation_assets.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
 
         public static List<string> ESIScopes = new List<string>
         {
@@ -118,34 +143,5 @@ namespace ThunderED
             "esi-characterstats.read.v1"
         };
 
-        public static bool HasCharStandingsScope(List<string> permissions)
-        {
-            if (permissions == null) return false;
-            return permissions.Any(a => a.Equals("esi-characters.read_standings.v1", StringComparison.OrdinalIgnoreCase));
-        }
-
-        public static bool HasCharLocationScope(List<string> permissions)
-        {
-            if (permissions == null) return false;
-            return permissions.Any(a => a.Equals("esi-location.read_location.v1", StringComparison.OrdinalIgnoreCase));
-        }
-
-        public static bool HasCharShipTypeScope(List<string> permissions)
-        {
-            if (permissions == null) return false;
-            return permissions.Any(a => a.Equals("esi-location.read_ship_type.v1", StringComparison.OrdinalIgnoreCase));
-        }
-
-        public static bool HasCharAssetsScope(List<string> permissions)
-        {
-            if (permissions == null) return false;
-            return permissions.Any(a => a.Equals("esi-assets.read_assets.v1", StringComparison.OrdinalIgnoreCase));
-        }
-
-        public static bool HasCorpAssetsScope(List<string> permissions)
-        {
-            if (permissions == null) return false;
-            return permissions.Any(a => a.Equals("esi-assets.read_corporation_assets.v1", StringComparison.OrdinalIgnoreCase));
-        }
     }
 }

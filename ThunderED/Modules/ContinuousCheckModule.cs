@@ -199,10 +199,8 @@ namespace ThunderED.Modules
 
                 if (isNewDay)
                 {
-                    foreach (var group in SettingsManager.Settings.StatsModule.GetEnabledGroups().Where(a=> !a.Value.IncludeInRating))
-                    {
-                        await ProcessStats(context, command, entity, group.Value);
-                    }
+                    foreach (var group in SettingsManager.Settings.StatsModule.GetEnabledGroups().Where(a=> !a.Value.IncludeInRating)) 
+                        await ProcessStats(context, command, entity, @group.Value);
 
                     var groups = SettingsManager.Settings.StatsModule.GetEnabledGroups().Values.Where(a => a.IncludeInRating);
                     if (groups.Any())
@@ -220,9 +218,6 @@ namespace ThunderED.Modules
                     await ProcessStats(context, command, entity, null);
                 }
 
-
-
-                
             }
             catch (Exception ex)
             {
@@ -275,28 +270,12 @@ namespace ThunderED.Modules
                 }
                 list = list.OrderByDescending(item =>
                 {
-                   /* var iskDiff = item.IskDestroyed - item.IskLost;
-                    var isk = iskDiff / 1000000d;
-                    var pts = (item.PointsDestroyed - item.PointsLost) / 10d;
-                    var ships = item.ShipsDestroyed - item.ShipsLost;
-                    isk = isk < 0 ? 0 : isk;
-                    pts = pts < 0 ? 0 : pts;
-                    ships = ships < 0 ? 0 : ships;
-                    var avg = (3 * isk + 2*pts + 1 * ships + 1) / (isk + pts + ships + 1);*/
-                    
                     var isk = item.IskDestroyed / (double)item.IskLost.ReturnMinimum(1);
                     var pts = item.PointsDestroyed / (double)item.PointsLost.ReturnMinimum(1);
                     var ships = item.ShipsDestroyed / (double)item.ShipsLost.ReturnMinimum(1);
 
                     var avg = (3 * isk + 2*ships + 1*pts + 1) / (isk + pts + ships + 1);
 
-                  /*  isk = item.IskLost / 1000000d;
-                    pts = item.PointsLost / 10d;
-                    var avg2 = (2*pts + 1 * item.ShipsLost + 1) / (pts + item.ShipsLost + 1);
-
-                    if (avg == 0 && avg2 == 0) return -1000;
-                    
-                    var result = avg - avg2;*/
                     return avg;
 
                 }).ToList();
@@ -365,40 +344,12 @@ namespace ThunderED.Modules
             var dayCommands = new List<string> { "d", "t", "today", "newday" };
             if (dayCommands.Contains(command,StringComparer.InvariantCultureIgnoreCase))
             {
-               /* var channel = grp?.DailyStatsChannel ?? 0;
-                if(isNewDay && channel == 0) return;
-                var to = now.Add(TimeSpan.FromHours(1));
-                to = to.Subtract(TimeSpan.FromMinutes(to.Minute));
-                var startTime = isNewDay ? today.Subtract(TimeSpan.FromDays(1)) : today;
-                var endTime = isNewDay ? startTime.AddHours(24) : to;
-                var options = new ZKillboardOptions
-                {
-                    StartTime = startTime,
-                    EndTime = endTime,
-                };
-                if (isAlliance)
-                    options.AllianceId = new List<long> {id};
-                else options.CorporationId = new List<long> {id};
-
-                string relPath = "/api/losses";
-                relPath = options.GetQueryString(relPath);
-                var losses = await RequestAsync<List<ZkbResponse.ZkbKill>>(requestHandler, new Uri(new Uri("https://zkillboard.com"), relPath)) ??
-                                new List<ZkbResponse.ZkbKill>();
-                relPath = "/api/kills";
-                relPath = options.GetQueryString(relPath);
-                var kills = await RequestAsync<List<ZkbResponse.ZkbKill>>(requestHandler, new Uri(new Uri("https://zkillboard.com"), relPath)) ??
-                            new List<ZkbResponse.ZkbKill>();
-                var shipsDestroyed = kills.Count;
-                var shipsLost = losses.Count;
-                var iskDestroyed = kills.Where(a=> a).Sum(a => a.Stats.TotalValue);
-                var iskLost = losses.Sum(a => a.Stats.TotalValue);*/
                 var channel = grp?.DailyStatsChannel ?? 0;
                 if(isNewDay && channel == 0) return;
 
-                var to = (now.Add(TimeSpan.FromHours(1)));
-                to = to.Subtract(TimeSpan.FromMinutes(to.Minute));
-               // var startTime = isNewDay ? today.Subtract(TimeSpan.FromDays(1)) : today;
-               // var endTime = isNewDay ? startTime.AddHours(24) : to;
+                //var to = (now.Add(TimeSpan.FromHours(1)));
+                //to = to.Subtract(TimeSpan.FromMinutes(to.Minute));
+
                 var diff = isNewDay ? 86400 : (int)(DateTime.UtcNow - DateTime.Today).TotalSeconds;
                 var m = diff / 3600;
                 diff = m * 3600;

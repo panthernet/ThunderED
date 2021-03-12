@@ -9,7 +9,6 @@ using Dasync.Collections;
 using Discord.Commands;
 using Newtonsoft.Json;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;

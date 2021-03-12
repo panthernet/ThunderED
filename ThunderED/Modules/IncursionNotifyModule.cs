@@ -18,6 +18,7 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Incursions module...", Category);
             await ParseMixedDataArray(new Dictionary<string, List<object>>{{"default", Settings.IncursionNotificationModule.LocationEntities}}, MixedParseModeEnum.Location);
         }
 
@@ -105,7 +106,7 @@ namespace ThunderED.Modules
             if (!isUpdate)
                 await SQLHelper.AddIncursion(incursion.constellation_id);
 
-            c = c ?? await APIHelper.ESIAPI.GetConstellationData(Reason, incursion.constellation_id);
+            c ??= await APIHelper.ESIAPI.GetConstellationData(Reason, incursion.constellation_id);
             var r = await APIHelper.ESIAPI.GetRegionData(Reason, c.region_id);
 
             var sb = new StringBuilder();

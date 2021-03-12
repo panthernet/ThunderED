@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
-namespace ThunderED.Classes.Entities
+namespace ThunderED
 {
     public class SimplifiedAuthEntity: IIdentifiable
     {
         public long Id { get; set; }
-        [Required]
+        [Classes.Required]
         public string Name { get; set; }
-        [Required]
+        [Classes.Required]
         public string Group { get; set; }
-        [Required]
+        [Classes.Required]
         public IEnumerable<string> RolesList;// = new List<string>();
         public string Roles { get; set; }
 

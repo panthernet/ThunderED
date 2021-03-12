@@ -2,9 +2,9 @@
 using ThunderED.Json;
 using ThunderED.Json.ZKill;
 
-namespace ThunderED.Classes.Entities
+namespace ThunderED
 {
-    public partial class KillDataEntry
+    public class KillDataEntry
     {
         public long killmailID;
         public string killTime;

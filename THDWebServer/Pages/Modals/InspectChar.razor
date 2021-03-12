@@ -515,77 +515,87 @@
 
     private async Task LoadCharacterData()
     {
-        _character = await DbHelper.GetAuthUser(MemberData.Id, true);
-        if (_character == null)
+        try
         {
-            Nav.NavigateTo("/", true);
-            return;
+            _character = await DbHelper.GetAuthUser(MemberData.Id, true);
+            if (_character == null)
+            {
+                Nav.NavigateTo("/", true);
+                return;
+            }
+            await _character.UpdateData();
+            await DbHelper.SaveAuthUser(_character);
+
+            _hasAlliance = _character.DataView.AllianceId > 0;
+            _corpImage = $"https://images.evetech.net/corporations/{_character.DataView.CorporationId}/logo?tenant=tranquility&size=64";
+            _allianceImage = $"https://images.evetech.net/alliances/{_character.DataView.AllianceId}/logo?tenant=tranquility&size=64";
+            _charImage = $"https://image.eveonline.com/Character/{_character.CharacterId}_256.png";
+
+            _hasToken = _character.HasToken;
+            if (_hasToken)
+            {
+                var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralToken(),
+                    _module.Settings.WebServerModule.CcpAppClientId,
+                    _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
+                _inspectToken = tq.Result;
+                if (!string.IsNullOrEmpty(_inspectToken))
+                {
+
+                    if (SettingsManager.HasCharLocationScope(_character.DataView.PermissionsList))
+                    {
+                        var locationData =
+                            await APIHelper.ESIAPI.GetCharacterLocation(_reason, _character.CharacterId, _inspectToken);
+                        var system =
+                            await APIHelper.ESIAPI.GetSystemData(_reason, locationData?.solar_system_id ?? 0);
+                        var station = locationData.station_id > 0 ? await APIHelper.ESIAPI.GetStationData(_reason, locationData.station_id, _inspectToken)
+                            : null;
+                        var citadel = locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetUniverseStructureData(_reason, locationData.structure_id, _inspectToken)
+                            : null;
+                        var loc = station != null ? station.name : citadel?.name;
+
+                        _locationData = $"{system.name} {loc}";
+                    }
+                    if (SettingsManager.HasCharShipTypeScope(_character.DataView.PermissionsList))
+                    {
+                        var stData =
+                            await APIHelper.ESIAPI.GetCharacterShipType(_reason, _character.CharacterId, _inspectToken);
+                        var tType = await APIHelper.ESIAPI.GetTypeId(_reason, stData.ship_type_id);
+                        _shipData = tType.name;
+                    }
+                    if (SettingsManager.HasCharSkillsScope(_character.DataView.PermissionsList))
+                    {
+                        await Task.Factory.StartNew(async () =>
+                        {
+                            var values = await _module.WebGetSkills(_character.CharacterId, _inspectToken);
+                            if (values != null)
+                            {
+                                _skillsListCache = values[1] as List<WebSkillItem>;
+                                _totalSp = ((int) values[0]).ToString("N0");
+                            }
+
+                            await InvokeAsync(StateHasChanged);
+                        });
+                    }
+                    if (SettingsManager.HasCharAssetsScope(_character.DataView.PermissionsList))
+                    {
+                        await Task.Factory.StartNew(async () =>
+                        {
+                            await LoadCharAssetsData();
+                        });
+                    }
+                    await LoadWalletData();
+                    await InvokeAsync(StateHasChanged);
+                }
+                else
+                {
+                    _hasToken = false;
+                    _character.Tokens.Clear();
+                }
+            }
         }
-        await _character.UpdateData();
-        await DbHelper.SaveAuthUser(_character);
-
-        _hasAlliance = _character.DataView.AllianceId > 0;
-        _corpImage = $"https://images.evetech.net/corporations/{_character.DataView.CorporationId}/logo?tenant=tranquility&size=64";
-        _allianceImage = $"https://images.evetech.net/alliances/{_character.DataView.AllianceId}/logo?tenant=tranquility&size=64";
-        _charImage = $"https://image.eveonline.com/Character/{_character.CharacterId}_256.png";
-
-        _hasToken = _character.HasToken;
-        if (_hasToken)
+        catch (Exception ex)
         {
-            var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralToken(),
-                _module.Settings.WebServerModule.CcpAppClientId,
-                _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
-            _inspectToken = tq.Result;
-            if (!string.IsNullOrEmpty(_inspectToken))
-            {
-
-                if (SettingsManager.HasCharLocationScope(_character.DataView.PermissionsList))
-                {
-                    var locationData =
-                        await APIHelper.ESIAPI.GetCharacterLocation(_reason, _character.CharacterId, _inspectToken);
-                    var system =
-                        await APIHelper.ESIAPI.GetSystemData(_reason, locationData?.solar_system_id ?? 0);
-                    var station = locationData.station_id > 0 ? await APIHelper.ESIAPI.GetStationData(_reason, locationData.station_id, _inspectToken)
-                        : null;
-                    var citadel = locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetUniverseStructureData(_reason, locationData.structure_id, _inspectToken)
-                        : null;
-                    var loc = station != null ? station.name : citadel?.name;
-
-                    _locationData = $"{system.name} {loc}";
-                }
-                if (SettingsManager.HasCharShipTypeScope(_character.DataView.PermissionsList))
-                {
-                    var stData =
-                        await APIHelper.ESIAPI.GetCharacterShipType(_reason, _character.CharacterId, _inspectToken);
-                    var tType = await APIHelper.ESIAPI.GetTypeId(_reason, stData.ship_type_id);
-                    _shipData = tType.name;
-                }
-                if (SettingsManager.HasCharSkillsScope(_character.DataView.PermissionsList))
-                {
-                    await Task.Factory.StartNew(async () =>
-                    {
-                        var values = await _module.WebGetSkills(_character.CharacterId, _inspectToken);
-                        _skillsListCache = values[1] as List<WebSkillItem>;
-                        _totalSp = ((int)values[0]).ToString("N0");
-
-                        await InvokeAsync(StateHasChanged);
-                    });
-                }
-                if (SettingsManager.HasCharAssetsScope(_character.DataView.PermissionsList))
-                {
-                    await Task.Factory.StartNew(async () =>
-                    {
-                        await LoadCharAssetsData();
-                    });
-                }
-                await LoadWalletData();
-                await InvokeAsync(StateHasChanged);
-            }
-            else
-            {
-                _hasToken = false;
-                _character.Tokens.Clear();
-            }
+            await LogHelper.LogEx(ex, LogCat.HRM);
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ThunderED.Helpers
+namespace ThunderED
 {
     public static class TextHelpers
     {

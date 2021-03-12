@@ -382,7 +382,7 @@ namespace ThunderED
                 return false;
             }
 
-           /* await DbHelper.UpdateMiningNotification(new ThdMiningNotification
+            /* await DbHelper.UpdateMiningNotification(new ThdMiningNotification
             {
                 CitadelId = 1031727644630,
                 Date = DateTime.Parse("03.04.2020 16:01"),
@@ -399,8 +399,6 @@ namespace ThunderED
             //load injected settings
             await SimplifiedAuth.UpdateInjectedSettings();
 
-            //do not enable old web server for the new shell
-            SettingsManager.Settings.Config.ModuleWebServer = false;
 
             //load APIs
             if (SettingsManager.Settings.Config.DiscordGuildId != 0)

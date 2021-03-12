@@ -4,7 +4,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -20,7 +19,6 @@ namespace ThunderED.Helpers
         public static DiscordAPI DiscordAPI { get; private set; }
         public static ESIAPI ESIAPI { get; private set; }
         public static ZKillAPI ZKillAPI { get; private set; }
-        public static FleetUpAPI FleetUpAPI { get; private set; }
 
         public static string GetItemTypeUrl(object id)
         {
@@ -69,7 +67,6 @@ namespace ThunderED.Helpers
             RunDiscordThread();
             ESIAPI = new ESIAPI();
             ZKillAPI = new ZKillAPI();
-            FleetUpAPI = new FleetUpAPI();
         }
 
         public static void PurgeCache()

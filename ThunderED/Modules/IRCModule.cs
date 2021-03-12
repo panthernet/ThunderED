@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ThunderED.Classes;
 using ThunderED.Classes.IRC;
 using ThunderED.Helpers;
 
@@ -53,6 +54,11 @@ namespace ThunderED.Modules
         private void IRC_Disconnected()
         {
             Disconnect();
+        }
+
+        public override async Task Initialize()
+        {
+            await LogHelper.LogModule("Initializing IRC module...", Category);
         }
 
         public override async Task Run(object prm)

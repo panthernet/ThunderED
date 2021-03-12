@@ -5,13 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
-using ThunderED.Classes.Enums;
+using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
 using ThunderED.Providers;
 
-namespace ThunderED.Helpers
+namespace ThunderED
 {
     public static partial class SQLHelper
     {
@@ -93,188 +92,6 @@ namespace ThunderED.Helpers
             await Provider?.DeleteWhereIn(table, field, list, not);
 
         }
-        #endregion
-
-
-        #region AuthUsers
-
-       /* public static async Task RenameAuthGroup(string @from, string to)
-        {
-            await Update("auth_users", "groupName", to, "groupName", from);
-        }
-
-        public static async Task<List<long>> DeleteAuthDataByDiscordId(ulong discordId)
-        {
-            var user = await GetAuthUserByDiscordId(discordId);
-            await Delete("auth_users", "discordID", discordId);
-            if (user != null && user.CharacterId > 0)
-            {
-                var data = await SelectData("auth_users", new[] {"characterID"}, new Dictionary<string, object> {{"main_character_id", user.CharacterId}});
-                return data?.Select(a=> Convert.ToInt64(a[0])).ToList();
-            }
-
-            return null;
-        }
-
-        
-        public static async Task UpdateMainCharacter(long altId, long mainId)
-        {
-            await Update("auth_users", "main_character_id", mainId, "characterID", altId);
-        }
-
-        public static async Task DeleteAuthDataByCharId(long characterID, bool deleteAlts = false)
-        {
-            await Delete("auth_users", "characterID", characterID);
-            if(deleteAlts)
-                await Delete("auth_users", "main_character_id", characterID);
-        }
-
-        private static async Task<List<AuthUserEntity>> GetAuthUsers(Dictionary<string,object> where)
-        {
-            var res = await SelectData("auth_users", new[] {"*"}, where);
-
-            return res?.Select(ParseAuthUser).ToList();
-        }
-
-        public static async Task<List<AuthUserEntity>> GetAuthUsers()
-        {
-            return await GetAuthUsers(null);
-        }
-
-        public static async Task<List<AuthUserEntity>> GetAuthUsers(int authState)
-        {
-            return await GetAuthUsers(new Dictionary<string, object>
-            {
-                {"authState", authState}
-            });
-        }
-
-        public static async Task<List<AuthUserEntity>> GetOutdatedAwaitingAuthUsers()
-        {
-            var res = await SelectData("auth_users", new[] {"*"});
-
-            return res?.Select(ParseAuthUser).Where(a=> a.IsPending || string.IsNullOrEmpty(a.GroupName)).ToList();
-        }
-
-        public static async Task<List<AuthUserEntity>> GetAuthUsersWithPerms(Dictionary<string,object> where = null)
-        {
-            var res = await SelectData("auth_users", new[] {"*"}, where);
-
-            return res?.Select(ParseAuthUser).Where(a=> !string.IsNullOrEmpty(a.Data.Permissions)).ToList();
-        }
-
-        public static async Task<List<AuthUserEntity>> GetAuthUsersWithPerms(int state)
-        {
-            var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object>{{"authState", state}});
-
-            return res?.Select(ParseAuthUser).Where(a=> !string.IsNullOrEmpty(a.Data.Permissions)).ToList();
-        }
-
-
-
-        public static async Task<List<ulong>> GetAuthUserIdsToCheck(int count = 100)
-        {
-            if (Provider == null) return new List<ulong>();
-
-            var list = await DbHelper.GetUserDiscordIdsForAuthCheck(count);
-
-            return list; 
-            //(await Provider.SelectData("auth_users", new[] { "discordID" })).Select(a => Convert.ToUInt64(a[0])).ToList();
-        }
-
-        public static async Task SetAuthUserLastCheck(ulong id, DateTime date)
-        {
-            await Update("auth_users", "last_check", date, "discordID", id);
-        }
-
-        public static async Task ResetAuthUsersLastCheck()
-        {
-            await Provider?.Update("auth_users", "last_check", null);
-        }
-
-        private static AuthUserEntity ParseAuthUser(object[] item)
-        {
-            return new AuthUserEntity
-            {
-                Id = Convert.ToInt64(item[0]),
-                CharacterId = Convert.ToInt64(item[1]),
-                DiscordId = Convert.ToUInt64(item[2]),
-                GroupName = (string) item[3],
-                RefreshToken = (string) item[4],
-                AuthState = Convert.ToInt32(item[5]),
-                Data = JsonConvert.DeserializeObject<AuthUserData>((string) item[6]),
-                RegCode = (string) item[7],
-                CreateDate = Convert.ToDateTime(item[8]),
-                DumpDate = item[9] == null ? null : (DateTime?)Convert.ToDateTime(item[9]),
-                MainCharacterId = item[10] == null ? null : (long?)Convert.ToInt64(item[10]),
-                LastCheck = item[11] == null? null : (DateTime?)Convert.ToDateTime(item[11]),
-                Ip = (string)item[12],
-            };
-        }
-
-        public static async Task SaveAuthUser(AuthUserEntity user, bool insertOnly = false)
-        {
-            var dic = new Dictionary<string, object>();
-            if(user.Id > 0)
-                dic.Add("Id", user.Id);
-            dic.Add("characterID", user.CharacterId);
-            dic.Add("discordID", user.DiscordId);
-            dic.Add("groupName", user.GroupName);
-            dic.Add("refreshToken", user.RefreshToken);
-            dic.Add("authState", user.AuthState);
-            dic.Add("reg_code", user.RegCode);
-            dic.Add("reg_date", user.CreateDate);
-            dic.Add("dump_date", user.DumpDate);
-            dic.Add("data", JsonConvert.SerializeObject(user.Data));
-            dic.Add("main_character_id", user.MainCharacterId);
-            dic.Add("last_check", user.LastCheck);
-            dic.Add("ip", user.Ip);
-            if (insertOnly)
-                await Insert("auth_users", dic);
-            else await InsertOrUpdate("auth_users", dic);
-        }
-
-
-        public static async Task<AuthUserEntity> GetAuthUserByDiscordId(ulong discordId, bool order = false)
-        {
-            var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object> {{"discordID", discordId}});
-
-            return res?.Select(ParseAuthUser).FirstOrDefault();
-        }
-
-        public static async Task<AuthUserEntity> GetAuthUserByCharacterId(long id, bool order = false)
-        {
-            var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object> {{"characterID", id}});
-
-            return res?.Select(ParseAuthUser).FirstOrDefault();
-        }
-        
-        public static async Task<bool> IsAuthUsersGroupNameInDB(string @from)
-        {
-            var result = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object> {{"groupName", from}});
-            return result != null && result.Count > 0;
-        }
-
-
-        public static async Task<AuthUserEntity> GetAuthUserByRegCode(string code)
-        {
-            var characterId = await Query<long>("auth_users", "characterID", "reg_code", code);
-            return await GetAuthUserByCharacterId(characterId);
-        }
-
-        public static async Task<ulong> GetAuthUserDiscordId(long characterId)
-        {
-            return await Query<ulong>("auth_users", "discordID", "characterID", characterId);
-        }
-
-        public static async Task<List<AuthUserEntity>> GetAuthUserAlts(long mainCharacterId)
-        {
-            var res = await SelectData("auth_users", new[] {"*"}, new Dictionary<string, object>{{"authState", (int)UserStatusEnum.Authed}, {"main_character_id", mainCharacterId}});
-
-            return res?.Select(ParseAuthUser).ToList();
-        }
-
-        */
         #endregion
 
         #region System
@@ -360,10 +177,7 @@ namespace ThunderED.Helpers
             else await Delete("cache", "type", type);
         }
 
-        public static async Task<string> GetCacheDataNextNotificationCheck()
-        {
-            return await Query<string>("cache_data", "data", "name", "nextNotificationCheck");
-        }
+
         public static async Task SetCacheDataNextNotificationCheck(int interval)
         {
             await Update("cache_data", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
@@ -376,25 +190,6 @@ namespace ThunderED.Helpers
                 {"id", id},
                 {"type", type}
             });
-        }
-
-        public static async Task<string> GetCacheDataFleetUpLastChecked()
-        {
-            return await Query<string>("cache_data", "data", "name", "fleetUpLastChecked");
-        }
-        public static async Task SetCacheDataFleetUpLastChecked(DateTime? dt)
-        {
-            await Update("cache_data", "data", dt.Value.ToString(CultureInfo.InvariantCulture), "name", "fleetUpLastChecked");
-        }
-
-        public static async Task<string> GetCacheDataFleetUpLastPosted()
-        {
-            return await Query<string>("cache_data", "data", "name", "fleetUpLastPostedOperation");
-        }
-
-        public static async Task SetCacheDataFleetUpLastPosted(long id)
-        {
-            await SQLHelper.Update("cache_data", "data", id.ToString(), "name", "fleetUpLastPostedOperation");
         }
 
         public static async Task<T> SelectCache<T>(object whereValue, int maxDays)
@@ -427,10 +222,6 @@ namespace ThunderED.Helpers
             await Update("timers", "announce", value, "id", id);
         }
 
-        public static async Task<string> GetTimersAuthTime(long characterId)
-        {
-            return await Query<string>("timers_auth", "time", "id", characterId);
-        }
 
         public static async Task<List<TimerItem>> SelectTimers()
         {
@@ -448,11 +239,6 @@ namespace ThunderED.Helpers
             }).ToList();
             list.ForEach(a=> a.Date = a.GetDateTime());
             return list;
-        }
-
-        public static async Task UpdateTimersAuth(long charId)
-        {
-            await InsertOrUpdate("timers_auth", new Dictionary<string, object> {{"id", charId}, {"time", DateTime.Now}});
         }
 
         public static async Task UpdateTimer(TimerItem entry)
@@ -652,42 +438,6 @@ namespace ThunderED.Helpers
         }
         #endregion
 
-        #region WebEditor
-
-        public static async Task<WebEditorAuthEntry> GetWebEditorAuthEntry(long characterId)
-        {    
-            return (await SelectData("web_editor_auth", new [] {"*"}, new Dictionary<string, object> {{"id", characterId}}))?.Select(a => new WebEditorAuthEntry
-                {
-                    Id = Convert.ToInt64(a[0]),
-                    Code = (string)a[1],
-                    Time = Convert.ToDateTime(a[2])
-                }
-            ).FirstOrDefault();
-        }
-
-        public static async Task<WebEditorAuthEntry> GetWebEditorAuthEntry(string code)
-        {    
-            return (await SelectData("web_editor_auth", new [] {"*"}, new Dictionary<string, object> {{"code", code}}))?.Select(a => new WebEditorAuthEntry
-                {
-                    Id = Convert.ToInt64(a[0]),
-                    Code = (string)a[1],
-                    Time = Convert.ToDateTime(a[2])
-                }
-            ).FirstOrDefault();
-        }
-
-        public static async Task SaveWebEditorAuthEntry(WebEditorAuthEntry entry)
-        {
-            var dic = new Dictionary<string, object> {{"id", entry.Id}, {"code", entry.Code}, {"time", entry.Time}};
-            await InsertOrUpdate("web_editor_auth", dic);
-        }
-
-        public static async Task DeleteWebEditorEntry(long weId)
-        {
-            await Delete("web_editor_auth", "id", weId);
-        }
-
-        #endregion
 
         #region Contracts
         public static async Task<List<JsonClasses.Contract>> LoadContracts(long characterID, bool isCorp)
@@ -769,49 +519,6 @@ namespace ThunderED.Helpers
         public static async Task UpdateMail(long charId, long mailId)
         {
             await InsertOrUpdate("mail", new Dictionary<string, object> {{"id", charId}, {"mailId", mailId}});
-        }
-        #endregion
-
-        #region HRM
-        public static async Task<long> GetHRAuthCharacterId(string authCode)
-        {
-            return await Query<long>("hrm_auth", "id", "code", authCode);
-        }
-
-        public static async Task<string> GetHRAuthTime(long characterId)
-        {
-            return await Query<string>("hrm_auth", "time", "id", characterId);
-        }
-
-        public static async Task SetHRAuthTime(string authCode)
-        {
-            await Update("hrm_auth", "time", DateTime.Now, "code", authCode);
-        }
-
-        public static async Task UpdateHrmAuth(long charId, string authCode)
-        {
-            await InsertOrUpdate("hrm_auth", new Dictionary<string, object> {{"id", charId}, {"time", DateTime.Now}, {"code", authCode}});
-        }
-        #endregion
-
-        #region Fleetup
-        public static async Task DeleteFleetupOp(long id)
-        {
-            await Delete("fleetup", "id", id);
-        }
-
-        public static async Task<long> GetFleetupAnnounce(long opId)
-        {
-            return await Query<long>("fleetup", "announce", "id", opId);
-        }
-
-        public static async Task AddFleetupOp(long id, long value)
-        {
-            await InsertOrUpdate("fleetup", new Dictionary<string, object>
-            {
-                { "id", id},
-                { "announce", value}
-            });
         }
         #endregion
 

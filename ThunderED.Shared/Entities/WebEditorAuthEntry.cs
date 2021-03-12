@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ThunderED.Classes.Entities
+namespace ThunderED
 {
     public class WebEditorAuthEntry
     {

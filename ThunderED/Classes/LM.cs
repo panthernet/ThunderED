@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using ThunderED.Classes;
 using ThunderED.Helpers;
 
 namespace ThunderED

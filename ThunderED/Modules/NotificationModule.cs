@@ -9,7 +9,6 @@ using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
-using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
@@ -22,17 +21,12 @@ namespace ThunderED.Modules
 
         private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
         private readonly ConcurrentDictionary<long, List<JsonClasses.Notification>> _passNotifications = new ConcurrentDictionary<long, List<JsonClasses.Notification>>();
-        private long _lastLoggerNotificationId;
+       // private long _lastLoggerNotificationId;
         private DateTime _lastCleanupCheck = DateTime.FromFileTime(0);
-
-        public NotificationModule()
-        {
-            LogHelper.LogModule("Initializing Notifications module...", Category).GetAwaiter().GetResult();
-            WebServerModule.ModuleConnectors.Add(Reason, Auth);
-        }
 
         public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Notifications module...", Category);
             await WebPartInitialization();
 
             var data = Settings.NotificationFeedModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);

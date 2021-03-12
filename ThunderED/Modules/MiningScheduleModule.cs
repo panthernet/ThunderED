@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Text;
 using System.Threading.Tasks;
 using ThunderED.Classes;
@@ -27,6 +26,8 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Mining Schedule module...", Category);
+
             if (WebServerModule.WebModuleConnectors.ContainsKey(Reason))
                 WebServerModule.WebModuleConnectors.Remove(Reason);
             WebServerModule.WebModuleConnectors.Add(Reason, ProcessRequest);

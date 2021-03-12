@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
-using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Modules;
 using ThunderED.Modules.OnDemand;
@@ -30,10 +28,9 @@ namespace ThunderED.Classes
             sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}about | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}tq ");
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
-                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}auth | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}authnotify | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}web ");
                 if (SettingsManager.Settings.Config.ModuleTimers)
                 {
-                    sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}timers | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}turl ");
+                    sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}timers");
                 }
             }
 
@@ -111,10 +108,7 @@ namespace ThunderED.Classes
                     break;   
                 case "auth":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpAuth", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
-                    break;                        
-                case "authnotify":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpAuthNotify", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
-                    break;                        
+                    break;
                 case "evetime":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTime")}", true);
                     break;                        
@@ -149,9 +143,6 @@ namespace ThunderED.Classes
                 case CMD_FWSTATS:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpFwstats", CMD_FWSTATS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;  
-                case CMD_TURL:
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTurl")}", true);
-                    break;
                 case CMD_TIMERS:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpTimers", CMD_TIMERS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;
@@ -443,16 +434,6 @@ namespace ThunderED.Classes
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersCmdAccessDenied"), true);
         }
 
-        internal const string CMD_TURL = "turl";
-        [Command(CMD_TURL, RunMode = RunMode.Async), Summary("Display timers url")]
-        public async Task TimersUrl()
-        {
-            if(IsForbidden()) return;
-
-            if(SettingsManager.Settings.Config.ModuleTimers)
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersUrlText", string.IsNullOrEmpty(SettingsManager.Settings.TimersModule.TinyUrl) ? WebServerModule.GetTimersAuthURL() : SettingsManager.Settings.TimersModule.TinyUrl), true);
-            else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersModuleDisabled"), true);
-        }
 
         [Command(CMD_FWSTATS, RunMode = RunMode.Async), Summary("Reports FW status for a faction")]
         public async Task FWStats()
@@ -522,9 +503,9 @@ namespace ThunderED.Classes
         public async Task Web()
         {
             if(IsForbidden()) return;
-            if (SettingsManager.Settings.Config.ModuleWebServer)
+            if (!string.IsNullOrEmpty(SettingsManager.Settings.WebServerModule.WebExternalIP))
             {
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ServerPaths.GetWebSiteUrl());
             }
             else
             {
@@ -594,7 +575,7 @@ namespace ThunderED.Classes
             {
                 var grps = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
                 if(grps.Values.Any(a=> a.PreliminaryAuthMode == false))
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ServerPaths.GetWebSiteUrl());
                 else
                 {
                     var grp =
@@ -604,7 +585,7 @@ namespace ThunderED.Classes
                             : grps.FirstOrDefault();
                     if (grp.Value != null)
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {ServerPaths.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
                     }
                 }
             }
@@ -625,7 +606,7 @@ namespace ThunderED.Classes
                 var grp = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().FirstOrDefault(a=> a.Key == group);
                 if (grp.Value != null)
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {ServerPaths.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
                 }
             }
             else
@@ -1072,7 +1053,7 @@ namespace ThunderED.Classes
             {
                 try
                 {
-                    var authString = WebServerModule.GetAuthPageUrl();
+                    var authString = ServerPaths.GetAuthPageUrl();
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
                         LM.Get("authInvite", authString), true);
                 }
@@ -1087,35 +1068,6 @@ namespace ThunderED.Classes
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDisabled"), true);
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [Command("authnotify", RunMode = RunMode.Async), Summary("Auth User")]
-        public async Task AuthNotify()
-        {
-            if(!IsAuthAllowed()) return;
-
-            if (SettingsManager.Settings.Config.ModuleNotificationFeed)
-            {
-                try
-                {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
-                        LM.Get("authNotifyInvite", WebServerModule.GetAuthNotifyURL()), true);
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("authnotify", ex);
-                    await Task.FromException(ex);
-                }
-            }
-            else
-            {
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDisabled"), true);
-            }
-        }
-
 
 
         /// <summary>

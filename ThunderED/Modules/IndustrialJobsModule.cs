@@ -1,38 +1,30 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
     public partial class IndustrialJobsModule: AppModuleBase
     {
         public override LogCat Category => LogCat.IndustryJobs;
-        private readonly int _checkInterval;
+        private int _checkInterval;
         private DateTime _lastCheckTime = DateTime.MinValue;
         private readonly ConcurrentDictionary<long, string> _etokens = new ConcurrentDictionary<long, string>();
         private readonly ConcurrentDictionary<long, string> _corpEtokens = new ConcurrentDictionary<long, string>();
 
-        public IndustrialJobsModule()
+        public override async Task Initialize()
         {
-            LogHelper.LogModule("Initializing IndustrialJobs module...", Category).GetAwaiter().GetResult();
+            await LogHelper.LogModule("Initializing Industrial Jobs module...", Category);
             _checkInterval = Settings.ContractNotificationsModule.CheckIntervalInMinutes;
             if (_checkInterval == 0)
                 _checkInterval = 1;
-            WebServerModule.ModuleConnectors.Add(Reason, OnAuthRequest);
-        }
 
-        public override async Task Initialize()
-        {
             await WebPartInitialization();
 
             var data = Settings.IndustrialJobsModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
@@ -40,87 +32,6 @@ namespace ThunderED.Modules
 
             _etokens.Clear();
             _corpEtokens.Clear();
-        }
-
-        private async Task<bool> OnAuthRequest(HttpListenerRequestEventArgs context)
-        {
-            if (!Settings.Config.ModuleIndustrialJobs) return false;
-
-            var request = context.Request;
-            var response = context.Response;
-
-            try
-            {
-                RunningRequestCount++;
-                var port = Settings.WebServerModule.WebExternalPort;
-
-                if (request.HttpMethod == HttpMethod.Get.ToString())
-                {
-                    if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{port}/callback")
-                    {
-                        var clientID = Settings.WebServerModule.CcpAppClientId;
-                        var secret = Settings.WebServerModule.CcpAppSecret;
-                        var prms = request.Url.Query.TrimStart('?').Split('&');
-                        var code = prms[0].Split('=')[1];
-                        var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
-
-                        if (string.IsNullOrEmpty(state)) return false;
-
-                        if (!state.StartsWith("ijobsauth")) return false;
-                        //var groupName = HttpUtility.UrlDecode(state.Replace("ijobsauth", ""));
-
-                        var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
-                        if (result == null)
-                        {
-                            await WebServerModule.WriteResponce(
-                                WebServerModule.GetAccessDeniedPage("Industry Jobs Module", LM.Get("accessDenied"),
-                                    WebServerModule.GetAuthPageUrl()), response);
-                            return true;
-                        }
-
-                        var lCharId = Convert.ToInt64(result[0]);
-                        //var group = Settings.IndustrialJobsModule.Groups[groupName];
-                        var allowedCharacters = GetAllParsedCharactersWithGroups();
-                        string allowedGroup = null;
-                        foreach (var (group, allowedCharacterIds) in allowedCharacters)
-                        {
-                            if (allowedCharacterIds.Contains(lCharId))
-                            {
-                                allowedGroup = group;
-                                break;
-                            }
-                        }
-
-                        if (string.IsNullOrEmpty(allowedGroup))
-                        {
-                            await WebServerModule.WriteResponce(
-                                WebServerModule.GetAccessDeniedPage("Industry Jobs Module", LM.Get("accessDenied"),
-                                    WebServerModule.GetAuthPageUrl()), response);
-                            return true;
-                        }
-
-                        await DbHelper.UpdateToken(result[1], lCharId, TokenEnum.Industry);
-                        await WebServerModule.WriteResponce(File
-                                .ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
-                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{header}", "authTemplateHeader")
-                                .Replace("{body}", LM.Get("industryJobsAuthSuccessHeader"))
-                                .Replace("{body2}", LM.Get("industryJobsAuthSuccessBody"))
-                                .Replace("{backText}", LM.Get("backText")), response
-                        );
-                        return true;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx(ex.Message, ex, Category);
-            }
-            finally
-            {
-                RunningRequestCount--;
-            }
-            return false;
         }
 
         public override async Task Run(object prm)

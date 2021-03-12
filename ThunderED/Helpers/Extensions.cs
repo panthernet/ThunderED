@@ -54,102 +54,6 @@ namespace ThunderED
             return authUser;
         }
 
-        public static async Task<bool> RefreshRadius(this KillDataEntry entry, string reason, JsonZKill.Killmail kill)
-        {
-            if (entry.killmailID > 0) return true;
-            try
-            {
-                entry.killmailID = kill.killmail_id;
-                entry.value = kill.zkb.totalValue;
-                entry.systemId = kill.solar_system_id;
-                entry.rSystem = await APIHelper.ESIAPI.GetSystemData(reason, entry.systemId);
-                entry.isUnreachableSystem = entry.systemId == 31000005;
-                if (entry.rSystem != null)
-                {
-                    entry.sysName = entry.rSystem.IsAbyss() ? "Abyss" : (entry.rSystem.IsThera() ? "Thera" : (entry.rSystem.IsWormhole() ? "J" : entry.rSystem.name));
-                    entry.isUnreachableSystem = entry.rSystem.IsUnreachable();
-                }
-                else entry.sysName = "?";
-                var rRegion = entry.rSystem != null ? await APIHelper.ESIAPI.GetRegionData(reason, entry.rSystem.DB_RegionId) : null;
-
-                entry.victimCharacterID = kill.victim.character_id;
-                entry.victimCorpID = kill.victim.corporation_id;
-                entry.victimAllianceID = kill.victim.alliance_id;
-                entry.attackers = kill.attackers;
-                entry.finalBlowAttacker = entry.attackers.FirstOrDefault(a => a.final_blow);
-                entry.finalBlowAttackerCharacterId = entry.finalBlowAttacker.character_id;
-                entry.finalBlowAttackerCorpId = entry.finalBlowAttacker?.corporation_id ?? 0;
-                entry.finalBlowAttackerAllyId = entry.finalBlowAttacker?.alliance_id ?? 0;
-                entry.victimShipID = kill.victim.ship_type_id;
-                entry.attackerShipID = entry.finalBlowAttacker.ship_type_id;
-                entry.killTime = kill.killmail_time.ToString(SettingsManager.Settings.Config.ShortTimeFormat);
-
-                entry.rVictimCorp = await APIHelper.ESIAPI.GetCorporationData(reason, entry.victimCorpID);
-                entry.rAttackerCorp = entry.finalBlowAttackerCorpId > 0
-                    ? await APIHelper.ESIAPI.GetCorporationData(reason, entry.finalBlowAttackerCorpId)
-                    : null;
-                entry.rVictimAlliance = entry.victimAllianceID != 0 ? await APIHelper.ESIAPI.GetAllianceData(reason, entry.victimAllianceID) : null;
-                entry.rAttackerAlliance = entry.finalBlowAttackerAllyId > 0
-                    ? await APIHelper.ESIAPI.GetAllianceData(reason, entry.finalBlowAttackerAllyId)
-                    : null;
-                entry.rVictimShipType = await APIHelper.ESIAPI.GetTypeId(reason, entry.victimShipID);
-                entry.rAttackerShipType = await APIHelper.ESIAPI.GetTypeId(reason, entry.attackerShipID);
-                entry.rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(reason, entry.victimCharacterID);
-                entry.rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(reason, entry.finalBlowAttacker?.character_id);
-                entry.systemSecurityStatus = Math.Round(entry.rSystem.security_status, 1).ToString("0.0");
-
-                entry.dic = new Dictionary<string, string>
-                    {
-                        {"{shipID}", entry.victimShipID.ToString()},
-                        {"{shipType}", entry.rVictimShipType?.name},
-                        {"{attackerShipID}", entry.attackerShipID.ToString()},
-                        {"{attackershipType}", entry.rAttackerShipType?.name},
-                        {"{iskValue}", entry.value.ToString("n0")},
-                        {"{iskFittedValue}", kill?.zkb?.fittedValue.ToString("n0") ?? "0"},
-                        {"{systemName}", entry.sysName},
-                        {"{systemID}", entry.rSystem.system_id.ToString()},
-                        {"{regionName}", rRegion?.name},
-                        {"{regionID}", rRegion != null ? entry.rSystem?.DB_RegionId.ToString() : null},
-                        {"{systemSec}", entry.systemSecurityStatus},
-                        {"{victimName}", entry.rVictimCharacter?.name},
-                        {"{victimID}", entry.rVictimCharacter?.character_id.ToString()},
-                        {"{victimCorpName}", entry.rVictimCorp?.name},
-                        {"{victimCorpID}", entry.rVictimCharacter?.corporation_id.ToString()},
-                        {"{victimCorpTicker}", entry.rVictimCorp?.ticker},
-                        {"{victimAllyName}", entry.rVictimAlliance?.name},
-                        {"{victimAllyID}", entry.rVictimAlliance != null ? entry.rVictimCorp?.alliance_id.ToString() : null},
-                        {"{victimAllyTicker}", entry.rVictimAlliance == null ? null : $"<{entry.rVictimAlliance.ticker}>"},
-                        {"{victimAllyOrCorpName}", entry.rVictimAlliance?.name ?? entry.rVictimCorp?.name},
-                        {"{victimAllyOrCorpTicker}", entry.rVictimAlliance?.ticker ?? entry.rVictimCorp?.ticker},
-                        {"{attackerName}", entry.rAttackerCharacter?.name},
-                        {"{attackerID}", entry.rAttackerCharacter?.character_id.ToString()},
-                        {"{attackerCorpName}", entry.rAttackerCorp?.name},
-                        {"{attackerCorpID}", entry.rAttackerCharacter?.corporation_id.ToString()},
-                        {"{attackerCorpTicker}", entry.rAttackerCorp?.ticker},
-                        {"{attackerAllyName}", entry.rAttackerAlliance?.name},
-                        {"{attackerAllyID}", entry.rAttackerAlliance != null ? entry.rAttackerCorp?.alliance_id.ToString() : null},
-                        {"{attackerAllyTicker}", entry.rAttackerAlliance == null ? null : $"<{entry.rAttackerAlliance.ticker}>"},
-                        {"{attackerAllyOrCorpName}", entry.rAttackerAlliance?.name ?? entry.rAttackerCorp?.name},
-                        {"{attackerAllyOrCorpTicker}", entry.rAttackerAlliance?.ticker ?? entry.rAttackerCorp?.ticker},
-                        {"{attackersCount}", entry.attackers?.Length.ToString()},
-                        {"{kmId}", entry.killmailID.ToString()},
-                        {"{timestamp}", entry.killTime},
-                        {"{isNpcKill}", entry.isNPCKill.ToString() ?? "false"},
-                        {"{isSoloKill}", kill?.zkb?.solo.ToString() ?? "false"},
-                        {"{isAwoxKill}", kill?.zkb?.awox.ToString() ?? "false"},
-                    };
-
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                entry.killmailID = 0;
-                await LogHelper.LogEx("refresh ex", ex, LogCat.RadiusKill);
-                return false;
-            }
-        }
-
         public static async Task<bool> Refresh(this KillDataEntry entry, string reason, JsonZKill.Killmail kill)
         {
             if (entry.killmailID > 0) return true;
@@ -311,21 +215,6 @@ namespace ThunderED
 
             ti.Date = ti.GetDateTime();
             return ti;
-        }
-
-        public static async Task PopulateNames(this JsonClasses.SkillsData entry)
-        {
-            foreach (var skill in entry.skills)
-            {
-                var t = await SQLHelper.GetTypeId(skill.skill_id);
-                if (t == null) continue;
-                skill.DB_Name = t.name;
-                skill.DB_Description = t.description;
-                skill.DB_Group = t.group_id;
-                var g = await SQLHelper.GetInvGroup(skill.DB_Group);
-                if (g == null) continue;
-                skill.DB_GroupName = g.groupName;
-            }
         }
 
         public static LogSeverity ToSeverity(this Discord.LogSeverity severity)

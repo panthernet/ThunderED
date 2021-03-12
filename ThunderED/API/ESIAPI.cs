@@ -11,14 +11,14 @@ using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Json.EveCentral;
+using ThunderED.Json.PriceChecks;
 
 namespace ThunderED.API
 {
     /// <summary>
     /// Use partial class to implement additional methods
     /// </summary>
-    public partial class ESIAPI: CacheBase
+    public class ESIAPI: CacheBase
     {
         private readonly string _language;
 
@@ -27,10 +27,10 @@ namespace ThunderED.API
             _language = SettingsManager.Settings.Config.UseEnglishESIOnly ? "en-us" : SettingsManager.Settings.Config.Language?.ToLower() ?? "en-us";
         }
 
-        public async Task<List<FuzzPrice>> GetFuzzPrice(string reason, List<long> ids)
+        public async Task<List<JsonFuzz.FuzzPrice>> GetFuzzPrice(string reason, List<long> ids)
         {
-            var result = await APIHelper.RequestWrapper<Dictionary<string, JsonEveCentral.FuzzItems>>($"https://market.fuzzwork.co.uk/aggregates/?station=60003760&types={string.Join(",", ids)}", reason);
-            return result.Select(a=> new FuzzPrice{ Id = Convert.ToInt64(a.Key), Sell = a.Value.sell.min, Buy = a.Value.buy.max }).ToList();
+            var result = await APIHelper.RequestWrapper<Dictionary<string, JsonFuzz.FuzzItems>>($"https://market.fuzzwork.co.uk/aggregates/?station=60003760&types={string.Join(",", ids)}", reason);
+            return result.Select(a=> new JsonFuzz.FuzzPrice{ Id = Convert.ToInt64(a.Key), Sell = a.Value.sell.min, Buy = a.Value.buy.max }).ToList();
         }
 
         public async Task RemoveAllCharacterDataFromCache(object id)

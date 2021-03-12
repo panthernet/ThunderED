@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ThunderED.Modules
+namespace ThunderED.Classes
 {
     public interface IDiscordRelayModule
     {

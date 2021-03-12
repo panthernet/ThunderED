@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
-using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 
@@ -13,22 +12,19 @@ namespace ThunderED.Modules
     public class SovTrackerModule : AppModuleBase
     {
         public override LogCat Category => LogCat.SovTracker;
-        private readonly int _checkInterval;
+        private int _checkInterval;
         private DateTime _lastCheckTime = DateTime.MinValue;
 
         private const long TCU_TYPEID = 32226;
         private const long IHUB_TYPEID = 32458;
 
-
-        public SovTrackerModule()
-        {
-            _checkInterval = Settings.SovTrackerModule.CheckIntervalInMinutes;
-        }
-
         private readonly Dictionary<string, Dictionary<string, List<long>>> _userStorage = new Dictionary<string, Dictionary<string, List<long>>>();
 
         public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Sov Tracker module...", Category);
+            _checkInterval = Settings.SovTrackerModule.CheckIntervalInMinutes;
+
             var data = Settings.SovTrackerModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.HolderAllianceEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member, _userStorage);
 

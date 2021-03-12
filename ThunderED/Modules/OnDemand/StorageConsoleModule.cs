@@ -4,74 +4,15 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Thd;
 
-namespace ThunderED.Modules
+namespace ThunderED.Modules.OnDemand
 {
     public class StorageConsoleModule: AppModuleBase
     {
         public static LogCat Category2 => LogCat.StorageConsole;
-        
         public override LogCat Category => Category2;
-
-        //protected readonly Dictionary<string, Dictionary<string, List<long>>> ParsedListAccessLists = new Dictionary<string, Dictionary<string, List<long>>>();
-        //protected readonly Dictionary<string, Dictionary<string, List<long>>> ParsedEditAccessLists = new Dictionary<string, Dictionary<string, List<long>>>();
-
-
-        /*public override async Task Initialize()
-        {
-            ParsedListAccessLists.Clear();
-            ParsedEditAccessLists.Clear();
-
-            var data = new Dictionary<string, List<object>> { { "general", Settings.StorageConsoleModule.EditAccessEntities } };
-            await ParseMixedDataArray(data, MixedParseModeEnum.Member, ParsedEditAccessLists);
-            data = new Dictionary<string, List<object>> { { "general", Settings.StorageConsoleModule.ListAccessEntities } };
-            await ParseMixedDataArray(data, MixedParseModeEnum.Member, ParsedListAccessLists);
-        }
-
-        #region Access
-
-        public static bool HasAccess(long userId, long corpId = 0, long allyId = 0)
-        {
-            return HasListAccess(userId, corpId, allyId) || HasEditAccess(userId, corpId, allyId);
-        }
-
-        public static bool HasListAccess(long userId, long corpId = 0, long allyId = 0)
-        {
-            if (!SettingsManager.Settings.Config.ModuleStorageConsole) return false;
-            var module = TickManager.GetModule<StorageConsoleModule>();
-            return GetAllCharacterIds(module.).Contains(userId) ||
-                   GetAllCorporationIds(module.ParsedListAccessLists).Contains(corpId) || (allyId > 0 &&
-                       GetAllAllianceIds(module.ParsedListAccessLists).Contains(allyId));
-        }
-
-        public static bool HasEditAccess(long userId, long corpId = 0, long allyId = 0)
-        {
-            if (!SettingsManager.Settings.Config.ModuleStorageConsole) return false;
-            var module = TickManager.GetModule<StorageConsoleModule>();
-            return GetAllCharacterIds(module.ParsedEditAccessLists).Contains(userId) ||
-                   GetAllCorporationIds(module.ParsedEditAccessLists).Contains(corpId) || (allyId > 0 &&
-                       GetAllAllianceIds(module.ParsedEditAccessLists).Contains(allyId));
-        }
-
-        private static List<long> GetAllCharacterIds(Dictionary<string, Dictionary<string, List<long>>> dic)
-        {
-            return dic.Where(a => a.Value.ContainsKey("character")).SelectMany(a => a.Value["character"]).Distinct().Where(a => a > 0).ToList();
-        }
-        private static List<long> GetAllCorporationIds(Dictionary<string, Dictionary<string, List<long>>> dic)
-        {
-            return dic.Where(a => a.Value.ContainsKey("corporation")).SelectMany(a => a.Value["corporation"]).Distinct().Where(a => a > 0).ToList();
-        }
-
-        private static List<long> GetAllAllianceIds(Dictionary<string, Dictionary<string, List<long>>> dic)
-        {
-            return dic.Where(a => a.Value.ContainsKey("alliance")).SelectMany(a => a.Value["alliance"]).Distinct().Where(a => a > 0).ToList();
-        }
-
-        #endregion
-        */
 
         public static async Task<string> GetListCommandResult(string message)
         {

@@ -1,5 +1,0 @@
-﻿    <script type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
-    <script type="text/javascript" src="/scripts/moments/{locale}.js"></script>
-    <link rel="stylesheet" href="/Content/scripts/dt.css">
-    <script type="text/javascript" src="/scripts/bootstrap-datetimepicker.js"></script>
-

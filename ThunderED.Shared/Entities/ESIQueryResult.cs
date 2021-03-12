@@ -1,4 +1,4 @@
-﻿namespace ThunderED.Classes.Entities
+﻿namespace ThunderED
 {
     public class ESIQueryResult<T>
         where T: class
@@ -19,6 +19,5 @@
         public bool IsNotValid => ErrorCode == -99;
 
         public bool IsFailed => ErrorCode != 0;
-
     }
 }

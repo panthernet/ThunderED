@@ -58,6 +58,12 @@
             {
                 <a href="@GetStructuresAuthURL()" class="btn btn-info btn-block" role="button">@GetStructuresAuthText()</a>
             }
+            
+            <!-- STANDINGS BUTTON -->
+            @if ((WebAuthModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleAuthWeb)
+            {
+                <a href="@ServerPaths.GetStandsAuthURL()" class="btn btn-info btn-block" role="button">@GetStandsAuthText()</a>
+            }
 
             <br>
             <br>
@@ -101,7 +107,7 @@
         var group = TickManager.GetModule<ContractNotificationsModule>()?.WebGetAuthGroup(UserId, out groupName);
         if (group == null) return null;
 
-        return WebServerModule.GetContractsAuthURL(group.FeedPersonalContracts, group.FeedCorporateContracts, groupName);
+        return ServerPaths.GetContractsAuthURL(group.FeedPersonalContracts, group.FeedCorporateContracts, groupName);
     }
 
     private string GetContractsAuthText()
@@ -117,7 +123,7 @@
         var group = TickManager.GetModule<IndustrialJobsModule>()?.WebGetAuthGroup(UserId, out groupName);
         if (group == null) return null;
 
-        return WebServerModule.GetIndustryJobsAuthURL(group.Filters.Any(a => a.Value.FeedPersonalJobs),
+        return ServerPaths.GetIndustryJobsAuthURL(group.Filters.Any(a => a.Value.FeedPersonalJobs),
             group.Filters.Any(a => a.Value.FeedCorporateJobs), groupName);
     }
 
@@ -130,7 +136,7 @@
 
     private string GetMiningScheduleAuthURL()
     {
-        return WebServerModule.GetMiningScheduleAuthURL();
+        return ServerPaths.GetMiningScheduleAuthURL();
     }
 
     private string GetMiningScheduleAuthText()
@@ -140,11 +146,17 @@
 
     private string GetStructuresAuthURL()
     {
-        return WebServerModule.GetStructuresAuthURL();
+        return ServerPaths.GetStructuresAuthURL();
     }
 
     private string GetStructuresAuthText()
     {
         return SettingsManager.Settings.StructureManagementModule.AuthButtonDiscordText;
+    }
+
+    private string GetStandsAuthText()
+    {
+        var grp = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().FirstOrDefault(a => a.Value.StandingsAuth != null).Value;
+        return grp?.CustomButtonText;
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Navigation;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Thd;
@@ -20,6 +19,8 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Moon Info module...", Category);
+
             ParsedViewAccessLists.Clear();
             ParsedLimitedAccessLists.Clear();
 

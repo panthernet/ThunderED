@@ -11,7 +11,6 @@ using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Modules.Sub;
 using ThunderED.Thd;
 
 namespace ThunderED.Modules
@@ -27,20 +26,13 @@ namespace ThunderED.Modules
         private static DateTime _lastStandsUpdateDate = DateTime.MinValue;
 
         protected readonly Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>> ParsedMembersLists = new Dictionary<string, Dictionary<string, Dictionary<string, List<long>>>>();
-
         public static WebAuthModule Instance { get; protected set; }
-
-        public WebAuthModule()
-        {
-            LogHelper.LogModule("Initializing WebAuth module...", Category).GetAwaiter().GetResult();
-            //WebServerModule.ModuleConnectors.Add(Reason, Auth);
-            Instance = this;
-        }
-
         private static readonly object UpdateLock = new object();
 
         public override async Task Initialize()
         {
+            Instance = this;
+            await LogHelper.LogModule("Initializing WebAuth module...", Category);
             await WebPartInitialization();
             //check entities
             foreach (var (groupName, group) in Settings.WebAuthModule.AuthGroups)
@@ -343,7 +335,7 @@ namespace ThunderED.Modules
 
         private static async Task<WebAuthResult> GetAuthGroupByCharacter(Dictionary<string, WebAuthGroup> groups, JsonClasses.CharacterData chData)
         {
-            groups = groups ?? SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
+            groups ??= SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
             var result = await GetAuthRoleEntityById(groups, chData);
             return result.RoleEntities.Any() ? new WebAuthResult {GroupName = result.GroupName, Group = result.Group, RoleEntities = result.RoleEntities} : null;
         }

@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;

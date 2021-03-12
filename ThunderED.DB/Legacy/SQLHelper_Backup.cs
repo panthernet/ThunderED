@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using ThunderED.Helpers;
 
-namespace ThunderED.Helpers
+namespace ThunderED
 {
     public static partial class SQLHelper
     {

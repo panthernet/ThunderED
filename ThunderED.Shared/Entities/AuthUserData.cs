@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace ThunderED.Classes.Entities
+namespace ThunderED
 {
     public class AuthUserData
     {

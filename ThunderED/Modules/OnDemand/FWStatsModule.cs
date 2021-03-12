@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
@@ -110,7 +109,7 @@ namespace ThunderED.Modules.OnDemand
 
                 var embed = new EmbedBuilder()
                     .WithTitle(LM.Get("fwstats_title", fwData.factionName))
-                    .AddField(LM.Get("fwstats_systems"), $"{statOccupiedSystemsCount}/{statTotalSystemsCount}", true)
+                    .AddField(LM.Get("fwstats_systems"), $"{statOccupiedSystemsCount}/{statTotalSystemsCount} Tier: {statTier}", true)
                     .AddField(LM.Get("fwstats_pilots"), LM.Get("fwstats_pilotsText", statPilots, statKillsYesterday), true)
                     .AddField(LM.Get("fwstats_tip"), prognose, true)
                     .WithColor(0x00FF00);

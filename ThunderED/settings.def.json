@@ -13,7 +13,6 @@
     "language": "en-US",
     "useEnglishESIOnly": "true",
 
-    "moduleWebServer": false,
     "moduleAuthCheck": false,
     "moduleAuthWeb": true,
     "moduleCharCorp": false,
@@ -67,7 +66,7 @@
 
   "webServerModule": {
     "UsePortInUrl": true,
-    "webExternalIP": "IP",
+    "webExternalIP": "",
     "webExternalPort": 8001,
     "discordUrl": "https://discord.gg/xxxxxx",
     "ccpAppClientId": "REQUIRED",

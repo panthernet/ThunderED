@@ -18,7 +18,8 @@ namespace ThunderED.Classes
             finally
             {
                 sw.Stop();
-                Console.WriteLine($"[SWATCH] {header}: {sw.ElapsedMilliseconds}");
+                if(!SettingsManager.Settings.Config.RunAsServiceCompatibility)
+                    Console.WriteLine($"[SWATCH] {header}: {sw.ElapsedMilliseconds}");
             }
 
             await Task.CompletedTask;
@@ -36,7 +37,8 @@ namespace ThunderED.Classes
             finally
             {
                 sw.Stop();
-                Console.WriteLine($"[SWATCH] {header}: {sw.ElapsedMilliseconds}");
+                if(!SettingsManager.Settings.Config.RunAsServiceCompatibility)
+                    Console.WriteLine($"[SWATCH] {header}: {sw.ElapsedMilliseconds}");
             }
         }
     }

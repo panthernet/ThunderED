@@ -102,7 +102,7 @@ namespace ThunderED
         {
             var sb = new StringBuilder();
 
-            if ((Config.ModuleNotificationFeed || Config.ModuleAuthWeb || Config.ModuleMail || Config.ModuleTimers || Config.ModuleContractNotifications || Config.ModuleHRM || Config.ModuleIndustrialJobs || Config.ModuleWebConfigEditor) && !Config.ModuleWebServer)
+            if ((Config.ModuleNotificationFeed || Config.ModuleAuthWeb || Config.ModuleMail || Config.ModuleTimers || Config.ModuleContractNotifications || Config.ModuleHRM || Config.ModuleIndustrialJobs || Config.ModuleWebConfigEditor))
             {
                 sb.AppendLine("General Config Settings");
                 sb.AppendLine("ModuleWebServer must be enabled if you plan to use Notifications, WebAuth, Mail, Timers, ContractsFeed, HRM, IndustryFeed or WebConfigEditor modules!\n");
@@ -1738,7 +1738,7 @@ namespace ThunderED
         [Comment("Specifies if queries and results from ESI should be received only in english or using the language settings")]
         public bool UseEnglishESIOnly { get; set; } = true;
 
-        public bool ModuleWebServer { get; set; } = false;
+        //public bool ModuleWebServer { get; set; } = false;
         [Comment("Enable auth check module which checks all authenticated users and strips roles if user has left your corp or alliance")]
         public bool ModuleAuthCheck { get; set; } = false;
         public bool ModuleAuthWeb { get; set; } = false;

@@ -23,6 +23,8 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Structure Management module...", Category);
+
             if (WebServerModule.WebModuleConnectors.ContainsKey(Reason))
                 WebServerModule.WebModuleConnectors.Remove(Reason);
             WebServerModule.WebModuleConnectors.Add(Reason, ProcessRequest);
