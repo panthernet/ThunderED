@@ -452,7 +452,7 @@ namespace ThunderED.API
 
                     if (SettingsManager.Settings.Config.ModuleTelegram)
                     {
-                        var name = GetGuildByChannel(messageParam.Channel.Id).GetUser(message.Author.Id)?.Nickname ??
+                        var name = GetGuildByChannel(messageParam.Channel.Id)?.GetUser(message.Author.Id)?.Nickname ??
                                    message.Author.Username;
                         TickManager.GetModule<TelegramModule>()
                             ?.SendMessage(message.Channel.Id, message.Author.Id, name, message.Content);
