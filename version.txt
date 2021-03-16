@@ -1,3 +1,8 @@
+### V2.0.9
++ Fixed DB cleanup
++ Fixed reg only LM feed
++ Fixed telegram + !timers command issue
+
 ### V2.0.8
  + Added ability to calculate mining ISK by refine materials price if possible (improvements will follow)
  + Added new ZKill group property `FeedOnlyKillsWithRegisteredUsers` to filter out kills by characters authed with this bot

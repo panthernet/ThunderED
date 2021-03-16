@@ -361,6 +361,10 @@ namespace ThunderED.Modules.OnDemand
                             !hasAttackerMatch && !hasVictimMatch)
                             continue;
 
+                        //skip if no reg user found in KM
+                        if(group.FeedOnlyKillsWithRegisteredUsers && !hasAttackerMatch && !hasVictimMatch)
+                            continue;
+
                         #endregion
 
                         #region Location checks (except system radius)
