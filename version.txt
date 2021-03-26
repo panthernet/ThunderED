@@ -2,6 +2,7 @@
 + Fixed DB cleanup
 + Fixed reg only LM feed
 + Fixed telegram + !timers command issue
++ Improved sov change messages
 
 ### V2.0.8
  + Added ability to calculate mining ISK by refine materials price if possible (improvements will follow)

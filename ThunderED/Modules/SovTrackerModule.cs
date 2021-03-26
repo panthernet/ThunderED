@@ -171,7 +171,7 @@ namespace ThunderED.Modules
                 var timers = data == null
                     ? null
                     : LM.Get("sovNextVulnerability", data.vulnerable_start_time.ToString(Settings.Config.ShortTimeFormat), data.vulnerable_end_time.ToString(Settings.Config.ShortTimeFormat));
-                msg =  $"{LM.Get("sovNewHolder", owner.name, owner.ticker)} {oldHolder}{timers}";
+                msg =  $"{LM.Get(isTcu?"sovNewHolder": "sovNewIhubHolder", owner.name, owner.ticker)} {oldHolder}{timers}";
             }
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(Settings.Resources.ImgLowFWStand)
