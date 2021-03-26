@@ -673,7 +673,7 @@
   "smColumnName": "Название",
   "smrColumnState": "Статус",
   "smrColumnFuel": "Топливо",
-  "smNotifyUnanchoringMessage": "@here Цитадель {0} снимется с якоря менее чем через {0} часов",
+  "smNotifyUnanchoringMessage": "@here Цитадель {0} снимется с якоря менее чем через {1} часов",
   "smNotifyUnanchoredMessage": "@here Цитадель {0} снялась с якоря!",
   "nmMoonTablePage": "Луны",
   "mtMoonsHeader": "Луны",

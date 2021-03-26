@@ -455,7 +455,7 @@ namespace ThunderED
         {
             await using var db = new ThunderedDbContext();
             return (await db.NotificationsList.AsNoTracking().FirstOrDefaultAsync(a =>
-                a.GroupName.Equals(group, StringComparison.OrdinalIgnoreCase) && a.Id == id));
+                EF.Functions.Like(a.GroupName,group) && a.Id == id));
         }
 
         public static async Task UpdateNotificationListEntry(string group, long id, string filter = "-")
@@ -464,7 +464,7 @@ namespace ThunderED
             {
                 await using var db = new ThunderedDbContext();
                 var item = await db.NotificationsList.FirstOrDefaultAsync(a =>
-                    a.GroupName.Equals(group, StringComparison.OrdinalIgnoreCase) && a.Id == id);
+                    EF.Functions.Like(a.GroupName, group) && a.Id == id);
                 if (item != null)
                 {
                     item.Time = DateTime.Now;
