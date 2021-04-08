@@ -25,7 +25,7 @@
             public string sunTypeID { get; set; }
             public string solarSystemSecurity { get; set; }
             public string systemColorCode { get; set; }
-            public int regionID { get; set; }
+            public int? regionID { get; set; }
             public string regionName { get; set; }
             public int locationID { get; set; }
             public string itemName { get; set; }
