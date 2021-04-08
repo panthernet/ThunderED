@@ -360,6 +360,8 @@ namespace ThunderED.Modules
                                 continue;
                         }
 
+                        var db = await DbHelper.GetMiningLedger(ledger.observer_id, false);
+
                         var item = new WebMiningLedger
                         {
                             CorporationName = corp.name,
@@ -369,7 +371,7 @@ namespace ThunderED.Modules
                             Date = ledger.last_updated,
                             FeederId = token.CharacterId,
                             TypeId = structure?.type_id ?? 0,
-                            Stats = loading
+                            Stats = db?.Stats ?? loading
                         };
 
                         innerList.Add(item);
@@ -723,60 +725,78 @@ namespace ThunderED.Modules
 
         public async Task<List<WebMiningLedger>> WebUpdateLedgerStats(List<WebMiningLedger> ledgers)
         {
-            foreach (var ledger in ledgers)
+            try
             {
-                var completeLedger = await DbHelper.GetMiningLedger(ledger.StructureId, true);
-
-                if (completeLedger != null && !string.IsNullOrEmpty(completeLedger.OreJson))
+                foreach (var ledger in ledgers)
                 {
-                    var entries = await GetLedgerEntries(ledger.StructureId, ledger.FeederId);
-                    var list = entries.GroupBy(a => a.OreId).ToDictionary(a => a.Key, a => a.Sum(b => b.Quantity * 10));
-                    var totalMinedVolume = list.Values.Sum(a => a);
-                    var initialVolume = completeLedger.RawOre.Values.Sum();
-                    var percTotal = 100 / (initialVolume / (double)totalMinedVolume);
+                    var completeLedger = await DbHelper.GetMiningLedger(ledger.StructureId, true);
 
-                    int r64 = 0;
-                    int r32 = 0;
-                    int r = 0;
-                    foreach (var (key, value) in list)
+                    if (completeLedger != null && !string.IsNullOrEmpty(completeLedger.Stats))
                     {
-                        if (R64List.Contains(key))
-                            r64 += value;
-                        else if (R32List.Contains(key))
-                            r32 += value;
-                        else r += value;
+                        ledger.Stats = completeLedger.Stats;
+                        continue;
                     }
 
-                    int r64input = 0;
-                    int r32input = 0;
-                    int rInput = 0;
-
-                    foreach (var (key, value) in completeLedger.RawOre)
+                    if (completeLedger != null && !string.IsNullOrEmpty(completeLedger.OreJson))
                     {
-                        if (R64List.Contains(key))
-                            r64input += value;
-                        else if (R32List.Contains(key))
-                            r32input += value;
-                        else rInput += value;
+                        var entries = await GetLedgerEntries(ledger.StructureId, ledger.FeederId);
+                        var list = entries.GroupBy(a => a.OreId)
+                            .ToDictionary(a => a.Key, a => a.Sum(b => b.Quantity * 10));
+                        var totalMinedVolume = list.Values.Sum(a => a);
+                        var initialVolume = completeLedger.RawOre.Values.Sum();
+                        var percTotal = 100 / (initialVolume / (double)totalMinedVolume);
+
+                        int r64 = 0;
+                        int r32 = 0;
+                        int r = 0;
+                        foreach (var (key, value) in list)
+                        {
+                            if (R64List.Contains(key))
+                                r64 += value;
+                            else if (R32List.Contains(key))
+                                r32 += value;
+                            else r += value;
+                        }
+
+                        int r64input = 0;
+                        int r32input = 0;
+                        int rInput = 0;
+
+                        foreach (var (key, value) in completeLedger.RawOre)
+                        {
+                            if (R64List.Contains(key))
+                                r64input += value;
+                            else if (R32List.Contains(key))
+                                r32input += value;
+                            else rInput += value;
+                        }
+
+                        var perc64 = 100 / (r64input / (double)r64);
+                        var perc32 = 100 / (r32input / (double)r32);
+                        var percOther = 100 / (rInput / (double)r);
+
+                        var sb = new StringBuilder();
+                        if (r64 > 0) sb.Append($"R64: {perc64:N0}%<br>");
+                        if (r32 > 0) sb.Append($"R32: {perc32:N0}%<br>");
+                        if (r > 0) sb.Append($"GOO: {percOther:N0}%<br>");
+                        sb.Append($"{LM.Get("msTotalIsk")}: {percTotal:N0}%");
+
+                        ledger.Stats = sb.ToString();
+
+                        completeLedger.Stats = ledger.Stats;
+                        await DbHelper.UpdateMiningLedger(completeLedger);
                     }
+                    else ledger.Stats = "-";
 
-                    var perc64 = 100 / (r64input / (double)r64);
-                    var perc32 = 100 / (r32input / (double)r32);
-                    var percOther = 100 / (rInput / (double)r);
-
-                    var sb = new StringBuilder();
-                    if (r64 > 0) sb.Append($"R64: {perc64:N0}%<br>");
-                    if (r32 > 0) sb.Append($"R32: {perc32:N0}%<br>");
-                    if (r > 0) sb.Append($"GOO: {percOther:N0}%<br>");
-                    sb.Append($"{LM.Get("msTotalIsk")}: {percTotal:N0}%");
-
-                    ledger.Stats = sb.ToString();
                 }
-                else ledger.Stats = "-";
 
+                return ledgers;
             }
-
-            return ledgers;
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex, LogCat.MiningSchedule);
+                return null;
+            }
         }
 
         public static readonly List<long> R64List = new List<long> { 45510, 45513, 45511, 45512, 46312, 46313, 46314, 46315, 46316, 46317, 46318, 46319 };

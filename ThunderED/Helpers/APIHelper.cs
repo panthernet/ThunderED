@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -470,6 +471,77 @@ namespace ThunderED.Helpers
 
             }
             return false;
+        }
+
+        public static async Task<T> PostWrapperWithResult<T>(string request, string json, string reason, string auth, bool noRetries = false, bool silent = false)
+            where T: class
+        {
+            string raw = null;
+            var retCount = SettingsManager.Settings.Config.RequestRetries;
+            retCount = retCount == 0 || noRetries ? 1 : retCount;
+            for (int i = 0; i < retCount; i++)
+            {
+                try
+                {
+                    var handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+                    using (var httpClient = new HttpClient(handler))
+                    {
+                        httpClient.DefaultRequestHeaders.Clear();
+                        httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+                        if (!string.IsNullOrEmpty(auth))
+                            httpClient.DefaultRequestHeaders.Add("Authorization", auth);
+                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                        httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+
+                        var ct = new CancellationTokenSource(5000);
+                        using (var responceMessage = await httpClient.PostAsync(request, new StringContent(json, Encoding.UTF8, "application/json")))
+                        {
+                            raw = await responceMessage.Content.ReadAsStringAsync();
+                            if (!responceMessage.IsSuccessStatusCode)
+                            {
+                                if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                    (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
+                                    await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
+
+                                if (raw.StartsWith("{\"error\""))
+                                {
+                                    if (SettingsManager.Settings.Config.ExtendedESILogging)
+                                        await LogHelper.LogError($"[{reason}] Request failure: {request}\n{raw}", LogCat.ESI, false);
+                                    return null;
+                                }
+                                continue;
+                            }
+                            if (typeof(T) == typeof(string))
+                                return (T)(object)raw;
+
+                            if (!typeof(T).IsClass)
+                                return null;
+
+                            var data = JsonConvert.DeserializeObject<T>(raw);
+                            if (data == null)
+                                await LogHelper.LogError($"[try: {i}][{reason}] Deserialized to null!{Environment.NewLine}Request: {request}", LogCat.ESI, false);
+                            else return data;
+                        }
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    //skip, probably due to timeout
+                }
+                catch (Exception ex)
+                {
+                    if (TickManager.IsNoConnection && request.StartsWith(SettingsManager.Settings.Config.ESIAddress))
+                        return null;
+
+                    if (!silent)
+                    {
+                        await LogHelper.LogEx(request, ex, LogCat.ESI);
+                        await LogHelper.LogInfo($"[try: {i}][{reason}]{Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONCE: {raw}", LogCat.ESI);
+                    }
+                }
+
+            }
+            return null;
         }
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using ThunderED.Helpers;
@@ -13,7 +14,9 @@ namespace ThunderED.Modules
     {
         public override LogCat Category => LogCat.SovTracker;
         private int _checkInterval;
+        private int _checkInterval2 = 3;
         private DateTime _lastCheckTime = DateTime.MinValue;
+        private DateTime _lastCheckTime2 = DateTime.MinValue;
 
         private const long TCU_TYPEID = 32226;
         private const long IHUB_TYPEID = 32458;
@@ -39,6 +42,8 @@ namespace ThunderED.Modules
             IsRunning = true;
             try
             {
+                await CheckAdm();
+
                 if((DateTime.Now - _lastCheckTime).TotalMinutes < _checkInterval) return;
                 _lastCheckTime = DateTime.Now;
                 await LogHelper.LogModule("Running Sov Tracker check...", Category);
@@ -75,14 +80,7 @@ namespace ThunderED.Modules
                         ? data.Where(a => idList.Contains(a.solar_system_id)).ToList()
                         : GetUpdatedList(data, group, groupName, holderIds);
 
-                    //check ADM
-                    if (group.TrackADMIndexChanges)
-                        foreach (var d in workingSet.Where(a => a.structure_type_id == TCU_TYPEID))
-                        {
-                            if (group.WarningThresholdValue > 0 &&
-                                d.vulnerability_occupancy_level < group.WarningThresholdValue)
-                                await SendIndexWarningMessage(d, group);
-                        }
+
 
                     //check sov
                     if (group.TrackIHUBHolderChanges || group.TrackTCUHolderChanges)
@@ -117,6 +115,87 @@ namespace ThunderED.Modules
             finally
             {
                 IsRunning = false;
+            }
+        }
+
+        private async Task CheckAdm()
+        {
+            if ((DateTime.Now - _lastCheckTime2).TotalMinutes < _checkInterval2) return;
+            _lastCheckTime2 = DateTime.Now;
+
+            var timers = Settings.SovTrackerModule.GetEnabledGroups().Where(a=> a.Value.TrackADMIndexChanges).Select(a =>
+                new
+                {
+                    Id = a.Key,
+                    Value = TimeSpan.TryParse(a.Value.AdmIndexCheckTimeOfTheDay, out var result)
+                        ? result
+                        : TimeSpan.MinValue
+                }).ToDictionary(a => a.Id, a => a.Value);
+            var todo = new List<string>();
+
+            foreach (var (key,value) in timers)
+            {
+                if(value == TimeSpan.MinValue) continue;
+                if(value.Hours == DateTime.UtcNow.Hour && (DateTime.UtcNow.Minute >=value.Minutes && DateTime.UtcNow.Minute < (value.Minutes+2)))
+                    todo.Add(key);
+            }
+
+            if(!todo.Any()) return;
+
+            var data = await APIHelper.ESIAPI.GetSovStructuresData(Reason);
+            foreach (var (groupName, group) in Settings.SovTrackerModule.GetEnabledGroups())
+            {
+                if(!todo.Contains(groupName)) continue;
+
+                if (APIHelper.DiscordAPI.GetChannel(group.DiscordChannelId) == null)
+                {
+                    await SendOneTimeWarning(groupName + "ch",
+                        $"Group {groupName} has invalid Discord channel ID!");
+                    continue;
+                }
+
+                var msgList = new List<string>();
+
+                //check ADM
+                var trackerData = await SQLHelper.GetSovIndexTrackerData(groupName);
+                var holderIds = GetParsedAlliances(groupName, _userStorage) ?? new List<long>();
+
+                var idList = trackerData.Select(a => a.solar_system_id).Distinct();
+
+                //expensive check for HolderAlliances
+                var workingSet = !holderIds.Any()
+                    ? data.Where(a => idList.Contains(a.solar_system_id)).ToList()
+                    : GetUpdatedList(data, group, groupName, holderIds);
+
+                foreach (var d in workingSet.Where(a => a.structure_type_id == TCU_TYPEID).OrderBy(a=>a.vulnerability_occupancy_level))
+                {
+                    if (group.WarningThresholdValue > 0 &&
+                        d.vulnerability_occupancy_level < group.WarningThresholdValue)
+                    {
+                        if (group.AdmDisplaySummary)
+                            msgList.Add(await GetAdmInfoString(d, group));
+                        else await SendIndexWarningMessage(d, group);
+                    }
+                        
+                }
+
+                if (msgList.Any())
+                {
+                    var sb = new StringBuilder();
+                    sb.Append(LM.Get("SovSummaryHeader", group.WarningThresholdValue));
+                    sb.Append("\n");
+                    sb.Append("```\n");
+                    foreach (var msg in msgList)
+                    {
+                        sb.Append(msg);
+                        sb.Append("\n");
+                    }
+                    sb.Append("```\n");
+                    var mention = string.Join(' ', group.DiscordMentions);
+                    if (string.IsNullOrEmpty(mention))
+                        mention = " ";
+                    await APIHelper.DiscordAPI.SendMessageAsync(group.DiscordChannelId, $"{mention} {sb}").ConfigureAwait(false);
+                }
             }
         }
 
@@ -200,6 +279,15 @@ namespace ThunderED.Modules
             if (string.IsNullOrEmpty(mention))
                 mention = " ";
             await APIHelper.DiscordAPI.SendMessageAsync(ch, $"{mention}", embed.Build()).ConfigureAwait(false);
+        }
+
+        private async Task<string> GetAdmInfoString(JsonClasses.SovStructureData data, SovTrackerGroup group)
+        {
+            var system = await APIHelper.ESIAPI.GetSystemData(Reason, data.solar_system_id);
+            //var alliance = await APIHelper.ESIAPI.GetAllianceData(Reason, data.alliance_id);
+            //var msg = LM.Get("sovLowIndexMessage", data.vulnerability_occupancy_level);
+
+            return $"{system?.name ?? LM.Get("Unknown")}:\t{data.vulnerability_occupancy_level}";
         }
     }
 }

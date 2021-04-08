@@ -85,6 +85,7 @@ namespace ThunderED
             modelBuilder.Entity<ThdMiningLedger>().Property(a => a.CitadelId).HasColumnName("citadel_id");
             modelBuilder.Entity<ThdMiningLedger>().Property(a => a.Date).HasColumnName("date");
             modelBuilder.Entity<ThdMiningLedger>().Property(a => a.OreJson).HasColumnName("ore_json");
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.Stats).HasColumnName("stats");
             #endregion
 
             #region Cache

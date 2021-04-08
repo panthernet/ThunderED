@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
@@ -92,14 +93,10 @@ namespace ThunderED.API
                 forceUpdate, noCache);
         }
 
-       /* public async Task<JsonClasses.AffiliationData> GetAffiliationeData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
-        {
-            if (id == null) return null;
-            if (isAggressive)
-                return await GetAgressiveESIEntry<JsonClasses.AllianceData>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 10);
-            return await GetEntry<JsonClasses.AllianceData>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
-                forceUpdate, noCache);
-        }*/
+         public async Task<List<JsonClasses.AffiliationData>> GetAffiliationsData(string reason, List<long> idList)
+         {
+            return await APIHelper.PostWrapperWithResult<List<JsonClasses.AffiliationData>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/affiliation/", JsonConvert.SerializeObject(idList), reason, null);
+         }
 
         public async Task<object> GetMemberEntityProperty(string reason, object id, string propertyName)
         {

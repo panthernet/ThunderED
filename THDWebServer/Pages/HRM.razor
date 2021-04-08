@@ -3,6 +3,7 @@
 
 @using ThunderED.Classes.Enums
 @using THDWebServer.Pages.Modals
+@using ThunderED.Helpers
 @using ThunderED.Thd
 
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_HRM)]
@@ -23,8 +24,16 @@
                             @if (_access.IsAuthedUsersVisible)
                             {
                                 <RadzenTabsItem Text="@LM.Get("hrmMembersHeader")">
+                                    <div>
+                                        @if (_access.CanKickUsers)
+                                        {
+                                            <RadzenButton ButtonType="ButtonType.Button" Icon="refresh" ButtonStyle="ButtonStyle.Info" Style="margin-right: 10px;"
+                                                          Disabled="@_isAuthedUsersListRefreshing"
+                                                          Click="async ()=> await UpdateCharList(UserStatusEnum.Authed)" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmButUpdateUsersData")}})" />
+                                        }
+                                    </div>
                                     <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countAuthUsers" AllowSorting="true" Data="@_authUsersList" TItem="WebUserItem" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                LoadData="@LoadAuthUsers" Style="height: 640px;" RowDoubleClick="async args=> await InspectCharacter(args, UserStatusEnum.Authed)"
+                                                LoadData="@LoadAuthUsers" Style="height: 640px;" RowDoubleClick="async args => await InspectCharacter(args, UserStatusEnum.Authed)"
                                                 @ref="_authedUsersGrid">
                                         <Columns>
                                             <RadzenGridColumn TItem="WebUserItem" Property="IconUrl" Filterable="false" Sortable="false" Width="90px">
@@ -70,69 +79,81 @@
                             }
                             @if (_access.IsAwaitingUsersVisible)
                             {
-                                <RadzenTabsItem Text="@LM.Get("hrmAwaitingHeader")">
-
-                                    <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countAwaitingUsers" AllowSorting="true" Data="@_awaitingUsersList" TItem="WebUserItem" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                LoadData="@LoadAwaitingUsers" @ref="_awaitingUsersGrid" Style="height: 640px;" RowDoubleClick="async args=> await InspectCharacter(args, UserStatusEnum.Awaiting)">
-                                        <Columns>
-                                            <RadzenGridColumn TItem="WebUserItem" Property="IconUrl" Filterable="false" Sortable="false" Width="90px">
-                                                <Template Context="order">
-                                                    <RadzenImage Path="@order.IconUrl" Style="width: 64px; height: 64px; display: block" />
-                                                </Template>
-                                            </RadzenGridColumn>
-                                            <RadzenGridColumn TItem="WebUserItem" Property="FilterString">
-                                                <Template Context="order">
-                                                    <div class="row">
-                                                        <div class="col">
-                                                            <p>
-                                                                <RadzenLabel Text="@order.CharacterName" Style="font-weight: bold"></RadzenLabel>
-                                                                <br>
-                                                                <RadzenLabel Text="@order.CorporationName"></RadzenLabel>
-                                                                <br>
-                                                                <RadzenLabel Text="@order.AllianceName"></RadzenLabel>
-                                                            </p>
-                                                        </div>
-                                                        <div class="col">
-                                                            <p>
-                                                            <p></p>
-                                                            <p class="text-right">
-                                                                @if (order.HasNoToken)
-                                                                {
-                                                                    <RadzenIcon Icon="warning" Style="color: yellowgreen;" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmTooltipNoESI")}})"></RadzenIcon>
-                                                                }
-                                                                @if (order.HasInvalidToken)
-                                                                {
-                                                                    <RadzenIcon Icon="vpn_key" Style="color: red;" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmTooltipInvalidESIToken")}})"></RadzenIcon>
-                                                                }
-                                                            </p>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </Template>
-                                            </RadzenGridColumn>
-                                            @if (_access.CanKickUsers)
-                                            {
-                                                <RadzenGridColumn TItem="WebUserItem" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center"
-                                                                  Width="60px">
-                                                    <Template Context="order">
-                                                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="async () => await DeleteAuthedUser(order, UserStatusEnum.Awaiting)"
-                                                                      Attributes="@_buttonAttributes">
-                                                        </RadzenButton>
-                                                    </Template>
-                                                </RadzenGridColumn>
-                                            }
-                                        </Columns>
-                                    </RadzenGrid>
-                                    @if (_awaitingUsersList == null)
+                        <RadzenTabsItem Text="@LM.Get("hrmAwaitingHeader")">
+                            <div>
+                                @if (_access.CanKickUsers)
+                                {
+                                    <RadzenButton ButtonType="ButtonType.Button" Icon="refresh" ButtonStyle="ButtonStyle.Info" Style="margin-right: 10px;"
+                                                  Disabled="@_isAwaitingUsersListRefreshing"
+                                                  Click="async ()=> await UpdateCharList(UserStatusEnum.Awaiting)" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmButUpdateUsersData")}})" />
+                                }
+                            </div>
+                            <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countAwaitingUsers" AllowSorting="true" Data="@_awaitingUsersList" TItem="WebUserItem" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        LoadData="@LoadAwaitingUsers" @ref="_awaitingUsersGrid" Style="height: 640px;" RowDoubleClick="async args=> await InspectCharacter(args, UserStatusEnum.Awaiting)">
+                                <Columns>
+                                    <RadzenGridColumn TItem="WebUserItem" Property="IconUrl" Filterable="false" Sortable="false" Width="90px">
+                                        <Template Context="order">
+                                            <RadzenImage Path="@order.IconUrl" Style="width: 64px; height: 64px; display: block" />
+                                        </Template>
+                                    </RadzenGridColumn>
+                                    <RadzenGridColumn TItem="WebUserItem" Property="FilterString">
+                                        <Template Context="order">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <p>
+                                                        <RadzenLabel Text="@order.CharacterName" Style="font-weight: bold"></RadzenLabel>
+                                                        <br>
+                                                        <RadzenLabel Text="@order.CorporationName"></RadzenLabel>
+                                                        <br>
+                                                        <RadzenLabel Text="@order.AllianceName"></RadzenLabel>
+                                                    </p>
+                                                </div>
+                                                <div class="col">
+                                                    <p>
+                                                    <p></p>
+                                                    <p class="text-right">
+                                                        @if (order.HasNoToken)
+                                                        {
+                                                            <RadzenIcon Icon="warning" Style="color: yellowgreen;" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmTooltipNoESI")}})"></RadzenIcon>
+                                                        }
+                                                        @if (order.HasInvalidToken)
+                                                        {
+                                                            <RadzenIcon Icon="vpn_key" Style="color: red;" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmTooltipInvalidESIToken")}})"></RadzenIcon>
+                                                        }
+                                                    </p>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </Template>
+                                    </RadzenGridColumn>
+                                    @if (_access.CanKickUsers)
                                     {
-                                        <RadzenLabel Text="@LM.Get("webLoading")" Class="generalLoadingTabText" />
+                                        <RadzenGridColumn TItem="WebUserItem" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center"
+                                                          Width="60px">
+                                            <Template Context="order">
+                                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="async () => await DeleteAuthedUser(order, UserStatusEnum.Awaiting)"
+                                                              Attributes="@_buttonAttributes">
+                                                </RadzenButton>
+                                            </Template>
+                                        </RadzenGridColumn>
                                     }
-                                </RadzenTabsItem>
+                                </Columns>
+                            </RadzenGrid>
+                            @if (_awaitingUsersList == null)
+                            {
+                                <RadzenLabel Text="@LM.Get("webLoading")" Class="generalLoadingTabText" />
+                            }
+                        </RadzenTabsItem>
                             }
                             @if (_access.IsDumpedUsersVisible)
                             {
                                 <RadzenTabsItem Text="@LM.Get("hrmDumpHeader")">
-
+                                    @if (_access.CanKickUsers)
+                                    {
+                                        <RadzenButton ButtonType="ButtonType.Button" Icon="refresh" ButtonStyle="ButtonStyle.Info" Style="margin-right: 10px;"
+                                                      Disabled="@_isDumpedUsersListRefreshing"
+                                                      Click="async ()=> await UpdateCharList(UserStatusEnum.Dumped)" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmButUpdateUsersData")}})" />
+                                    }
                                     <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countDumpUsers" AllowSorting="true" Data="@_dumpUsersList" TItem="WebUserItem" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                                 LoadData="@LoadDumpedUsers" @ref="_dumpedUsersGrid" Style="height: 640px;" RowDoubleClick="async args=> await InspectCharacter(args, UserStatusEnum.Dumped)">
                                         <Columns>
@@ -197,7 +218,12 @@
                             @if (_access.IsSpyUsersVisible)
                             {
                                 <RadzenTabsItem Text="@LM.Get("hrmSpiesHeader")">
-
+                                    @if (_access.CanKickUsers)
+                                    {
+                                        <RadzenButton ButtonType="ButtonType.Button" Icon="refresh" ButtonStyle="ButtonStyle.Info" Style="margin-right: 10px;"
+                                                      Disabled="@_isSpyingUsersListRefreshing"
+                                                      Click="async ()=> await UpdateCharList(UserStatusEnum.Spying)" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmButUpdateUsersData")}})" />
+                                    }
                                     <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countSpyUsers" AllowSorting="true" Data="@_spyUsersList" TItem="WebUserItem" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                                 LoadData="@LoadSpyUsers" @ref="_spyUsersGrid" Style="height: 640px;" RowDoubleClick="async args=> await InspectCharacter(args, UserStatusEnum.Spying)">
                                         <Columns>
@@ -246,7 +272,7 @@
 </div>
 
 @functions {
-        [CascadingParameter] IModalService Modal { get; set; }
+    [CascadingParameter] IModalService Modal { get; set; }
 
     private RadzenGrid<WebUserItem> _awaitingUsersGrid;
     private RadzenGrid<WebUserItem> _dumpedUsersGrid;
@@ -264,6 +290,11 @@
     private int _countAwaitingUsers;
     private int _countDumpUsers;
     private int _countSpyUsers;
+
+    private bool _isAuthedUsersListRefreshing;
+    private bool _isAwaitingUsersListRefreshing;
+    private bool _isDumpedUsersListRefreshing;
+    private bool _isSpyingUsersListRefreshing;
 
     protected override async Task OnInitializedAsync()
     {
@@ -305,13 +336,15 @@ var user = new WebAuthUserData(new AuthUserEntity { CharacterId = 1731524545 }, 
 
         object[] data = null;
 
-        await Swatch.Run(async () => {
-           data = await DbHelper.GetUsersList(UserStatusEnum.Authed, args);
+        await Swatch.Run(async () =>
+        {
+            data = await DbHelper.GetUsersList(UserStatusEnum.Authed, args);
         }, "GetUsersList");
 
-        await Swatch.Run(async () => {
-           _authUsersList = await _module.WebGetUsers(data[0] as List<ThdAuthUser>, _access); //query.ToList();
-        }, "WebGetUsers");
+        await Swatch.Run(async () =>
+        {
+            _authUsersList = await _module.WebGetUsers(data[0] as List<ThdAuthUser>, _access); //query.ToList();
+    }, "WebGetUsers");
         _countAuthUsers = (int)data[1];
 
         await InvokeAsync(StateHasChanged);
@@ -323,7 +356,7 @@ var user = new WebAuthUserData(new AuthUserEntity { CharacterId = 1731524545 }, 
 
         var data = await DbHelper.GetUsersList(UserStatusEnum.Awaiting, args);
 
-        _awaitingUsersList = await  _module.WebGetUsers(data[0] as List<ThdAuthUser>, _access); //query.ToList();
+        _awaitingUsersList = await _module.WebGetUsers(data[0] as List<ThdAuthUser>, _access); //query.ToList();
         _countAwaitingUsers = (int)data[1];
 
         await InvokeAsync(StateHasChanged);
@@ -335,7 +368,7 @@ var user = new WebAuthUserData(new AuthUserEntity { CharacterId = 1731524545 }, 
 
         var data = await DbHelper.GetUsersList(UserStatusEnum.Dumped, args);
 
-        _dumpUsersList = await  _module.WebGetUsers(data[0] as List<ThdAuthUser>, _access);
+        _dumpUsersList = await _module.WebGetUsers(data[0] as List<ThdAuthUser>, _access);
         _countDumpUsers = (int)data[1];
 
         await InvokeAsync(StateHasChanged);
@@ -347,7 +380,7 @@ var user = new WebAuthUserData(new AuthUserEntity { CharacterId = 1731524545 }, 
 
         var data = await DbHelper.GetUsersList(UserStatusEnum.Spying, args);
 
-        _spyUsersList = await  _module.WebGetUsers(data[0] as List<ThdAuthUser>, _access); //query.ToList();
+        _spyUsersList = await _module.WebGetUsers(data[0] as List<ThdAuthUser>, _access); //query.ToList();
         _countSpyUsers = (int)data[1];
 
         await InvokeAsync(StateHasChanged);
@@ -400,12 +433,163 @@ var user = new WebAuthUserData(new AuthUserEntity { CharacterId = 1731524545 }, 
         var result = await Modal.Show<InspectChar>("Inspection", prms, o).Result;
 
         //if we deleted char from inspect window
-        if (!result.Cancelled && !(bool)result.Data)
+        if (!result.Cancelled && (result.Data is bool data && !data))
         {
             await RemoveCharFromLists(value, type);
             //add char to dump if it is enabled
             if (type != UserStatusEnum.Dumped && SettingsManager.Settings.HRMModule.UseDumpForMembers)
                 await AddCharToList(value, UserStatusEnum.Dumped);
+        }
+        else
+        {
+            if (result.Data is ThdAuthUser d)
+            {
+                switch (type)
+                {
+                    case UserStatusEnum.Awaiting:
+                        if (_awaitingUsersList != null)
+                        {
+                            foreach (var item in _awaitingUsersList.Where(a => a.Id == d.CharacterId))
+                            {
+                                item.AllianceName = d.DataView.AllianceName;
+                                item.CorporationName = d.DataView.CorporationName;
+                            }
+                        }
+                        break;
+                    case UserStatusEnum.Authed:
+                        if (_authUsersList != null)
+                        {
+                            foreach (var item in _authUsersList.Where(a => a.Id == d.CharacterId))
+                            {
+                                item.AllianceName = d.DataView.AllianceName;
+                                item.CorporationName = d.DataView.CorporationName;
+                            }
+                        }
+                        break;
+                    case UserStatusEnum.Dumped:
+                        if (_dumpUsersList != null)
+                        {
+                            foreach (var item in _dumpUsersList.Where(a => a.Id == d.CharacterId))
+                            {
+                                item.AllianceName = d.DataView.AllianceName;
+                                item.CorporationName = d.DataView.CorporationName;
+                            }
+                        }
+                        break;
+                    case UserStatusEnum.Spying:
+                        if (_spyUsersList != null)
+                        {
+                            foreach (var item in _spyUsersList.Where(a => a.Id == d.CharacterId))
+                            {
+                                item.AllianceName = d.DataView.AllianceName;
+                                item.CorporationName = d.DataView.CorporationName;
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    private void UpdateRefreshingListFlag(UserStatusEnum type, bool value)
+    {
+        switch (type)
+        {
+            case UserStatusEnum.Awaiting:
+                _isAwaitingUsersListRefreshing = value;
+                if (!value)
+                    _awaitingUsersGrid.Reload();
+                break;
+            case UserStatusEnum.Authed:
+                _isAuthedUsersListRefreshing = value;
+                if (!value)
+                    _authedUsersGrid.Reload();
+                break;
+            case UserStatusEnum.Dumped:
+                _isDumpedUsersListRefreshing = value;
+                if (!value)
+                    _dumpedUsersGrid.Reload();
+                break;
+            case UserStatusEnum.Spying:
+                _isSpyingUsersListRefreshing = value;
+                if (!value)
+                    _spyUsersGrid.Reload();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
+
+    private async Task UpdateCharList(UserStatusEnum type)
+    {
+        UpdateRefreshingListFlag(type, true);
+        await InvokeAsync(StateHasChanged);
+
+        var input = GetList(type);
+
+        if (input != null)
+        {
+            await Task.Factory.StartNew(async () =>
+            {
+                var lists = input.Select(a => a.Id).ToList().SplitList(1000);
+                foreach (var list in lists)
+                {
+                    var r = await APIHelper.ESIAPI.GetAffiliationsData("HRM", list);
+
+                    foreach (var item in r)
+                    {
+                        var corp = await APIHelper.ESIAPI.GetCorporationData("HRM", item.corporation_id, true);
+                        var ally = item.alliance_id > 0 ? await APIHelper.ESIAPI.GetAllianceData("HRM", item.alliance_id, true) : null;
+                        var ch = input.FirstOrDefault(a => a.Id == item.character_id);
+                        var db = await DbHelper.GetAuthUser(item.character_id);
+
+                        if (corp != null && ch != null)
+                        {
+                            ch.CorporationName = db.DataView.CorporationName = corp.name;
+                            ch.CorporationTicker = db.DataView.CorporationTicker = corp.ticker;
+                            db.DataView.CorporationId = item.corporation_id;
+                        }
+                        if (ch != null)
+                        {
+                            if (ally != null)
+                            {
+                                ch.AllianceName = db.DataView.AllianceName = ally.name;
+                                ch.AllianceTicker = db.DataView.AllianceTicker = ally.ticker;
+                                db.DataView.AllianceId = item.alliance_id;
+                            }
+                            else
+                            {
+                                ch.AllianceName = db.DataView.AllianceName = null;
+                                ch.AllianceTicker = db.DataView.AllianceTicker = null;
+                                db.DataView.AllianceId = 0;
+                            }
+                        }
+                        await DbHelper.SaveAuthUser(db);
+
+                    }
+
+                    UpdateRefreshingListFlag(type, false);
+                    
+                    await InvokeAsync(StateHasChanged);
+                }
+            });
+        }
+    }
+
+    private List<WebUserItem> GetList(UserStatusEnum type)
+    {
+        switch (type)
+        {
+            case UserStatusEnum.Awaiting:
+                return _authUsersList;
+            case UserStatusEnum.Authed:
+                return _authUsersList;
+            case UserStatusEnum.Dumped:
+                return _dumpUsersList;
+            case UserStatusEnum.Spying:
+                return _spyUsersList;
+            default:
+                throw new Exception($"Invalid value {type}");
         }
     }
 
@@ -484,6 +668,7 @@ var user = new WebAuthUserData(new AuthUserEntity { CharacterId = 1731524545 }, 
 {
         {"title", (LM.Get(SettingsManager.Settings.HRMModule.UseDumpForMembers ? "hrmDumpAuthButtonTooltip" : "hrmDeleteAuthButtonTooltip"))}
     };
+
 
 
 }

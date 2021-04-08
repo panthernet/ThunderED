@@ -309,6 +309,7 @@ namespace ThunderED
         [Comment("Check interval in minutes")]
         public int CheckIntervalInMinutes { get; set; } = 1;
 
+
 #if EDITOR
         public ObservableDictionary<string,  SovTrackerGroup> Groups { get; set; } = new ObservableDictionary<string, SovTrackerGroup>();
 #else
@@ -347,7 +348,10 @@ namespace ThunderED
     {
         [Comment("Is config element enabled at runtime")]
         public bool IsEnabled { get; set; } = true;
-
+        [Comment("Check time of the day for ADM index")]
+        public string AdmIndexCheckTimeOfTheDay { get; set; } = "07:00:00";
+        [Comment("Display summary for all problematic ADM indexes found")]
+        public bool AdmDisplaySummary { get; set; } = true;
 #if EDITOR
         public ObservableCollection<object> LocationEntities { get; set; } = new ObservableCollection<object>();
         public ObservableCollection<object> HolderAllianceEntities { get; set; } = new ObservableCollection<object>();

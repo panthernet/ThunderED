@@ -11,11 +11,19 @@ namespace ThunderED.Thd
         public long CitadelId { get; set; }
         public DateTime? Date { get; set; }
         public string OreJson;
+        public string Stats;
 
 
         public void Unpack()
         {
-            RawOre = RawOre.FromJson(OreJson);
+            try
+            {
+                RawOre = RawOre.FromJson(OreJson);
+            }
+            catch
+            {
+                RawOre = new Dictionary<long, int>();
+            }
         }
 
         [NotMapped]

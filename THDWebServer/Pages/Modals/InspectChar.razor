@@ -732,7 +732,7 @@
         return query.ToList();
     }
 
-    async Task Close() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    async Task Close() => await BlazoredModal.CloseAsync(ModalResult.Ok(_character));
 
     private async Task OnMailRowClick(WebMailHeader args)
     {

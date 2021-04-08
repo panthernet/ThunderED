@@ -703,5 +703,7 @@
   "scEmpty": "Storage is empty",
   "scItemNotFound": "Item not found",
   "scItemDeleted": "Item {0} has been deleted",
-  "scItemAdded": "Item {0} has been added!"
+  "scItemAdded": "Item {0} has been added!",
+  "hrmButUpdateUsersData": "Async refresh information about characters corporation and alliance",
+  "SovSummaryHeader": "Daily report about ADM index less than {0} in sov"
 }

@@ -184,7 +184,7 @@ namespace ThunderED.Modules
                                                 //have some announces
                                                 if (left <= announces.Max())
                                                 {
-                                                    var value = announces.Where(a => a < left).OrderByDescending(a => a)
+                                                    var value = announces.Where(a => a <= left).OrderByDescending(a => a)
                                                         .FirstOrDefault();
                                                     value = value == 0 ? announces.Min() : value;
                                                     result.Add(new NotifyItem

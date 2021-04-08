@@ -24,6 +24,16 @@ namespace ThunderED.Helpers
             return $"{value * 100}%";
         }
 
+        public static IEnumerable<List<T>> SplitList<T>(this List<T> locations, int nSize = 30)
+        {
+            for (int i = 0; i < locations.Count; i += nSize)
+            {
+                yield return locations.GetRange(i, Math.Min(nSize, locations.Count - i));
+            }
+        }
+
+
+
         public static void AddOrUpdate<T, T2>(this ConcurrentDictionary<T, T2> dic, T id, T2 data)
         {
             if (dic.ContainsKey(id))
@@ -41,7 +51,7 @@ namespace ThunderED.Helpers
         public static string GetRemains(this DateTime entry, string template)
         {
             var dif = (entry - DateTime.UtcNow);
-            return string.Format(template, dif.Days, dif.Hours, dif.Minutes);
+            return string.Format(template, dif.Days < 0 ? 0 : dif.Days, dif.Hours < 0 ? 0 : dif.Hours, dif.Minutes < 0 ? 0 : dif.Minutes);
         }
 
         public static T2 Get<T, T2>(this ConcurrentDictionary<T, T2> dic, T id)

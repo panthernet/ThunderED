@@ -826,7 +826,9 @@
         "TrackADMIndexChanges": true,
         "TrackTCUHolderChanges": true,
         "TrackIHUBHolderChanges": true,
-        "DiscordChannelId": 0
+        "DiscordChannelId": 0,
+        "AdmIndexCheckTimeOfTheDay": "07:00:00",
+        "AdmDisplaySummary":  true 
       }
     }
   },
