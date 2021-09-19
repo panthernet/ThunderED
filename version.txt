@@ -1,5 +1,6 @@
 ### V2.0.11
 + Added StructureImpendingAbandonmentAssetsAtRisk notification support
++ Fixed some price check fails
 
 ### V2.0.10
 + Store old ledger stats in DB

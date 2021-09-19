@@ -7,6 +7,7 @@ using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
+using ThunderED.Json.PriceChecks;
 using ThunderED.Modules.Sub;
 using ThunderED.Thd;
 
@@ -649,7 +650,7 @@ namespace ThunderED.Modules
                     }).ToList();
 
                 var oreIds = entries.Select(a => a.type_id).Distinct().ToList();
-                var prices = await APIHelper.ESIAPI.GetFuzzPrice(Reason, oreIds);
+                var prices = await APIHelper.ESIAPI.GetFuzzPrice(Reason, oreIds) ?? new List<JsonFuzz.FuzzPrice>();
                 var componentPrices = await DecompositionHelper.GetPrices(70d, oreIds);
 
                 foreach (var entry in entries)
@@ -659,7 +660,7 @@ namespace ThunderED.Modules
                     var ore = await APIHelper.ESIAPI.GetTypeId(Reason, entry.type_id);
                     var price = componentPrices.ContainsKey(entry.type_id)
                         ? (componentPrices.FirstOrDefault(a => a.Key == entry.type_id).Value * Math.Round(entry.quantity / 100d, MidpointRounding.ToZero))
-                        : (prices.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0);
+                        : (prices?.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0);
                     //var price = prices.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0;
 
                     list.Add(new WebMiningLedgerEntry

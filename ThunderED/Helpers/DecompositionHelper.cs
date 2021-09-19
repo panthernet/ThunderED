@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ThunderED.Json.PriceChecks;
+
 namespace ThunderED.Helpers
 {
 
@@ -13,10 +15,11 @@ namespace ThunderED.Helpers
         {
             try
             {
+                if (ids.Count == 0) return new Dictionary<long, double>();
                 var result = new Dictionary<long, double>();
                 var tmp = await DbHelper.GetCustomSchemeValues(ids);
                 var compIds = tmp.Select(a => a.ItemId).Distinct().ToList();
-                var compPrices = await APIHelper.ESIAPI.GetFuzzPrice("Decomp", compIds);
+                var compPrices = compIds.Count > 0 ? await APIHelper.ESIAPI.GetFuzzPrice("Decomp", compIds) : new List<JsonFuzz.FuzzPrice>();
 
                 foreach (var id in ids)
                 {

@@ -21,8 +21,10 @@ namespace ThunderED.Classes
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
         public async Task Help()
         {
-            if(IsForbidden()) return;
+            // await DecompositionHelper.GetPrices(70d, new List<long> { 45510, 46312 });
 
+            if (IsForbidden()) return;                                          
+            
             var sb = new StringBuilder();
             sb.Append(LM.Get("helpTextPrivateCommands"));
             sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}about | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}tq ");
