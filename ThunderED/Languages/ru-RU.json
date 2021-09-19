@@ -629,7 +629,8 @@
   "webTimerHoursShort": "ч",
   "webTimerMinutesShort": "м",
   "webHrmDumpUserQuestion": "Переместить персонажа в группу Сброшенные?",
-  "webWarning": "Внимание"
+  "webWarning": "Внимание",
+  "StructureImpendingAbandonmentAssetsAtRiskMsg": "Ваше имущество в цитадели {0} находится под угрозой. Осталось дней: {1}"
 
 
 }

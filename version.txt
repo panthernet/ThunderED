@@ -1,3 +1,6 @@
+### V1.5.4
+ + Added StructureImpendingAbandonmentAssetsAtRisk notification support
+
 ### V1.5.3
  + Added core type in the StructureOnline notification
  + Added abandoned flag to StructureDestroyed notification
