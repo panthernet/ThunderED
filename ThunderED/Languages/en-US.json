@@ -637,7 +637,7 @@
   "webTimerMinutesShort": "m",
   "webHrmDumpUserQuestion": "Move character to Dump?",
   "webWarning": "Warning",
-  "StructureImpendingAbandonmentAssetsAtRiskMsg":  "Your assets are at risk in the {0} citadel. Days left for loot pinata: {1}" 
-
+  "StructureImpendingAbandonmentAssetsAtRiskMsg":  "Your assets are at risk in the {0} citadel. Days left for loot pinata: {1}" ,
+  "StructureItemsMovedToSafety": "Your assets in {0} have been moved to Asset Safety!"
 
 }
