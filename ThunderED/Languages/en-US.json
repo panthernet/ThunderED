@@ -705,5 +705,7 @@
   "scItemDeleted": "Item {0} has been deleted",
   "scItemAdded": "Item {0} has been added!",
   "hrmButUpdateUsersData": "Async refresh information about characters corporation and alliance",
-  "SovSummaryHeader": "Daily report about ADM index less than {0} in sov"
+  "SovSummaryHeader": "Daily report about ADM index less than {0} in sov",
+  "StructureImpendingAbandonmentAssetsAtRiskMsg":  "Your assets are at risk in the {0} citadel. Days left for loot pinata: {1}" ,
+  "StructureItemsMovedToSafety": "Your assets in {0} have been moved to Asset Safety!"
 }

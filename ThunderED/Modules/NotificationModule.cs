@@ -1271,33 +1271,46 @@ namespace ThunderED.Modules
                                                 }
                                                     break;
                                                 case "StructureImpendingAbandonmentAssetsAtRisk":
-                                                    {
-                                                        var daysLeft = Convert.ToInt32(GetData("daysUntilAbandon", data));
-                                                        var isCorp = Convert.ToBoolean(GetData("isCorpOwned", data));
+                                                {
+                                                    var daysLeft = Convert.ToInt32(GetData("daysUntilAbandon", data));
+                                                    var isCorp = Convert.ToBoolean(GetData("isCorpOwned", data));
 
-                                                        var stTypeName = structureType == null ? LM.Get("Structure") : structureType.name;
-                                                        var stName = structureNameDirect ?? LM.Get("Unknown");
+                                                    var stTypeName = structureType == null ? LM.Get("Structure") : structureType.name;
+                                                    var stName = structureNameDirect ?? LM.Get("Unknown");
 
-                                                        builder = new EmbedBuilder()
-                                                            .WithColor(new Color(0xff0000))
-                                                            .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
-                                                            .WithAuthor(author => author.WithName(LM.Get("StructureImpendingAbandonmentAssetsAtRiskMsg", stName, daysLeft)))
-                                                            .AddField(LM.Get("BlameCorp"), isCorp, true)
-                                                            .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
-                                                            .WithTimestamp(timestamp);
-                                                        embed = builder.Build();
+                                                    builder = new EmbedBuilder()
+                                                        .WithColor(new Color(0xff9900))
+                                                        .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
+                                                        .WithAuthor(author => author.WithName(LM.Get("StructureImpendingAbandonmentAssetsAtRiskMsg", stName, daysLeft)))
+                                                        //.AddField(LM.Get("BlameCorp"), isCorp, true)
+                                                        .AddField(LM.Get("System"), systemName, true)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                        .WithTimestamp(timestamp);
+                                                    embed = builder.Build();
 
-                                                        await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                }
+                                                    break;
+                                                case "StructureItemsMovedToSafety":
+                                                {
+                                                    builder = new EmbedBuilder()
+                                                        .WithColor(new Color(0xff0000))
+                                                        .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
+                                                        .WithAuthor(author => author.WithName(LM.Get("StructureItemsMovedToSafety", systemName)))
+                                                        //.AddField(LM.Get("BlameCorp"), isCorp, true)
+                                                        .AddField(LM.Get("System"), systemName, true)
+                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                        .WithTimestamp(timestamp);
+                                                    embed = builder.Build();
 
-                                                    }
-
+                                                    await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                }
                                                     break;
                                             }
 
                                             //await SetLastNotificationId(notification.notification_id, null);                                            
                                             await SetLastNotificationId(notification.notification_id, groupName, filterPair.Key);
-
-
+                                            
                                         }
                                         catch (Exception ex)
                                         {
