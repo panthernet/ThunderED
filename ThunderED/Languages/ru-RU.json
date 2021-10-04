@@ -698,6 +698,7 @@
   "scItemDeleted": "Предмет {0} был удален",
   "scItemAdded": "Предмет {0} был добавлен!",
   "hrmButUpdateUsersData": "Обновить данные о корпорации и альянсе пользователей в асинхронном режиме",
-  "SovSummaryHeader": "Ежедневный отчет об индексах в клайме ниже {0}"
-
+  "SovSummaryHeader": "Ежедневный отчет об индексах в клайме ниже {0}",
+  "StructureImpendingAbandonmentAssetsAtRiskMsg":  "Your assets are at risk in the {0} citadel. Days left for loot pinata: {1}" ,
+  "StructureItemsMovedToSafety": "Your assets in {0} have been moved to Asset Safety!"
 }
