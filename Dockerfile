@@ -51,4 +51,3 @@ ENTRYPOINT ["dotnet", "THDWebServer.dll"]
 #COPY --from=build-env /app/ThunderED/out .
 #COPY --from=build-res /app/Restarter/out .
 #ENTRYPOINT ["dotnet", "ThunderED.dll"]
-
