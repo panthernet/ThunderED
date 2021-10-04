@@ -12,11 +12,10 @@
 ## Advantages
 * .NET Core powered multi-platform support (Win, Linux, Mac, etc.)
 * Standalone build with no additional software or framework requirements (Docker compatible)
-* 100% ESI API
-* Multiple language support
+* Multiple language support with overrides
 * Multiple DB support: sqlite, MySQL
-* The very own JackKnife inspection utility!
-* Web templates and rich settings
+* The very own HR character inspection utility!
+* Modern customizable web shell and rich settings
 * Effective caching logic for less network and memory load
 * Highly customizable Message templates for killmails without any source-code modifications
 * Modular design for new extensions such as templates, modules and DB support
@@ -73,8 +72,8 @@ With this bot you will have tools to:
 
 ## Build Requirements
 * Visual Studio 2019 Community Edition (Windows)
-* Docker (Linux)
-* .NET Core 2.2
+* Docker (Linux, Windows)
+* .NET Core 3.1
 
 ## Pics
 [The bottom of the 1st post, under the cut](https://forums.eveonline.com/t/thundered-eve-online-discord-bot/74213)

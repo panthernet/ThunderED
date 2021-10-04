@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,6 @@ using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
-using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
@@ -22,17 +21,12 @@ namespace ThunderED.Modules
 
         private readonly ConcurrentDictionary<long, string> _tags = new ConcurrentDictionary<long, string>();
         private readonly ConcurrentDictionary<long, List<JsonClasses.Notification>> _passNotifications = new ConcurrentDictionary<long, List<JsonClasses.Notification>>();
-        private long _lastLoggerNotificationId;
+       // private long _lastLoggerNotificationId;
         private DateTime _lastCleanupCheck = DateTime.FromFileTime(0);
-
-        public NotificationModule()
-        {
-            LogHelper.LogModule("Initializing Notifications module...", Category).GetAwaiter().GetResult();
-            WebServerModule.ModuleConnectors.Add(Reason, Auth);
-        }
 
         public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Notifications module...", Category);
             await WebPartInitialization();
 
             var data = Settings.NotificationFeedModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
@@ -92,7 +86,7 @@ namespace ThunderED.Modules
 
                         foreach (var charId in ids)
                         {
-                            var rToken = await SQLHelper.GetRefreshTokenDefault(charId);
+                            var rToken = await DbHelper.GetToken(charId, TokenEnum.Notification);
                             if (string.IsNullOrEmpty(rToken))
                             {
                                 await SendOneTimeWarning(charId + 100, $"Failed to get notifications refresh token for character {charId}! User is not authenticated.");
@@ -105,8 +99,13 @@ namespace ThunderED.Modules
                             if (tq.Data.IsNoConnection) return;
                             if (string.IsNullOrEmpty(token))
                             {
-                                if (tq.Data.IsNotValid)
-                                    await SendOneTimeWarning(charId, $"Notifications token for character {charId} is outdated or no more valid!");
+                                if (tq.Data.IsNotValid && !tq.Data.IsNoConnection)
+                                {
+                                    await SendOneTimeWarning(charId,
+                                        $"Notifications token for character {charId} is outdated or no more valid!");
+                                    await LogHelper.LogWarning($"Deleting invalid notification refresh token for {charId}", Category);
+                                    await DbHelper.DeleteToken(charId, TokenEnum.Notification);
+                                }
                                 else
                                     await LogHelper.LogWarning(
                                         $"Unable to get notifications token for character {charId}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})");
@@ -131,22 +130,26 @@ namespace ThunderED.Modules
 
                             var notifications = result.Result;
 
-                         /*   notifications.Add(new JsonClasses.Notification
-                            {
-                                text = @"aggressorAllianceID: 99008425
-aggressorCorpID: 98278226
-aggressorID: 95494038
-planetID: 40212927
-planetTypeID: 2016
-reinforceExitTime: 132147728200000000
-solarSystemID: 30003358
-typeID: 2233",
+                              /* notifications.Add(new JsonClasses.Notification
+                               {
+                                   text = @"firedBy: 1723125545
+   firedByLink: 
+   moonID: 40208153
+   oreVolumeByType:
+     45496: 4789716.712817478
+     45498: 3050697.396077991
+     45512: 6573391.23187997
+   solarSystemID: 30003280
+   structureID: 1030932825175
+   structureLink: 
+   structureName: 6-CZ49 - VIP Floor
+   structureTypeID: 35835",
 
 
-                                notification_id = 999990000,
-                                type = "OrbitalReinforced",
-                                timestamp = "2019-06-29T17:20:00Z"
-                            });*/
+                                   notification_id = 1386092327,
+                                   type = "MoonminingLaserFired",
+                                   timestamp = "2021-02-25T11:20:00Z"
+                               });*/
 
                             var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, charId);
                             var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
@@ -202,7 +205,7 @@ typeID: 2233",
                                             var system = string.IsNullOrEmpty(systemId) ? null : await APIHelper.ESIAPI.GetSystemData(Reason, systemId);
                                             var systemName = system == null ? LM.Get("Unknown") : (system.name == system.system_id.ToString() ? "Abyss" : system.name);
                                             var structureId = GetData("structureID", data);
-                                            var structure = string.IsNullOrEmpty(structureId) ? null : await APIHelper.ESIAPI.GetStructureData(Reason, structureId, token);
+                                            var structure = string.IsNullOrEmpty(structureId) ? null : await APIHelper.ESIAPI.GetUniverseStructureData(Reason, structureId, token);
                                             var structureNameDirect = GetData("structureName", data);
 
                                             var structureTypeId = GetData("structureTypeID", data);
@@ -228,6 +231,8 @@ typeID: 2233",
                                             }
 
                                             Dictionary<string, string> oreComposition = null;
+                                            Dictionary<long, int> oreCompositionRaw = null;
+                                            
                                             if (data.ContainsKey("oreVolumeByType"))
                                             {
                                                 try
@@ -241,12 +246,14 @@ typeID: 2233",
                                                     if (pass > 0)
                                                     {
                                                         oreComposition = new Dictionary<string, string>();
+                                                        oreCompositionRaw = new Dictionary<long, int>();
                                                         for (int i = ltqIndex + 1; i < endIndex; i++)
                                                         {
                                                             if (!keys[i].All(char.IsDigit)) continue;
                                                             var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, keys[i])).name;
                                                             var value = double.Parse(data[keys[i]].Split('.')[0]).ToString("N");
                                                             oreComposition.Add(typeName, value);
+                                                            oreCompositionRaw.Add(Convert.ToInt64(keys[i]), Convert.ToInt32(value.Split('.')[0].Replace(",", "")));
                                                         }
                                                     }
                                                 }
@@ -270,7 +277,7 @@ typeID: 2233",
                                             if (filter.CharMentions.Count > 0)
                                             {
                                                 var list = filter.CharMentions.Select(a =>
-                                                        SQLHelper.GetAuthUserDiscordId(a).GetAwaiter().GetResult()).Where(a => a != 0)
+                                                        DbHelper.GetAuthUser(a).GetAwaiter().GetResult()?.DiscordId ?? 0).Where(a => a != 0)
                                                     .ToList();
                                                 if (list.Count > 0)
                                                 {
@@ -506,7 +513,7 @@ typeID: 2233",
                                                         .WithAuthor(author =>
                                                             author.WithName(text))
                                                         .AddField(LM.Get("System"), systemName, true)
-                                                        .AddField(string.IsNullOrEmpty(core) ? LM.Get("Abandoned") : LM.Get("NeedCore"), string.IsNullOrEmpty(core) ? LM.Get(isAbandoned ? "Yes" : "No") : core, true)
+                                                        .AddField(string.IsNullOrEmpty(core) ? LM.Get("Abandoned") : LM.Get("NeedCore"), string.IsNullOrEmpty(core) ? LM.Get(isAbandoned ? "webYes" : "webNo") : core, true)
                                                         .AddField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"), true)
                                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
@@ -603,6 +610,7 @@ typeID: 2233",
 
                                                     //"text": "autoTime: 131632776620000000\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 1003894.7944164276\n  46676: 3861704.652392864\n  46681: 1934338.7763798237\n  46687: 5183861.7768108845\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
                                                     await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
+
                                                     var compText = new StringBuilder();
                                                     if (oreComposition != null)
                                                         foreach (var pair in oreComposition)
@@ -614,6 +622,7 @@ typeID: 2233",
                                                         compText.Remove(compText.Length - 3, 3);
                                                     else compText.Append(LM.Get("Unknown"));
 
+
                                                     builder = new EmbedBuilder()
                                                         .WithColor(new Color(0xb386f7))
                                                         .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
@@ -624,12 +633,29 @@ typeID: 2233",
                                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
 
+                                                    string startedBy = null;
                                                     if (notification.type == "MoonminingExtractionStarted")
                                                     {
-                                                        var startedBy = data.ContainsKey("startedBy")
+                                                        startedBy = data.ContainsKey("startedBy")
                                                             ? ((await APIHelper.ESIAPI.GetCharacterData(Reason, data["startedBy"]))?.name ?? LM.Get("Auto"))
                                                             : null;
                                                         builder.AddField(LM.Get("moonminingStartedBy"), startedBy ?? LM.Get("Unknown"));
+                                                    }
+
+
+                                                    if (notification.type.Equals("MoonminingExtractionStarted",
+                                                        StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        try
+                                                        {
+                                                            DateTime.TryParse(data["autoTime"], out var autoTime);
+                                                            await MiningScheduleModule.UpdateNotificationFromFeed(
+                                                                compText.ToString().Replace("|", "<br>").Replace(".00",""), Convert.ToInt64(structureId), autoTime.ToUniversalTime(), startedBy ?? LM.Get("Unknown"));
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            await LogHelper.LogEx(ex, Category);
+                                                        }
                                                     }
 
                                                     embed = builder.Build();
@@ -655,6 +681,12 @@ typeID: 2233",
                                                     builder.WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                                         .WithTimestamp(timestamp);
                                                     embed = builder.Build();
+
+                                                    if (!string.IsNullOrEmpty(structureId))
+                                                    {
+                                                        await MiningScheduleModule.UpdateOreVolumeFromFeed(Convert.ToInt64(structureId),
+                                                            oreCompositionRaw.ToJson());
+                                                    }
 
                                                     await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
                                                     break;
@@ -1239,23 +1271,23 @@ typeID: 2233",
                                                 }
                                                     break;
                                                 case "StructureImpendingAbandonmentAssetsAtRisk":
-                                                {
-                                                    var daysLeft = Convert.ToInt32(GetData("daysUntilAbandon", data));
-                                                    var isCorp = Convert.ToBoolean(GetData("isCorpOwned", data));
+                                                    {
+                                                        var daysLeft = Convert.ToInt32(GetData("daysUntilAbandon", data));
+                                                        var isCorp = Convert.ToBoolean(GetData("isCorpOwned", data));
 
-                                                    var stTypeName = structureType == null ? LM.Get("Structure") : structureType.name;
-                                                    var stName = structureNameDirect ?? LM.Get("Unknown");
+                                                        var stTypeName = structureType == null ? LM.Get("Structure") : structureType.name;
+                                                        var stName = structureNameDirect ?? LM.Get("Unknown");
 
-                                                    builder = new EmbedBuilder()
-                                                        .WithColor(new Color(0xff0000))
-                                                        .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
-                                                        .WithAuthor(author => author.WithName(LM.Get("StructureImpendingAbandonmentAssetsAtRiskMsg", stName, daysLeft)))
-                                                        .AddField(LM.Get("BlameCorp"), isCorp, true)
-                                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
-                                                        .WithTimestamp(timestamp);
-                                                    embed = builder.Build();
+                                                        builder = new EmbedBuilder()
+                                                            .WithColor(new Color(0xff0000))
+                                                            .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
+                                                            .WithAuthor(author => author.WithName(LM.Get("StructureImpendingAbandonmentAssetsAtRiskMsg", stName, daysLeft)))
+                                                            .AddField(LM.Get("BlameCorp"), isCorp, true)
+                                                            .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                                            .WithTimestamp(timestamp);
+                                                        embed = builder.Build();
 
-                                                    await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
+                                                        await APIHelper.DiscordAPI.SendMessageAsync(discordChannel, mention, embed).ConfigureAwait(false);
 
                                                     }
 

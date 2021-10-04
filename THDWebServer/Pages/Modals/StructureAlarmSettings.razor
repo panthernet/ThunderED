@@ -1,0 +1,23 @@
+﻿@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_STRUCTURES)]
+@inject ProtectedSessionStorage Store
+
+<div class="modal-content" style="width: 500px;">
+    <div class="modal-body">
+        <div class="row">
+
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+                <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="@(LM.Get("webTimersConfirmEdit"))"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" style="display: inline-block; margin-left: 10px;" Text="@LM.Get("Cancel")" Click="@OnClose"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    async Task OnClose() => await BlazoredModal.CancelAsync();
+
+}

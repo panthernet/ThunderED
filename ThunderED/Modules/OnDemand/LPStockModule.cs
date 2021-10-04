@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using ThunderED.Classes;
 using ThunderED.Helpers;
 
 namespace ThunderED.Modules.OnDemand

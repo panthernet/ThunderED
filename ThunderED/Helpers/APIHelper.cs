@@ -20,7 +20,6 @@ namespace ThunderED.Helpers
         public static DiscordAPI DiscordAPI { get; private set; }
         public static ESIAPI ESIAPI { get; private set; }
         public static ZKillAPI ZKillAPI { get; private set; }
-        public static FleetUpAPI FleetUpAPI { get; private set; }
 
         public static string GetItemTypeUrl(object id)
         {
@@ -69,7 +68,6 @@ namespace ThunderED.Helpers
             RunDiscordThread();
             ESIAPI = new ESIAPI();
             ZKillAPI = new ZKillAPI();
-            FleetUpAPI = new FleetUpAPI();
         }
 
         public static void PurgeCache()
@@ -119,6 +117,10 @@ namespace ThunderED.Helpers
                             raw = await responseMessage.Content.ReadAsStringAsync();
                             if (!responseMessage.IsSuccessStatusCode)
                             {
+                                if (responseMessage.StatusCode == HttpStatusCode.NotFound && !request.Contains("/route/"))
+                                    await LogHelper.LogWarning($"Query address is invalid: {request}", LogCat.ESI);
+                                if (responseMessage.StatusCode == HttpStatusCode.Forbidden)
+                                    await LogHelper.LogWarning($"Query address is forbidden: {request}", LogCat.ESIWarnings);
                                 result.Data.ErrorCode = (int)responseMessage.StatusCode;
                                 result.Data.Message = raw;
                                 if (responseMessage.StatusCode != HttpStatusCode.NotModified && responseMessage.StatusCode != HttpStatusCode.NotFound && responseMessage.StatusCode != HttpStatusCode.Forbidden &&
@@ -218,7 +220,7 @@ namespace ThunderED.Helpers
                         if (!string.IsNullOrEmpty(etag))
                             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("if-none-match", etag);
 
-                        var ct = new CancellationTokenSource(5000);
+                        var ct = new CancellationTokenSource(10000);
                         using (var responseMessage = await httpClient.GetAsync(request, ct.Token))
                         {
                             result.Data.ETag = responseMessage.Headers.FirstOrDefault(a => a.Key == "ETag").Value?.FirstOrDefault().Trim('"');
@@ -226,6 +228,10 @@ namespace ThunderED.Helpers
                             raw = await responseMessage.Content.ReadAsStringAsync();
                             if (!responseMessage.IsSuccessStatusCode)
                             {
+                                if (responseMessage.StatusCode == HttpStatusCode.NotFound && !request.Contains("/route/"))
+                                    await LogHelper.LogWarning($"Query address is invalid: {request}", LogCat.ESI);
+                                if (responseMessage.StatusCode == HttpStatusCode.Forbidden)
+                                    await LogHelper.LogWarning($"Query address is forbidden: {request}", LogCat.ESIWarnings);
                                 result.Data.ErrorCode = (int)responseMessage.StatusCode;
                                 result.Data.Message = raw;
                                 if (responseMessage.StatusCode != HttpStatusCode.NotModified && responseMessage.StatusCode != HttpStatusCode.NotFound && responseMessage.StatusCode != HttpStatusCode.Forbidden &&
@@ -332,12 +338,19 @@ namespace ThunderED.Helpers
                             httpClient.DefaultRequestHeaders.Add("Authorization", auth);
                         if(!string.IsNullOrEmpty(eToken))
                             httpClient.DefaultRequestHeaders.Add("Etoken", eToken);
-
+#if DEBUG
+                        var ct = new CancellationTokenSource(50000);
+#else
                         var ct = new CancellationTokenSource(5000);
+#endif
 
                         using (var responseMessage = await httpClient.GetAsync(request, ct.Token))
                         {
                             raw = await responseMessage.Content.ReadAsStringAsync();
+                            if (responseMessage.StatusCode == HttpStatusCode.NotFound && !request.Contains("/route/"))
+                                await LogHelper.LogWarning($"Query address is invalid: {request}", LogCat.ESIWarnings);
+                            if (responseMessage.StatusCode == HttpStatusCode.Forbidden)
+                                await LogHelper.LogWarning($"Query address is forbidden: {request}", LogCat.ESIWarnings);
                             if (responseMessage.Content.Headers.ContentEncoding.Any(a=> "br".Equals(a, StringComparison.OrdinalIgnoreCase)))
                             {
                                 using (var b = new BrotliStream(await responseMessage.Content.ReadAsStreamAsync(), CompressionMode.Decompress, true))
@@ -458,6 +471,77 @@ namespace ThunderED.Helpers
 
             }
             return false;
+        }
+
+        public static async Task<T> PostWrapperWithResult<T>(string request, string json, string reason, string auth, bool noRetries = false, bool silent = false)
+            where T: class
+        {
+            string raw = null;
+            var retCount = SettingsManager.Settings.Config.RequestRetries;
+            retCount = retCount == 0 || noRetries ? 1 : retCount;
+            for (int i = 0; i < retCount; i++)
+            {
+                try
+                {
+                    var handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+                    using (var httpClient = new HttpClient(handler))
+                    {
+                        httpClient.DefaultRequestHeaders.Clear();
+                        httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
+                        if (!string.IsNullOrEmpty(auth))
+                            httpClient.DefaultRequestHeaders.Add("Authorization", auth);
+                        httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                        httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+
+                        var ct = new CancellationTokenSource(5000);
+                        using (var responceMessage = await httpClient.PostAsync(request, new StringContent(json, Encoding.UTF8, "application/json")))
+                        {
+                            raw = await responceMessage.Content.ReadAsStringAsync();
+                            if (!responceMessage.IsSuccessStatusCode)
+                            {
+                                if (responceMessage.StatusCode != HttpStatusCode.NotFound && responceMessage.StatusCode != HttpStatusCode.Forbidden &&
+                                    (responceMessage.StatusCode != HttpStatusCode.BadGateway && responceMessage.StatusCode != HttpStatusCode.GatewayTimeout) && !silent)
+                                    await LogHelper.LogError($"[try: {i}][{reason}] Potential {responceMessage.StatusCode} request failure: {request}", LogCat.ESI, false);
+
+                                if (raw.StartsWith("{\"error\""))
+                                {
+                                    if (SettingsManager.Settings.Config.ExtendedESILogging)
+                                        await LogHelper.LogError($"[{reason}] Request failure: {request}\n{raw}", LogCat.ESI, false);
+                                    return null;
+                                }
+                                continue;
+                            }
+                            if (typeof(T) == typeof(string))
+                                return (T)(object)raw;
+
+                            if (!typeof(T).IsClass)
+                                return null;
+
+                            var data = JsonConvert.DeserializeObject<T>(raw);
+                            if (data == null)
+                                await LogHelper.LogError($"[try: {i}][{reason}] Deserialized to null!{Environment.NewLine}Request: {request}", LogCat.ESI, false);
+                            else return data;
+                        }
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    //skip, probably due to timeout
+                }
+                catch (Exception ex)
+                {
+                    if (TickManager.IsNoConnection && request.StartsWith(SettingsManager.Settings.Config.ESIAddress))
+                        return null;
+
+                    if (!silent)
+                    {
+                        await LogHelper.LogEx(request, ex, LogCat.ESI);
+                        await LogHelper.LogInfo($"[try: {i}][{reason}]{Environment.NewLine}REQUEST: {request}{Environment.NewLine}RESPONCE: {raw}", LogCat.ESI);
+                    }
+                }
+
+            }
+            return null;
         }
     }
 

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
@@ -21,10 +19,10 @@ namespace ThunderED.Modules
             //update Roles string
             list.ForEach(a=> a.Roles = string.Join(',', a.RolesList));
             //save data
-            await SettingsManager.SaveSimplifiedAuthData(list
+            await SimplifiedAuth.SaveData(list
                 .Select(a => $"{a.Name}|{a.Group}|{a.Roles}").ToList());
             //inject updated simplified auth data
-            await SettingsManager.LoadSimplifiedAuth();
+            await SimplifiedAuth.LoadData();
             //rebuild auth cache
             if (Settings.Config.ModuleAuthWeb)
                 await TickManager.GetModule<WebAuthModule>().Initialize();

@@ -1,0 +1,26 @@
+﻿@page "/"
+@using System.IO
+@inject AuthenticationStateProvider Auth
+@inject ProtectedSessionStorage ProtectedSessionStore
+
+<div class="container" style="height: 100%">
+    <div class="colorifier">
+        <p style="text-align: center">
+            <h2>@LM.Get("webWelcomeHeader")</h2>
+        </p>
+    </div>
+    <!--center content-->
+    <div class="centralizer">
+        <div class="text-center">
+        
+            @if (WebUiHelper.GetAsset("logo.png") != null)
+            {
+                <p>
+                    <RadzenImage Path="@WebUiHelper.GetAsset("logo.png")"></RadzenImage>
+                </p>
+            }
+            <p><a class="btn btn-info btn-block" href="@ServerPaths.GetGeneralAuthPageUrl()" role="button" style="min-width: 150px; max-width: 250px;display: inline-block">@LM.Get("butGeneralAuthPage")</a></p>
+        </div>
+    </div>
+</div>
+

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -11,6 +10,11 @@ namespace ThunderED.Modules
         private DateTime _lastAuthCheck = DateTime.MinValue;
         private DateTime _lastDiscordAuthCheck = DateTime.MinValue;
         public override LogCat Category => LogCat.AuthCheck;
+
+        public override async Task Initialize()
+        {
+            await LogHelper.LogModule("Initializing Auth Check module...", Category);
+        }
 
         public override async Task Run(object prm)
         {
@@ -43,7 +47,7 @@ namespace ThunderED.Modules
                 await LogHelper.LogModule("Running DB users auth check...", Category);
                 if (manual)
                 {
-                    await SQLHelper.ResetAuthUsersLastCheck();
+                    await DbHelper.ResetAuthUsersLastCheck();
                 }
                 await WebAuthModule.UpdateAllUserRoles(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles, manual);
                 await LogHelper.LogModule("DB users auth check complete!", Category);
@@ -53,11 +57,11 @@ namespace ThunderED.Modules
 
         private async Task CheckDiscordUsers(bool manual)
         {
-            if (DateTime.Now > _lastDiscordAuthCheck.AddMinutes(15) || manual)
+            if (DateTime.Now > _lastDiscordAuthCheck.AddMinutes(5) || manual)
             {
                 _lastDiscordAuthCheck = DateTime.Now;
                 await LogHelper.LogModule("Running Discord users auth check...", Category);
-                await WebAuthModule.UpdateAuthUserRolesFromDiscord(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles, false);
+                await WebAuthModule.UpdateAuthUserRolesFromDiscord(Settings.WebAuthModule.ExemptDiscordRoles, Settings.WebAuthModule.AuthCheckIgnoreRoles, true);
             }
         }
     }

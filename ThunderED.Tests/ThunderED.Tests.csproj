@@ -20,4 +20,19 @@
     <ProjectReference Include="..\ThunderED\ThunderED.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Discord.Net.Commands">
+      <HintPath>..\ThunderED\Discord.Net.Commands.dll</HintPath>
+    </Reference>
+    <Reference Include="Discord.Net.Core">
+      <HintPath>..\ThunderED\Discord.Net.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Discord.Net.Rest">
+      <HintPath>..\ThunderED\Discord.Net.Rest.dll</HintPath>
+    </Reference>
+    <Reference Include="Discord.Net.WebSocket">
+      <HintPath>..\ThunderED\Discord.Net.WebSocket.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

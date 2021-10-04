@@ -10,6 +10,20 @@ namespace ThunderED.Classes
 
         #region Simple Urls
 
+        /// <summary>
+        /// Get EVE type image 64x64
+        /// </summary>
+        /// <param name="typeId">Type ID</param>
+        public static string GetTypeImageUrl(long typeId)
+        {
+            return $"https://images.evetech.net/types/{typeId}/icon";
+        }
+
+        public static string GetCharacterImageUrl(long typeId, int size=64)
+        {
+            return $"https://images.evetech.net/characters/{typeId}/portrait?size={size}";
+        }
+
         public static string GetGeneralAuthPageUrl()
         {
             return "/authpage";
@@ -34,6 +48,21 @@ namespace ThunderED.Classes
             return "/timers";
         }
 
+        public static string GetMiningSchedulePageUrl()
+        {
+            return "/ms";
+        }
+
+        public static string GetStructureManagementPageUrl()
+        {
+            return "/struct";
+        }
+
+        public static string GetMoonTablePageUrl()
+        {
+            return "/moontable";
+        }
+
         public static string GetAuthUrl()
         {
             return "/auth";
@@ -47,6 +76,17 @@ namespace ThunderED.Classes
         public static string GetFeedSuccessUrl()
         {
             return "/feedsuccess";
+        }
+
+        public static string GetAuthSuccessUrl()
+        {
+            return "/authsuccess";
+        }
+
+
+        public static string GetBadRequestUrl()
+        {
+            return "/badrq";
         }
 
         #endregion
@@ -70,6 +110,18 @@ namespace ThunderED.Classes
         {
             var callbackurl = $"{GetWebSiteUrl()}/callback";
             return callbackurl;
+        }
+
+        public static string GetOpenContractURL(long contractId)
+        {
+            var clientId = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var callbackurl = GetCallBackUrl();
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&state=opencontract{contractId}&scope=esi-ui.open_window.v1";
+        }
+
+        internal static string GetAuthPageUrl()
+        {
+            return $"{GetWebSiteUrl()}{GetGeneralAuthPageUrl()}";
         }
 
         #region Auth URLs
@@ -163,25 +215,54 @@ namespace ThunderED.Classes
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}&state=ijobsauth{HttpUtility.UrlEncode(groupName)}";
         }
 
-        internal static string GetCustomAuthUrl(string ip, List<string> permissions, string group = null, long mainCharacterId = 0)
+        public static string GetCustomAuthUrl(string ip, List<string> permissions, string group = null, long mainCharacterId = 0, bool nox = false)
         {
             var clientId = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var callbackurl = GetCallBackUrl();
 
-            var grp = string.IsNullOrEmpty(group) ? null : $"&state=x{HttpUtility.UrlEncode(group)}";
+            var grp = string.IsNullOrEmpty(group) ? null : $"&state={(nox?null:"x")}{HttpUtility.UrlEncode(group)}";
             var mc = mainCharacterId == 0 ? null : $"|{mainCharacterId}";
 
             var pString = string.Join('+', permissions);
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}{grp}{mc}|{ip}";
         }
 
-        internal static string GetAuthUrl(string ip, string groupName = null, long mainCharacterId = 0)
+        public static string GetAuthUrl(string ip, string groupName = null, long mainCharacterId = 0, bool nox = false)
         {
             var clientId = SettingsManager.Settings.WebServerModule.CcpAppClientId;
             var callbackurl = GetCallBackUrl();
-            var grp = string.IsNullOrEmpty(groupName) ? null : $"&state=x{HttpUtility.UrlEncode(groupName)}";
+            var grp = string.IsNullOrEmpty(groupName) ? null : $"&state={(nox ? null : "x")}{HttpUtility.UrlEncode(groupName)}";
             var mc = mainCharacterId == 0 ? null : $"|{mainCharacterId}";
             return $"https://login.eveonline.com/oauth/authorize?response_type=code&amp;redirect_uri={callbackurl}&amp;client_id={clientId}{grp}{mc}|{ip}";
+        }
+
+        public static string GetMiningScheduleAuthURL()
+        {
+            var clientId = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var callbackurl = GetCallBackUrl();
+            var list = new List<string>
+            {
+                "esi-corporations.read_structures.v1",
+                "esi-universe.read_structures.v1",
+                "esi-industry.read_corporation_mining.v1"
+            };
+            var pString = string.Join('+', list);
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}&state=ms";
+        }
+
+
+        public static string GetStructuresAuthURL()
+        {
+            var clientId = SettingsManager.Settings.WebServerModule.CcpAppClientId;
+            var callbackurl = GetCallBackUrl();
+            var list = new List<string>
+            {
+                "esi-corporations.read_structures.v1",
+                "esi-universe.read_structures.v1",
+            };
+            var pString = string.Join('+', list);
+            return $"https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}&state=sm";
+
         }
         #endregion
 

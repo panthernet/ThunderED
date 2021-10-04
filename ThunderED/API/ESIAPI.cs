@@ -6,24 +6,32 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
+using ThunderED.Json.PriceChecks;
 
 namespace ThunderED.API
 {
     /// <summary>
     /// Use partial class to implement additional methods
     /// </summary>
-    public partial class ESIAPI: CacheBase
+    public class ESIAPI: CacheBase
     {
         private readonly string _language;
 
         public ESIAPI()
         {
             _language = SettingsManager.Settings.Config.UseEnglishESIOnly ? "en-us" : SettingsManager.Settings.Config.Language?.ToLower() ?? "en-us";
+        }
+
+        public async Task<List<JsonFuzz.FuzzPrice>> GetFuzzPrice(string reason, List<long> ids)
+        {
+            var result = await APIHelper.RequestWrapper<Dictionary<string, JsonFuzz.FuzzItems>>($"https://market.fuzzwork.co.uk/aggregates/?station=60003760&types={string.Join(",", ids)}", reason);
+            return result.Select(a=> new JsonFuzz.FuzzPrice{ Id = Convert.ToInt64(a.Key), Sell = a.Value.sell.min, Buy = a.Value.buy.max }).ToList();
         }
 
         public async Task RemoveAllCharacterDataFromCache(object id)
@@ -85,14 +93,10 @@ namespace ThunderED.API
                 forceUpdate, noCache);
         }
 
-       /* public async Task<JsonClasses.AffiliationData> GetAffiliationeData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
-        {
-            if (id == null) return null;
-            if (isAggressive)
-                return await GetAgressiveESIEntry<JsonClasses.AllianceData>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 10);
-            return await GetEntry<JsonClasses.AllianceData>($"{SettingsManager.Settings.Config.ESIAddress}latest/alliances/{id}/?datasource=tranquility&language={_language}", reason, id, 1,
-                forceUpdate, noCache);
-        }*/
+         public async Task<List<JsonClasses.AffiliationData>> GetAffiliationsData(string reason, List<long> idList)
+         {
+            return await APIHelper.PostWrapperWithResult<List<JsonClasses.AffiliationData>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/affiliation/", JsonConvert.SerializeObject(idList), reason, null);
+         }
 
         public async Task<object> GetMemberEntityProperty(string reason, object id, string propertyName)
         {
@@ -118,8 +122,9 @@ namespace ThunderED.API
             if (data != null)
                 return data;
 
-            return await GetEntry<JsonClasses.Type_id>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/types/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
+            var result =  await GetEntry<JsonClasses.Type_id>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/types/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
                 forceUpdate);
+            return result;
         }
 
         public async Task<JsonClasses.SystemIDSearch> GetRadiusSystems(string reason, object id)
@@ -151,18 +156,17 @@ namespace ThunderED.API
         }
 
 
-        public async Task<JsonClasses.StructureData> GetStructureData(string reason, object id, string token)
+        public async Task<JsonClasses.StructureData> GetUniverseStructureData(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<JsonClasses.StructureData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/structures/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await GetEntry<JsonClasses.StructureData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/structures/{id}/?datasource=tranquility&language={_language}", reason, id, 1, false, false, authHeader);
         }
 
         public async Task<JsonClasses.StationData> GetStationData(string reason, object id, string token)
         {
             var authHeader = $"Bearer {token}";
-            return await APIHelper.RequestWrapper<JsonClasses.StationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/stations/{id}/?datasource=tranquility&language={_language}", reason, authHeader);
+            return await GetEntry<JsonClasses.StationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/stations/{id}/?datasource=tranquility&language={_language}", reason, id, 30, false, false, authHeader);
         }
-
 
         public async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, object id)
         {
@@ -315,14 +319,14 @@ namespace ThunderED.API
 
  
         
-        private async Task<T> GetEntry<T>(string url, string reason, object id, int days, bool forceUpdate = false, bool noCache = false) 
+        private async Task<T> GetEntry<T>(string url, string reason, object id, int days, bool forceUpdate = false, bool noCache = false, string authHeader = null) 
             where T : class
         {
             if (id == null || id.ToString() == "0") return null;
             var data = await GetFromDbCache<T>(id, days);
             if(data == null || forceUpdate)
             {
-                data = await APIHelper.RequestWrapper<T>(url, reason);
+                data = await APIHelper.RequestWrapper<T>(url, reason, authHeader);
                 if(data != null && !noCache)
                     await UpdateDbCache(data, id, days);
             }
@@ -367,7 +371,7 @@ namespace ThunderED.API
         {
             await SQLHelper.DeleteCache(type);
             await SettingsManager.UpdateSettings();
-            await SettingsManager.UpdateInjectedSettings();
+            await SimplifiedAuth.UpdateInjectedSettings();
         }
         #endregion
 
@@ -644,6 +648,90 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<List<JsonClasses.CharacterTitle>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/titles/?datasource=tranquility&include_completed=true&language={_language}", reason, authHeader);
         }
 
+        public async Task<List<MiningExtractionJson>> GetCorpMiningExtractions(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<MiningExtractionJson>();
+            while (true)
+            {
+                var result = await APIHelper.RequestWrapper<List<MiningExtractionJson>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporation/{id}/mining/extractions/?datasource=tranquility&page={page}&language={_language}",
+                    reason, authHeader);
+                if (result == null || !result.Any())
+                    break;
+                list.AddRange(result);
+                if (result.Count < 1000)
+                    break;
+                page++;
+            }
+
+            return list;
+        }
+
+        public async Task<List<MiningLedgerJson>> GetCorpMiningLedgers(string reason, object id, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<MiningLedgerJson>();
+            while (true)
+            {
+                var result = await APIHelper.RequestWrapper<List<MiningLedgerJson>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporation/{id}/mining/observers/?datasource=tranquility&page={page}&language={_language}",
+                    reason, authHeader);
+                if (result == null || !result.Any())
+                    break;
+                list.AddRange(result);
+                if (result.Count < 1000)
+                    break;
+                page++;
+            }
+
+            return list;
+        }
+
+        public async Task<List<MiningLedgerEntryJson>> GetCorpMiningLedgerEntries(string reason, long corporationId, long observerId, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<MiningLedgerEntryJson>();
+            while (true)
+            {
+                var result = await APIHelper.RequestWrapper<List<MiningLedgerEntryJson>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporation/{corporationId}/mining/observers/{observerId}/?datasource=tranquility&page={page}&language={_language}",
+                    reason, authHeader);
+                if (result == null || !result.Any())
+                    break;
+                list.AddRange(result);
+                if (result.Count < 1000)
+                    break;
+                page++;
+            }
+
+            return list;
+        }
+
+        public async Task<List<CorporationStructureJson>> GetCorpStructures(string reason, object corporationId, string token)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<CorporationStructureJson>();
+            while (true)
+            {
+                var result = await APIHelper.RequestWrapper<List<CorporationStructureJson>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{corporationId}/structures/?datasource=tranquility&page={page}&language={_language}",
+                    reason, authHeader);
+                if (result == null || !result.Any())
+                    break;
+                list.AddRange(result);
+                if (result.Count < 1000)
+                    break;
+                page++;
+            }
+
+            return list;
+        }
+
         public bool IsNpcCharacter(object id)
         {
             if (id == null) return false;
@@ -665,5 +753,64 @@ namespace ThunderED.API
 
             return false;
         }
+
+        public async Task<ESIQueryResult<List<AssetData>>> GetCharacterAssets(object id, string token, string etag = null, bool onePage = false)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<AssetData>();
+            while (true)
+            {
+                var result = await APIHelper.ESIRequestWrapper<List<AssetData>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/assets/?datasource=tranquility&page={page}&language={_language}",
+                    authHeader, etag);
+                if (result?.Result == null)
+                    break;
+                etag = result.Data.ETag;
+                list.AddRange(result.Result);
+                if (result.Result.Count < 1000)
+                    break;
+                page++;
+                if (onePage)
+                    break;
+            }
+
+            return new ESIQueryResult<List<AssetData>>
+            {
+                Data = new QueryData { ETag = etag },
+                Result = list
+            };
+        }
+
+        public async Task<ESIQueryResult<List<AssetData>>> GetCorpAssets(object id, string token, string etag = null, bool onePage = false)
+        {
+            var authHeader = $"Bearer {token}";
+            var page = 1;
+            var list = new List<AssetData>();
+            while (true)
+            {
+                var result = await APIHelper.ESIRequestWrapper<List<AssetData>>(
+                    $"{SettingsManager.Settings.Config.ESIAddress}latest/corporations/{id}/assets/?datasource=tranquility&page={page}&language={_language}",
+                    authHeader, etag);
+                if (result?.Result == null)
+                    break;
+                etag = result.Data.ETag;
+                list.AddRange(result.Result);
+                if (result.Result.Count < 1000)
+                    break;
+                page++;
+                if (onePage)
+                    break;
+            }
+
+            return new ESIQueryResult<List<AssetData>>
+            {
+                Data = new QueryData { ETag = etag },
+                Result = list
+            };
+        }
+
+        //public async Task<ESIQueryResult<List<>>>
+
     }
 }

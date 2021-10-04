@@ -12,6 +12,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -105,20 +105,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="..\ThunderED\Classes\CommentAttribute.cs">
-      <Link>Classes\CommentAttribute.cs</Link>
+    <Compile Include="..\ThunderED.Shared\Classes\CommentAttribute.cs">
+      <Link>Classes\Shared\CommentAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\ThunderED\Classes\Enums\UserStatusEnum.cs">
+    <Compile Include="..\ThunderED.Shared\Enums\UserStatusEnum.cs">
       <Link>Classes\Shared\UserStatusEnum.cs</Link>
     </Compile>
-    <Compile Include="..\ThunderED\Classes\MixedListAttribute.cs">
-      <Link>Classes\MixedListAttribute.cs</Link>
+    <Compile Include="..\ThunderED.Shared\Settings\Settings.cs">
+      <Link>Classes\Shared\Settings.cs</Link>
     </Compile>
-    <Compile Include="..\ThunderED\Classes\Settings.cs">
-      <Link>Classes\Settings.cs</Link>
-    </Compile>
-    <Compile Include="..\ThunderED\Classes\SettingsManager_Scopes.cs">
-      <Link>Classes\SettingsManager_Scopes.cs</Link>
+    <Compile Include="..\ThunderED.Shared\Settings\ValidatableSettings.cs">
+      <Link>Classes\Shared\ValidatableSettings.cs</Link>
     </Compile>
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
@@ -197,7 +194,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>
@@ -205,5 +201,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

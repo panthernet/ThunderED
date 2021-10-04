@@ -452,7 +452,7 @@ namespace ThunderED.API
 
                     if (SettingsManager.Settings.Config.ModuleTelegram)
                     {
-                        var name = GetGuildByChannel(messageParam.Channel.Id).GetUser(message.Author.Id)?.Nickname ??
+                        var name = GetGuildByChannel(messageParam.Channel.Id)?.GetUser(message.Author.Id)?.Nickname ??
                                    message.Author.Username;
                         TickManager.GetModule<TelegramModule>()
                             ?.SendMessage(message.Channel.Id, message.Author.Id, name, message.Content);
@@ -495,7 +495,7 @@ namespace ThunderED.API
                         var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0
                             ? arg.Guild.DefaultChannel
                             : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
-                        var authurl = WebServerModule.GetAuthPageUrl();
+                        var authurl = ServerPaths.GetAuthPageUrl();
                         if (!string.IsNullOrWhiteSpace(authurl))
                             await APIHelper.DiscordAPI.SendMessageAsync(channel,
                                 LM.Get("welcomeMessage", arg.Mention, authurl,

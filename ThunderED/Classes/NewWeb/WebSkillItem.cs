@@ -15,7 +15,7 @@ namespace ThunderED.Classes
         public void UpdateVisual()
         {
             var sb = new StringBuilder(5);
-            for (var i = 0; i < ValueTrained; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var color = GetSkillCellColor(i+1);
                 sb.Append(

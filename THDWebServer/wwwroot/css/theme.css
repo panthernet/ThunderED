@@ -1,0 +1,23 @@
+﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
+.colorifier {
+    background-color: black !important;
+    color: white !important;
+}
+
+.colorifier_blue {
+    background-color: #05163D !important;
+    color: white !important;
+    border-bottom: 0px !important;
+}
+
+.frontcolor {
+    color: white !important;
+}
+
+.centralizer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90%;
+}

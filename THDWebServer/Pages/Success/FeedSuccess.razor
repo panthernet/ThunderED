@@ -1,0 +1,61 @@
+﻿@page "/feedsuccess"
+@using Microsoft.AspNetCore.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
+@inject NavigationManager NavigationManager
+
+<div class="container" style="height: 100%">
+    <div class="colorifier text-center">
+        <h2>@LM.Get("webAuthFeedHeader")</h2>
+    </div>
+    <div class="centralizer">
+        <div class="text-center">
+            @if (WebUiHelper.GetAsset("eve_logo_light.png") != null)
+            {
+                <h1>
+                    <img src="@WebUiHelper.GetAsset("eve_logo_light.png")" width="250" />
+                </h1>
+            }
+            <p class="lead frontcolor">@((MarkupString) Message1)</p>
+            @if (!string.IsNullOrEmpty(Message2))
+            {
+                <p class="frontcolor">@((MarkupString) Message2)</p>
+            }
+            @if (!string.IsNullOrEmpty(Message3))
+            {
+                <p class="frontcolor">@((MarkupString) Message3)</p>
+            }
+
+            @if (WebUiHelper.GetAsset("success.png") != null)
+            {
+                <p><img src="@WebUiHelper.GetAsset("success.png")" width="150"/></p>
+            }
+            <p><a class="btn btn-info" href="@ReturnUrl" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+        </div>
+    </div>
+</div>
+@code
+{
+    protected string ReturnUrl { get; set; }
+    protected string Message1 { get; set; }
+    protected string Message2 { get; set; }
+    protected string Message3 { get; set; }
+
+    protected bool ShowDiscordButton { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ReturnUrl = await ProtectedSessionStore.GetAndClear<string>("returnUrl") ?? "/";
+        Message1 = await ProtectedSessionStore.GetAndClear<string>("message1");
+        Message2 = await ProtectedSessionStore.GetAndClear<string>("message2");
+        Message3 = await ProtectedSessionStore.GetAndClear<string>("message3");
+
+        if (string.IsNullOrEmpty(Message1) && string.IsNullOrEmpty(Message2) && string.IsNullOrEmpty(Message3))
+        {
+            //default
+            NavigationManager.NavigateTo("/badrq");
+            return;
+        }
+
+        await base.OnInitializedAsync();
+    }
+}

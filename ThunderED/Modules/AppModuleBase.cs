@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ThunderED.Classes;
 using ThunderED.Helpers;
 
 namespace ThunderED.Modules
@@ -70,36 +68,36 @@ namespace ThunderED.Modules
 
         protected virtual List<long> GetParsedSolarSystems(string groupName, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return !storage.ContainsKey(groupName) ? null : (!storage[groupName].ContainsKey("solar_system") ? null : storage[groupName]["solar_system"]);
         }
         protected virtual List<long> GetParsedConstellations(string groupName, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return !storage.ContainsKey(groupName) ? null : (!storage[groupName].ContainsKey("constellation") ? null : storage[groupName]["constellation"]);
         }
 
         protected virtual List<long> GetParsedRegions(string groupName, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return !storage.ContainsKey(groupName) ? null : (!storage[groupName].ContainsKey("region") ? null : storage[groupName]["region"]);
         }
 
         protected virtual List<long> GetParsedCharacters(string groupName, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return !storage.ContainsKey(groupName) ? null : (!storage[groupName].ContainsKey("character") ? null : storage[groupName]["character"]);
         }
 
         protected virtual List<long> GetAllParsedCharacters(Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return storage.Where(a=> a.Value.ContainsKey("character")).SelectMany(a=> a.Value["character"]).Distinct().ToList();
         }
 
         protected virtual Dictionary<string, List<long>> GetAllParsedCharactersWithGroups(Dictionary<string, Dictionary<string, List<long>>> storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return storage.Where(a => a.Value.ContainsKey("character"))
                 .SelectMany(a => new Dictionary<string, List<long>> {{a.Key, a.Value["character"]}})
                 .ToDictionary(a => a.Key, a => a.Value);
@@ -108,31 +106,31 @@ namespace ThunderED.Modules
 
         protected virtual List<long> GetParsedCorporations(string groupName, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return !storage.ContainsKey(groupName) ? null : (!storage[groupName].ContainsKey("corporation") ? null : storage[groupName]["corporation"]);
         }
 
         protected virtual List<long> GetAllParsedCorporations(Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return storage.Where(a=> a.Value.ContainsKey("corporation")).SelectMany(a=> a.Value["corporation"]).Distinct().ToList();
         }
 
         protected virtual List<long> GetParsedAlliances(string groupName, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return !storage.ContainsKey(groupName) ? null : (!storage[groupName].ContainsKey("alliance") ? null : storage[groupName]["alliance"]);
         }
 
         protected virtual List<long> GetAllParsedAlliances(Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             return storage.Where(a=> a.Value.ContainsKey("alliance")).SelectMany(a=> a.Value["alliance"]).Distinct().ToList();
         }
 
         protected virtual async Task ParseMixedDataArray(Dictionary<string, List<object>> data, MixedParseModeEnum mode, Dictionary<string, Dictionary<string, List<long>>>  storage = null)
         {
-            storage = storage ?? ParsedGroups;
+            storage ??= ParsedGroups;
             storage.Clear();
             foreach (var groupPair in data)
             {
@@ -151,6 +149,19 @@ namespace ThunderED.Modules
                     }
                         continue;
                 }
+            }
+        }
+
+        protected virtual async Task<Dictionary<string, List<long>>> ParseMixedDataArray(List<object> data, MixedParseModeEnum mode)
+        {
+            switch (mode)
+            {
+                case MixedParseModeEnum.Location:
+                    return await ParseLocationDataArray(data);
+                case MixedParseModeEnum.Member:
+                    return await ParseMemberDataArray(data);
+                default:
+                    return null;
             }
         }
 
@@ -374,9 +385,9 @@ namespace ThunderED.Modules
                         .SelectMany(a => a.Value[prm]).Distinct().Where(a => a > 0).ToList();
                 if (!dic.ContainsKey(group)) return new List<long>();
                 var item = dic[group];
-                if (!item.ContainsKey(filter)) return new List<long>();
+                if (!item.ContainsKey(filter ?? string.Empty)) return new List<long>();
 
-                return item[filter].Where(a => a.Key.Equals(prm, StringComparison.OrdinalIgnoreCase))
+                return item[filter ?? string.Empty].Where(a => a.Key.Equals(prm, StringComparison.OrdinalIgnoreCase))
                     .SelectMany(a => a.Value).Distinct().Where(a => a > 0).ToList();
             }
             catch (Exception ex)

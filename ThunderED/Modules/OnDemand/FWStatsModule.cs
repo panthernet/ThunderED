@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
@@ -110,7 +109,7 @@ namespace ThunderED.Modules.OnDemand
 
                 var embed = new EmbedBuilder()
                     .WithTitle(LM.Get("fwstats_title", fwData.factionName))
-                    .AddField(LM.Get("fwstats_systems"), $"{statOccupiedSystemsCount}/{statTotalSystemsCount}", true)
+                    .AddField(LM.Get("fwstats_systems"), $"{statOccupiedSystemsCount}/{statTotalSystemsCount} Tier: {statTier}", true)
                     .AddField(LM.Get("fwstats_pilots"), LM.Get("fwstats_pilotsText", statPilots, statKillsYesterday), true)
                     .AddField(LM.Get("fwstats_tip"), prognose, true)
                     .WithColor(0x00FF00);
@@ -281,7 +280,7 @@ namespace ThunderED.Modules.OnDemand
                         break;
                 }
 
-                var users = await SQLHelper.GetAuthUsersWithPerms((int)UserStatusEnum.Authed);
+                var users = await DbHelper.GetAuthUsers(UserStatusEnum.Authed, true, true);
                 if (!users.Any())
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("badstandNoUsers"));
@@ -293,14 +292,14 @@ namespace ThunderED.Modules.OnDemand
                 var lookupId = isFaction ? data.factionId : data.factionCorpId;
                 foreach (var user in users)
                 {
-                    if (!SettingsManager.HasCharStandingsScope(user.Data.PermissionsList)) continue;
-                    var token = (await APIHelper.ESIAPI.RefreshToken(user.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From FWStats | Char ID: {user.CharacterId} | Char name: {user.Data.CharacterName}"))?.Result;
+                    if (!SettingsManager.HasCharStandingsScope(user.DataView.PermissionsList)) continue;
+                    var token = (await APIHelper.ESIAPI.RefreshToken(user.GetGeneralToken(), SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From FWStats | Char ID: {user.CharacterId} | Char name: {user.DataView.CharacterName}"))?.Result;
                     if (string.IsNullOrEmpty(token)) continue;
                     var st = await APIHelper.ESIAPI.GetcharacterStandings("FWStats", user.CharacterId, token);
                     var exStand = st.FirstOrDefault(a => a.from_type == from_t && a.from_id == lookupId);
                     if (exStand == null) continue;
-                    list.Add(new StandsEntity {Name = user.Data.CharacterName, CharId = user.CharacterId, Stand = exStand.standing, Tickers = ""});
+                    list.Add(new StandsEntity {Name = user.DataView.CharacterName, CharId = user.CharacterId, Stand = exStand.standing, Tickers = ""});
                 }
 
                 if (!list.Any() || list.All(a => a.Stand >= 0))

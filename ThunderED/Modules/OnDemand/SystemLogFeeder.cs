@@ -35,8 +35,12 @@ namespace ThunderED.Modules.OnDemand
                     _timer.Start();
                 }
             };
+
+            try{LogHelper.OnLogMessage -= FeedMessage;} catch {}
+            LogHelper.OnLogMessage += FeedMessage;
+
             _timer.Start();
-            await Task.Delay(1);
+            await Task.CompletedTask;
         }
 
         private static readonly ConcurrentQueue<string> Package = new ConcurrentQueue<string>();
@@ -72,14 +76,6 @@ namespace ThunderED.Modules.OnDemand
                 var sv = SettingsManager.Settings?.SystemLogFeederModule?.LogSeverity.ToSeverity() ?? LogSeverity.Module;
                 if ((int) sv > (int) severity) return;
 
-             /*   if (message.Contains($"{SettingsManager.Settings.SystemLogFeederModule.DiscordChannelId}"))
-                {
-                    _isEnabled = false;
-                    _timer.Start();
-                }*/
-
-                //if (Package.ToArray().Sum(a => a.Length) + message.Length >= DiscordAPI.MAX_MSG_LENGTH)
-                //    await SendMessage();
                 if(message.Length > DiscordAPI.MAX_MSG_LENGTH)
                     foreach (var line in message.SplitToLines(DiscordAPI.MAX_MSG_LENGTH))
                         Package.Enqueue(line);

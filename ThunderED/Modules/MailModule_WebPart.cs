@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Classes.Enums;
@@ -80,13 +78,12 @@ namespace ThunderED.Modules
 
                 //var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
 
-                await SQLHelper.InsertOrUpdateTokens("", characterId, "", result[1]);
+                await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Mail);
                 await LogHelper.LogInfo($"Mail feed added for character: {characterId}", LogCat.AuthWeb);
 
-                var res = WebQueryResult.ContractsAuthSuccess;
+                var res = WebQueryResult.FeedAuthSuccess;
                 res.Message1 = LM.Get("mailAuthSuccessHeader");
                 res.Message2 = LM.Get("mailAuthSuccessBody");
-                res.AddValue("url", ServerPaths.GetFeedSuccessUrl());
                 return res;
             }
             catch (Exception ex)

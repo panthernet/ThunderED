@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using ThunderED.Helpers;
 
@@ -21,7 +20,7 @@ namespace ThunderED.API
         /// <summary>
         /// Clear all cache by type. Everything if null.
         /// </summary>
-        /// <param name="type">Cahce type</param>
+        /// <param name="type">Cache type</param>
         internal virtual void ResetCache(string type = null)
         {
         }

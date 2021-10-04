@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Matrix.Xmpp.Chatstates;
 using Matrix.Xmpp.Client;
-using ThunderED.Classes;
 using ThunderED.Helpers;
 
 namespace ThunderED.Modules
@@ -14,9 +12,9 @@ namespace ThunderED.Modules
     {
         public override LogCat Category => LogCat.Jabber;
 
-        public JabberModule()
+        public override async Task Initialize()
         {
-            LogHelper.LogModule("Initializing Jabber module...", Category).GetAwaiter().GetResult();
+            await LogHelper.LogModule("Initializing Jabber module...", Category);
         }
 
         private bool _isJabberRunning;

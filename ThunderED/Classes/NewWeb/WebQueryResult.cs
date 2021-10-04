@@ -6,14 +6,14 @@ namespace ThunderED.Classes
 {
     public class WebQueryResult
     {
-        public static WebQueryResult GeneralAuthSuccess => new WebQueryResult(WebQueryResultEnum.GeneralAuthSuccess, "/authsuccess", ServerPaths.GetGeneralAuthPageUrl());
+        public static WebQueryResult GeneralAuthSuccess => new WebQueryResult(WebQueryResultEnum.GeneralAuthSuccess, ServerPaths.GetAuthSuccessUrl(), ServerPaths.GetGeneralAuthPageUrl());
+        public static WebQueryResult FeedAuthSuccess => new WebQueryResult(WebQueryResultEnum.FeedSuccess, ServerPaths.GetFeedSuccessUrl(), ServerPaths.GetFeedAuthPageUrl());
         public static WebQueryResult False => new WebQueryResult(WebQueryResultEnum.False);
-        public static WebQueryResult EsiFailure => new WebQueryResult(WebQueryResultEnum.EsiFailure, "/badrq") { Message1 = LM.Get("ESIFailure") };
-        public static WebQueryResult BadRequestToRoot=> new WebQueryResult(WebQueryResultEnum.BadRequest, "/badrq", "/");
-        public static WebQueryResult BadRequestToGeneralAuth => new WebQueryResult(WebQueryResultEnum.BadRequest, "/badrq", ServerPaths.GetGeneralAuthPageUrl());
-        public static WebQueryResult BadRequestToSystemAuth => new WebQueryResult(WebQueryResultEnum.BadRequest, "/badrq", ServerPaths.GetFeedAuthPageUrl());
+        public static WebQueryResult EsiFailure => new WebQueryResult(WebQueryResultEnum.EsiFailure, ServerPaths.GetBadRequestUrl()) { Message1 = LM.Get("ESIFailure") };
+        public static WebQueryResult BadRequestToRoot=> new WebQueryResult(WebQueryResultEnum.BadRequest, ServerPaths.GetBadRequestUrl(), "/");
+        public static WebQueryResult BadRequestToGeneralAuth => new WebQueryResult(WebQueryResultEnum.BadRequest, ServerPaths.GetBadRequestUrl(), ServerPaths.GetGeneralAuthPageUrl());
+        public static WebQueryResult BadRequestToSystemAuth => new WebQueryResult(WebQueryResultEnum.BadRequest, ServerPaths.GetBadRequestUrl(), ServerPaths.GetFeedAuthPageUrl());
         public static WebQueryResult RedirectUrl => new WebQueryResult(WebQueryResultEnum.RedirectUrl);
-        public static WebQueryResult ContractsAuthSuccess => new WebQueryResult(WebQueryResultEnum.FeedSuccess);
 
         public string Message1 { get; set; }
         public string Message2 { get; set; }
@@ -58,7 +58,9 @@ namespace ThunderED.Classes
 
         public void AddUrl(string url)
         {
-            Values.Add("url", url);
+            if (Values.ContainsKey("url"))
+                Values["url"] = url;
+            else Values.Add("url", url);
         }
 
         public string GetUrl()

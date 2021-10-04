@@ -1,0 +1,97 @@
+﻿@using ThunderED.Modules
+<div class="modal-content" style="width: 510px; height: 310px;">
+    <div class="modal-header">
+        <h5 class="modal-title">@Header</h5>
+        <RadzenButton ButtonType="ButtonType.Button" Icon="close" ButtonStyle="ButtonStyle.Secondary"
+                      Click="Cancel" />
+    </div>
+    <div class="modal-body">
+        <div class="col">
+            <div class="row">@Message</div>
+            @if (_isError)
+            {
+                <div class="row">
+                    <p style="color: white; background-color: red; font-weight: bold; font-size: 1em; text-align: center; width: 98%;">@_errorText</p>
+                </div>
+            }
+            <div class="row">
+                <RadzenTextArea Style="height: 150px; width: 100%;" @bind-Value="@_inputText" />
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center" style="margin: 10px;">
+        <div>
+            <RadzenButton ButtonType="ButtonType.Button" Icon="save" Text="@(LM.Get("webUploadButton"))" @ref="@_uploadButton"
+                          Click="UploadClick" Disabled="@(!_isButtonEnabled)" />
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    private RadzenButton _uploadButton;
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public string Header { get; set; }
+    [Parameter] public string Message { get; set; }
+    [Parameter] public WebInputValidateEnum ValidationType { get; set; }
+
+    async Task Close(MoonUploadResult result) => await BlazoredModal.CloseAsync(ModalResult.Ok(result));
+    async Task Cancel() => await BlazoredModal.CancelAsync();
+    private bool _isError;
+    private string _inputText;
+
+    private bool _isButtonEnabled = true;
+    private string _errorText;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task UploadClick()
+    {
+        if (string.IsNullOrEmpty(_inputText)) return;
+
+        _isError = false;
+        _isButtonEnabled = false;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            switch (ValidationType)
+            {
+                case WebInputValidateEnum.MoonInput:
+                    {
+                        var module = TickManager.GetModule<MoonInfoModule>();
+                        var result = await module.CheckUploadString(_inputText);
+                        if (!string.IsNullOrEmpty(result.Error))
+                        {
+                            _isError = true;
+                            _errorText = result.Error;
+                        }
+                        else
+                        {
+                            await Close(result);
+                            return;
+                        }
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        finally
+        {
+            if (_isError)
+            {
+                _isButtonEnabled = true;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+}

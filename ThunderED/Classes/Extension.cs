@@ -136,17 +136,6 @@ namespace ThunderED.Classes
             return dt.AddDays(-1 * diff).Date;
         }
 
-        public static DateTime ToEveTime(this string value)
-        {
-            return DateTime.TryParse(value, out var localTimestamp) ? localTimestamp.ToUniversalTime() : DateTime.MinValue;
-        }
-
-        public static string ToEveTimeString(this string value)
-        {
-            var t = value.ToEveTime();
-            return $"{t.ToShortDateString()} {t.ToShortTimeString()}";
-        }
-
 
         public static void AddOnlyNew<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
         {
@@ -162,7 +151,7 @@ namespace ThunderED.Classes
 
         public static IEnumerable<string> Split(this string str, int chunkSize)
         {
-            IEnumerable<string> retVal = Enumerable.Range(0, str.Length / chunkSize)
+            var retVal = Enumerable.Range(0, str.Length / chunkSize)
                 .Select(i => str.Substring(i * chunkSize, chunkSize));
 
             if (str.Length % chunkSize > 0)

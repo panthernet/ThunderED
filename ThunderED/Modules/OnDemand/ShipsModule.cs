@@ -9,10 +9,10 @@ using Dasync.Collections;
 using Discord.Commands;
 using Newtonsoft.Json;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules.OnDemand
 {
@@ -142,13 +142,13 @@ namespace ThunderED.Modules.OnDemand
                 }
 
 
-                var usersToCheck = new List<AuthUserEntity>();
+                var usersToCheck = new List<ThdAuthUser>();
                 if (!isAll)
                 {
                     foreach (var userId in APIHelper.DiscordAPI.GetUserIdsFromChannel(context.Guild.Id, context.Channel.Id, isOnlineOnly))
                     {
-                        var item = await SQLHelper.GetAuthUserByDiscordId(userId);
-                        if (item != null && !string.IsNullOrEmpty(item.Data.Permissions) && SettingsManager.HasCharSkillsScope(item.Data.PermissionsList))
+                        var item = await DbHelper.GetAuthUserByDiscordId(userId);
+                        if (item != null && !string.IsNullOrEmpty(item.DataView.Permissions) && SettingsManager.HasCharSkillsScope(item.DataView.PermissionsList))
                             usersToCheck.Add(item);
                     }
                 }
@@ -157,13 +157,13 @@ namespace ThunderED.Modules.OnDemand
                     if (isOnlineOnly)
                     {
                         var dusers = APIHelper.DiscordAPI.GetUserIdsFromChannel(context.Guild.Id, 0, true);
-                        usersToCheck = (await SQLHelper.GetAuthUsers((int) UserStatusEnum.Authed)).Where(item => dusers.Contains(item.DiscordId) &&
-                                !string.IsNullOrEmpty(item.Data.Permissions) && SettingsManager.HasCharSkillsScope(item.Data.PermissionsList))
+                        usersToCheck = (await DbHelper.GetAuthUsers(UserStatusEnum.Authed, true)).Where(item => dusers.Contains(item.DiscordId ?? 0) &&
+                                !string.IsNullOrEmpty(item.DataView.Permissions) && SettingsManager.HasCharSkillsScope(item.DataView.PermissionsList))
                             .ToList();
                     }
                     else
-                        usersToCheck = (await SQLHelper.GetAuthUsers((int) UserStatusEnum.Authed)).Where(item =>
-                                !string.IsNullOrEmpty(item.Data.Permissions) && SettingsManager.HasCharSkillsScope(item.Data.PermissionsList))
+                        usersToCheck = (await DbHelper.GetAuthUsers(UserStatusEnum.Authed, true)).Where(item =>
+                                !string.IsNullOrEmpty(item.DataView.Permissions) && SettingsManager.HasCharSkillsScope(item.DataView.PermissionsList))
                             .ToList();
                 }
 
@@ -181,11 +181,11 @@ namespace ThunderED.Modules.OnDemand
                 var usersData = new ConcurrentBag<ShipUserData>();
                 await usersToCheck.ParallelForEachAsync(async userEntity =>
                 {
-                    var token = (await APIHelper.ESIAPI.RefreshToken(userEntity.RefreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From {Category} | Char ID: {userEntity.CharacterId} | Char name: {userEntity.Data.CharacterName}"))?.Result;
+                    var token = (await APIHelper.ESIAPI.RefreshToken(userEntity.GetGeneralToken(), SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From {Category} | Char ID: {userEntity.CharacterId} | Char name: {userEntity.DataView.CharacterName}"))?.Result;
                     if (string.IsNullOrEmpty(token))
                     {
-                        await LogHelper.LogWarning($"Character {userEntity.Data.CharacterName}({userEntity.CharacterId}) has invalid token!");
+                        await LogHelper.LogWarning($"Character {userEntity.DataView.CharacterName}({userEntity.CharacterId}) has invalid token!");
                         return;
                     }
                     var skills = await APIHelper.ESIAPI.GetCharSkills(Reason, userEntity.CharacterId, token);
@@ -265,7 +265,7 @@ namespace ThunderED.Modules.OnDemand
                                 userCounted = true;
                             }
 
-                            var tmplt = group.FormatTemplate.Replace("{NAME}", user.User.Data.CharacterName)
+                            var tmplt = group.FormatTemplate.Replace("{NAME}", user.User.DataView.CharacterName)
                                 .Replace("{ST1}", st1)
                                 .Replace("{ST2}", st2);
                             for (int i = 1; i < 99; i++)
@@ -351,7 +351,7 @@ namespace ThunderED.Modules.OnDemand
 
     public class ShipUserData
     {
-        public AuthUserEntity User;
+        public ThdAuthUser User;
         public JsonClasses.SkillsData Skills;
     }
 

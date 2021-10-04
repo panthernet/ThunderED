@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ThunderED.Classes;
 using ThunderED.Helpers;
 
 namespace ThunderED.Modules
@@ -23,6 +24,11 @@ namespace ThunderED.Modules
             _client?.StopReceiving();
             _client = null;
             _me = null;
+        }
+
+        public override async Task Initialize()
+        {
+            await LogHelper.LogModule("Initializing Telegram module...", Category);
         }
 
         public override async Task Run(object prm)

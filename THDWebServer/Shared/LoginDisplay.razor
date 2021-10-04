@@ -1,0 +1,29 @@
+﻿@using THDWebServer.Authentication
+@inject ProtectedSessionStorage Store
+@inject AuthenticationStateProvider Auth
+@inject NavigationManager Nav
+<AuthorizeView>
+    <Authorized>
+        <a>@LM.Get("webWelcomeUserName", UserName)</a>&nbsp;&nbsp;
+        <button @onclick="Logout" class="btn btn-info" role="button"style="height: 30px; padding-top: .2rem;">@LM.Get("webButtonLogout")</button>&nbsp;&nbsp;
+    </Authorized>
+    <NotAuthorized>
+        <a href="@ServerPaths.GetUserAuthUrl()"><img src="Assets/eve_login.png" style="height: 30px; margin-right: 10px;" /></a>&nbsp;&nbsp;
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+
+    protected string UserName { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserName = (await Store.GetAsync<WebAuthUserData>("user"))?.Name;
+        await base.OnInitializedAsync();
+    }
+
+    private async void Logout()
+    {
+        await ((CustomAuthenticationStateProvider)Auth).Logout();
+        Nav.NavigateTo("/", true);
+    }
+}

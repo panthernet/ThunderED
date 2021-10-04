@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+@using THDWebServer.Pages.Modals
+@inject IModalService Modal
+
+<div class="sidebar">
+    <NavMenu />
+</div>
+
+<div class="main" style="background-image: url('@WebUiHelper.GetAsset("auth_bg.jpg")');">
+    <div class="colorifier_blue top-row px-4">
+        <LoginDisplay />
+        <button @onclick="ShowAbout" class="btn btn-info" role="button" style="height: 30px; padding-top: .2rem;">@LM.Get("webAbout")</button>
+    </div>
+
+    <div class="content px-4" style="height: 80%">
+        @Body
+    </div>
+</div>
+
+@functions {
+    private void ShowAbout()
+    {
+        var o = new ModalOptions {Class = "blazored-about-modal" };
+        Modal.Show<About>(LM.Get("webAboutThundered"), o);
+    }
+}

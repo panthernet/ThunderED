@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
@@ -22,17 +21,18 @@ namespace ThunderED.Classes
         [Command("help", RunMode = RunMode.Async), Summary("Reports help text.")]
         public async Task Help()
         {
-            if(IsForbidden()) return;
+            // await DecompositionHelper.GetPrices(70d, new List<long> { 45510, 46312 });
 
+            if (IsForbidden()) return;                                          
+            
             var sb = new StringBuilder();
             sb.Append(LM.Get("helpTextPrivateCommands"));
             sb.Append($": ** {SettingsManager.Settings.Config.BotDiscordCommandPrefix}about | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}tq ");
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
-                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}auth | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}authnotify | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}web ");
                 if (SettingsManager.Settings.Config.ModuleTimers)
                 {
-                    sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}timers | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}turl ");
+                    sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}timers");
                 }
             }
 
@@ -66,10 +66,6 @@ namespace ThunderED.Classes
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}lp ");
             }
 
-           /* if (SettingsManager.Settings.Config.ModuleFleetup)
-            {
-                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}ops ");
-            }*/
             if (SettingsManager.Settings.Config.ModuleContractNotifications)
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}clist ");
@@ -81,6 +77,10 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.CommandsConfig.EnableRoleManagementCommands)
             {
                 sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}{CMD_LISTROLES} | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}{CMD_ADDROLE} | {SettingsManager.Settings.Config.BotDiscordCommandPrefix}{CMD_REMROLE} ");
+            }
+            if (SettingsManager.Settings.Config.ModuleStorageConsole)
+            {
+                sb.Append($"| {SettingsManager.Settings.Config.BotDiscordCommandPrefix}storage");
             }
 
 
@@ -110,10 +110,7 @@ namespace ThunderED.Classes
                     break;   
                 case "auth":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpAuth", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
-                    break;                        
-                case "authnotify":
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpAuthNotify", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
-                    break;                        
+                    break;
                 case "evetime":
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTime")}", true);
                     break;                        
@@ -148,9 +145,6 @@ namespace ThunderED.Classes
                 case CMD_FWSTATS:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpFwstats", CMD_FWSTATS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;  
-                case CMD_TURL:
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{LM.Get("helpTurl")}", true);
-                    break;
                 case CMD_TIMERS:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpTimers", CMD_TIMERS, SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;
@@ -181,6 +175,11 @@ namespace ThunderED.Classes
                     break;
                 case CMD_REMROLE:
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("helpRemoveRoleCommand", SettingsManager.Settings.Config.BotDiscordCommandPrefix, CMD_REMROLE), true);
+                    break;
+                case "storage":
+                case "st":
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
+                        LM.Get("helpSc", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
                     break;
             }
         }
@@ -250,6 +249,86 @@ namespace ThunderED.Classes
 
         #endregion
 
+
+        #region StorageConsole
+
+        [Command("storage", RunMode = RunMode.Async)]
+        public async Task StorageCommand()
+        {
+            if (!SettingsManager.Settings.Config.ModuleStorageConsole) return;
+            if (IsForbidden()) return;
+
+            if (!await IsAllowedByRoles(SettingsManager.Settings.StorageConsoleModule.ListAccessRoles, Context.User.Id))
+                return;
+
+            var r = await StorageConsoleModule.GetListCommandResult("list");
+            if (r != null)
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, r, true);
+        }
+
+        [Command("st", RunMode = RunMode.Async)]
+        public async Task StCommand()
+        {
+            await StorageCommand();
+        }
+
+        [Command("st", RunMode = RunMode.Async)]
+        public async Task StCommand([Remainder] string command)
+        {
+            await StorageCommand(command);
+        }
+
+        [Command("storage", RunMode = RunMode.Async)]
+        public async Task StorageCommand([Remainder] string command)
+        {
+            if (!SettingsManager.Settings.Config.ModuleStorageConsole) return;
+            if (IsForbidden()) return;
+
+            var showHelp = true;
+
+            var lCommand = command?.ToLower();
+            if (!string.IsNullOrEmpty(lCommand) && (lCommand.StartsWith("list") || lCommand.StartsWith("add") ||
+                                                    lCommand.StartsWith("sub") || lCommand.StartsWith("set") ||
+                                                    lCommand.StartsWith("del")))
+            {
+                if (lCommand.StartsWith("list"))
+                {
+                    if (!await IsAllowedByRoles(SettingsManager.Settings.StorageConsoleModule.ListAccessRoles, Context.User.Id))
+                        return;
+                    var r = await StorageConsoleModule.GetListCommandResult(command);
+                    if (r == null)
+                    {
+                    }
+                    else
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, r, true);
+                        showHelp = false;
+                    }
+                }
+                else
+                {
+                    if (!await IsAllowedByRoles(SettingsManager.Settings.StorageConsoleModule.EditAccessRoles, Context.User.Id))
+                        return;
+                    var r = await StorageConsoleModule.UpdateStorage(command);
+                    if (r == null)
+                    {
+                        showHelp = false;
+                    }
+                    else
+                    {
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, r, true);
+                        showHelp = false;
+                    }
+                }
+            }
+
+            if (showHelp)
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
+                    LM.Get("helpSc", SettingsManager.Settings.Config.BotDiscordCommandPrefix), true);
+        }
+
+        #endregion
+
         internal const string CMD_TQ= "tq";
         [Command(CMD_TQ, RunMode = RunMode.Async), Summary("Reports TQ status")]
         public async Task TQStatus()
@@ -290,7 +369,7 @@ namespace ThunderED.Classes
 
             var skip = !allys.Any() && !corps.Any() && !chars.Any();
 
-            var authUser = await SQLHelper.GetAuthUserByDiscordId(Context.User.Id);
+            var authUser = await DbHelper.GetAuthUserByDiscordId(Context.User.Id);
             if (skip || authUser != null)
             {
                 var ch = await APIHelper.ESIAPI.GetCharacterData("Discord", authUser.CharacterId, true);
@@ -338,7 +417,7 @@ namespace ThunderED.Classes
             var corps = TickManager.GetModule<TimersModule>().GetAllCorporationIds();
             var chars = TickManager.GetModule<TimersModule>().GetAllCharacterIds();
 
-            var authUser = await SQLHelper.GetAuthUserByDiscordId(Context.User.Id);
+            var authUser = await DbHelper.GetAuthUserByDiscordId(Context.User.Id);
             if (authUser != null)
             {
                 var ch = await APIHelper.ESIAPI.GetCharacterData("Discord", authUser.CharacterId, true);
@@ -357,16 +436,6 @@ namespace ThunderED.Classes
             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersCmdAccessDenied"), true);
         }
 
-        internal const string CMD_TURL = "turl";
-        [Command(CMD_TURL, RunMode = RunMode.Async), Summary("Display timers url")]
-        public async Task TimersUrl()
-        {
-            if(IsForbidden()) return;
-
-            if(SettingsManager.Settings.Config.ModuleTimers)
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersUrlText", string.IsNullOrEmpty(SettingsManager.Settings.TimersModule.TinyUrl) ? WebServerModule.GetTimersAuthURL() : SettingsManager.Settings.TimersModule.TinyUrl), true);
-            else await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("timersModuleDisabled"), true);
-        }
 
         [Command(CMD_FWSTATS, RunMode = RunMode.Async), Summary("Reports FW status for a faction")]
         public async Task FWStats()
@@ -436,9 +505,9 @@ namespace ThunderED.Classes
         public async Task Web()
         {
             if(IsForbidden()) return;
-            if (SettingsManager.Settings.Config.ModuleWebServer)
+            if (!string.IsNullOrEmpty(SettingsManager.Settings.WebServerModule.WebExternalIP))
             {
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
+                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ServerPaths.GetWebSiteUrl());
             }
             else
             {
@@ -483,13 +552,13 @@ namespace ThunderED.Classes
                     return;
                 }
 
-                if (!await SQLHelper.IsAuthUsersGroupNameInDB(from))
+                if (!await DbHelper.IsAuthUsersGroupNameInDB(from))
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("rngroupInitialNotFound"), true);
                     return;
                 }
 
-                await SQLHelper.RenameAuthGroup(from, to);
+                await DbHelper.RenameAuthGroup(from, to);
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("rngroupComplete"), true);
             }
             catch (Exception ex)
@@ -508,7 +577,7 @@ namespace ThunderED.Classes
             {
                 var grps = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
                 if(grps.Values.Any(a=> a.PreliminaryAuthMode == false))
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, WebServerModule.GetWebSiteUrl());
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ServerPaths.GetWebSiteUrl());
                 else
                 {
                     var grp =
@@ -518,7 +587,7 @@ namespace ThunderED.Classes
                             : grps.FirstOrDefault();
                     if (grp.Value != null)
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {ServerPaths.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
                     }
                 }
             }
@@ -539,7 +608,7 @@ namespace ThunderED.Classes
                 var grp = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().FirstOrDefault(a=> a.Key == group);
                 if (grp.Value != null)
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {WebServerModule.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {ServerPaths.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
                 }
             }
             else
@@ -574,14 +643,14 @@ namespace ThunderED.Classes
                         characterId = Convert.ToInt64(data);
                     }
 
-                    var authUser = code == null ? await SQLHelper.GetAuthUserByCharacterId(characterId) : await SQLHelper.GetAuthUserByRegCode(code);
+                    var authUser = code == null ? await DbHelper.GetAuthUser(characterId) : await DbHelper.GetAuthUserByRegCode(code);
                     //check if entry exists
                     if (authUser == null)// || !authUser.HasToken)
                     {
                         await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
                         return;
                     }
-                    code = code ?? authUser.RegCode;
+                    code ??= authUser.RegCode;
                     characterId = characterId > 0 ? characterId : authUser.CharacterId;
 
 
@@ -591,15 +660,15 @@ namespace ThunderED.Classes
                         case "accept":
                         {
                             //check if pending users have valid entry
-                            if (!authUser.HasRegCode)
+                            if (string.IsNullOrEmpty(authUser.RegCode))
                             {
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
                                 return;
                             }
                             //check if user confirmed application
-                            if (!authUser.IsPending)
+                            if (authUser.AuthState < 2)
                             {
-                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authUserNotConfirmed", authUser.Data.CharacterName));
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authUserNotConfirmed", authUser.DataView.CharacterName));
                                 return;
                             }
 
@@ -621,7 +690,7 @@ namespace ThunderED.Classes
                             //authed for action!
                             if (authUser.DiscordId > 0)
                             {
-                                await WebAuthModule.AuthUser(Context, code, authUser.DiscordId);
+                                await WebAuthModule.AuthUser(Context, code, authUser.DiscordId ?? 0);
                             }
                             else
                             {
@@ -633,20 +702,20 @@ namespace ThunderED.Classes
                         case "decline":
                         {
                             //check if pending users have valid entry
-                            if (!authUser.HasRegCode)
+                            if (string.IsNullOrEmpty(authUser.RegCode))
                             {
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
                                 return;
                             }
 
-                            await SQLHelper.DeleteAuthDataByCharId(characterId);
-                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserDeclined", authUser.Data.CharacterName));
+                            await DbHelper.DeleteAuthUser(characterId);
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserDeclined", authUser.DataView.CharacterName));
 
                             return;
                         }
                         case "confirm":
 
-                            if (!authUser.HasRegCode || authUser.DiscordId > 0)
+                            if (string.IsNullOrEmpty(authUser.RegCode) || authUser.DiscordId > 0)
                             {
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("entryNotFound"));
                                 return;
@@ -654,9 +723,9 @@ namespace ThunderED.Classes
 
                             authUser.DiscordId = Context.Message.Author.Id;
                             authUser.SetStateAwaiting();
-                            await SQLHelper.SaveAuthUser(authUser);
+                            await DbHelper.SaveAuthUser(authUser);
                             await TickManager.GetModule<WebAuthModule>().ProcessPreliminaryApplicant(authUser, Context);
-                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserConfirmed", authUser.Data.CharacterName));
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserConfirmed", authUser.DataView.CharacterName));
                             return;
                         default:
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("invalidCommandSyntax"));
@@ -824,12 +893,12 @@ namespace ThunderED.Classes
                             return;
                         }
 
-                        var user = await SQLHelper.GetAuthUserByCharacterId(long.Parse(values[1]));
+                        var user = await DbHelper.GetAuthUser(long.Parse(values[1]), true);
                         if (user == null || !user.HasToken)
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysTokenNotFound"), true);
                         else
                         {
-                            var t = await APIHelper.ESIAPI.RefreshToken(user.RefreshToken,
+                            var t = await APIHelper.ESIAPI.RefreshToken(user.GetGeneralToken(),
                                 SettingsManager.Settings.WebServerModule.CcpAppClientId,
                                 SettingsManager.Settings.WebServerModule.CcpAppSecret);
                             if(t.Data.IsFailed)
@@ -947,7 +1016,7 @@ namespace ThunderED.Classes
                 if(!await IsExecByAdmin()) return;
 
                 await SettingsManager.UpdateSettings();
-                await SettingsManager.UpdateInjectedSettings();
+                await SimplifiedAuth.UpdateInjectedSettings();
                 TickManager.InvalidateModules();
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, ":white_check_mark: REHASH COMPLETED", true);
             }
@@ -986,7 +1055,7 @@ namespace ThunderED.Classes
             {
                 try
                 {
-                    var authString = WebServerModule.GetAuthPageUrl();
+                    var authString = ServerPaths.GetAuthPageUrl();
                     await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
                         LM.Get("authInvite", authString), true);
                 }
@@ -1001,35 +1070,6 @@ namespace ThunderED.Classes
                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDisabled"), true);
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [Command("authnotify", RunMode = RunMode.Async), Summary("Auth User")]
-        public async Task AuthNotify()
-        {
-            if(!IsAuthAllowed()) return;
-
-            if (SettingsManager.Settings.Config.ModuleNotificationFeed)
-            {
-                try
-                {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context,
-                        LM.Get("authNotifyInvite", WebServerModule.GetAuthNotifyURL()), true);
-                }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx("authnotify", ex);
-                    await Task.FromException(ex);
-                }
-            }
-            else
-            {
-                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDisabled"), true);
-            }
-        }
-
 
 
         /// <summary>
@@ -1380,6 +1420,8 @@ namespace ThunderED.Classes
 
         private async Task<bool> IsAllowedByRoles(List<string> roles, ulong userId)
         {
+            if (roles == null || !roles.Any()) return true;
+
             var result = APIHelper.DiscordAPI.GetUserRoleNames(userId);
             if (!result.Any(roles.Contains))
             {

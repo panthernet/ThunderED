@@ -1,0 +1,756 @@
+﻿@using ThunderED.Modules
+@using ThunderED.Helpers
+@using ThunderED.Json
+@using ThunderED.Classes.Entities
+@using System.Linq.Dynamic.Core
+@using ThunderED.Thd
+
+@inject AuthenticationStateProvider Auth
+@inject ProtectedSessionStorage Store
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_HRM)]
+@inject NavigationManager Nav
+@inject IModalService Modal
+
+<div class="modal-content hrm-inspect">
+    <div class="modal-header">
+        <h5 class="modal-title">@LM.Get("hrmInspectingHeader", MemberData?.CharacterName)</h5>
+        <div class="row">
+        @if (_access.CanKickUsers)
+        {
+            <RadzenButton ButtonType="ButtonType.Button" Icon="voice_over_off" ButtonStyle="ButtonStyle.Danger" Style="margin-right: 10px;"
+                          Click="ExecuteKickUser" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmButDeleteUserAuth")}})"/>
+        }
+            <RadzenButton ButtonType="ButtonType.Button" Icon="close" ButtonStyle="ButtonStyle.Secondary"
+                          Click="Close"/>
+        </div>
+    </div>
+    <div class="modal-body">
+        <div>
+            <div class="row" style="padding: .3rem 1rem;">
+                <!-- Images column-->
+                <div class="col-auto">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-auto col-hrm-img">
+                                <div>
+                                    <img src="@_corpImage" alt="corp logo" class="corp-img">
+                                </div>
+                                @if (_hasAlliance)
+                                {
+                                    <div>
+                                        <img src="@_allianceImage" alt="alli logo" class="corp-img">
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-auto col-hrm-img">
+                                <img src="@_charImage" alt="character image" class="char-img">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5 col-lg-5" style="font-size: small">
+                    <div class="row-fluid">
+                        @LM.Get("hrmInspectChar"):&nbsp; <a href="@($"https://zkillboard.com/character/{_character?.CharacterId}")">@MemberData.CharacterName</a>
+                    </div>
+                    <div class="row-fluid">
+                        @LM.Get("hrmInspectCorp"):&nbsp; <a href="@($"https://zkillboard.com/corporation/{_character?.DataView.CorporationId}")">@($"{_character?.DataView.CorporationName} [{_character?.DataView.CorporationTicker}]")</a>
+                    </div>
+                    @if (_hasAlliance)
+                    {
+                        <div class="row-fluid">
+                            @LM.Get("hrmInspectAlly"):&nbsp; <a href="@($"https://zkillboard.com/alliance/{_character?.DataView.AllianceId}")">@($"{_character?.DataView.AllianceName} [{_character?.DataView.AllianceTicker}]")</a>
+                        </div>
+                    }
+                    <div class="row-fluid">
+                        @LM.Get("hrmInspectSS"):&nbsp; @(_character?.MiscData.SecurityStatus != null ? Math.Round(_character.MiscData.SecurityStatus.Value, 1).ToString("0.0") : null)
+                    </div>
+                    <div class="row-fluid">
+                        @LM.Get("hrmInspectBirth"):&nbsp; @_character?.MiscData.BirthDate.ToString(_module.Settings.Config.ShortTimeFormat)
+                    </div>
+                    @if (SettingsManager.HasCharSkillsScope(_character?.DataView.PermissionsList) && _hasToken)
+                    {
+                        <div class="row-fluid">
+                            SP:&nbsp; @_totalSp
+                        </div>
+                    }
+                    @if (SettingsManager.HasCharWalletScope(_character?.DataView.PermissionsList) && _hasToken)
+                    {
+                        <div class="row-fluid">
+                            ISK:&nbsp; @_totalIskBalance
+                        </div>
+                    }
+                    @if (SettingsManager.HasCharLocationScope(_character?.DataView.PermissionsList) && _hasToken)
+                    {
+                        <div class="row-fluid">
+                            @LM.Get("hrmInspectLocation"):&nbsp; @_locationData
+                        </div>
+                    }
+                    @if (SettingsManager.HasCharShipTypeScope(_character?.DataView.PermissionsList) && _hasToken)
+                    {
+                        <div class="row-fluid">
+                            @LM.Get("hrmInspectShip"):&nbsp; @_shipData
+                        </div>
+                    }
+                    <div class="row-fluid">
+                        @LM.Get("hrmInspectIp"):&nbsp; @(string.IsNullOrEmpty(_character?.Ip) ? LM.Get("Unknown") : _character.Ip)
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="padding: .3rem 1rem;">
+                <RadzenTabs Style="padding: 0;">
+                    <Tabs>
+                        <RadzenTabsItem Text="@LM.Get("hrmTabCorpHistory")" Style="padding: 0;">
+                            <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@(_corpHistoryList?.Count ?? 0)" AllowSorting="true" Data="@_corpHistoryList" TItem="JsonClasses.CorporationHistoryEntry"
+                                        LoadData="@LoadCorpHistoryData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        AllowColumnResize="true">
+                                <Columns>
+                                    <RadzenGridColumn TItem="JsonClasses.CorporationHistoryEntry" Filterable="false" Sortable="false" Width="50px">
+                                        <Template Context="order">
+                                            <RadzenImage Path="@($"https://image.eveonline.com/Corporation/{order.corporation_id}_32.png")" Style="width: 32px; height: 32px; display: block" />
+                                        </Template>
+                                    </RadzenGridColumn>
+                                    <RadzenGridColumn TItem="JsonClasses.CorporationHistoryEntry" Title="@LM.Get("hrmCVCorpName")" FilterProperty="CorpName">
+                                        <Template Context="order">
+                                            <a target="_blank" rel="noopener noreferrer" href="@($"https://zkillboard.com/corporation/{order.corporation_id}")">
+                                                @($"{order.CorpName} [{order.CorpTicker}] {(order.IsNpcCorp ? " (npc)" : null)}{(order.is_deleted ? " (closed)" : null)}")
+                                            </a>
+                                        </Template>
+                                    </RadzenGridColumn>
+                                    <RadzenGridColumn TItem="JsonClasses.CorporationHistoryEntry" Title="@LM.Get("hrmCVJoined")" Width="120px">
+                                        <Template Context="order">
+                                            @(order.Date.ToShortDateString())
+                                        </Template>
+                                    </RadzenGridColumn>
+                                    <RadzenGridColumn TItem="JsonClasses.CorporationHistoryEntry" Title="@LM.Get("hrmCVDays")" Width="120px">
+                                        <Template Context="order">
+                                            @(order.Days)
+                                        </Template>
+                                    </RadzenGridColumn>
+                                </Columns>
+                            </RadzenGrid>
+                            @if (_isCorpsLoading)
+                            {
+                                <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+                            }
+                        </RadzenTabsItem>
+                        @if (SettingsManager.HasReadMailScope(_character?.DataView.PermissionsList) && _hasToken)
+                        {
+                            <RadzenTabsItem Text="@LM.Get("hrmTabMail")">
+                                <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countMail" AllowSorting="true" Data="@_mailList" TItem="WebMailHeader"
+                                            LoadData="@LoadMailData" Class="hrm-table" RowDoubleClick="async args=> await OnMailRowClick(args)" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            AllowColumnResize="true">
+                                    <Columns>
+                                        <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailSubjectHeader")" FilterProperty="Subject">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Subject" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailFromHeader")" FilterProperty="FromName">
+                                            <Template Context="order">
+                                                @if (!string.IsNullOrEmpty(order.FromLink))
+                                                {
+                                                    <a target="_blank" rel="noopener noreferrer" href="@order.FromLink">@order.FromName</a>
+                                                }
+                                                else
+                                                {
+                                                    @order.FromName
+                                                }
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailToHeader")" FilterProperty="ToName">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.ToName" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebMailHeader" Title="@LM.Get("mailDateHeader")" Width="100px">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@(order.Date.ToShortDateString())" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                    </Columns>
+                                </RadzenGrid>
+                                @if (_isMailLoading)
+                                {
+                                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+                                }
+                            </RadzenTabsItem>
+                        }
+                        @if (SettingsManager.HasCharContractsScope(_character?.DataView.PermissionsList) && _hasToken)
+                        {
+                            <RadzenTabsItem Text="@LM.Get("hrmTabContracts")">
+                                <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countContracts" AllowSorting="true" Data="@_contractsList" TItem="WebContract"
+                                            LoadData="@LoadContractsData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            AllowColumnResize="true">
+                                    <Columns>
+                                        <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractType")" FilterProperty="Type">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Type" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractFrom")" FilterProperty="From">
+                                            <Template Context="order">
+                                                <a target="_blank" rel="noopener noreferrer" href="@order.FromLink">@order.From</a>
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractTo")" FilterProperty="To">
+                                            <Template Context="order">
+                                                <a target="_blank" rel="noopener noreferrer" href="@order.ToLink">@order.To</a>
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractStatus")" FilterProperty="Status">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Status" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractDate")">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@(order.CompleteDate)" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractInfo")" FilterProperty="Title">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Title" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContract" Title="@LM.Get("hrmContractItems")" FilterProperty="AllItems" Width="50px">
+                                            <Template Context="order">
+                                                @if (!string.IsNullOrEmpty(order.IncludedItems))
+                                                {
+                                                    <div>I<img src="https://github.com/panthernet/ThunderED/blob/master/ThunderED/Content/Icons/itemIconSmall.png?raw=true" alt="" title="@order.IncludedItems" /></div>
+                                                }
+                                                @if (!string.IsNullOrEmpty(order.AskingItems))
+                                                {
+                                                    <div>A<img src="https://github.com/panthernet/ThunderED/blob/master/ThunderED/Content/Icons/itemIconSmall.png?raw=true" alt="" title="@order.AskingItems" /></div>
+                                                }
+                                            </Template>
+                                        </RadzenGridColumn>
+                                    </Columns>
+                                </RadzenGrid>
+                                @if (_isContractsLoading)
+                                {
+                                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+                                }
+                            </RadzenTabsItem>
+                        }
+                        @if (SettingsManager.HasCharContactsScope(_character?.DataView.PermissionsList) && _hasToken)
+                        {
+                            <RadzenTabsItem Text="@LM.Get("hrmTabContacts")">
+                                <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countContacts" AllowSorting="true" Data="@_contactsList" TItem="WebContact"
+                                            LoadData="@LoadContactsData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            AllowColumnResize="true">
+                                    <Columns>
+                                        <RadzenGridColumn TItem="WebContact" Title="@LM.Get("hrmContactName")" FilterProperty="Name">
+                                            <Template Context="order">
+                                                <a target="_blank" rel="noopener noreferrer" href="@order.ZkbLink">@order.Name</a>
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContact" Title="@LM.Get("hrmContactType")" FilterProperty="Type">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Type" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContact" Title="@LM.Get("hrmContractBlocked")" FilterProperty="Blocked">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Blocked" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContact" Title="@LM.Get("hrmContractStand")" FilterProperty="Stand">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Stand" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebContact" Title="@LM.Get("hrmContractHrStand")" FilterProperty="HrStand">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.HrStand" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                    </Columns>
+                                </RadzenGrid>
+                                @if (_isContactsLoading)
+                                {
+                                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+                                }
+                            </RadzenTabsItem>
+                        }
+                        @if (SettingsManager.HasCharWalletScope(_character?.DataView.PermissionsList) && _hasToken)
+                        {
+                            <RadzenTabsItem Text="@LM.Get("hrmTabJournal")">
+                                <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countWalletJournal" AllowSorting="true" Data="@_walletJournalList" TItem="WebWalletJournal"
+                                            LoadData="@LoadWalletJournalData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            AllowColumnResize="true">
+                                    <Columns>
+                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalDate")" Width="140px">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Date.ToString(SettingsManager.Settings.Config.ShortTimeFormat)" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalType")" FilterProperty="Type" Width="250px">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Type" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalAmount")" FilterProperty="Amount" Width="180px">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Amount" Class="@order.WebClass" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebWalletJournal" Title="@LM.Get("hrmJournalDescription")" FilterProperty="Description">
+                                            <Template Context="order">
+                                                <div style="position: relative;" tooltip="@order.Description">@order.Description</div>
+                                            </Template>
+                                        </RadzenGridColumn>
+                                    </Columns>
+                                </RadzenGrid>
+                                @if (_isWalletJournalLoading)
+                                {
+                                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+                                }
+                            </RadzenTabsItem>
+                        }
+                        @if (SettingsManager.HasCharWalletScope(_character?.DataView.PermissionsList) && _hasToken)
+                        {
+                            <RadzenTabsItem Text="@LM.Get("hrmTabTransfers")">
+                                <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countWalletTrans" AllowSorting="true" Data="@_walletTransList" TItem="WebWalletTrans"
+                                            LoadData="@LoadWalletTransData" Class="hrm-table" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            AllowColumnResize="true">
+                                    <Columns>
+                                        <RadzenGridColumn TItem="WebWalletTrans" Title="@LM.Get("hrmTransDateHeader")" FilterProperty="Date">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Date.ToString(SettingsManager.Settings.Config.ShortTimeFormat)" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebWalletTrans" Title="@LM.Get("hrmTransTypeHeader")" FilterProperty="Type">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@order.Type" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebWalletTrans" Title="@LM.Get("hrmTransCreditHeader")" FilterProperty="Credit">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@(order.Credit.ToString("N"))" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebWalletTrans" Title="@LM.Get("hrmTransClientHeader")" FilterProperty="Client">
+                                            <Template Context="order">
+                                                <a target="_blank" rel="noopener noreferrer" href="@order.ClientZkbLink">@order.Client</a>
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebWalletTrans" Title="@LM.Get("hrmTransWhereHeader")" FilterProperty="Where">
+                                            <Template Context="order">
+                                                <RadzenLabel Text="@(order.Where)" />
+                                            </Template>
+                                        </RadzenGridColumn>
+                                    </Columns>
+                                </RadzenGrid>
+                                @if (_isWalletTransLoading)
+                                {
+                                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+                                }
+                            </RadzenTabsItem>
+                        }
+                        @if (SettingsManager.HasCharSkillsScope(_character?.DataView.PermissionsList) && _hasToken)
+                        {
+                            <RadzenTabsItem Text="@LM.Get("hrmTabSkills")">
+                                <RadzenGrid LoadData="@LoadSkillzData" TItem="WebSkillItem" Count="@_countSkillsList" PageSize="30" AllowFiltering="true" AllowPaging="true" Class="hrm-table"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowColumnResize="true" Data="@_skillsList" CellRender="@SkillCellRender">
+                                    <Columns>
+                                        <RadzenGridColumn TItem="WebSkillItem" Title="@LM.Get("hrmSkillName")" FilterProperty="Name">
+                                            <Template Context="order">
+                                                @if (!order.IsCategory)
+                                                {
+                                                    <RadzenLabel Text="@order.Name" />
+                                                }
+                                                else
+                                                {
+                                                    <RadzenLabel Text="@order.Name" Style="font-weight: bold" />
+                                                }
+                                            </Template>
+                                        </RadzenGridColumn>
+                                        <RadzenGridColumn TItem="WebSkillItem" Title="@LM.Get("hrmSkillLevel")" FilterProperty="ValueTrained"
+                                                          Width="120">
+                                            <Template Context="order">
+                                                @if (!order.IsCategory)
+                                                {
+                                                    @((MarkupString) order.Visual)
+                                                }
+                                            </Template>
+                                        </RadzenGridColumn>
+                                    </Columns>
+                                </RadzenGrid>
+                                @if (_isSkillsListLoading)
+                                {
+                                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+                                }
+                            </RadzenTabsItem>
+                        }
+                        @if (false) //SettingsManager.HasCharAssetsScope(_character?.Data.PermissionsList) && _hasToken
+                        {
+                            <RadzenTabsItem Text="@LM.Get("hrmTabCharAssets")">
+                                
+                                <RadzenTree Data="@_charAssetCategoriesList" Expand=@OnExpandCharAssets Style="width: 100%; height: 320px">
+                                    <RadzenTreeLevel TextProperty="Name"/>
+                                </RadzenTree>
+
+                                @if (_isCharAssetListLoading)
+                                {
+                                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText"/>
+                                }
+                            </RadzenTabsItem>
+                        }
+                    </Tabs>
+                </RadzenTabs>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    void OnExpandCharAssets(TreeExpandEventArgs args)
+    {
+        var category = args.Value as WebAssetCategory;
+
+        args.Children.Data = _charAssetList[category.Name];
+        args.Children.TextProperty = "Visual";
+        args.Children.HasChildren = (product) => false;
+    }
+
+    private HRMModule _module;
+    private HRMAccessFilter _access = new HRMAccessFilter();
+    [Parameter] public WebUserItem MemberData { get; set; }
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    //[CascadingParameter] IModalService Modal { get; set; }
+
+    private bool _hasAlliance;
+    private ThdAuthUser _character;
+    private ThdAuthUser _inspector;
+    private string _reason = "HRM";
+    private bool _hasToken;
+    private string _inspectToken;
+
+    private string _corpImage;
+    private string _allianceImage;
+    private string _charImage;
+    private string _totalSp;
+    private string _totalIskBalance;
+    private string _locationData;
+    private string _shipData;
+
+    private List<JsonClasses.CorporationHistoryEntry> _corpHistoryList;
+    private List<WebMailHeader> _mailList;
+    private List<WebContract> _contractsList;
+    private List<WebContact> _contactsList;
+    private List<WebWalletTrans> _walletTransList;
+    private List<WebWalletJournal> _walletJournalList;
+    private List<WebSkillItem> _skillsList;
+    private Dictionary<string, List<WebAssetData>> _charAssetList = new Dictionary<string, List<WebAssetData>>();
+    private List<WebAssetCategory> _charAssetCategoriesList;
+
+    #region Grid vars
+
+    private bool _isCorpsLoading = true;
+    private bool _isMailLoading = true;
+    private bool _isContractsLoading = true;
+    private bool _isContactsLoading = true;
+    private bool _isWalletTransLoading = true;
+    private bool _isWalletJournalLoading = true;
+    private bool _isSkillsListLoading = true;
+    private bool _isCharAssetListLoading = true;
+
+    private int _countMail;
+    private int _countContacts;
+    private int _countContracts;
+    private int _countWalletTrans;
+    private int _countWalletJournal;
+    private int _countSkillsList;
+
+    #endregion
+
+    #region Cache
+    private List<WebMailHeader> _mailListCache;
+    private List<WebContract> _contractsListCache;
+    private List<WebContact> _contactsListCache;
+    private List<WebWalletTrans> _walletTransListCache;
+    private List<WebWalletJournal> _walletJournalListCache;
+    private List<WebSkillItem> _skillsListCache;
+    #endregion
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        if (!HRMModule.HasWebAccess(user.Id))
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+        _module = TickManager.GetModule<HRMModule>();
+        if (_module == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+        _access = await _module.WebGetAccess(user.Id);
+        if (_access == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _inspector = await DbHelper.GetAuthUser(user.Id, true);
+        if (_inspector == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        await LoadCharacterData();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadCharacterData()
+    {
+        try
+        {
+            _character = await DbHelper.GetAuthUser(MemberData.Id, true);
+            if (_character == null)
+            {
+                Nav.NavigateTo("/", true);
+                return;
+            }
+            await _character.UpdateData();
+            await DbHelper.SaveAuthUser(_character);
+
+            _hasAlliance = _character.DataView.AllianceId > 0;
+            _corpImage = $"https://images.evetech.net/corporations/{_character.DataView.CorporationId}/logo?tenant=tranquility&size=64";
+            _allianceImage = $"https://images.evetech.net/alliances/{_character.DataView.AllianceId}/logo?tenant=tranquility&size=64";
+            _charImage = $"https://image.eveonline.com/Character/{_character.CharacterId}_256.png";
+
+            _hasToken = _character.HasToken;
+            if (_hasToken)
+            {
+                var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralToken(),
+                    _module.Settings.WebServerModule.CcpAppClientId,
+                    _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
+                _inspectToken = tq.Result;
+                if (!string.IsNullOrEmpty(_inspectToken))
+                {
+
+                    if (SettingsManager.HasCharLocationScope(_character.DataView.PermissionsList))
+                    {
+                        var locationData =
+                            await APIHelper.ESIAPI.GetCharacterLocation(_reason, _character.CharacterId, _inspectToken);
+                        var system =
+                            await APIHelper.ESIAPI.GetSystemData(_reason, locationData?.solar_system_id ?? 0);
+                        var station = locationData.station_id > 0 ? await APIHelper.ESIAPI.GetStationData(_reason, locationData.station_id, _inspectToken)
+                            : null;
+                        var citadel = locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetUniverseStructureData(_reason, locationData.structure_id, _inspectToken)
+                            : null;
+                        var loc = station != null ? station.name : citadel?.name;
+
+                        _locationData = $"{system.name} {loc}";
+                    }
+                    if (SettingsManager.HasCharShipTypeScope(_character.DataView.PermissionsList))
+                    {
+                        var stData =
+                            await APIHelper.ESIAPI.GetCharacterShipType(_reason, _character.CharacterId, _inspectToken);
+                        var tType = await APIHelper.ESIAPI.GetTypeId(_reason, stData.ship_type_id);
+                        _shipData = tType.name;
+                    }
+                    if (SettingsManager.HasCharSkillsScope(_character.DataView.PermissionsList))
+                    {
+                        await Task.Factory.StartNew(async () =>
+                        {
+                            var values = await _module.WebGetSkills(_character.CharacterId, _inspectToken);
+                            if (values != null)
+                            {
+                                _skillsListCache = values[1] as List<WebSkillItem>;
+                                _totalSp = ((int) values[0]).ToString("N0");
+                            }
+
+                            await InvokeAsync(StateHasChanged);
+                        });
+                    }
+                    if (SettingsManager.HasCharAssetsScope(_character.DataView.PermissionsList))
+                    {
+                        await Task.Factory.StartNew(async () =>
+                        {
+                            await LoadCharAssetsData();
+                        });
+                    }
+                    await LoadWalletData();
+                    await InvokeAsync(StateHasChanged);
+                }
+                else
+                {
+                    _hasToken = false;
+                    _character.Tokens.Clear();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await LogHelper.LogEx(ex, LogCat.HRM);
+        }
+    }
+
+    private async Task LoadSkillzData(LoadDataArgs args)
+    {
+        if (_skillsListCache == null)
+        {
+            var count = 0;
+            while (count < 10)
+            {
+                if (_skillsListCache == null)
+                {
+                    await Task.Delay(1000);
+                    count++;
+                }
+                else break;
+            }
+            if (count >= 10)
+                return;
+        }
+
+        _skillsList = ApplyAjaxFilters(_skillsListCache, args, out _countSkillsList);
+        _isSkillsListLoading = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadWalletData()
+    {
+        if (_hasToken && SettingsManager.HasCharWalletScope(_character.DataView.PermissionsList))
+        {
+            var value = await APIHelper.ESIAPI.GetCharacterWalletBalance(_reason, _character.CharacterId, _inspectToken);
+            _totalIskBalance = value.ToString("N");
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadWalletJournalData(LoadDataArgs args)
+    {
+        _walletJournalListCache ??= await _module.WebGetWalletJournal(_character.CharacterId, _inspectToken);
+        if (_walletJournalListCache == null) return;
+        _walletJournalList = ApplyAjaxFilters(_walletJournalListCache, args, out _countWalletJournal);
+        _isWalletJournalLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadWalletTransData(LoadDataArgs args)
+    {
+        _walletTransListCache ??= await _module.WebGetWalletTrans(_character.CharacterId, _inspectToken);
+        if (_walletTransListCache == null) return;
+        _walletTransList = ApplyAjaxFilters(_walletTransListCache, args, out _countWalletTrans);
+        _isWalletTransLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadCharAssetsData()
+    {
+        var data = await _module.WebGetCharAssetsList(_character.CharacterId, _inspectToken);
+        if (data != null)
+        {
+            _charAssetList = data.GroupBy(a => a.LocationName).ToDictionary(a => a.Key, a => a.ToList());
+            _charAssetCategoriesList = _charAssetList.Keys.Select(a => new WebAssetCategory {Name = a}).ToList();
+        }
+        _isCharAssetListLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadMailData(LoadDataArgs args)
+    {
+        _mailListCache ??= await _module.WebGetMailHeaders(_character.CharacterId, _inspectToken);
+        _mailList = ApplyAjaxFilters(_mailListCache, args, out _countMail);
+        _isMailLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadCorpHistoryData(LoadDataArgs args)
+    {
+        _corpHistoryList = ApplyAjaxFilters(await _module.WebGenerateCorpHistory(_character.CharacterId), args, out _);
+        _isCorpsLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    private async Task LoadContractsData(LoadDataArgs args)
+    {
+        _contractsListCache ??= await _module.WebGetCharContracts(_character.CharacterId, _inspectToken);
+        _contractsList = ApplyAjaxFilters(_contractsListCache, args, out _countContracts);
+        _isContractsLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadContactsData(LoadDataArgs args)
+    {
+        _contactsListCache ??= await _module.WebGetCharContacts(_character.CharacterId, _inspectToken, _inspector.CharacterId);
+        _contactsList = ApplyAjaxFilters(_contactsListCache, args, out _countContacts);
+        _isContactsLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    private async Task ExecuteSearchMail()
+    {
+        var prms = new ModalParameters();
+        prms.Add("UserId", _character.CharacterId);
+        prms.Add("Token", _inspectToken);
+        var o = new ModalOptions { DisableBackgroundCancel = false, Animation = ModalAnimation.FadeIn(1), HideHeader = true, ContentScrollable = true };
+        await Modal.Show<MailSearch>("null", prms, o).Result;
+    }
+
+    private async void ExecuteKickUser()
+    {
+        if (await Modal.ShowConfirm(LM.Get("webWarning"), LM.Get("hrmButDeleteUserAuthConfirm")))
+        {
+            if (await _module.WebDeleteUser(MemberData))
+            {
+                await BlazoredModal.CloseAsync(ModalResult.Ok(false));
+            }
+        }
+    }
+
+    private List<T> ApplyAjaxFilters<T>(IEnumerable<T> list, LoadDataArgs args, out int count)
+    {
+        var query = list.AsQueryable();
+        if (!string.IsNullOrEmpty(args.Filter))
+            query = query.Where(args.Filter);
+        count = query.Count();
+
+        if (!string.IsNullOrEmpty(args.OrderBy))
+            query = query.OrderBy(args.OrderBy);
+        if (args.Skip.HasValue)
+            query = query.Skip(args.Skip.Value);
+        if (args.Top.HasValue)
+            query = query.Take(args.Top.Value);
+        return query.ToList();
+    }
+
+    async Task Close() => await BlazoredModal.CloseAsync(ModalResult.Ok(_character));
+
+    private async Task OnMailRowClick(WebMailHeader args)
+    {
+        var prms = new ModalParameters();
+        prms.Add("MailId", args.MailId);
+        prms.Add("UserId", _character.CharacterId);
+        prms.Add("Token", _inspectToken);
+        var o = new ModalOptions { DisableBackgroundCancel = false, Animation = ModalAnimation.FadeIn(1), HideHeader = true, ContentScrollable = true };
+        await Modal.Show<MailViewer>("null", prms, o).Result;
+    }
+
+
+    private void SkillCellRender(CellRenderEventArgs<WebSkillItem> args)
+    {
+        if (args.Data.IsCategory)
+        {
+            args.Attributes.Add("style", $"background-color: darkgray;");
+        }
+    }
+
+}

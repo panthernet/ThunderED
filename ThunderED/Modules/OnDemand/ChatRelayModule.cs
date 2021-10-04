@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using ThunderED.Helpers;
-using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules.OnDemand
 {
@@ -16,12 +15,12 @@ namespace ThunderED.Modules.OnDemand
 
         private readonly Dictionary<string, List<string>> _pool = new Dictionary<string, List<string>>();
 
-        public ChatRelayModule()
+        public override async Task Initialize()
         {
-            LogHelper.LogModule("Initializing ChatRelay module...", Category).GetAwaiter().GetResult();
-            WebServerModule.ModuleConnectors.Add(Reason, OnRequestReceived);
+            await LogHelper.LogModule("Initializing ChatRelay module...", Category);
         }
 
+        //TODO
         private async Task<bool> OnRequestReceived(HttpListenerRequestEventArgs context)
         {
             if (!Settings.Config.ModuleChatRelay) return false;

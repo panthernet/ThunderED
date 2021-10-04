@@ -1,0 +1,95 @@
+﻿@page "/authpage"
+@using ThunderED.Modules
+@using ThunderED.Classes.Enums
+
+@inject ProtectedSessionStorage Store
+@inject AuthenticationStateProvider Auth
+
+<div class="container" style="height: 100%">
+    <div class="colorifier text-center">
+        <p>
+            <h2>@LM.Get("authWebDiscordHeader")</h2>
+        </p>
+    </div>
+
+    <div class="centralizer">
+        <div class="text-center">
+            <!-- HEADER -->
+            @if (SettingsManager.Settings.Config.ModuleAuthWeb && Groups.Count > 0)
+            {
+                @if (WebUiHelper.GetAsset("discord_light.png") != null)
+                {
+                    <p><RadzenImage Path="@WebUiHelper.GetAsset("discord_light.png")" Style="width: 356px;"></RadzenImage></p>
+                }
+                <p class="frontcolor">@((MarkupString) LM.Get("authPageGeneralAuthHeader"))</p>
+            }
+            <!-- ONE BUTTON -->
+            @if (SettingsManager.Settings.WebAuthModule.UseOneAuthButton)
+            {
+                <a href="@ServerPaths.GetOneButtonUrl()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText</a>
+            }
+            <!-- STANDINGS AUTH LIST-->
+            @if (SettingsManager.Settings.Config.ModuleAuthWeb)
+            {
+                @foreach (var (key, group) in GroupsForCycle.Where(a => a.Value.StandingsAuth != null))
+                {
+                    @if (group.Hidden) { continue; }
+
+                    <a href="@ServerPaths.GetAuthUrl()?group=@HttpUtility.UrlEncode(key)" class="btn btn-info btn-block" role="button">@(string.IsNullOrEmpty(group.CustomButtonText) ? key : group.CustomButtonText)</a>
+                }
+            }
+            <!-- NORMAL AUTH LIST-->
+            @if (SettingsManager.Settings.Config.ModuleAuthWeb)
+            {
+                @foreach (var (key, group) in GroupsForCycle.Where(a => a.Value.StandingsAuth == null))
+                {
+                    @if (group.Hidden) { continue; }
+                    @if (group.BindToMainCharacter && !_hasReg) continue;
+
+                    <a href="@ServerPaths.GetAuthUrl()?group=@HttpUtility.UrlEncode(group.BindToMainCharacter ? WebAuthModule.DEF_ALTREGGROUP_NAME : key)" class="btn btn-info btn-block" role="button">@(group.CustomButtonText ?? SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText)</a>
+                }
+            }
+
+            <br>
+            <br>
+            <p class="text-center"><a class="btn btn-info" href="/" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+
+        </div>
+    </div>
+</div>
+
+@code
+{
+    public Dictionary<string, WebAuthGroup> Groups { get; set; }
+
+    public IEnumerable<KeyValuePair<string, WebAuthGroup>> GroupsForCycle { get; set; }
+
+    public bool DisplayManagerHeader => SettingsManager.Settings.Config.ModuleAuthWeb ||
+                                        SettingsManager.Settings.Config.ModuleNotificationFeed ||
+                                        SettingsManager.Settings.Config.ModuleMail ||
+                                        SettingsManager.Settings.Config.ModuleContractNotifications ||
+                                        SettingsManager.Settings.Config.ModuleIndustrialJobs;
+
+    private bool _hasReg = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Groups = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
+        GroupsForCycle = SettingsManager.Settings.WebAuthModule.UseOneAuthButton
+            ? Groups.Where(a => a.Value.ExcludeFromOneButtonMode || a.Value.BindToMainCharacter)
+            : Groups;
+
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user != null)
+        {
+            if (await CustomAuthenticationStateProvider.HasAuth(Auth))
+            {
+
+                var auth = await DbHelper.GetAuthUser(user.Id);
+                if (auth != null && !auth.MainCharacterId.HasValue)
+                    _hasReg = auth.AuthState == (int) UserStatusEnum.Authed;
+            }
+        }
+        await base.OnInitializedAsync();
+    }
+}

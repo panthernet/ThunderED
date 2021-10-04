@@ -1,0 +1,160 @@
+﻿@using ThunderED.Modules
+@using System.Linq.Dynamic.Core
+@using ThunderED.Thd
+
+@inject AuthenticationStateProvider Auth
+@inject ProtectedSessionStorage Store
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_MINING_SCHEDULE)]
+@inject NavigationManager Nav
+@inject IModalService Modal
+
+<div class="modal-content hrm-inspect">
+    <div class="modal-header">
+        <h5 class="modal-title">@LM.Get("msInspectingLedgerHeader", Ledger?.StructureName)</h5>
+        <RadzenButton ButtonType="ButtonType.Button" Icon="close" ButtonStyle="ButtonStyle.Secondary"
+                      Click="Close" />
+    </div>
+    <div class="modal-body">
+        <div class="row" style="margin-left: 20px; margin-bottom: 5px;">
+            <RadzenCheckBox @bind-Value=@_isMergeAltsOption TValue="bool" Change="async (args)=> await MergeAltsChanged(args)" /> @LM.Get("msMergeAltsCheck")
+        </div>
+        <RadzenGrid AllowFiltering="true" AllowPaging="false" Count="@_countLedger" AllowSorting="true" Data="@_ledgerList" TItem="WebMiningLedgerEntry"
+                    LoadData="@LoadLedgerData" Style="height: 97%;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    AllowColumnResize="true" @ref="@_ledgerGrid">
+            <Columns>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="false" Sortable="false" Width="90px">
+                    <Template Context="order">
+                        <RadzenImage Path="@ServerPaths.GetCharacterImageUrl(order.CharacterId)" Style="width: 64px; height: 64px; display: block" />
+                    </Template>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" FilterProperty="NameFilter" SortProperty="NameFilter"
+                                  Title="@LM.Get("msLedgerColumnCharacter")">
+                    <Template Context="order">
+                        @($"{order.CharacterName} [{order.CorporationTicker}]")
+                        @if (_isMergeAltsOption && order.Alts.Any())
+                        {
+                            <img src="@WebUiHelper.GetAsset("alt_ser_small.png")" class="text-center" title="@order.AltData" style="width: 16px; height: 16px;"/>
+                        }
+                    </Template>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="150px" FilterProperty="OreName" SortProperty="OreName"
+                                  Title="@LM.Get("msLedgerColumnOre")">
+                    <Template Context="order">
+                        <RadzenLabel Text="@order.OreName"/>
+                    </Template>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="200px" FilterProperty="Quantity" SortProperty="Quantity"
+                                  Title="@LM.Get("msLedgerColumnQuantity")">
+                    <Template Context="order">
+                        <RadzenLabel Text="@(order.Quantity.ToString())"/>
+                    </Template>
+                    <FooterTemplate>
+                        @LM.Get("msTotalVolume"): <b>@($"{(_ledgerList?.Sum(o => o.Quantity) * 10):N0} m3")</b>
+                    </FooterTemplate>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="200px" FilterProperty="Price" SortProperty="Price"
+                                  Title="@LM.Get("msLedgerColumnPrice")">
+                    <Template Context="order">
+                        <RadzenLabel Text="@($"{order.Price:N0} ISK")"/>
+                    </Template>
+                    <FooterTemplate>
+                        @LM.Get("msTotalIsk"): <b>@($"{_ledgerList?.Sum(o => o.Price):N0} ISK")</b>
+                    </FooterTemplate>
+                </RadzenGridColumn>
+            </Columns>
+        </RadzenGrid>
+        @if (_isLedgerLoading)
+        {
+            <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
+        }
+    </div>
+</div>
+
+@functions {
+
+    private MiningScheduleModule _module;
+    [Parameter] public WebMiningLedger Ledger { get; set; }
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    private ThdAuthUser _inspector;
+    private RadzenGrid<WebMiningLedgerEntry> _ledgerGrid;
+
+    private bool _isMergeAltsOption = true;
+    private bool _isLedgerLoading = true;
+    private int _countLedger;
+    private List<WebMiningLedgerEntry> _ledgerEntriesCache;
+    private List<WebMiningLedgerEntry> _ledgerEntriesMergedCache;
+    private List<WebMiningLedgerEntry> _ledgerList;
+
+    async Task Close() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        if (!MiningScheduleModule.HasViewAccess(user))
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+        _module = TickManager.GetModule<MiningScheduleModule>();
+        if (_module == null || !SettingsManager.Settings.Config.ModuleMiningSchedule)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _inspector = await DbHelper.GetAuthUser(user.Id, true);
+        if (_inspector == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        await Task.Factory.StartNew(async () =>
+        {
+            _ledgerEntriesCache = await _module.GetLedgerEntries(Ledger.StructureId, Ledger.FeederId);
+            _ledgerEntriesMergedCache = await _module.MergeLedgerEntries(_ledgerEntriesCache);
+            _isLedgerLoading = false;
+        });
+
+        await base.OnInitializedAsync();
+    }
+
+    private List<T> ApplyAjaxFilters<T>(IEnumerable<T> list, LoadDataArgs args, out int count)
+    {
+        var query = list.AsQueryable();
+        if (!string.IsNullOrEmpty(args.Filter))
+            query = query.Where(args.Filter);
+        count = query.Count();
+
+        if (!string.IsNullOrEmpty(args.OrderBy))
+            query = query.OrderBy(args.OrderBy);
+        //if (args.Skip.HasValue)
+        //   query = query.Skip(args.Skip.Value);
+        // if (args.Top.HasValue)
+        //    query = query.Take(args.Top.Value);
+        return query.ToList();
+    }
+
+    private async Task LoadLedgerData(LoadDataArgs args)
+    {
+        while (_isLedgerLoading)
+            await Task.Delay(100);
+
+        _ledgerList = ApplyAjaxFilters(_isMergeAltsOption ? _ledgerEntriesMergedCache : _ledgerEntriesCache, args, out _countLedger);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task MergeAltsChanged(bool value)
+    {
+        await _ledgerGrid.Reload();
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

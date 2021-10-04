@@ -7,7 +7,6 @@ using Discord;
 using Discord.Commands;
 using ThunderED.Classes;
 using ThunderED.Helpers;
-using ThunderED.Json.FleetUp;
 
 namespace ThunderED.Modules
 {

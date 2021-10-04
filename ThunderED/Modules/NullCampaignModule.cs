@@ -18,6 +18,7 @@ namespace ThunderED.Modules
 
         public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Null Campaigns module...", Category);
             var data = Settings.NullCampaignModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.LocationEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Location);
         }

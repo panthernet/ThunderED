@@ -13,9 +13,8 @@
     "language": "en-US",
     "useEnglishESIOnly": "true",
 
-    "moduleWebServer": false,
     "moduleAuthCheck": false,
-    "moduleAuthWeb": false,
+    "moduleAuthWeb": true,
     "moduleCharCorp": false,
     "moduleLiveKillFeed": false,
     "modulePriceCheck": false,
@@ -39,6 +38,10 @@
     "ModuleSovTracker": false,
     "ModuleWebConfigEditor": false,
     "ModuleIndustrialJobs": false,
+    "ModuleMiningSchedule": false,
+    "ModuleStructureManagement": false,
+    "ModuleMoonTable": false,
+    "ModuleStorageConsole": false,
 
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
@@ -57,12 +60,13 @@
     "RunAsServiceCompatibility": false,
     "DisableLogIntoFiles": false,
     "LanguageFilesFolder": "",
-    "EnableLegacyRestartLogic": false 
+    "EnableLegacyRestartLogic": false,
+    "EnableSwatch": false
   },
 
   "webServerModule": {
     "UsePortInUrl": true,
-    "webExternalIP": "IP",
+    "webExternalIP": "",
     "webExternalPort": 8001,
     "discordUrl": "https://discord.gg/xxxxxx",
     "ccpAppClientId": "REQUIRED",
@@ -112,6 +116,7 @@
         "FeedGroupKills": true,
         "FeedUrlsOnly": false,
         "StopOnFirstFilterMatch": true,
+        "FeedOnlyKillsWithRegisteredUsers": false, 
         "MessageTemplateFileName": "",
         "Filters": {
           "filter1": {
@@ -199,7 +204,7 @@
   "WebAuthModule": {
     "authCheckIntervalMinutes": 60,
     "AuthTakeNumberOfUsersPerPass": 100,
-
+    "DisplayFeedAuthWithoutRegistration": false,
     "StandingsRefreshIntervalInMinutes": 60,
     "exemptDiscordRoles": [ "Admins" ],
     "AuthCheckIgnoreRoles": [ "CustomDiscordRoleToSkipOnAuthCheck" ],
@@ -218,6 +223,7 @@
     "AuthButtonDiscordText": "Discord Auth",
     "authGroups": {
       "DefaultGroup": {
+        "IsEnabled": true,
         "AllowedMembers": {},
         "ManualAssignmentRoles": [],
         "CustomButtonText": "General Auth"
@@ -417,7 +423,7 @@
     "CheckIntervalInMinutes": 1,
     "MaxTrackingCount": 150,
     "UseOneAuthButton": false,
-    "AuthButtonDiscordText": "Industry Auth",
+    "AuthButtonDiscordText": "Contracts Auth",
     "Groups": {
       "group1": {
         "IsEnabled": false,
@@ -603,7 +609,7 @@
     "groups": {
       "groupName1": {
         "IsEnabled": true,
-        "CharacterEntities": [ ],
+        "CharacterEntities": [],
         "defaultDiscordChannelID": 0,
         "fetchLastNotifDays": 0,
         "filters": {
@@ -678,13 +684,14 @@
               "CorpKicked",
               "CorpNewCEOMsg",
               "CorpTaxChangeMsg",
-              "OwnershipTransferred"
+              "OwnershipTransferred",
+              "StructureImpendingAbandonmentAssetsAtRisk"
             ],
             "channelID": 0,
             "defaultMention": "@everyone",
-			"SpecialSettings": {
-				"DoNotReportNpcBashForCitadels": false
-			},
+            "SpecialSettings": {
+              "DoNotReportNpcBashForCitadels": false
+            },
             "charMentions": [],
             "roleMentions": []
           }
@@ -820,7 +827,9 @@
         "TrackADMIndexChanges": true,
         "TrackTCUHolderChanges": true,
         "TrackIHUBHolderChanges": true,
-        "DiscordChannelId": 0
+        "DiscordChannelId": 0,
+        "AdmIndexCheckTimeOfTheDay": "07:00:00",
+        "AdmDisplaySummary":  true 
       }
     }
   },
@@ -858,6 +867,58 @@
         "ButtonText": "Industry Auth"
       }
     }
-  }
+  },
+
+  "MiningScheduleModule": {
+    "AuthButtonDiscordText": "Mining Schedule Auth",
+    "AuthAccessEntities": [],
+    "Extractions": {
+      "ViewAccessEntities": [],
+      "ComplexAccess": {
+        "AccessEntry1": {
+          "Entities": [],
+          "CanManageOwnCorporation": false,
+          "StructureNames": []
+        }
+      }
+    },
+    "Ledger": {
+      "ViewAccessEntities": [],
+      "ComplexAccess": {
+        "AccessEntry1": {
+          "Entities": [],
+          "CanManageOwnCorporation": false,
+          "StructureNames": []
+        }
+      }
+    }
+  },
+
+  "StructureManagementModule": {
+    "AuthButtonDiscordText": "Structure Management Auth",
+    "AuthAccessEntities": [],
+    "ViewAccessEntities": [],
+    "ComplexAccess": {
+      "AccessEntry1": {
+        "Entities": [],
+        "StructureNames": [],
+        "CustomNotifications": {
+          "UnanchoringHours": [ 1, 24 ],
+          "UnanchoringDiscordChannelIds": []
+        }
+      }
+    }
+  },
+
+  "MoonTableModule": {
+    "ViewAccessEntities": [],
+    "LimitedAccessEntities": []
+  },
+
+  "StorageConsoleModule": {
+    "NameFormattingLength": 20,
+    "ListAccessRoles": [],
+    "EditAccessRoles": []
+  } 
 
 }

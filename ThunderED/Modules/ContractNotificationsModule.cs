@@ -19,134 +19,23 @@ namespace ThunderED.Modules
     public partial class ContractNotificationsModule : AppModuleBase
     {
         public override LogCat Category => LogCat.ContractNotif;
-        private readonly int _checkInterval;
+        private int _checkInterval;
         private DateTime _lastCheckTime = DateTime.MinValue;
 
         private readonly ConcurrentDictionary<long, string> _etokens = new ConcurrentDictionary<long, string>();
         private readonly ConcurrentDictionary<long, string> _corpEtokens = new ConcurrentDictionary<long, string>();
 
-        public ContractNotificationsModule()
+        public override async Task Initialize()
         {
+            await LogHelper.LogModule("Initializing Contracts module...", Category);
             _checkInterval = Settings.ContractNotificationsModule.CheckIntervalInMinutes;
             if (_checkInterval == 0)
                 _checkInterval = 1;
-            WebServerModule.ModuleConnectors.Add(Reason, OnAuthRequest);
-        }
 
-        public override async Task Initialize()
-        {
             await WebPartInitialization();
 
             var data = Settings.ContractNotificationsModule.GetEnabledGroups().ToDictionary(pair => pair.Key, pair => pair.Value.CharacterEntities);
             await ParseMixedDataArray(data, MixedParseModeEnum.Member);
-        }
-
-        private async Task<bool> OnAuthRequest(HttpListenerRequestEventArgs context)
-        {
-            if (!Settings.Config.ModuleContractNotifications) return false;
-
-            var request = context.Request;
-            var response = context.Response;
-
-            try
-            {
-                RunningRequestCount++;
-                var extPort = Settings.WebServerModule.WebExternalPort;
-                var port = Settings.WebServerModule.WebExternalPort;
-
-                if (request.HttpMethod == HttpMethod.Get.ToString())
-                {
-                    if (request.Url.LocalPath == "/callback" || request.Url.LocalPath == $"{extPort}/callback" ||
-                        request.Url.LocalPath == $"{port}/callback")
-                    {
-                        var clientID = Settings.WebServerModule.CcpAppClientId;
-                        var secret = Settings.WebServerModule.CcpAppSecret;
-                        var prms = request.Url.Query.TrimStart('?').Split('&');
-                        var code = prms[0].Split('=')[1];
-                        var state = prms.Length > 1 ? prms[1].Split('=')[1] : null;
-
-                        if (string.IsNullOrEmpty(state)) return false;
-                        if (state.StartsWith("opencontract"))
-                        {
-                            var contractId = Convert.ToInt64(state.Substring(12, state.Length - 12));
-                            var res = await APIHelper.ESIAPI.GetAuthToken(code, clientID, secret);
-                            if (string.IsNullOrEmpty(res[0]))
-                            {
-                                await WebServerModule.WriteResponce(
-                                    WebServerModule.GetAccessDeniedPage("Contracts Module",
-                                        LM.Get("contractFailedToOpen"), WebServerModule.GetWebSiteUrl()), response);
-                                return true;
-                            }
-
-                            if (await APIHelper.ESIAPI.OpenContractIngame(Reason, contractId, res[0]))
-                            {
-                                await WebServerModule.WriteResponce(LM.Get("contractOpened"), response);
-                            }
-                            else
-                            {
-                                await WebServerModule.WriteResponce(
-                                    WebServerModule.GetAccessDeniedPage("Contracts Module",
-                                        LM.Get("contractFailedToOpen"), WebServerModule.GetWebSiteUrl()), response);
-                            }
-
-                            return true;
-                        }
-
-                        if (!state.StartsWith("cauth")) return false;
-                       // var groupName = HttpUtility.UrlDecode(state.Replace("cauth", ""));
-
-                        var result = await WebAuthModule.GetCharacterIdFromCode(code, clientID, secret);
-                        if (result == null)
-                        {
-                            await WebServerModule.WriteResponce(
-                                WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"),
-                                    WebServerModule.GetAuthPageUrl()), response);
-                            return true;
-                        }
-
-                        var lCharId = Convert.ToInt64(result[0]);
-                        //var group = Settings.ContractNotificationsModule.GetEnabledGroups()[groupName];
-                        var chars = GetAllParsedCharactersWithGroups();
-                        string allowedGroup = null;
-                        foreach (var (group, allowedCharacterIds) in chars)
-                        {
-                            if (allowedCharacterIds.Contains(lCharId))
-                            {
-                                allowedGroup = group;
-                                break;
-                            }
-                        }
-
-                        if (string.IsNullOrEmpty(allowedGroup))
-                        {
-                            await WebServerModule.WriteResponce(
-                                WebServerModule.GetAccessDeniedPage("Contracts Module", LM.Get("accessDenied"),
-                                    WebServerModule.GetAuthPageUrl()), response);
-                            return true;
-                        }
-
-                        await SQLHelper.InsertOrUpdateTokens("", result[0], "", result[1]);
-                        await WebServerModule.WriteResponce(File
-                                .ReadAllText(SettingsManager.FileTemplateMailAuthSuccess)
-                                .Replace("{headerContent}", WebServerModule.GetHtmlResourceDefault(false))
-                                .Replace("{header}", "authTemplateHeader")
-                                .Replace("{body}", LM.Get("contractAuthSuccessHeader"))
-                                .Replace("{body2}", LM.Get("contractAuthSuccessBody"))
-                                .Replace("{backText}", LM.Get("backText")), response
-                        );
-                        return true;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx(ex.Message, ex, Category);
-            }
-            finally
-            {
-                RunningRequestCount--;
-            }
-            return false;
         }
 
         private static readonly List<string> _completeStatuses = new List<string> {"finished_issuer", "finished_contractor", "finished", "cancelled", "rejected", "failed", "deleted", "reversed"};
@@ -172,8 +61,8 @@ namespace ThunderED.Modules
                         if(characterID <=0) continue;
                         try
                         {
-                            var rtoken = await SQLHelper.GetRefreshTokenForContracts(characterID);
-                            if (rtoken == null)
+                            var rtoken = await DbHelper.GetToken(characterID, TokenEnum.Contract);
+                            if (string.IsNullOrEmpty(rtoken))
                             {
                                 await SendOneTimeWarning(characterID, $"Contracts feed token for character {characterID} not found! User is not authenticated.");
                                 continue;
@@ -183,8 +72,15 @@ namespace ThunderED.Modules
                             var token = tq.Result;
                             if (string.IsNullOrEmpty(token))
                             {
-                                if (tq.Data.IsNotValid)
-                                    await LogHelper.LogWarning($"Contracts token for character {characterID} is outdated or no more valid!", Category);
+                                if (tq.Data.IsNotValid && !tq.Data.IsNoConnection)
+                                {
+                                    await LogHelper.LogWarning(
+                                        $"Contracts token for character {characterID} is outdated or no more valid!",
+                                        Category);
+
+                                    await LogHelper.LogWarning($"Deleting invalid mail refresh token for {characterID}", Category);
+                                    await DbHelper.DeleteToken(characterID, TokenEnum.Contract);
+                                }
                                 else
                                     await LogHelper.LogWarning($"Unable to get contracts token for character {characterID}. Current check cycle will be skipped. {tq.Data.ErrorCode}({tq.Data.Message})", Category);
 
@@ -511,7 +407,7 @@ namespace ThunderED.Modules
                     typeName = LM.Get("contractTypeCourier");
                     days = contract.days_to_complete;
                     expire = (int) (contract.DateExpired - contract.DateIssued).Value.TotalDays;
-                    endLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.end_location_id, token))?.name ??
+                    endLocation = (await APIHelper.ESIAPI.GetUniverseStructureData(Reason, contract.end_location_id, token))?.name ??
                                   (await APIHelper.ESIAPI.GetStationData(Reason, contract.end_location_id, token))?.name;
                     endLocation = string.IsNullOrEmpty(endLocation) ? LM.Get("contractSomeCitadel") : endLocation;
                     break;
@@ -549,7 +445,7 @@ namespace ThunderED.Modules
 
             //location
 
-            var startLocation = (await APIHelper.ESIAPI.GetStructureData(Reason, contract.start_location_id, token))?.name ??
+            var startLocation = (await APIHelper.ESIAPI.GetUniverseStructureData(Reason, contract.start_location_id, token))?.name ??
                                 (await APIHelper.ESIAPI.GetStationData(Reason, contract.start_location_id, token))?.name;
             startLocation = string.IsNullOrEmpty(startLocation) ? LM.Get("contractSomeCitadel") : startLocation;
             var locationText = LM.Get("contractMsgIssued");
@@ -581,7 +477,7 @@ namespace ThunderED.Modules
                     embed.AddField(LM.Get("contractMsgVolume"), $"{contract.volume:N1} m3", true);
                 }
                 if (filter.ShowIngameOpen)
-                    embed.WithDescription($"[{LM.Get("contractOpenIngame")}]({WebServerModule.GetOpenContractURL(contract.contract_id)})");
+                    embed.WithDescription($"[{LM.Get("contractOpenIngame")}]({ServerPaths.GetOpenContractURL(contract.contract_id)})");
             }
             else
             {
@@ -666,7 +562,7 @@ namespace ThunderED.Modules
 
                 if (filter.ShowIngameOpen)
                 {
-                    embed.WithDescription($"[{LM.Get("contractOpenIngame")}]({WebServerModule.GetOpenContractURL(contract.contract_id)})\n");
+                    embed.WithDescription($"[{LM.Get("contractOpenIngame")}]({ServerPaths.GetOpenContractURL(contract.contract_id)})\n");
                 }
 
                 if (contract.type == "courier")

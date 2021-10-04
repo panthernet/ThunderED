@@ -1,16 +1,53 @@
-### V1.5.4
- + Added StructureImpendingAbandonmentAssetsAtRisk notification support
+### V2.0.11
++ Added StructureImpendingAbandonmentAssetsAtRisk notification support
++ Fixed some price check fails
 
-### V1.5.3
+### V2.0.10
++ Store old ledger stats in DB
++ Added AdmIndexCheckTimeOfTheDay and AdmDisplaySummary properties to sov tracker groups
++ Improved ADM check to run at specified time and allow to display summary
++ Fixed !char command
+
+### V2.0.9
++ Fixed DB cleanup
++ Fixed reg only LM feed
++ Fixed telegram + !timers command issue
++ Fixed unanchoring notification
++ Improved sov change messages
+
+### V2.0.8
+ + Added ability to calculate mining ISK by refine materials price if possible (improvements will follow)
+ + Added new ZKill group property `FeedOnlyKillsWithRegisteredUsers` to filter out kills by characters authed with this bot
+ + Fixed moon data import to support localizations
+ + Fixed MySQL error with tokens table (thanks to Aaron Static)
+ + Fixed alt registration
+ + Fixed standings feed auth
+
+ - Removed old web server and associated code for better maintainability
+ - Removed ModuleWebServer property from settings file
+
+### V2.0.5
+ + New flexible web shell called THDWebServer
+ + New Mining Schedule module with extraction timers and ledger
+ + New structure manager module with fuel and status info
+ + New Moon Table module to keep tracking of moon ore composition data
+ + New Storage Console module for simple Discord command management of resources stockpile
  + Added core type in the StructureOnline notification
  + Added abandoned flag to StructureDestroyed notification
  + Added ability to override language strings using the custom_language.json file in Data or root folder
  + Added several new properties to Telegram relay to allow/disallow messages based on string content and to block T->D or D->T relays separately
+ + Added timeout to ESI queries
+ + Added citadels to cache
  + Improved simple auth entity injection (less queries and faster loading)
+ + Improved invalid tokens handling
+ + Default config file will be created on startup
+ + Discord setup is now not necessary to run the web shell and modules though modules that require sensitive posting to Discord will be suspended
  + Fixed command symbol to accept string values (thanks to secondfry)
  + Fixed wallet balance to decimal
  + Fixed ability to disable auth checks
- + Fixed ability to disable ZKB module
+ + Fixed ability to disable ZKB module 
+ + Fixed invalid token check in HRM
+ + Fixed telegram module restart
 
 ### V1.5.2
  + Fixed sov tracking entities recognition
