@@ -110,9 +110,6 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
                 OnDemandModules.Add(new LiveKillFeedModule());
 
-           // if (SettingsManager.Settings.Config.ModuleRadiusKillFeed)
-           //     OnDemandModules.Add(new RadiusKillFeedModule());
-
             if (SettingsManager.Settings.Config.ModuleChatRelay)
                 OnDemandModules.Add(new ChatRelayModule());
 

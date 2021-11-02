@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 
 namespace ThunderED.Modules
