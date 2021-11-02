@@ -7,7 +7,7 @@
 
 ### Support with ISK: send donations to [Duke Veldspar](https://zkillboard.com/character/96496243/) character. Thank you!
 
-<a href="https://paypal.me/panthernet"><img src="http://joxi.ru/1A55agNCDKM9bA.jpg"></a>
+<a href="https://paypal.me/panthernet"><img src="https://www.paypalobjects.com/webstatic/mktg/logo-center/PP_Acceptance_Marks_for_LogoCenter_150x94.png"></a>
 
 ## Advantages
 * .NET Core powered multi-platform support (Win, Linux, Mac, etc.)
