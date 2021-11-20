@@ -288,7 +288,7 @@ namespace ThunderED.Modules
                 if (rChar == null)
                     return WebQueryResult.EsiFailure;
 
-                if (!HasAuthAccess(rChar))
+                if (!await HasAuthAccess(rChar))
                 {
                     await LogHelper.LogWarning($"Unauthorized feed request from {characterId}", Category);
                     var r = WebQueryResult.BadRequestToSystemAuth;
@@ -319,27 +319,37 @@ namespace ThunderED.Modules
 
         #region Auth checks
 
-        public static bool HasAuthAccess(in JsonClasses.CharacterData data)
+        public static async Task<bool> HasAuthAccess(JsonClasses.CharacterData data)
         {
             if (data == null) return false;
-            return HasAuthAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0);
+            return await HasAuthAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0);
         }
 
-        public static bool HasAuthAccess(WebAuthUserData data)
+        public static async Task<bool> HasAuthAccess(WebAuthUserData data)
         {
             if (data == null) return false;
-            return HasAuthAccess(data.Id, data.CorpId, data.AllianceId);
+            return await HasAuthAccess(data.Id, data.CorpId, data.AllianceId);
         }
 
-        private static bool HasAuthAccess(long id, long corpId, long allianceId)
+        private static async Task<bool> HasAuthAccess(long id, long corpId, long allianceId)
         {
             if (!SettingsManager.Settings.Config.ModuleStructureManagement) return false;
             var module = TickManager.GetModule<StructureManagementModule>();
 
-            return HasAccess(id, corpId, allianceId, module.ParsedAuthAccessMembersLists);
+            if (HasAccess(id, corpId, allianceId, module.ParsedAuthAccessMembersLists))
+                return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(id);
+            if (roles == null) return false;
+
+            if (SettingsManager.Settings.StructureManagementModule.AuthAccessDiscordRoles != null &&
+                roles.Intersect(SettingsManager.Settings.StructureManagementModule.AuthAccessDiscordRoles)
+                    .Any())
+                return true;
+            return false;
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Security check for access
         /// </summary>
         public static bool HasViewAccess(in JsonClasses.CharacterData data)
@@ -348,17 +358,27 @@ namespace ThunderED.Modules
             if (!SettingsManager.Settings.Config.ModuleStructureManagement) return false;
             var module = TickManager.GetModule<StructureManagementModule>();
             return HasAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedViewAccessMembersLists);
-        }
+        }*/
 
         /// <summary>
         /// Security check for access
         /// </summary>
-        public static bool HasViewAccess(WebAuthUserData data)
+        public static async Task<bool> HasViewAccess(WebAuthUserData data)
         {
             if (data == null) return false;
             if (!SettingsManager.Settings.Config.ModuleStructureManagement) return false;
             var module = TickManager.GetModule<StructureManagementModule>();
-            return HasAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedViewAccessMembersLists);
+            if (HasAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedViewAccessMembersLists))
+                return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(data.Id);
+            if (roles == null) return false;
+
+            if (SettingsManager.Settings.StructureManagementModule.ViewAccessDiscordRoles != null &&
+                roles.Intersect(SettingsManager.Settings.StructureManagementModule.ViewAccessDiscordRoles)
+                    .Any())
+                return true;
+            return false;
         }
 
         #endregion
@@ -396,14 +416,14 @@ namespace ThunderED.Modules
 
         #region Manage access checks
 
-        public static bool HasManageAccess(in JsonClasses.CharacterData data, out string groupName)
+        /*public static bool HasManageAccess(in JsonClasses.CharacterData data, out string groupName)
         {
             groupName = null;
             if (data == null) return false;
             if (!SettingsManager.Settings.Config.ModuleStructureManagement) return false;
             var module = TickManager.GetModule<StructureManagementModule>();
             return HasAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedManageAccessMembersLists, out groupName);
-        }
+        }*/
 
         public static bool HasManageAccess(WebAuthUserData data, out string groupName)
         {
@@ -411,7 +431,20 @@ namespace ThunderED.Modules
             if (data == null) return false;
             if (!SettingsManager.Settings.Config.ModuleStructureManagement) return false;
             var module = TickManager.GetModule<StructureManagementModule>();
-            return HasAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedManageAccessMembersLists, out groupName);
+            if (HasAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedManageAccessMembersLists, out groupName))
+                return true;
+
+            var roles = DiscordHelper.GetDiscordRoles(data.Id).GetAwaiter().GetResult();
+            if (roles == null) return false;
+
+            foreach (var (key, value) in SettingsManager.Settings.MiningScheduleModule.Ledger.ComplexAccess)
+                if (value.DiscordRoles != null &&
+                    roles.Intersect(value.DiscordRoles).Any())
+                {
+                    groupName = key;
+                    return true;
+                }
+            return false;
         }
         /*/// <summary>
         /// Global access flag to ledger operations

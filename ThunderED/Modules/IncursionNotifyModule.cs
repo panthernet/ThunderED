@@ -13,8 +13,7 @@ namespace ThunderED.Modules
     {
         public override LogCat Category => LogCat.Incursions;
 
-        private DateTime _runAt = DateTime.UtcNow.Date + TimeSpan.FromHours(11) + TimeSpan.FromMinutes(5);
-        private bool _isChecked;
+        private DateTime? _lastTimersCheck;
 
         public override async Task Initialize()
         {
@@ -28,61 +27,57 @@ namespace ThunderED.Modules
             IsRunning = true;
             try
             {
-                if (_runAt.Date != DateTime.UtcNow.Date)
+                if (_lastTimersCheck != null && (DateTime.Now - _lastTimersCheck.Value).TotalMinutes <= 2) return;
+                _lastTimersCheck = DateTime.Now;
+
+                if (!await APIHelper.ESIAPI.IsServerOnline(Reason))
                 {
-                    _isChecked = false;
-                    _runAt = DateTime.UtcNow.Date + TimeSpan.FromHours(11) + TimeSpan.FromMinutes(5);
+                    await Task.Delay(1000);
+                    return;
                 }
 
-                if (_runAt < DateTime.UtcNow && !_isChecked)
+                var channel = APIHelper.DiscordAPI.GetChannel(Settings.IncursionNotificationModule.DiscordChannelId);
+                if (channel == null)
                 {
-                    if (!await APIHelper.ESIAPI.IsServerOnline(Reason))
-                    {
-                        await Task.Delay(1000);
-                        return;
-                    }
-
-                    var channel = APIHelper.DiscordAPI.GetChannel(Settings.IncursionNotificationModule.DiscordChannelId);
-                    if (channel == null)
-                    {
-                        await LogHelper.LogError(
-                            "IncursionNotificationModule is not configured properly! Make sure you have correct channel specified and bot have correct access rights!");
-                        return;
-                    }
-                    await LogHelper.LogModule("Running Incursions module check...", Category);
-
-                    var incursions = await APIHelper.ESIAPI.GetIncursions(Reason);
-                    if (incursions == null) return;
-                    _isChecked = true;
-
-                    var regionIds = GetParsedRegions("default") ?? new List<long>();
-                    var constIds = GetParsedConstellations("default") ?? new List<long>();
-                    var systemIds = GetParsedSolarSystems("default") ?? new List<long>();
-
-                    var sysIds = constIds.SelectMany(a =>
-                        (SQLHelper.GetSystemsByConstellation(a).GetAwaiter().GetResult())
-                        ?.Select(b => b.system_id)).ToList();
-                    sysIds.AddRange(regionIds.SelectMany(a =>
-                        (SQLHelper.GetSystemsByRegion(a).GetAwaiter().GetResult())
-                        ?.Select(b => b.system_id)));
-                    sysIds.AddRange(systemIds);
-                    sysIds = sysIds.Distinct().ToList();
-
-                    foreach (var incursion in incursions)
-                    {
-                        if (constIds.Count == 0 && regionIds.Count == 0 && systemIds.Count == 0)
-                        {
-                            await ReportIncursion(incursion, null, channel);
-                            continue;
-                        }
-
-                        var result = incursion.infested_solar_systems.Intersect(sysIds).Any();
-                        if (result)
-                            await ReportIncursion(incursion, null, channel);
-                    }
-
-                    await SQLHelper.DeleteWhereIn("incursions", "constId", incursions.Select(a => a.constellation_id).ToList(), not:true);
+                    await LogHelper.LogError(
+                        "IncursionNotificationModule is not configured properly! Make sure you have correct channel specified and bot have correct access rights!");
+                    return;
                 }
+
+                await LogHelper.LogModule("Running Incursions module check...", Category);
+
+                var incursions = await APIHelper.ESIAPI.GetIncursions(Reason);
+                if (incursions == null) return;
+
+                var regionIds = GetParsedRegions("default") ?? new List<long>();
+                var constIds = GetParsedConstellations("default") ?? new List<long>();
+                var systemIds = GetParsedSolarSystems("default") ?? new List<long>();
+
+                var sysIds = constIds.SelectMany(a =>
+                    (SQLHelper.GetSystemsByConstellation(a).GetAwaiter().GetResult())
+                    ?.Select(b => b.system_id)).ToList();
+                sysIds.AddRange(regionIds.SelectMany(a =>
+                    (SQLHelper.GetSystemsByRegion(a).GetAwaiter().GetResult())
+                    ?.Select(b => b.system_id)));
+                sysIds.AddRange(systemIds);
+                sysIds = sysIds.Distinct().ToList();
+
+                foreach (var incursion in incursions)
+                {
+                    if (constIds.Count == 0 && regionIds.Count == 0 && systemIds.Count == 0)
+                    {
+                        await ReportIncursion(incursion, null, channel);
+                        continue;
+                    }
+
+                    var result = incursion.infested_solar_systems.Intersect(sysIds).Any();
+                    if (result)
+                        await ReportIncursion(incursion, null, channel);
+                }
+
+                await SQLHelper.DeleteWhereIn("incursions", "constId",
+                    incursions.Select(a => a.constellation_id).ToList(), not: true);
+
             }
             catch (Exception ex)
             {
@@ -99,12 +94,9 @@ namespace ThunderED.Modules
         {
             var result = await SQLHelper.IsIncurionExists(incursion.constellation_id);
             //skip existing incursion report
-            var isUpdate = result && Settings.IncursionNotificationModule.ReportIncursionStatusAfterDT;
-            if(!isUpdate && result)
+            if(result)
                 return;
-
-            if (!isUpdate)
-                await SQLHelper.AddIncursion(incursion.constellation_id);
+            await SQLHelper.AddIncursion(incursion.constellation_id);
 
             c ??= await APIHelper.ESIAPI.GetConstellationData(Reason, incursion.constellation_id);
             var r = await APIHelper.ESIAPI.GetRegionData(Reason, c.region_id);
@@ -116,9 +108,10 @@ namespace ThunderED.Modules
                 sb.Append(" | ");
             }
             sb.Remove(sb.Length - 3, 2);
-
-            var x = new EmbedBuilder().WithTitle(isUpdate ? LM.Get("incursionUpdateHeader", c.name, r.name) : LM.Get("incursionNewHeader", c.name, r.name))                
-                .WithColor(isUpdate ? new Color(0x000045) : new Color(0xdd5353))
+            //LM.Get("incursionUpdateHeader", c.name, r.name)
+            //new Color(0x000045)
+            var x = new EmbedBuilder().WithTitle(LM.Get("incursionNewHeader", c.name, r.name))                
+                .WithColor(new Color(0xdd5353))
                 .WithThumbnailUrl(Settings.Resources.ImgIncursion)
                 .AddField(LM.Get("incursionInfestedSystems"), sb.ToString())
                 .AddField(LM.Get("incursionInfluence"), (incursion.influence).ToString("P"), true)

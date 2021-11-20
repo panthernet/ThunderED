@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
@@ -13,23 +14,49 @@ namespace ThunderED.Modules
             await Task.CompletedTask;
         }
 
-        public static bool HasWebAccess(long id, long corpId, long allianceId)
+        public static async Task<bool> HasWebAccess(WebAuthUserData usr)
         {
             if (!SettingsManager.Settings.Config.ModuleTimers) return false;
             var module = TickManager.GetModule<TimersModule>();
             if (module == null) return false;
-            return module.GetAllCharacterIds().Contains(id) || module.GetAllCorporationIds().Contains(corpId) ||
-                   module.GetAllAllianceIds().Contains(allianceId);
+
+
+            var result =  module.GetAllCharacterIds().Contains(usr.Id) || module.GetAllCorporationIds().Contains(usr.CorpId) ||
+                   module.GetAllAllianceIds().Contains(usr.AllianceId);
+            if (result) return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(usr.Id);
+            if (roles == null) return false;
+
+            foreach (var group in SettingsManager.Settings.TimersModule.AccessList.Values)
+            {
+                if (group.FilterDiscordRoles != null && roles.Intersect(group.FilterDiscordRoles)
+                    .Any())
+                    return true;
+            }
+
+            return false;
         }
 
-        public static bool HasWebEditorAccess(in long userId, in long corpId, in long allyId)
+        public static async Task<bool> HasWebEditorAccess(WebAuthUserData usr)
         {
-            //todo discord roles check
             if (!SettingsManager.Settings.Config.ModuleTimers) return false;
             var module = TickManager.GetModule<TimersModule>();
-            return module.GetAllParsedCharacters(module.ParsedEditLists).Contains(userId) ||
-                   module.GetAllParsedCorporations(module.ParsedEditLists).Contains(corpId) ||
-                   module.GetAllParsedAlliances(module.ParsedEditLists).Contains(allyId);
+            var result = module.GetAllParsedCharacters(module.ParsedEditLists).Contains(usr.Id) ||
+                   module.GetAllParsedCorporations(module.ParsedEditLists).Contains(usr.CorpId) ||
+                   module.GetAllParsedAlliances(module.ParsedEditLists).Contains(usr.AllianceId);
+            if (result) return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(usr.Id);
+            if (roles == null || !roles.Any()) return false;
+            foreach (var group in SettingsManager.Settings.TimersModule.AccessList.Values)
+            {
+                if (group.FilterDiscordRoles != null && roles.Intersect(group.FilterDiscordRoles)
+                    .Any())
+                    return true;
+            }
+
+            return false;
         }
 
         public static async Task<string> SaveTimer(WebTimerData data, WebAuthUserData user)

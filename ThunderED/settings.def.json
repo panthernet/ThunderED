@@ -796,8 +796,7 @@
   "incursionNotificationModule": {
     "DiscordChannelId": 0,
     "DefaultMention": "@everyone",
-    "LocationEntities": [],
-    "ReportIncursionStatusAfterDT": true
+    "LocationEntities": []
   },
 
   "NullCampaignModule": {
@@ -872,11 +871,14 @@
   "MiningScheduleModule": {
     "AuthButtonDiscordText": "Mining Schedule Auth",
     "AuthAccessEntities": [],
+    "AuthAccessDiscordRoles": [],
     "Extractions": {
       "ViewAccessEntities": [],
+      "ViewAccessDiscordRoles": [],
       "ComplexAccess": {
         "AccessEntry1": {
           "Entities": [],
+          "DiscordRoles": [],
           "CanManageOwnCorporation": false,
           "StructureNames": []
         }
@@ -884,9 +886,11 @@
     },
     "Ledger": {
       "ViewAccessEntities": [],
+      "ViewAccessDiscordRoles": [],
       "ComplexAccess": {
         "AccessEntry1": {
           "Entities": [],
+          "DiscordRoles": [],
           "CanManageOwnCorporation": false,
           "StructureNames": []
         }
@@ -897,10 +901,13 @@
   "StructureManagementModule": {
     "AuthButtonDiscordText": "Structure Management Auth",
     "AuthAccessEntities": [],
+    "AuthAccessDiscordRoles": [],
     "ViewAccessEntities": [],
+    "ViewAccessDiscordRoles": [],
     "ComplexAccess": {
       "AccessEntry1": {
         "Entities": [],
+        "DiscordRoles": [],
         "StructureNames": [],
         "CustomNotifications": {
           "UnanchoringHours": [ 1, 24 ],
@@ -912,7 +919,9 @@
 
   "MoonTableModule": {
     "ViewAccessEntities": [],
-    "LimitedAccessEntities": []
+    "ViewAccessDiscordRoles": [],
+    "LimitedAccessEntities": [],
+    "LimitedAccessDiscordRoles": []
   },
 
   "StorageConsoleModule": {

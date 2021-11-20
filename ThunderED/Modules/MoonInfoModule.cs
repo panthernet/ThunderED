@@ -57,27 +57,47 @@ namespace ThunderED.Modules
 
         #region Access
 
-        public static bool HasAccess(WebAuthUserData user)
+        public static async Task<bool> HasAccess(WebAuthUserData user)
         {
-            return HasViewAccess(user) || HasLimitedAccess(user);
+            return await HasViewAccess(user) || await HasLimitedAccess(user);
         }
 
-        public static bool HasViewAccess(WebAuthUserData user)
+        public static async Task<bool> HasViewAccess(WebAuthUserData user)
         {
             if (!SettingsManager.Settings.Config.ModuleMoonTable) return false;
             var module = TickManager.GetModule<MoonInfoModule>();
-            return GetAllCharacterIds(module.ParsedViewAccessLists).Contains(user.Id) ||
-                   GetAllCorporationIds(module.ParsedViewAccessLists).Contains(user.CorpId) || (user.AllianceId > 0 &&
-                       GetAllAllianceIds(module.ParsedViewAccessLists).Contains(user.AllianceId));
+            if (GetAllCharacterIds(module.ParsedViewAccessLists).Contains(user.Id) ||
+                GetAllCorporationIds(module.ParsedViewAccessLists).Contains(user.CorpId) || (user.AllianceId > 0 &&
+                    GetAllAllianceIds(module.ParsedViewAccessLists).Contains(user.AllianceId)))
+                return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(user.Id);
+            if (roles == null) return false;
+
+            if (SettingsManager.Settings.MoonTableModule.ViewAccessDiscordRoles != null &&
+                roles.Intersect(SettingsManager.Settings.MoonTableModule.ViewAccessDiscordRoles)
+                    .Any())
+                return true;
+            return false;
         }
 
-        public static bool HasLimitedAccess(WebAuthUserData user)
+        public static async Task<bool> HasLimitedAccess(WebAuthUserData user)
         {
             if (!SettingsManager.Settings.Config.ModuleMoonTable) return false;
             var module = TickManager.GetModule<MoonInfoModule>();
-            return GetAllCharacterIds(module.ParsedLimitedAccessLists).Contains(user.Id) ||
-                   GetAllCorporationIds(module.ParsedLimitedAccessLists).Contains(user.CorpId) || (user.AllianceId > 0 &&
-                       GetAllAllianceIds(module.ParsedLimitedAccessLists).Contains(user.AllianceId));
+            if (GetAllCharacterIds(module.ParsedLimitedAccessLists).Contains(user.Id) ||
+                GetAllCorporationIds(module.ParsedLimitedAccessLists).Contains(user.CorpId) || (user.AllianceId > 0 &&
+                    GetAllAllianceIds(module.ParsedLimitedAccessLists).Contains(user.AllianceId)))
+                return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(user.Id);
+            if (roles == null) return false;
+
+            if (SettingsManager.Settings.MoonTableModule.LimitedAccessDiscordRoles != null &&
+                roles.Intersect(SettingsManager.Settings.MoonTableModule.LimitedAccessDiscordRoles)
+                    .Any())
+                return true;
+            return false;
         }
 
         private static List<long> GetAllCharacterIds(Dictionary<string, Dictionary<string, List<long>>> dic)

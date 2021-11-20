@@ -49,12 +49,12 @@
                 <a href="@GetIndustryAuthURL()" class="btn btn-info btn-block" role="button">@GetIndustryAuthText()</a>
             }
             <!-- MINING SCHEDULE BUTTON -->
-            @if ((MiningScheduleModule.HasAuthAccess(UserData) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleMiningSchedule)
+            @if ((MiningScheduleModule.HasAuthAccess(UserData).GetAwaiter().GetResult() || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleMiningSchedule)
             {
                 <a href="@GetMiningScheduleAuthURL()" class="btn btn-info btn-block" role="button">@GetMiningScheduleAuthText()</a>
             }
             <!-- STRUCTURES BUTTON -->
-            @if ((StructureManagementModule.HasAuthAccess(UserData) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleStructureManagement)
+            @if ((StructureManagementModule.HasAuthAccess(UserData).GetAwaiter().GetResult() || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleStructureManagement)
             {
                 <a href="@GetStructuresAuthURL()" class="btn btn-info btn-block" role="button">@GetStructuresAuthText()</a>
             }
@@ -156,7 +156,7 @@
 
     private string GetStandsAuthText()
     {
-        var grp = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().FirstOrDefault(a => a.Value.StandingsAuth != null).Value;
+        var grp = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().FirstOrDefault(a => a.Value.StandingsAuth != null && a.Value.IsEnabled).Value;
         return grp?.CustomButtonText;
     }
 }

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>D:\Projects\EVE\ThunderED\THD\THDWebServer\bin\Release\publish\windows</_PublishTargetUrl>
+    <History>True|2021-11-02T16:51:04.3709000Z;</History>
+  </PropertyGroup>
+</Project>

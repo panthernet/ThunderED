@@ -169,12 +169,12 @@
 
         string groupName = null;
         _hasExtractionsEditAccess = MiningScheduleModule.HasExtrEditAccess(user, out groupName);
-        _hasExtractionsViewAccess = _hasExtractionsEditAccess || MiningScheduleModule.HasObserverExtrViewAccess(user);
+        _hasExtractionsViewAccess = _hasExtractionsEditAccess || await MiningScheduleModule.HasObserverExtrViewAccess(user);
         if (_hasExtractionsEditAccess && !string.IsNullOrEmpty(groupName))
             _extractionGroup = SettingsManager.Settings.MiningScheduleModule.Extractions.ComplexAccess.FirstOrDefault(a => a.Key.Equals(groupName, StringComparison.OrdinalIgnoreCase)).Value;
 
         _hasLedgerEditAccess = MiningScheduleModule.HasLedgerEditAccess(user, out groupName);
-        _hasLedgerViewAccess = _hasLedgerEditAccess || MiningScheduleModule.HasObserverLedgerViewAccess(user);
+        _hasLedgerViewAccess = _hasLedgerEditAccess || await MiningScheduleModule.HasObserverLedgerViewAccess(user);
         if (_hasLedgerEditAccess && !string.IsNullOrEmpty(groupName))
             _ledgerGroup = SettingsManager.Settings.MiningScheduleModule.Ledger.ComplexAccess.FirstOrDefault(a => a.Key.Equals(groupName, StringComparison.OrdinalIgnoreCase)).Value;
 

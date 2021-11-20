@@ -151,11 +151,19 @@ namespace ThunderED
     public class MoonTableSettings
     {
 #if EDITOR
+        [Comment("List of entities with full access to the moon tables")]
         public ObservableCollection<object> ViewAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of Discord roles with full access to the moon tables")]
+        public ObservableCollection<string> ViewAccessDiscordRoles { get; set; } = new ObservableCollection<string>();
+        [Comment("List of entities with limited access to the moon tables")]
         public ObservableCollection<object> LimitedAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of Discord roles with limited access to the moon tables")]
+        public ObservableCollection<string> LimitedAccessDiscordRoles { get; set; } = new ObservableCollection<string>();
 #else
         public List<object> ViewAccessEntities { get; set; } = new List<object>();
+        public List<string> ViewAccessDiscordRoles { get; set; } = new List<string>();
         public List<object> LimitedAccessEntities { get; set; } = new List<object>();
+        public List<string> LimitedAccessDiscordRoles { get; set; } = new List<string>();
 #endif
     }
 
@@ -1597,8 +1605,7 @@ namespace ThunderED
         [Comment("Numeric Discord channel ID")]
         [Required]
         public ulong DiscordChannelId { get; set; }
-        [Comment("Set to **True** if you want bot to post status update about existing incursions. \nSet to **False** to report only new incursions")]
-        public bool ReportIncursionStatusAfterDT { get; set; }
+
         [Comment("Optional default mention for Incursions report. Default: @everyone")]
         public string DefaultMention { get; set; } = "@everyone";
 #if EDITOR
@@ -1849,15 +1856,20 @@ namespace ThunderED
         public string AuthButtonDiscordText { get; set; } = "Structure Management Auth";
 #if EDITOR
         [Comment("List of names and Ids of entities (char/corp/alliance) with access to the ledger")]
-        [Required]
         public ObservableCollection<object> ViewAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of Discord roles with access to the ledger")]
+        public ObservableCollection<string> ViewAccessDiscordRoles { get; set; } = new ObservableCollection<string>();
+
         [Comment("List of names and Ids of entities (char/corp/alliance) who can register as feeders")]
-        [Required]
         public ObservableCollection<object> AuthAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of Discord roles who can register as feeders")]
+        public ObservableCollection<string> AuthAccessDiscordRoles { get; set; } = new ObservableCollection<string>();
         [Comment("The list of groups to control access to the structure management")]
-        public ObservableDictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new ObservableDictionary<string, MiningComplexAccessGroup>();        
+        public ObservableDictionary<string, StructureAccessGroup> ComplexAccess { get; set; } = new ObservableDictionary<string, StructureAccessGroup>();
 #else
         public List<object> ViewAccessEntities { get; set; } = new List<object>();
+        public List<string> ViewAccessDiscordRoles { get; set; } = new List<string>();
+        public List<string> AuthAccessDiscordRoles { get; set; } = new List<string>();
         public List<object> AuthAccessEntities { get; set; } = new List<object>();
         public Dictionary<string, StructureAccessGroup> ComplexAccess { get; set; } = new Dictionary<string, StructureAccessGroup>();
 #endif
@@ -1868,13 +1880,15 @@ namespace ThunderED
 #if EDITOR
 
         [Comment("List of names and Ids of entities (char/corp/alliance) who can have access to this group")]
-        [Required]
         public ObservableCollection<object> Entities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of Discord roles who can have access to this group")]
+        public ObservableCollection<string> DiscordRoles { get; set; } = new ObservableCollection<string>();
         [Required]
         [Comment("List of structure names that group can manage. Case insensitive.")]
         public ObservableCollection<string> StructureNames { get; set; } = new ObservableCollection<string>();
 #else
         public List<object> Entities { get; set; } = new List<object>();
+        public List<string> DiscordRoles { get; set; } = new List<string>();
         public List<string> StructureNames { get; set; } = new List<string>();
 #endif
         [Comment("Set to True to allow all specified entities manage any accessible structures that belong to their corporations")]
@@ -1903,10 +1917,12 @@ namespace ThunderED
 #if EDITOR
 
         [Comment("List of names and Ids of entities (char/corp/alliance) who can register as feeders")]
-        [Required]
         public ObservableCollection<object> AuthAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of Discord roles who can register as feeders")]
+        public ObservableCollection<string> AuthAccessDiscordRoles { get; set; } = new ObservableCollection<string>();
 #else
         public List<object> AuthAccessEntities { get; set; } = new List<object>();
+        public List<string> AuthAccessDiscordRoles { get; set; } = new List<string>();
 #endif
         public MiningScheduleExtractionsSection Extractions { get; set; } = new MiningScheduleExtractionsSection();
         public MiningScheduleLedgersSection Ledger { get; set; } = new MiningScheduleLedgersSection();
@@ -1916,12 +1932,14 @@ namespace ThunderED
     {
 #if EDITOR
         [Comment("List of names and Ids of entities (char/corp/alliance) with access to the ledger")]
-        [Required]
         public ObservableCollection<object> ViewAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of Discord roles with access to the ledger")]
+        public ObservableCollection<string> ViewAccessDiscordRoles { get; set; } = new ObservableCollection<string>();
         [Comment("The list of groups to control access to the Ledger")]
-        public ObservableDictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new ObservableDictionary<string, MiningComplexAccessGroup>();        
+        public ObservableDictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new ObservableDictionary<string, MiningComplexAccessGroup>();
 #else
         public List<object> ViewAccessEntities { get; set; } = new List<object>();
+        public List<string> ViewAccessDiscordRoles { get; set; } = new List<string>();
         public Dictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new Dictionary<string, MiningComplexAccessGroup>();
 #endif
     }
@@ -1931,13 +1949,15 @@ namespace ThunderED
 #if EDITOR
 
         [Comment("List of names and Ids of entities (char/corp/alliance) who can have access to this group")]
-        [Required]
         public ObservableCollection<object> Entities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of Discord roles who can have access to this group")]
+        public ObservableCollection<string> DiscordRoles { get; set; } = new ObservableCollection<string>();
         [Required]
         [Comment("List of structure names that group can manage. Case insensitive.")]
         public ObservableCollection<string> StructureNames { get; set; } = new ObservableCollection<string>();
 #else
         public List<object> Entities { get; set; } = new List<object>();
+        public List<string> DiscordRoles { get; set; } = new List<string>();
         public List<string> StructureNames { get; set; } = new List<string>();
 #endif
         [Comment("Set to True to allow all specified entities manage any accessible structures that belong to their corporations")]
@@ -1948,12 +1968,14 @@ namespace ThunderED
     {
 #if EDITOR
         [Comment("List of names and Ids of entities (char/corp/alliance) with access to the extractions list")]
-        [Required]
         public ObservableCollection<object> ViewAccessEntities { get; set; } = new ObservableCollection<object>();
+        [Comment("List of Discord roles with access to the extractions list")]
+        public ObservableCollection<string> ViewAccessDiscordRoles { get; set; } = new ObservableCollection<string>();
         [Comment("The list of groups to control access to the moon extractions")]
-        public ObservableDictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new ObservableDictionary<string, MiningComplexAccessGroup>();        
+        public ObservableDictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new ObservableDictionary<string, MiningComplexAccessGroup>();
 #else
         public List<object> ViewAccessEntities { get; set; } = new List<object>();
+        public List<string> ViewAccessDiscordRoles { get; set; } = new List<string>();
         public Dictionary<string, MiningComplexAccessGroup> ComplexAccess { get; set; } = new Dictionary<string, MiningComplexAccessGroup>();
 #endif
     }

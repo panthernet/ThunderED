@@ -1,3 +1,10 @@
+### V2.0.12
++ Added Discord role access for MiningSchedule module
++ Added Discord role access for Structures module
++ Added Discord role access for Moons module
++ Fixed Timers access by Discord roles
++ Reworked Incursions module: removed `ReportIncursionStatusAfterDT` option and made module to check for new incursions within several minutes
+
 ### V2.0.11
 + Added StructureImpendingAbandonmentAssetsAtRisk notification support
 + Added StructureItemsMovedToSafety notification support

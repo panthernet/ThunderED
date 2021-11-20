@@ -149,8 +149,8 @@
 
         _module = TickManager.GetModule<MoonInfoModule>();
 
-        _hasViewAccess = MoonInfoModule.HasViewAccess(user);
-        _hasLimitedAccess = MoonInfoModule.HasLimitedAccess(user);
+        _hasViewAccess = await MoonInfoModule.HasViewAccess(user);
+        _hasLimitedAccess = await MoonInfoModule.HasLimitedAccess(user);
 
         if (!_hasViewAccess && !_hasLimitedAccess)
         {

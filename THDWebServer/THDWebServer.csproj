@@ -6,7 +6,9 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <Configurations>Debug;Release;DebugNoReg</Configurations>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
   </PropertyGroup>
+
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;WEB</DefineConstants>

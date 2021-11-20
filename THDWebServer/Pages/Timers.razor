@@ -126,7 +126,7 @@
             return;
         }
 
-        _isEditor = TimersModule.HasWebEditorAccess(user.Id, user.CorpId, user.AllianceId);
+        _isEditor = await TimersModule.HasWebEditorAccess(user);
 
         _timers = await SQLHelper.SelectTimers();
 

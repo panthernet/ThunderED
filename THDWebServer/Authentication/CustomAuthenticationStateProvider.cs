@@ -73,28 +73,28 @@ namespace THDWebServer.Authentication
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_HRM));
             }
-            if (TimersModule.HasWebAccess(usr.Id, usr.CorpId, usr.AllianceId))
+            if (await TimersModule.HasWebAccess(usr))
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_TIMERS));
             }
-            if (MiningScheduleModule.HasViewAccess(usr))
+            if (await MiningScheduleModule.HasViewAccess(usr))
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_MINING_SCHEDULE));
             }
 
-            if (StructureManagementModule.HasViewAccess(usr) || StructureManagementModule.HasManageAccess(usr, out _))
+            if (await StructureManagementModule.HasViewAccess(usr) || StructureManagementModule.HasManageAccess(usr, out _))
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_STRUCTURES));
             }
 
-            if (MoonInfoModule.HasAccess(usr))
+            if (await MoonInfoModule.HasAccess(usr))
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_MOON_TABLE));
             }
 
             if (ContractNotificationsModule.HasAuthAccess(usr.Id) || IndustrialJobsModule.HasAuthAccess(usr.Id) ||
                 MailModule.HasAuthAccess(usr.Id) || NotificationModule.HasAuthAccess(usr.Id) || WebAuthModule.HasAuthAccess(usr.Id)
-                || MiningScheduleModule.HasAuthAccess(usr))
+                || await MiningScheduleModule.HasAuthAccess(usr))
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_FEED_AUTH));
             }

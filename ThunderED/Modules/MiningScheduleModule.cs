@@ -111,7 +111,7 @@ namespace ThunderED.Modules
                 if(rChar == null)
                     return WebQueryResult.EsiFailure;
 
-                if (!HasAuthAccess(rChar))
+                if (!await HasAuthAccess(rChar))
                 {
                     await LogHelper.LogWarning($"Unauthorized feed request from {characterId}", Category);
                     var r = WebQueryResult.BadRequestToSystemAuth;
@@ -394,20 +394,40 @@ namespace ThunderED.Modules
         /// <summary>
         /// Admin access to observer all extractions operations
         /// </summary>
-        public static bool HasObserverExtrViewAccess(in JsonClasses.CharacterData data)
+        public static async Task<bool> HasObserverExtrViewAccess(JsonClasses.CharacterData data)
         {
             if (data == null) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
-            return HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedExtrViewAccessMembersLists);
+            if (HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0,
+                module.ParsedExtrViewAccessMembersLists))
+                return true;
+            var roles = await DiscordHelper.GetDiscordRoles(data.character_id);
+            if (roles == null) return false;
+
+            if (SettingsManager.Settings.MiningScheduleModule.Extractions.ViewAccessDiscordRoles != null &&
+                roles.Intersect(SettingsManager.Settings.MiningScheduleModule.Extractions.ViewAccessDiscordRoles)
+                    .Any())
+                return true;
+            return false;
         }
         /// <summary>
         /// Admin access to observer all extractions operations
         /// </summary>
-        public static bool HasObserverExtrViewAccess(WebAuthUserData data)
+        public static async Task<bool> HasObserverExtrViewAccess(WebAuthUserData data)
         {
             if (data == null) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
-            return HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedExtrViewAccessMembersLists);
+            if (HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedExtrViewAccessMembersLists))
+                return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(data.Id);
+            if (roles == null) return false;
+
+            if (SettingsManager.Settings.MiningScheduleModule.Extractions.ViewAccessDiscordRoles != null &&
+                roles.Intersect(SettingsManager.Settings.MiningScheduleModule.Extractions.ViewAccessDiscordRoles)
+                    .Any())
+                return true;
+            return false;
         }
 
         public static bool HasExtrEditAccess(in JsonClasses.CharacterData data, out string groupName)
@@ -415,7 +435,20 @@ namespace ThunderED.Modules
             groupName = null;
             if (data == null) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
-            return HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedExtrEntitiesLists, out groupName);
+            if (HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0,
+                module.ParsedExtrEntitiesLists, out groupName))
+                return true;
+            var roles = DiscordHelper.GetDiscordRoles(data.character_id).GetAwaiter().GetResult();
+            if (roles == null) return false;
+
+            foreach (var (key,value) in SettingsManager.Settings.MiningScheduleModule.Extractions.ComplexAccess)
+                if (value.DiscordRoles != null &&
+                    roles.Intersect(value.DiscordRoles).Any())
+                {
+                    groupName = key;
+                    return true;
+                }
+            return false;
         }
 
         public static bool HasExtrEditAccess(WebAuthUserData data, out string groupName)
@@ -423,24 +456,36 @@ namespace ThunderED.Modules
             groupName = null;
             if (data == null) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
-            return HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedExtrEntitiesLists, out groupName);
+            if (HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedExtrEntitiesLists, out groupName))
+                return true;
+            var roles = DiscordHelper.GetDiscordRoles(data.Id).GetAwaiter().GetResult();
+            if (roles == null) return false;
+
+            foreach (var (key, value) in SettingsManager.Settings.MiningScheduleModule.Extractions.ComplexAccess)
+                if (value.DiscordRoles != null &&
+                    roles.Intersect(value.DiscordRoles).Any())
+                {
+                    groupName = key;
+                    return true;
+                }
+            return false;
         }
 
         /// <summary>
         /// Global access flag to extractions operations
         /// </summary>
-        public static bool HasCommonExtrViewAccess(in JsonClasses.CharacterData data)
+        public static async Task<bool> HasCommonExtrViewAccess(JsonClasses.CharacterData data)
         {
             if (data == null) return false;
-            return HasObserverExtrViewAccess(data) || HasExtrEditAccess(data, out _);
+            return await HasObserverExtrViewAccess(data) || HasExtrEditAccess(data, out _);
         }
         /// <summary>
         /// Global access flag to extractions operations
         /// </summary>
-        public static bool HasCommonExtrViewAccess(in WebAuthUserData data)
+        public static async Task<bool> HasCommonExtrViewAccess(WebAuthUserData data)
         {
             if (data == null) return false;
-            return HasObserverExtrViewAccess(data) || HasExtrEditAccess(data, out _);
+            return await HasObserverExtrViewAccess(data) || HasExtrEditAccess(data, out _);
         }
         #endregion
 
@@ -449,21 +494,42 @@ namespace ThunderED.Modules
         /// <summary>
         /// Admin access to observer all ledger operations
         /// </summary>
-        public static bool HasObserverLedgerViewAccess(in JsonClasses.CharacterData data)
+        public static async Task<bool> HasObserverLedgerViewAccess(JsonClasses.CharacterData data)
         {
             if (data == null) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
-            return HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedLedgerViewAccessMembersLists);
+            if (HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0,
+                module.ParsedLedgerViewAccessMembersLists))
+                return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(data.character_id);
+            if (roles == null) return false;
+
+            if (SettingsManager.Settings.MiningScheduleModule.Ledger.ViewAccessDiscordRoles!= null && 
+                roles.Intersect(SettingsManager.Settings.MiningScheduleModule.Ledger.ViewAccessDiscordRoles)
+                .Any())
+                return true;
+            return false;
         }
 
         /// <summary>
         /// Admin access to observer all ledger operations
         /// </summary>
-        public static bool HasObserverLedgerViewAccess(WebAuthUserData data)
+        public static async Task<bool> HasObserverLedgerViewAccess(WebAuthUserData data)
         {
             if (data == null) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
-            return HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedLedgerViewAccessMembersLists);
+            if (HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedLedgerViewAccessMembersLists))
+                return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(data.Id);
+            if (roles == null) return false;
+
+            if (SettingsManager.Settings.MiningScheduleModule.Ledger.ViewAccessDiscordRoles != null &&
+                roles.Intersect(SettingsManager.Settings.MiningScheduleModule.Ledger.ViewAccessDiscordRoles)
+                    .Any())
+                return true;
+            return false;
         }
 
         public static bool HasLedgerEditAccess(in JsonClasses.CharacterData data, out string groupName)
@@ -471,7 +537,20 @@ namespace ThunderED.Modules
             groupName = null;
             if (data == null) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
-            return HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0, module.ParsedLedgerEntitiesLists, out groupName);
+            if (HasViewAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0,
+                module.ParsedLedgerEntitiesLists, out groupName))
+                return true;
+            var roles = DiscordHelper.GetDiscordRoles(data.character_id).GetAwaiter().GetResult();
+            if (roles == null) return false;
+
+            foreach (var (key, value) in SettingsManager.Settings.MiningScheduleModule.Ledger.ComplexAccess)
+                if (value.DiscordRoles != null &&
+                    roles.Intersect(value.DiscordRoles).Any())
+                {
+                    groupName = key;
+                    return true;
+                }
+            return false;
         }
 
         public static bool HasLedgerEditAccess(WebAuthUserData data, out string groupName)
@@ -479,51 +558,73 @@ namespace ThunderED.Modules
             groupName = null;
             if (data == null) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
-            return HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedLedgerEntitiesLists, out groupName);
+            if (HasViewAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedLedgerEntitiesLists, out groupName))
+                return true;
+            var roles = DiscordHelper.GetDiscordRoles(data.Id).GetAwaiter().GetResult();
+            if (roles == null) return false;
+
+            foreach (var (key, value) in SettingsManager.Settings.MiningScheduleModule.Ledger.ComplexAccess)
+                if (value.DiscordRoles != null &&
+                    roles.Intersect(value.DiscordRoles).Any())
+                {
+                    groupName = key;
+                    return true;
+                }
+            return false;
         }
         /// <summary>
         /// Global access flag to ledger operations
         /// </summary>
-        public static bool HasCommonLedgerViewAccess(in JsonClasses.CharacterData data)
+        public static async Task<bool> HasCommonLedgerViewAccess(JsonClasses.CharacterData data)
         {
             if (data == null) return false;
-            return HasObserverLedgerViewAccess(data) || HasLedgerEditAccess(data, out _);
+            return await HasObserverLedgerViewAccess(data) || HasLedgerEditAccess(data, out _);
         }
         /// <summary>
         /// Global access flag to ledger operations
         /// </summary>
-        public static bool HasCommonLedgerViewAccess(in WebAuthUserData data)
+        public static async Task<bool> HasCommonLedgerViewAccess(WebAuthUserData data)
         {
             if (data == null) return false;
-            return HasObserverLedgerViewAccess(data) || HasLedgerEditAccess(data, out _);
+            return await HasObserverLedgerViewAccess(data) || HasLedgerEditAccess(data, out _);
         }
         #endregion
 
         #region Auth checks
 
-        public static bool HasAuthAccess(in JsonClasses.CharacterData data)
+        public static async Task<bool> HasAuthAccess(JsonClasses.CharacterData data)
         {
             if (data == null) return false;
-            return HasAuthAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0);
+            return await HasAuthAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0);
         }
 
-        public static bool HasAuthAccess(WebAuthUserData data)
+        public static async Task<bool> HasAuthAccess(WebAuthUserData data)
         {
             if (data == null) return false;
-            return HasAuthAccess(data.Id, data.CorpId, data.AllianceId);
+            return await HasAuthAccess(data.Id, data.CorpId, data.AllianceId);
         }
 
-        private static bool HasAuthAccess(long id, long corpId, long allianceId)
+        private static async Task<bool> HasAuthAccess(long id, long corpId, long allianceId)
         {
             if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
 
-            return module.GetAccessAllCharacterIds(module.ParsedAuthAccessMembersLists).Contains(id) ||
-                   module.GetAccessAllCorporationIds(module.ParsedAuthAccessMembersLists).Contains(corpId) || (allianceId > 0 &&
-                                                                            module.GetAccessAllAllianceIds(module.ParsedAuthAccessMembersLists).Contains(allianceId));
+            if (module.GetAccessAllCharacterIds(module.ParsedAuthAccessMembersLists).Contains(id) ||
+                module.GetAccessAllCorporationIds(module.ParsedAuthAccessMembersLists).Contains(corpId) ||
+                (allianceId > 0 &&
+                 module.GetAccessAllAllianceIds(module.ParsedAuthAccessMembersLists).Contains(allianceId)))
+                return true;
+
+            var roles = await DiscordHelper.GetDiscordRoles(id);
+            if (roles == null || SettingsManager.Settings.MiningScheduleModule.AuthAccessDiscordRoles == null) return false;
+
+            if (roles.Intersect(SettingsManager.Settings.MiningScheduleModule.AuthAccessDiscordRoles)
+                    .Any())
+                return true;
+            return false;
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Security check for access
         /// </summary>
         public static bool HasViewAccess(in JsonClasses.CharacterData data)
@@ -531,16 +632,20 @@ namespace ThunderED.Modules
             if (data == null) return false;
             if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
             return HasObserverExtrViewAccess(data) || HasObserverLedgerViewAccess(data) || HasExtrEditAccess(data, out _) || HasLedgerEditAccess(data, out _);
-        }
+        }*/
 
         /// <summary>
         /// Security check for access
         /// </summary>
-        public static bool HasViewAccess(WebAuthUserData data)
+        public static async Task<bool> HasViewAccess(WebAuthUserData data)
         {
             if (data == null) return false;
             if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
-            return HasObserverExtrViewAccess(data) || HasObserverLedgerViewAccess(data) || HasExtrEditAccess(data, out _) || HasLedgerEditAccess(data, out _);
+            if (await HasObserverExtrViewAccess(data) || await HasObserverLedgerViewAccess(data) ||
+                HasExtrEditAccess(data, out _) || HasLedgerEditAccess(data, out _))
+                return true;
+
+            return false;
         }
 
         #endregion

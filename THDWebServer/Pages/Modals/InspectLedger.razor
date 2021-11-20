@@ -96,7 +96,7 @@
             return;
         }
 
-        if (!MiningScheduleModule.HasViewAccess(user))
+        if (!await MiningScheduleModule.HasViewAccess(user))
         {
             Nav.NavigateTo("/", true);
             return;

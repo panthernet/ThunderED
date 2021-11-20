@@ -251,7 +251,9 @@ namespace TED_ConfigEditor
             AvailableModulesList.Clear();
 
             var configurableList = GetAvailableModuleNames();
-            foreach (var propertyInfo in Settings.Config.GetType().GetProperties().Where(a=> a.Name.StartsWith("Module")))
+            AvailableModulesList.Add("moduleWebServer");
+
+            foreach (var propertyInfo in Settings.Config.GetType().GetProperties().Where(a=> a.Name.ToLower().StartsWith("module")))
             {
                 var entry = configurableList.FirstOrDefault(a => a.Equals(propertyInfo.Name, StringComparison.OrdinalIgnoreCase));
                 //(string)propertyInfo.GetAttributeValue<ConfigEntryNameAttribute>("Name");
