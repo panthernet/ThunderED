@@ -252,7 +252,6 @@ namespace ThunderED
 #else
         public Dictionary<string, WCEAccessFilter> AccessList { get; set; } = new  Dictionary<string, WCEAccessFilter>();
 #endif
-        public int SessionTimeoutInMinutes { get; set; } = 10;
         public string AuthButtonDiscordText { get; set; } = "Settings";
 
         /// <summary>
@@ -1818,7 +1817,8 @@ namespace ThunderED
         public bool EnableLegacyRestartLogic { get; set; }
         [Comment("Enables stopwatch measures for some backend functions. Debug purpose only.")]
         public bool EnableSwatch { get; set; }
-        
+        [Comment("Web session timeout in minutes")]
+        public int WebSessionTimeout { get; set; } = 60;
 
 
 #if EDITOR

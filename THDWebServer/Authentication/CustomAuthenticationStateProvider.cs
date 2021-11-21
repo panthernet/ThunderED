@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ProtectedBrowserStorage;
+using ThunderED;
 using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
@@ -49,7 +50,7 @@ namespace THDWebServer.Authentication
             Auth.TryAdd(usr.Id, new AuthState());
 #endif
 
-            if (usr == null || usr.Id == 0 || string.IsNullOrEmpty(usr.Code) || !Auth.ContainsKey(usr.Id) || Auth[usr.Id].IsExpired(30))
+            if (usr == null || usr.Id == 0 || string.IsNullOrEmpty(usr.Code) || !Auth.ContainsKey(usr.Id) || Auth[usr.Id].IsExpired(SettingsManager.Settings.Config.WebSessionTimeout))
             {
                 return new AuthenticationState(new ClaimsPrincipal());
             }

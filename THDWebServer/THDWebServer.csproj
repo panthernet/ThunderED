@@ -35,7 +35,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
-    <PackageReference Include="Radzen.Blazor" Version="3.1.2" />
+    <PackageReference Include="Radzen.Blazor" Version="3.12.2" />
   </ItemGroup>
 
   <ItemGroup>

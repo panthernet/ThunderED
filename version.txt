@@ -2,6 +2,7 @@
 + Added Discord role access for MiningSchedule module
 + Added Discord role access for Structures module
 + Added Discord role access for Moons module
++ Added new enrty in settings `WebSessionTimeout` to specify the web session timeout for users
 + Fixed Timers access by Discord roles
 + Reworked Incursions module: removed `ReportIncursionStatusAfterDT` option and made module to check for new incursions within several minutes
 

@@ -61,7 +61,9 @@
     "DisableLogIntoFiles": false,
     "LanguageFilesFolder": "",
     "EnableLegacyRestartLogic": false,
-    "EnableSwatch": false
+    "EnableSwatch": false,
+
+    "WebSessionTimeout":  60 
   },
 
   "webServerModule": {
@@ -378,7 +380,6 @@
   },
 
   "WebConfigEditorModule": {
-    "SessionTimeoutInMinutes": 10,
     "AccessList": {
       "DefaultList": {
         "AllowedEntities": [],
