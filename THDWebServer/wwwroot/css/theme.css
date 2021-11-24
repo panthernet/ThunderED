@@ -1,8 +1,38 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+:root {
+    --beforeValue: '';
+}
+
+.pageHeader {
+    font-size: 42px;
+    font-family: 'term';
+    text-shadow: black 0 0 5px;
+    color: white;
+    line-height: 1;
+}
+
+.serverName {
+    text-shadow: 0px 0px 10px black;
+    font-family: term;
+    font-size: 25px;
+    vertical-align: middle;
+}
+
+.userName {
+    text-shadow: 0px 0px 10px black;
+    font-family: term;
+    font-size: 20px;
+    vertical-align: middle;
+}
+
 .colorifier {
     background-color: black !important;
     color: white !important;
+}
+
+.colorifier_opacity {
+    background-color: rgba(0,0,0, .5)
 }
 
 .colorifier_blue {
@@ -20,4 +50,151 @@
     justify-content: center;
     align-items: center;
     height: 90%;
+}
+
+
+.navButton1, .navButton3, .navButton4, .navButton5 {
+    border: none;
+    border-radius: 4px;
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.48);
+    overflow: hidden;
+    padding: 5px 30px 5px 30px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    position: relative;
+    color: white;
+    outline: none;
+    cursor: pointer;
+    width: 135px;
+    -webkit-transition: background-position .7s,box-shadow .4s;
+    transition: background-position .7s,box-shadow .4s;
+    background-size: 110%;
+    font-family: 'eternal', sans-serif;
+}
+
+.navButton2 {
+    border: none;
+    border-radius: 4px;
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.48);
+    overflow: hidden;
+    padding: 5px 5px 5px 5px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    position: relative;
+    color: white;
+    outline: none;
+    cursor: pointer;
+    width: 100%;
+    -webkit-transition: background-position .7s,box-shadow .4s;
+    transition: background-position .7s,box-shadow .4s;
+    background-size: 110%;
+    font-family: 'eternal', sans-serif;
+}
+
+    .navButton1:hover, .navButton2:hover, .navButton3:hover, .navButton4:hover, .navButton5:hover {
+        background-position: 0% 30%;
+    }
+
+    .navButton1:before, .navButton2:before, .navButton3:before, .navButton4:before, .navButton5:before {
+        font-family: FontAwesome;
+        display: block;
+        position: absolute;
+    }
+
+    .navButton1:before, .navButton2:before, .navButton4:before, .navButton5:before {
+        -webkit-transition: all 1s;
+        transition: all 1s;
+        font-size: 20px;
+        left: 7px;
+        top: 3px;
+    }
+
+.navButton3:before{
+    -webkit-transition: all 1s;
+    transition: all 1s;
+    font-size: 20px;
+    left: 17px;
+    top: 5px;
+}
+
+.navButton1, .navButton3 {
+    box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.16) inset, 0px 0px 10px 0px #E48A3C;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#E48A3C), to(rgba(222, 135, 61, 0.24))), url("https://static7.depositphotos.com/1222912/788/i/600/depositphotos_7887354-stock-photo-stars-background-01.jpg");
+    background-image: linear-gradient(to bottom, #E48A3C, rgba(222, 135, 61, 0.24)), url("https://static7.depositphotos.com/1222912/788/i/600/depositphotos_7887354-stock-photo-stars-background-01.jpg");
+}
+
+    .navButton1:hover, .navButton2:hover, .navButton3:hover {
+        box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.16) inset, 0px 0px 30px 0px #E48A3C;
+    }
+
+
+        .navButton1:hover:before, .navButton2:hover:before, .navButton3:hover:before {
+            -webkit-transform: scale(1.2);
+            transform: scale(1.2);
+        }
+
+    .navButton1:before, .navButton3:before {
+        color: white;
+        content: var(--beforeValue);
+    }
+
+.navButton2 {
+    box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.16) inset, 0px 0px 10px 0px #669999;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#669999), to(rgba(222, 135, 61, 0.24))), url("https://static7.depositphotos.com/1222912/788/i/600/depositphotos_7887354-stock-photo-stars-background-01.jpg");
+    background-image: linear-gradient(to bottom, #669999, rgba(222, 135, 61, 0.24)), url("https://static7.depositphotos.com/1222912/788/i/600/depositphotos_7887354-stock-photo-stars-background-01.jpg");
+}
+
+    .navButton2:hover {
+        box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.16) inset, 0px 0px 20px 0px #669999;
+    }
+
+    .navButton2:before {
+        color: white;
+        content: var(--beforeValue);
+    }
+
+.rotate3D {
+    background-color: transparent;
+    animation: animate 5s linear infinite;
+    perspective: 800px;
+}
+
+@keyframes animate {
+    0% {
+        transform: rotateY(0deg);
+    }
+
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
+.imgShadow {
+    -webkit-filter: drop-shadow(5px 5px 5px #222222);
+    filter: drop-shadow(5px 5px 5px #222222);
+}
+
+.fontTerm {
+    font-family: "term";
+}
+
+.fontTermShadow {
+    font-family: "term";
+    text-shadow: 0px 0px 10px black;
+}
+
+.fontEternal {
+    font-family: "eternal";
+}
+
+.fontEternalShadow {
+    font-family: "eternal";
+    text-shadow: 0px 0px 20px black;
+    font-size: 30px;
+}
+
+.longButton {
+    width: 300px;
+    height: 35px;
+    color: white;
 }

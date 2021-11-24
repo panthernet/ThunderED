@@ -48,6 +48,7 @@
         ESIWarnings,
         StructureManagement,
         MoonInfo,
-        StorageConsole
+        StorageConsole,
+        Remind
     }
 }

@@ -1,8 +1,8 @@
 ﻿@page "/badrq"
 @inject ProtectedSessionStorage ProtectedSessionStore
 <div class="container" style="height: 100%">
-    <div class="colorifier text-center">
-        <h2>@((MarkupString)LM.Get("webAuthErrorHeader"))</h2>
+    <div class="frontcolor text-center pageHeader">
+        @((MarkupString)LM.Get("webAuthErrorHeader"))
     </div>
 
     <div class="centralizer">
@@ -10,24 +10,27 @@
             @if (WebUiHelper.GetAsset("eve_logo_light.png") != null)
             {
                 <h1>
-                    <img src="@WebUiHelper.GetAsset("eve_logo_light.png")" width="250" />
+                    <img src="@WebUiHelper.GetAsset("eve_logo_light.png")" width="200" />
                 </h1>
             }
 
-            <p class="lead frontcolor">@((MarkupString) Message1)</p>
+            <p class="lead frontcolor fontTermShadow">@((MarkupString) Message1)</p>
             @if (!string.IsNullOrEmpty(Message2))
             {
-                <p class="frontcolor">@((MarkupString) Message2)</p>
+                <p class="frontcolor fontTermShadow">@((MarkupString) Message2)</p>
             }
             @if (!string.IsNullOrEmpty(Message3))
             {
-                <p class="frontcolor">@((MarkupString) Message3)</p>
+                <p class="frontcolor fontTermShadow">@((MarkupString) Message3)</p>
             }
             @if (WebUiHelper.GetAsset("fail.png") != null)
             {
                 <p><img src="@WebUiHelper.GetAsset("fail.png")" width="90"/></p>
             }
-            <p><a class="btn btn-info" href="@ReturnUrl" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+            <p style="text-align: -webkit-center">
+                <a href="@ReturnUrl"><div class='navButton2 text-center' role="button" style="width: 150px; height: 35px;">@LM.Get("backText")</div></a>
+            </p>
+
         </div>
     </div>
 </div>

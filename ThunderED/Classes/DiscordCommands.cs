@@ -250,6 +250,18 @@ namespace ThunderED.Classes
         #endregion
 
 
+        [Command("remind", RunMode = RunMode.Async)]
+        public async Task RemindCommand()
+        {
+            if (!SettingsManager.Settings.Config.ModuleRemind) return;
+            if (IsForbidden()) return;
+
+            if (!await APIHelper.DiscordAPI.IsBotPrivateChannel(Context.Channel))
+                return;
+
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("remWebUrl", ServerPaths.GetRemindUrl()), false);
+        }
+
         #region StorageConsole
 
         [Command("storage", RunMode = RunMode.Async)]
@@ -690,7 +702,7 @@ namespace ThunderED.Classes
                             //authed for action!
                             if (authUser.DiscordId > 0)
                             {
-                                await WebAuthModule.AuthUser(Context, code, authUser.DiscordId ?? 0);
+                                await WebAuthModule.AuthUser(Context, code, authUser.DiscordId ?? 0, SettingsManager.Settings.Config.DiscordGuildId);
                             }
                             else
                             {
@@ -1106,7 +1118,7 @@ namespace ThunderED.Classes
                     }
                     else
                     {
-                        await WebAuthModule.AuthUser(Context, x, 0);
+                        await WebAuthModule.AuthUser(Context, x, 0, SettingsManager.Settings.Config.DiscordGuildId);
                     }
                 }
                 catch (Exception ex)

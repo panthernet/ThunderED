@@ -7,6 +7,10 @@
 @inject IModalService Modal
 @inject NavigationManager Nav
 
+<div class="text-center pageHeader">
+    @LM.Get("hrmMiningPage")
+</div>
+
 <div class="container">
     <RadzenTabs Style="padding: 0;">
         <Tabs>
@@ -23,7 +27,7 @@
                         <Columns>
                             <RadzenGridColumn TItem="WebMiningExtraction" Property="IconUrl" Filterable="false" Sortable="false" Width="90px">
                                 <Template Context="order">
-                                    <RadzenImage Path="@ServerPaths.GetTypeImageUrl(order.TypeId)" Style="width: 64px; height: 64px; display: block" />
+                                    <RadzenImage Path="@ServerPaths.GetTypeImageUrl(order.TypeId)" Style="width: 64px; height: 64px; display: block"/>
                                 </Template>
                             </RadzenGridColumn>
                             <RadzenGridColumn TItem="WebMiningExtraction" Property="CorporationName" Filterable="true" Sortable="true" FilterProperty="CorporationName" SortProperty="CorporationName"
@@ -32,7 +36,7 @@
                                     <RadzenLabel Text="@order.CorporationName"/>
                                 </Template>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true"  FilterProperty="StructureName" SortProperty="StructureName"
+                            <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" FilterProperty="StructureName" SortProperty="StructureName"
                                               Title="@LM.Get("msExtractionsColumnName")">
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.StructureName"/>
@@ -41,7 +45,7 @@
                             <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="170px" FilterProperty="OreComposition" SortProperty="OreComposition"
                                               Title="@LM.Get("msExtractionsColumnOre")">
                                 <Template Context="order">
-                                    @((MarkupString)order.OreComposition)
+                                    @((MarkupString) order.OreComposition)
                                 </Template>
                             </RadzenGridColumn>
                             <RadzenGridColumn TItem="WebMiningExtraction" Filterable="true" Sortable="true" Width="130px" FilterProperty="Operator" SortProperty="Operator"
@@ -91,7 +95,7 @@
                         <Columns>
                             <RadzenGridColumn TItem="WebMiningLedger" Property="IconUrl" Filterable="false" Sortable="false" Width="90px">
                                 <Template Context="order">
-                                    <RadzenImage Path="@ServerPaths.GetTypeImageUrl(order.TypeId)" Style="width: 64px; height: 64px; display: block" />
+                                    <RadzenImage Path="@ServerPaths.GetTypeImageUrl(order.TypeId)" Style="width: 64px; height: 64px; display: block"/>
                                 </Template>
                             </RadzenGridColumn>
                             <RadzenGridColumn TItem="WebMiningLedger" Property="CorporationName" Filterable="true" Sortable="true" FilterProperty="CorporationName" SortProperty="CorporationName"
@@ -115,7 +119,7 @@
                             <RadzenGridColumn TItem="WebMiningLedger" Filterable="true" Sortable="true" Width="160px"
                                               Title="@LM.Get("msLedgerColumnStats")">
                                 <Template Context="order">
-                                    @((MarkupString)order.Stats)
+                                    @((MarkupString) order.Stats)
                                 </Template>
                             </RadzenGridColumn>
                         </Columns>

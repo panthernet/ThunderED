@@ -1,15 +1,13 @@
 ﻿@page "/feedauthpage"
 @using ThunderED.Modules
-@using ThunderED.Modules.Sub
-@using ThunderED.Json
 
 @inject ProtectedSessionStorage Store
 @inject AuthenticationStateProvider Auth
 @inject NavigationManager Nav
 
 <div class="container" style="height: 100%">
-    <div class="colorifier text-center">
-        <h2>@LM.Get("authWebSystemHeader")</h2>
+    <div class="frontcolor text-center pageHeader">
+        @LM.Get("authWebSystemHeader")
     </div>
 
     <div class="centralizer">
@@ -19,55 +17,71 @@
             @if (DisplayManagerHeader)
             {
 
-                <p class="colorifier" style="opacity: .5">@((MarkupString) LM.Get("authPageSystemAuthHeader"))</p>
+                <p class="frontcolor fontEternalShadow">@((MarkupString) LM.Get("authPageSystemAuthHeader"))</p>
             }
             else
             {
-                <p class="colorifier">
-                    <h2 style='text-align: center'>@LM.Get("authWebNoFeedsHeader")</h2>
+                <p class="frontcolor fontEternalShadow text-center">
+                    @LM.Get("authWebNoFeedsHeader")
                 </p>
             }
 
             @if ((UserId > 0 && ContractNotificationsModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleContractNotifications)
             {
-                <a href="@GetContractsAuthURL()" class="btn btn-info btn-block" role="button">@GetContractsAuthText()</a>
+                <p style="text-align: -webkit-center">
+                    <a href="@GetContractsAuthURL()"><div class="navButton1 longButton" role="button">@GetContractsAuthText()</div></a>
+                </p>
             }
             <!-- NOTIFICATIONS BUTTON -->
             @if ((UserId > 0 && NotificationModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleNotificationFeed)
             {
-                <a href="@ServerPaths.GetAuthNotifyURL()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.NotificationFeedModule.AuthButtonDiscordText</a>
+<p style="text-align: -webkit-center">
+                    <a href="@ServerPaths.GetAuthNotifyURL()"><div class="navButton1 longButton" role="button">@SettingsManager.Settings.NotificationFeedModule.AuthButtonDiscordText</div></a>
+                </p>
             }
             <!-- MAIL BUTTON -->
             @if ((MailModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleMail)
             {
-                <a href="@ServerPaths.GetMailAuthURL()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.MailModule.AuthButtonDiscordText</a>
+<p style="text-align: -webkit-center">
+                    <a href="@ServerPaths.GetMailAuthURL()"><div class="navButton1 longButton" role="button">@SettingsManager.Settings.MailModule.AuthButtonDiscordText</div></a>
+                </p>
             }
 
             <!-- INDUSTRIAL BUTTON -->
             @if ((IndustrialJobsModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleIndustrialJobs)
             {
-                <a href="@GetIndustryAuthURL()" class="btn btn-info btn-block" role="button">@GetIndustryAuthText()</a>
+<p style="text-align: -webkit-center">
+                    <a href="@GetIndustryAuthURL()"><div class="navButton1 longButton" role="button">@GetIndustryAuthText()</div></a>
+                </p>
             }
             <!-- MINING SCHEDULE BUTTON -->
             @if ((MiningScheduleModule.HasAuthAccess(UserData).GetAwaiter().GetResult() || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleMiningSchedule)
             {
-                <a href="@GetMiningScheduleAuthURL()" class="btn btn-info btn-block" role="button">@GetMiningScheduleAuthText()</a>
+<p style="text-align: -webkit-center">
+                    <a href="@GetMiningScheduleAuthURL()"><div class="navButton1 longButton" role="button">@GetMiningScheduleAuthText()</div></a>
+                </p>
             }
             <!-- STRUCTURES BUTTON -->
             @if ((StructureManagementModule.HasAuthAccess(UserData).GetAwaiter().GetResult() || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleStructureManagement)
             {
-                <a href="@GetStructuresAuthURL()" class="btn btn-info btn-block" role="button">@GetStructuresAuthText()</a>
+<p style="text-align: -webkit-center">
+                    <a href="@GetStructuresAuthURL()"><div class="navButton1 longButton" role="button">@GetStructuresAuthText()</div></a>
+                </p>
             }
-            
+
             <!-- STANDINGS BUTTON -->
             @if ((WebAuthModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleAuthWeb)
             {
-                <a href="@ServerPaths.GetStandsAuthURL()" class="btn btn-info btn-block" role="button">@GetStandsAuthText()</a>
+<p style="text-align: -webkit-center">
+                    <a href="@ServerPaths.GetStandsAuthURL()"><div class="navButton1 longButton" role="button">@GetStandsAuthText()</div></a>
+                </p>
             }
 
             <br>
             <br>
-            <p class="text-center"><a class="btn btn-info" href="/" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+            <p style="text-align: -webkit-center">
+                <a href="/"><div class="navButton2" role="button" style="width: 150px">@LM.Get("backText")</div></a>
+            </p>
 
         </div>
     </div>

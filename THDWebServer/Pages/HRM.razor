@@ -13,12 +13,16 @@
 
 @inject ThunderedDbContext DbContext
 
+<div class="text-center pageHeader">
+    @LM.Get("hrmTemplateHeader")
+</div>
+
 <div class="container">
     <RadzenTabs>
         <Tabs>
             @if (_access.IsAltUsersVisible || _access.IsAuthedUsersVisible || _access.IsAwaitingUsersVisible || _access.IsDumpedUsersVisible)
             {
-                <RadzenTabsItem Text="Inspector">
+                <RadzenTabsItem Text="@LM.Get("hrmInspector")">
                     <RadzenTabs>
                         <Tabs>
                             @if (_access.IsAuthedUsersVisible)
@@ -33,7 +37,7 @@
                                         }
                                     </div>
                                     <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countAuthUsers" AllowSorting="true" Data="@_authUsersList" TItem="WebUserItem" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                LoadData="@LoadAuthUsers" Style="height: 640px;" RowDoubleClick="async args => await InspectCharacter(args, UserStatusEnum.Authed)"
+                                                LoadData="@LoadAuthUsers" Style="height: 600px;" RowDoubleClick="async args => await InspectCharacter(args, UserStatusEnum.Authed)"
                                                 @ref="_authedUsersGrid">
                                         <Columns>
                                             <RadzenGridColumn TItem="WebUserItem" Property="IconUrl" Filterable="false" Sortable="false" Width="90px">

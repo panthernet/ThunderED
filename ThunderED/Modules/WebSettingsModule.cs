@@ -130,7 +130,20 @@ namespace ThunderED.Modules
         {
             if (!SettingsManager.Settings.Config.ModuleWebConfigEditor) return false;
             var m = TickManager.GetModule<WebSettingsModule>();
-            return m?.GetAllParsedCharacters().Contains(id) ?? false;
+            var result = m?.GetAllParsedCharacters().Contains(id) ?? false;
+            if (result) return true;
+
+            var roles = DiscordHelper.GetDiscordRoles(id).GetAwaiter().GetResult();
+            if (roles == null) return false;
+
+            foreach (var group in SettingsManager.Settings.WebConfigEditorModule.AccessList.Values)
+            {
+                if (group.AllowedDiscordRoles != null && roles.Intersect(group.AllowedDiscordRoles)
+                    .Any())
+                    return true;
+            }
+
+            return false;
         }
     }
 

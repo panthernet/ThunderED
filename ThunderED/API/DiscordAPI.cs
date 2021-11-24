@@ -489,19 +489,34 @@ namespace ThunderED.API
                 if (!await Throttle()) return;
                 try
                 {
-                    if (SettingsManager.Settings.Config.WelcomeMessage &&
-                        arg.Guild.Id == SettingsManager.Settings.Config.DiscordGuildId)
+                    if (SettingsManager.Settings.Config.WelcomeMessage)
                     {
-                        var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0
-                            ? arg.Guild.DefaultChannel
-                            : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
-                        var authurl = ServerPaths.GetAuthPageUrl();
-                        if (!string.IsNullOrWhiteSpace(authurl))
-                            await APIHelper.DiscordAPI.SendMessageAsync(channel,
-                                LM.Get("welcomeMessage", arg.Mention, authurl,
-                                    SettingsManager.Settings.Config.BotDiscordCommandPrefix));
+                        if (arg.Guild.Id == SettingsManager.Settings.Config.DiscordGuildId)
+                        {
+                            var channel = SettingsManager.Settings.Config.WelcomeMessageChannelId == 0
+                                ? arg.Guild.DefaultChannel
+                                : arg.Guild.GetTextChannel(SettingsManager.Settings.Config.WelcomeMessageChannelId);
+                            var authurl = ServerPaths.GetAuthPageUrl();
+                            if (!string.IsNullOrWhiteSpace(authurl))
+                                await APIHelper.DiscordAPI.SendMessageAsync(channel,
+                                    LM.Get("welcomeMessage", arg.Mention, authurl,
+                                        SettingsManager.Settings.Config.BotDiscordCommandPrefix));
+                            else
+                                await APIHelper.DiscordAPI.SendMessageAsync(channel,
+                                    LM.Get("welcomeAuth", arg.Mention));
+                        }
                         else
-                            await APIHelper.DiscordAPI.SendMessageAsync(channel, LM.Get("welcomeAuth", arg.Mention));
+                        {
+                            var channel = arg.Guild.DefaultChannel;
+                            var authurl = ServerPaths.GetAuthPageUrl();
+                            if (!string.IsNullOrWhiteSpace(authurl))
+                                await APIHelper.DiscordAPI.SendMessageAsync(channel,
+                                    LM.Get("welcomeMessage", arg.Mention, authurl,
+                                        SettingsManager.Settings.Config.BotDiscordCommandPrefix));
+                            else
+                                await APIHelper.DiscordAPI.SendMessageAsync(channel,
+                                    LM.Get("welcomeAuth", arg.Mention));
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -825,6 +840,15 @@ namespace ThunderED.API
 
             return _cacheGuilds.FirstOrDefault(a => a.Id == guildId)?.Channels.FirstOrDefault(a => a.Id == channelId)
                 ?.Users.Where(a => !isOnlineOnly || a.Status != UserStatus.Offline).Select(a => a.Id).ToList();
+        }
+
+        /// <summary>
+        /// Return all guild where specified user is present
+        /// </summary>
+        /// <param name="discordUserId">User Id</param>
+        public List<ulong> GetGuildsFromUser(ulong discordUserId)
+        {
+            return _cacheGuilds.Where(a => a.GetUser(discordUserId) != null).Select(a=> a.Id).ToList();
         }
     }
 }

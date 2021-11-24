@@ -1,0 +1,140 @@
+﻿@using THDWebServer.Authentication
+@inject NavigationManager Nav
+@inject IJSRuntime JSRuntime
+
+<div class="">
+    <ul class="nav flex-row">
+
+        @if(!string.IsNullOrEmpty(SettingsManager.Settings.WebServerModule.ZkbUrl))
+        {
+            <li class="nav-item px-2">
+                <button class='navButton3' style="--beforeValue: url('@WebUiHelper.GetAsset("wreck.png")'); width: 35px; height: 35px;" @onclick="NavButtonZkbClick"></button>
+            </li>
+        }
+
+
+        @if(!string.IsNullOrEmpty(SettingsManager.Settings.WebServerModule.DiscordUrl))
+        {
+            <li class="nav-item px-2">
+                <button class='navButton3' style="--beforeValue: url('@WebUiHelper.GetSvg("discord.svg")'); width: 35px; height: 35px;" @onclick="NavButtonDiscordClick"></button>
+            </li>
+        }
+
+        @if (SettingsManager.Settings.Config.ModuleAuthWeb)
+        {
+            <li class="nav-item px-2">
+                <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("auth.svg")')" @onclick="NavButtonAuthClick">@LM.Get("nmAuthPage")</button>
+            </li>
+        }
+
+        @if (SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration)
+        {
+            <li class="nav-item px-2">
+                <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("feed.svg")')" @onclick="NavButtonFeedClick">@LM.Get("nmAuthFeedPage")</button>
+            </li>
+        }
+        else
+        {
+            <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_FEED_AUTH">
+                <li class="nav-item px-2">
+                    <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("feed.svg")')" @onclick="NavButtonFeedClick">@LM.Get("nmAuthFeedPage")</button>
+                </li>
+            </AuthorizeView>
+        }
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_HRM">
+            <li class="nav-item px-2">
+                <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("hrm.svg")')" @onclick="NavButtonHrmClick">@LM.Get("nmHrmPage")</button>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_TIMERS">
+            <li class="nav-item px-2">
+                <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("timers.svg")')" @onclick="NavButtonTimersClick">@LM.Get("nmTimersPage")</button>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_MINING_SCHEDULE">
+            <li class="nav-item px-2">
+                <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("mining.svg")')" @onclick="NavButtonMiningClick">@LM.Get("nmMiningSchedulePage")</button>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_STRUCTURES">
+            <li class="nav-item px-2">
+                <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("struct.svg")')" @onclick="NavButtonStructClick">@LM.Get("nmStructureManagementPage")</button>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_MOON_TABLE">
+            <li class="nav-item px-2">
+                <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("moon.svg")')" @onclick="NavButtonMoonClick">@LM.Get("nmMoonTablePage")</button>
+            </li>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_WEB_SETTINGS">
+            <li class="nav-item px-2">
+                <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("settings.svg")')" @onclick="NavButtonSettingsClick">@LM.Get("nmWebSettings")</button>
+            </li>
+        </AuthorizeView>
+    </ul>
+</div>
+
+@code {
+    private bool _noReg = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+#if NOREG
+    _noReg = true;
+#endif
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task NavButtonDiscordClick()
+    {
+        await JSRuntime.InvokeAsync<object>("open", SettingsManager.Settings.WebServerModule.DiscordUrl, "_blank");
+    }
+
+    private void NavButtonAuthClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetGeneralAuthPageUrl());
+    }
+
+    private void NavButtonFeedClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetFeedAuthPageUrl());
+    }
+
+    private void NavButtonHrmClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetHrmPageUrl());
+    }
+
+    private void NavButtonTimersClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetTimersPageUrl());
+    }
+
+    private void NavButtonMiningClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetMiningSchedulePageUrl());
+    }
+
+    private void NavButtonStructClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetStructureManagementPageUrl());
+    }
+
+    private void NavButtonMoonClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetMoonTablePageUrl());
+    }
+
+    private void NavButtonSettingsClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetWebSettingsPageUrl());
+    }
+
+    private async Task NavButtonZkbClick()
+    {
+        await JSRuntime.InvokeAsync<object>("open", SettingsManager.Settings.WebServerModule.ZkbUrl, "_blank");
+    }
+
+}

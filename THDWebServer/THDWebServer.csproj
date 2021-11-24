@@ -80,13 +80,16 @@
     <ProjectReference Include="..\ThunderED\ThunderED.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="wwwroot\Assets\logo.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\Assets\nav_logo.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="wwwroot\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Remove="wwwroot\CustomAssets\Html\index - Копировать.html" />
+	  <Content Remove="wwwroot\CustomAssets\Html\index.html" />
+	  <Content Remove="wwwroot\Fonts\helix.ttf" />
+	</ItemGroup>
 
 </Project>

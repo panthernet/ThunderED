@@ -267,5 +267,9 @@ namespace ThunderED.Classes
         #endregion
 
 
+        public static string GetRemindUrl()
+        {
+            return $"{GetWebSiteUrl()}/remauth";
+        }
     }
 }

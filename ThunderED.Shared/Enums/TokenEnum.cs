@@ -8,6 +8,10 @@
         Industry,
         Contract,
         MiningSchedule,
-        Structures
+        Structures,
+        PersonalNotification,
+        PersonalIndustry,
+        PersonalContract,
+        PersonalMail
     }
 }

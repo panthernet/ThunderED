@@ -259,6 +259,131 @@ namespace ThunderED.Modules
             return result;
         }
 
+        public static async Task<List<WebAuthResult>> GetAuthRoleEntitiesById(Dictionary<string, WebAuthGroup> groups, JsonClasses.CharacterData chData, ulong discordUserId)
+        {
+            groups ??= SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
+            var ret = new List<WebAuthResult>();
+            var mainFilled = false;
+
+            var mainResult = new WebAuthResult();
+            foreach (var (groupName, group) in groups)
+            {
+                var localResult = group.DiscordGuildId > 0 ? new WebAuthResult() : null;
+                //skip if we've already found main group, will check only other guilds
+                if(localResult == null && mainFilled)
+                    continue;
+                //skip if local guild doesn't have discord user
+                if (localResult != null && APIHelper.DiscordAPI.GetUserIdsFromGuild(@group.DiscordGuildId).All(a => a != discordUserId))
+                    continue;
+                
+                var result = localResult ?? mainResult;
+
+                if (group.StandingsAuth == null)
+                {
+                    var nameList = new List<string>();
+                    foreach (var (entityName, entity) in group.AllowedMembers)
+                    {
+
+                        //found guest
+                        if (!entity.Entities.Any())
+                        {
+
+                            await AuthInfoLog(chData, $"[GARE] Found guest group {groupName}! Return OK.", true);
+                            result.RoleEntities.Add(entity);
+                            result.Group = group;
+                            result.GroupName = groupName;
+                            if (localResult == null) //mark main as found
+                            {
+                                mainFilled = true;
+                                ret.Add(mainResult);
+                            }
+                            else ret.Add(localResult);
+                            continue;
+                        }
+
+                        await AuthInfoLog(chData, $"[GARE] Checking {groupName}|{entityName} - FSTOP: {group.StopSearchingOnFirstMatch} ...", true);
+                        List<long> data;
+                        lock (UpdateLock)
+                            data = Instance.GetTier2CharacterIds(Instance.ParsedMembersLists, groupName, entityName);
+                        if (data.Contains(chData.character_id))
+                            result.RoleEntities.Add(entity);
+                        else
+                        {
+                            lock (UpdateLock)
+                                data = Instance.GetTier2CorporationIds(Instance.ParsedMembersLists, groupName, entityName);
+                            if (data.Contains(chData.corporation_id))
+                                result.RoleEntities.Add(entity);
+                            else
+                            {
+                                lock (UpdateLock)
+                                    data = Instance.GetTier2AllianceIds(Instance.ParsedMembersLists, groupName, entityName);
+                                if (chData.alliance_id.HasValue && data.Contains(chData.alliance_id.Value))
+                                    result.RoleEntities.Add(entity);
+                            }
+                        }
+
+                        //return if we have a match and don't need to check all members
+                        if (result.RoleEntities.Any())
+                        {
+                            nameList.Add(entityName);
+                            if (group.StopSearchingOnFirstMatch)
+                            {
+                                await AuthInfoLog(chData, $"[GARE] Found match. Return OK.", true);
+                                result.Group = group;
+                                result.GroupName = groupName;
+                                if (localResult == null) //mark main as found
+                                {
+                                    mainFilled = true;
+                                    ret.Add(mainResult);
+                                }
+                                else ret.Add(localResult);
+                                continue;
+                            }
+                            else
+                            {
+                                await AuthInfoLog(chData, $"[GARE] Found pre-match in {groupName}|{entityName}. Continue search...", true);
+                            }
+                        }
+                    }
+
+                    //return after all members has been checked
+                    if (result.RoleEntities.Any())
+                    {
+                        await AuthInfoLog(chData, $"[GARE] Found matches from {string.Join(',', nameList)}. Return OK.", true);
+                        result.Group = group;
+                        result.GroupName = groupName;
+                        if (localResult == null) //mark main as found
+                        {
+                            mainFilled = true;
+                            ret.Add(mainResult);
+                        }
+                        else ret.Add(localResult);
+                        continue;
+                    }
+                }
+                else
+                {
+                    var r = await GetEntityForStandingsAuth(group, chData);
+                    if (r.Any())
+                    {
+                        await AuthInfoLog(chData, $"[GARE] Found match. Return OK.", true);
+                        result.Group = group;
+                        result.GroupName = groupName;
+                        result.RoleEntities = r;
+                        if (localResult == null) //mark main as found
+                        {
+                            mainFilled = true;
+                            ret.Add(mainResult);
+                        }
+                        else ret.Add(localResult);
+                        continue;
+                    }
+                }
+            }
+
+            return ret;
+        }
+
         public static async Task<WebAuthResult> GetAuthRoleEntityById(KeyValuePair<string, WebAuthGroup> group, JsonClasses.CharacterData chData)
         {
             var (key, value) = @group;
@@ -339,7 +464,20 @@ namespace ThunderED.Modules
             var result = await GetAuthRoleEntityById(groups, chData);
             return result.RoleEntities.Any() ? new WebAuthResult {GroupName = result.GroupName, Group = result.Group, RoleEntities = result.RoleEntities} : null;
         }
-        
+
+        /// <summary>
+        /// Multi-Discord guild impl
+        /// </summary>
+        /// <param name="groups"></param>
+        /// <param name="chData"></param>
+        /// <param name="discordUserId"></param>
+        private static async Task<List<WebAuthResult>> GetAuthGroupsByCharacter(Dictionary<string, WebAuthGroup> groups, JsonClasses.CharacterData chData, ulong discordUserId)
+        {
+            groups ??= SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups();
+            var result = await GetAuthRoleEntitiesById(groups, chData, discordUserId);
+            return result.Where(a=> a.RoleEntities.Any()).ToList();
+        }
+
         public async Task ProcessPreliminaryApplicant(ThdAuthUser user, ICommandContext context = null)
         {
             try
@@ -374,7 +512,7 @@ namespace ThunderED.Modules
                     }
 
                     //auth
-                    await AuthUser(context, user.RegCode, user.DiscordId ?? 0);
+                    await AuthUser(context, user.RegCode, user.DiscordId ?? 0, Settings.Config.DiscordGuildId);
                 }
             }
             catch (Exception ex)
@@ -499,7 +637,7 @@ namespace ThunderED.Modules
                 await LogHelper.LogWarning($"[{ch.CharacterId}|{ch.DataView.CharacterName}]: {message}", LogCat.AuthCheck);
         }
 
-        internal static async Task AuthUser(ICommandContext context, string remainder, ulong discordId)
+        internal static async Task AuthUser(ICommandContext context, string remainder, ulong discordId, ulong guildId)
         {
             JsonClasses.CharacterData characterData = null;
             try
@@ -542,7 +680,7 @@ namespace ThunderED.Modules
                 characterData = await APIHelper.ESIAPI.GetCharacterData("Auth", authUser.CharacterId, true);
 
                 //check if we fit some group
-                var result = await GetRoleGroup(characterData, discordId, authUser.GetGeneralToken());
+                var result = await GetRoleGroup(characterData, discordId, guildId, authUser.GetGeneralToken());
                 if (result.IsConnectionError)
                 {
                     await AuthWarningLog(authUser, $"Possible connection error while processing auth request(search for group)!");
@@ -613,6 +751,12 @@ namespace ThunderED.Modules
 
                     await UpdateUserRoles(discordId, SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles,
                         SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles);
+                    if(SettingsManager.Settings.WebAuthModule.AuxiliaryDiscordGuildIds != null)
+                        foreach (var discordGuildId in SettingsManager.Settings.WebAuthModule.AuxiliaryDiscordGuildIds)
+                        {
+                            await UpdateUserRoles(discordId, SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles,
+                                SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles, false, APIHelper.DiscordAPI.GetGuild(discordGuildId));
+                        }
 
                     //notify about success
                     if(channel != 0)

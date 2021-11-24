@@ -1,0 +1,39 @@
+﻿@inherits LayoutComponentBase
+@using THDWebServer.Pages.Modals
+@inject IModalService Modal
+
+<div class="main" style="background-image: url('@WebUiHelper.GetAsset("auth_bg2.jpg")'); height: 100vh;">
+
+    <div class="main" style="overflow: auto; background-image: linear-gradient(black, transparent);">
+        <div class="navbar-brand frontcolor" style="vertical-align: middle;">
+            @if (WebUiHelper.GetAsset("nav_logo.png") != null)
+            {
+                <RadzenImage Path="@WebUiHelper.GetAsset("nav_logo.png")" Style="width: 32px; height: 32px;"></RadzenImage>
+            }
+            <a href="/" class="serverName frontcolor">@LM.Get("webServerName")</a>
+        </div>
+
+        <div class="navbar-brand px-4 float-right" style="">
+            <LoginDisplay_2/>
+            <button @onclick="ShowAbout" class="navButton2" style="padding-top: .2rem; width: 120px;">@LM.Get("webAbout")</button>
+        </div>
+    </div>
+
+    <NavMenu_2 />
+
+    <div class="content">
+        @Body
+    </div>
+    
+    <div class="footer2" style="background-image: linear-gradient(transparent,black); height: 50px;">
+    </div>
+
+</div>
+
+@functions {
+    private void ShowAbout()
+    {
+        var o = new ModalOptions {Class = "blazored-about-modal" };
+        Modal.Show<About>(LM.Get("webAboutThundered"), o);
+    }
+}

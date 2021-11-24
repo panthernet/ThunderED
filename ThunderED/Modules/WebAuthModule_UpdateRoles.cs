@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dasync.Collections;
 using Discord.WebSocket;
+
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
 using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
@@ -26,7 +29,22 @@ namespace ThunderED.Modules
 
         internal static async Task UpdateAuthUserRolesFromDiscord(List<string> exemptRoles, List<string> authCheckIgnoreRoles, bool useParallel)
         {
-            var discordGuild = APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
+            //check main
+            await UpdateAuthUserRolesFromDiscordInternal(SettingsManager.Settings.Config.DiscordGuildId, exemptRoles,
+                authCheckIgnoreRoles, useParallel);
+
+            if(SettingsManager.Settings.WebAuthModule.AuxiliaryDiscordGuildIds != null)
+                foreach (var guildId in SettingsManager.Settings.WebAuthModule.AuxiliaryDiscordGuildIds)
+                {
+                    await UpdateAuthUserRolesFromDiscordInternal(guildId, exemptRoles,
+                        authCheckIgnoreRoles, useParallel);
+                }
+        }
+
+        private static async Task UpdateAuthUserRolesFromDiscordInternal(ulong discordGuildId, List<string> exemptRoles,
+            List<string> authCheckIgnoreRoles, bool useParallel)
+        {
+            var discordGuild = APIHelper.DiscordAPI.GetGuild(discordGuildId);
             await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache before update");
             await discordGuild.DownloadUsersAsync();
             await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache after update");
@@ -36,7 +54,7 @@ namespace ThunderED.Modules
                 authCheckIgnoreRoles = authCheckIgnoreRoles.ToList();
                 authCheckIgnoreRoles.AddRange(DiscordRolesManagementModule.AvailableRoleNames);
             }
-            var idList = APIHelper.DiscordAPI.GetUserIdsFromGuild(SettingsManager.Settings.Config.DiscordGuildId);
+            var idList = APIHelper.DiscordAPI.GetUserIdsFromGuild(discordGuildId);
 
             //get only discord users which are not present in DB
             var idFromDb = await DbHelper.GetUserDiscordIdsForAuthCheck(int.MaxValue);
@@ -50,7 +68,7 @@ namespace ThunderED.Modules
                     var user = await DbHelper.GetAuthUserByDiscordId(id, true);
                     if (user != null && user.AuthState == (int)UserStatusEnum.Authed) return;
                     //check user roles
-                    await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
+                    await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false, discordGuild);
                 }, SettingsManager.MaxConcurrentThreads);
             }
             else
@@ -60,7 +78,7 @@ namespace ThunderED.Modules
                     var user = await DbHelper.GetAuthUserByDiscordId(id, true);
                     if (user != null && user.AuthState == (int)UserStatusEnum.Authed) return;
                     //check user roles
-                    await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles);
+                    await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false, discordGuild);
                 }
             }
         }
@@ -78,22 +96,32 @@ namespace ThunderED.Modules
             await AuthInfoLog($"Fetched {ids?.Count} users to check within this pass", true);
             if (ids == null || !ids.Any()) return;
 
-            var discordGuild = APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
-            if (discordGuild == null)
+            var list = new List<ulong>(SettingsManager.Settings.WebAuthModule.AuxiliaryDiscordGuildIds);
+            list.Insert(0, SettingsManager.Settings.Config.DiscordGuildId);
+
+            foreach (var guildId in list)
             {
-                await LogHelper.LogWarning($"Discord guild {SettingsManager.Settings.Config.DiscordGuildId} is null!");
-                return;
+                await AuthInfoLog($"Checking {guildId} Discord guild...");
+                var discordGuild = APIHelper.DiscordAPI.GetGuild(guildId);
+                if (discordGuild == null)
+                {
+                    await LogHelper.LogWarning(
+                        $"Discord guild {guildId} is null!");
+                    continue;
+                }
+
+                await AuthInfoLog(
+                    $"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache before update");
+                await discordGuild.DownloadUsersAsync();
+                await AuthInfoLog(
+                    $"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache after update");
+
+                await ids.ParallelForEachAsync(async id =>
+                {
+                    await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false, discordGuild);
+                    await DbHelper.SetAuthUserLastCheck(id, DateTime.Now);
+                }, SettingsManager.MaxConcurrentThreads);
             }
-
-            await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache before update");
-            await discordGuild.DownloadUsersAsync();
-            await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache after update");
-
-             await ids.ParallelForEachAsync(async id =>
-            {
-                await UpdateUserRoles(id, exemptRoles, authCheckIgnoreRoles, false, discordGuild);
-                await DbHelper.SetAuthUserLastCheck(id, DateTime.Now);
-            }, SettingsManager.MaxConcurrentThreads);
         }
 
         public static async Task<string> UpdateUserRoles(ulong discordUserId, List<string> exemptRoles, List<string> authCheckIgnoreRoles,
@@ -107,13 +135,15 @@ namespace ThunderED.Modules
 
                 if (u != null && (u.Id == currentUser.Id || u.IsBot || u.Roles.Any(r => exemptRoles.Contains(r.Name))))
                 {
-                    await AuthInfoLog(discordUserId, "[RUPD] User is bot or have an exempt role. Skipping roles update...", true);
+                    if(discordGuild.Id == SettingsManager.Settings.Config.DiscordGuildId)
+                        await AuthInfoLog(discordUserId, "[RUPD] User is bot or have an exempt role. Skipping roles update...", true);
                     return null;
                 }
 
                 if (u == null && (discordUserId == currentUser.Id))
                 {
-                    await AuthInfoLog(discordUserId, "[RUPD] Discord user not found. Skipping roles update...", true);
+                    if(discordGuild.Id == SettingsManager.Settings.Config.DiscordGuildId)
+                        await AuthInfoLog(discordUserId, "[RUPD] Discord user not found. Skipping roles update...", true);
                     return null;
                 }
 
@@ -154,7 +184,7 @@ namespace ThunderED.Modules
                     var remroles = new List<SocketRole>();
 
                     await AuthInfoLog(characterData, $"[RUPD] PRE CHARID: {authUser.CharacterId} DID: {discordUserId} AUTH: {authUser.AuthState} GRP: {authUser.GroupName} TOKEN: {!string.IsNullOrEmpty(authUser.GetGeneralToken())}", true);
-                    var result = authUser.AuthState == (int)UserStatusEnum.Dumped ? new RoleSearchResult() : await GetRoleGroup(characterData, discordUserId, authUser.GetGeneralToken());
+                    var result = authUser.AuthState == (int)UserStatusEnum.Dumped ? new RoleSearchResult() : await GetRoleGroup(characterData, discordUserId, discordGuild.Id, authUser.GetGeneralToken());
                     if (result.IsConnectionError)
                     {
                         await AuthWarningLog(characterData, "[RUPD] Connection error while searching for group! Skipping roles update.");
@@ -241,10 +271,12 @@ namespace ThunderED.Modules
                         {
                             try
                             {
+                                result.UpdatedRoles =
+                                    result.UpdatedRoles.Where(a => !a.Name.Equals("@everyone")).ToList();
                                 await u.AddRolesAsync(result.UpdatedRoles);
                                 actuallyDone = true;
                             }
-                            catch
+                            catch(Exception ex)
                             {
                                 await AuthWarningLog(characterData, $"[RUPD] Failed to add {string.Join(", ", result.UpdatedRoles.Select(a=> a.Name))} roles to {characterData.name} ({u.Username})!");
                             }
@@ -454,11 +486,14 @@ namespace ThunderED.Modules
             return SettingsManager.Settings.WebAuthModule.AuthGroups.FirstOrDefault(a => a.Value.IsEnabled && a.Key.Trim().Equals(trimmedName,StringComparison.OrdinalIgnoreCase));
         }
 
-        public static async Task<RoleSearchResult> GetRoleGroup(JsonClasses.CharacterData characterData, ulong discordUserId, string refreshToken = null)
+        public static async Task<RoleSearchResult> GetRoleGroup(JsonClasses.CharacterData characterData, ulong discordUserId, ulong guildId, string refreshToken = null)
         {
             var result = new RoleSearchResult();
-            var discordGuild = APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId);
-            var u = discordGuild.GetUser(discordUserId);
+            var discordGuildList = APIHelper.DiscordAPI.GetGuildsFromUser(discordUserId);
+            //TODO multi guild reg - need to update database
+
+            var mainDiscordGuild = APIHelper.DiscordAPI.GetGuild(guildId);
+            var mainDiscordUser = mainDiscordGuild.GetUser(discordUserId);
 
             try
             {
@@ -469,8 +504,8 @@ namespace ThunderED.Modules
                     return result;
                 }
 
-                if (u != null)
-                    result.UpdatedRoles.Add(u.Roles.FirstOrDefault(x => x.Name == "@everyone"));
+                if (mainDiscordUser != null)
+                    result.UpdatedRoles.Add(mainDiscordUser.Roles.FirstOrDefault(x => x.Name == "@everyone"));
 
 
                 var groupsToCheck = new Dictionary<string, WebAuthGroup>();
@@ -551,7 +586,9 @@ namespace ThunderED.Modules
                 
 
                 await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterData.character_id} DID: {authData?.DiscordId} AUTH: {authData?.AuthState} GRP: {authData?.GroupName}", true);
+                //TODO multi impl
                 var foundGroup = await GetAuthGroupByCharacter(groupsToCheck, characterData);
+
                 if (foundGroup != null)
                 {
                     await AuthInfoLog(characterData, $"[RG] Group found: {foundGroup.GroupName} Roles: {string.Join(',', foundGroup.RoleEntities.SelectMany(a=> a.DiscordRoles))} Titles: {string.Join(',', foundGroup.RoleEntities.SelectMany(a=> a.Titles))}!", true);
@@ -572,8 +609,8 @@ namespace ThunderED.Modules
                         }
                     }
 
-
-                    await UpdateResultRolesWithTitles(discordGuild, foundGroup.RoleEntities, result, characterData, uToken);
+                    //var useDiscordGuildId = foundGroup.DiscordGuildId == 0 ? mainDiscordGuild
+                    await UpdateResultRolesWithTitles(mainDiscordGuild, foundGroup.RoleEntities, result, characterData, uToken);
                     result.ValidManualAssignmentRoles.AddRange(foundGroup.Group.ManualAssignmentRoles.Where(a => !result.ValidManualAssignmentRoles.Contains(a)));
                     result.GroupName = foundGroup.GroupName;
                     result.Group = foundGroup.Group;

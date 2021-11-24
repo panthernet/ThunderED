@@ -117,3 +117,7 @@ ServiceFabricBackup/
 *.mdf
 *.ldf
 *.ndf
+/THDWebServer/wwwroot/CustomAssets/nav_logo.png
+/THDWebServer/wwwroot/CustomAssets/logo.png
+/THDWebServer/wwwroot/CustomAssets/Html/index.html
+/THDWebServer/wwwroot/CustomAssets/Html/index - Копировать.html

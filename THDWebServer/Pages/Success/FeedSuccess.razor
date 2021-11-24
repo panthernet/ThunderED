@@ -4,32 +4,34 @@
 @inject NavigationManager NavigationManager
 
 <div class="container" style="height: 100%">
-    <div class="colorifier text-center">
-        <h2>@LM.Get("webAuthFeedHeader")</h2>
+    <div class="frontcolor text-center pageHeader">
+        @LM.Get("webAuthFeedHeader")
     </div>
     <div class="centralizer">
         <div class="text-center">
             @if (WebUiHelper.GetAsset("eve_logo_light.png") != null)
             {
                 <h1>
-                    <img src="@WebUiHelper.GetAsset("eve_logo_light.png")" width="250" />
+                    <img src="@WebUiHelper.GetAsset("eve_logo_light.png")" width="200" />
                 </h1>
             }
-            <p class="lead frontcolor">@((MarkupString) Message1)</p>
+            <p class="lead frontcolor fontEternalShadow">@((MarkupString) Message1)</p>
             @if (!string.IsNullOrEmpty(Message2))
             {
-                <p class="frontcolor">@((MarkupString) Message2)</p>
+                <p class="frontcolor fontEternalShadow">@((MarkupString) Message2)</p>
             }
             @if (!string.IsNullOrEmpty(Message3))
             {
-                <p class="frontcolor">@((MarkupString) Message3)</p>
+                <p class="frontcolor fontEternalShadow">@((MarkupString) Message3)</p>
             }
 
             @if (WebUiHelper.GetAsset("success.png") != null)
             {
-                <p><img src="@WebUiHelper.GetAsset("success.png")" width="150"/></p>
+                <p><img src="@WebUiHelper.GetAsset("success.png")" width="150" /></p>
             }
-            <p><a class="btn btn-info" href="@ReturnUrl" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+            <p style="text-align: -webkit-center">
+                <a href="@ReturnUrl"><div class="navButton2" role="button" style="width: 150px">@LM.Get("backText")</div></a>
+            </p>
         </div>
     </div>
 </div>

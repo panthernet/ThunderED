@@ -1,0 +1,35 @@
+﻿@using THDWebServer.Authentication
+@inject ProtectedSessionStorage Store
+@inject AuthenticationStateProvider Auth
+@inject NavigationManager Nav
+<AuthorizeView>
+    <Authorized>
+        <a class="frontcolor userName">@LM.Get("webWelcomeUserName", UserName)</a>&nbsp;&nbsp;
+        <button @onclick="Logout" class="navButton2" style="padding-top: .2rem; width: 120px;">@LM.Get("webButtonLogout")</button>&nbsp;&nbsp;
+    </Authorized>
+    <NotAuthorized>
+        <button @onclick="NavLogin" class="navButton2" style="padding-top: .2rem; width: 120px;">@LM.Get("webLogin")</button>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+
+    protected string UserName { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserName = (await Store.GetAsync<WebAuthUserData>("user"))?.Name;
+        await base.OnInitializedAsync();
+    }
+
+    private async void Logout()
+    {
+        await ((CustomAuthenticationStateProvider)Auth).Logout();
+        Nav.NavigateTo("/", true);
+    }
+
+    private void NavLogin()
+    {
+        Nav.NavigateTo(ServerPaths.GetUserAuthUrl(), true);
+    }
+
+}

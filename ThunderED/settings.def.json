@@ -78,7 +78,8 @@
     "UseHTTPS": false,
     "CertificatePath": "",
     "CertificatePassword": "",
-    "CertificateStorageName": ""
+    "CertificateStorageName": "",
+	"ZkbUrl": ""
   },
 
   "Database": {

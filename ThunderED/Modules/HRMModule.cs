@@ -160,8 +160,21 @@ namespace ThunderED.Modules
         public static bool HasWebAccess(in long id)
         {
             if (!SettingsManager.Settings.Config.ModuleHRM) return false;
-            return SettingsManager.Settings.HRMModule.GetEnabledGroups().Values.SelectMany(a => a.UsersAccessList)
-                .Contains(id);
+            if (SettingsManager.Settings.HRMModule.GetEnabledGroups().Values.SelectMany(a => a.UsersAccessList)
+                .Contains(id))
+                return true;
+
+            var roles = DiscordHelper.GetDiscordRoles(id).GetAwaiter().GetResult();
+            if (roles == null) return false;
+
+            foreach (var group in SettingsManager.Settings.HRMModule.AccessList.Values)
+            {
+                if (group.RolesAccessList != null && roles.Intersect(group.RolesAccessList)
+                    .Any())
+                    return true;
+            }
+
+            return false;
         }
     }
 

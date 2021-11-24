@@ -2,25 +2,55 @@
 @using System.IO
 @inject AuthenticationStateProvider Auth
 @inject ProtectedSessionStorage ProtectedSessionStore
+@inject NavigationManager Nav
 
-<div class="container" style="height: 100%">
-    <div class="colorifier">
-        <p style="text-align: center">
-            <h2>@LM.Get("webWelcomeHeader")</h2>
-        </p>
-    </div>
-    <!--center content-->
-    <div class="centralizer">
-        <div class="text-center">
-        
-            @if (WebUiHelper.GetAsset("logo.png") != null)
-            {
-                <p>
-                    <RadzenImage Path="@WebUiHelper.GetAsset("logo.png")"></RadzenImage>
-                </p>
-            }
-            <p><a class="btn btn-info btn-block" href="@ServerPaths.GetGeneralAuthPageUrl()" role="button" style="min-width: 150px; max-width: 250px;display: inline-block">@LM.Get("butGeneralAuthPage")</a></p>
+<div class="container frontcolor" style="height: 100%">
+
+    @if (!string.IsNullOrEmpty(CustomHtml))
+    {
+        @((MarkupString)CustomHtml)
+    }
+    else
+    {
+        <div class="pageHeader text-center">
+            @LM.Get("webWelcomeHeader")
         </div>
-    </div>
+        <div class="userName text-center">
+            @LM.Get("webWelcomeMessage")
+        </div>
+        <!--center content-->
+        <div class="centralizer">
+            <div class="text-center">
+
+                @if (WebUiHelper.GetAsset("logo.png") != null)
+                {
+                    <p class="rotate3D">
+                        <RadzenImage Path="@WebUiHelper.GetAsset("logo.png")" Style="width: 150px;"></RadzenImage>
+                    </p>
+                }
+                <button class="navButton2" @onclick="RegisterClick" style="font-size: 25px;margin-bottom: 25px; padding: 10px 10px 10px 10px;">@LM.Get("butGeneralAuthPage")</button>
+            </div>
+        </div>
+    }
 </div>
+
+@code
+{
+    private string CustomHtml;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        CustomHtml = WebUiHelper.GetCustomHtmlContent("index.html");
+        CustomHtml = CustomHtml.Replace("@AuthButtonText", LM.Get("butGeneralAuthPage"))
+            .Replace("@AuthPagePath", ServerPaths.GetGeneralAuthPageUrl())
+            .Replace("@LogoPath", WebUiHelper.GetAsset("logo.png"));
+    }
+
+    private void RegisterClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetGeneralAuthPageUrl());
+    }
+}
 

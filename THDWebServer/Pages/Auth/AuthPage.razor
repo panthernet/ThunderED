@@ -6,9 +6,9 @@
 @inject AuthenticationStateProvider Auth
 
 <div class="container" style="height: 100%">
-    <div class="colorifier text-center">
+    <div class="frontcolor text-center pageHeader">
         <p>
-            <h2>@LM.Get("authWebDiscordHeader")</h2>
+            @LM.Get("authWebDiscordHeader")
         </p>
     </div>
 
@@ -19,23 +19,31 @@
             {
                 @if (WebUiHelper.GetAsset("discord_light.png") != null)
                 {
-                    <p><RadzenImage Path="@WebUiHelper.GetAsset("discord_light.png")" Style="width: 356px;"></RadzenImage></p>
+                    <img src="@WebUiHelper.GetAsset("discord_light.png")" class="imgShadow" style="width: 100px;">
                 }
-                <p class="frontcolor">@((MarkupString) LM.Get("authPageGeneralAuthHeader"))</p>
+                <p class="frontcolor fontEternalShadow">@((MarkupString) LM.Get("authPageGeneralAuthHeader"))</p>
             }
             <!-- ONE BUTTON -->
             @if (SettingsManager.Settings.WebAuthModule.UseOneAuthButton)
             {
-                <a href="@ServerPaths.GetOneButtonUrl()" class="btn btn-info btn-block" role="button">@SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText</a>
+                <p style="text-align: -webkit-center">
+                    <a href="@ServerPaths.GetOneButtonUrl()"><div class='navButton1 longButton' role="button">@SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText</div></a>
+                </p>
             }
             <!-- STANDINGS AUTH LIST-->
             @if (SettingsManager.Settings.Config.ModuleAuthWeb)
             {
                 @foreach (var (key, group) in GroupsForCycle.Where(a => a.Value.StandingsAuth != null))
                 {
-                    @if (group.Hidden) { continue; }
+                    @if (group.Hidden)
+                    {
+                        continue;
+                    }
 
-                    <a href="@ServerPaths.GetAuthUrl()?group=@HttpUtility.UrlEncode(key)" class="btn btn-info btn-block" role="button">@(string.IsNullOrEmpty(group.CustomButtonText) ? key : group.CustomButtonText)</a>
+                    <p style="text-align: -webkit-center">
+                        <a href="@ServerPaths.GetAuthUrl()?group=@HttpUtility.UrlEncode(key)">
+                            <div class="navButton1 longButton" role="button">@(string.IsNullOrEmpty(group.CustomButtonText) ? key : group.CustomButtonText)</div></a>
+                    </p>
                 }
             }
             <!-- NORMAL AUTH LIST-->
@@ -43,16 +51,24 @@
             {
                 @foreach (var (key, group) in GroupsForCycle.Where(a => a.Value.StandingsAuth == null))
                 {
-                    @if (group.Hidden) { continue; }
+                    @if (group.Hidden)
+                    {
+                        continue;
+                    }
                     @if (group.BindToMainCharacter && !_hasReg) continue;
 
-                    <a href="@ServerPaths.GetAuthUrl()?group=@HttpUtility.UrlEncode(group.BindToMainCharacter ? WebAuthModule.DEF_ALTREGGROUP_NAME : key)" class="btn btn-info btn-block" role="button">@(group.CustomButtonText ?? SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText)</a>
+                    <p style="text-align: -webkit-center">
+                        <a href="@ServerPaths.GetAuthUrl()?group=@HttpUtility.UrlEncode(group.BindToMainCharacter ? WebAuthModule.DEF_ALTREGGROUP_NAME : key)">
+                            <div class='navButton1 longButton text-center' role="button">@(group.CustomButtonText ?? SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText)</div></a>
+                    </p>
                 }
             }
 
             <br>
             <br>
-            <p class="text-center"><a class="btn btn-info" href="/" role="button" style="min-width: 150px">@LM.Get("backText")</a></p>
+            <p style="text-align: -webkit-center">
+                <a href="/"><div class='navButton2 text-center' role="button" style="width: 150px; height: 35px;">@LM.Get("backText")</div></a>
+            </p>
 
         </div>
     </div>

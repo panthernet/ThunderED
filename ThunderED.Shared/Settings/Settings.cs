@@ -1784,6 +1784,7 @@ namespace ThunderED
         public bool ModuleStructureManagement { get; set; } = false;
         public bool ModuleMoonTable { get; set; } = false;
         public bool ModuleStorageConsole { get; set; } = false;
+        public bool ModuleRemind { get; set; } = false;
 
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";
@@ -1819,6 +1820,7 @@ namespace ThunderED
         public bool EnableSwatch { get; set; }
         [Comment("Web session timeout in minutes")]
         public int WebSessionTimeout { get; set; } = 60;
+
 
 
 #if EDITOR
@@ -2044,6 +2046,8 @@ namespace ThunderED
         public string CertificatePassword { get; set; }
         [Comment("Optional certificate name to search in the Storage (mutually exclusive with the path)")]
         public string CertificateStorageName { get; set; }
+        [Comment("Optional link to corp/alliance ZKB")]
+        public string ZkbUrl { get; set; }
 
 #if EDITOR
         public override string this[string columnName]
@@ -2119,13 +2123,16 @@ namespace ThunderED
         [Comment("The list of channels where !auth command is allowed (including the forbidden channels which has lower priority)")]
         [Required]
         public ObservableCollection<ulong> ComAuthChannels { get; set; } = new ObservableCollection<ulong>();
+        [Comment("List of auxiliary Discord guild Ids to also run web auth for (Optional)")]
+        public ObservableCollection<ulong> AuxiliaryDiscordGuildIds { get; set; } = new ObservableCollection<ulong>();
         [Comment("The list of groups to filter auth requests")]
         [Required]
-        public ObservableDictionary<string, WebAuthGroup> AuthGroups { get; set; } = new ObservableDictionary<string, WebAuthGroup>();        
+        public ObservableDictionary<string, WebAuthGroup> AuthGroups { get; set; } = new ObservableDictionary<string, WebAuthGroup>();   
 #else
         public List<string> ExemptDiscordRoles { get; set; } = new List<string>();
         public List<string> AuthCheckIgnoreRoles { get; set; } = new List<string>();
         public List<ulong> ComAuthChannels { get; set; } = new List<ulong>();
+        public List<ulong> AuxiliaryDiscordGuildIds { get; set; } = new List<ulong>();
         public Dictionary<string, WebAuthGroup> AuthGroups { get; set; } = new Dictionary<string, WebAuthGroup>();
 #endif
 
@@ -2176,6 +2183,7 @@ namespace ThunderED
         public ObservableCollection<string> UpgradeGroupNames { get; set; } = new ObservableCollection<string>();
         [Comment("List of linked group names for additional auth checks. If user group has been invalidated he will pass a check for all groups mentioned in this list. ")]
         public ObservableCollection<string> DowngradeGroupNames { get; set; } = new ObservableCollection<string>();
+
         
 #else
         public List<string> AuthRoles { get; set; } = new List<string>();
@@ -2183,6 +2191,7 @@ namespace ThunderED
         public List<string> ManualAssignmentRoles { get; set; } = new List<string>();
         public List<string> UpgradeGroupNames { get; set; } = new List<string>();
         public List<string> DowngradeGroupNames { get; set; } = new List<string>();
+
 #endif
         [Comment("Remove user authentication if supplied ESI token has become invalid")]
         public bool RemoveAuthIfTokenIsInvalid { get;set; }
@@ -2223,6 +2232,8 @@ namespace ThunderED
         [Comment("Is config element enabled at runtime")]
         public bool IsEnabled { get; set; } = true;
 
+        [Comment("Optional Discord guild Id to restrict checks only for that guild ")]
+        public ulong DiscordGuildId { get; set; }
 
         public bool IsEmpty()
         {

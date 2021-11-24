@@ -8,10 +8,10 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject AuthenticationStateProvider Auth
 
-<div class="colorifier container text-center">
+<div class="frontcolor container text-center pageHeader">
     @if (IsLoading)
     {
-        <h4>@LM.Get("msgProcessingQuery")</h4>
+        @LM.Get("msgProcessingQuery")
     }
 </div>
 

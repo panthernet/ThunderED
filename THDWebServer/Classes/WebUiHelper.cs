@@ -31,5 +31,21 @@ namespace THDWebServer.Classes
 
             return asset;
         }
+
+        public static string GetSvg(string name)
+        {
+            var def = Path.Combine(DefaultAssetPath, "Svg", name);
+            var cus = Path.Combine(CustomAssetPath, "Svg", name);
+            var asset = File.Exists(cus) ? $"/CustomAssets/Svg/{name}" : (File.Exists(def) ? $"/Assets/Svg/{name}" : null);
+
+            return asset;
+        }
+
+        public static string GetCustomHtmlContent(string name)
+        {
+            var cus = Path.Combine(CustomAssetPath, "Html", name);
+            var asset = File.Exists(cus) ? File.ReadAllText(cus) : null;
+            return asset;
+        }
     }
 }

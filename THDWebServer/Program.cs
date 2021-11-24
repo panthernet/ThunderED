@@ -100,6 +100,7 @@ namespace THDWebServer
                 {
                     webBuilder
                         .UseStartup<Startup>()
+                        .UseStaticWebAssets()
                         .ConfigureKestrel((c, options) =>
                         {
                             var isIp = IPAddress.TryParse(SettingsManager.Settings.WebServerModule.WebExternalIP,

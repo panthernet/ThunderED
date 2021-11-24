@@ -454,7 +454,7 @@ namespace ThunderED.Modules
             await DbHelper.SaveAuthUser(sUser);
             if (sUser.DiscordId > 0)
             {
-                await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId ?? 0);
+                await WebAuthModule.AuthUser(null, sUser.RegCode, sUser.DiscordId ?? 0, SettingsManager.Settings.Config.DiscordGuildId);
                 return UserStatusEnum.Authed;
             }
             return UserStatusEnum.Awaiting;
