@@ -45,6 +45,8 @@ namespace ThunderED.Modules
             List<string> authCheckIgnoreRoles, bool useParallel)
         {
             var discordGuild = APIHelper.DiscordAPI.GetGuild(discordGuildId);
+            if(discordGuild == null) return;
+
             await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache before update");
             await discordGuild.DownloadUsersAsync();
             await AuthInfoLog($"Guild ({discordGuild.IsConnected}) has {discordGuild.DownloadedMemberCount} members in cache after update");

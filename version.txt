@@ -1,3 +1,6 @@
+### V2.0.14
++ Fixed aux guilds handling when guild is specified but bot isn't there yet
+
 ### V2.0.13
 + Web UI update, part 1
 + Added new setting ZkbUrl. Show ZKB button on web UI if set.
