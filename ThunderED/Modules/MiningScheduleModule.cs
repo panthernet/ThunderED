@@ -80,6 +80,7 @@ namespace ThunderED.Modules
         {
             if (!Settings.Config.ModuleMiningSchedule)
                 return WebQueryResult.False;
+            if (TickManager.IsNoConnection || TickManager.IsESIUnreachable) return WebQueryResult.EsiFailure;
 
             try
             {

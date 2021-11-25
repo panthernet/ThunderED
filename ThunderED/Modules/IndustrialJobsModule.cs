@@ -37,6 +37,7 @@ namespace ThunderED.Modules
         public override async Task Run(object prm)
         {
             if (IsRunning || !Settings.Config.ModuleIndustrialJobs || !APIHelper.IsDiscordAvailable) return;
+            if (TickManager.IsNoConnection || TickManager.IsESIUnreachable) return;
             IsRunning = true;
             try
             {

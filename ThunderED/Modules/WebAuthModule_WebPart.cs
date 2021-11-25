@@ -26,6 +26,8 @@ namespace ThunderED.Modules
         {
             if (!Settings.Config.ModuleAuthWeb)
                 return WebQueryResult.False;
+            if (TickManager.IsNoConnection || TickManager.IsESIUnreachable) return WebQueryResult.EsiFailure;
+
             try
             {
                 RunningRequestCount++;

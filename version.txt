@@ -3,6 +3,10 @@
 + Added new setting ZkbUrl. Show ZKB button on web UI if set.
 + Added new settings `AuxiliaryDiscordGuildIds` to Web Auth. If specified the auth checks will also be applied to these guilds allowing auth to somewhat work on several guilds at once.
 + Modified Discord welcome messages (if enabled) to be printed in aux guilds default channels
++ `UseSocketsForZKillboard` setting has been deprecated. ZKill module will now always use websockets by default.
++ Improved ZKill module to cache KMs while there's an outage of ESI connection
++ Improved module logic for modules which do not require ESI to run while ESI is not available (Timer notifications)
++ Fixed some connection outage exceptions
 
 ### V2.0.12
 + Added Discord role access for MiningSchedule module

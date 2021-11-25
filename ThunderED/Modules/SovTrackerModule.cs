@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
+
+using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 
@@ -39,6 +41,7 @@ namespace ThunderED.Modules
         public override async Task Run(object prm)
         {
             if (IsRunning || !APIHelper.IsDiscordAvailable) return;
+            if (TickManager.IsNoConnection || TickManager.IsESIUnreachable) return;
             IsRunning = true;
             try
             {

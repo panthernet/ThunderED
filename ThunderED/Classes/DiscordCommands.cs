@@ -348,7 +348,8 @@ namespace ThunderED.Classes
             if(IsForbidden()) return;
             var tq = await APIHelper.ESIAPI.GetServerStatus("ESIAPI");
             var isOnline = tq.Result != null && tq.Result.players > 20;
-            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("tqStatusText", isOnline ? LM.Get("online") : LM.Get("offline"), tq?.Result.players ?? 0), true);
+            
+            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("tqStatusText", isOnline ? LM.Get("online") : LM.Get("offline"), tq?.Result?.players ?? 0, APIHelper.IsDiscordAvailable, await APIHelper.ESIAPI.IsServerOnline("default")), true);
         }
 
         internal const string CMD_TIMERS= "timers";

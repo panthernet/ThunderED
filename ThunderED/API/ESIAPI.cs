@@ -457,7 +457,7 @@ namespace ThunderED.API
         {
             var status = await GetServerStatus(reason);
             if (status?.Data == null || status.Data.IsNoConnection) return false;
-            return status.Result.players > 20;
+            return (status.Result?.players ?? 0) > 20;
         }
 
         public async Task<int> IsServerOnlineEx(string reason)
@@ -472,7 +472,7 @@ namespace ThunderED.API
                     return -1; //esi down
                 }
 
-                return res.Result.players > 20 ? 1 : 0;
+                return (res.Result?.players ?? 0) > 20 ? 1 : 0;
             }
             catch
             {

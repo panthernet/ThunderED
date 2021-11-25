@@ -27,6 +27,7 @@ namespace ThunderED.Modules
         {
 
             if (IsRunning || !APIHelper.IsDiscordAvailable) return;
+            if (TickManager.IsNoConnection || TickManager.IsESIUnreachable) return;
             IsRunning = true;
 
             await ProcessExistingCampaigns();

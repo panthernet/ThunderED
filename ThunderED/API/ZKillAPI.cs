@@ -42,17 +42,15 @@ namespace ThunderED.API
                         _webSocket = null;
                         return null;
                     }
-                    else
-                    {
-                        if (!_webSocket.Send("{\"action\":\"sub\",\"channel\":\"killstream\"}"))
-                        {
-                            _webSocket?.Dispose();
-                            _webSocket = null;
-                            return null;
-                        }
 
-                        await LogHelper.LogInfo("ZKB feed core WebSocket connect successful!", LogCat.ZKill);
+                    if (!_webSocket.Send("{\"action\":\"sub\",\"channel\":\"killstream\"}"))
+                    {
+                        _webSocket?.Dispose();
+                        _webSocket = null;
+                        return null;
                     }
+
+                    await LogHelper.LogInfo("ZKB feed core WebSocket connect successful!", LogCat.ZKill);
 
                 }
 
@@ -82,7 +80,7 @@ namespace ThunderED.API
             }
         }
 
-        internal async Task<JsonZKill.ZKillboard> GetRedisqResponce()
+       /* internal async Task<JsonZKill.ZKillboard> GetRedisqResponce()
         {
             var redisqID = SettingsManager.Settings.ZKBSettingsModule.ZkillLiveFeedRedisqID;
 			var request = string.IsNullOrEmpty(redisqID)
@@ -96,7 +94,7 @@ namespace ThunderED.API
             }
 				//await LogHelper.LogError("[GetRedisqResponce] Null data!", LogCat.ZKill, false);
 			return data;
-        }
+        }*/
 
         internal async Task<List<JsonClasses.ESIKill>> GetCharacterKills(object characterId)
         {

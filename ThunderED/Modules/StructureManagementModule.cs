@@ -55,6 +55,7 @@ namespace ThunderED.Modules
         {
           
             if(!Settings.Config.ModuleStructureManagement || _isRunning) return;
+            if (TickManager.IsNoConnection || TickManager.IsESIUnreachable) return;
             _isRunning = true;
             try
             {

@@ -186,7 +186,7 @@
   "Location": "Location",
   "Aggressor": "Agressor",
   "backText": "Go Back",
-  "tqStatusText": "```\nTQ status: {0}\nPlayers: {1}\n```",
+  "tqStatusText": "```\nTQ status: {0}\nDiscord online: {2}\nESI online: {3}\nPlayers: {1}\n```",
   "Online": "Online",
   "Offline": "Offline",
   "incursionUpdateHeader": "Incursion status update for {0} const of {1} region",

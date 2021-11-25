@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Thd;
@@ -43,8 +45,9 @@ namespace ThunderED.Modules
         public override async Task Run(object prm)
         {
             if (!Settings.Config.ModuleHRM) return;
+            if (TickManager.IsNoConnection || TickManager.IsESIUnreachable) return;
 
-            if(IsRunning) return;
+            if (IsRunning) return;
             IsRunning = true;
             try
             {

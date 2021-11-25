@@ -177,7 +177,7 @@
   "Location": "Локация",
   "Aggressor": "Агрессор",
   "backText": "Назад",
-  "tqStatusText": "```\nСтатус TQ: {0}\nИгроков: {1}\n```",
+  "tqStatusText": "```\nСтатус TQ: {0}\nDiscord онлайн: {2}\nESI онлайн: {3}\nИгроков: {1}\n```",
   "Online": "Работает",
   "Offline": "Выключен",
   "incursionUpdateHeader": "Статус вторжения в консте {0} региона {1}",

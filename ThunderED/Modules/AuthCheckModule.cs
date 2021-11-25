@@ -19,7 +19,9 @@ namespace ThunderED.Modules
         public override async Task Run(object prm)
         {
             if(IsRunning) return;
-            if(Settings.Config.ModuleAuthWeb && TickManager.GetModule<WebAuthModule>().IsEntityInitFailed) return;
+            if (TickManager.IsNoConnection || TickManager.IsESIUnreachable) return;
+
+            if (Settings.Config.ModuleAuthWeb && TickManager.GetModule<WebAuthModule>().IsEntityInitFailed) return;
             if(!Settings.Config.ModuleAuthCheck) return;
 
             IsRunning = true;
