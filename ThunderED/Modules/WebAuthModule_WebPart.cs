@@ -289,8 +289,8 @@ namespace ThunderED.Modules
 
                         if (add)
                         {
-                            if (autoSearchGroup && group.ESICustomAuthRoles.Any()) 
-                                //for one button with ESI - had to auth twice
+                            if (autoSearchGroup && group.ESICustomAuthRoles.Any()) //TODO     sus change
+                            //for one button with ESI - had to auth twice
                             {
                                 var redirect = WebQueryResult.RedirectUrl;
                                 redirect.AddValue("url", ServerPaths.GetCustomAuthUrl(rawIp, group.ESICustomAuthRoles.ToList(), groupName));

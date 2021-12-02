@@ -9,7 +9,11 @@ namespace THDWebServer.Classes.Services
     {
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await ThunderED.ExternalAccess.Start();
+            if (!await ThunderED.ExternalAccess.Start())
+            {
+
+            }
+            
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

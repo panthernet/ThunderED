@@ -56,7 +56,7 @@ namespace ThunderED.Modules
             const bool logConsole = true;
             const bool logFile = true;
 
-            if (DateTime.Now > _lastTokensCheck)
+            if (DateTime.Now >= _lastTokensCheck)
             {
                 _lastTokensCheck = DateTime.Now.AddMinutes(5);
 
@@ -97,13 +97,8 @@ namespace ThunderED.Modules
 
                         await LogHelper.LogInfo($"Passed", LogCat.TokenUpdate, logConsole, logFile);
 
-                        var handler = new JsonWebTokenHandler();
-                        if (handler.CanReadToken(result.Result))
-                        {
-                            token.Scopes = string.Join(',',
-                                handler.ReadJsonWebToken(result.Result).Claims.SelectMany(a => a.Value));
-                            await DbHelper.UpdateToken(token.Token, token.CharacterId, token.Type, token.Scopes);
-                        }
+                        token.Scopes = APIHelper.ESIAPI.GetScopesFromToken(result.Result);
+                        await DbHelper.UpdateToken(token.Token, token.CharacterId, token.Type, token.Scopes);
                     }
                 }
                 catch (Exception ex)

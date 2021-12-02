@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -242,6 +243,18 @@ namespace ThunderED.API
         {
             var ssoClient = new HttpClient();
             ssoClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
+        public string GetScopesFromToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            if (handler.CanReadToken(token))
+            {
+                var slice = handler.ReadJwtToken(token);
+                return string.Join(',', slice.Claims.Select(a => a.Value));
+            }
+
+            return null;
         }
 
         public async Task<ESIQueryResult<string>> GetAccessToken(ThdToken token, string notes = null, bool logDetails = true, [CallerMemberName] string methodname = null)

@@ -5,7 +5,7 @@
 + Added `CanSeeIP` option for HRM groups
 + Added `CanFetchToken` option for HRM groups
 + Added `CanEditSettings` option for settings module
-+ Added new button to char inspection in HRM to fetch refresh token into clipboard (if any)
++ Added new button to char inspection in HRM to fetch fresh access token into clipboard (if any)
 + Added WebAuth settings to web UI
 + Removed SimpleAuth web UI. Simple auth will be deprecated once web UI settings are polished.
 + Fixed logs overwrite error

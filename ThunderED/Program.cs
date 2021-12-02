@@ -458,7 +458,7 @@ namespace ThunderED
                         var r = await APIHelper.ESIAPI.GetAccessToken(token);
                         if (r?.Data == null)
                             continue;
-                        if (r.Data.IsNoConnection)
+                        if (r.Data.IsNoConnection || r.Data.IsNotDeserialized)
                         {
                             await LogHelper.LogError($"Connection lost! Operation aborted. Please restart.");
                             await Task.Delay(2000);
@@ -482,12 +482,8 @@ namespace ThunderED
                         }
 
                         token.Token = r.RefreshToken;
-                        var handler = new JwtSecurityTokenHandler();
-                        if (handler.CanReadToken(r.Result))
-                        {
-                            var slice = handler.ReadJwtToken(r.Result);
-                            token.Scopes = string.Join(',', slice.Claims.SelectMany(a=> a.Value));
-                        }
+                        token.Scopes = APIHelper.ESIAPI.GetScopesFromToken(r.Result);
+
                         await DbHelper.UpdateToken(token.Token, token.CharacterId, token.Type, token.Scopes);
                     }
 
