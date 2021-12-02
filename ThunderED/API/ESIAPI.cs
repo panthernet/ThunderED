@@ -254,7 +254,7 @@ namespace ThunderED.API
 
                     var values = new Dictionary<string, string> {{"grant_type", "refresh_token"}, {"refresh_token", $"{refreshToken}"}};
                     var content = new FormUrlEncodedContent(values);
-                    using (var responseMessage = await ssoClient.PostAsync("https://login.eveonline.com/oauth/token", content))
+                    using (var responseMessage = await ssoClient.PostAsync("https://login.eveonline.com/v2/oauth/token", content))
                     {
                         var raw = await responseMessage.Content.ReadAsStringAsync();
                         if (!responseMessage.IsSuccessStatusCode)
@@ -273,7 +273,9 @@ namespace ThunderED.API
                             return result;
                         }
 
-                        result.Result = (string)JObject.Parse(raw)["access_token"];
+                        var d = JObject.Parse(raw);
+                        result.Result = (string)d["access_token"];
+                        result.RefreshToken = (string)d["refresh_token"];
                         return result;
                     }
                 }
@@ -300,7 +302,7 @@ namespace ThunderED.API
                     ssoClient.DefaultRequestHeaders.Add("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes(clientID + ":" + secret))}");
                     var content = new FormUrlEncodedContent(values);
 
-                    using (var tokenresponse = await ssoClient.PostAsync("https://login.eveonline.com/oauth/token", content))
+                    using (var tokenresponse = await ssoClient.PostAsync("https://login.eveonline.com/v2/oauth/token", content))
                     {
                         var responseString = await tokenresponse.Content.ReadAsStringAsync();
                         return new[] {(string) JObject.Parse(responseString)["access_token"], (string) JObject.Parse(responseString)["refresh_token"]};

@@ -10,18 +10,25 @@
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_HRM)]
 @inject NavigationManager Nav
 @inject IModalService Modal
+@inject IJSRuntime JSRuntime
+
 
 <div class="modal-content hrm-inspect">
     <div class="modal-header">
         <h5 class="modal-title">@LM.Get("hrmInspectingHeader", MemberData?.CharacterName)</h5>
         <div class="row">
-        @if (_access.CanKickUsers)
-        {
-            <RadzenButton ButtonType="ButtonType.Button" Icon="voice_over_off" ButtonStyle="ButtonStyle.Danger" Style="margin-right: 10px;"
-                          Click="ExecuteKickUser" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmButDeleteUserAuth")}})"/>
-        }
+            @if (_access.CanFetchToken)
+            {
+                <RadzenButton ButtonType="ButtonType.Button" Icon="vpn_key" ButtonStyle="ButtonStyle.Info" Style="margin-right: 10px;"
+                          Click="ExecuteGetToken" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmButGetToken")}})" />
+            }
+            @if (_access.CanKickUsers)
+            {
+                <RadzenButton ButtonType="ButtonType.Button" Icon="voice_over_off" ButtonStyle="ButtonStyle.Danger" Style="margin-right: 10px;"
+                          Click="ExecuteKickUser" Attributes="@(new Dictionary<string, object> {{"title", LM.Get("hrmButDeleteUserAuth")}})" />
+            }
             <RadzenButton ButtonType="ButtonType.Button" Icon="close" ButtonStyle="ButtonStyle.Secondary"
-                          Click="Close"/>
+                          Click="Close" />
         </div>
     </div>
     <div class="modal-body">
@@ -92,7 +99,7 @@
                         </div>
                     }
                     <div class="row-fluid">
-                        @LM.Get("hrmInspectIp"):&nbsp; @(string.IsNullOrEmpty(_character?.Ip) ? LM.Get("Unknown") : LM.Get("Unknown"))
+                        @LM.Get("hrmInspectIp"):&nbsp; @(string.IsNullOrEmpty(_character?.Ip) || !_access.CanSeeIP ? LM.Get("Unknown") : _character?.Ip)
                     </div>
                 </div>
             </div>
@@ -385,14 +392,14 @@
                         @if (false) //SettingsManager.HasCharAssetsScope(_character?.Data.PermissionsList) && _hasToken
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabCharAssets")">
-                                
+
                                 <RadzenTree Data="@_charAssetCategoriesList" Expand=@OnExpandCharAssets Style="width: 100%; height: 320px">
-                                    <RadzenTreeLevel TextProperty="Name"/>
+                                    <RadzenTreeLevel TextProperty="Name" />
                                 </RadzenTree>
 
                                 @if (_isCharAssetListLoading)
                                 {
-                                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText"/>
+                                    <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
                                 }
                             </RadzenTabsItem>
                         }
@@ -570,7 +577,7 @@
                             if (values != null)
                             {
                                 _skillsListCache = values[1] as List<WebSkillItem>;
-                                _totalSp = ((int) values[0]).ToString("N0");
+                                _totalSp = ((int)values[0]).ToString("N0");
                             }
 
                             await InvokeAsync(StateHasChanged);
@@ -657,7 +664,7 @@
         if (data != null)
         {
             _charAssetList = data.GroupBy(a => a.LocationName).ToDictionary(a => a.Key, a => a.ToList());
-            _charAssetCategoriesList = _charAssetList.Keys.Select(a => new WebAssetCategory {Name = a}).ToList();
+            _charAssetCategoriesList = _charAssetList.Keys.Select(a => new WebAssetCategory { Name = a }).ToList();
         }
         _isCharAssetListLoading = false;
         await InvokeAsync(StateHasChanged);
@@ -713,6 +720,18 @@
             {
                 await BlazoredModal.CloseAsync(ModalResult.Ok(false));
             }
+        }
+    }
+
+    private async Task ExecuteGetToken()
+    {
+        var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralToken(),
+            _module.Settings.WebServerModule.CcpAppClientId,
+            _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
+
+        if (!string.IsNullOrEmpty(tq.Result))
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", tq.Result);
         }
     }
 

@@ -600,7 +600,7 @@ namespace ThunderED.Classes
                             : grps.FirstOrDefault();
                     if (grp.Value != null)
                     {
-                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {ServerPaths.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
+                        await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {ServerPaths.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles.ToList(), grp.Key)}");
                     }
                 }
             }
@@ -621,7 +621,7 @@ namespace ThunderED.Classes
                 var grp = SettingsManager.Settings.WebAuthModule.GetEnabledAuthGroups().FirstOrDefault(a=> a.Key == group);
                 if (grp.Value != null)
                 {
-                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {ServerPaths.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles, grp.Key)}");
+                    await APIHelper.DiscordAPI.ReplyMessageAsync(Context, $"{grp.Key}: {ServerPaths.GetCustomAuthUrl("-", grp.Value.ESICustomAuthRoles.ToList(), grp.Key)}");
                 }
             }
             else

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using ThunderED.Classes;
@@ -137,7 +138,20 @@ namespace ThunderED.Modules
 
         private HRMAccessFilter MergeHRMFilters(IEnumerable<HRMAccessFilter> result)
         {
-            return new HRMAccessFilter
+            var r = new HRMAccessFilter();
+            var list = r.GetType().GetProperties().Where(a => a.CanWrite && a.PropertyType == typeof(bool));
+            foreach (var propertyInfo in list)
+            {
+                var st = result.Any(a => (bool)propertyInfo.GetValue(a));
+                propertyInfo.SetValue(r, st);
+            }
+
+            r.AuthGroupNamesFilter = result.SelectMany(a => a.AuthGroupNamesFilter).Distinct().ToList();
+            r.AuthAllianceIdFilter = result.SelectMany(a => a.AuthAllianceIdFilter).Distinct().ToList();
+            r.AuthCorporationIdFilter = result.SelectMany(a => a.AuthCorporationIdFilter).Distinct().ToList();
+
+            return r;
+            /*return new HRMAccessFilter
             {
                 ApplyGroupFilterToAwaitingUsers = result.Any(a=> a.ApplyGroupFilterToAwaitingUsers),
                 CanInspectAltUsers = result.Any(a=> a.CanInspectAltUsers),
@@ -148,6 +162,10 @@ namespace ThunderED.Modules
                 CanKickUsers = result.Any(a=> a.CanKickUsers),
                 CanMoveToSpies = result.Any(a=> a.CanMoveToSpies),
                 CanRestoreDumped = result.Any(a=> a.CanRestoreDumped),
+
+                CanSeeIP = result.Any(a => a.CanSeeIP),
+                CanFetchToken = result.Any(a => a.CanFetchToken),
+
                 CanSearchMail = result.Any(a=> a.CanSearchMail),
                 IsAltUsersVisible = result.Any(a=> a.IsAltUsersVisible),
                 IsAuthedUsersVisible = result.Any(a=> a.IsAuthedUsersVisible),
@@ -157,7 +175,7 @@ namespace ThunderED.Modules
                 AuthGroupNamesFilter = result.SelectMany(a=> a.AuthGroupNamesFilter).Distinct().ToList(),
                 AuthAllianceIdFilter = result.SelectMany(a=> a.AuthAllianceIdFilter).Distinct().ToList(),
                 AuthCorporationIdFilter = result.SelectMany(a=> a.AuthCorporationIdFilter).Distinct().ToList(),
-            };
+            };*/
         }
 
         public static bool HasWebAccess(in long id)

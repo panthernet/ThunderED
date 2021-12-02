@@ -85,6 +85,9 @@ namespace ThunderED.Json
             public string timestamp;
             public bool is_read;
             public string text;
+
+            [JsonIgnore]
+            public DateTime Date => DateTime.Parse(timestamp);
         }
 
         public class StructureData

@@ -42,8 +42,8 @@ namespace ThunderED.Modules
                     await LogHelper.LogWarning(
                         $"Group {groupName} contains duplicate `AllowedMembers` names {string.Join(',', keys)}! Set unique names to avoid inconsistency during auth checks!", Category);
                 await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(group.AllowedMembers.Values.SelectMany(a => a.DiscordRoles).Distinct().ToList(), Category);
-                await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(group.ManualAssignmentRoles, Category);
-                await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(group.AuthRoles, Category);
+                await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(group.ManualAssignmentRoles.ToList(), Category);
+                await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(group.AuthRoles.ToList(), Category);
                 if (group.StandingsAuth != null)
                 {
                     await APIHelper.DiscordAPI.CheckAndNotifyBadDiscordRoles(group.StandingsAuth.StandingFilters.Values.SelectMany(a=> a.DiscordRoles).Distinct().ToList(), Category);
@@ -736,7 +736,7 @@ namespace ThunderED.Modules
                     authUser.SetStateAuthed();
                     authUser.RegCode = null;
 
-                    await authUser.UpdateData(characterData, null, null, group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null);
+                    await authUser.UpdateData(characterData, null, null, @group.ESICustomAuthRoles.Any() ? string.Join(',', group.ESICustomAuthRoles) : null);
 
                     authUser.Id = 0; //we clean up prev regs so new user here
                     await DbHelper.SaveAuthUser(authUser);
@@ -749,13 +749,13 @@ namespace ThunderED.Modules
                     await AuthInfoLog(authUser, $"Running roles update for {characterData.name} {(group.PreliminaryAuthMode ? $"[AUTO-AUTH from {result.GroupName}]" : $"[MANUAL-AUTH {result.GroupName}]")}");
 
                     await APIHelper.DiscordAPI.GetGuild(SettingsManager.Settings.Config.DiscordGuildId).DownloadUsersAsync();
-
-                    await UpdateUserRoles(discordId, SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles,
+                    var exemptRolesList = SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles.ToList();
+                    await UpdateUserRoles(discordId, exemptRolesList,
                         SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles);
                     if(SettingsManager.Settings.WebAuthModule.AuxiliaryDiscordGuildIds != null)
                         foreach (var discordGuildId in SettingsManager.Settings.WebAuthModule.AuxiliaryDiscordGuildIds)
                         {
-                            await UpdateUserRoles(discordId, SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles,
+                            await UpdateUserRoles(discordId, exemptRolesList,
                                 SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles, false, APIHelper.DiscordAPI.GetGuild(discordGuildId));
                         }
 

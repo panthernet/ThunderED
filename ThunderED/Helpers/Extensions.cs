@@ -50,7 +50,7 @@ namespace ThunderED
                 MainCharacterId = mainCharId
             };
             var characterData = await APIHelper.ESIAPI.GetCharacterData(LogCat.AuthWeb.ToString(), characterId);
-            await authUser.UpdateData(characterData, null, null, group.ESICustomAuthRoles.Count > 0 ? string.Join(',', group.ESICustomAuthRoles) : null);
+            await authUser.UpdateData(characterData, null, null, @group.ESICustomAuthRoles.Any() ? string.Join(',', group.ESICustomAuthRoles) : null);
             return authUser;
         }
 

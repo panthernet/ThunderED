@@ -72,7 +72,7 @@ namespace THDWebServer.Classes
 
         public static async Task<bool> ShowConfirm(this IModalService modal, string header = null, string message = null)
         {
-            var options = new ModalOptions() { HideCloseButton = true };
+            var options = new ModalOptions() { HideCloseButton = true, Class = "blazored-modal2" };
             var parameters = new ModalParameters();
             parameters.Add("Message", message);
             return !(await modal.Show<Confirm>(header ?? LM.Get("webConfirmation"), parameters, options).Result).Cancelled;

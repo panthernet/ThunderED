@@ -1,0 +1,325 @@
+﻿@using ThunderED.Modules
+@using ThunderED.Helpers
+
+@inject AuthenticationStateProvider Auth
+@inject ProtectedSessionStorage Store
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_WEB_SETTINGS)]
+@inject NavigationManager Nav
+@inject IModalService Modal
+
+<div class="hrm-inspect frontcolor fontEternal">
+<div class="col-md">
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameIsEnabled")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenCheckBox @bind-Value="AuthGroup.Value.IsEnabled" AllowClear="true" TValue="bool"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameRemoveAuthIfTokenIsInvalid")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenCheckBox @bind-Value="AuthGroup.Value.RemoveAuthIfTokenIsInvalid" AllowClear="true" TValue="bool"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameRemoveTokenIfTokenIsInvalid")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenCheckBox @bind-Value="AuthGroup.Value.RemoveTokenIfTokenIsInvalid" AllowClear="true" TValue="bool"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameStopSearchingOnFirstMatch")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenCheckBox @bind-Value="AuthGroup.Value.StopSearchingOnFirstMatch" AllowClear="true" TValue="bool"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameHidden")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenCheckBox @bind-Value="AuthGroup.Value.Hidden" AllowClear="true" TValue="bool"/>
+    </div>
+</div>
+                
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameAuthRoles")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenDropDown @bind-Value="AuthGroup.Value.AuthRoles" Data="@_discordRolesList" Style="width: 100%" Multiple="true"
+                        AllowClear="true" ValueProperty="Name" TextProperty="Name"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameManualAssignmentRoles")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenDropDown @bind-Value="AuthGroup.Value.ManualAssignmentRoles" Data="@_discordRolesList" Style="width: 100%" Multiple="true"
+                        AllowClear="true" ValueProperty="Name" TextProperty="Name"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameCustomButtonText")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenTextBox @bind-Value="AuthGroup.Value.CustomButtonText" Style="width: 100%"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameExcludeFromOneButtonMode")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenCheckBox @bind-Value="AuthGroup.Value.ExcludeFromOneButtonMode" TValue="bool"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameDefaultMention")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenTextBox @bind-Value="AuthGroup.Value.DefaultMention" Style="width: 100%"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameESICustomAuthRoles")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenDropDown @bind-Value="AuthGroup.Value.ESICustomAuthRoles" Data="@_esiRolesList" Style="width: 100%" Multiple="true"
+                        AllowClear="true" ValueProperty="Name" TextProperty="Name"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNamePreliminaryAuthMode")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenCheckBox @bind-Value="AuthGroup.Value.PreliminaryAuthMode" TValue="bool"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameAppInvalidationInHours")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenNumeric @bind-Value="AuthGroup.Value.AppInvalidationInHours" Style="width: 100%" TValue="int"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameSkipDiscordAuthPage")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenCheckBox @bind-Value="AuthGroup.Value.SkipDiscordAuthPage" TValue="bool"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameBindToMainCharacter")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenCheckBox @bind-Value="AuthGroup.Value.BindToMainCharacter" TValue="bool"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameUpgradeGroupNames")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenDropDown @bind-Value="AuthGroup.Value.UpgradeGroupNames" Data="@_groupNamesList" Style="width: 100%" Multiple="true"
+                        AllowClear="true" ValueProperty="Name" TextProperty="Name"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 align-items-center d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameDowngradeGroupNames")"/>
+    </div>
+    <div class="col-md-8">
+        <RadzenDropDown @bind-Value="AuthGroup.Value.DowngradeGroupNames" Data="@_groupNamesList" Style="width: 100%" Multiple="true"
+                        AllowClear="true" ValueProperty="Name" TextProperty="Name"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col d-flex">
+        <RadzenLabel Text="@LM.Get("wsAuthColNameAllowedMembers")" />
+        <button class='navButton2' @onclick="InsertRow" style="width: 150px; margin-bottom: 10px; margin-left: 10px;"><RadzenIcon Icon="add_circle_outline" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webSettingsAddEntryButton")</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col d-flex align-items-center">
+
+        <RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" Data="@(AuthGroup.Value.AllowedMembers)" TItem="KeyValuePair<string, AuthRoleEntity>"
+                    Count="@(AuthGroup.Value.AllowedMembers.Count)" @ref="_allowedGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+            <Columns>
+                <RadzenGridColumn TItem="KeyValuePair<string, AuthRoleEntity>" Property="Key" Width="100px" Title="@LM.Get("webSettingsAuthNameColumnName")">
+                    <EditTemplate Context="order">
+                        <RadzenTextBox @bind-Value=@_editMembersName Style="width: 100%; display: block" Name="EntryName"/>
+                        <RadzenRequiredValidator Text="Value is required" Component="EntryName" Popup="true"/>
+                    </EditTemplate>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="KeyValuePair<string, AuthRoleEntity>" Property="Value" Title="@LM.Get("wsAuthColNameEntities")" FilterProperty="Value.EntitiesFilterString" SortProperty="Value.EntitiesFilterString">
+                    <Template Context="order">
+                        @string.Join(',', order.Value.Entities)
+                    </Template>
+                    <EditTemplate Context="order">
+                        <RadzenTextBox @bind-Value=@_editMembersEntities Style="width: 100%; display: block"/>
+                    </EditTemplate>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="KeyValuePair<string, AuthRoleEntity>" Property="Value" Title="@LM.Get("wsAuthColNameDiscordRoles")" FilterProperty="Value.DiscordRolesFilterString" SortProperty="Value.DiscordRolesFilterString">
+                    <Template Context="order">
+                        @string.Join(',', order.Value.DiscordRoles)
+                    </Template>
+                    <EditTemplate Context="order">
+                        <RadzenDropDown @bind-Value="order.Value.DiscordRoles" Data="@_discordRolesList" Style="width: 100%" Multiple="true"
+                                        AllowClear="true" Name="RolesName" TextProperty="Name" ValueProperty="Name"
+                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Placeholder="Select...">
+                        </RadzenDropDown>
+                    </EditTemplate>
+                </RadzenGridColumn>
+
+                <RadzenGridColumn TItem="KeyValuePair<string, AuthRoleEntity>" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="25px">
+                    <Template Context="order">
+                        @if (!_isEditingMembersGrid)
+                        {
+                            <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(order))"/>
+                        }
+                    </Template>
+                    <EditTemplate Context="order">
+                        <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveRow(order))"/>
+                        <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(order))"/>
+                    </EditTemplate>
+                </RadzenGridColumn>
+                <RadzenGridColumn TItem="KeyValuePair<string, AuthRoleEntity>" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="25px">
+                    <Template Context="order">
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(order))"/>
+                    </Template>
+                    <EditTemplate Context="order">
+                    </EditTemplate>
+                </RadzenGridColumn>
+            </Columns>
+        </RadzenGrid>
+    </div>
+</div>
+</div>
+</div>
+
+@code {
+    [Parameter]public KeyValuePair<string, WebAuthGroup> AuthGroup { get; set; }
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    private WebSettingsModule _module;
+    private IEnumerable<SettingsEditor.TestClass> _discordRolesList;
+    private IEnumerable<SettingsEditor.TestClass> _esiRolesList;
+    private IEnumerable<SettingsEditor.TestClass> _groupNamesList;
+    RadzenGrid<KeyValuePair<string, AuthRoleEntity>> _allowedGrid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _module = TickManager.GetModule<WebSettingsModule>();
+        if (_module == null)
+        {
+            return;
+        }
+
+
+        _discordRolesList = _module.WebGetAuthRolesList().ConvertAll(a => new SettingsEditor.TestClass { Name = a, Id = a.GetHashCode() });
+        _esiRolesList = SettingsManager.ESIScopes.ConvertAll(a => new SettingsEditor.TestClass { Name = a, Id = a.GetHashCode() });
+        _groupNamesList = _module.WebGetAuthGroupsList().ConvertAll(a=> new SettingsEditor.TestClass {Name=a, Id=a.GetHashCode()});
+
+        await base.OnInitializedAsync();
+    }
+
+    #region MemebersGrid
+
+    private bool _isEditingMembersGrid;
+    private KeyValuePair<string, AuthRoleEntity>? _editingAuthRow;
+    private string _editMembersName;
+    private string _editMembersEntities;
+
+    async Task InsertRow()
+    {
+        var value = new KeyValuePair<string, AuthRoleEntity>("New Entity", new AuthRoleEntity());
+        await _allowedGrid.InsertRow(value);
+        _isEditingMembersGrid = true;
+    }
+
+    async Task EditRow(KeyValuePair<string, AuthRoleEntity> order)
+    {
+        if (_isEditingMembersGrid) return;
+        _editingAuthRow = order.Clone();
+        _editMembersName = order.Key;
+        _isEditingMembersGrid = true;
+        await _allowedGrid.EditRow(order);
+    }
+
+    async Task SaveRow(KeyValuePair<string, AuthRoleEntity> order)
+    {
+        /*if (!order.Validate())
+            {
+                _authGrid.CancelEditRow(order);
+                return;
+            }*/
+        await _allowedGrid.UpdateRow(order);
+        AuthGroup.Value.AllowedMembers.Remove(order.Key);
+        order.Value.Entities = _editMembersEntities.Split(",").Select(a => (object) a).ToList();
+        AuthGroup.Value.AllowedMembers.Add(_editMembersName, order.Value);
+        await _allowedGrid.Reload();
+
+        _editingAuthRow = null;
+        _editMembersName = null;
+        _editMembersEntities = null;
+        _isEditingMembersGrid = false;
+    }
+
+    async Task CancelEdit(KeyValuePair<string, AuthRoleEntity> order)
+    {
+        //order.UpdateFrom(_editingAuthRow); TODO
+        _allowedGrid.CancelEditRow(order);
+
+        AuthGroup.Value.AllowedMembers.Remove(order.Key);
+        if(_editingAuthRow != null)
+            AuthGroup.Value.AllowedMembers.Add(_editingAuthRow.Value.Key, _editingAuthRow.Value.Value);
+        await _allowedGrid.Reload();
+
+        _editingAuthRow = null;
+        _editMembersName = null;
+        _editMembersEntities = null;
+        _isEditingMembersGrid = false;
+    }
+
+    async Task DeleteRow(KeyValuePair<string, AuthRoleEntity> order)
+    {
+        if(!await Modal.ShowConfirm(null, LM.Get("webGenericQuestionMessage")))
+            return;
+
+        if (AuthGroup.Value.AllowedMembers.ContainsKey(order.Key))
+        {
+            AuthGroup.Value.AllowedMembers.Remove(order.Key);
+            await _allowedGrid.Reload();
+        }
+        else
+        {
+            _allowedGrid.CancelEditRow(order);
+            _editMembersName = null;
+            _editMembersEntities = null;
+        }
+    }
+    #endregion
+
+}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
@@ -426,10 +427,84 @@ namespace ThunderED
                 }
             }
 
+            if (!await MigrateTov2Auth())
+            {
+                await LogHelper.LogError($"V2 migration failed!");
+                return false;
+            }
+
             //initiate core timer
             _timer = new Timer(TickCallback, new AutoResetEvent(true), 100, 100);
 
             return true;
+        }
+
+        private static async Task<bool> MigrateTov2Auth()
+        {
+            //return true;
+            try
+            {
+                var version = await DbHelper.GetCacheDataEntry("auth_version");
+                if (version == null) //v2 go go
+                {
+                    await LogHelper.LogWarning($"Migrating auth to V2...");
+                    var tokens = await DbHelper.GetAllTokens();
+                    await LogHelper.LogWarning(
+                        $"{tokens.Count} tokens found. There might be errors, it's okay.");
+                    await Task.Delay(2000);
+
+                    foreach (var token in tokens)
+                    {
+                        var r = await APIHelper.ESIAPI.RefreshToken(token.Token,
+                            SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                            SettingsManager.Settings.WebServerModule.CcpAppSecret, nameof(MigrateTov2Auth));
+                        if (r?.Data == null)
+                            continue;
+                        if (r.Data.IsNoConnection)
+                        {
+                            await LogHelper.LogError($"Connection lost! Operation aborted. Please restart.");
+                            await Task.Delay(2000);
+                            return false;
+                        }
+
+                        if (r.Data.IsFailed)
+                        {
+                            await LogHelper.LogWarning(
+                                $"Failed for {token.CharacterId}|{token.Type}. Removing token due to error {r.Data.ErrorCode}. {r.Data.Message}");
+                            await DbHelper.DeleteToken(token.CharacterId, token.Type);
+                            continue;
+                        }
+
+                        if (string.IsNullOrEmpty(r.RefreshToken))
+                        {
+                            await LogHelper.LogError(
+                                $"Refresh token is null, something is wrong. Aborting. Please restart or contacts devs. {r.Data.Message}");
+                            await Task.Delay(2000);
+                            return false;
+                        }
+
+                        token.Token = r.RefreshToken;
+                        var handler = new JwtSecurityTokenHandler();
+                        if (handler.CanReadToken(r.Result))
+                        {
+                            var slice = handler.ReadJwtToken(r.Result);
+                            token.Scopes = string.Join(',', slice.Claims.SelectMany(a=> a.Value));
+                        }
+                        await DbHelper.UpdateToken(token.Token, token.CharacterId, token.Type, token.Scopes);
+                    }
+
+                    await DbHelper.UpdateCacheDataEntry("auth_version", "v2");
+                    await LogHelper.LogWarning($"Migration to V2 auth has been completed!");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogError($"Critical failure. Abort.");
+                await LogHelper.LogEx(ex);
+                return false;
+            }
         }
 
         private static async Task CheckAuthIntegrity()

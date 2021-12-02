@@ -26,15 +26,15 @@
     <PackageReference Include="Blazor.Extensions.Storage" Version="1.1.0-preview3" />
     <PackageReference Include="Blazored.Modal" Version="6.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.21" />
     <PackageReference Include="Microsoft.AspNetCore.ProtectedBrowserStorage" Version="0.1.0-alpha.19521.1" />
     <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.3">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.5" />
     <PackageReference Include="Radzen.Blazor" Version="3.12.2" />
   </ItemGroup>
 
@@ -58,6 +58,8 @@
     <Watch Remove="Pages\Modals\AddRFTimerModal.razor" />
     <Watch Remove="Pages\Modals\AddTimerModal.razor" />
     <Watch Remove="Pages\Modals\Confirm.razor" />
+    <Watch Remove="Pages\Modals\EditAuthGroup.razor" />
+    <Watch Remove="Pages\Modals\EditAuthSettings.razor" />
     <Watch Remove="Pages\Modals\ErrorDialog.razor" />
     <Watch Remove="Pages\Modals\InspectChar.razor" />
     <Watch Remove="Pages\Modals\InspectLedger.razor" />
@@ -67,6 +69,7 @@
     <Watch Remove="Pages\Modals\StructureAlarmSettings.razor" />
     <Watch Remove="Pages\MoonTable.razor" />
     <Watch Remove="Pages\SettingsEditor.razor" />
+    <Watch Remove="Pages\SettingsEditor_auth.razor" />
     <Watch Remove="Pages\StructureManagement.razor" />
     <Watch Remove="Pages\Success\FeedSuccess.razor" />
     <Watch Remove="Pages\Timers.razor" />
@@ -87,6 +90,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="wwwroot\css\modal.css" />
 	  <Content Remove="wwwroot\CustomAssets\Html\index - Копировать.html" />
 	  <Content Remove="wwwroot\CustomAssets\Html\index.html" />
 	  <Content Remove="wwwroot\Fonts\helix.ttf" />

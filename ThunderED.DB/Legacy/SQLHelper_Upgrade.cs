@@ -13,7 +13,7 @@ namespace ThunderED
         //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19","1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", 
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5", "2.0.6", "2.0.7","2.0.9","2.0.10"
+            "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5", "2.0.6", "2.0.7","2.0.9","2.0.10", "2.0.15", "2.0.16"
         };
 
         public static async Task<bool> Upgrade()
@@ -26,6 +26,8 @@ namespace ThunderED
             try
             {
                 var firstUpdate = new Version(MajorVersionUpdates[0]);
+                var isSqlite = SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
+                    StringComparison.OrdinalIgnoreCase);
                 if (vDbVersion < firstUpdate)
                 {
                     await LogHelper.LogError("Your database version is below the required minimum for an upgrade. You have to do clean install without the ability to migrate your data. Consult GitHub WIKI or reach @panthernet#1659 on Discord group for assistance.");
@@ -671,6 +673,44 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                         case "2.0.10":
                             await BackupDatabase();
                             await RunCommand("alter table mining_ledger add stats text; ");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
+                        case "2.0.15":
+                            await BackupDatabase();
+                            await RunCommand($"alter table tokens add roles {(SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite", StringComparison.OrdinalIgnoreCase) ? "integer":"BIGINT")}; ");
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            break;
+                        case "2.0.16":
+                            await BackupDatabase();
+
+                            await RunCommand($"alter table tokens add scopes TEXT; ");
+
+                            if (isSqlite)
+                            {
+                                await RunCommand(
+                                    $"create table cache_data_dg_tmp(	name TEXT,	data TEXT, constraint cache_data_pk primary key (name) );");
+                                await RunCommand(
+                                    $"insert into cache_data_dg_tmp(name, data) select name, data from cache_data;");
+                                await RunCommand($"drop table cache_data;");
+                                await RunCommand($"alter table cache_data_dg_tmp rename to cache_data;");
+                                await RunCommand($"create unique index cacheData_name_uindex on cache_data(name); ");
+
+                                await RunCommand(
+                                    "create table cache_dg_tmp (	type text not null,	id text not null,	lastAccess timestamp default CURRENT_TIMESTAMP not null,	lastUpdate timestamp default CURRENT_TIMESTAMP not null,	text text not null,	days integer default 1 not null,	constraint cache_pk		primary key (type, id));");
+                                await RunCommand(
+                                    "insert into cache_dg_tmp(type, id, lastAccess, lastUpdate, text, days) select type, id, lastAccess, lastUpdate, text, days from cache;");
+                                await RunCommand("drop table cache;");
+                                await RunCommand("alter table cache_dg_tmp rename to cache;");
+                                await RunCommand("create index typeIdIndex on cache(type, id); ");
+                            }
+                            else
+                            {
+                                await RunCommand("alter table cache add constraint cache_pk primary key(type(256), id(256)); ");
+                                await RunCommand("alter table cache_data drop key cacheData_name_uindex;");
+                                await RunCommand(
+                                    "alter table cache_data add constraint cacheData_name_uindex primary key(name(256)); ");
+                            }
+
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         #endregion

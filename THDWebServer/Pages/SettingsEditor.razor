@@ -15,71 +15,12 @@
 <div class="container">
     <RadzenTabs>
         <Tabs>
-            @if (_access.CanEditSimplifiedAuth)
-            {
-                <RadzenTabsItem Text="@LM.Get("webSettingsSimpleAuthTabName")">
-                    <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="@LM.Get("webSettingsAddEntryButton")" Click="@InsertRow" />
-                    <RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="20" AllowSorting="true" Data="@_authList" TItem="SimplifiedAuthEntity"
-                                Count="@_countAuths" @ref="_authListGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
-                        <Columns>
-                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Property="Name" Title="@LM.Get("webSettingsSaColumnName")">
-                                <EditTemplate Context="order">
-                                    <RadzenTextBox @bind-Value="order.Name" Style="width:100%; display: block" Name="EntryName" />
-                                    <RadzenRequiredValidator Text="Value is required" Component="EntryName" Popup="true" />
-                                </EditTemplate>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Property="Group" Title="@LM.Get("webSettingsSaColumnGroup")">
-                                <EditTemplate Context="order">
-                                    <RadzenDropDown @bind-Value="order.Group" Data="@_authGroupsList" Style="width:100%" Name="GroupName">
-                                        <Template>
-                                            @context
-                                        </Template>
-                                    </RadzenDropDown>
-                                    <RadzenRequiredValidator Text="Value is required" Component="GroupName" Popup="true" />
-                                </EditTemplate>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Property="RolesList" Title="@LM.Get("webSettingsSaColumnRoles")">
-                                <Template Context="order">
-                                    @string.Join(',', (string[])order.RolesList.ToArray())
-                                </Template>
-                                <EditTemplate Context="order">
-                                    <RadzenDropDown @bind-Value="order.RolesList" Data="@_authRolesList2" Style="width: 100%" Multiple="true"
-                                                    AllowClear="true" Name="RolesName" TextProperty="Name" ValueProperty="Name"
-                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Placeholder="Select...">
-                                        <!--  -->
-                                    </RadzenDropDown>
-                                </EditTemplate>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px">
-                                <Template Context="order">
-                                    <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(order))">
-                                    </RadzenButton>
-                                </Template>
-                                <EditTemplate Context="order">
-                                    <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveRow(order))">
-                                    </RadzenButton>
-                                    <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(order))">
-                                    </RadzenButton>
-                                </EditTemplate>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px">
-                                <Template Context="order">
-                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(order))">
-                                    </RadzenButton>
-                                </Template>
-                                <EditTemplate Context="order">
-                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(order))">
-                                    </RadzenButton>
-                                </EditTemplate>
-                            </RadzenGridColumn>
-                        </Columns>
-                    </RadzenGrid>
-                </RadzenTabsItem>
-            }
+           
             @if (_access.CanEditTimers)
             {
                 <RadzenTabsItem Text="@LM.Get("webSettingsTimersTabName")">
-                    <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="@LM.Get("webSettingsAddEntryButton")" Click="@InsertTimersRow" />
+                    <button class='navButton2' @onclick="InsertTimersRow" style="width: 150px; margin-bottom: 10px; margin-left: 10px;"><RadzenIcon Icon="add_circle_outline" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webSettingsAddEntryButton")</button>
+
                     <RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="20" AllowSorting="true" Data="@_timersList" TItem="TiData"
                                 Count="@_countTimers" @ref="_timersListGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
                         <Columns>
@@ -105,7 +46,7 @@
                                     </RadzenDropDown>
                                 </EditTemplate>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px">
+                            <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
                                 <Template Context="order">
                                     <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditTimersRow(order))" />
                                 </Template>
@@ -114,7 +55,7 @@
                                     <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelTimersEdit(order))" />
                                 </EditTemplate>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px">
+                            <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
                                 <Template Context="order">
                                     <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteTimersRow(order))" />
                                 </Template>
@@ -124,6 +65,18 @@
                             </RadzenGridColumn>
                         </Columns>
                     </RadzenGrid>
+                </RadzenTabsItem>
+            }
+            @if (_access.CanEditSettings)
+            {
+                <RadzenTabsItem Text="@LM.Get("webSettingsSettingsTabName")">
+                    <RadzenTabs>
+                        <Tabs>
+                            <RadzenTabsItem Text="@LM.Get("webSettingsSimpleAuthTabName")">
+                                <SettingsEditor_auth/>
+                            </RadzenTabsItem>
+                        </Tabs>
+                    </RadzenTabs>
                 </RadzenTabsItem>
             }
         </Tabs>
@@ -146,7 +99,7 @@
         public string Name { get; set; }
     }
 
-    private WCEAccessFilter _access = new WCEAccessFilter { CanEditSimplifiedAuth = false, CanEditTimers = false };
+    private WCEAccessFilter _access = new WCEAccessFilter { CanEditSimplifiedAuth = false, CanEditTimers = false, CanEditSettings = false};
     private List<SimplifiedAuthEntity> _authList;
     private List<TiData> _timersList;
     private WebSettingsModule _module;
@@ -257,6 +210,9 @@
 
     async Task DeleteRow(SimplifiedAuthEntity order)
     {
+        if(!await Modal.ShowConfirm(null, LM.Get("webGenericQuestionMessage")))
+            return;
+
         if (_authList.Contains(order))
         {
             _authList.Remove(order);
@@ -316,6 +272,9 @@
 
     async Task DeleteTimersRow(TiData order)
     {
+        if(!await Modal.ShowConfirm(null, LM.Get("webGenericQuestionMessage")))
+            return;
+
         if (_timersList.Contains(order))
         {
             _timersList.Remove(order);
@@ -342,4 +301,67 @@
     }
     #endregion
 
+    /*
+      @if (_access.CanEditSimplifiedAuth)
+            {
+                <RadzenTabsItem Text="@LM.Get("webSettingsSimpleAuthTabName")" >
+                    <button class='navButton2' @onclick="InsertRow" style="width: 150px; margin-bottom: 10px; margin-left: 10px;"><RadzenIcon Icon="add_circle_outline" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webSettingsAddEntryButton")</button>
+                    <RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="20" AllowSorting="true" Data="@_authList" TItem="SimplifiedAuthEntity"
+                                Count="@_countAuths" @ref="_authListGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                        <Columns>
+                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Property="Name" Title="@LM.Get("webSettingsSaColumnName")">
+                                <EditTemplate Context="order">
+                                    <RadzenTextBox @bind-Value="order.Name" Style="width:100%; display: block" Name="EntryName" />
+                                    <RadzenRequiredValidator Text="Value is required" Component="EntryName" Popup="true" />
+                                </EditTemplate>
+                            </RadzenGridColumn>
+                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Property="Group" Title="@LM.Get("webSettingsSaColumnGroup")">
+                                <EditTemplate Context="order">
+                                    <RadzenDropDown @bind-Value="order.Group" Data="@_authGroupsList" Style="width:100%" Name="GroupName">
+                                        <Template>
+                                            @context
+                                        </Template>
+                                    </RadzenDropDown>
+                                    <RadzenRequiredValidator Text="Value is required" Component="GroupName" Popup="true" />
+                                </EditTemplate>
+                            </RadzenGridColumn>
+                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Property="RolesList" Title="@LM.Get("webSettingsSaColumnRoles")">
+                                <Template Context="order">
+                                    @string.Join(',', (string[])order.RolesList.ToArray())
+                                </Template>
+                                <EditTemplate Context="order">
+                                    <RadzenDropDown @bind-Value="order.RolesList" Data="@_authRolesList2" Style="width: 100%" Multiple="true"
+                                                    AllowClear="true" Name="RolesName" TextProperty="Name" ValueProperty="Name"
+                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Placeholder="Select...">
+                                        <!--  -->
+                                    </RadzenDropDown>
+                                </EditTemplate>
+                            </RadzenGridColumn>
+                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+                                <Template Context="order">
+                                    <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(order))">
+                                    </RadzenButton>
+                                </Template>
+                                <EditTemplate Context="order">
+                                    <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveRow(order))">
+                                    </RadzenButton>
+                                    <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(order))">
+                                    </RadzenButton>
+                                </EditTemplate>
+                            </RadzenGridColumn>
+                            <RadzenGridColumn TItem="SimplifiedAuthEntity" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+                                <Template Context="order">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(order))">
+                                    </RadzenButton>
+                                </Template>
+                                <EditTemplate Context="order">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(order))">
+                                    </RadzenButton>
+                                </EditTemplate>
+                            </RadzenGridColumn>
+                        </Columns>
+                    </RadzenGrid>
+                </RadzenTabsItem>
+            }
+     */
 }

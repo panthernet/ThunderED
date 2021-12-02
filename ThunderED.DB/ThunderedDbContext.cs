@@ -12,6 +12,7 @@ namespace ThunderED
         public DbSet<ThdMiningNotification> MiningNotifications { get; set; }
         public DbSet<ThdMiningLedger> MiningLedgers { get; set; }
         public DbSet<ThdCacheEntry> Cache { get; set; }
+        public DbSet<ThdCacheDataEntry> CacheData { get; set; }
         public DbSet<ThdNotificationListEntry> NotificationsList { get; set; }
         public DbSet<ThdMoonTableEntry> MoonTable { get; set; }
         public DbSet<ThdStorageConsoleEntry> StorageConsole { get; set; }
@@ -59,6 +60,8 @@ namespace ThunderED
             modelBuilder.Entity<ThdToken>().Property(a => a.CharacterId).HasColumnName("character_id");
             modelBuilder.Entity<ThdToken>().Property(a => a.Token).HasColumnName("token");
             modelBuilder.Entity<ThdToken>().Property(a => a.Type).HasColumnName("type");
+            modelBuilder.Entity<ThdToken>().Property(a => a.Roles).HasColumnName("roles");
+            modelBuilder.Entity<ThdToken>().Property(a => a.Scopes).HasColumnName("scopes");
             modelBuilder.Entity<ThdToken>().HasOne(a => a.User).WithMany(a => a.Tokens)
                 .HasForeignKey(a => a.CharacterId).HasPrincipalKey(a => a.CharacterId);
             #endregion
@@ -90,6 +93,7 @@ namespace ThunderED
 
             #region Cache
             modelBuilder.Entity<ThdCacheEntry>().HasIndex(u => u.Id);
+
             modelBuilder.Entity<ThdCacheEntry>().ToTable("cache");
 
             modelBuilder.Entity<ThdCacheEntry>().Property(a => a.Id).HasColumnName("id");
@@ -98,6 +102,15 @@ namespace ThunderED
             modelBuilder.Entity<ThdCacheEntry>().Property(a => a.LastUpdate).HasColumnName("lastUpdate");
             modelBuilder.Entity<ThdCacheEntry>().Property(a => a.Content).HasColumnName("text");
             modelBuilder.Entity<ThdCacheEntry>().Property(a => a.Days).HasColumnName("days");
+            #endregion
+
+            #region CacheData
+            modelBuilder.Entity<ThdCacheDataEntry>().HasKey(a=> a.Name);
+            modelBuilder.Entity<ThdCacheDataEntry>().ToTable("cache_data");
+            modelBuilder.Entity<ThdCacheDataEntry>().HasIndex(u => u.Name);
+
+            modelBuilder.Entity<ThdCacheDataEntry>().Property(a => a.Name).HasColumnName("name");
+            modelBuilder.Entity<ThdCacheDataEntry>().Property(a => a.Data).HasColumnName("data");
             #endregion
 
             #region ThdNotificationListEntry

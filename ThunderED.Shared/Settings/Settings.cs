@@ -275,6 +275,7 @@ namespace ThunderED
 #endif
         public bool CanEditSimplifiedAuth { get; set; } = true;
         public bool CanEditTimers { get; set; } = true;
+        public bool CanEditSettings { get; set; } = true;
 
         [Comment("Is config element enabled at runtime")]
         public bool IsEnabled { get; set; } = true;
@@ -681,6 +682,8 @@ namespace ThunderED
         public bool CanInspectSpyUsers { get; set; } = true;
         public bool CanInspectAltUsers { get; set; } = true;
         public bool CanRestoreDumped { get; set; } = true;
+        public bool CanSeeIP { get; set; } = false;
+        public bool CanFetchToken { get; set; } = false;
 
         public bool CanAccessUser(int authState)
         {
@@ -1377,7 +1380,7 @@ namespace ThunderED
 #else
         public Dictionary<string, NotificationSettingsGroup> Groups { get; set; } = new Dictionary<string, NotificationSettingsGroup>();
 #endif
-
+        public NotificationTracker Tracker { get; set; } = new NotificationTracker();
         /// <summary>
         /// Returns only enabled groups
         /// </summary>
@@ -1403,6 +1406,48 @@ namespace ThunderED
             }
         }
 #endif
+    }
+
+    public class NotificationTracker
+    {
+#if EDITOR
+        [Comment("The list of groups")]
+        public ObservableDictionary<string, NotificationTrackerGroup> Groups { get; set; } = new ObservableDictionary<string, NotificationTrackerGroup>();
+        [Comment("List of string to filter out characters, alliances and corporations which afffect all groups")]
+        public ObservableCollection<string> GlobalFilterOut { get; set; } = new ObservableCollection<string>();
+#else
+        public Dictionary<string, NotificationTrackerGroup> Groups { get; set; } = new Dictionary<string, NotificationTrackerGroup>();
+        public List<string> GlobalFilterOut { get; set; } = new List<string>();
+#endif
+        public int UpdateIntervalInMinutes { get; set; } = 5;
+
+        /// <summary>
+        /// Returns only enabled groups
+        /// </summary>
+        public Dictionary<string, NotificationTrackerGroup> GetEnabledGroups()
+        {
+            return Groups.Where(a => a.Value.IsEnabled).ToDictionary(a => a.Key, a => a.Value);
+        }
+    }
+
+    public class NotificationTrackerGroup
+    {
+#if EDITOR
+        [Comment("List of notification IDs")]
+        public ObservableCollection<string> Notifications { get; set; } = new ObservableCollection<string>();
+        [Comment("List of discord channel IDs")]
+        public ObservableCollection<ulong> DiscordChannels { get; set; } = new ObservableCollection<ulong>();
+        [Comment("List of string to filter out characters, alliances and corporations")]
+        public ObservableCollection<string> FilterOut { get; set; } = new ObservableCollection<string>();
+#else
+        public List<string> Notifications { get; set; } = new List<string>();
+        public List<ulong> DiscordChannels { get; set; } = new List<ulong>();
+        public List<string> FilterOut { get; set; } = new List<string>();
+#endif
+        [Comment("Feed from all valid keys in DB")]
+        public bool FeedFromAllRegisteredUsers { get; set; } = false;
+
+        public bool IsEnabled { get; set; } = true;
     }
 
     public class NotificationSettingsGroup: ValidatableSettings
@@ -2129,7 +2174,7 @@ namespace ThunderED
         [Required]
         public ObservableDictionary<string, WebAuthGroup> AuthGroups { get; set; } = new ObservableDictionary<string, WebAuthGroup>();   
 #else
-        public List<string> ExemptDiscordRoles { get; set; } = new List<string>();
+        public IEnumerable<string> ExemptDiscordRoles { get; set; } = new List<string>();
         public List<string> AuthCheckIgnoreRoles { get; set; } = new List<string>();
         public List<ulong> ComAuthChannels { get; set; } = new List<ulong>();
         public List<ulong> AuxiliaryDiscordGuildIds { get; set; } = new List<ulong>();
@@ -2186,11 +2231,11 @@ namespace ThunderED
 
         
 #else
-        public List<string> AuthRoles { get; set; } = new List<string>();
+        public IEnumerable<string> AuthRoles { get; set; } = new List<string>();
         public Dictionary<string, AuthRoleEntity> AllowedMembers { get; set; } = new Dictionary<string, AuthRoleEntity>();
-        public List<string> ManualAssignmentRoles { get; set; } = new List<string>();
-        public List<string> UpgradeGroupNames { get; set; } = new List<string>();
-        public List<string> DowngradeGroupNames { get; set; } = new List<string>();
+        public IEnumerable<string> ManualAssignmentRoles { get; set; } = new List<string>();
+        public IEnumerable<string> UpgradeGroupNames { get; set; } = new List<string>();
+        public IEnumerable<string> DowngradeGroupNames { get; set; } = new List<string>();
 
 #endif
         [Comment("Remove user authentication if supplied ESI token has become invalid")]
@@ -2243,7 +2288,7 @@ namespace ThunderED
         [Comment("The list of ESI access role names to check on auth")]
         public ObservableCollection<string> ESICustomAuthRoles { get; set; } = new ObservableCollection<string>();
 #else
-        public List<string> ESICustomAuthRoles { get; set; } = new List<string>();
+        public IEnumerable<string> ESICustomAuthRoles { get; set; } = new List<string>();
 
         [JsonIgnore]
         public bool MustHaveGroupName => true; //ESICustomAuthRoles.Any() || StandingsAuth != null;
@@ -2308,9 +2353,13 @@ namespace ThunderED
         [Comment("Optional titles list to assign Discord roles")]
         public ObservableDictionary<string, TitleAuthGroup> Titles { get; set; } = new ObservableDictionary<string, TitleAuthGroup>();
 #else
-        public List<string> DiscordRoles { get; set; } = new List<string>();
+        public IEnumerable<string> DiscordRoles { get; set; } = new List<string>();
         public List<object> Entities { get; set; } = new List<object>();
         public Dictionary<string, TitleAuthGroup> Titles { get; set; } = new Dictionary<string, TitleAuthGroup>();
+        [JsonIgnore]
+        public string EntitiesFilterString => Entities == null ? null : string.Join(',', Entities);
+        [JsonIgnore]
+        public string DiscordRolesFilterString => Entities == null ? null : string.Join(',', DiscordRoles);
 #endif
 
 

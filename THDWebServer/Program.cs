@@ -46,7 +46,7 @@ namespace THDWebServer
                 // ignore
             }
 
-            CreateHostBuilder(args).Build().Run();
+            await CreateHostBuilder(args).Build().RunAsync();
             
         }
 

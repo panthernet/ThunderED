@@ -70,7 +70,7 @@ namespace ThunderED.Modules
 
                 if (sUser.DiscordId > 0)
                     await WebAuthModule.UpdateUserRoles(sUser.DiscordId ?? 0,
-                        Settings.WebAuthModule.ExemptDiscordRoles,
+                        Settings.WebAuthModule.ExemptDiscordRoles.ToList(),
                         Settings.WebAuthModule.AuthCheckIgnoreRoles, true);
                 return true;
             }

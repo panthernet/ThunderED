@@ -56,7 +56,7 @@
             {
                 var group = pair.Value;
                 _altUrl = group.ESICustomAuthRoles.Any()
-                    ? ServerPaths.GetCustomAuthUrl(Ip, group.ESICustomAuthRoles, "altReg",
+                    ? ServerPaths.GetCustomAuthUrl(Ip, group.ESICustomAuthRoles.ToList(), "altReg",
                         user.CharacterId, true)
                     : ServerPaths.GetAuthUrl(Ip, "altReg", user.CharacterId, true);
 

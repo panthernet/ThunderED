@@ -118,6 +118,7 @@ namespace ThunderED
             lock (_locker)
             {
                 using var safe = Stream.Synchronized(File.OpenWrite(filename));
+                safe.Seek(0, SeekOrigin.End);
                 using var sw = new StreamWriter(safe);
                 sw.WriteLine(message);
             }

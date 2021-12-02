@@ -97,10 +97,29 @@ namespace ThunderED
 
         #region Tokens
 
+        public static async Task<List<ThdToken>> GetTokensWithoutScopes()
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Tokens.AsNoTracking().Where(a => a.Scopes == null && a.Type == TokenEnum.General).ToListAsync();
+        }
+
+
+        public static async Task<List<ThdToken>> GetTokensByScope(string scope)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Tokens.AsNoTracking().Where(a => EF.Functions.Like(a.Scopes, scope)).ToListAsync();
+        }
+
         public static async Task<List<ThdToken>> GetTokens(TokenEnum type)
         {
             await using var db = new ThunderedDbContext();
             return await db.Tokens.AsNoTracking().Where(a => a.Type == type).ToListAsync();
+        }
+
+        public static async Task<List<ThdToken>> GetAllTokens()
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Tokens.AsNoTracking().ToListAsync();
         }
 
         public static async Task DeleteToken(long userId, TokenEnum type)
@@ -113,7 +132,7 @@ namespace ThunderED
             await db.SaveChangesAsync();
         }
 
-        public static async Task UpdateToken(string token, long characterId, TokenEnum type)
+        public static async Task UpdateToken(string token, long characterId, TokenEnum type, string scopes = null)
         {
             try
             {
@@ -125,10 +144,15 @@ namespace ThunderED
                     {
                         CharacterId = characterId,
                         Token = token,
-                        Type = type
+                        Type = type,
+                        Scopes = scopes
                     });
                 }
-                else entry.Token = token;
+                else
+                {
+                    entry.Token = token;
+                    entry.Scopes = scopes;
+                }
 
                 await db.SaveChangesAsync();
             }
@@ -486,6 +510,27 @@ namespace ThunderED
 
         #endregion
 
+        #region CacheData
+
+        public static async Task<ThdCacheDataEntry> GetCacheDataEntry(string name)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.CacheData.FirstOrDefaultAsync(a => EF.Functions.Like(a.Name,name));
+        }
+
+        public static async Task UpdateCacheDataEntry(string name, string data)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.CacheData.AsNoTracking().FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
+            if (old != null)
+                db.CacheData.Remove(old);
+            await db.CacheData.AddAsync(new ThdCacheDataEntry { Name = name, Data = data });
+
+            await db.SaveChangesAsync();
+        }
+
+        #endregion
+
         #region Moon table
 
         public static async Task UpdateMoonTable(ThdMoonTableEntry entry)
@@ -632,5 +677,7 @@ namespace ThunderED
         }
 
         #endregion
+
+
     }
 }

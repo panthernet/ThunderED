@@ -1,0 +1,208 @@
+﻿@using ThunderED.Modules
+@using ThunderED.Helpers
+@using System.Collections
+
+@inject AuthenticationStateProvider Auth
+@inject ProtectedSessionStorage Store
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_WEB_SETTINGS)]
+@inject NavigationManager Nav
+@inject IModalService Modal
+
+
+<div class="hrm-inspect frontcolor fontEternal">
+    <div class="col-md">
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameAuthButtonDiscordText")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox @bind-Value="SettingsManager.Settings.WebAuthModule.AuthButtonDiscordText" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameAuthCheckIntervalMinutes")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenNumeric @bind-Value="SettingsManager.Settings.WebAuthModule.AuthCheckIntervalMinutes" TValue="int" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameAuthTakeNumberOfUsersPerPass")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenNumeric @bind-Value="SettingsManager.Settings.WebAuthModule.AuthTakeNumberOfUsersPerPass" TValue="int" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameStandingsRefreshIntervalInMinutes")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenNumeric @bind-Value="SettingsManager.Settings.WebAuthModule.StandingsRefreshIntervalInMinutes" TValue="int" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameDisplayFeedAuthWithoutRegistration")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration" AllowClear="true" TValue="bool" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameExemptDiscordRoles")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenDropDown @bind-Value="SettingsManager.Settings.WebAuthModule.ExemptDiscordRoles" Data="@_discordRolesList" Style="width: 100%" Multiple="true"
+                                AllowClear="true" ValueProperty="Name" TextProperty="Name"
+                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameAuthCheckIgnoreRoles")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenDropDown @bind-Value="SettingsManager.Settings.WebAuthModule.AuthCheckIgnoreRoles" Data="@_discordRolesList" Style="width: 100%" Multiple="true"
+                                AllowClear="true" ValueProperty="Name" TextProperty="Name"
+                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameAuthCheckUnregisteredDiscordUsers")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="SettingsManager.Settings.WebAuthModule.AuthCheckUnregisteredDiscordUsers" AllowClear="true" TValue="bool" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameAuthReportChannel")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenNumeric @bind-Value="SettingsManager.Settings.WebAuthModule.AuthReportChannel" TValue="ulong" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameComAuthChannels")"/>
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox @bind-Value="@ComAuthChannels" Style="width: 100%" Multiple="true"
+                               AllowClear="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameDefaultAuthGroup")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox @bind-Value="SettingsManager.Settings.WebAuthModule.DefaultAuthGroup" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameAutoClearAuthCommandsFromDiscord")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="SettingsManager.Settings.WebAuthModule.AutoClearAuthCommandsFromDiscord" TValue="bool" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameEnforceCorpTickers")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="SettingsManager.Settings.WebAuthModule.EnforceCorpTickers" TValue="bool" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameEnforceAllianceTickers")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="SettingsManager.Settings.WebAuthModule.EnforceAllianceTickers" TValue="bool" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameEnforceSingleTickerPerUser")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="SettingsManager.Settings.WebAuthModule.EnforceSingleTickerPerUser" TValue="bool" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameEnforceCharName")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="SettingsManager.Settings.WebAuthModule.EnforceCharName" TValue="bool" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameUseOneAuthButton")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="SettingsManager.Settings.WebAuthModule.UseOneAuthButton" TValue="bool" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsAuthGenColNameEnableDetailedLogging")" />
+            </div>
+            <div class="col-md-8">
+                <RadzenCheckBox @bind-Value="SettingsManager.Settings.WebAuthModule.EnableDetailedLogging" TValue="bool" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    private WebSettingsModule _module;
+    private IEnumerable<SettingsEditor.TestClass> _discordRolesList;
+    private string _comAuthChannels;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _module = TickManager.GetModule<WebSettingsModule>();
+        if (_module == null)
+        {
+            return;
+        }
+
+        _discordRolesList = _module.WebGetAuthRolesList().ConvertAll(a => new SettingsEditor.TestClass { Name = a, Id = a.GetHashCode() }).ToList();
+
+        _comAuthChannels = string.Join(',', SettingsManager.Settings.WebAuthModule.ComAuthChannels);
+
+        await base.OnInitializedAsync();
+    }
+
+    private string ComAuthChannels
+    {
+        get => _comAuthChannels;
+        set
+        {
+            _comAuthChannels = value;
+            var list = _comAuthChannels?.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            if (list != null)
+            {
+                SettingsManager.Settings.WebAuthModule.ComAuthChannels.Clear();
+                foreach (var s in list)
+                {
+                    if(ulong.TryParse(s, out var val))
+                        SettingsManager.Settings.WebAuthModule.ComAuthChannels.Add(val);
+                }
+            }
+        }
+    }
+
+}

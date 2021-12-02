@@ -1,5 +1,18 @@
-### V2.0.14
+### V2.0.16
++ Migration to v2 auth
+
++ Added new `Tracker` block to Notifications module. It will allow to check and feed selected notifications from the whole Database.
++ Added new background worker to check and remember available ESI token roles if missing any
++ Removed SimpleAuth web UI. Simple auth will be deprecated once web UI settings are polished.
++ Fixed logs overwrite error
+
++ Added `CanSeeIP` option for HRM groups
++ Added `CanFetchToken` option for HRM groups
++ Added `CanEditSettings` option for settings module
++ Added new button to char inspection in HRM to fetch refresh token into clipboard (if any)
++ Added WebAuth settings to web UI
 + Fixed aux guilds handling when guild is specified but bot isn't there yet
++ Improved web UI in several ways
 
 ### V2.0.13
 + Web UI update, part 1

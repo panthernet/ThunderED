@@ -1,9 +1,9 @@
 ﻿<div style="width: 400px;">
-    <p style="text-align: center">@(Message ?? LM.Get("webPerformAction"))</p>
+    <p class="frontcolor" style="text-align: center">@(Message ?? LM.Get("webPerformAction"))</p>
     
     <p style="text-align: center">
-        <button @onclick="Close" class="btn btn-primary">@LM.Get("webYes")</button>
-        <button @onclick="Cancel" class="btn btn-secondary">@LM.Get("webNo")</button>
+        <button @onclick="Close" class="navButton2" style="padding-top: .2rem; width: 80px;">@LM.Get("webYes")</button>
+        <button @onclick="Cancel" class="navButton2" style="padding-top: .2rem; width: 80px;">@LM.Get("webNo")</button>
     </p>
 </div>
 

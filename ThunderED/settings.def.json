@@ -384,14 +384,16 @@
         "AllowedEntities": [],
         "AllowedDiscordRoles": [],
         "CanEditSimplifiedAuth": true,
-        "CanEditTimers": true
+        "CanEditTimers": true,
+        "CanEditSettings":  true 
       },
       "ExampleList": {
         "IsEnabled": false,
         "AllowedEntities": [ "Character Name", "c:Corporation Name", "a:Alliance Name", 1234567890 ],
         "AllowedDiscordRoles": [ "Adminz" ],
         "CanEditSimplifiedAuth": true,
-        "CanEditTimers": true
+        "CanEditTimers": true,
+        "CanEditSettings": true
       }
     }
   },
@@ -488,7 +490,9 @@
         "CanInspectDumpedUsers": true,
         "CanInspectSpyUsers": true,
         "CanInspectAltUsers": true,
-        "CanRestoreDumped": true
+        "CanRestoreDumped": true,
+		"CanSeeIP": false,
+		"CanFetchToken": false,
       }
     },
     "AuthButtonDiscordText": "HR auth",
@@ -697,7 +701,20 @@
           }
         }
       }
-    }
+    },
+	"Tracker": {
+		"GlobalFilterOut": [],
+	    "UpdateIntervalInMinutes": 5,
+		"Groups":{
+			"Group1": {
+				"IsEnabled": false,
+				"Notifications": [],
+				"DiscordChannels": [],
+				"FeedFromAllRegisteredUsers": false,
+				"FilterOut": ["text to filter out"]
+			}
+		}
+	}
   },
 
   "motd": {
@@ -928,6 +945,5 @@
     "NameFormattingLength": 20,
     "ListAccessRoles": [],
     "EditAccessRoles": []
-  } 
-
+  }
 }

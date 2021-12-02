@@ -49,6 +49,8 @@
         StructureManagement,
         MoonInfo,
         StorageConsole,
-        Remind
+        Remind,
+        UpdateTracker,
+        TokenUpdate
     }
 }

@@ -61,7 +61,7 @@ namespace ThunderED.Modules
                         var grp = GetGroupByName(groupName).Value;
                         var url = grp.MustHaveGroupName ||
                                   (Settings.WebAuthModule.UseOneAuthButton && grp.ExcludeFromOneButtonMode)
-                            ? ServerPaths.GetCustomAuthUrl(inputIp, grp.ESICustomAuthRoles, groupName)
+                            ? ServerPaths.GetCustomAuthUrl(inputIp, grp.ESICustomAuthRoles.ToList(), groupName)
                             : ServerPaths.GetAuthUrl(inputIp);
                         var result = WebQueryResult.RedirectUrl;
                         result.AddValue("url", url);
@@ -293,7 +293,7 @@ namespace ThunderED.Modules
                                 //for one button with ESI - had to auth twice
                             {
                                 var redirect = WebQueryResult.RedirectUrl;
-                                redirect.AddValue("url", ServerPaths.GetCustomAuthUrl(rawIp, group.ESICustomAuthRoles, groupName));
+                                redirect.AddValue("url", ServerPaths.GetCustomAuthUrl(rawIp, group.ESICustomAuthRoles.ToList(), groupName));
                                 return redirect;
                             }
 
@@ -307,7 +307,7 @@ namespace ThunderED.Modules
                                 CharacterId = Convert.ToInt64(characterId),
                                 DataView = 
                                 {
-                                    Permissions = group.ESICustomAuthRoles.Count > 0
+                                    Permissions = @group.ESICustomAuthRoles.Any()
                                         ? string.Join(',', group.ESICustomAuthRoles)
                                         : null
                                 },
