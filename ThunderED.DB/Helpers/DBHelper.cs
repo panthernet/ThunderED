@@ -107,7 +107,7 @@ namespace ThunderED
         public static async Task<List<ThdToken>> GetTokensByScope(string scope)
         {
             await using var db = new ThunderedDbContext();
-            return await db.Tokens.AsNoTracking().Where(a => EF.Functions.Like(a.Scopes, scope)).ToListAsync();
+            return await db.Tokens.AsNoTracking().Where(a => EF.Functions.Like(a.Scopes, $"%{scope}%")).ToListAsync();
         }
 
         public static async Task<List<ThdToken>> GetTokens(TokenEnum type)
@@ -445,6 +445,9 @@ namespace ThunderED
             var now = DateTime.Now;
             var content = db.Cache.AsNoTracking().Where(a => a.Id == cacheId).ToList()
                 .FirstOrDefault(a => (now - a.LastUpdate).Minutes <= minutes)?.Content;
+            if (content != null && content.GetType() == typeof(T))
+                return (T)(object)content;
+                
             return string.IsNullOrEmpty(content) ? (T) (object) null : JsonConvert.DeserializeObject<T>(content);
         }
 

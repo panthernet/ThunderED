@@ -135,6 +135,30 @@ namespace ThunderED.Modules
                         await LogHelper.LogInfo($"Token charId={token.CharacterId}", LogCat.UpdateTracker, logConsole, logFile);
                         try
                         {
+
+                            #region Apply global filters
+                            var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, token.CharacterId, true);
+                            //skip npc corp characters
+                            if (feederChar == null || APIHelper.ESIAPI.IsNpcCorporation(feederChar.corporation_id))
+                                continue;
+
+                            var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
+                            var feederAlliance = feederChar?.alliance_id > 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, feederChar?.alliance_id) : null;
+                            var skip = false;
+                            foreach (var filter in Settings.NotificationFeedModule.Tracker.GlobalFilterOut)
+                            {
+                                if (feederChar.name.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                                    feederCorp.name.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                                    (feederAlliance != null &&
+                                     feederAlliance.name.Contains(filter, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    skip = true;
+                                    break;
+                                }
+                            }
+                            if(skip) continue;
+                            #endregion
+
                             if (!_trackerKeys.ContainsKey(token.CharacterId) ||
                                 (DateTime.Now - _trackerKeys[token.CharacterId].KeyUpdate).Minutes >= 19)
                             {
@@ -147,13 +171,26 @@ namespace ThunderED.Modules
                             }
 
                             var track = _trackerKeys[token.CharacterId];
+                            var cacheHeader = $"nmt|{token.CharacterId}";
 
+                            //try fetch last ETAG
+                            if (string.IsNullOrEmpty(track.Etag))
+                            {
+                                var tag = await DbHelper.GetCache<string>(cacheHeader, 60);
+                                if (tag != null)
+                                    track.Etag = tag;
+                            }
+                            //get notifications
                             var nResult = await APIHelper.ESIAPI.GetNotifications(Reason, token.CharacterId,
                                 track.Key, track.Etag);
                             await LogHelper.LogInfo($"Notif raw: {nResult?.Result?.Count} Result: {nResult?.Data?.ErrorCode} NoCon: {nResult?.Data?.IsNoConnection}", LogCat.UpdateTracker, logConsole, logFile);
-
-                            if (nResult == null || nResult.Result == null) continue;
+                            //continue if failed badly
+                            if (nResult?.Result == null) continue;
+                            //update ETAG
                             track.Etag = nResult.Data.ETag;
+                            await DbHelper.UpdateCache(cacheHeader, track.Etag);
+                            //continue if no new data
+                            if(nResult.Data.IsNotModified) continue;
 
                             var notifications = nResult.Result.Where(a =>
                                 a.Date >= lastCheck && allEnabledTypes.ContainsCaseInsensitive(a.type)).ToList();
