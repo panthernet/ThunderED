@@ -84,14 +84,14 @@
 </div>
 
 @functions {
-    RadzenGrid<SimplifiedAuthEntity> _authListGrid;
+   // RadzenGrid<SimplifiedAuthEntity> _authListGrid;
     RadzenGrid<TiData> _timersListGrid;
 
     //IEnumerable<string> _authRolesList;
     IEnumerable<TestClass> _authRolesList2;
     List<string> _authGroupsList;
 
-    IEnumerable<string> values;// = new List<string>();
+    //IEnumerable<string> values;// = new List<string>();
 
     public class TestClass
     {
@@ -165,7 +165,7 @@
     }
 
     #region Auth
-    private SimplifiedAuthEntity _editingAuthRow;
+   /* private SimplifiedAuthEntity _editingAuthRow;
 
     async Task InsertRow()
     {
@@ -223,7 +223,7 @@
         {
             _authListGrid.CancelEditRow(order);
         }
-    }
+    }*/
     #endregion
 
     #region Timers

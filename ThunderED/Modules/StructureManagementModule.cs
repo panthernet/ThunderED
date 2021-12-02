@@ -59,15 +59,14 @@ namespace ThunderED.Modules
             _isRunning = true;
             try
             {
-                if ((_lastCheck == null || (DateTime.Now - _lastCheck.Value).Minutes >= 2) && ParsedManageAccessMembersLists.Any())
+                if ((_lastCheck == null || DateTime.Now >= _lastCheck) && ParsedManageAccessMembersLists.Any())
                 {
+                    _lastCheck = DateTime.Now.AddMinutes(2);
                     var result = new List<NotifyItem>();
                     var processedCorps = new List<long>();
                     foreach (var token in await DbHelper.GetTokens(TokenEnum.Structures))
                     {
-                        var r = await APIHelper.ESIAPI.RefreshToken(token.Token,
-                            Settings.WebServerModule.CcpAppClientId,
-                            Settings.WebServerModule.CcpAppSecret);
+                        var r = await APIHelper.ESIAPI.GetAccessToken(token);
                         if (r == null || r.Data.IsFailed)
                         {
                             await LogHelper.LogWarning($"Failed to refresh structure token from {token.CharacterId}",
@@ -474,8 +473,7 @@ namespace ThunderED.Modules
 
             foreach (var token in tokens)
             {
-                var r = await APIHelper.ESIAPI.RefreshToken(token.Token, Settings.WebServerModule.CcpAppClientId,
-                    Settings.WebServerModule.CcpAppSecret);
+                var r = await APIHelper.ESIAPI.GetAccessToken(token);
                 if (r == null || r.Data.IsFailed)
                 {
                     await LogHelper.LogWarning($"Failed to refresh structure token from {token.CharacterId}",

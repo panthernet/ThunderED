@@ -114,10 +114,9 @@ namespace ThunderED.Modules
         private async Task<bool?> CheckMailToken(ThdAuthUser entity)
         {
             var token = await DbHelper.GetToken(entity.CharacterId, TokenEnum.Mail);
-            if (string.IsNullOrEmpty(token))
+            if (token == null)
                 return null;
-            var result = await APIHelper.ESIAPI.RefreshToken(token, Settings.WebServerModule.CcpAppClientId,
-                Settings.WebServerModule.CcpAppSecret);
+            var result = await APIHelper.ESIAPI.GetAccessToken(token);
             if (result.Data.IsNotValid && !result.Data.IsNoConnection)
                 return false;
             return !string.IsNullOrEmpty(result.Result);

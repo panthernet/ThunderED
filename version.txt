@@ -13,6 +13,7 @@
 + Added WebAuth settings to web UI
 + Fixed aux guilds handling when guild is specified but bot isn't there yet
 + Improved web UI in several ways
++ Improved access token handling, made some code refactoring
 
 ### V2.0.13
 + Web UI update, part 1

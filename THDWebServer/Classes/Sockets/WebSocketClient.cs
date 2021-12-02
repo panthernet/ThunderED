@@ -11,6 +11,6 @@ namespace THDWebServer.Classes
         public WebSocket Socket { get; set; }
         public Queue<SocketMessage> Queue { get; } = new Queue<SocketMessage>();
         public TaskCompletionSource<bool> Finish { get; set; }
-        public string? Code { get; set; }
+        public string Code { get; set; }
     }
 }

@@ -56,18 +56,17 @@ namespace ThunderED.Modules
                         if (charId == 0) continue;
 
                         var rToken = await DbHelper.GetToken(charId, TokenEnum.Mail);
-                        if (string.IsNullOrEmpty(rToken))
+                        if (rToken == null)
                         {
                             await SendOneTimeWarning(charId, $"Mail feed token for character {charId} not found! User is not authenticated or missing refresh token.");
                             continue;
                         }
 
-                        var tq = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
-                            , $"From {Category} | Char ID: {charId}");
+                        var tq = await APIHelper.ESIAPI.GetAccessToken(rToken, $"From {Category} | Char ID: {charId}");
                         var token = tq.Result;
                         if (string.IsNullOrEmpty(token))
                         {
-                            await LogHelper.LogWarning($"Unable to get contracts token for character {charId}. Refresh token might be outdated or no more valid {tq.Data.ErrorCode}({tq.Data.Message})", Category);
+                            await LogHelper.LogWarning($"Unable to get mail token for character {charId}. Refresh token might be outdated or no more valid {tq.Data.ErrorCode}({tq.Data.Message})", Category);
                             if (tq.Data.IsNotValid && !tq.Data.IsNoConnection)
                             {
                                 await LogHelper.LogWarning($"Deleting invalid mail refresh token for {charId}", Category);
@@ -450,8 +449,8 @@ namespace ThunderED.Modules
                     if (!SettingsManager.HasReadMailScope(user.DataView.PermissionsList))
                         continue;
 
-                    var token = (await APIHelper.ESIAPI.RefreshToken(user.GetGeneralToken(), SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From Mail | Char ID: {user.CharacterId} | Char name: {user.DataView.CharacterName}"))?.Result;
+                    var token = (await APIHelper.ESIAPI.GetAccessToken(user.GetGeneralToken(),
+                        $"From Mail | Char ID: {user.CharacterId} | Char name: {user.DataView.CharacterName}"))?.Result;
 
                     if (string.IsNullOrEmpty(token))
                         continue;

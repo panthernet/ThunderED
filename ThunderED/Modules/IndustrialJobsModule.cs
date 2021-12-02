@@ -51,13 +51,13 @@ namespace ThunderED.Modules
                     foreach (var characterID in chars)
                     {
                         var rtoken = await DbHelper.GetToken(characterID, TokenEnum.Industry);
-                        if (string.IsNullOrEmpty(rtoken))
+                        if (rtoken == null)
                         {
                             await SendOneTimeWarning(characterID, $"Industry jobs feed token for character {characterID} not found! User is not authenticated.");
                             continue;
                         }
 
-                        var tq = await APIHelper.ESIAPI.RefreshToken(rtoken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret, $"From {Category} | Char ID: {characterID}");
+                        var tq = await APIHelper.ESIAPI.GetAccessToken(rtoken,$"From {Category} | Char ID: {characterID}");
                         var token = tq.Result;
                         if (string.IsNullOrEmpty(token))
                         {

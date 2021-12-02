@@ -34,6 +34,8 @@ namespace THDWebServer.Classes
             {
                 //todo generate message if(client.)
             }
+
+            await Task.Delay(1);
         }
 
         private async Task ProcessSocket(WebSocketClient client)

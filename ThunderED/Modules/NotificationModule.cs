@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -10,6 +11,7 @@ using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules
 {
@@ -90,20 +92,7 @@ namespace ThunderED.Modules
 
         }
 
-        private async Task<string> GetRefreshedKey(string token, bool logConsole, bool logFile)
-        {
-            var r = await APIHelper.ESIAPI.RefreshToken(token,
-                Settings.WebServerModule.CcpAppClientId,
-                Settings.WebServerModule.CcpAppSecret, nameof(GetRefreshedKey));
-            if (r?.Data == null || r.Data.IsFailed || r.Data.IsNoConnection)
-            {
-                await LogHelper.LogInfo($"Key result. Error:{r?.Data?.ErrorCode} NoCon: {r?.Data?.IsNoConnection}", LogCat.UpdateTracker, logConsole, logFile);
-                return null;
-            }
 
-            await LogHelper.LogInfo($"Key result. Error:{r?.Data?.ErrorCode} NoCon: {r?.Data?.IsNoConnection}", LogCat.UpdateTracker, logConsole, logFile);
-            return r.Result;
-        }
 
         private DateTime _lastTrackerCheckTime = DateTime.Now.Subtract(TimeSpan.FromMinutes(15));
         private volatile bool _isTrackerRunning;
@@ -151,7 +140,7 @@ namespace ThunderED.Modules
                             {
                                 await LogHelper.LogInfo($"Key update...", LogCat.UpdateTracker, logConsole, logFile);
 
-                                var key = await GetRefreshedKey(token.Token, logConsole, logFile);
+                                var key = (await APIHelper.ESIAPI.GetAccessToken(token))?.Result;
                                 await LogHelper.LogInfo($"Key: {key != null}", LogCat.UpdateTracker, logConsole, logFile);
                                 if (key == null) continue;
                                 _trackerKeys.AddOrUpdate(token.CharacterId, new TrackerData(key));
@@ -252,14 +241,13 @@ namespace ThunderED.Modules
                         foreach (var charId in ids)
                         {
                             var rToken = await DbHelper.GetToken(charId, TokenEnum.Notification);
-                            if (string.IsNullOrEmpty(rToken))
+                            if (rToken == null)
                             {
                                 await SendOneTimeWarning(charId + 100, $"Failed to get notifications refresh token for character {charId}! User is not authenticated.");
                                 continue;
                             }
 
-                            var tq = await APIHelper.ESIAPI.RefreshToken(rToken, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
-                                , $"From {Category} | Char ID: {charId}");
+                            var tq = await APIHelper.ESIAPI.GetAccessToken(rToken, $"From {Category} | Char ID: {charId}");
                             var token = tq.Result;
                             if (tq.Data.IsNoConnection) return;
                             if (string.IsNullOrEmpty(token))

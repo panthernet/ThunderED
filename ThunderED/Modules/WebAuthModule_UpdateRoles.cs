@@ -185,8 +185,8 @@ namespace ThunderED.Modules
 
                     var remroles = new List<SocketRole>();
 
-                    await AuthInfoLog(characterData, $"[RUPD] PRE CHARID: {authUser.CharacterId} DID: {discordUserId} AUTH: {authUser.AuthState} GRP: {authUser.GroupName} TOKEN: {!string.IsNullOrEmpty(authUser.GetGeneralToken())}", true);
-                    var result = authUser.AuthState == (int)UserStatusEnum.Dumped ? new RoleSearchResult() : await GetRoleGroup(characterData, discordUserId, discordGuild.Id, authUser.GetGeneralToken());
+                    await AuthInfoLog(characterData, $"[RUPD] PRE CHARID: {authUser.CharacterId} DID: {discordUserId} AUTH: {authUser.AuthState} GRP: {authUser.GroupName} TOKEN: {!string.IsNullOrEmpty(authUser.GetGeneralTokenString())}", true);
+                    var result = authUser.AuthState == (int)UserStatusEnum.Dumped ? new RoleSearchResult() : await GetRoleGroup(characterData, discordUserId, discordGuild.Id, authUser.GetGeneralTokenString());
                     if (result.IsConnectionError)
                     {
                         await AuthWarningLog(characterData, "[RUPD] Connection error while searching for group! Skipping roles update.");
@@ -280,6 +280,7 @@ namespace ThunderED.Modules
                             }
                             catch(Exception ex)
                             {
+                                await LogHelper.LogEx(ex, LogCat.AuthWeb);
                                 await AuthWarningLog(characterData, $"[RUPD] Failed to add {string.Join(", ", result.UpdatedRoles.Select(a=> a.Name))} roles to {characterData.name} ({u.Username})!");
                             }
                         }

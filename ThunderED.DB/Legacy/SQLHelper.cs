@@ -9,6 +9,7 @@ using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.Internal;
 using ThunderED.Providers;
+using ThunderED.Thd;
 
 namespace ThunderED
 {

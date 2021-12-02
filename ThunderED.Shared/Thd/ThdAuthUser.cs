@@ -20,8 +20,8 @@ namespace ThunderED.Thd
         public long? MainCharacterId;
         public DateTime? LastCheck;
         public string Ip;
-        [Obsolete]
-        public string RefreshToken { get; set; }
+        //[Obsolete]
+        //public string RefreshToken { get; set; }
 
         [NotMapped] public AuthUserData DataView = new AuthUserData();
         [NotMapped] public MiscUserData MiscData = new MiscUserData();
@@ -38,9 +38,14 @@ namespace ThunderED.Thd
         public List<ThdToken> Tokens { get; set; }
 
 
-        public string GetGeneralToken()
+        public string GetGeneralTokenString()
         {
             return Tokens?.FirstOrDefault(a => a.Type == TokenEnum.General)?.Token;
+        }
+
+        public ThdToken GetGeneralToken()
+        {
+            return Tokens?.FirstOrDefault(a => a.Type == TokenEnum.General);
         }
 
         public void SetStateDumpster()

@@ -92,7 +92,6 @@
 
 @code {
     private bool collapseNavMenu = true;
-    private bool _noReg = false;
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
@@ -102,10 +101,6 @@
 
     protected override async  Task OnInitializedAsync()
     {
-#if NOREG
-        _noReg = true;
-#endif
-
         await base.OnInitializedAsync();
     }
 

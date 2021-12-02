@@ -76,14 +76,9 @@
 </div>
 
 @code {
-    private bool _noReg = false;
 
     protected override async Task OnInitializedAsync()
     {
-#if NOREG
-    _noReg = true;
-#endif
-
         await base.OnInitializedAsync();
     }
 

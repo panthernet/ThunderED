@@ -10,7 +10,7 @@ namespace ThunderED.Classes
     public class WebTimerData: INotifyPropertyChanged
     {
         private int _type;
-        private int _stage;
+        //private int _stage;
         private string _location = "-";
         private string _owner = "-";
         private DateTime _date;

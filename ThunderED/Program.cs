@@ -455,9 +455,7 @@ namespace ThunderED
 
                     foreach (var token in tokens)
                     {
-                        var r = await APIHelper.ESIAPI.RefreshToken(token.Token,
-                            SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                            SettingsManager.Settings.WebServerModule.CcpAppSecret, nameof(MigrateTov2Auth));
+                        var r = await APIHelper.ESIAPI.GetAccessToken(token);
                         if (r?.Data == null)
                             continue;
                         if (r.Data.IsNoConnection)

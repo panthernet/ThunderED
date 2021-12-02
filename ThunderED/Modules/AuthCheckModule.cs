@@ -76,9 +76,7 @@ namespace ThunderED.Modules
                     {
                         await LogHelper.LogInfo($"Tokens {token.CharacterId}", LogCat.TokenUpdate, logConsole, logFile);
 
-                        var result = await APIHelper.ESIAPI.RefreshToken(token.Token,
-                            Settings.WebServerModule.CcpAppClientId,
-                            Settings.WebServerModule.CcpAppSecret, nameof(RunTokensCheck));
+                        var result = await APIHelper.ESIAPI.GetAccessToken(token);
                         await LogHelper.LogInfo(
                             $"Result: {result?.Data?.ErrorCode} NoCon: {result?.Data?.IsNoConnection} Msg:{result?.Data?.Message}",
                             LogCat.TokenUpdate, logConsole, logFile);

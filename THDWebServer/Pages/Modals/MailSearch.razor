@@ -93,7 +93,7 @@
 
     private List<WebMailHeader> _mailList;
     private List<WebMailHeader> _cacheMailList;
-    private bool _isMailLoading = false;
+    //private bool _isMailLoading = false;
     private int _countMail;
 
     private readonly List<string> _searchTypeList = new List<string>
@@ -135,14 +135,14 @@
     private async Task OnSearch()
     {
         if(string.IsNullOrEmpty(_searchValue)) return;
-        _isMailLoading = true;
+        //_isMailLoading = true;
         await InvokeAsync(StateHasChanged);
 
         _cacheMailList ??= await _module.WebGetMailHeaders(UserId, Token);
         _mailList = _cacheMailList;
         _countMail = _mailList?.Count ?? 0;
         //_mailList = ApplyAjaxFilters(_cacheMailList, args, out _countMail);
-        _isMailLoading = false;
+        //_isMailLoading = false;
         await InvokeAsync(StateHasChanged);
     }
 

@@ -664,8 +664,10 @@ namespace ThunderED.Modules
 
                 if (authUser.DataView.PermissionsList.Any())
                 {
-                    var token = string.IsNullOrEmpty(authUser.GetGeneralToken()) ? null : (await APIHelper.ESIAPI.RefreshToken(authUser.GetGeneralToken(), SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From WebAuth | Char ID: {authUser.CharacterId} | Char name: {authUser.DataView.CharacterName}"));
+                    var token = string.IsNullOrEmpty(authUser.GetGeneralTokenString())
+                        ? null
+                        : (await APIHelper.ESIAPI.GetAccessToken(authUser.GetGeneralToken(),
+                            $"From WebAuth | Char ID: {authUser.CharacterId} | Char name: {authUser.DataView.CharacterName}"));
                     //delete char if token is invalid
                     if (string.IsNullOrEmpty(token?.Result) && token!= null && token.Data.IsFailed && !token.Data.IsNoConnection)
                     {
@@ -681,7 +683,7 @@ namespace ThunderED.Modules
                 characterData = await APIHelper.ESIAPI.GetCharacterData("Auth", authUser.CharacterId, true);
 
                 //check if we fit some group
-                var result = await GetRoleGroup(characterData, discordId, guildId, authUser.GetGeneralToken());
+                var result = await GetRoleGroup(characterData, discordId, guildId, authUser.GetGeneralTokenString());
                 if (result.IsConnectionError)
                 {
                     await AuthWarningLog(authUser, $"Possible connection error while processing auth request(search for group)!");

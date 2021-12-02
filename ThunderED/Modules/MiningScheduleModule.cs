@@ -152,8 +152,7 @@ namespace ThunderED.Modules
 
                 foreach (var token in tokens)
                 {
-                    var r = await APIHelper.ESIAPI.RefreshToken(token.Token, Settings.WebServerModule.CcpAppClientId,
-                        Settings.WebServerModule.CcpAppSecret);
+                    var r = await APIHelper.ESIAPI.GetAccessToken(token);
                     if (r == null || r.Data.IsFailed)
                     {
                         await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}");
@@ -294,8 +293,7 @@ namespace ThunderED.Modules
 
                 foreach (var token in tokens)
                 {
-                    var r = await APIHelper.ESIAPI.RefreshToken(token.Token, Settings.WebServerModule.CcpAppClientId,
-                        Settings.WebServerModule.CcpAppSecret);
+                    var r = await APIHelper.ESIAPI.GetAccessToken(token);
                     if (r == null || r.Data.IsFailed)
                     {
                         await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}",
@@ -702,8 +700,7 @@ namespace ThunderED.Modules
             {
                 var token = await DbHelper.GetToken(charId, TokenEnum.MiningSchedule);
 
-                var r = await APIHelper.ESIAPI.RefreshToken(token, Settings.WebServerModule.CcpAppClientId,
-                    Settings.WebServerModule.CcpAppSecret);
+                var r = await APIHelper.ESIAPI.GetAccessToken(token);
                 if (r == null || r.Data.IsFailed)
                 {
                     await LogHelper.LogWarning($"Failed to refresh mining token from {charId}", Category);

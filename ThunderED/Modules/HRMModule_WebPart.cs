@@ -215,10 +215,9 @@ namespace ThunderED.Modules
                     var hrUserInfo = await DbHelper.GetAuthUser(hrId, true);
                     if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.DataView.PermissionsList))
                     {
-                        var hrToken = (await APIHelper.ESIAPI.RefreshToken(hrUserInfo.GetGeneralToken(),
-                                Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
-                                , $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.DataView.CharacterName}")
-                            )?.Result;
+                        var hrToken = (await APIHelper.ESIAPI.GetAccessToken(hrUserInfo.GetGeneralToken(),
+                                $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.DataView.CharacterName}"))
+                            ?.Result;
                         if (!string.IsNullOrEmpty(hrToken))
                         {
                             hrContacts = (await APIHelper.ESIAPI.GetCharacterContacts(Reason, hrId, hrToken)).Result;

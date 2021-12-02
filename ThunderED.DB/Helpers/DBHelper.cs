@@ -163,10 +163,17 @@ namespace ThunderED
             }
         }
 
-        public static async Task<string> GetToken(long charId, TokenEnum type)
+        public static async Task<string> GetTokenString(long charId, TokenEnum type)
         {
             await using var db = new ThunderedDbContext();
             return db.Tokens.FirstOrDefault(a => a.CharacterId == charId && a.Type == type)?.Token;
+        }
+
+
+        public static async Task<ThdToken> GetToken(long charId, TokenEnum type)
+        {
+            await using var db = new ThunderedDbContext();
+            return db.Tokens.AsNoTracking().FirstOrDefault(a => a.CharacterId == charId && a.Type == type);
         }
 
         #endregion

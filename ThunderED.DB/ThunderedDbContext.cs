@@ -38,7 +38,7 @@ namespace ThunderED
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.CharacterId).HasColumnName("characterID");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.DiscordId).HasColumnName("discordID");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.GroupName).HasColumnName("groupName");
-            modelBuilder.Entity<ThdAuthUser>().Property(a => a.RefreshToken).HasColumnName("refreshToken");
+            //modelBuilder.Entity<ThdAuthUser>().Property(a => a.RefreshToken).HasColumnName("refreshToken");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.AuthState).HasColumnName("authState");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.Data).HasColumnName("data");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.RegCode).HasColumnName("reg_code");

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -13,6 +14,7 @@ using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.PriceChecks;
+using ThunderED.Thd;
 
 namespace ThunderED.API
 {
@@ -240,6 +242,24 @@ namespace ThunderED.API
         {
             var ssoClient = new HttpClient();
             ssoClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
+        public async Task<ESIQueryResult<string>> GetAccessToken(ThdToken token, string notes = null, bool logDetails = true, [CallerMemberName] string methodname = null)
+        {
+            var r = await APIHelper.ESIAPI.RefreshToken(token.Token,
+                SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                SettingsManager.Settings.WebServerModule.CcpAppSecret, nameof(GetAccessToken));
+            if (r?.Data == null || r.Data.IsFailed || r.Data.IsNoConnection)
+            {
+                if (logDetails)
+                    await LogHelper.LogInfo($"[{methodname}] Token refresh. Error:{r?.Data?.ErrorCode} NoCon: {r?.Data?.IsNoConnection} {notes}", LogCat.ESI);
+                return r;
+            }
+
+            if (!token.Token.Equals(r.RefreshToken))
+                await DbHelper.UpdateToken(token.Token, token.CharacterId, token.Type, token.Scopes);
+
+            return r;
         }
 
         public async Task<ESIQueryResult<string>> RefreshToken(string refreshToken, string clientId, string secret, string notes = null)

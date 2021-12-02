@@ -293,7 +293,7 @@ namespace ThunderED.Modules.OnDemand
                 foreach (var user in users)
                 {
                     if (!SettingsManager.HasCharStandingsScope(user.DataView.PermissionsList)) continue;
-                    var token = (await APIHelper.ESIAPI.RefreshToken(user.GetGeneralToken(), SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                    var token = (await APIHelper.ESIAPI.RefreshToken(user.GetGeneralTokenString(), SettingsManager.Settings.WebServerModule.CcpAppClientId,
                         SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From FWStats | Char ID: {user.CharacterId} | Char name: {user.DataView.CharacterName}"))?.Result;
                     if (string.IsNullOrEmpty(token)) continue;
                     var st = await APIHelper.ESIAPI.GetcharacterStandings("FWStats", user.CharacterId, token);

@@ -541,7 +541,7 @@
             _hasToken = _character.HasToken;
             if (_hasToken)
             {
-                var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralToken(),
+                var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralTokenString(),
                     _module.Settings.WebServerModule.CcpAppClientId,
                     _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
                 _inspectToken = tq.Result;
@@ -725,7 +725,7 @@
 
     private async Task ExecuteGetToken()
     {
-        var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralToken(),
+        var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralTokenString(),
             _module.Settings.WebServerModule.CcpAppClientId,
             _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
 
