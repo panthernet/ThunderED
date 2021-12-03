@@ -568,6 +568,24 @@ namespace ThunderED.Modules
             var structureId = GetData("structureID", data);
             var structure = string.IsNullOrEmpty(structureId) ? null : await APIHelper.ESIAPI.GetUniverseStructureData(Reason, structureId, token);
             var structureNameDirect = GetData("structureName", data);
+            //parse structure name from link
+            var sname2 = GetData("structureLink", data);
+            if (!string.IsNullOrEmpty(sname2) && string.IsNullOrEmpty(structureNameDirect))
+            {
+                try
+                {
+                    var from = sname2.IndexOf('>') + 1;
+                    var to = sname2.IndexOf("</a>");
+                    if (from != 0 && to != -1)
+                        structureNameDirect = sname2.Substring(from, to - from);
+                }
+                catch
+                {
+                    // ignore
+                }
+            }
+
+
 
             var structureTypeId = GetData("structureTypeID", data);
             var structureType = string.IsNullOrEmpty(structureTypeId) ? null : await APIHelper.ESIAPI.GetTypeId(Reason, structureTypeId);
@@ -1179,11 +1197,31 @@ namespace ThunderED.Modules
                                 image = Settings.Resources.ImgCorpTaxChangeMsg;
                                 break;
                             case "OwnershipTransferred":
-                                var oldOwner = await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("oldOwnerCorpID", data));
-                                var newOwner = await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("newOwnerCorpID", data));
-                                text = LM.Get("notifOwnershipTransferred", GetData("structureName", data), oldOwner?.name, newOwner?.name);
-                                image = Settings.Resources.ImgCitFuelAlert;
-                                break;
+                                {
+                                    var oldOwner =
+                                        await APIHelper.ESIAPI.GetCorporationData(Reason,
+                                            GetData("oldOwnerCorpID", data));
+                                    var newOwner =
+                                        await APIHelper.ESIAPI.GetCorporationData(Reason,
+                                            GetData("newOwnerCorpID", data));
+                                    text = LM.Get("notifOwnershipTransferred", GetData("structureName", data),
+                                        oldOwner?.name, newOwner?.name);
+                                    image = Settings.Resources.ImgCitFuelAlert;
+
+                                    builder = new EmbedBuilder()
+                                        .WithColor(color)
+                                        .WithAuthor(author => author.WithName(text))
+                                        .WithThumbnailUrl(image)
+                                        .AddField(LM.Get("Structure"), structureType?.name ?? LM.Get("Unknown"), true)
+                                        .AddField(LM.Get("System"), systemName ?? LM.Get("Unknown"), true)
+                                        .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                                        .WithTimestamp(timestamp);
+                                    embed = builder.Build();
+
+                                    foreach (var channel in discordChannels)
+                                        await APIHelper.DiscordAPI.SendMessageAsync(channel, mention, embed).ConfigureAwait(false);
+                                    return true;
+                                }
                             default:
                                 await LogHelper.LogWarning($"Unknown notif type {notification.type}");
                                 return false;
