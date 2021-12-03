@@ -28,6 +28,7 @@ namespace ThunderED
         public DbSet<ThdNullCampaign> NullCampaigns { get; set; }
         public DbSet<ThdIncursion> Incursions { get; set; }
         public DbSet<ThdMail> Mails { get; set; }
+        public DbSet<ThdSovIndexTracker> SovIndexTrackers { get; set; }
         
         //public DbSet<ThdType> Types { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
@@ -113,6 +114,16 @@ namespace ThunderED
             modelBuilder.Entity<ThdMail>().ToTable("mail");
             modelBuilder.Entity<ThdMail>().Property(a => a.Id).HasColumnName("id");
             modelBuilder.Entity<ThdMail>().Property(a => a.MailId).HasColumnName("mailId");
+            #endregion
+
+
+            #region ThdSovIndexTracker
+            modelBuilder.Entity<ThdSovIndexTracker>().HasKey(u => u.GroupName);
+            modelBuilder.Entity<ThdSovIndexTracker>().HasIndex(u => u.GroupName);
+
+            modelBuilder.Entity<ThdSovIndexTracker>().ToTable("sovIndexTracker");
+            modelBuilder.Entity<ThdSovIndexTracker>().Property(a => a.GroupName).HasColumnName("groupName");
+            modelBuilder.Entity<ThdSovIndexTracker>().Property(a => a.Data).HasColumnName("data").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject< List<JsonClasses.SovStructureData>>(v));
             #endregion
 
             #region ThdToken

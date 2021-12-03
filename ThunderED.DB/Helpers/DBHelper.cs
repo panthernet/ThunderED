@@ -687,6 +687,32 @@ namespace ThunderED
         }
         #endregion
 
+        #region Sov Index Tracker
+        public static async Task<List<JsonClasses.SovStructureData>> GetSovIndexTrackerData(string name)
+        {
+            await using var db = new ThunderedDbContext();
+            return (await db.SovIndexTrackers.FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupName, name)))?.Data;
+        }
+
+        public static async Task SaveSovIndexTrackerData(string name, List<JsonClasses.SovStructureData> data)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.SovIndexTrackers.FirstOrDefaultAsync(
+                a => EF.Functions.Like(a.GroupName, name));
+            if (old == null)
+            {
+                await db.SovIndexTrackers.AddAsync(new ThdSovIndexTracker { GroupName = name, Data = data});
+            }
+            else
+            {
+                old.Data = data;
+            }
+
+            await db.SaveChangesAsync();
+        }
+
+        #endregion
+
         #region Moon table
 
         public static async Task UpdateMoonTable(ThdMoonTableEntry entry)

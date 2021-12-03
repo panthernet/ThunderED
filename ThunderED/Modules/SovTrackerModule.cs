@@ -63,7 +63,7 @@ namespace ThunderED.Modules
                         continue;
                     }
 
-                    var trackerData = await SQLHelper.GetSovIndexTrackerData(groupName);
+                    var trackerData = await DbHelper.GetSovIndexTrackerData(groupName);
                     var holderIds = GetParsedAlliances(groupName, _userStorage) ?? new List<long>();
 
                     if (!trackerData.Any())
@@ -72,7 +72,7 @@ namespace ThunderED.Modules
                         if (!list.Any())
                             await SendOneTimeWarning(groupName, $"No systems found for Sov Tracker group {groupName}!");
                         else
-                            await SQLHelper.SaveSovIndexTrackerData(groupName, list);
+                            await DbHelper.SaveSovIndexTrackerData(groupName, list);
                         return;
                     }
 
@@ -106,7 +106,7 @@ namespace ThunderED.Modules
                             }
                         }
 
-                    await SQLHelper.SaveSovIndexTrackerData(groupName, workingSet);
+                    await DbHelper.SaveSovIndexTrackerData(groupName, workingSet);
                     // t.Stop();
                     // Debug.WriteLine($"Sov check: {t.Elapsed.TotalSeconds}sec");
                 }

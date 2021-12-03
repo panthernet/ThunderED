@@ -525,7 +525,7 @@ namespace ThunderED
         #endregion
 
         #region Sov Index Tracker
-        public static async Task<List<JsonClasses.SovStructureData>> GetSovIndexTrackerData(string name)
+        /*public static async Task<List<JsonClasses.SovStructureData>> GetSovIndexTrackerData(string name)
         {
             var res = await SelectData("sovIndexTracker", new[] {"data"}, new Dictionary<string, object> {{"groupName", name}});
             if(res == null || !res.Any()) return  new List<JsonClasses.SovStructureData>();
@@ -540,7 +540,7 @@ namespace ThunderED
                 {"data", JsonConvert.SerializeObject(data)}
             });
         }
-
+        */
         #endregion
 
         #region Industry Jobs
