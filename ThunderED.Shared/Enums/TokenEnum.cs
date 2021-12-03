@@ -12,6 +12,7 @@
         PersonalNotification,
         PersonalIndustry,
         PersonalContract,
-        PersonalMail
+        PersonalMail,
+        AuthStandings
     }
 }

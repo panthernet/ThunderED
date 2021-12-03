@@ -5,6 +5,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+
+using Dasync.Collections;
+
 using Discord;
 
 using ThunderED.Classes;
@@ -100,141 +103,191 @@ namespace ThunderED.Modules
         private async Task UpdateTracker2()
         {
             if (_isTrackerRunning) return;
-
-            const bool logConsole = true;
-            const bool logFile = true;
-
-            if (DateTime.Now > _nextTrackerCheck)
+            _isTrackerRunning = true;
+            try
             {
-                _nextTrackerCheck = DateTime.Now.AddMinutes(Settings.NotificationFeedModule.Tracker.UpdateIntervalInMinutes);
-                _isTrackerRunning = true;
-                await LogHelper.LogInfo($"Starting tracker update... Passed count: {_trackerNotifications.Count}", LogCat.UpdateTracker, logConsole, logFile);
 
-                if (_trackerNotifications.Count > 500)
-                    _trackerNotifications.RemoveRange(0,100);
+                const bool logConsole = true;
+                const bool logFile = false;
 
-
-                try
+                if (DateTime.Now > _nextTrackerCheck)
                 {
-                    var enabledGroups = Settings.NotificationFeedModule.Tracker.GetEnabledGroups()
-                        .Where(a => (a.Value.DiscordChannels?.Any() ?? false) &&
-                                    (a.Value.Notifications?.Any() ?? false))
-                        .ToDictionary(a => a.Key, a => a.Value);
-                    if (!enabledGroups.Any()) return;
-                    await LogHelper.LogInfo($"Found {enabledGroups.Count} groups", LogCat.UpdateTracker, logConsole, logFile);
+                    _nextTrackerCheck =
+                        DateTime.Now.AddMinutes(Settings.NotificationFeedModule.Tracker.UpdateIntervalInMinutes);
+                    await LogHelper.LogInfo($"Starting tracker update... Count: {_trackerNotifications.Count}. Threads: {Settings.Config.ConcurrentThreadsCount}",
+                        LogCat.UpdateTracker);
 
-                    var tokens = await DbHelper.GetTokensByScope(SettingsManager.GetNotificationsESIScope());
-                    await LogHelper.LogInfo($"Fetched {tokens.Count} tokens", LogCat.UpdateTracker, logConsole, logFile);
+                    if (_trackerNotifications.Count > 500)
+                        _trackerNotifications.RemoveRange(0, 100);
 
-                    var lastCheck = _lastTrackerCheckTime.Subtract(TimeSpan.FromSeconds(1));
-                    _lastTrackerCheckTime = DateTime.Now;
-                    var allEnabledTypes = enabledGroups.Values.SelectMany(a => a.Notifications).Distinct().ToList();
 
-                    foreach (var token in tokens)
+                    await Swatch.Run(async () =>
                     {
-                        await LogHelper.LogInfo($"Token charId={token.CharacterId}", LogCat.UpdateTracker, logConsole, logFile);
                         try
                         {
 
-                            #region Apply global filters
-                            var feederChar = await APIHelper.ESIAPI.GetCharacterData(Reason, token.CharacterId, true);
-                            //skip npc corp characters
-                            if (feederChar == null || APIHelper.ESIAPI.IsNpcCorporation(feederChar.corporation_id))
-                                continue;
+                            var enabledGroups = Settings.NotificationFeedModule.Tracker.GetEnabledGroups()
+                                .Where(a => (a.Value.DiscordChannels?.Any() ?? false) &&
+                                            (a.Value.Notifications?.Any() ?? false))
+                                .ToDictionary(a => a.Key, a => a.Value);
+                            if (!enabledGroups.Any()) return;
+                            await LogHelper.LogInfo($"Found {enabledGroups.Count} groups", LogCat.UpdateTracker,
+                                logConsole,
+                                logFile);
 
-                            var feederCorp = await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
-                            var feederAlliance = feederChar?.alliance_id > 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, feederChar?.alliance_id) : null;
-                            var skip = false;
-                            foreach (var filter in Settings.NotificationFeedModule.Tracker.GlobalFilterOut)
+                            var tokens = await DbHelper.GetTokensByScope(SettingsManager.GetNotificationsESIScope());
+                            await LogHelper.LogInfo($"Fetched {tokens.Count} tokens", LogCat.UpdateTracker, logConsole,
+                                logFile);
+
+                            var lastCheck = _lastTrackerCheckTime.Subtract(TimeSpan.FromSeconds(1));
+                            _lastTrackerCheckTime = DateTime.Now;
+                            var allEnabledTypes = enabledGroups.Values.SelectMany(a => a.Notifications).Distinct()
+                                .ToList();
+
+                            await tokens.ParallelForEachAsync(async token =>
                             {
-                                if (feederChar.name.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
-                                    feederCorp.name.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
-                                    (feederAlliance != null &&
-                                     feederAlliance.name.Contains(filter, StringComparison.OrdinalIgnoreCase)))
+                                await LogHelper.LogInfo($"Token charId={token.CharacterId}", LogCat.UpdateTracker,
+                                    logConsole, logFile);
+                                try
                                 {
-                                    skip = true;
-                                    break;
+
+                                    #region Apply global filters
+
+                                    var feederChar =
+                                        await APIHelper.ESIAPI.GetCharacterData(Reason, token.CharacterId, true);
+                                    //skip npc corp characters
+                                    if (feederChar == null || (Settings.NotificationFeedModule.Tracker.SkipCharactersInNpcCorps &&
+                                        APIHelper.ESIAPI.IsNpcCorporation(feederChar.corporation_id)))
+                                        return;
+
+                                    var feederCorp =
+                                        await APIHelper.ESIAPI.GetCorporationData(Reason, feederChar?.corporation_id);
+                                    var feederAlliance = feederChar?.alliance_id > 0
+                                        ? await APIHelper.ESIAPI.GetAllianceData(Reason, feederChar?.alliance_id)
+                                        : null;
+                                    var skip = false;
+
+                                    //filter all chars that doesn't fit input 
+                                    if (Settings.NotificationFeedModule.Tracker.GlobalFilterIn.Any())
+                                    {
+                                        foreach (var filter in Settings.NotificationFeedModule.Tracker.GlobalFilterIn)
+                                        {
+                                            if (!feederChar.name.Contains(filter, StringComparison.OrdinalIgnoreCase) &&
+                                                !feederCorp.name.Contains(filter, StringComparison.OrdinalIgnoreCase) &&
+                                                (feederAlliance == null ||
+                                                 !feederAlliance.name.Contains(filter, StringComparison.OrdinalIgnoreCase)))
+                                            {
+                                                skip = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    //filter out all chars that falls into out
+                                    foreach (var filter in Settings.NotificationFeedModule.Tracker.GlobalFilterOut)
+                                    {
+                                        if (feederChar.name.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                                            feederCorp.name.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                                            (feederAlliance != null &&
+                                             feederAlliance.name.Contains(filter, StringComparison.OrdinalIgnoreCase)))
+                                        {
+                                            skip = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (skip) return;
+
+                                    #endregion
+
+                                    if (!_trackerKeys.ContainsKey(token.CharacterId) ||
+                                        (DateTime.Now - _trackerKeys[token.CharacterId].KeyUpdate).Minutes >= 19)
+                                    {
+                                        await LogHelper.LogInfo($"Key update...", LogCat.UpdateTracker, logConsole,
+                                            logFile);
+
+                                        var key = (await APIHelper.ESIAPI.GetAccessToken(token))?.Result;
+                                        await LogHelper.LogInfo($"Key: {key != null}", LogCat.UpdateTracker, logConsole,
+                                            logFile);
+                                        if (key == null) return;
+                                        _trackerKeys.AddOrUpdate(token.CharacterId, new TrackerData(key));
+                                    }
+
+                                    var track = _trackerKeys[token.CharacterId];
+                                    var cacheHeader = $"nmt|{token.CharacterId}";
+
+                                    //try fetch last ETAG
+                                    if (string.IsNullOrEmpty(track.Etag))
+                                    {
+                                        var tag = await DbHelper.GetCache<string>(cacheHeader, 60);
+                                        if (tag != null)
+                                            track.Etag = tag;
+                                    }
+
+                                    //get notifications
+                                    var nResult = await APIHelper.ESIAPI.GetNotifications(Reason, token.CharacterId,
+                                        track.Key, track.Etag);
+                                    await LogHelper.LogInfo(
+                                        $"Notif raw: {nResult?.Result?.Count} Result: {nResult?.Data?.ErrorCode} NoCon: {nResult?.Data?.IsNoConnection}",
+                                        LogCat.UpdateTracker, logConsole, logFile);
+                                    //continue if failed badly
+                                    if (nResult?.Result == null) return;
+                                    //update ETAG
+                                    track.Etag = nResult.Data.ETag;
+                                    await DbHelper.UpdateCache(cacheHeader, track.Etag);
+                                    //continue if no new data
+                                    if (nResult.Data.IsNotModified) return;
+
+                                    var notifications = nResult.Result.Where(a =>
+                                            a.Date >= lastCheck && allEnabledTypes.ContainsCaseInsensitive(a.type))
+                                        .ToList();
+                                    await LogHelper.LogInfo($"Notif filtered: {notifications.Count}",
+                                        LogCat.UpdateTracker,
+                                        logConsole, logFile);
+
+                                    foreach (var notification in notifications)
+                                    {
+                                        if (_trackerNotifications.Contains(notification.notification_id))
+                                            continue;
+
+                                        foreach (var (key, value) in enabledGroups)
+                                        {
+                                            if (!value.Notifications.ContainsCaseInsensitive(notification.type))
+                                                continue;
+
+                                            var filters =
+                                                Settings.NotificationFeedModule.Tracker.GlobalFilterOut.ToList();
+                                            filters.AddRange(value.FilterOut);
+                                            filters = filters.Distinct().ToList();
+
+                                            var outResult = await OutPutNotification(notification,
+                                                value.DiscordChannels,
+                                                track.Key,
+                                                token.CharacterId, null, null, filters);
+                                            if (outResult &&
+                                                !_trackerNotifications.Contains(notification.notification_id))
+                                                _trackerNotifications.Add(notification.notification_id);
+                                        }
+                                    }
                                 }
-                            }
-                            if(skip) continue;
-                            #endregion
-
-                            if (!_trackerKeys.ContainsKey(token.CharacterId) ||
-                                (DateTime.Now - _trackerKeys[token.CharacterId].KeyUpdate).Minutes >= 19)
-                            {
-                                await LogHelper.LogInfo($"Key update...", LogCat.UpdateTracker, logConsole, logFile);
-
-                                var key = (await APIHelper.ESIAPI.GetAccessToken(token))?.Result;
-                                await LogHelper.LogInfo($"Key: {key != null}", LogCat.UpdateTracker, logConsole, logFile);
-                                if (key == null) continue;
-                                _trackerKeys.AddOrUpdate(token.CharacterId, new TrackerData(key));
-                            }
-
-                            var track = _trackerKeys[token.CharacterId];
-                            var cacheHeader = $"nmt|{token.CharacterId}";
-
-                            //try fetch last ETAG
-                            if (string.IsNullOrEmpty(track.Etag))
-                            {
-                                var tag = await DbHelper.GetCache<string>(cacheHeader, 60);
-                                if (tag != null)
-                                    track.Etag = tag;
-                            }
-                            //get notifications
-                            var nResult = await APIHelper.ESIAPI.GetNotifications(Reason, token.CharacterId,
-                                track.Key, track.Etag);
-                            await LogHelper.LogInfo($"Notif raw: {nResult?.Result?.Count} Result: {nResult?.Data?.ErrorCode} NoCon: {nResult?.Data?.IsNoConnection}", LogCat.UpdateTracker, logConsole, logFile);
-                            //continue if failed badly
-                            if (nResult?.Result == null) continue;
-                            //update ETAG
-                            track.Etag = nResult.Data.ETag;
-                            await DbHelper.UpdateCache(cacheHeader, track.Etag);
-                            //continue if no new data
-                            if(nResult.Data.IsNotModified) continue;
-
-                            var notifications = nResult.Result.Where(a =>
-                                a.Date >= lastCheck && allEnabledTypes.ContainsCaseInsensitive(a.type)).ToList();
-                            await LogHelper.LogInfo($"Notif filtered: {notifications.Count}", LogCat.UpdateTracker, logConsole, logFile);
-
-                            foreach (var notification in notifications)
-                            {
-                                if (_trackerNotifications.Contains(notification.notification_id))
-                                    continue;
-
-                                foreach (var (key, value) in enabledGroups)
+                                catch (Exception ex)
                                 {
-                                    if (!value.Notifications.ContainsCaseInsensitive(notification.type))
-                                        continue;
-
-                                    var filters = Settings.NotificationFeedModule.Tracker.GlobalFilterOut.ToList();
-                                    filters.AddRange(value.FilterOut);
-                                    filters = filters.Distinct().ToList();
-
-                                    var outResult = await OutPutNotification(notification, value.DiscordChannels,
-                                        track.Key,
-                                        token.CharacterId, null, null, filters);
-                                    if (outResult && !_trackerNotifications.Contains(notification.notification_id))
-                                        _trackerNotifications.Add(notification.notification_id);
-
+                                    await LogHelper.LogEx(ex, Category);
                                 }
-
-                            }
+                            }, Settings.Config.ConcurrentThreadsCount);
                         }
                         catch (Exception ex)
                         {
                             await LogHelper.LogEx(ex, Category);
                         }
-                    }
+                    }).ContinueWith(async msec=> await LogHelper.LogWarning($"Tracker: {TimeSpan.FromMilliseconds(msec.Result).ToFormattedString()}", LogCat.UpdateTracker, logConsole));
 
+                    
                 }
-                catch (Exception ex)
-                {
-                    await LogHelper.LogEx(ex, Category);
-                }
-                finally
-                {
-                    _isTrackerRunning = false;
-                }
+            }
+            finally
+            {
+                _isTrackerRunning = false;
             }
         }
 
@@ -575,23 +628,52 @@ namespace ThunderED.Modules
                 ? ((await APIHelper.ESIAPI.GetCharacterData(Reason, data["firedBy"]))?.name ?? LM.Get("Auto"))
                 : null;
             #endregion
+            await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
 
             switch (notification.type)
             {
-                case "OrbitalAttacked":
+                case "TowerAlertMsg": //pos
                     {
                         var struc = await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data));
-                        var planet = await APIHelper.ESIAPI.GetPlanet(Reason, GetData("planetID", data));
+                        var moon = await APIHelper.ESIAPI.GetMoon(Reason, GetData("moonID", data));
 
-                        var agressor = (await APIHelper.ESIAPI.GetCharacterData(Reason, GetData("aggressorID", data)))?.name;
+                        var aggressor = (await APIHelper.ESIAPI.GetCharacterData(Reason, GetData("aggressorID", data)))?.name;
                         var aggCorp = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("aggressorCorpID", data)))?.name;
                         var aggAllyId = GetData("aggressorAllianceID", data);
                         var aggAlly = string.IsNullOrEmpty(aggAllyId) || aggAllyId == "0"
                             ? null
                             : (await APIHelper.ESIAPI.GetAllianceData(Reason, aggAllyId))?.ticker;
-                        var aggText = $"{agressor} - {aggCorp}{(string.IsNullOrEmpty(aggAlly) ? null : $"[{aggAlly}]")}";
+                        var aggText = $"{aggressor} - {aggCorp}{(string.IsNullOrEmpty(aggAlly) ? null : $"[{aggAlly}]")}";
 
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
+                        builder = new EmbedBuilder()
+                            .WithColor(new Color(0xdd5353))
+                            .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
+                            .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_TowerAlertMsg",
+                                    struc?.name, feederCorp?.name))
+                                .WithUrl($"https://zkillboard.com/character/{GetData("aggressorID", data)}"))
+                            .AddField(LM.Get("Location"), $"{systemName} - {moon?.name ?? LM.Get("Unknown")}", true)
+                            .AddField(LM.Get("Aggressor"), aggText, true)
+                            .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                            .WithTimestamp(timestamp);
+                        embed = builder.Build();
+
+                        foreach (var channel in discordChannels)
+                            await APIHelper.DiscordAPI.SendMessageAsync(channel, mention, embed).ConfigureAwait(false);
+                    }
+                    break;
+                case "OrbitalAttacked": //customs
+                    {
+                        var struc = await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data));
+                        var planet = await APIHelper.ESIAPI.GetPlanet(Reason, GetData("planetID", data));
+
+                        var aggressor = (await APIHelper.ESIAPI.GetCharacterData(Reason, GetData("aggressorID", data)))?.name;
+                        var aggCorp = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("aggressorCorpID", data)))?.name;
+                        var aggAllyId = GetData("aggressorAllianceID", data);
+                        var aggAlly = string.IsNullOrEmpty(aggAllyId) || aggAllyId == "0"
+                            ? null
+                            : (await APIHelper.ESIAPI.GetAllianceData(Reason, aggAllyId))?.ticker;
+                        var aggText = $"{aggressor} - {aggCorp}{(string.IsNullOrEmpty(aggAlly) ? null : $"[{aggAlly}]")}";
+
 
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
@@ -622,8 +704,6 @@ namespace ThunderED.Modules
                             : (await APIHelper.ESIAPI.GetAllianceData(Reason, aggAllyId))?.ticker;
                         var aggText = $"{agressor} - {aggCorp}{(string.IsNullOrEmpty(aggAlly) ? null : $"[{aggAlly}]")}";
                         var exitTime = DateTime.FromFileTime(Convert.ToInt64(GetData("reinforceExitTime", data)));
-
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
 
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
@@ -660,7 +740,6 @@ namespace ThunderED.Modules
                             : (await APIHelper.ESIAPI.GetAllianceData(Reason, aggAllyId))?.ticker;
                         var aggText = $"{aggName} - {aggCorp}{(string.IsNullOrEmpty(aggAlly) ? null : $"[{aggAlly}]")}";
 
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
                             .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
@@ -683,7 +762,6 @@ namespace ThunderED.Modules
                 case "StructureWentHighPower":
                     {
                         //"text": "solarsystemID: 30045335\nstructureID: &id001 1026192163696\nstructureShowInfoData:\n- showinfo\n- 35835\n- *id001\nstructureTypeID: 35835\n"
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var color = notification.type == "StructureWentLowPower" ? new Color(0xdd5353) : new Color(0x00ff00);
                         var text = notification.type == "StructureWentLowPower" ? LM.Get("LowPower") : LM.Get("HighPower");
                         builder = new EmbedBuilder()
@@ -707,7 +785,6 @@ namespace ThunderED.Modules
                 case "StructureLostShields":
                     {
                         // "text": "solarsystemID: 30003842\nstructureID: &id001 1026660410904\nstructureShowInfoData:\n- showinfo\n- 35832\n- *id001\nstructureTypeID: 35832\ntimeLeft: 1557974732906\ntimestamp: 131669979190000000\nvulnerableTime: 9000000000\n"
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         textAdd = notification.type == "StructureLostArmor" ? LM.Get("armorSmall") : LM.Get("shieldSmall");
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
@@ -745,7 +822,6 @@ namespace ThunderED.Modules
                 case "StructureDestroyed":
                 case "StructureOnline":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var d = GetData("isAbandoned", data);
                         var isAbandoned = !string.IsNullOrEmpty(d) && Convert.ToBoolean(d);
                         var core = GetData("requiresDeedTypeID", data);
@@ -790,7 +866,6 @@ namespace ThunderED.Modules
                     break;
                 case "StructureAnchoring":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var owner = GetData("ownerCorpName", data) ?? LM.Get("Unknown");
                         var text = LM.Get("StructureAnchoring", owner,
                             structureType == null ? LM.Get("Structure") : structureType.name);
@@ -812,7 +887,6 @@ namespace ThunderED.Modules
                     break;
                 case "AllAnchoringMsg":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var corpName = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data) ?? null))?.name ?? LM.Get("Unknown");
                         var allianceName = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allianceID", data) ?? null))?.name;
                         var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data)))?.name ?? LM.Get("Unknown");
@@ -836,7 +910,6 @@ namespace ThunderED.Modules
                     break;
                 case "StructureUnanchoring":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var owner = GetData("ownerCorpName", data) ?? LM.Get("Unknown");
                         var text = LM.Get("StructureUnanchoring", owner,
                             structureType == null ? LM.Get("Structure") : structureType.name);
@@ -856,9 +929,29 @@ namespace ThunderED.Modules
                             await APIHelper.DiscordAPI.SendMessageAsync(channel, mention, embed).ConfigureAwait(false);
                     }
                     break;
+                case "TowerResourceAlertMsg":
+                    {
+                        var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data)))?.name ?? LM.Get("Unknown");
+                        var moonName = (await APIHelper.ESIAPI.GetMoon(Reason, GetData("moonID", data)))?.name ?? LM.Get("Unknown");
+                        var location = $"{systemName}-{moonName}";
+                        var corpName = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data) ?? null))?.name ?? LM.Get("Unknown");
+                        var allianceName = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allianceID", data) ?? null))?.name;
+                        var text = LM.Get("PosFuelAlert", typeName, string.IsNullOrEmpty(allianceName) ? corpName : $"{allianceName} - {corpName}");
+
+                        builder = new EmbedBuilder()
+                            .WithColor(new Color(0xf2882b))
+                            .WithThumbnailUrl(Settings.Resources.ImgCitFuelAlert)
+                            .WithAuthor(author => author.WithName(text))
+                            .AddField(LM.Get("System"), location, true)
+                            .AddField(LM.Get("Structure"), typeName, true)
+                            .AddField(LM.Get("Fuel"), "???", true)
+                            .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
+                            .WithTimestamp(timestamp);
+                        embed = builder.Build();
+                    }
+                    break;
                 case "StructureFuelAlert":
                     //"text": "listOfTypesAndQty:\n- - 307\n  - 4246\nsolarsystemID: 30045331\nstructureID: &id001 1027052813591\nstructureShowInfoData:\n- showinfo\n- 35835\n- *id001\nstructureTypeID: 35835\n"
-                    await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                     builder = new EmbedBuilder()
                         .WithColor(new Color(0xf2882b))
                         .WithThumbnailUrl(Settings.Resources.ImgCitFuelAlert)
@@ -879,8 +972,6 @@ namespace ThunderED.Modules
                 case "MoonminingExtractionFinished":
 
                     //"text": "autoTime: 131632776620000000\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 1003894.7944164276\n  46676: 3861704.652392864\n  46681: 1934338.7763798237\n  46687: 5183861.7768108845\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
-                    await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
-
                     var compText = new StringBuilder();
                     if (oreComposition != null)
                         foreach (var pair in oreComposition)
@@ -936,7 +1027,6 @@ namespace ThunderED.Modules
                 case "MoonminingAutomaticFracture":
                 case "MoonminingLaserFired":
                     //"text": "firedBy: 91684736\nfiredByLink: <a href=\"showinfo:1386\/\/91684736\">Mike Myzukov<\/a>\nmoonID: 40349232\nmoonLink: <a href=\"showinfo:14\/\/40349232\">Teskanen IV - Moon 14<\/a>\noreVolumeByType:\n  45513: 241789.6056930224\n  46676: 930097.5066294272\n  46681: 465888.4702051679\n  46687: 1248541.084139049\nsolarSystemID: 30045335\nsolarSystemLink: <a href=\"showinfo:5\/\/30045335\">Teskanen<\/a>\nstructureID: 1026192163696\nstructureLink: <a href=\"showinfo:35835\/\/1026192163696\">Teskanen - Nebula Prime<\/a>\nstructureName: Teskanen - Nebula Prime\nstructureTypeID: 35835\n"
-                    await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
 
                     builder = new EmbedBuilder()
                         .WithColor(new Color(0xb386f7))
@@ -1208,7 +1298,6 @@ namespace ThunderED.Modules
                 case "CorpAppNewMsg":
                 case "CharAppWithdrawMsg":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var character = await APIHelper.ESIAPI.GetCharacterData(Reason, GetData("charID", data), true);
                         var corp = await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data), true);
                         var text = "";
@@ -1287,7 +1376,6 @@ namespace ThunderED.Modules
 
                 case "SovStructureDestroyed":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
                             .WithAuthor(
@@ -1303,7 +1391,6 @@ namespace ThunderED.Modules
 
                 case "SovStationEnteredFreeport":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var exittime = DateTime.FromFileTime(Convert.ToInt64(GetData("freeportexittime", data)));
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
@@ -1320,7 +1407,6 @@ namespace ThunderED.Modules
                     break;
                 case "StationServiceDisabled":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
                             .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
@@ -1339,7 +1425,6 @@ namespace ThunderED.Modules
 
                 case "SovCommandNodeEventStarted":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var constellation = await APIHelper.ESIAPI.GetConstellationData(Reason, GetData("constellationID", data));
                         var campaignId = Convert.ToInt32(GetData("campaignEventType", data));
                         var cmp = campaignId == 1 ? "1" : (campaignId == 2 ? "2" : "3");
@@ -1358,7 +1443,6 @@ namespace ThunderED.Modules
 
                 case "SovStructureReinforced":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var decloakTime = DateTime.FromFileTime(Convert.ToInt64(GetData("decloakTime", data)));
                         var campaignId = Convert.ToInt32(GetData("campaignEventType", data));
                         var cmp = campaignId == 1 ? "1" : (campaignId == 2 ? "2" : "3");
@@ -1378,7 +1462,6 @@ namespace ThunderED.Modules
 
                 case "EntosisCaptureStarted":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
                             .WithAuthor(
@@ -1401,7 +1484,6 @@ namespace ThunderED.Modules
                 case "CorpWarInvalidatedMsg":
                     {
                         //"text": "againstID: 98464487\ncost: 50000000.0\ndeclaredByID: 99005333\ndelayHours: 24\nhostileState: 0\n"
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var declaredById = GetData("declaredByID", data);
                         var declareByAlianceName = !string.IsNullOrEmpty(declaredById)
                             ? (await APIHelper.ESIAPI.GetAllianceData(Reason, declaredById, true))?.name
@@ -1455,7 +1537,6 @@ namespace ThunderED.Modules
                     break;
                 case "AllyJoinedWarAggressorMsg":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var allyID = GetData("allyID", data);
                         var ally = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allyID", data)))?.name ??
                                    (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("allyID", data)))?.name;
@@ -1476,7 +1557,6 @@ namespace ThunderED.Modules
                     break;
                 case "AllyJoinedWarDefenderMsg":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         string allyStr = null;
                         var allyData = await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allyID", data));
                         if (allyData != null) allyStr = allyData.name;
@@ -1515,7 +1595,6 @@ namespace ThunderED.Modules
                     break;
                 case "AllyJoinedWarAllyMsg":
                     {
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var allyID = GetData("allyID", data);
                         var agressorStr2 = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("aggressorID", data)))?.name ??
                                            (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("aggressorID", data)))?.name;
@@ -1540,7 +1619,6 @@ namespace ThunderED.Modules
                 case "FWAllianceWarningMsg":
                     {
                         //"text": "allianceID: 99005333\ncorpList: <br>Quarian Fleet - standings:-0.0500\nfactionID: 500001\nrequiredStanding: 0.0001\n"
-                        await LogHelper.LogInfo($"Sending Notification ({notification.type})", Category);
                         var allianceId = GetData("allianceID", data);
                         var allyStr3 = !string.IsNullOrEmpty(allianceId)
                             ? (await APIHelper.ESIAPI.GetAllianceData(Reason, allianceId, true))?.name

@@ -106,16 +106,17 @@ namespace ThunderED.Modules
 
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
 
-                    await SQLHelper.DeleteAuthStands(numericCharId);
-                    var data = new AuthStandsEntity { CharacterID = numericCharId, Token = result[1] };
+                    await DbHelper.DeleteAuthStands(numericCharId);
 
-                    var tq = await APIHelper.ESIAPI.RefreshToken(data.Token, Settings.WebServerModule.CcpAppClientId,
-                        Settings.WebServerModule.CcpAppSecret, $"From {Category} | Char ID: {characterId}");
+                    var refreshToken = await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.AuthStandings);
+                    var data = new ThdStandsAuth { CharacterId = numericCharId };
+
+                    var tq = await APIHelper.ESIAPI.GetAccessToken(refreshToken, $"From {Category} | Char ID: {characterId}");
                     var token = tq.Result;
 
                     if (!tq.Data.IsFailed)
                         await RefreshStandings(data, token);
-                    await SQLHelper.SaveAuthStands(data);
+                    await DbHelper.UpdateAuthStands(data);
 
                     await LogHelper.LogInfo($"Auth stands feed added for character: {characterId}({rChar.name})",
                         LogCat.AuthWeb);

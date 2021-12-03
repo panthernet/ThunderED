@@ -463,7 +463,7 @@ namespace ThunderED
         #endregion
        
         #region AuthStandings
-        public static async Task SaveAuthStands(AuthStandsEntity data)
+        /*public static async Task SaveAuthStands(AuthStandsEntity data)
         {
             await InsertOrUpdate("stand_auth", new Dictionary<string, object>
             {
@@ -493,7 +493,7 @@ namespace ThunderED
         public static async Task DeleteAuthStands(long id)
         {
             await Delete("stand_auth", "characterID", id);
-        }
+        }*/
         #endregion
 
         #region Incursions

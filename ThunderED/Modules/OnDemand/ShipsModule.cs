@@ -181,8 +181,9 @@ namespace ThunderED.Modules.OnDemand
                 var usersData = new ConcurrentBag<ShipUserData>();
                 await usersToCheck.ParallelForEachAsync(async userEntity =>
                 {
-                    var token = (await APIHelper.ESIAPI.RefreshToken(userEntity.GetGeneralTokenString(), SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                        SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From {Category} | Char ID: {userEntity.CharacterId} | Char name: {userEntity.DataView.CharacterName}"))?.Result;
+                    var token = (await APIHelper.ESIAPI.GetAccessToken(userEntity.GetGeneralToken(),
+                            $"From {Category} | Char ID: {userEntity.CharacterId} | Char name: {userEntity.DataView.CharacterName}"))
+                        ?.Result;
                     if (string.IsNullOrEmpty(token))
                     {
                         await LogHelper.LogWarning($"Character {userEntity.DataView.CharacterName}({userEntity.CharacterId}) has invalid token!");

@@ -25,9 +25,9 @@ namespace ThunderED.Classes
             await Task.CompletedTask;
         }
 
-        public static async Task Run(Func<Task> action, string header = null)
+        public static async Task<long> Run(Func<Task> action, string header = null)
         {
-            if (action == null) return;
+            if (action == null) return 0;
 
             var sw = Stopwatch.StartNew();
             try
@@ -40,6 +40,7 @@ namespace ThunderED.Classes
                 if(!SettingsManager.Settings.Config.RunAsServiceCompatibility)
                     Console.WriteLine($"[SWATCH] {header}: {sw.ElapsedMilliseconds}");
             }
+            return sw.ElapsedMilliseconds;
         }
     }
 }

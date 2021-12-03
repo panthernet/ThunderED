@@ -70,7 +70,7 @@
     "UsePortInUrl": true,
     "webExternalIP": "",
     "webExternalPort": 8001,
-    "discordUrl": "https://discord.gg/xxxxxx",
+    "discordUrl": "https://discord.gg/F55bkrvE",
     "ccpAppClientId": "REQUIRED",
     "ccpAppSecret": "REQUIRED",
     "ServerStatusPort": 0,
@@ -689,7 +689,9 @@
               "CorpNewCEOMsg",
               "CorpTaxChangeMsg",
               "OwnershipTransferred",
-              "StructureImpendingAbandonmentAssetsAtRisk"
+              "StructureImpendingAbandonmentAssetsAtRisk",
+			  "TowerResourceAlertMsg",
+			  "TowerAlertMsg"
             ],
             "channelID": 0,
             "defaultMention": "@everyone",
@@ -703,8 +705,10 @@
       }
     },
 	"Tracker": {
-		"GlobalFilterOut": [],
+		"GlobalFilterIn": [],
+		"GlobalFilterOut": ["Name part to filter out"],
 	    "UpdateIntervalInMinutes": 5,
+		"SkipCharactersInNpcCorps": true,
 		"Groups":{
 			"Group1": {
 				"IsEnabled": false,

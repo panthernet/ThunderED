@@ -100,17 +100,19 @@ namespace ThunderED.Modules
                         foreach (var numericCharId in Settings.WebAuthModule.GetEnabledAuthGroups().Values.Where(a => a.StandingsAuth != null).SelectMany(a => a.StandingsAuth.CharacterIDs)
                             .Distinct())
                         {
-                            var st = await SQLHelper.LoadAuthStands(numericCharId);
+                            var st = await DbHelper.GetAuthStands(numericCharId);
                             if (st == null) return;
-                            var tq = await APIHelper.ESIAPI.RefreshToken(st.Token, Settings.WebServerModule.CcpAppClientId, Settings.WebServerModule.CcpAppSecret
-                                , $"From {Category} | Char ID: {st.CharacterID}");
+                            var dbToken = await DbHelper.GetToken(numericCharId, TokenEnum.AuthStandings);
+                            if(dbToken == null) return;
+
+                            var tq = await APIHelper.ESIAPI.GetAccessToken(dbToken,$"From {Category} | Char ID: {st.CharacterId}");
                             var token = tq.Result;
 
                             if (!tq.Data.IsFailed)
                             {
                                 await RefreshStandings(st, token);
-                                await SQLHelper.DeleteAuthStands(numericCharId);
-                                await SQLHelper.SaveAuthStands(st);
+                                await DbHelper.DeleteAuthStands(numericCharId);
+                                await DbHelper.UpdateAuthStands(st);
                                 sb.Append($"{numericCharId},");
                             }
                             else
@@ -396,7 +398,7 @@ namespace ThunderED.Modules
             var list = new List<AuthRoleEntity>();
             foreach (var characterID in group.StandingsAuth.CharacterIDs)
             {
-                var standings = await SQLHelper.LoadAuthStands(characterID);
+                var standings = await DbHelper.GetAuthStands(characterID);
                 if (standings == null) continue;
 
                 await AuthInfoLog(chData, $"[GARE] Checking stands from {characterID}...", true);
@@ -562,11 +564,11 @@ namespace ThunderED.Modules
 
         }
 
-        private async Task RefreshStandings(AuthStandsEntity data, string token)
+        private async Task RefreshStandings(ThdStandsAuth data, string token)
         {
-            var stands = await APIHelper.ESIAPI.GetCharacterContacts(Reason, data.CharacterID, token);
+            var stands = await APIHelper.ESIAPI.GetCharacterContacts(Reason, data.CharacterId, token);
             data.PersonalStands = stands.Data.IsFailed ? data.PersonalStands : stands.Result;
-            var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, data.CharacterID, true);
+            var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, data.CharacterId, true);
             if (rChar != null)
             {
                 stands = await APIHelper.ESIAPI.GetCorpContacts(Reason, rChar.corporation_id, token);

@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Newtonsoft.Json;
+using ThunderED.Json;
 using ThunderED.Thd;
 
 namespace ThunderED
@@ -17,6 +22,7 @@ namespace ThunderED
         public DbSet<ThdMoonTableEntry> MoonTable { get; set; }
         public DbSet<ThdStorageConsoleEntry> StorageConsole { get; set; }
         public DbSet<ThdInvCustomScheme> CustomSchemes { get; set; }
+        public DbSet<ThdStandsAuth> StandsAuth { get; set; }
         //public DbSet<ThdType> Types { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
@@ -47,6 +53,18 @@ namespace ThunderED
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.MainCharacterId).HasColumnName("main_character_id");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.LastCheck).HasColumnName("last_check");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.Ip).HasColumnName("ip");
+
+            #endregion
+
+            #region ThdStandsAuth
+            modelBuilder.Entity<ThdStandsAuth>().HasKey(u => u.CharacterId);
+            modelBuilder.Entity<ThdStandsAuth>().ToTable("stand_auth");
+
+            modelBuilder.Entity<ThdStandsAuth>().Property(a => a.CharacterId).HasColumnName("characterID").ValueGeneratedNever();
+            modelBuilder.Entity<ThdStandsAuth>().Property(a => a.Token).HasColumnName("token");
+            modelBuilder.Entity<ThdStandsAuth>().Property(a => a.PersonalStands).HasColumnName("personalStands").HasConversion(v=> JsonConvert.SerializeObject(v), v=> JsonConvert.DeserializeObject<List<JsonClasses.Contact>>(v));
+            modelBuilder.Entity<ThdStandsAuth>().Property(a => a.CorpStands).HasColumnName("corpStands").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contact>>(v));
+            modelBuilder.Entity<ThdStandsAuth>().Property(a => a.AllianceStands).HasColumnName("allianceStands").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contact>>(v));
 
             #endregion
 
@@ -185,6 +203,7 @@ namespace ThunderED
 
             #endregion
         }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

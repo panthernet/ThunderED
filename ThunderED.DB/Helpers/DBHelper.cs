@@ -132,7 +132,7 @@ namespace ThunderED
             await db.SaveChangesAsync();
         }
 
-        public static async Task UpdateToken(string token, long characterId, TokenEnum type, string scopes = null)
+        public static async Task<ThdToken> UpdateToken(string token, long characterId, TokenEnum type, string scopes = null)
         {
             try
             {
@@ -140,13 +140,14 @@ namespace ThunderED
                 var entry = db.Tokens.FirstOrDefault(a => a.Type == type && a.CharacterId == characterId);
                 if (entry == null)
                 {
-                    await db.Tokens.AddAsync(new ThdToken
+                    entry = new ThdToken
                     {
                         CharacterId = characterId,
                         Token = token,
                         Type = type,
                         Scopes = scopes
-                    });
+                    };
+                    await db.Tokens.AddAsync(entry);
                 }
                 else
                 {
@@ -155,6 +156,8 @@ namespace ThunderED
                 }
 
                 await db.SaveChangesAsync();
+
+                return entry;
             }
             catch (Exception ex)
             {
@@ -684,6 +687,49 @@ namespace ThunderED
             await using var db = new ThunderedDbContext();
 
             return await db.CustomSchemes.AsNoTracking().Where(a=> ids.Contains(a.Id)).ToListAsync();
+        }
+
+        #endregion
+
+        #region Auth stands
+        public static async Task<ThdStandsAuth> GetAuthStands(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.StandsAuth.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == id);
+        }
+
+        public static async Task DeleteAuthStands(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            var item = await db.StandsAuth.FirstOrDefaultAsync(a => a.CharacterId == id);
+            if (item != null)
+            {
+                db.Remove(item);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public static async Task UpdateAuthStands(ThdStandsAuth entry)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.StandsAuth.FirstOrDefaultAsync(a => a.CharacterId == entry.CharacterId);
+            if (old != null)
+            {
+                db.Attach(entry);
+                db.Entry(entry).State = EntityState.Modified;
+            }
+            else
+            {
+                await db.AddAsync(entry);
+            }
+
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task<List<ThdStandsAuth>> GetAllAuthStands()
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.StandsAuth.AsNoTracking().ToListAsync();
         }
 
         #endregion

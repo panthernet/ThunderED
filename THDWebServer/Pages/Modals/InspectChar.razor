@@ -541,9 +541,7 @@
             _hasToken = _character.HasToken;
             if (_hasToken)
             {
-                var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralTokenString(),
-                    _module.Settings.WebServerModule.CcpAppClientId,
-                    _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
+                var tq = await APIHelper.ESIAPI.GetAccessToken(_character.GetGeneralToken(), $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
                 _inspectToken = tq.Result;
                 if (!string.IsNullOrEmpty(_inspectToken))
                 {
@@ -725,9 +723,7 @@
 
     private async Task ExecuteGetToken()
     {
-        var tq = await APIHelper.ESIAPI.RefreshToken(_character.GetGeneralTokenString(),
-            _module.Settings.WebServerModule.CcpAppClientId,
-            _module.Settings.WebServerModule.CcpAppSecret, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
+        var tq = await APIHelper.ESIAPI.GetAccessToken(_character.GetGeneralToken(),$"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.DataView.CharacterName}");
 
         if (!string.IsNullOrEmpty(tq.Result))
         {

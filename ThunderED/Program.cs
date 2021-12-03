@@ -170,35 +170,8 @@ namespace ThunderED
                     await Task.Delay(10);
                 }
 
-                    /*if (!SettingsManager.Settings.Config.RunAsServiceCompatibility)
-                    {
-                        var command = Console.ReadLine();
-                        var arr = command?.Split(" ");
-                        if ((arr?.Length ?? 0) == 0) continue;
-                        switch (arr[0])
-                        {
-                            case "help":
-                                Console.WriteLine("List of available commands:");
-                                Console.WriteLine(" quit    - quit app");
-                                Console.WriteLine(" flushn  - flush all notification IDs from database");
-                                Console.WriteLine(" getnurl - display notification auth url");
-                                Console.WriteLine(" flushcache - flush all cache from database");
-                                Console.WriteLine(" token [ID] - refresh and display EVE character token from database");
-                                break;
-                            case "token":
-                                if (arr.Length == 1) continue;
-                                if (!long.TryParse(arr[1], out var id))
-                                    continue;
-                                var rToken = await SQLHelper.GetRefreshTokenDefault(id);
-                                Console.WriteLine(await APIHelper.ESIAPI
-                                    .RefreshToken(rToken, SettingsManager.Settings.WebServerModule.CcpAppClientId, SettingsManager.Settings.WebServerModule.CcpAppSecret));
-                                break;
-                        }
 
-                        await Task.Delay(10);
-                    }
-                    else                 */
-                    await Task.Delay(10);
+                await Task.Delay(10);
                 if(_confirmClose) return;
             }
         }

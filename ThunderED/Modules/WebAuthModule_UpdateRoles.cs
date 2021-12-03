@@ -12,6 +12,7 @@ using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Modules.OnDemand;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules
 {
@@ -570,8 +571,11 @@ namespace ThunderED.Modules
                // string groupName = null;
 
                 //refresh token
-                var tq = string.IsNullOrEmpty(refreshToken) ? null : await APIHelper.ESIAPI.RefreshToken(refreshToken, SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                    SettingsManager.Settings.WebServerModule.CcpAppSecret, $"From WebAuth | Char ID: {characterData?.character_id} | Char name: {characterData?.name}");
+                var tq = string.IsNullOrEmpty(refreshToken)
+                    ? null
+                    : await APIHelper.ESIAPI.GetAccessToken(
+                        new ThdToken {Token = refreshToken, CharacterId = characterData.character_id, Type = TokenEnum.General},
+                        $"From WebAuth | Char ID: {characterData?.character_id} | Char name: {characterData?.name}");
 
                 var uToken = tq?.Result;
                 if (tq != null)

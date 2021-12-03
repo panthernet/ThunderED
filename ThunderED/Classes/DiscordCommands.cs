@@ -911,9 +911,7 @@ namespace ThunderED.Classes
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysTokenNotFound"), true);
                         else
                         {
-                            var t = await APIHelper.ESIAPI.RefreshToken(user.GetGeneralTokenString(),
-                                SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                                SettingsManager.Settings.WebServerModule.CcpAppSecret);
+                            var t = await APIHelper.ESIAPI.GetAccessToken(user.GetGeneralToken());
                             if(t.Data.IsFailed)
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysTokenNotFound", values[1]), true);
                             else

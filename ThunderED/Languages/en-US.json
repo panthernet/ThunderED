@@ -740,9 +740,9 @@
   "wsAuthColNameUpgradeGroupNames": "Upgrade group names",
   "wsAuthColNameDowngradeGroupNames": "Downgrade group names",
   "wsAuthColNameAllowedMembers": "Allowed members",
-
   "wsAuthColNameEntities": "Entities",
   "wsAuthColNameDiscordRoles": "Discord roles",
+
   "hrmButGetToken": "Get refresh token for ESI",
   "webConfirmation": "Confirmation",
   "webGenericQuestionMessage": "Complete action?",
@@ -767,7 +767,9 @@
   "wsAuthGenColNameEnforceSingleTickerPerUser": "Enforce single ticker per user",
   "wsAuthGenColNameEnforceCharName": "Enforce character name",
   "wsAuthGenColNameUseOneAuthButton": "Use one reg button",
-  "wsAuthGenColNameEnableDetailedLogging": "Enable detailed logging"
+  "wsAuthGenColNameEnableDetailedLogging": "Enable detailed logging",
 
+  "NotifyHeader_TowerAlertMsg": "{0} belonging to {1} is under attack!",
+  "PosFuelAlert": "{0} belonging to {1} is low on fuel!"
 
 }

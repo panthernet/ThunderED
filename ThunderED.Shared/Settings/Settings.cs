@@ -1415,12 +1415,14 @@ namespace ThunderED
         public ObservableDictionary<string, NotificationTrackerGroup> Groups { get; set; } = new ObservableDictionary<string, NotificationTrackerGroup>();
         [Comment("List of string to filter out characters, alliances and corporations which afffect all groups")]
         public ObservableCollection<string> GlobalFilterOut { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> GlobalFilterIn { get; set; } = new ObservableCollection<string>();
 #else
         public Dictionary<string, NotificationTrackerGroup> Groups { get; set; } = new Dictionary<string, NotificationTrackerGroup>();
         public List<string> GlobalFilterOut { get; set; } = new List<string>();
+        public List<string> GlobalFilterIn { get; set; } = new List<string>();
 #endif
-        public int UpdateIntervalInMinutes { get; set; } = 5;
-
+        public int UpdateIntervalInMinutes { get; set; } = 10;
+        public bool SkipCharactersInNpcCorps { get; set; } = true;
         /// <summary>
         /// Returns only enabled groups
         /// </summary>

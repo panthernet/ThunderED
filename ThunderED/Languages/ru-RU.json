@@ -710,8 +710,9 @@
   "hrmSettingsPage": "Настройки",
   "remWebUrl": "Вы можете зарегистрироваться для получения персональных уведомлений здесь: {0}",
   "webSettingsWebAuthTabName": "Регистрация",
-  "webSettingsAuthEnabledColumnName": "Enabled",
-  "webSettingsAuthGroupModalHeader": "{0} group settings",
+  "webSettingsAuthNameColumnName": "Название",
+  "webSettingsAuthEnabledColumnName": "Включено",
+  "webSettingsAuthGroupModalHeader": "Настройки группы {0}",
 
   "wsAuthColNameIsEnabled": "Enabled",
   "wsAuthColNameRemoveAuthIfTokenIsInvalid": "Remove tokens on broken reg",
@@ -732,6 +733,9 @@
   "wsAuthColNameUpgradeGroupNames": "Upgrade group names",
   "wsAuthColNameDowngradeGroupNames": "Downgrade group names",
   "wsAuthColNameAllowedMembers": "Allowed members",
+  "wsAuthColNameEntities": "Entities",
+  "wsAuthColNameDiscordRoles": "Discord roles",
+
   "hrmButGetToken": "Получить токен обновления для ESI",
   "webConfirmation": "Подтверждение",
   "webGenericQuestionMessage": "Выполнить действие?",
@@ -756,6 +760,8 @@
   "wsAuthGenColNameEnforceSingleTickerPerUser": "Enforce single ticker per user",
   "wsAuthGenColNameEnforceCharName": "Enforce character name",
   "wsAuthGenColNameUseOneAuthButton": "Use one reg button",
-  "wsAuthGenColNameEnableDetailedLogging": "Enable detailed logging"
+  "wsAuthGenColNameEnableDetailedLogging": "Enable detailed logging",
 
+  "NotifyHeader_TowerAlertMsg": "Объект {0}, принадлежащий {1} атакован!",
+  "PosFuelAlert": "В {0} принадлежащем {1} кончается топливо!"
 }

@@ -270,7 +270,11 @@ namespace ThunderED.API
             }
 
             if (!token.Token.Equals(r.RefreshToken))
+            {
+                if (string.IsNullOrEmpty(token.Scopes))
+                    token.Scopes = APIHelper.ESIAPI.GetScopesFromToken(r.Result);
                 await DbHelper.UpdateToken(token.Token, token.CharacterId, token.Type, token.Scopes);
+            }
 
             return r;
         }
