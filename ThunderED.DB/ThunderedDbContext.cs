@@ -32,10 +32,8 @@ namespace ThunderED
         public DbSet<ThdStarRegion> StarRegions{ get; set; }
         public DbSet<ThdStarConstellation> StarConstellations { get; set; }
         
-        //public DbSet<ThdType> Types { get; set; }
-        //public DbSet<JsonClasses.SystemName> Systems { get; set; }
-        //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
-        //public DbSet<JsonClasses.RegionData> Regions { get; set; }
+        public DbSet<ThdType> Types { get; set; }
+        public DbSet<ThdGroup> Groups { get; set; }
 
         public ThunderedDbContext()
         {
@@ -253,7 +251,8 @@ namespace ThunderED
             #endregion
 
             #region ThdType
-            /* modelBuilder.Entity<ThdType>().HasIndex(u => u.Id).IsUnique();
+             modelBuilder.Entity<ThdType>().HasKey(u => u.Id);
+             modelBuilder.Entity<ThdType>().HasIndex(u => u.Id);
              modelBuilder.Entity<ThdType>().ToTable("inv_types");
 
              modelBuilder.Entity<ThdType>().Property(a => a.Id).HasColumnName("typeID").ValueGeneratedNever();
@@ -270,7 +269,24 @@ namespace ThunderED
              modelBuilder.Entity<ThdType>().Property(a => a.MarketGroupId).HasColumnName("marketGroupID");
              modelBuilder.Entity<ThdType>().Property(a => a.IconId).HasColumnName("iconID");
              modelBuilder.Entity<ThdType>().Property(a => a.SoundId).HasColumnName("soundID");
-             modelBuilder.Entity<ThdType>().Property(a => a.GraphicId).HasColumnName("graphicID");*/
+             modelBuilder.Entity<ThdType>().Property(a => a.GraphicId).HasColumnName("graphicID");
+
+            #endregion
+
+            #region ThdGroup
+            modelBuilder.Entity<ThdGroup>().HasKey(u => u.GroupId);
+            modelBuilder.Entity<ThdGroup>().HasIndex(u => u.CategoryId);
+            modelBuilder.Entity<ThdGroup>().ToTable("inv_groups");
+
+            modelBuilder.Entity<ThdGroup>().Property(a => a.CategoryId).HasColumnName("categoryID");
+            modelBuilder.Entity<ThdGroup>().Property(a => a.GroupId).HasColumnName("groupID").ValueGeneratedNever();
+            modelBuilder.Entity<ThdGroup>().Property(a => a.GroupName).HasColumnName("groupName");
+            modelBuilder.Entity<ThdGroup>().Property(a => a.IconId).HasColumnName("iconID");
+            modelBuilder.Entity<ThdGroup>().Property(a => a.UseBasePrice).HasColumnName("useBasePrice");
+            modelBuilder.Entity<ThdGroup>().Property(a => a.Anchored).HasColumnName("anchored");
+            modelBuilder.Entity<ThdGroup>().Property(a => a.Anchorable).HasColumnName("anchorable");
+            modelBuilder.Entity<ThdGroup>().Property(a => a.Fittable).HasColumnName("fittableNonSingleton");
+            modelBuilder.Entity<ThdGroup>().Property(a => a.Published).HasColumnName("published");
 
             #endregion
 

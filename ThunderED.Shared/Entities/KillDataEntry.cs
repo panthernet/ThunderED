@@ -28,8 +28,8 @@ namespace ThunderED
         public JsonClasses.AllianceData rVictimAlliance;
         public JsonClasses.AllianceData rAttackerAlliance;
         public string sysName;
-        public JsonClasses.Type_id rVictimShipType;
-        public JsonClasses.Type_id rAttackerShipType;
+        public ThdType rVictimShipType;
+        public ThdType rAttackerShipType;
         public JsonClasses.CharacterData rVictimCharacter;
         public JsonClasses.CharacterData rAttackerCharacter;
         public string systemSecurityStatus;

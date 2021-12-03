@@ -601,7 +601,7 @@ namespace ThunderED.Modules
                     var keys = data.Keys.ToList();
                     var ltqIndex = keys.IndexOf("listOfTypesAndQty");
                     int.TryParse(keys[ltqIndex + 1].Split(' ').Last(), out itemQuantity);
-                    itemName = (await APIHelper.ESIAPI.GetTypeId(Reason, keys[ltqIndex + 2].Split(' ').Last()))?.name ?? LM.Get("Unknown");
+                    itemName = (await APIHelper.ESIAPI.GetTypeId(Reason, keys[ltqIndex + 2].Split(' ').Last()))?.Name ?? LM.Get("Unknown");
                 }
                 catch
                 {
@@ -629,7 +629,7 @@ namespace ThunderED.Modules
                         for (int i = ltqIndex + 1; i < endIndex; i++)
                         {
                             if (!keys[i].All(char.IsDigit)) continue;
-                            var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, keys[i])).name;
+                            var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, keys[i])).Name;
                             var value = double.Parse(data[keys[i]].Split('.')[0]).ToString("N");
                             oreComposition.Add(typeName, value);
                             oreCompositionRaw.Add(Convert.ToInt64(keys[i]), Convert.ToInt32(value.Split('.')[0].Replace(",", "")));
@@ -667,7 +667,7 @@ namespace ThunderED.Modules
                             .WithColor(new Color(0xdd5353))
                             .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
                             .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_TowerAlertMsg",
-                                    struc?.name, feederCorp?.name))
+                                    struc?.Name, feederCorp?.name))
                                 .WithUrl($"https://zkillboard.com/character/{GetData("aggressorID", data)}"))
                             .AddField(LM.Get("Location"), $"{systemName} - {moon?.name ?? LM.Get("Unknown")}", true)
                             .AddField(LM.Get("Aggressor"), aggText, true)
@@ -697,7 +697,7 @@ namespace ThunderED.Modules
                             .WithColor(new Color(0xdd5353))
                             .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
                             .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_OrbitalAttacked",
-                                    struc?.name, feederCorp?.name))
+                                    struc?.Name, feederCorp?.name))
                                 .WithUrl($"https://zkillboard.com/character/{GetData("aggressorID", data)}"))
                             .AddField(LM.Get("Location"), $"{systemName} - {planet?.name ?? LM.Get("Unknown")}", true)
                             .AddField(LM.Get("Aggressor"), aggText, true)
@@ -727,7 +727,7 @@ namespace ThunderED.Modules
                             .WithColor(new Color(0xdd5353))
                             .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
                             .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_OrbitalReinforced",
-                                    struc?.name, feederCorp?.name, exitTime))
+                                    struc?.Name, feederCorp?.name, exitTime))
                                 .WithUrl($"https://zkillboard.com/character/{GetData("aggressorID", data)}"))
                             .AddField(LM.Get("Location"), $"{systemName} - {planet?.name ?? LM.Get("Unknown")}", true)
                             .AddField(LM.Get("Aggressor"), aggText, true)
@@ -762,7 +762,7 @@ namespace ThunderED.Modules
                             .WithColor(new Color(0xdd5353))
                             .WithThumbnailUrl(Settings.Resources.ImgCitUnderAttack)
                             .WithAuthor(author => author.WithName(LM.Get("NotifyHeader_StructureUnderAttack",
-                                    structureType == null ? LM.Get("structure").ToLower() : structureType.name))
+                                    structureType == null ? LM.Get("structure").ToLower() : structureType.Name))
                                 .WithUrl($"https://zkillboard.com/character/{aggCharId}"))
                             .AddField(LM.Get("System"), systemName, true)
                             .AddField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"), true)
@@ -787,7 +787,7 @@ namespace ThunderED.Modules
                             .WithThumbnailUrl(Settings.Resources.ImgCitLowPower)
                             .WithAuthor(author =>
                                 author.WithName(LM.Get("StructureWentLowPower",
-                                    (structureType == null ? LM.Get("structure").ToLower() : structureType.name) ?? LM.Get("Unknown"), text)))
+                                    (structureType == null ? LM.Get("structure").ToLower() : structureType.Name) ?? LM.Get("Unknown"), text)))
                             .AddField(LM.Get("System"), systemName, true)
                             .AddField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"), true)
                             .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
@@ -811,7 +811,7 @@ namespace ThunderED.Modules
                                 : Settings.Resources.ImgCitLostArmor)
                             .WithAuthor(author =>
                                 author.WithName(LM.Get("StructureLostArmor",
-                                    structureType == null ? LM.Get("Structure") : structureType.name, textAdd)))
+                                    structureType == null ? LM.Get("Structure") : structureType.Name, textAdd)))
                             .AddField(LM.Get("System"), systemName, true)
                             .AddField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"), true)
                             .AddField("Time Left", timeleft ?? LM.Get("Unknown"), true)
@@ -825,7 +825,7 @@ namespace ThunderED.Modules
                             {
                                 timerChar = "Auto",
                                 timerET = (timestamp + TimeSpan.FromTicks(Convert.ToInt64(strTime))).ToString(),
-                                timerLocation = $"{systemName} - {structureType.name} - {structure?.name}",
+                                timerLocation = $"{systemName} - {structureType.Name} - {structure?.name}",
                                 timerStage = notification.type == "StructureLostShields" ? 2 : 1,
                                 timerType = 2,
                                 timerOwner = "Alliance"
@@ -850,7 +850,7 @@ namespace ThunderED.Modules
                                 var coreType = await APIHelper.ESIAPI.GetTypeId(Reason,
                                     core.RemoveDotValue());
                                 if (coreType != null)
-                                    core = coreType.name;
+                                    core = coreType.Name;
                             }
                             catch
                             {
@@ -863,8 +863,8 @@ namespace ThunderED.Modules
                             ? Settings.Resources.ImgCitDestroyed
                             : Settings.Resources.ImgCitOnline;
                         var text = notification.type == "StructureDestroyed"
-                            ? LM.Get("StructureDestroyed", owner, structureType == null ? LM.Get("Unknown") : structureType.name)
-                            : LM.Get("StructureOnline", structureType == null ? LM.Get("Unknown") : structureType.name);
+                            ? LM.Get("StructureDestroyed", owner, structureType == null ? LM.Get("Unknown") : structureType.Name)
+                            : LM.Get("StructureOnline", structureType == null ? LM.Get("Unknown") : structureType.Name);
                         var color = notification.type == "StructureDestroyed" ? new Color(0xdd5353) : new Color(0x00ff00);
                         builder = new EmbedBuilder()
                             .WithColor(color)
@@ -886,7 +886,7 @@ namespace ThunderED.Modules
                     {
                         var owner = GetData("ownerCorpName", data) ?? LM.Get("Unknown");
                         var text = LM.Get("StructureAnchoring", owner,
-                            structureType == null ? LM.Get("Structure") : structureType.name);
+                            structureType == null ? LM.Get("Structure") : structureType.Name);
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xff0000))
                             .WithThumbnailUrl(Settings.Resources.ImgCitAnchoring)
@@ -907,7 +907,7 @@ namespace ThunderED.Modules
                     {
                         var corpName = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data) ?? null))?.name ?? LM.Get("Unknown");
                         var allianceName = (await APIHelper.ESIAPI.GetAllianceData(Reason, GetData("allianceID", data) ?? null))?.name;
-                        var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data)))?.name ?? LM.Get("Unknown");
+                        var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data)))?.Name ?? LM.Get("Unknown");
                         var moonName = (await APIHelper.ESIAPI.GetMoon(Reason, GetData("moonID", data)))?.name ?? LM.Get("Unknown");
                         var text = LM.Get("PosAnchoring", string.IsNullOrEmpty(allianceName) ? corpName : $"{allianceName} - {corpName}");
                         builder = new EmbedBuilder()
@@ -930,7 +930,7 @@ namespace ThunderED.Modules
                     {
                         var owner = GetData("ownerCorpName", data) ?? LM.Get("Unknown");
                         var text = LM.Get("StructureUnanchoring", owner,
-                            structureType == null ? LM.Get("Structure") : structureType.name);
+                            structureType == null ? LM.Get("Structure") : structureType.Name);
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xff0000))
                             .WithThumbnailUrl(Settings.Resources.ImgCitAnchoring)
@@ -949,7 +949,7 @@ namespace ThunderED.Modules
                     break;
                 case "TowerResourceAlertMsg":
                     {
-                        var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data)))?.name ?? LM.Get("Unknown");
+                        var typeName = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("typeID", data)))?.Name ?? LM.Get("Unknown");
                         var moonName = (await APIHelper.ESIAPI.GetMoon(Reason, GetData("moonID", data)))?.name ?? LM.Get("Unknown");
                         var location = $"{systemName}-{moonName}";
                         var corpName = (await APIHelper.ESIAPI.GetCorporationData(Reason, GetData("corpID", data) ?? null))?.name ?? LM.Get("Unknown");
@@ -974,7 +974,7 @@ namespace ThunderED.Modules
                         .WithColor(new Color(0xf2882b))
                         .WithThumbnailUrl(Settings.Resources.ImgCitFuelAlert)
                         .WithAuthor(author => author.WithName(LM.Get("StructureFuelAlert",
-                            structureType == null ? LM.Get("Structure") : structureType.name)))
+                            structureType == null ? LM.Get("Structure") : structureType.Name)))
                         .AddField(LM.Get("System"), systemName, true)
                         .AddField(LM.Get("Structure"), structure?.name ?? LM.Get("Unknown"), true)
                         .AddField(LM.Get("Fuel"), itemQuantity == 0 ? LM.Get("Unknown") : $"{itemQuantity} {itemName}", true)
@@ -1006,7 +1006,7 @@ namespace ThunderED.Modules
                         .WithColor(new Color(0xb386f7))
                         .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
                         .WithAuthor(author =>
-                            author.WithName(LM.Get(notification.type, structureType == null ? LM.Get("Structure") : structureType.name)))
+                            author.WithName(LM.Get(notification.type, structureType == null ? LM.Get("Structure") : structureType.Name)))
                         .AddField(LM.Get("Structure"), structureNameDirect ?? LM.Get("Unknown"), true)
                         .AddField(LM.Get("Composition"), compText.ToString(), true)
                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
@@ -1050,7 +1050,7 @@ namespace ThunderED.Modules
                         .WithColor(new Color(0xb386f7))
                         .WithThumbnailUrl(Settings.Resources.ImgMoonComplete)
                         .WithAuthor(author =>
-                            author.WithName(LM.Get(notification.type, structureType == null ? LM.Get("Structure") : structureType.name)))
+                            author.WithName(LM.Get(notification.type, structureType == null ? LM.Get("Structure") : structureType.Name)))
                         .AddField(LM.Get("Structure"), structureNameDirect ?? LM.Get("Unknown"), true);
                     if (notification.type == "MoonminingLaserFired")
                     {
@@ -1162,7 +1162,7 @@ namespace ThunderED.Modules
                                 break;
                             case "BillOutOfMoneyMsg":
                                 color = new Color(0xFF0000);
-                                var btype = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("billTypeID", data)))?.name;
+                                var btype = (await APIHelper.ESIAPI.GetTypeId(Reason, GetData("billTypeID", data)))?.Name;
                                 text = LM.Get("notifBillOutOfMoneyMsg", corp, btype, GetData("dueDate", data)?.ToEveTimeString());
                                 image = Settings.Resources.ImgBillOutOfMoneyMsg;
                                 break;
@@ -1212,7 +1212,7 @@ namespace ThunderED.Modules
                                         .WithColor(color)
                                         .WithAuthor(author => author.WithName(text))
                                         .WithThumbnailUrl(image)
-                                        .AddField(LM.Get("Structure"), structureType?.name ?? LM.Get("Unknown"), true)
+                                        .AddField(LM.Get("Structure"), structureType?.Name ?? LM.Get("Unknown"), true)
                                         .AddField(LM.Get("System"), systemName ?? LM.Get("Unknown"), true)
                                         .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                                         .WithTimestamp(timestamp);
@@ -1417,7 +1417,7 @@ namespace ThunderED.Modules
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
                             .WithAuthor(
-                                author => author.WithName(LM.Get("SovStructureDestroyed", structureType?.name, systemName)))
+                                author => author.WithName(LM.Get("SovStructureDestroyed", structureType?.Name, systemName)))
                             .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                             .WithTimestamp(timestamp);
                         embed = builder.Build();
@@ -1433,7 +1433,7 @@ namespace ThunderED.Modules
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
                             .WithAuthor(
-                                author => author.WithName(LM.Get("SovStationEnteredFreeport", structureType?.name, systemName)))
+                                author => author.WithName(LM.Get("SovStationEnteredFreeport", structureType?.Name, systemName)))
                             .AddField("Exit Time", exittime, true)
                             .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                             .WithTimestamp(timestamp);
@@ -1449,7 +1449,7 @@ namespace ThunderED.Modules
                             .WithColor(new Color(0xdd5353))
                             .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
                             .WithAuthor(author =>
-                                author.WithName(LM.Get("StationServiceDisabled", structureType?.name, systemName)))
+                                author.WithName(LM.Get("StationServiceDisabled", structureType?.Name, systemName)))
                             .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                             .WithTimestamp(timestamp);
                         embed = builder.Build();
@@ -1503,7 +1503,7 @@ namespace ThunderED.Modules
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
                             .WithAuthor(
-                                author => author.WithName(LM.Get("EntosisCaptureStarted", structureType?.name, systemName)))
+                                author => author.WithName(LM.Get("EntosisCaptureStarted", structureType?.Name, systemName)))
                             .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                             .WithTimestamp(timestamp);
                         embed = builder.Build();
@@ -1684,7 +1684,7 @@ namespace ThunderED.Modules
                         var daysLeft = Convert.ToInt32(GetData("daysUntilAbandon", data));
                         var isCorp = Convert.ToBoolean(GetData("isCorpOwned", data));
 
-                        var stTypeName = structureType == null ? LM.Get("Structure") : structureType.name;
+                        var stTypeName = structureType == null ? LM.Get("Structure") : structureType.Name;
                         var stName = structureNameDirect ?? LM.Get("Unknown");
 
                         builder = new EmbedBuilder()

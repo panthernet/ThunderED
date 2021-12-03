@@ -352,12 +352,12 @@ namespace ThunderED.Modules
             
             if (job.Activity == IndustryJobActivity.build || job.Activity == IndustryJobActivity.inventing || job.Activity == IndustryJobActivity.reverseEng)
             {
-                sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowFrom"),-11}: {bpType?.name ?? unk}");
-                sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowTo"),-11}: {productType?.name ?? unk}");
+                sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowFrom"),-11}: {bpType?.Name ?? unk}");
+                sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowTo"),-11}: {productType?.Name ?? unk}");
             }
             else
             {
-                sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowBPO"),-11}: {productType?.name ?? unk}");
+                sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowBPO"),-11}: {productType?.Name ?? unk}");
             }
             if (!string.IsNullOrEmpty(timeToComplete))
                 sb.AppendLine($"{colorMove}{LM.Get("industryJobsRowDuration"),-11}: {timeToComplete}");

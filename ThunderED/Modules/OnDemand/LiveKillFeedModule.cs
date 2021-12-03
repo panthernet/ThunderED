@@ -707,7 +707,7 @@ namespace ThunderED.Modules.OnDemand
                 var victimAlliance = km.rVictimAlliance == null
                     ? ""
                     : $"{LM.Get("killFeedAlliance", $"[{km.rVictimAlliance?.name}]")}({GetKillMailLink(km.victimAllianceID, KillMailLinkTypes.alliance)})";
-                var victimShip = $"{LM.Get("killFeedShip", $"[{km.rVictimShipType?.name}]({GetKillMailLink(km.victimShipID, KillMailLinkTypes.ship)})")}";
+                var victimShip = $"{LM.Get("killFeedShip", $"[{km.rVictimShipType?.Name}]({GetKillMailLink(km.victimShipID, KillMailLinkTypes.ship)})")}";
 
 
                 string[] victimStringArray = new string[] {victimName, victimCorp, victimAlliance, victimShip};
@@ -717,7 +717,7 @@ namespace ThunderED.Modules.OnDemand
                 var attackerAlliance = km.rAttackerAlliance == null || km.finalBlowAttackerAllyId == 0
                     ? null
                     : $"{LM.Get("killFeedAlliance", $"[{km.rAttackerAlliance?.name}]({GetKillMailLink(km.finalBlowAttackerAllyId, KillMailLinkTypes.alliance)})")}";
-                var attackerShip = $"{LM.Get("killFeedShip", $"[{km.rAttackerShipType?.name}]({GetKillMailLink(km.attackerShipID, KillMailLinkTypes.ship)})")}";
+                var attackerShip = $"{LM.Get("killFeedShip", $"[{km.rAttackerShipType?.Name}]({GetKillMailLink(km.attackerShipID, KillMailLinkTypes.ship)})")}";
 
                 string[] attackerStringArray = new string[] {attackerName, attackerCorp, attackerAlliance, attackerShip};
 
@@ -733,7 +733,7 @@ namespace ThunderED.Modules.OnDemand
                     .WithThumbnailUrl($"https://image.eveonline.com/Type/{km.victimShipID}_64.png")
                     .WithAuthor(author =>
                     {
-                        author.WithName(LM.Get("killFeedHeader", km.rVictimShipType?.name, km.rSystem?.SolarSystemName))
+                        author.WithName(LM.Get("killFeedHeader", km.rVictimShipType?.Name, km.rSystem?.SolarSystemName))
                             .WithUrl($"https://zkillboard.com/kill/{km.killmailID}/");
                         if (km.isNPCKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
                     })

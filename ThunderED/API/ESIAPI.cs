@@ -118,16 +118,22 @@ namespace ThunderED.API
             return await APIHelper.RequestWrapper<List<JsonClasses.CorporationHistoryEntry>>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{charId}/corporationhistory/?datasource=tranquility&language={_language}", reason);
         }
 
-        public async Task<JsonClasses.Type_id> GetTypeId(string reason, object id, bool forceUpdate = false)
+        public async Task<ThdType> GetTypeId(string reason, object id, bool forceUpdate = false)
         {
             
-            var data = await SQLHelper.GetTypeId(Convert.ToInt64(id));
+            var data = await DbHelper.GetTypeId(Convert.ToInt64(id));
             if (data != null)
                 return data;
 
             var result =  await GetEntry<JsonClasses.Type_id>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/types/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
                 forceUpdate);
-            return result;
+            if (result != null)
+            {
+                var item = ThdType.FromJson(result);
+                await DbHelper.SaveType(item);
+                return item;
+            }
+            return null;
         }
 
         public async Task<JsonClasses.SystemIDSearch> GetRadiusSystems(string reason, object id)

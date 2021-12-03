@@ -72,7 +72,7 @@ namespace ThunderED.Modules.Static
             var alliance = allianceData?.name ?? LM.Get("None");
             var allianceTicker = allianceData != null ? $"[{allianceData?.ticker}]" : "";
             var lastSeenSystem = systemData?.SolarSystemName ?? LM.Get("None");
-            var lastSeenShip = lastShip?.name ?? LM.Get("None");
+            var lastSeenShip = lastShip?.Name ?? LM.Get("None");
             var dangerous = characterStats.dangerRatio > 70 ? LM.Get("Dangerous") : LM.Get("Snuggly");
             var dRatio = characterStats.dangerRatio > 70
                 ? characterStats.dangerRatio

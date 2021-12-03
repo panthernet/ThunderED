@@ -771,7 +771,7 @@ namespace ThunderED.Modules
                         CharacterName = ch?.name ?? LM.Get("Unknown"),
                         CharacterId = ch?.character_id ?? 0,
                         CorporationTicker = c?.ticker,
-                        OreName = ore?.name ?? LM.Get("Unknown"),
+                        OreName = ore?.Name ?? LM.Get("Unknown"),
                         OreId = entry.type_id,
                         Quantity = entry.quantity,
                         Price = price ,

@@ -42,10 +42,10 @@ namespace ThunderED
 
             if (!string.IsNullOrEmpty(args.Filter))
             {
-                var index = args.Filter.IndexOf("Contains(")+10;
-                var end = args.Filter.IndexOf('"', index+1);
+                var index = args.Filter.IndexOf("Contains(") + 10;
+                var end = args.Filter.IndexOf('"', index + 1);
                 var value = args.Filter.Substring(index, end - index).ToLower();
-                q = q.Where(a=> a.Data.ToLower().Contains(value));
+                q = q.Where(a => a.Data.ToLower().Contains(value));
             }
 
             if (!string.IsNullOrEmpty(args.OrderBy))
@@ -101,7 +101,8 @@ namespace ThunderED
         public static async Task<List<ThdToken>> GetTokensWithoutScopes()
         {
             await using var db = new ThunderedDbContext();
-            return await db.Tokens.AsNoTracking().Where(a => a.Scopes == null && a.Type == TokenEnum.General).ToListAsync();
+            return await db.Tokens.AsNoTracking().Where(a => a.Scopes == null && a.Type == TokenEnum.General)
+                .ToListAsync();
         }
 
 
@@ -133,7 +134,8 @@ namespace ThunderED
             await db.SaveChangesAsync();
         }
 
-        public static async Task<ThdToken> UpdateToken(string token, long characterId, TokenEnum type, string scopes = null)
+        public static async Task<ThdToken> UpdateToken(string token, long characterId, TokenEnum type,
+            string scopes = null)
         {
             try
             {
@@ -201,10 +203,11 @@ namespace ThunderED
         public static async Task<List<long>> GetAuthUsersId(UserStatusEnum type)
         {
             await using var db = new ThunderedDbContext();
-            return await db.Users.AsNoTracking().Where(a => a.AuthState == (int)type).Select(a=> a.CharacterId).ToListAsync();
+            return await db.Users.AsNoTracking().Where(a => a.AuthState == (int) type).Select(a => a.CharacterId)
+                .ToListAsync();
         }
 
-        
+
 
         public static async Task<List<ThdAuthUser>> GetAuthUsers(bool includeToken = false,
             bool checkPermissions = false)
@@ -450,8 +453,8 @@ namespace ThunderED
             var content = db.Cache.AsNoTracking().Where(a => a.Id == cacheId).ToList()
                 .FirstOrDefault(a => (now - a.LastUpdate).Minutes <= minutes)?.Content;
             if (content != null && content.GetType() == typeof(T))
-                return (T)(object)content;
-                
+                return (T) (object) content;
+
             return string.IsNullOrEmpty(content) ? (T) (object) null : JsonConvert.DeserializeObject<T>(content);
         }
 
@@ -486,14 +489,14 @@ namespace ThunderED
         {
             await using var db = new ThunderedDbContext();
             return (await db.NotificationsList.AsNoTracking().FirstOrDefaultAsync(a =>
-                EF.Functions.Like(a.GroupName,group) && a.Id == id))?.Time;
+                EF.Functions.Like(a.GroupName, group) && a.Id == id))?.Time;
         }
 
         public static async Task<ThdNotificationListEntry> GetNotificationListEntry(string group, long id)
         {
             await using var db = new ThunderedDbContext();
             return (await db.NotificationsList.AsNoTracking().FirstOrDefaultAsync(a =>
-                EF.Functions.Like(a.GroupName,group) && a.Id == id));
+                EF.Functions.Like(a.GroupName, group) && a.Id == id));
         }
 
         public static async Task UpdateNotificationListEntry(string group, long id, string filter = "-")
@@ -529,7 +532,7 @@ namespace ThunderED
         public static async Task<ThdCacheDataEntry> GetCacheDataEntry(string name)
         {
             await using var db = new ThunderedDbContext();
-            return await db.CacheData.FirstOrDefaultAsync(a => EF.Functions.Like(a.Name,name));
+            return await db.CacheData.FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
         }
 
         public static async Task UpdateCacheDataEntry(string name, string data)
@@ -538,7 +541,7 @@ namespace ThunderED
             var old = await db.CacheData.AsNoTracking().FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
             if (old != null)
                 db.CacheData.Remove(old);
-            await db.CacheData.AddAsync(new ThdCacheDataEntry { Name = name, Data = data });
+            await db.CacheData.AddAsync(new ThdCacheDataEntry {Name = name, Data = data});
 
             await db.SaveChangesAsync();
         }
@@ -572,6 +575,7 @@ namespace ThunderED
                 await db.Contracts.AddAsync(new ThdContract
                     {CharacterId = characterId, CorpData = isCorp ? data : null, Data = isCorp ? null : data});
             }
+
             await db.SaveChangesAsync();
         }
 
@@ -582,16 +586,18 @@ namespace ThunderED
         public static async Task<List<JsonClasses.NullCampaignItem>> GetNullCampaigns(string group)
         {
             await using var db = new ThunderedDbContext();
-            var result = await db.NullCampaigns.AsNoTracking().Where(a => EF.Functions.Like(a.GroupKey, group)).ToListAsync();
-            if(result != null)
-                result.ForEach(a=> a.Data.LastAnnounce = a.LastAnnounce);
-            return result?.Select(a=> a.Data).ToList();
+            var result = await db.NullCampaigns.AsNoTracking().Where(a => EF.Functions.Like(a.GroupKey, group))
+                .ToListAsync();
+            if (result != null)
+                result.ForEach(a => a.Data.LastAnnounce = a.LastAnnounce);
+            return result?.Select(a => a.Data).ToList();
         }
 
         public static async Task UpdateNullCampaignAnnounce(string group, long campaignId, int announce)
         {
             await using var db = new ThunderedDbContext();
-            var result = await db.NullCampaigns.FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupKey, group) && a.CampaignId == campaignId);
+            var result = await db.NullCampaigns.FirstOrDefaultAsync(a =>
+                EF.Functions.Like(a.GroupKey, group) && a.CampaignId == campaignId);
             if (result != null)
             {
                 result.LastAnnounce = announce;
@@ -599,10 +605,13 @@ namespace ThunderED
             }
         }
 
-        public static async Task UpdateNullCampaign(string groupName, long id, DateTimeOffset startTime, JsonClasses.NullCampaignItem data)
+        public static async Task UpdateNullCampaign(string groupName, long id, DateTimeOffset startTime,
+            JsonClasses.NullCampaignItem data)
         {
             await using var db = new ThunderedDbContext();
-            var result = await db.NullCampaigns.FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupKey, groupName) && a.CampaignId == id);
+            var result =
+                await db.NullCampaigns.FirstOrDefaultAsync(a =>
+                    EF.Functions.Like(a.GroupKey, groupName) && a.CampaignId == id);
             if (result != null)
             {
                 result.Time = startTime;
@@ -617,13 +626,16 @@ namespace ThunderED
                     Time = startTime
                 });
             }
+
             await db.SaveChangesAsync();
         }
 
         public static async Task DeleteNullCampaign(string groupName, long id)
         {
             await using var db = new ThunderedDbContext();
-            var result = await db.NullCampaigns.FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupKey, groupName) && a.CampaignId == id);
+            var result =
+                await db.NullCampaigns.FirstOrDefaultAsync(a =>
+                    EF.Functions.Like(a.GroupKey, groupName) && a.CampaignId == id);
             if (result != null)
             {
                 db.NullCampaigns.Remove(result);
@@ -634,18 +646,21 @@ namespace ThunderED
         public static async Task<List<long>> GetNullsecCampaignIdList(string groupName)
         {
             await using var db = new ThunderedDbContext();
-            return await db.NullCampaigns.AsNoTracking().Where(a => EF.Functions.Like(a.GroupKey, groupName)).Select(a=> a.CampaignId).ToListAsync();
+            return await db.NullCampaigns.AsNoTracking().Where(a => EF.Functions.Like(a.GroupKey, groupName))
+                .Select(a => a.CampaignId).ToListAsync();
         }
 
         public static async Task<bool> IsNullsecCampaignExists(string groupName, long id)
         {
             await using var db = new ThunderedDbContext();
-            return await db.NullCampaigns.AsNoTracking().FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupKey, groupName) && a.CampaignId == id) != null;
+            return await db.NullCampaigns.AsNoTracking()
+                .FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupKey, groupName) && a.CampaignId == id) != null;
         }
 
         #endregion
 
         #region Incursions
+
         public static async Task<bool> IsIncursionExists(long id)
         {
             await using var db = new ThunderedDbContext();
@@ -659,9 +674,11 @@ namespace ThunderED
             await db.Incursions.AddAsync(new ThdIncursion {ConstId = id, Time = DateTime.Now});
             await db.SaveChangesAsync();
         }
+
         #endregion
 
         #region Mail
+
         public static async Task<long> GetLastMailId(long charId)
         {
             await using var db = new ThunderedDbContext();
@@ -676,7 +693,7 @@ namespace ThunderED
                 a => a.Id == charId);
             if (old == null)
             {
-                await db.Mails.AddAsync(new ThdMail{Id = charId, MailId = mailId});
+                await db.Mails.AddAsync(new ThdMail {Id = charId, MailId = mailId});
             }
             else
             {
@@ -685,9 +702,11 @@ namespace ThunderED
 
             await db.SaveChangesAsync();
         }
+
         #endregion
 
         #region Sov Index Tracker
+
         public static async Task<List<JsonClasses.SovStructureData>> GetSovIndexTrackerData(string name)
         {
             await using var db = new ThunderedDbContext();
@@ -701,7 +720,7 @@ namespace ThunderED
                 a => EF.Functions.Like(a.GroupName, name));
             if (old == null)
             {
-                await db.SovIndexTrackers.AddAsync(new ThdSovIndexTracker { GroupName = name, Data = data});
+                await db.SovIndexTrackers.AddAsync(new ThdSovIndexTracker {GroupName = name, Data = data});
             }
             else
             {
@@ -714,14 +733,15 @@ namespace ThunderED
         #endregion
 
         #region Industry Jobs
+
         public static async Task<List<JsonClasses.IndustryJob>> GetIndustryJobs(long characterId, bool isCorp)
         {
             await using var db = new ThunderedDbContext();
             if (isCorp)
                 return (await db.IndustryJobs.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == characterId))
-                    ?.CorporateJobs.OrderByDescending(a=> a.job_id).ToList();
+                    ?.CorporateJobs.OrderByDescending(a => a.job_id).ToList();
             return (await db.IndustryJobs.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == characterId))
-                ?.PersonalJobs.OrderByDescending(a=> a.job_id).ToList();
+                ?.PersonalJobs.OrderByDescending(a => a.job_id).ToList();
         }
 
         public static async Task SaveIndustryJobs(long characterId, List<JsonClasses.IndustryJob> data, bool isCorp)
@@ -737,10 +757,14 @@ namespace ThunderED
             else
             {
                 await db.IndustryJobs.AddAsync(new ThdIndustryJob
-                    { CharacterId = characterId, CorporateJobs = isCorp ? data : null, PersonalJobs = isCorp ? null : data });
+                {
+                    CharacterId = characterId, CorporateJobs = isCorp ? data : null, PersonalJobs = isCorp ? null : data
+                });
             }
+
             await db.SaveChangesAsync();
         }
+
         #endregion
 
         #region Moon table
@@ -827,7 +851,7 @@ namespace ThunderED
         public static async Task<ThdStorageConsoleEntry> GetStorageConsoleEntry(string name)
         {
             await using var db = new ThunderedDbContext();
-            return await db.StorageConsole.AsNoTracking().FirstOrDefaultAsync(a=> EF.Functions.Like(a.Name, name));
+            return await db.StorageConsole.AsNoTracking().FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
         }
 
 
@@ -845,6 +869,7 @@ namespace ThunderED
                 await db.StorageConsole.AddAsync(new ThdStorageConsoleEntry {Name = name, Value = value});
 
             }
+
             await db.SaveChangesAsync();
         }
 
@@ -885,12 +910,13 @@ namespace ThunderED
         {
             await using var db = new ThunderedDbContext();
 
-            return await db.CustomSchemes.AsNoTracking().Where(a=> ids.Contains(a.Id)).ToListAsync();
+            return await db.CustomSchemes.AsNoTracking().Where(a => ids.Contains(a.Id)).ToListAsync();
         }
 
         #endregion
 
         #region Auth stands
+
         public static async Task<ThdStandsAuth> GetAuthStands(long id)
         {
             await using var db = new ThunderedDbContext();
@@ -990,7 +1016,34 @@ namespace ThunderED
             return input;
         }
 
+        public static async Task<ThdType> GetTypeId(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Types.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
+        }
+
+        public static async Task<ThdGroup> GetInvGroup(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Groups.AsNoTracking().FirstOrDefaultAsync(a => a.GroupId == id);
+        }
+
+        public static async Task SaveType(ThdType input)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.Types.AddAsync(input);
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task SaveGroup(ThdGroup input)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.Groups.AddAsync(input);
+            await db.SaveChangesAsync();
+        }
+
         #endregion
+
 
     }
 }

@@ -36,7 +36,7 @@ namespace ThunderED.Modules
             if (entry.RegionId == 0)
                 entry.RegionId = (await APIHelper.ESIAPI.GetSystemData("MoonInfo", entry.SystemId))?.RegionId ?? 0;
             if (string.IsNullOrEmpty(entry.OreName))
-                entry.OreName = (await APIHelper.ESIAPI.GetTypeId("MoonInfo", entry.OreId))?.name;
+                entry.OreName = (await APIHelper.ESIAPI.GetTypeId("MoonInfo", entry.OreId))?.Name;
             await DbHelper.UpdateMoonTable(entry);
         }
 
@@ -48,7 +48,7 @@ namespace ThunderED.Modules
                     entry.RegionId = (await APIHelper.ESIAPI.GetSystemData("MoonInfo", entry.SystemId))?.RegionId ??
                                      0;
                 if (string.IsNullOrEmpty(entry.OreName))
-                    entry.OreName = (await APIHelper.ESIAPI.GetTypeId("MoonInfo", entry.OreId))?.name;
+                    entry.OreName = (await APIHelper.ESIAPI.GetTypeId("MoonInfo", entry.OreId))?.Name;
             }
 
             return await DbHelper.UpdateMoonTable(list);

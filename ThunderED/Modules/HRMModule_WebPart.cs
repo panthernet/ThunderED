@@ -349,7 +349,7 @@ namespace ThunderED.Modules
                     list.Add(new WebWalletTrans
                     {
                         Date = entry.DateEntry,
-                        Type = type?.name,
+                        Type = type?.Name,
                         Credit = amount,
                         Client = from,
                         ClientZkbLink = $"https://zkillboard.com/{urlSection}/{entry.client_id}/",
@@ -378,15 +378,15 @@ namespace ThunderED.Modules
                 {
                     foreach (var skill in skills.skills)
                     {
-                        var t = await SQLHelper.GetTypeId(skill.skill_id);
+                        var t = await DbHelper.GetTypeId(skill.skill_id);
                         if (t != null)
                         {
-                            skill.DB_Name = t.name;
+                            skill.DB_Name = t.Name;
                             //skill.DB_Description = t.description;
-                            skill.DB_Group = t.group_id;
-                            var g = await SQLHelper.GetInvGroup(skill.DB_Group);
+                            skill.DB_Group = t.GroupId;
+                            var g = await DbHelper.GetInvGroup(skill.DB_Group);
                             if (g != null)
-                                skill.DB_GroupName = g.groupName;
+                                skill.DB_GroupName = g.GroupName;
                         }
                     }
 
@@ -475,7 +475,7 @@ namespace ThunderED.Modules
                         ItemTypeId = asset.type_id ?? 0,
                         LocationId = asset.location_id,
                         Quantity = asset.quantity,
-                        ItemTypeName = (await APIHelper.ESIAPI.GetTypeId(Reason, asset.type_id ?? 0))?.name ??
+                        ItemTypeName = (await APIHelper.ESIAPI.GetTypeId(Reason, asset.type_id ?? 0))?.Name ??
                                        "Unknown"
                     };
                     switch (asset.location_type)
@@ -488,7 +488,7 @@ namespace ThunderED.Modules
                             item.LocationName = (await APIHelper.ESIAPI.GetSystemData(Reason, asset.location_id))?.SolarSystemName;
                             break;
                         case AssetLocationType.item:
-                            item.LocationName = (await APIHelper.ESIAPI.GetTypeId(Reason, asset.location_id))?.name;
+                            item.LocationName = (await APIHelper.ESIAPI.GetTypeId(Reason, asset.location_id))?.Name;
                             break;
                         case AssetLocationType.other:
                             item.LocationName = "Unknown";

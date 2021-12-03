@@ -358,7 +358,7 @@ namespace ThunderED
         }*/
 
         
-        public static async Task<JsonClasses.Type_id> GetTypeId(long id)
+      /*  public static async Task<JsonClasses.Type_id> GetTypeId(long id)
         {
             return (await SelectData("inv_types", new[] {"typeID", "groupID","typeName", "description", "mass", "volume"}, new Dictionary<string, object>
             {
@@ -386,7 +386,7 @@ namespace ThunderED
                 categoryId = Convert.ToInt64(item[1]),
                 groupName = Convert.ToString(item[2]),
             }).FirstOrDefault();
-        }
+        }*/
 
         #endregion
 

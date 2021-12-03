@@ -102,9 +102,9 @@ namespace ThunderED
                 entry.dic = new Dictionary<string, string>
                     {
                         {"{shipID}", entry.victimShipID.ToString()},
-                        {"{shipType}", entry.rVictimShipType?.name},
+                        {"{shipType}", entry.rVictimShipType?.Name},
                         {"{attackerShipID}", entry.attackerShipID.ToString()},
-                        {"{attackerShipType}", entry.rAttackerShipType?.name},
+                        {"{attackerShipType}", entry.rAttackerShipType?.Name},
                         {"{iskValue}", entry.value.ToString("n0")},
                         {"{iskFittedValue}", kill?.zkb?.fittedValue.ToString("n0") ?? "0"},
                         {"{systemName}", entry.sysName},

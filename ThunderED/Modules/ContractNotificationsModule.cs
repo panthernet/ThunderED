@@ -535,9 +535,9 @@ namespace ThunderED.Modules
                         var t = await APIHelper.ESIAPI.GetTypeId(Reason, item.type_id);
                         if (item.is_included)
                         {
-                            sbItemsSubmitted.Append($"{t?.name} x{item.quantity}\n");
+                            sbItemsSubmitted.Append($"{t?.Name} x{item.quantity}\n");
                         }
-                        else sbItemsAsking.Append($"{t?.name} x{item.quantity}\n");
+                        else sbItemsAsking.Append($"{t?.Name} x{item.quantity}\n");
                     }
                 }
 
@@ -631,8 +631,8 @@ namespace ThunderED.Modules
                 {
                     var t = await APIHelper.ESIAPI.GetTypeId(reason, item.type_id);
                     if(item.is_included)
-                        sbItemsSubmitted.Append($"{t?.name} x{item.quantity}\n");
-                    else sbItemsAsking.Append($"{t?.name} x{item.quantity}\n");
+                        sbItemsSubmitted.Append($"{t?.Name} x{item.quantity}\n");
+                    else sbItemsAsking.Append($"{t?.Name} x{item.quantity}\n");
                 }
             }
 

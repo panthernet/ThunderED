@@ -565,7 +565,7 @@
                         var stData =
                             await APIHelper.ESIAPI.GetCharacterShipType(_reason, _character.CharacterId, _inspectToken);
                         var tType = await APIHelper.ESIAPI.GetTypeId(_reason, stData.ship_type_id);
-                        _shipData = tType.name;
+                        _shipData = tType.Name;
                     }
                     if (SettingsManager.HasCharSkillsScope(_character.DataView.PermissionsList))
                     {
