@@ -933,6 +933,64 @@ namespace ThunderED
 
         #endregion
 
+        #region System, region, const
+
+        public static async Task<List<ThdStarSystem>> GetSystemsByConstellation(long constellationId)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.StarSystems.AsNoTracking().Where(a => a.ConstellationId == constellationId).ToListAsync();
+        }
+
+        public static async Task<List<ThdStarSystem>> GetSystemsByRegion(long regionId)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.StarSystems.AsNoTracking().Where(a => a.RegionId == regionId).ToListAsync();
+        }
+
+        public static async Task<ThdStarSystem> GetSystemById(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.StarSystems.AsNoTracking().FirstOrDefaultAsync(a => a.SolarSystemId == id);
+        }
+
+        public static async Task<ThdStarSystem> SaveStarSystem(ThdStarSystem input)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.StarSystems.AddAsync(input);
+            await db.SaveChangesAsync();
+            return input;
+        }
+
+        public static async Task<ThdStarRegion> GetRegionById(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.StarRegions.AsNoTracking().FirstOrDefaultAsync(a => a.RegionId == id);
+
+        }
+
+        public static async Task<ThdStarConstellation> GetConstellationById(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.StarConstellations.AsNoTracking().FirstOrDefaultAsync(a => a.ConstellationId == id);
+        }
+
+        public static async Task<ThdStarRegion> SaveStarRegion(ThdStarRegion input)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.StarRegions.AddAsync(input);
+            await db.SaveChangesAsync();
+            return input;
+        }
+
+        public static async Task<ThdStarConstellation> SaveStarConstellation(ThdStarConstellation input)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.StarConstellations.AddAsync(input);
+            await db.SaveChangesAsync();
+            return input;
+        }
+
+        #endregion
 
     }
 }

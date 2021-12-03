@@ -485,7 +485,7 @@ namespace ThunderED.Modules
                                 (await APIHelper.ESIAPI.GetStationData(Reason, asset.location_id, inspectToken))?.name;
                             break;
                         case AssetLocationType.solar_system:
-                            item.LocationName = (await APIHelper.ESIAPI.GetSystemData(Reason, asset.location_id))?.name;
+                            item.LocationName = (await APIHelper.ESIAPI.GetSystemData(Reason, asset.location_id))?.SolarSystemName;
                             break;
                         case AssetLocationType.item:
                             item.LocationName = (await APIHelper.ESIAPI.GetTypeId(Reason, asset.location_id))?.name;

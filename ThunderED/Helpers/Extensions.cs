@@ -90,14 +90,14 @@ namespace ThunderED
                 entry.rAttackerAlliance = entry.finalBlowAttackerAllyId > 0
                     ? await APIHelper.ESIAPI.GetAllianceData(reason, entry.finalBlowAttackerAllyId)
                     : null;
-                entry.sysName = entry.rSystem.name == entry.rSystem.system_id.ToString() ? "Abyss" : entry.rSystem.name;
-                var rConst = entry.rSystem != null ? await APIHelper.ESIAPI.GetConstellationData(reason, entry.rSystem.constellation_id) : null;
-                var rRegion = rConst != null ? await APIHelper.ESIAPI.GetRegionData(reason, rConst.region_id) : null;
+                entry.sysName = entry.rSystem.SolarSystemName == entry.rSystem.SolarSystemId.ToString() ? "Abyss" : entry.rSystem.SolarSystemName;
+                var rConst = entry.rSystem != null ? await APIHelper.ESIAPI.GetConstellationData(reason, entry.rSystem.ConstellationId) : null;
+                var rRegion = rConst != null ? await APIHelper.ESIAPI.GetRegionData(reason, rConst.RegionId) : null;
                 entry.rVictimShipType = await APIHelper.ESIAPI.GetTypeId(reason, entry.victimShipID);
                 entry.rAttackerShipType = await APIHelper.ESIAPI.GetTypeId(reason, entry.attackerShipID);
                 entry.rVictimCharacter = await APIHelper.ESIAPI.GetCharacterData(reason, entry.victimCharacterID);
                 entry.rAttackerCharacter = await APIHelper.ESIAPI.GetCharacterData(reason, entry.finalBlowAttacker?.character_id);
-                entry.systemSecurityStatus = Math.Round(entry.rSystem.security_status, 1).ToString("0.0");
+                entry.systemSecurityStatus = Math.Round(entry.rSystem.Security, 1).ToString("0.0");
 
                 entry.dic = new Dictionary<string, string>
                     {
@@ -108,11 +108,11 @@ namespace ThunderED
                         {"{iskValue}", entry.value.ToString("n0")},
                         {"{iskFittedValue}", kill?.zkb?.fittedValue.ToString("n0") ?? "0"},
                         {"{systemName}", entry.sysName},
-                        {"{systemID}", entry.rSystem.system_id.ToString()},
-                        {"{constName}", rConst?.name},
-                        {"{constID}", rConst?.constellation_id.ToString()},
-                        {"{regionName}", rRegion?.name},
-                        {"{regionID}", rRegion != null ? rConst?.region_id.ToString() : null},
+                        {"{systemID}", entry.rSystem.SolarSystemId.ToString()},
+                        {"{constName}", rConst?.ConstellationName},
+                        {"{constID}", rConst?.ConstellationId.ToString()},
+                        {"{regionName}", rRegion?.RegionName},
+                        {"{regionID}", rRegion != null ? rConst?.RegionId.ToString() : null},
                         {"{systemSec}", entry.systemSecurityStatus},
                         {"{victimName}", entry.rVictimCharacter?.name},
                         {"{victimID}", entry.rVictimCharacter?.character_id.ToString()},

@@ -171,22 +171,38 @@ namespace ThunderED.API
             return await GetEntry<JsonClasses.StationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/stations/{id}/?datasource=tranquility&language={_language}", reason, id, 30, false, false, authHeader);
         }
 
-        public async Task<JsonClasses.ConstellationData> GetConstellationData(string reason, object id)
+        public async Task<ThdStarConstellation> GetConstellationData(string reason, object id)
         {
-            var data = await SQLHelper.GetConstellationById(Convert.ToInt64(id));
+            var data = await DbHelper.GetConstellationById(Convert.ToInt64(id));
             if (data != null)
                 return data;
 
-            return await GetEntry<JsonClasses.ConstellationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/constellations/{id}/?datasource=tranquility&language={_language}", reason, id, 180);
+            var result = await GetEntry<JsonClasses.ConstellationData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/constellations/{id}/?datasource=tranquility&language={_language}", reason, id, 180);
+            if (result != null)
+            {
+                var item = ThdStarConstellation.FromJson(result);
+                await DbHelper.SaveStarConstellation(item);
+                return item;
+            }
+
+            return null;
         }
 
-        public async Task<JsonClasses.RegionData> GetRegionData(string reason, object id)
+        public async Task<ThdStarRegion> GetRegionData(string reason, object id)
         {
-            var data = await SQLHelper.GetRegionById(Convert.ToInt64(id));
+            var data = await DbHelper.GetRegionById(Convert.ToInt64(id));
             if (data != null)
                 return data;
 
-            return await GetEntry<JsonClasses.RegionData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/regions/{id}/?datasource=tranquility&language={_language}", reason, id, 180);
+            var result = await GetEntry<JsonClasses.RegionData>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/regions/{id}/?datasource=tranquility&language={_language}", reason, id, 180);
+            if (result != null)
+            {
+                var item = ThdStarRegion.FromJson(result, Convert.ToInt64(id));
+                await DbHelper.SaveStarRegion(item);
+                return item;
+            }
+
+            return null;
         }
 
 
@@ -229,14 +245,24 @@ namespace ThunderED.API
                 $"{SettingsManager.Settings.Config.ESIAddress}latest/fw/systems/?datasource=tranquility&language={_language}", reason, null, etag);
         }
 
-        public async Task<JsonClasses.SystemName> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
+        public async Task<ThdStarSystem> GetSystemData(string reason, object id, bool forceUpdate = false, bool noCache = false)
         {
-            var system = await SQLHelper.GetSystemById(Convert.ToInt64(id));
+            var system = await DbHelper.GetSystemById(Convert.ToInt64(id));
             if (system != null)
                 return system;
 
-            return await GetEntry<JsonClasses.SystemName>($"{SettingsManager.Settings.Config.ESIAddress}dev/universe/systems/{id}/?datasource=tranquility&language={_language}", reason, id, 180,
+            var result = await GetEntry<JsonClasses.SystemName>($"{SettingsManager.Settings.Config.ESIAddress}dev/universe/systems/{id}/?datasource=tranquility&language={_language}", reason, id, 180,
                 forceUpdate, noCache);
+            if (result != null)
+            {
+                //write new system data to DB
+                var sys = ThdStarSystem.FromJson(result);
+                var cnst = await GetConstellationData(reason, sys.ConstellationId);
+                sys.RegionId = cnst?.RegionId ?? sys.RegionId;
+                return await DbHelper.SaveStarSystem(sys);
+            }
+
+            return null;
         }
 
         public void Auth(string client, string key)

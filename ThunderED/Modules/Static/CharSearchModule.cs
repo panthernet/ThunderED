@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using ThunderED.Helpers;
 using ThunderED.Json;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules.Static
 {
@@ -42,7 +43,7 @@ namespace ThunderED.Modules.Static
             var zLosslast = zkillLosses.Count > 0 ? zkillLosses[0] : new JsonClasses.ESIKill();
             var km = zkillLast == null ? zLosslast : (zLosslast == null ? zkillLast : (zLosslast.killmail_time > zkillLast.killmail_time ? zLosslast : zkillLast));
 
-            JsonClasses.SystemName systemData = null;
+            ThdStarSystem systemData = null;
             var lastShipType = LM.Get("Unknown");
 
             if (km != null)
@@ -70,7 +71,7 @@ namespace ThunderED.Modules.Static
 
             var alliance = allianceData?.name ?? LM.Get("None");
             var allianceTicker = allianceData != null ? $"[{allianceData?.ticker}]" : "";
-            var lastSeenSystem = systemData?.name ?? LM.Get("None");
+            var lastSeenSystem = systemData?.SolarSystemName ?? LM.Get("None");
             var lastSeenShip = lastShip?.name ?? LM.Get("None");
             var dangerous = characterStats.dangerRatio > 70 ? LM.Get("Dangerous") : LM.Get("Snuggly");
             var dRatio = characterStats.dangerRatio > 70

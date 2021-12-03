@@ -564,7 +564,7 @@ namespace ThunderED.Modules
             #region Process data
             var systemId = GetData("solarSystemID", data);
             var system = string.IsNullOrEmpty(systemId) ? null : await APIHelper.ESIAPI.GetSystemData(Reason, systemId);
-            var systemName = system == null ? LM.Get("Unknown") : (system.name == system.system_id.ToString() ? "Abyss" : system.name);
+            var systemName = system == null ? LM.Get("Unknown") : (system.SolarSystemName == system.SolarSystemId.ToString() ? "Abyss" : system.SolarSystemName);
             var structureId = GetData("structureID", data);
             var structure = string.IsNullOrEmpty(structureId) ? null : await APIHelper.ESIAPI.GetUniverseStructureData(Reason, structureId, token);
             var structureNameDirect = GetData("structureName", data);
@@ -1151,7 +1151,7 @@ namespace ThunderED.Modules
                             case "AllianceCapitalChanged":
                                 var allyId = GetData("allianceID", data);
                                 var accAlly = string.IsNullOrEmpty(allyId) ? null : (await APIHelper.ESIAPI.GetAllianceData(Reason, allyId))?.name;
-                                text = LM.Get("notifAllianceCapitalChanged", accAlly, system?.name);
+                                text = LM.Get("notifAllianceCapitalChanged", accAlly, system?.SolarSystemName);
                                 image = Settings.Resources.ImgAllMaintenanceBillMsg;
                                 break;
                             case "BountyPlacedAlliance":
@@ -1431,7 +1431,7 @@ namespace ThunderED.Modules
                         builder = new EmbedBuilder()
                             .WithColor(new Color(0xdd5353))
                             .WithAuthor(author =>
-                                author.WithName(LM.Get("SovCommandNodeEventStarted", cmp, systemName, constellation?.name)))
+                                author.WithName(LM.Get("SovCommandNodeEventStarted", cmp, systemName, constellation?.ConstellationName)))
                             .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                             .WithTimestamp(timestamp);
                         embed = builder.Build();

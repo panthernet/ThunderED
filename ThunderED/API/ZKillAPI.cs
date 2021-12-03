@@ -222,7 +222,7 @@ namespace ThunderED.API
 
                 var system = most > 0 ? await APIHelper.ESIAPI.GetSystemData(LogCat.Stats.ToString(), most) : null;
                 var pl = await APIHelper.ESIAPI.GetPlanet("", most);
-                var name = system?.name ?? pl?.name;
+                var name = system?.SolarSystemName ?? pl?.name;
                 if (!string.IsNullOrEmpty(name))
                 {
                     if (name.StartsWith("Stargate"))

@@ -170,7 +170,7 @@
                 _regions = new List<WebStellarRegionEntry>();
                 foreach (var id in ids)
                 {
-                    var name = (await APIHelper.ESIAPI.GetRegionData("MoonInfo", id))?.name;
+                    var name = (await APIHelper.ESIAPI.GetRegionData("MoonInfo", id))?.RegionName;
                     _regions.Add(new WebStellarRegionEntry { Id = id, Name = name });
                 }
                 _selectedRegion = _regions.FirstOrDefault();
@@ -304,7 +304,7 @@
                 foreach (var region in newRegions)
                 {
                     var r = await APIHelper.ESIAPI.GetRegionData("MoonInfo", region);
-                    _regions.Add(new WebStellarRegionEntry {Id = region, Name = r?.name ?? LM.Get("Unknown")});
+                    _regions.Add(new WebStellarRegionEntry {Id = region, Name = r?.RegionName ?? LM.Get("Unknown")});
 
                 }
             }

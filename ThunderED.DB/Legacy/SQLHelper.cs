@@ -287,7 +287,7 @@ namespace ThunderED
 
         #region StaticData
 
-        public static async Task<List<JsonClasses.SystemName>> GetSystemsByConstellation(long constellationId)
+        /*public static async Task<List<JsonClasses.SystemName>> GetSystemsByConstellation(long constellationId)
         {
             return (await SelectData("map_solar_systems", new[] {"solarSystemID", "constellationID", "regionID", "solarSystemName", "security"}, new Dictionary<string, object>
             {
@@ -330,9 +330,9 @@ namespace ThunderED
                 name = Convert.ToString(item[3]),
                 security_status = (float)Convert.ToDouble(item[4]),
             }).FirstOrDefault();
-        }
+        }*/
 
-        public static async Task<JsonClasses.RegionData> GetRegionById(long id)
+        /*public static async Task<JsonClasses.RegionData> GetRegionById(long id)
         {
             return (await SelectData("map_regions", new[] {"regionID", "regionName"}, new Dictionary<string, object>
             {
@@ -355,7 +355,7 @@ namespace ThunderED
                 constellation_id = Convert.ToInt64(item[1]),
                 name = Convert.ToString(item[2]),
             }).FirstOrDefault();
-        }
+        }*/
 
         
         public static async Task<JsonClasses.Type_id> GetTypeId(long id)

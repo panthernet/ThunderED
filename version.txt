@@ -1,4 +1,4 @@
-### V2.0.18
+### V2.0.19
 + Migration to v2 auth
 + Added new `Tracker` block to Notifications module. It will allow to check and feed selected notifications from the whole Database.
 + Added new background worker to check and remember available ESI token scopes if missing any
@@ -15,7 +15,7 @@
 + Improved access token handling, made some code refactoring
 + Improved caching logic and handling
 + Improved security
-+ Migrated standings auth,contracts,nullsec campaigns,incursions,mail,sov tracker, industry to EF
++ Migrated standings auth,contracts,nullsec campaigns,incursions,mail,sov tracker, industry, static data to EF
 
 ### V2.0.13
 + Web UI update, part 1

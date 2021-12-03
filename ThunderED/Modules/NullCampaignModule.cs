@@ -51,9 +51,9 @@ namespace ThunderED.Modules
                     var constIds = GetParsedConstellations(groupName) ?? new List<long>();
                     var sysIds = GetParsedSolarSystems(groupName) ?? new List<long>();
                     foreach (var regionId in regionIds)
-                        systemIds.AddRange((await SQLHelper.GetSystemsByRegion(regionId))?.Select(a=> a.system_id));
+                        systemIds.AddRange((await DbHelper.GetSystemsByRegion(regionId))?.Select(a=> a.SolarSystemId));
                     foreach (var cId in constIds)
-                        systemIds.AddRange((await SQLHelper.GetSystemsByConstellation(cId))?.Select(a=> a.system_id));
+                        systemIds.AddRange((await DbHelper.GetSystemsByConstellation(cId))?.Select(a=> a.SolarSystemId));
                     systemIds.AddRange(sysIds);
 
                     var campaigns = allCampaigns.Where(a => systemIds.Contains(a.solar_system_id));
@@ -156,11 +156,11 @@ namespace ThunderED.Modules
         private async Task PrepareMessage(JsonClasses.NullCampaignItem campaign, NullCampaignGroup @group, string message, uint color)
         {
             var system = await APIHelper.ESIAPI.GetSystemData(Reason, campaign.solar_system_id);
-            var c = await APIHelper.ESIAPI.GetConstellationData(Reason, system.constellation_id);
-            var region = await APIHelper.ESIAPI.GetRegionData(Reason, c.region_id);
+            var c = await APIHelper.ESIAPI.GetConstellationData(Reason, system.ConstellationId);
+            var region = await APIHelper.ESIAPI.GetRegionData(Reason, c.RegionId);
 
             var defender = await APIHelper.ESIAPI.GetAllianceData(Reason, campaign.defender_id);
-            await NotifyNullsecCampaign(campaign, message, region.name, system.name, defender.name, group, color);
+            await NotifyNullsecCampaign(campaign, message, region.RegionName, system.SolarSystemName, defender.name, group, color);
         }
 
         private async Task NotifyNullsecCampaign(JsonClasses.NullCampaignItem campaign, string message, string region, string system, string defender, NullCampaignGroup @group,

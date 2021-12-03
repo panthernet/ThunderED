@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
 using ThunderED.Json;
 using ThunderED.Thd;
@@ -30,6 +28,9 @@ namespace ThunderED
         public DbSet<ThdMail> Mails { get; set; }
         public DbSet<ThdSovIndexTracker> SovIndexTrackers { get; set; }
         public DbSet<ThdIndustryJob> IndustryJobs { get; set; }
+        public DbSet<ThdStarSystem> StarSystems { get; set; }
+        public DbSet<ThdStarRegion> StarRegions{ get; set; }
+        public DbSet<ThdStarConstellation> StarConstellations { get; set; }
         
         //public DbSet<ThdType> Types { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
@@ -76,7 +77,6 @@ namespace ThunderED
 
             #endregion
 
-
             #region ThdContract
             modelBuilder.Entity<ThdContract>().HasKey(u => u.CharacterId);
             modelBuilder.Entity<ThdContract>().ToTable("contracts");
@@ -88,6 +88,9 @@ namespace ThunderED
             #endregion
 
             #region ThdNullCampaign
+
+            modelBuilder.Entity<ThdNullCampaign>().HasKey("GroupKey", "CampaignId");
+
             modelBuilder.Entity<ThdNullCampaign>().HasIndex(u => u.GroupKey);
             modelBuilder.Entity<ThdNullCampaign>().HasIndex("GroupKey","CampaignId");
 
@@ -116,7 +119,6 @@ namespace ThunderED
             modelBuilder.Entity<ThdMail>().Property(a => a.Id).HasColumnName("id");
             modelBuilder.Entity<ThdMail>().Property(a => a.MailId).HasColumnName("mailId");
             #endregion
-
 
             #region ThdSovIndexTracker
             modelBuilder.Entity<ThdSovIndexTracker>().HasKey(u => u.GroupName);
@@ -251,25 +253,99 @@ namespace ThunderED
             #endregion
 
             #region ThdType
-           /* modelBuilder.Entity<ThdType>().HasIndex(u => u.Id).IsUnique();
-            modelBuilder.Entity<ThdType>().ToTable("inv_types");
+            /* modelBuilder.Entity<ThdType>().HasIndex(u => u.Id).IsUnique();
+             modelBuilder.Entity<ThdType>().ToTable("inv_types");
 
-            modelBuilder.Entity<ThdType>().Property(a => a.Id).HasColumnName("typeID").ValueGeneratedNever();
-            modelBuilder.Entity<ThdType>().Property(a => a.GroupId).HasColumnName("groupID");
-            modelBuilder.Entity<ThdType>().Property(a => a.Name).HasColumnName("typeName");
-            modelBuilder.Entity<ThdType>().Property(a => a.Description).HasColumnName("description");
-            modelBuilder.Entity<ThdType>().Property(a => a.Mass).HasColumnName("mass");
-            modelBuilder.Entity<ThdType>().Property(a => a.Volume).HasColumnName("volume");
-            modelBuilder.Entity<ThdType>().Property(a => a.Capacity).HasColumnName("capacity");
-            modelBuilder.Entity<ThdType>().Property(a => a.PortionSize).HasColumnName("portionSize");
-            modelBuilder.Entity<ThdType>().Property(a => a.RaceId).HasColumnName("raceID");
-            modelBuilder.Entity<ThdType>().Property(a => a.BasePrice).HasColumnName("basePrice");
-            modelBuilder.Entity<ThdType>().Property(a => a.Published).HasColumnName("published");
-            modelBuilder.Entity<ThdType>().Property(a => a.MarketGroupId).HasColumnName("marketGroupID");
-            modelBuilder.Entity<ThdType>().Property(a => a.IconId).HasColumnName("iconID");
-            modelBuilder.Entity<ThdType>().Property(a => a.SoundId).HasColumnName("soundID");
-            modelBuilder.Entity<ThdType>().Property(a => a.GraphicId).HasColumnName("graphicID");*/
+             modelBuilder.Entity<ThdType>().Property(a => a.Id).HasColumnName("typeID").ValueGeneratedNever();
+             modelBuilder.Entity<ThdType>().Property(a => a.GroupId).HasColumnName("groupID");
+             modelBuilder.Entity<ThdType>().Property(a => a.Name).HasColumnName("typeName");
+             modelBuilder.Entity<ThdType>().Property(a => a.Description).HasColumnName("description");
+             modelBuilder.Entity<ThdType>().Property(a => a.Mass).HasColumnName("mass");
+             modelBuilder.Entity<ThdType>().Property(a => a.Volume).HasColumnName("volume");
+             modelBuilder.Entity<ThdType>().Property(a => a.Capacity).HasColumnName("capacity");
+             modelBuilder.Entity<ThdType>().Property(a => a.PortionSize).HasColumnName("portionSize");
+             modelBuilder.Entity<ThdType>().Property(a => a.RaceId).HasColumnName("raceID");
+             modelBuilder.Entity<ThdType>().Property(a => a.BasePrice).HasColumnName("basePrice");
+             modelBuilder.Entity<ThdType>().Property(a => a.Published).HasColumnName("published");
+             modelBuilder.Entity<ThdType>().Property(a => a.MarketGroupId).HasColumnName("marketGroupID");
+             modelBuilder.Entity<ThdType>().Property(a => a.IconId).HasColumnName("iconID");
+             modelBuilder.Entity<ThdType>().Property(a => a.SoundId).HasColumnName("soundID");
+             modelBuilder.Entity<ThdType>().Property(a => a.GraphicId).HasColumnName("graphicID");*/
 
+            #endregion
+
+            #region ThdStarSystem
+            modelBuilder.Entity<ThdStarSystem>().HasKey(u => u.SolarSystemId);
+            modelBuilder.Entity<ThdStarSystem>().HasIndex(u => u.SolarSystemId);
+            modelBuilder.Entity<ThdStarSystem>().HasIndex(u => u.ConstellationId);
+            modelBuilder.Entity<ThdStarSystem>().HasIndex(u => u.RegionId);
+            modelBuilder.Entity<ThdStarSystem>().HasIndex(u => u.Security);
+
+            modelBuilder.Entity<ThdStarSystem>().ToTable("map_solar_systems");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.RegionId).HasColumnName("regionID");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.ConstellationId).HasColumnName("constellationID");
+
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.SolarSystemId).HasColumnName("solarSystemID");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.SolarSystemName).HasColumnName("solarSystemName");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.X).HasColumnName("x");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Y).HasColumnName("y");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Z).HasColumnName("z");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.XMin).HasColumnName("xMin");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.YMin).HasColumnName("yMin");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.ZMin).HasColumnName("zMin");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.XMax).HasColumnName("xMax");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.YMax).HasColumnName("yMax");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.ZMax).HasColumnName("zMax");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Luminosity).HasColumnName("luminosity");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Border).HasColumnName("border");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Fringe).HasColumnName("fringe");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Corridor).HasColumnName("corridor");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Hub).HasColumnName("hub");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.International).HasColumnName("international");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Regional).HasColumnName("regional");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Constellation).HasColumnName("constellation");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Security).HasColumnName("security");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.FactionId).HasColumnName("factionID");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.Radius).HasColumnName("radius");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.SunTypeId).HasColumnName("sunTypeID");
+            modelBuilder.Entity<ThdStarSystem>().Property(a => a.SecurityClass).HasColumnName("securityClass");
+            #endregion
+
+            #region ThdStarRegion
+            modelBuilder.Entity<ThdStarRegion>().HasKey(u => u.RegionId);
+            modelBuilder.Entity<ThdStarRegion>().ToTable("map_regions");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.RegionName).HasColumnName("regionName");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.RegionId).HasColumnName("regionID");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.X).HasColumnName("x");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.Y).HasColumnName("y");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.Z).HasColumnName("z");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.XMin).HasColumnName("xMin");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.YMin).HasColumnName("yMin");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.ZMin).HasColumnName("zMin");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.XMax).HasColumnName("xMax");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.YMax).HasColumnName("yMax");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.ZMax).HasColumnName("zMax");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.FactionId).HasColumnName("factionID");
+            modelBuilder.Entity<ThdStarRegion>().Property(a => a.Radius).HasColumnName("radius");
+            #endregion
+
+            #region ThdStarConstellation
+            modelBuilder.Entity<ThdStarConstellation>().HasKey(u => u.ConstellationId);
+            modelBuilder.Entity<ThdStarConstellation>().ToTable("map_constellations");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.ConstellationName).HasColumnName("constellationName");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.ConstellationId).HasColumnName("constellationID");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.RegionId).HasColumnName("regionID");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.X).HasColumnName("x");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.Y).HasColumnName("y");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.Z).HasColumnName("z");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.XMin).HasColumnName("xMin");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.YMin).HasColumnName("yMin");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.ZMin).HasColumnName("zMin");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.XMax).HasColumnName("xMax");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.YMax).HasColumnName("yMax");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.ZMax).HasColumnName("zMax");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.FactionId).HasColumnName("factionID");
+            modelBuilder.Entity<ThdStarConstellation>().Property(a => a.Radius).HasColumnName("radius");
             #endregion
         }
 

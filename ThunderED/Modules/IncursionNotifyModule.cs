@@ -8,6 +8,7 @@ using Discord;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules
 {
@@ -57,11 +58,11 @@ namespace ThunderED.Modules
                 var systemIds = GetParsedSolarSystems("default") ?? new List<long>();
 
                 var sysIds = constIds.SelectMany(a =>
-                    (SQLHelper.GetSystemsByConstellation(a).GetAwaiter().GetResult())
-                    ?.Select(b => b.system_id)).ToList();
+                    (DbHelper.GetSystemsByConstellation(a).GetAwaiter().GetResult())
+                    ?.Select(b => b.SolarSystemId)).ToList();
                 sysIds.AddRange(regionIds.SelectMany(a =>
-                    (SQLHelper.GetSystemsByRegion(a).GetAwaiter().GetResult())
-                    ?.Select(b => b.system_id)));
+                    (DbHelper.GetSystemsByRegion(a).GetAwaiter().GetResult())
+                    ?.Select(b => b.SolarSystemId)));
                 sysIds.AddRange(systemIds);
                 sysIds = sysIds.Distinct().ToList();
 
@@ -93,7 +94,7 @@ namespace ThunderED.Modules
 
         }
 
-        private async Task ReportIncursion(JsonClasses.IncursionData incursion, JsonClasses.ConstellationData c, IMessageChannel channel)
+        private async Task ReportIncursion(JsonClasses.IncursionData incursion, ThdStarConstellation c, IMessageChannel channel)
         {
             var result = await DbHelper.IsIncursionExists(incursion.constellation_id);
             //skip existing incursion report
@@ -102,18 +103,18 @@ namespace ThunderED.Modules
             await DbHelper.AddIncursion(incursion.constellation_id);
 
             c ??= await APIHelper.ESIAPI.GetConstellationData(Reason, incursion.constellation_id);
-            var r = await APIHelper.ESIAPI.GetRegionData(Reason, c.region_id);
+            var r = await APIHelper.ESIAPI.GetRegionData(Reason, c.RegionId);
 
             var sb = new StringBuilder();
             foreach (var system in incursion.infested_solar_systems)
             {
-                sb.Append((await APIHelper.ESIAPI.GetSystemData(Reason, system)).name);
+                sb.Append((await APIHelper.ESIAPI.GetSystemData(Reason, system)).SolarSystemName);
                 sb.Append(" | ");
             }
             sb.Remove(sb.Length - 3, 2);
             //LM.Get("incursionUpdateHeader", c.name, r.name)
             //new Color(0x000045)
-            var x = new EmbedBuilder().WithTitle(LM.Get("incursionNewHeader", c.name, r.name))                
+            var x = new EmbedBuilder().WithTitle(LM.Get("incursionNewHeader", c.ConstellationName, r.RegionName))                
                 .WithColor(new Color(0xdd5353))
                 .WithThumbnailUrl(Settings.Resources.ImgIncursion)
                 .AddField(LM.Get("incursionInfestedSystems"), sb.ToString())

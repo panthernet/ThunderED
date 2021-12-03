@@ -223,11 +223,11 @@ namespace ThunderED.Modules
                     list = list.Where(a =>
                     {
                         var system = APIHelper.ESIAPI.GetSystemData(Reason, a.solar_system_id).GetAwaiter().GetResult();
-                        if (!system.DB_RegionId.HasValue) return false;
-                        if (hasRegions && groupRegions.Contains(system.DB_RegionId.Value))
+                        if (system.RegionId == 0) return false;
+                        if (hasRegions && groupRegions.Contains(system.RegionId))
                             return true;
 
-                        return hasConsts && @groupConstellations.Contains(system.constellation_id);
+                        return hasConsts && @groupConstellations.Contains(system.ConstellationId);
                     }).ToList();
                 return list;
             }
@@ -257,7 +257,7 @@ namespace ThunderED.Modules
             }
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(Settings.Resources.ImgLowFWStand)
-                .AddField(LM.Get("sovSystem"), system?.name ?? LM.Get("Unknown"), true)
+                .AddField(LM.Get("sovSystem"), system?.SolarSystemName ?? LM.Get("Unknown"), true)
                 .AddField(LM.Get("sovMessage"), msg);
             var ch = APIHelper.DiscordAPI.GetChannel(group.DiscordChannelId);
             var mention = string.Join(' ', group.DiscordMentions);
@@ -274,7 +274,7 @@ namespace ThunderED.Modules
             var msg = LM.Get("sovLowIndexMessage", data.vulnerability_occupancy_level);
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(Settings.Resources.ImgLowFWStand)
-                .AddField(LM.Get("sovSystem"), system?.name ?? LM.Get("Unknown"), true)
+                .AddField(LM.Get("sovSystem"), system?.SolarSystemName ?? LM.Get("Unknown"), true)
                 .AddField(LM.Get("sovHolder"), alliance?.name ?? LM.Get("Unknown"), true)
                 .AddField(LM.Get("sovMessage"), msg);
             var ch = APIHelper.DiscordAPI.GetChannel(group.DiscordChannelId);
@@ -290,7 +290,7 @@ namespace ThunderED.Modules
             //var alliance = await APIHelper.ESIAPI.GetAllianceData(Reason, data.alliance_id);
             //var msg = LM.Get("sovLowIndexMessage", data.vulnerability_occupancy_level);
 
-            return $"{system?.name ?? LM.Get("Unknown")}:\t{data.vulnerability_occupancy_level}";
+            return $"{system?.SolarSystemName ?? LM.Get("Unknown")}:\t{data.vulnerability_occupancy_level}";
         }
     }
 }

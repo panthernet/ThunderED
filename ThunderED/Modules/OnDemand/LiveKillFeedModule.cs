@@ -13,6 +13,7 @@ using ThunderED.Helpers;
 using ThunderED.Json;
 using ThunderED.Json.ZKill;
 using ThunderED.Modules.Sub;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules.OnDemand
 {
@@ -195,9 +196,9 @@ namespace ThunderED.Modules.OnDemand
                         var rSystem = await APIHelper.ESIAPI.GetSystemData(Reason, kill.solar_system_id);
 
                         exList = GetTier2ConstellationIds(ParsedExcludeLocationLists, groupName, filterName);
-                        if (rSystem != null && exList.Contains(rSystem.constellation_id)) continue;
+                        if (rSystem != null && exList.Contains(rSystem.ConstellationId)) continue;
                         exList = GetTier2RegionIds(ParsedExcludeLocationLists, groupName, filterName);
-                        if (rSystem?.DB_RegionId != null && exList.Contains(rSystem.DB_RegionId.Value)) continue;
+                        if (rSystem?.RegionId > 0 && exList.Contains(rSystem.RegionId)) continue;
 
                         exList = GetTier2TypeIds(ParsedExcludeVictimShipsLists, groupName, filterName);
                         if (exList.Contains(kill.victim.ship_type_id)) continue;
@@ -545,15 +546,15 @@ namespace ThunderED.Modules.OnDemand
             await km.Refresh(Reason, kill);
 
             var routeLength = 0;
-            JsonClasses.ConstellationData rConst = null;
-            JsonClasses.RegionData rRegion;
+            ThdStarConstellation rConst = null;
+            ThdStarRegion rRegion;
             var srcSystem = mode == RadiusMode.Range ? await APIHelper.ESIAPI.GetSystemData(Reason, radiusId) : null;
 
             if (radiusId == km.systemId)
             {
                 //right there
-                rConst = km.rSystem.constellation_id == 0 ? null : await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
-                rRegion = rConst?.region_id == null ||  rConst.region_id == 0 ? null : await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
+                rConst = km.rSystem.ConstellationId == 0 ? null : await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.ConstellationId);
+                rRegion = rConst?.RegionId == null ||  rConst.RegionId == 0 ? null : await APIHelper.ESIAPI.GetRegionData(Reason, rConst.RegionId);
             }
             else
             {
@@ -581,29 +582,29 @@ namespace ThunderED.Modules.OnDemand
                         //not in range
                         if (routeLength > radius) return false;
 
-                        var rSystemName = radiusId > 0 ? srcSystem?.name ?? LM.Get("Unknown") : LM.Get("Unknown");
+                        var rSystemName = radiusId > 0 ? srcSystem?.SolarSystemName ?? LM.Get("Unknown") : LM.Get("Unknown");
                         km.dic.Add("{radiusSystem}", rSystemName);
                         km.dic.Add("{radiusJumps}", routeLength.ToString());
 
                         break;
                     case RadiusMode.Constellation:
-                        if (km.rSystem.constellation_id != radiusId) return false;
+                        if (km.rSystem.ConstellationId != radiusId) return false;
                         break;
                     case RadiusMode.Region:
-                        if (km.rSystem.DB_RegionId > 0)
+                        if (km.rSystem.RegionId > 0)
                         {
-                            if (km.rSystem.DB_RegionId != radiusId) return false;
+                            if (km.rSystem.RegionId != radiusId) return false;
                         }
                         else
                         {
-                            rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
-                            if (rConst == null || rConst.region_id != radiusId) return false;
+                            rConst = await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.ConstellationId);
+                            if (rConst == null || rConst.RegionId != radiusId) return false;
                         }
 
                         break;
                 }
-                rConst = rConst ?? await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.constellation_id);
-                rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.region_id);
+                rConst = rConst ?? await APIHelper.ESIAPI.GetConstellationData(Reason, km.rSystem.ConstellationId);
+                rRegion = await APIHelper.ESIAPI.GetRegionData(Reason, rConst.RegionId);
             }
 
             //var rSystemName = rSystem?.name ?? LM.Get("Unknown");
@@ -611,8 +612,8 @@ namespace ThunderED.Modules.OnDemand
             km.dic.Add("{isRangeMode}", (mode == RadiusMode.Range).ToString());
             km.dic.Add("{isConstMode}", (mode == RadiusMode.Constellation).ToString());
             km.dic.Add("{isRegionMode}", (mode == RadiusMode.Region).ToString());
-            km.dic.AddOrUpdateEx("{constName}", rConst?.name);
-            km.dic.AddOrUpdateEx("{regionName}", rRegion?.name);
+            km.dic.AddOrUpdateEx("{constName}", rConst?.ConstellationName);
+            km.dic.AddOrUpdateEx("{regionName}", rRegion?.RegionName);
 
             var channels = filter.DiscordChannels.Any() ? filter.DiscordChannels : group.DiscordChannels;
 
@@ -625,7 +626,7 @@ namespace ThunderED.Modules.OnDemand
                     await APIHelper.DiscordAPI.SendMessageAsync(channel, kill.zkb.url);
                 else
                 {
-                    var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {srcSystem?.name}" : $"{LM.Get("InSmall")} {km.sysName} ({km.systemSecurityStatus})";
+                    var jumpsText = routeLength > 0 ? $"{routeLength} {LM.Get("From")} {srcSystem?.SolarSystemName}" : $"{LM.Get("InSmall")} {km.sysName} ({km.systemSecurityStatus})";
                     await SendEmbedKillMessage(new List<ulong> {channel}, new Color(0x989898), km, string.IsNullOrEmpty(jumpsText) ? "-" : jumpsText, group.ShowGroupName ? groupName : " ");
                 }
             }
@@ -633,7 +634,7 @@ namespace ThunderED.Modules.OnDemand
             return true;
         }
 
-        private bool? CheckLocation(JsonClasses.SystemName rSystem, JsonZKill.Killmail kill, KillMailFilter filter, string groupName, string filterName)
+        private bool? CheckLocation(ThdStarSystem rSystem, JsonZKill.Killmail kill, KillMailFilter filter, string groupName, string filterName)
         {
             if (rSystem == null)
             {
@@ -641,19 +642,19 @@ namespace ThunderED.Modules.OnDemand
                 return false;
             }
 
-            if (!filter.ShowHighsecSystem && rSystem.security_status >= .5f) return false;
-            if (!filter.ShowLowsecSystem && rSystem.security_status >= .1f) return false;
+            if (!filter.ShowHighsecSystem && rSystem.Security >= .5f) return false;
+            if (!filter.ShowLowsecSystem && rSystem.Security >= .1f) return false;
             if (!filter.ShowWormholeSystem && rSystem.IsWormhole()) return false;
             if (!filter.ShowAbyssSystem && rSystem.IsAbyss()) return false;
-            if (!filter.ShowNullsecSystem && rSystem.security_status <= 0f) return false;
+            if (!filter.ShowNullsecSystem && rSystem.Security <= 0f) return false;
 
             //Region
             var fRegions = GetTier2RegionIds(ParsedLocationLists, groupName, filterName);
-            if (fRegions.Any() && rSystem.DB_RegionId.HasValue && fRegions.Contains(rSystem.DB_RegionId.Value))
+            if (fRegions.Any() && rSystem.RegionId > 0 && fRegions.Contains(rSystem.RegionId))
                 return true;
             //Constellation
             var fConsts = GetTier2ConstellationIds(ParsedLocationLists, groupName, filterName);
-            if (fConsts.Any() && fConsts.Contains(rSystem.constellation_id))
+            if (fConsts.Any() && fConsts.Contains(rSystem.ConstellationId))
                 return true;
             //System
             var fSystems = GetTier2SystemIds(ParsedLocationLists, groupName, filterName);
@@ -732,7 +733,7 @@ namespace ThunderED.Modules.OnDemand
                     .WithThumbnailUrl($"https://image.eveonline.com/Type/{km.victimShipID}_64.png")
                     .WithAuthor(author =>
                     {
-                        author.WithName(LM.Get("killFeedHeader", km.rVictimShipType?.name, km.rSystem?.name))
+                        author.WithName(LM.Get("killFeedHeader", km.rVictimShipType?.name, km.rSystem?.SolarSystemName))
                             .WithUrl($"https://zkillboard.com/kill/{km.killmailID}/");
                         if (km.isNPCKill) author.WithIconUrl("http://www.panthernet.org/uf/npc2.jpg");
                     })

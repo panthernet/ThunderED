@@ -34,7 +34,7 @@ namespace ThunderED.Modules
         public async Task UpdateMoonTable(ThdMoonTableEntry entry)
         {
             if (entry.RegionId == 0)
-                entry.RegionId = (await APIHelper.ESIAPI.GetSystemData("MoonInfo", entry.SystemId))?.DB_RegionId ?? 0;
+                entry.RegionId = (await APIHelper.ESIAPI.GetSystemData("MoonInfo", entry.SystemId))?.RegionId ?? 0;
             if (string.IsNullOrEmpty(entry.OreName))
                 entry.OreName = (await APIHelper.ESIAPI.GetTypeId("MoonInfo", entry.OreId))?.name;
             await DbHelper.UpdateMoonTable(entry);
@@ -45,7 +45,7 @@ namespace ThunderED.Modules
             foreach (var entry in list)
             {
                 if (entry.RegionId == 0)
-                    entry.RegionId = (await APIHelper.ESIAPI.GetSystemData("MoonInfo", entry.SystemId))?.DB_RegionId ??
+                    entry.RegionId = (await APIHelper.ESIAPI.GetSystemData("MoonInfo", entry.SystemId))?.RegionId ??
                                      0;
                 if (string.IsNullOrEmpty(entry.OreName))
                     entry.OreName = (await APIHelper.ESIAPI.GetTypeId("MoonInfo", entry.OreId))?.name;

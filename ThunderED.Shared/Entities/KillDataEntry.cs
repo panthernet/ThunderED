@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ThunderED.Json;
 using ThunderED.Json.ZKill;
+using ThunderED.Thd;
 
 namespace ThunderED
 {
@@ -21,7 +22,7 @@ namespace ThunderED
         public long finalBlowAttackerAllyId;
         public bool isNPCKill;
         public long systemId;
-        public JsonClasses.SystemName rSystem;
+        public ThdStarSystem rSystem;
         public JsonClasses.CorporationData rVictimCorp;
         public JsonClasses.CorporationData rAttackerCorp;
         public JsonClasses.AllianceData rVictimAlliance;
