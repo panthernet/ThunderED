@@ -160,7 +160,7 @@ namespace ThunderED.Modules
                 var msgList = new List<string>();
 
                 //check ADM
-                var trackerData = await SQLHelper.GetSovIndexTrackerData(groupName);
+                var trackerData = await DbHelper.GetSovIndexTrackerData(groupName);
                 var holderIds = GetParsedAlliances(groupName, _userStorage) ?? new List<long>();
 
                 var idList = trackerData.Select(a => a.solar_system_id).Distinct();
