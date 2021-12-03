@@ -15,10 +15,7 @@
 + Improved access token handling, made some code refactoring
 + Improved caching logic and handling
 + Improved security
-+ Migrated standings auth to EF
-+ Migrated contracts to EF
-+ Migrated nullsec campaigns to EF
-+ Migrated incursions to EF
++ Migrated standings auth,contracts,nullsec campaigns,incursions,mail to EF
 
 ### V2.0.13
 + Web UI update, part 1

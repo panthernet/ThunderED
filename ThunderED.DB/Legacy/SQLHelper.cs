@@ -512,6 +512,7 @@ namespace ThunderED
         #endregion
 
         #region Mail
+        /*
         public static async Task<long> GetLastMailId(long charId)
         {
             return await Query<long>("mail", "mailId", "id", charId);
@@ -520,7 +521,7 @@ namespace ThunderED
         public static async Task UpdateMail(long charId, long mailId)
         {
             await InsertOrUpdate("mail", new Dictionary<string, object> {{"id", charId}, {"mailId", mailId}});
-        }
+        }*/
         #endregion
 
         #region Sov Index Tracker

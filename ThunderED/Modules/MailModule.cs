@@ -95,7 +95,7 @@ namespace ThunderED.Modules
 
                         var mailsHeaders = result.Result;
 
-                        var lastMailId = await SQLHelper.GetLastMailId(charId);
+                        var lastMailId = await DbHelper.GetLastMailId(charId);
                         var prevMailId = lastMailId;
 
                         if (lastMailId > 0)
@@ -151,7 +151,7 @@ namespace ThunderED.Modules
                         }
 
                         if (prevMailId != lastMailId || lastMailId == 0)
-                            await SQLHelper.UpdateMail(charId, lastMailId);
+                            await DbHelper.UpdateMail(charId, lastMailId);
                     }
                 }
 

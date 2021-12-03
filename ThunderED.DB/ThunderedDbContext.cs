@@ -27,6 +27,7 @@ namespace ThunderED
         public DbSet<ThdContract> Contracts { get; set; }
         public DbSet<ThdNullCampaign> NullCampaigns { get; set; }
         public DbSet<ThdIncursion> Incursions { get; set; }
+        public DbSet<ThdMail> Mails { get; set; }
         
         //public DbSet<ThdType> Types { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
@@ -105,6 +106,14 @@ namespace ThunderED
             modelBuilder.Entity<ThdIncursion>().Property(a => a.Time).HasColumnName("time");
             #endregion
 
+            #region ThdMail
+            modelBuilder.Entity<ThdMail>().HasKey(u => u.Id);
+            modelBuilder.Entity<ThdMail>().HasIndex(u => u.Id);
+
+            modelBuilder.Entity<ThdMail>().ToTable("mail");
+            modelBuilder.Entity<ThdMail>().Property(a => a.Id).HasColumnName("id");
+            modelBuilder.Entity<ThdMail>().Property(a => a.MailId).HasColumnName("mailId");
+            #endregion
 
             #region ThdToken
             modelBuilder.Entity<ThdToken>().HasIndex(u => u.Id).IsUnique();

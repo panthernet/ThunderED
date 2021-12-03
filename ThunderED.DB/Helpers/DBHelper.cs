@@ -645,7 +645,6 @@ namespace ThunderED
 
         #endregion
 
-
         #region Incursions
         public static async Task<bool> IsIncursionExists(long id)
         {
@@ -658,6 +657,32 @@ namespace ThunderED
         {
             await using var db = new ThunderedDbContext();
             await db.Incursions.AddAsync(new ThdIncursion {ConstId = id, Time = DateTime.Now});
+            await db.SaveChangesAsync();
+        }
+        #endregion
+
+        #region Mail
+        public static async Task<long> GetLastMailId(long charId)
+        {
+            await using var db = new ThunderedDbContext();
+            return (await db.Mails.AsNoTracking().FirstOrDefaultAsync(
+                a => a.Id == charId))?.MailId ?? 0;
+        }
+
+        public static async Task UpdateMail(long charId, long mailId)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.Mails.FirstOrDefaultAsync(
+                a => a.Id == charId);
+            if (old == null)
+            {
+                await db.Mails.AddAsync(new ThdMail{Id = charId, MailId = mailId});
+            }
+            else
+            {
+                old.MailId = mailId;
+            }
+
             await db.SaveChangesAsync();
         }
         #endregion
