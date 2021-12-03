@@ -645,6 +645,23 @@ namespace ThunderED
 
         #endregion
 
+
+        #region Incursions
+        public static async Task<bool> IsIncursionExists(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Incursions.AsNoTracking().FirstOrDefaultAsync(
+                a => a.ConstId == id) != null;
+        }
+
+        public static async Task AddIncursion(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.Incursions.AddAsync(new ThdIncursion {ConstId = id, Time = DateTime.Now});
+            await db.SaveChangesAsync();
+        }
+        #endregion
+
         #region Moon table
 
         public static async Task UpdateMoonTable(ThdMoonTableEntry entry)

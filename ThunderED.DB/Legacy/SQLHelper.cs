@@ -497,7 +497,7 @@ namespace ThunderED
         #endregion
 
         #region Incursions
-        public static async Task<bool> IsIncurionExists(long id)
+        /*public static async Task<bool> IsIncurionExists(long id)
         {
             return await Query<long>("incursions", "constId", "constId", id) > 0;
         }
@@ -508,7 +508,7 @@ namespace ThunderED
             {
                 { "constId", id }
             });
-        }
+        }*/
         #endregion
 
         #region Mail

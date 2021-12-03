@@ -26,6 +26,8 @@ namespace ThunderED
         public DbSet<ThdStandsAuth> StandsAuth { get; set; }
         public DbSet<ThdContract> Contracts { get; set; }
         public DbSet<ThdNullCampaign> NullCampaigns { get; set; }
+        public DbSet<ThdIncursion> Incursions { get; set; }
+        
         //public DbSet<ThdType> Types { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
@@ -93,6 +95,16 @@ namespace ThunderED
             modelBuilder.Entity<ThdNullCampaign>().Property(a => a.Data).HasColumnName("data").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<JsonClasses.NullCampaignItem>(v));
             modelBuilder.Entity<ThdNullCampaign>().Property(a => a.LastAnnounce).HasColumnName("lastAnnounce");
             #endregion
+
+            #region ThdIncursion
+            modelBuilder.Entity<ThdIncursion>().HasKey(u => u.ConstId);
+            modelBuilder.Entity<ThdIncursion>().HasIndex(u => u.ConstId);
+
+            modelBuilder.Entity<ThdIncursion>().ToTable("incursions");
+            modelBuilder.Entity<ThdIncursion>().Property(a => a.ConstId).HasColumnName("constId");
+            modelBuilder.Entity<ThdIncursion>().Property(a => a.Time).HasColumnName("time");
+            #endregion
+
 
             #region ThdToken
             modelBuilder.Entity<ThdToken>().HasIndex(u => u.Id).IsUnique();

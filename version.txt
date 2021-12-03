@@ -18,6 +18,7 @@
 + Migrated standings auth to EF
 + Migrated contracts to EF
 + Migrated nullsec campaigns to EF
++ Migrated incursions to EF
 
 ### V2.0.13
 + Web UI update, part 1

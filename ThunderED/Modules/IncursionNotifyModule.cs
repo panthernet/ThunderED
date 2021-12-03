@@ -95,11 +95,11 @@ namespace ThunderED.Modules
 
         private async Task ReportIncursion(JsonClasses.IncursionData incursion, JsonClasses.ConstellationData c, IMessageChannel channel)
         {
-            var result = await SQLHelper.IsIncurionExists(incursion.constellation_id);
+            var result = await DbHelper.IsIncursionExists(incursion.constellation_id);
             //skip existing incursion report
             if(result)
                 return;
-            await SQLHelper.AddIncursion(incursion.constellation_id);
+            await DbHelper.AddIncursion(incursion.constellation_id);
 
             c ??= await APIHelper.ESIAPI.GetConstellationData(Reason, incursion.constellation_id);
             var r = await APIHelper.ESIAPI.GetRegionData(Reason, c.region_id);
