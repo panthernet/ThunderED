@@ -1654,7 +1654,8 @@ namespace ThunderED.Modules
                             .WithThumbnailUrl(Settings.Resources.ImgCitServicesOffline)
                             .WithAuthor(author => author.WithName(LM.Get("StructureImpendingAbandonmentAssetsAtRiskMsg", stName, daysLeft)))
                             //.AddField(LM.Get("BlameCorp"), isCorp, true)
-                            .AddField(LM.Get("System"), systemName, true)
+                            .AddField(LM.Get("System"), $"{systemName}({Math.Round(system.Security, 1):0.0})", true)
+                            .AddField(LM.Get("Structure"), stTypeName, true)
                             .WithFooter($"EVE Time: {timestamp.ToShortDateString()} {timestamp.ToShortTimeString()}")
                             .WithTimestamp(timestamp);
                         embed = builder.Build();

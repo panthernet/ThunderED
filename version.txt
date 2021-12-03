@@ -15,6 +15,7 @@
 + Improved access token handling, made some code refactoring
 + Improved caching logic and handling
 + Improved security
++ Improved asset notification info
 + Migrated standings auth,contracts,nullsec campaigns,incursions,mail,sov tracker, industry, static data to EF
 
 ### V2.0.13
