@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using Discord;
 using Discord.Commands;
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules
 {
@@ -149,13 +145,13 @@ namespace ThunderED.Modules
             var lastContractId = contracts.FirstOrDefault()?.contract_id ?? 0;
             if (lastContractId == 0) return;
 
-            var lst = !isCorp ? await SQLHelper.LoadContracts(characterID, false) : await SQLHelper.LoadContracts(characterID, true);
-            var otherList = isCorp ? await SQLHelper.LoadContracts(characterID, false) : null;
+            var lst = await DbHelper.GetContracts(characterID, isCorp);
+            var otherList = isCorp ? await DbHelper.GetContracts(characterID, false) : null;
 
             if (lst == null)
             {
                 lst = new List<JsonClasses.Contract>(contracts.Where(a=> _activeStatuses.ContainsCaseInsensitive(a.status)).TakeSmart(maxContracts));
-                await SQLHelper.SaveContracts(characterID, lst, isCorp);
+                await DbHelper.SaveContracts(characterID, lst, isCorp);
                 return;
             }
 
@@ -321,7 +317,7 @@ namespace ThunderED.Modules
                     lst.Remove(o);
             }
 
-            await SQLHelper.SaveContracts(characterID, lst, isCorp);
+            await DbHelper.SaveContracts(characterID, lst, isCorp);
 
         }
 
@@ -656,9 +652,9 @@ namespace ThunderED.Modules
                 foreach (var characterID in chars)
                 {       
                     if(group.FeedPersonalContracts)
-                        personalContracts.AddRange(await SQLHelper.LoadContracts(characterID, false));
+                        personalContracts.AddRange(await DbHelper.GetContracts(characterID, false));
                     if(group.FeedCorporateContracts)
-                        corpContracts.AddRange(await SQLHelper.LoadContracts(characterID, true));
+                        corpContracts.AddRange(await DbHelper.GetContracts(characterID, true));
                 }
 
                 if (mod.Length > 1)

@@ -26,7 +26,7 @@
                 </p>
             }
 
-            @if ((UserId > 0 && ContractNotificationsModule.HasAuthAccess(UserId) || SettingsManager.Settings.WebAuthModule.DisplayFeedAuthWithoutRegistration) && SettingsManager.Settings.Config.ModuleContractNotifications)
+            @if (UserId > 0 && ContractNotificationsModule.HasAuthAccess(UserId))
             {
                 <p style="text-align: -webkit-center">
                     <a href="@GetContractsAuthURL()"><div class="navButton1 longButton" role="button">@GetContractsAuthText()</div></a>

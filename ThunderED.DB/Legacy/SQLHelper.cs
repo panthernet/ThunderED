@@ -441,7 +441,7 @@ namespace ThunderED
 
 
         #region Contracts
-        public static async Task<List<JsonClasses.Contract>> LoadContracts(long characterID, bool isCorp)
+        /*public static async Task<List<JsonClasses.Contract>> LoadContracts(long characterID, bool isCorp)
         {
             var data = (string)(await SelectData("contracts", new [] {isCorp ? "corpdata" : "data"}, new Dictionary<string, object> {{"characterID", characterID}}))?.FirstOrDefault()?.FirstOrDefault();
             return string.IsNullOrEmpty(data) ? null : JsonConvert.DeserializeObject<List<JsonClasses.Contract>>(data).OrderByDescending(a=> a.contract_id).ToList();
@@ -459,7 +459,7 @@ namespace ThunderED
                 {isCorp ? "corpdata" : "data", string.IsNullOrEmpty(result) ? null : result},
                 {isCorp ? "data" : "corpdata", string.IsNullOrEmpty(d) ? null : d}
             });
-        }
+        }*/
         #endregion
        
         #region AuthStandings

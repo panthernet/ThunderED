@@ -52,6 +52,9 @@ namespace THDWebServer.Authentication
 
             if (usr == null || usr.Id == 0 || string.IsNullOrEmpty(usr.Code) || !Auth.ContainsKey(usr.Id) || Auth[usr.Id].IsExpired(SettingsManager.Settings.Config.WebSessionTimeout))
             {
+                if(usr != null)
+                    await ProtectedSessionStore.DeleteAsync("user");
+
                 return new AuthenticationState(new ClaimsPrincipal());
             }
 
@@ -142,6 +145,7 @@ namespace THDWebServer.Authentication
             if (Auth.ContainsKey(id))
             {
                 Auth.Remove(id);
+                await ProtectedSessionStore.DeleteAsync("user");
             }
         }
     }

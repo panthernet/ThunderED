@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Radzen;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
+using ThunderED.Json;
 using ThunderED.Thd;
 
 namespace ThunderED
@@ -539,6 +540,38 @@ namespace ThunderED
                 db.CacheData.Remove(old);
             await db.CacheData.AddAsync(new ThdCacheDataEntry { Name = name, Data = data });
 
+            await db.SaveChangesAsync();
+        }
+
+        #endregion
+
+        #region Contracts
+
+        public static async Task<List<JsonClasses.Contract>> GetContracts(long characterID, bool isCorp)
+        {
+            await using var db = new ThunderedDbContext();
+            if (isCorp)
+                return (await db.Contracts.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == characterID))
+                    ?.CorpData;
+            return (await db.Contracts.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == characterID))
+                ?.Data;
+        }
+
+        public static async Task SaveContracts(long characterId, List<JsonClasses.Contract> data, bool isCorp)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.Contracts.FirstOrDefaultAsync(a => a.CharacterId == characterId);
+            if (old != null)
+            {
+                if (isCorp)
+                    old.CorpData = data;
+                else old.Data = data;
+            }
+            else
+            {
+                await db.Contracts.AddAsync(new ThdContract
+                    {CharacterId = characterId, CorpData = isCorp ? data : null, Data = isCorp ? null : data});
+            }
             await db.SaveChangesAsync();
         }
 

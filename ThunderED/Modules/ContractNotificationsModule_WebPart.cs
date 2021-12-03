@@ -78,7 +78,7 @@ namespace ThunderED.Modules
 
                     // var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
 
-                    await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Notification);
+                    await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Contract);
 
                     await LogHelper.LogInfo($"Contracts feed added for character: {characterId}", LogCat.AuthWeb);
 

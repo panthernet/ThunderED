@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -23,6 +24,7 @@ namespace ThunderED
         public DbSet<ThdStorageConsoleEntry> StorageConsole { get; set; }
         public DbSet<ThdInvCustomScheme> CustomSchemes { get; set; }
         public DbSet<ThdStandsAuth> StandsAuth { get; set; }
+        public DbSet<ThdContract> Contracts { get; set; }
         //public DbSet<ThdType> Types { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
@@ -65,6 +67,17 @@ namespace ThunderED
             modelBuilder.Entity<ThdStandsAuth>().Property(a => a.PersonalStands).HasColumnName("personalStands").HasConversion(v=> JsonConvert.SerializeObject(v), v=> JsonConvert.DeserializeObject<List<JsonClasses.Contact>>(v));
             modelBuilder.Entity<ThdStandsAuth>().Property(a => a.CorpStands).HasColumnName("corpStands").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contact>>(v));
             modelBuilder.Entity<ThdStandsAuth>().Property(a => a.AllianceStands).HasColumnName("allianceStands").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contact>>(v));
+
+            #endregion
+
+
+            #region ThdContract
+            modelBuilder.Entity<ThdContract>().HasKey(u => u.CharacterId);
+            modelBuilder.Entity<ThdContract>().ToTable("contracts");
+
+            modelBuilder.Entity<ThdContract>().Property(a => a.CharacterId).HasColumnName("characterID").ValueGeneratedNever();
+            modelBuilder.Entity<ThdContract>().Property(a => a.Data).HasColumnName("data").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contract>>(v).OrderByDescending(a=> a.contract_id).ToList());
+            modelBuilder.Entity<ThdContract>().Property(a => a.CorpData).HasColumnName("corpdata").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contract>>(v).OrderByDescending(a => a.contract_id).ToList());
 
             #endregion
 
