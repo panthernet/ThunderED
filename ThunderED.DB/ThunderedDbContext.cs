@@ -29,6 +29,7 @@ namespace ThunderED
         public DbSet<ThdIncursion> Incursions { get; set; }
         public DbSet<ThdMail> Mails { get; set; }
         public DbSet<ThdSovIndexTracker> SovIndexTrackers { get; set; }
+        public DbSet<ThdIndustryJob> IndustryJobs { get; set; }
         
         //public DbSet<ThdType> Types { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
@@ -124,6 +125,16 @@ namespace ThunderED
             modelBuilder.Entity<ThdSovIndexTracker>().ToTable("sovIndexTracker");
             modelBuilder.Entity<ThdSovIndexTracker>().Property(a => a.GroupName).HasColumnName("groupName");
             modelBuilder.Entity<ThdSovIndexTracker>().Property(a => a.Data).HasColumnName("data").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject< List<JsonClasses.SovStructureData>>(v));
+            #endregion
+
+            #region ThdIndustryJob
+            modelBuilder.Entity<ThdIndustryJob>().HasKey(u => u.CharacterId);
+            modelBuilder.Entity<ThdIndustryJob>().HasIndex(u => u.CharacterId);
+
+            modelBuilder.Entity<ThdIndustryJob>().ToTable("industry_jobs");
+            modelBuilder.Entity<ThdIndustryJob>().Property(a => a.CharacterId).HasColumnName("character_id");
+            modelBuilder.Entity<ThdIndustryJob>().Property(a => a.PersonalJobs).HasColumnName("personal_jobs").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.IndustryJob>>(v));
+            modelBuilder.Entity<ThdIndustryJob>().Property(a => a.CorporateJobs).HasColumnName("corporate_jobs").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.IndustryJob>>(v));
             #endregion
 
             #region ThdToken

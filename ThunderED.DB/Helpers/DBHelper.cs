@@ -713,6 +713,36 @@ namespace ThunderED
 
         #endregion
 
+        #region Industry Jobs
+        public static async Task<List<JsonClasses.IndustryJob>> GetIndustryJobs(long characterId, bool isCorp)
+        {
+            await using var db = new ThunderedDbContext();
+            if (isCorp)
+                return (await db.IndustryJobs.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == characterId))
+                    ?.CorporateJobs.OrderByDescending(a=> a.job_id).ToList();
+            return (await db.IndustryJobs.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == characterId))
+                ?.PersonalJobs.OrderByDescending(a=> a.job_id).ToList();
+        }
+
+        public static async Task SaveIndustryJobs(long characterId, List<JsonClasses.IndustryJob> data, bool isCorp)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.IndustryJobs.FirstOrDefaultAsync(a => a.CharacterId == characterId);
+            if (old != null)
+            {
+                if (isCorp)
+                    old.CorporateJobs = data;
+                else old.PersonalJobs = data;
+            }
+            else
+            {
+                await db.IndustryJobs.AddAsync(new ThdIndustryJob
+                    { CharacterId = characterId, CorporateJobs = isCorp ? data : null, PersonalJobs = isCorp ? null : data });
+            }
+            await db.SaveChangesAsync();
+        }
+        #endregion
+
         #region Moon table
 
         public static async Task UpdateMoonTable(ThdMoonTableEntry entry)

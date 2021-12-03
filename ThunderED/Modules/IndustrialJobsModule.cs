@@ -130,8 +130,8 @@ namespace ThunderED.Modules
             var lastJobId = esiJobs.FirstOrDefault()?.job_id ?? 0;
             if (lastJobId == 0) return;
 
-            var dbJobs = !isCorp ? await SQLHelper.LoadIndustryJobs(characterID, false) : await SQLHelper.LoadIndustryJobs(characterID, true);
-            var dbJobsOther = isCorp ? await SQLHelper.LoadIndustryJobs(characterID, false) : null;//TODO check for sanity
+            var dbJobs = !isCorp ? await DbHelper.GetIndustryJobs(characterID, false) : await DbHelper.GetIndustryJobs(characterID, true);
+            var dbJobsOther = isCorp ? await DbHelper.GetIndustryJobs(characterID, false) : null;//TODO check for sanity
 
             //check if initial startup
             if (dbJobs == null)
@@ -139,7 +139,7 @@ namespace ThunderED.Modules
                 dbJobs = new List<JsonClasses.IndustryJob>(esiJobs.Where(a=> a.StatusValue != IndustryJobStatusEnum.delivered));
                 //if (dbJobs.Any())
                // {
-                await SQLHelper.SaveIndustryJobs(characterID, dbJobs, isCorp);
+                await DbHelper.SaveIndustryJobs(characterID, dbJobs, isCorp);
                 return;
                 //}
             }
@@ -222,7 +222,7 @@ namespace ThunderED.Modules
                     dbJobs.Remove(o);
             }
 
-            await SQLHelper.SaveIndustryJobs(characterID, dbJobs, isCorp);
+            await DbHelper.SaveIndustryJobs(characterID, dbJobs, isCorp);
         }
 
         private bool CheckJobForFilter(IndustryJobFilter filter, JsonClasses.IndustryJob job, bool isCorp)

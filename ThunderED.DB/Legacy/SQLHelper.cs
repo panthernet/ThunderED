@@ -544,7 +544,7 @@ namespace ThunderED
         #endregion
 
         #region Industry Jobs
-        public static async Task<List<JsonClasses.IndustryJob>> LoadIndustryJobs(long characterID, bool isCorp)
+        /*public static async Task<List<JsonClasses.IndustryJob>> LoadIndustryJobs(long characterID, bool isCorp)
         {
             var data = (string)(await SelectData("industry_jobs", new [] {isCorp ? "corporate_jobs" : "personal_jobs"}, new Dictionary<string, object> {{"character_id", characterID}}))?.FirstOrDefault()?.FirstOrDefault();
             return string.IsNullOrEmpty(data) ? null : JsonConvert.DeserializeObject<List<JsonClasses.IndustryJob>>(data).OrderByDescending(a=> a.job_id).ToList();
@@ -562,7 +562,7 @@ namespace ThunderED
                 {isCorp ? "corporate_jobs" : "personal_jobs", string.IsNullOrEmpty(result) ? null : result},
                 {isCorp ? "personal_jobs" : "corporate_jobs", string.IsNullOrEmpty(d) ? null : d}
             });
-        }
+        }*/
         #endregion
 
     }
