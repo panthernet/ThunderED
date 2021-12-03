@@ -25,6 +25,7 @@ namespace ThunderED
         public DbSet<ThdInvCustomScheme> CustomSchemes { get; set; }
         public DbSet<ThdStandsAuth> StandsAuth { get; set; }
         public DbSet<ThdContract> Contracts { get; set; }
+        public DbSet<ThdNullCampaign> NullCampaigns { get; set; }
         //public DbSet<ThdType> Types { get; set; }
         //public DbSet<JsonClasses.SystemName> Systems { get; set; }
         //public DbSet<JsonClasses.ConstellationData> Constellations { get; set; }
@@ -79,6 +80,18 @@ namespace ThunderED
             modelBuilder.Entity<ThdContract>().Property(a => a.Data).HasColumnName("data").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contract>>(v).OrderByDescending(a=> a.contract_id).ToList());
             modelBuilder.Entity<ThdContract>().Property(a => a.CorpData).HasColumnName("corpdata").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contract>>(v).OrderByDescending(a => a.contract_id).ToList());
 
+            #endregion
+
+            #region ThdNullCampaign
+            modelBuilder.Entity<ThdNullCampaign>().HasIndex(u => u.GroupKey);
+            modelBuilder.Entity<ThdNullCampaign>().HasIndex("GroupKey","CampaignId");
+
+            modelBuilder.Entity<ThdNullCampaign>().ToTable("null_campaigns");
+            modelBuilder.Entity<ThdNullCampaign>().Property(a => a.GroupKey).HasColumnName("groupKey");
+            modelBuilder.Entity<ThdNullCampaign>().Property(a => a.CampaignId).HasColumnName("campaignId");
+            modelBuilder.Entity<ThdNullCampaign>().Property(a => a.Time).HasColumnName("time");
+            modelBuilder.Entity<ThdNullCampaign>().Property(a => a.Data).HasColumnName("data").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<JsonClasses.NullCampaignItem>(v));
+            modelBuilder.Entity<ThdNullCampaign>().Property(a => a.LastAnnounce).HasColumnName("lastAnnounce");
             #endregion
 
             #region ThdToken

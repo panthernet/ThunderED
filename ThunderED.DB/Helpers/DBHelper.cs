@@ -577,6 +577,74 @@ namespace ThunderED
 
         #endregion
 
+        #region NullCampaign
+
+        public static async Task<List<JsonClasses.NullCampaignItem>> GetNullCampaigns(string group)
+        {
+            await using var db = new ThunderedDbContext();
+            var result = await db.NullCampaigns.AsNoTracking().Where(a => EF.Functions.Like(a.GroupKey, group)).ToListAsync();
+            if(result != null)
+                result.ForEach(a=> a.Data.LastAnnounce = a.LastAnnounce);
+            return result?.Select(a=> a.Data).ToList();
+        }
+
+        public static async Task UpdateNullCampaignAnnounce(string group, long campaignId, int announce)
+        {
+            await using var db = new ThunderedDbContext();
+            var result = await db.NullCampaigns.FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupKey, group) && a.CampaignId == campaignId);
+            if (result != null)
+            {
+                result.LastAnnounce = announce;
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public static async Task UpdateNullCampaign(string groupName, long id, DateTimeOffset startTime, JsonClasses.NullCampaignItem data)
+        {
+            await using var db = new ThunderedDbContext();
+            var result = await db.NullCampaigns.FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupKey, groupName) && a.CampaignId == id);
+            if (result != null)
+            {
+                result.Time = startTime;
+                result.Data = data;
+            }
+            else
+            {
+                await db.NullCampaigns.AddAsync(new ThdNullCampaign
+                {
+                    GroupKey = groupName,
+                    CampaignId = id,
+                    Time = startTime
+                });
+            }
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task DeleteNullCampaign(string groupName, long id)
+        {
+            await using var db = new ThunderedDbContext();
+            var result = await db.NullCampaigns.FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupKey, groupName) && a.CampaignId == id);
+            if (result != null)
+            {
+                db.NullCampaigns.Remove(result);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public static async Task<List<long>> GetNullsecCampaignIdList(string groupName)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.NullCampaigns.AsNoTracking().Where(a => EF.Functions.Like(a.GroupKey, groupName)).Select(a=> a.CampaignId).ToListAsync();
+        }
+
+        public static async Task<bool> IsNullsecCampaignExists(string groupName, long id)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.NullCampaigns.AsNoTracking().FirstOrDefaultAsync(a => EF.Functions.Like(a.GroupKey, groupName) && a.CampaignId == id) != null;
+        }
+
+        #endregion
+
         #region Moon table
 
         public static async Task UpdateMoonTable(ThdMoonTableEntry entry)

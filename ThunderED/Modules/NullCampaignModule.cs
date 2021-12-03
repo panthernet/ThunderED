@@ -57,19 +57,19 @@ namespace ThunderED.Modules
                     systemIds.AddRange(sysIds);
 
                     var campaigns = allCampaigns.Where(a => systemIds.Contains(a.solar_system_id));
-                    var existIds = await SQLHelper.GetNullsecCampaignIdList(groupName);
+                    var existIds = await DbHelper.GetNullsecCampaignIdList(groupName);
                     campaigns = campaigns.Where(a => !existIds.Contains(a.campaign_id));
 
                     foreach (var campaign in campaigns)
                     {
-                        if(await SQLHelper.IsNullsecCampaignExists(groupName, campaign.campaign_id))
+                        if(await DbHelper.IsNullsecCampaignExists(groupName, campaign.campaign_id))
                             continue;
 
                         var startTime = campaign.Time;
                         var totalMinutes = DateTime.UtcNow >= startTime ? 0 : (int)(startTime - DateTime.UtcNow).TotalMinutes;
                         if(totalMinutes == 0) continue;
 
-                        await SQLHelper.UpdateNullCampaign(groupName, campaign.campaign_id, startTime, campaign.ToJson());
+                        await DbHelper.UpdateNullCampaign(groupName, campaign.campaign_id, startTime, campaign);
                         if(group.ReportNewCampaign)
                             await PrepareMessage(campaign, group, LM.Get("NC_NewCampaign"), 0x00FF00);
 
@@ -105,7 +105,7 @@ namespace ThunderED.Modules
                 await LogHelper.LogModule("Running NullCampaign module check...", Category);
                 foreach (var pair in Settings.NullCampaignModule.GetEnabledGroups())
                 {
-                    foreach (var campaign in await SQLHelper.GetNullCampaigns(pair.Key))
+                    foreach (var campaign in await DbHelper.GetNullCampaigns(pair.Key))
                     {
                         var startTime = campaign.Time;
                         //delete outdated campaigns
@@ -114,7 +114,7 @@ namespace ThunderED.Modules
                             if (!pair.Value.Announces.Any())
                                 await PrepareMessage(campaign, pair.Value, LM.Get("NC_LessThanMinsLeft", TimeSpan.FromMinutes(0).ToFormattedString()), 0xFF0000);
 
-                            await SQLHelper.DeleteNullCampaign(pair.Key, campaign.campaign_id);
+                            await DbHelper.DeleteNullCampaign(pair.Key, campaign.campaign_id);
                             await LogHelper.LogInfo($"Nullsec Campaign {campaign.campaign_id} has been deleted...", Category, true, false);
                             continue;
                         }
@@ -135,7 +135,7 @@ namespace ThunderED.Modules
                                 {
                                     await PrepareMessage(campaign, pair.Value, LM.Get("NC_LessThanMinsLeft", TimeSpan.FromMinutes(minutesLeft).ToFormattedString()), 0xFF0000);
                                     //update last announce
-                                    await SQLHelper.UpdateNullCampaignAnnounce(pair.Key, campaign.campaign_id, announce);
+                                    await DbHelper.UpdateNullCampaignAnnounce(pair.Key, campaign.campaign_id, announce);
                                     break;
                                 }
                             }

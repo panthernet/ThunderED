@@ -392,7 +392,7 @@ namespace ThunderED
 
         #region NullCampaigns
 
-        public static async Task<List<JsonClasses.NullCampaignItem>> GetNullCampaigns(string group)
+       /* public static async Task<List<JsonClasses.NullCampaignItem>> GetNullCampaigns(string group)
         {
             return (await SelectData("null_campaigns", new[] {"data", "lastAnnounce" }, new Dictionary<string, object>{{"groupKey", group}}))
                 .Select(item =>
@@ -436,7 +436,7 @@ namespace ThunderED
         public static async Task<bool> IsNullsecCampaignExists(string groupName, long id)
         {
             return await IsEntryExists("null_campaigns", new Dictionary<string, object> {{"groupKey", groupName}, {"campaignId", id}});
-        }
+        }*/
         #endregion
 
 
