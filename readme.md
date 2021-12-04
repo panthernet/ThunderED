@@ -39,6 +39,9 @@ With this bot you will have tools to:
 * Receive pings from external messengers like Jabber, IRC, Telegram
 * Keep track of personal and corp contracts
 * Keep track of industry jobs for members and corporations
+* Manage your structures, incl. fuel and vulnerability info
+* Manage your mining ops with the info about upcoming extractions and passed mining ops (ore composition, prices, etc.)
+* Keep centralized database of moon ore compositions scanned by probes
 
 ## Supported Modules
 * Web Auth - authenticate EVE characters in Discord using built-in web server, use JackKnife utility to inspect them before you accept them into your community
@@ -69,6 +72,9 @@ With this bot you will have tools to:
 * Commands Module
   - WIP Ships command - define patterns and receive statistics about the ships/fits your members can fly
   - Define which roles your members can self-assign
+* Mining module - keep track of upcoming extractions with detailed info about or composition. Keep tracking the ops with the mining ledger with the ability to sum ore with alt characters and display approx price
+* Structures module - keep track of your structures fuel and vulnerability states
+* Moon module - centralized database for moon ore compositions based on the data uploaded from probe scan window
 
 ## Build Requirements
 * Visual Studio 2019 Community Edition (Windows)
