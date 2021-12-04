@@ -65,7 +65,15 @@ namespace ThunderED.Modules
                                 continue;
                             }
 
-                            var tq = await APIHelper.ESIAPI.GetAccessToken(rtoken,$"From {Category} | Char ID: {characterID}");
+                            if(rtoken.Scopes == null) continue;
+
+                            var s = new ESIScope();
+                            if (SettingsManager.HasCharContractsScope(rtoken.Scopes.Split(',').ToList()))
+                                s.AddCharContracts();
+                            if (SettingsManager.HasCorpContractsScope(rtoken.Scopes.Split(',').ToList()))
+                                s.AddCorpContracts();
+
+                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rtoken, s.Merge(),$"From {Category} | Char ID: {characterID}");
                             var token = tq.Result;
                             if (string.IsNullOrEmpty(token))
                             {

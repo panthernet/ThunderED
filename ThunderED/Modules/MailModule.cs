@@ -62,7 +62,7 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        var tq = await APIHelper.ESIAPI.GetAccessToken(rToken, $"From {Category} | Char ID: {charId}");
+                        var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rToken, new ESIScope().AddCharReadMail().Merge(), $"From {Category} | Char ID: {charId}");
                         var token = tq.Result;
                         if (string.IsNullOrEmpty(token))
                         {
@@ -449,7 +449,7 @@ namespace ThunderED.Modules
                     if (!SettingsManager.HasReadMailScope(user.DataView.PermissionsList))
                         continue;
 
-                    var token = (await APIHelper.ESIAPI.GetAccessToken(user.GetGeneralToken(),
+                    var token = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(user.GetGeneralToken(), new ESIScope().AddCharReadMail().Merge(),
                         $"From Mail | Char ID: {user.CharacterId} | Char name: {user.DataView.CharacterName}"))?.Result;
 
                     if (string.IsNullOrEmpty(token))

@@ -51,6 +51,7 @@
         StorageConsole,
         Remind,
         UpdateTracker,
-        TokenUpdate
+        TokenUpdate,
+        AccessToken
     }
 }

@@ -293,7 +293,7 @@ namespace ThunderED.Modules.OnDemand
                 foreach (var user in users)
                 {
                     if (!SettingsManager.HasCharStandingsScope(user.DataView.PermissionsList)) continue;
-                    var token = (await APIHelper.ESIAPI.GetAccessToken(user.GetGeneralToken(),
+                    var token = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(user.GetGeneralToken(), new ESIScope().AddCharStandings().Merge(),
                             $"From FWStats | Char ID: {user.CharacterId} | Char name: {user.DataView.CharacterName}"))
                         ?.Result;
                     if (string.IsNullOrEmpty(token)) continue;

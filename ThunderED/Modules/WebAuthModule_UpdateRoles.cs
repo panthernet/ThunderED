@@ -591,6 +591,8 @@ namespace ThunderED.Modules
                     }
                 }
                 
+                
+
 
                 await AuthInfoLog(characterData, $"[RG] PRE TOCHECK: {string.Join(',', groupsToCheck.Keys)} CHARID: {characterData.character_id} DID: {authData?.DiscordId} AUTH: {authData?.AuthState} GRP: {authData?.GroupName}", true);
                 //TODO multi impl

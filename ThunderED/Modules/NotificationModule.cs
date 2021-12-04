@@ -83,8 +83,8 @@ namespace ThunderED.Modules
         private class TrackerData
         {
             public string Etag;
-            public DateTime KeyUpdate;
-            public string Key;
+            public readonly DateTime KeyUpdate;
+            public readonly string Key;
 
             public TrackerData(string key)
             {
@@ -107,7 +107,7 @@ namespace ThunderED.Modules
             try
             {
 
-                const bool logConsole = true;
+                const bool logConsole = false;
                 const bool logFile = false;
 
                 if (DateTime.Now > _nextTrackerCheck)
@@ -206,7 +206,7 @@ namespace ThunderED.Modules
                                         await LogHelper.LogInfo($"Key update...", LogCat.UpdateTracker, logConsole,
                                             logFile);
 
-                                        var key = (await APIHelper.ESIAPI.GetAccessToken(token))?.Result;
+                                        var key = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddNotifications().Merge()))?.Result;
                                         await LogHelper.LogInfo($"Key: {key != null}", LogCat.UpdateTracker, logConsole,
                                             logFile);
                                         if (key == null) return;
@@ -337,7 +337,7 @@ namespace ThunderED.Modules
                                 continue;
                             }
 
-                            var tq = await APIHelper.ESIAPI.GetAccessToken(rToken, $"From {Category} | Char ID: {charId}");
+                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rToken, new ESIScope().AddNotifications().Merge(), $"From {Category} | Char ID: {charId}");
                             var token = tq.Result;
                             if (tq.Data.IsNoConnection) return;
                             if (string.IsNullOrEmpty(token))

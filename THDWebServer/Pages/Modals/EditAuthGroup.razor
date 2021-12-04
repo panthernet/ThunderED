@@ -277,7 +277,7 @@
             }*/
         await _allowedGrid.UpdateRow(order);
         AuthGroup.Value.AllowedMembers.Remove(order.Key);
-        order.Value.Entities = _editMembersEntities.Split(",").Select(a => (object) a).ToList();
+        order.Value.Entities = string.IsNullOrEmpty(_editMembersEntities) ? new List<object>() : _editMembersEntities.Split(",").Select(a => (object) a).ToList();
         AuthGroup.Value.AllowedMembers.Add(_editMembersName, order.Value);
         await _allowedGrid.Reload();
 

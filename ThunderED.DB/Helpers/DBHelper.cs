@@ -101,7 +101,7 @@ namespace ThunderED
         public static async Task<List<ThdToken>> GetTokensWithoutScopes()
         {
             await using var db = new ThunderedDbContext();
-            return await db.Tokens.AsNoTracking().Where(a => a.Scopes == null && a.Type == TokenEnum.General)
+            return await db.Tokens.AsNoTracking().Where(a => a.Scopes == null)
                 .ToListAsync();
         }
 
@@ -270,8 +270,8 @@ namespace ThunderED
             if (item != null)
             {
                 db.Users.Remove(item);
-                var tokens = db.Tokens.Where(a => a.CharacterId == characterId && a.Type == TokenEnum.General);
-                db.Tokens.RemoveRange(tokens);
+                //var tokens = db.Tokens.Where(a => a.CharacterId == characterId && a.Type == TokenEnum.General);
+                //db.Tokens.RemoveRange(tokens);
 
                 var alts = await db.Users.Where(a => a.MainCharacterId == characterId).ToListAsync();
                 if (alts.Any())

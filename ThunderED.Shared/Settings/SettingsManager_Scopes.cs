@@ -30,6 +30,12 @@ namespace ThunderED
             return permissions.Any(a => a.Equals("esi-characters.read_contacts.v1", StringComparison.OrdinalIgnoreCase));
         }
 
+        public static bool HasCorpContractsScope(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-contracts.read_corporation_contracts.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
         public static bool HasCharSkillsScope(List<string> permissions)
         {
             if (permissions == null) return false;
@@ -46,6 +52,11 @@ namespace ThunderED
         {
             if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-location.read_location.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static string GetCharLocationESIScope()
+        {
+            return "esi-location.read_location.v1";
         }
 
         public static bool HasCharShipTypeScope(List<string> permissions)
@@ -65,6 +76,19 @@ namespace ThunderED
             if (permissions == null) return false;
             return permissions.Any(a => a.Equals("esi-assets.read_corporation_assets.v1", StringComparison.OrdinalIgnoreCase));
         }
+
+        public static bool HasCharIndustryJobs(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-industry.read_character_jobs.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool HasCorpIndustryJobs(List<string> permissions)
+        {
+            if (permissions == null) return false;
+            return permissions.Any(a => a.Equals("esi-industry.read_corporation_jobs.v1", StringComparison.OrdinalIgnoreCase));
+        }
+
 
         public static string GetNotificationsESIScope()
         {
@@ -143,6 +167,7 @@ namespace ThunderED
             "esi-alliances.read_contacts.v1",
             "esi-corporations.read_fw_stats.v1",
         };
+
 
     }
 }

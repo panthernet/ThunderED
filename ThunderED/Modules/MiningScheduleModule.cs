@@ -120,7 +120,13 @@ namespace ThunderED.Modules
                     return r;
                 }
 
-                await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.MiningSchedule);
+                var t = await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.MiningSchedule);
+                var accessToken = (await APIHelper.ESIAPI.GetAccessToken(t))?.Result;
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    t.Scopes = APIHelper.ESIAPI.GetScopesFromToken(accessToken);
+                    await DbHelper.UpdateToken(t.Token, t.CharacterId, t.Type, t.Scopes);
+                }
                 await LogHelper.LogInfo($"Feed added for character: {characterId}", Category);
 
                 var res = WebQueryResult.FeedAuthSuccess;
@@ -152,7 +158,7 @@ namespace ThunderED.Modules
 
                 foreach (var token in tokens)
                 {
-                    var r = await APIHelper.ESIAPI.GetAccessToken(token);
+                    var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpMining().AddCorpStructure().AddUniverseStructure().Merge());
                     if (r == null || r.Data.IsFailed)
                     {
                         await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}");
@@ -293,7 +299,7 @@ namespace ThunderED.Modules
 
                 foreach (var token in tokens)
                 {
-                    var r = await APIHelper.ESIAPI.GetAccessToken(token);
+                    var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpMining().AddCorpStructure().AddUniverseStructure().Merge());
                     if (r == null || r.Data.IsFailed)
                     {
                         await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}",
@@ -700,7 +706,7 @@ namespace ThunderED.Modules
             {
                 var token = await DbHelper.GetToken(charId, TokenEnum.MiningSchedule);
 
-                var r = await APIHelper.ESIAPI.GetAccessToken(token);
+                var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpMining().AddCorpStructure().AddUniverseStructure().Merge());
                 if (r == null || r.Data.IsFailed)
                 {
                     await LogHelper.LogWarning($"Failed to refresh mining token from {charId}", Category);

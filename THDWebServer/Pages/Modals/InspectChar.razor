@@ -479,6 +479,8 @@
     private List<WebWalletTrans> _walletTransListCache;
     private List<WebWalletJournal> _walletJournalListCache;
     private List<WebSkillItem> _skillsListCache;
+    private string _walletAccessToken;
+
     #endregion
 
     protected override async Task OnInitializedAsync()
@@ -546,32 +548,36 @@
                 if (!string.IsNullOrEmpty(_inspectToken))
                 {
 
-                    if (SettingsManager.HasCharLocationScope(_character.DataView.PermissionsList))
+                    var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddLocation().AddUniverseStructure().Merge()))?.Result;
+                    if (SettingsManager.HasCharLocationScope(_character.DataView.PermissionsList) && !string.IsNullOrEmpty(localAccess))
                     {
                         var locationData =
-                            await APIHelper.ESIAPI.GetCharacterLocation(_reason, _character.CharacterId, _inspectToken);
+                            await APIHelper.ESIAPI.GetCharacterLocation(_reason, _character.CharacterId, localAccess);
                         var system =
                             await APIHelper.ESIAPI.GetSystemData(_reason, locationData?.solar_system_id ?? 0);
-                        var station = locationData.station_id > 0 ? await APIHelper.ESIAPI.GetStationData(_reason, locationData.station_id, _inspectToken)
+                        var station = locationData != null && locationData.station_id > 0 ? await APIHelper.ESIAPI.GetStationData(_reason, locationData.station_id, localAccess)
                             : null;
-                        var citadel = locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetUniverseStructureData(_reason, locationData.structure_id, _inspectToken)
+                        var citadel = locationData != null && locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetUniverseStructureData(_reason, locationData.structure_id, localAccess)
                             : null;
                         var loc = station != null ? station.name : citadel?.name;
 
                         _locationData = $"{system.SolarSystemName} {loc}";
                     }
-                    if (SettingsManager.HasCharShipTypeScope(_character.DataView.PermissionsList))
+                    
+                    localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddShip().Merge()))?.Result;
+                    if (SettingsManager.HasCharShipTypeScope(_character.DataView.PermissionsList) && !string.IsNullOrEmpty(localAccess))
                     {
                         var stData =
-                            await APIHelper.ESIAPI.GetCharacterShipType(_reason, _character.CharacterId, _inspectToken);
+                            await APIHelper.ESIAPI.GetCharacterShipType(_reason, _character.CharacterId, localAccess);
                         var tType = await APIHelper.ESIAPI.GetTypeId(_reason, stData.ship_type_id);
-                        _shipData = tType.Name;
+                        _shipData = tType?.Name;
                     }
-                    if (SettingsManager.HasCharSkillsScope(_character.DataView.PermissionsList))
+                    localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddSkills().Merge()))?.Result;
+                    if (SettingsManager.HasCharSkillsScope(_character.DataView.PermissionsList) && !string.IsNullOrEmpty(localAccess))
                     {
                         await Task.Factory.StartNew(async () =>
                         {
-                            var values = await _module.WebGetSkills(_character.CharacterId, _inspectToken);
+                            var values = await _module.WebGetSkills(_character.CharacterId, localAccess);
                             if (values != null)
                             {
                                 _skillsListCache = values[1] as List<WebSkillItem>;
@@ -581,11 +587,12 @@
                             await InvokeAsync(StateHasChanged);
                         });
                     }
-                    if (SettingsManager.HasCharAssetsScope(_character.DataView.PermissionsList))
+                    localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharAssets().Merge()))?.Result;
+                    if (SettingsManager.HasCharAssetsScope(_character.DataView.PermissionsList) && !string.IsNullOrEmpty(localAccess))
                     {
                         await Task.Factory.StartNew(async () =>
                         {
-                            await LoadCharAssetsData();
+                            await LoadCharAssetsData(localAccess);
                         });
                     }
                     await LoadWalletData();
@@ -630,9 +637,11 @@
 
     private async Task LoadWalletData()
     {
-        if (_hasToken && SettingsManager.HasCharWalletScope(_character.DataView.PermissionsList))
+        _walletAccessToken = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharWallet().Merge()))?.Result;
+
+        if (!string.IsNullOrEmpty(_walletAccessToken) && SettingsManager.HasCharWalletScope(_character.DataView.PermissionsList))
         {
-            var value = await APIHelper.ESIAPI.GetCharacterWalletBalance(_reason, _character.CharacterId, _inspectToken);
+            var value = await APIHelper.ESIAPI.GetCharacterWalletBalance(_reason, _character.CharacterId, _walletAccessToken);
             _totalIskBalance = value.ToString("N");
             await InvokeAsync(StateHasChanged);
         }
@@ -640,7 +649,7 @@
 
     private async Task LoadWalletJournalData(LoadDataArgs args)
     {
-        _walletJournalListCache ??= await _module.WebGetWalletJournal(_character.CharacterId, _inspectToken);
+        _walletJournalListCache ??= await _module.WebGetWalletJournal(_character.CharacterId, _walletAccessToken);
         if (_walletJournalListCache == null) return;
         _walletJournalList = ApplyAjaxFilters(_walletJournalListCache, args, out _countWalletJournal);
         _isWalletJournalLoading = false;
@@ -649,16 +658,16 @@
 
     private async Task LoadWalletTransData(LoadDataArgs args)
     {
-        _walletTransListCache ??= await _module.WebGetWalletTrans(_character.CharacterId, _inspectToken);
+        _walletTransListCache ??= await _module.WebGetWalletTrans(_character.CharacterId, _walletAccessToken);
         if (_walletTransListCache == null) return;
         _walletTransList = ApplyAjaxFilters(_walletTransListCache, args, out _countWalletTrans);
         _isWalletTransLoading = false;
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task LoadCharAssetsData()
+    private async Task LoadCharAssetsData(string token)
     {
-        var data = await _module.WebGetCharAssetsList(_character.CharacterId, _inspectToken);
+        var data = await _module.WebGetCharAssetsList(_character.CharacterId, token);
         if (data != null)
         {
             _charAssetList = data.GroupBy(a => a.LocationName).ToDictionary(a => a.Key, a => a.ToList());
@@ -670,10 +679,14 @@
 
     private async Task LoadMailData(LoadDataArgs args)
     {
-        _mailListCache ??= await _module.WebGetMailHeaders(_character.CharacterId, _inspectToken);
-        _mailList = ApplyAjaxFilters(_mailListCache, args, out _countMail);
-        _isMailLoading = false;
-        await InvokeAsync(StateHasChanged);
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharReadMail().Merge()))?.Result;
+        if (!string.IsNullOrEmpty(localAccess))
+        {
+            _mailListCache ??= await _module.WebGetMailHeaders(_character.CharacterId, localAccess);
+            _mailList = ApplyAjaxFilters(_mailListCache, args, out _countMail);
+            _isMailLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task LoadCorpHistoryData(LoadDataArgs args)
@@ -686,28 +699,40 @@
 
     private async Task LoadContractsData(LoadDataArgs args)
     {
-        _contractsListCache ??= await _module.WebGetCharContracts(_character.CharacterId, _inspectToken);
-        _contractsList = ApplyAjaxFilters(_contractsListCache, args, out _countContracts);
-        _isContractsLoading = false;
-        await InvokeAsync(StateHasChanged);
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharContracts().Merge()))?.Result;
+        if (!string.IsNullOrEmpty(localAccess))
+        {
+            _contractsListCache ??= await _module.WebGetCharContracts(_character.CharacterId, localAccess);
+            _contractsList = ApplyAjaxFilters(_contractsListCache, args, out _countContracts);
+            _isContractsLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task LoadContactsData(LoadDataArgs args)
     {
-        _contactsListCache ??= await _module.WebGetCharContacts(_character.CharacterId, _inspectToken, _inspector.CharacterId);
-        _contactsList = ApplyAjaxFilters(_contactsListCache, args, out _countContacts);
-        _isContactsLoading = false;
-        await InvokeAsync(StateHasChanged);
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharContacts().Merge()))?.Result;
+        if (!string.IsNullOrEmpty(localAccess))
+        {
+            _contactsListCache ??= await _module.WebGetCharContacts(_character.CharacterId, localAccess, _inspector.CharacterId);
+            _contactsList = ApplyAjaxFilters(_contactsListCache, args, out _countContacts);
+            _isContactsLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
 
     private async Task ExecuteSearchMail()
     {
-        var prms = new ModalParameters();
-        prms.Add("UserId", _character.CharacterId);
-        prms.Add("Token", _inspectToken);
-        var o = new ModalOptions { DisableBackgroundCancel = false, Animation = ModalAnimation.FadeIn(1), HideHeader = true, ContentScrollable = true };
-        await Modal.Show<MailSearch>("null", prms, o).Result;
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharReadMail().Merge()))?.Result;
+        if (!string.IsNullOrEmpty(localAccess))
+        {
+            var prms = new ModalParameters();
+            prms.Add("UserId", _character.CharacterId);
+            prms.Add("Token", localAccess);
+            var o = new ModalOptions {DisableBackgroundCancel = false, Animation = ModalAnimation.FadeIn(1), HideHeader = true, ContentScrollable = true};
+            await Modal.Show<MailSearch>("null", prms, o).Result;
+        }
     }
 
     private async void ExecuteKickUser()
@@ -751,12 +776,16 @@
 
     private async Task OnMailRowClick(WebMailHeader args)
     {
-        var prms = new ModalParameters();
-        prms.Add("MailId", args.MailId);
-        prms.Add("UserId", _character.CharacterId);
-        prms.Add("Token", _inspectToken);
-        var o = new ModalOptions { DisableBackgroundCancel = false, Animation = ModalAnimation.FadeIn(1), HideHeader = true, ContentScrollable = true };
-        await Modal.Show<MailViewer>("null", prms, o).Result;
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharReadMail().Merge()))?.Result;
+        if (!string.IsNullOrEmpty(localAccess))
+        {
+            var prms = new ModalParameters();
+            prms.Add("MailId", args.MailId);
+            prms.Add("UserId", _character.CharacterId);
+            prms.Add("Token", localAccess);
+            var o = new ModalOptions {DisableBackgroundCancel = false, Animation = ModalAnimation.FadeIn(1), HideHeader = true, ContentScrollable = true};
+            await Modal.Show<MailViewer>("null", prms, o).Result;
+        }
     }
 
 

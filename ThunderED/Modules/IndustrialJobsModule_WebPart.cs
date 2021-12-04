@@ -78,8 +78,14 @@ namespace ThunderED.Modules
 
                 //var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
 
-                await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Industry);
+                var t = await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Industry);
                 await LogHelper.LogInfo($"Industry feed added for character: {characterId}", LogCat.AuthWeb);
+                var accessToken = (await APIHelper.ESIAPI.GetAccessToken(t))?.Result;
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    t.Scopes = APIHelper.ESIAPI.GetScopesFromToken(accessToken);
+                    await DbHelper.UpdateToken(t.Token, t.CharacterId, t.Type, t.Scopes);
+                }
 
                 var res = WebQueryResult.FeedAuthSuccess;
                 res.Message1 = LM.Get("industryJobsAuthSuccessHeader");

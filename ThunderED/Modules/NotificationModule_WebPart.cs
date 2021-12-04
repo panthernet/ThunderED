@@ -58,7 +58,13 @@ namespace ThunderED.Modules
 
                     var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, characterId, true);
 
-                    await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Notification);
+                    var t = await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Notification);
+                    var accessToken = (await APIHelper.ESIAPI.GetAccessToken(t))?.Result;
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        t.Scopes = APIHelper.ESIAPI.GetScopesFromToken(accessToken);
+                        await DbHelper.UpdateToken(t.Token, t.CharacterId, t.Type, t.Scopes);
+                    }
                     await LogHelper.LogInfo($"Notification feed added for character: {characterId}", Category);
 
                     var res = WebQueryResult.FeedAuthSuccess;

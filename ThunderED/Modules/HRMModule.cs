@@ -116,7 +116,7 @@ namespace ThunderED.Modules
             var token = await DbHelper.GetToken(entity.CharacterId, TokenEnum.Mail);
             if (token == null)
                 return null;
-            var result = await APIHelper.ESIAPI.GetAccessToken(token);
+            var result = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCharReadMail().Merge());
             if (result.Data.IsNotValid && !result.Data.IsNoConnection)
                 return false;
             return !string.IsNullOrEmpty(result.Result);

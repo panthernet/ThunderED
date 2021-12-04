@@ -53,11 +53,20 @@ namespace ThunderED.Modules
                         var rtoken = await DbHelper.GetToken(characterID, TokenEnum.Industry);
                         if (rtoken == null)
                         {
-                            await SendOneTimeWarning(characterID, $"Industry jobs feed token for character {characterID} not found! User is not authenticated.");
+                            await SendOneTimeWarning(characterID,
+                                $"Industry jobs feed token for character {characterID} not found! User is not authenticated.");
                             continue;
                         }
+                        if (rtoken.Scopes == null) continue;
 
-                        var tq = await APIHelper.ESIAPI.GetAccessToken(rtoken,$"From {Category} | Char ID: {characterID}");
+                        var scope = new ESIScope();
+                        if (SettingsManager.HasCharIndustryJobs(rtoken.Scopes.Split(',').ToList()))
+                            scope.AddCharIndustry();
+                        if (SettingsManager.HasCorpIndustryJobs(rtoken.Scopes.Split(',').ToList()))
+                            scope.AddCorpIndustry();
+
+
+                        var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rtoken, scope.Merge(), $"From {Category} | Char ID: {characterID}");
                         var token = tq.Result;
                         if (string.IsNullOrEmpty(token))
                         {

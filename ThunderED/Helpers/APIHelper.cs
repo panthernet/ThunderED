@@ -180,7 +180,7 @@ namespace ThunderED.Helpers
                     if (TickManager.IsNoConnection && request.StartsWith(SettingsManager.Settings.Config.ESIAddress))
                     {
                         result.Data.Message = "No connection";
-                        result.Data.IsNoConnection = true;
+                        result.Data.ErrorCode = 400;
                         return result;
                     }
 
@@ -300,7 +300,7 @@ namespace ThunderED.Helpers
                     if (TickManager.IsNoConnection && request.StartsWith(SettingsManager.Settings.Config.ESIAddress))
                     {
                         result.Data.Message = "No connection";
-                        result.Data.IsNoConnection = true;
+                        result.Data.ErrorCode = 400;
                         return result;
                     }
 

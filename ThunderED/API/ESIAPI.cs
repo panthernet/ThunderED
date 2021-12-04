@@ -283,7 +283,7 @@ namespace ThunderED.API
             if (handler.CanReadToken(token))
             {
                 var slice = handler.ReadJwtToken(token);
-                return string.Join(',', slice.Claims.Select(a => a.Value));
+                return string.Join(',', slice.Claims.Where(a=> a.Value.StartsWith("esi")).Select(a => a.Value));
             }
 
             return null;
@@ -291,7 +291,7 @@ namespace ThunderED.API
 
         public async Task<ESIQueryResult<string>> GetAccessToken(ThdToken token, string notes = null, bool logDetails = true, [CallerMemberName] string methodname = null)
         {
-            var r = await APIHelper.ESIAPI.RefreshToken(token.Token,
+            var r = await APIHelper.ESIAPI.RefreshToken(token,
                 SettingsManager.Settings.WebServerModule.CcpAppClientId,
                 SettingsManager.Settings.WebServerModule.CcpAppSecret, nameof(GetAccessToken));
             if (r?.Data == null || r.Data.IsFailed || r.Data.IsNoConnection)
@@ -311,7 +311,29 @@ namespace ThunderED.API
             return r;
         }
 
-        public async Task<ESIQueryResult<string>> RefreshToken(string refreshToken, string clientId, string secret, string notes = null)
+        public async Task<ESIQueryResult<string>> GetAccessTokenWithScopes(ThdToken token, string scope, string notes = null, bool logDetails = true, [CallerMemberName] string methodname = null)
+        {
+            var r = await APIHelper.ESIAPI.RefreshToken(token,
+                SettingsManager.Settings.WebServerModule.CcpAppClientId,
+                SettingsManager.Settings.WebServerModule.CcpAppSecret, nameof(GetAccessToken), scope);
+            if (r?.Data == null || r.Data.IsFailed || r.Data.IsNoConnection)
+            {
+                if (logDetails)
+                    await LogHelper.LogInfo($"[{methodname}] Token refresh. Error:{r?.Data?.ErrorCode} NoCon: {r?.Data?.IsNoConnection} {notes}", LogCat.ESI);
+                return r;
+            }
+
+            if (!token.Token.Equals(r.RefreshToken))
+            {
+                if (string.IsNullOrEmpty(token.Scopes))
+                    token.Scopes = APIHelper.ESIAPI.GetScopesFromToken(r.Result);
+                await DbHelper.UpdateToken(token.Token, token.CharacterId, token.Type, token.Scopes);
+            }
+
+            return r;
+        }
+
+        private async Task<ESIQueryResult<string>> RefreshToken(ThdToken refreshToken, string clientId, string secret, string notes = null, string scope = null)
         { 
             var result = new ESIQueryResult<string>();
             try
@@ -321,18 +343,44 @@ namespace ThunderED.API
                     ssoClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
                     ssoClient.DefaultRequestHeaders.Add("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes(clientId + ":" + secret))}");
 
-                    var values = new Dictionary<string, string> {{"grant_type", "refresh_token"}, {"refresh_token", $"{refreshToken}"}};
+                    var values = new Dictionary<string, string> {{"grant_type", "refresh_token"}, {"refresh_token", $"{refreshToken.Token}"}};
+                    if(!string.IsNullOrEmpty(scope))
+                        values.Add("scope", scope);
                     var content = new FormUrlEncodedContent(values);
                     using (var responseMessage = await ssoClient.PostAsync("https://login.eveonline.com/v2/oauth/token", content))
                     {
                         var raw = await responseMessage.Content.ReadAsStringAsync();
                         if (!responseMessage.IsSuccessStatusCode)
                         {
+                            //new logs
+                            try
+                            {
+                                string msg = null;
+                                string code = null;
+                                try
+                                {
+                                    var parse = JObject.Parse(raw);
+                                    msg = parse["error"]?.ToString();
+                                    code = parse["sso_code"]?.ToString();
+                                }
+                                catch
+                                {
+                                    // ignore
+                                }
+
+                                await LogHelper.LogWarning(
+                                    $"Access token request for {refreshToken.CharacterId} failed with code {(int)responseMessage.StatusCode}!\nScope: {scope}\nNotes: {notes}\nMessage: {msg}\nSSO: {code}]nMsg: {raw}\n", LogCat.AccessToken);
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
+
                             if (raw.StartsWith("{\"error\""))
                             {
-                                await LogHelper.LogWarning($"[TOKEN] Request failure: {raw}\n{notes}", LogCat.ESI);
+                                await LogHelper.LogWarning($"[TOKEN] Request failure: {raw}\n{notes}", LogCat.AccessToken);
                                 result.Data.ErrorCode = -99;
-                                result.Data.Message = "Valid ESI request error";
+                                result.Data.Message = $"Valid ESI request error";
                             }
                             else
                             {
@@ -351,8 +399,8 @@ namespace ThunderED.API
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx($"{nameof(RefreshToken)} {notes}", ex, LogCat.ESI);
-                result.Data.ErrorCode = -1;
+                await LogHelper.LogEx($"{nameof(RefreshToken)} {notes}", ex, LogCat.AccessToken);
+                result.Data.ErrorCode = 400;
                 result.Data.Message = "Unexpected exception";
                 return result;
             }

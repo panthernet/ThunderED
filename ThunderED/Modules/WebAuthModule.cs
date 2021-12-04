@@ -105,7 +105,7 @@ namespace ThunderED.Modules
                             var dbToken = await DbHelper.GetToken(numericCharId, TokenEnum.AuthStandings);
                             if(dbToken == null) return;
 
-                            var tq = await APIHelper.ESIAPI.GetAccessToken(dbToken,$"From {Category} | Char ID: {st.CharacterId}");
+                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(dbToken, new ESIScope().AddCharContacts().AddCorpContacts().AddAllyContacts().Merge(),$"From {Category} | Char ID: {st.CharacterId}");
                             var token = tq.Result;
 
                             if (!tq.Data.IsFailed)

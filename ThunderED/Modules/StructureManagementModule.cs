@@ -66,7 +66,7 @@ namespace ThunderED.Modules
                     var processedCorps = new List<long>();
                     foreach (var token in await DbHelper.GetTokens(TokenEnum.Structures))
                     {
-                        var r = await APIHelper.ESIAPI.GetAccessToken(token);
+                        var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpStructure().AddUniverseStructure().Merge());
                         if (r == null || r.Data.IsFailed)
                         {
                             await LogHelper.LogWarning($"Failed to refresh structure token from {token.CharacterId}",
@@ -296,7 +296,13 @@ namespace ThunderED.Modules
                     return r;
                 }
 
-                await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Structures);
+                var t = await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.Structures);
+                var accessToken = (await APIHelper.ESIAPI.GetAccessToken(t))?.Result;
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    t.Scopes = APIHelper.ESIAPI.GetScopesFromToken(accessToken);
+                    await DbHelper.UpdateToken(t.Token, t.CharacterId, t.Type, t.Scopes);
+                }
                 await LogHelper.LogInfo($"Feed added for character: {characterId}", Category);
 
                 var res = WebQueryResult.FeedAuthSuccess;
@@ -473,7 +479,7 @@ namespace ThunderED.Modules
 
             foreach (var token in tokens)
             {
-                var r = await APIHelper.ESIAPI.GetAccessToken(token);
+                var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpStructure().AddUniverseStructure().Merge());
                 if (r == null || r.Data.IsFailed)
                 {
                     await LogHelper.LogWarning($"Failed to refresh structure token from {token.CharacterId}",

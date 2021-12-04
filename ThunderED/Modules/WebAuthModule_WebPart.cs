@@ -109,9 +109,15 @@ namespace ThunderED.Modules
                     await DbHelper.DeleteAuthStands(numericCharId);
 
                     var refreshToken = await DbHelper.UpdateToken(result[1], numericCharId, TokenEnum.AuthStandings);
+                    var accessToken = (await APIHelper.ESIAPI.GetAccessToken(refreshToken))?.Result;
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        refreshToken.Scopes = APIHelper.ESIAPI.GetScopesFromToken(accessToken);
+                        await DbHelper.UpdateToken(refreshToken.Token, refreshToken.CharacterId, refreshToken.Type, refreshToken.Scopes);
+                    }
                     var data = new ThdStandsAuth { CharacterId = numericCharId };
 
-                    var tq = await APIHelper.ESIAPI.GetAccessToken(refreshToken, $"From {Category} | Char ID: {characterId}");
+                    var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(refreshToken, new ESIScope().AddCharContacts().AddCorpContacts().AddAllyContacts().Merge(), $"From {Category} | Char ID: {characterId}");
                     var token = tq.Result;
 
                     if (!tq.Data.IsFailed)
@@ -151,7 +157,7 @@ namespace ThunderED.Modules
                         mainCharId = webUserData?.Id ?? 0;
 
                         var inputGroupName = state?.Length > 1
-                            ? HttpUtility.UrlDecode(state.Substring(1, state.Length - 1))
+                            ? HttpUtility.UrlDecode( state[0]=='=' || state[0]=='x' ? state.Substring(1, state.Length - 1) : state)
                             : null;
                         var inputGroup = GetGroupByName(inputGroupName).Value;
                         var autoSearchGroup = inputGroup == null && (state?.Equals("oneButton") ?? false);

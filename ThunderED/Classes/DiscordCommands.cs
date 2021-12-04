@@ -911,7 +911,13 @@ namespace ThunderED.Classes
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysTokenNotFound"), true);
                         else
                         {
-                            var t = await APIHelper.ESIAPI.GetAccessToken(user.GetGeneralToken());
+                            string scope = null;
+                            if (values.Length > 2)
+                            {
+                                scope = values[2];
+                            }
+
+                            var t = await APIHelper.ESIAPI.GetAccessTokenWithScopes(user.GetGeneralToken(), scope);
                             if(t.Data.IsFailed)
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysTokenNotFound", values[1]), true);
                             else

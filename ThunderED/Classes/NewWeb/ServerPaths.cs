@@ -156,9 +156,9 @@ namespace ThunderED.Classes
                 "esi-characters.read_contacts.v1",
                 "esi-corporations.read_contacts.v1"
             };
-            var pString = string.Join('+', permissions);
+            var pString = string.Join(' ', permissions);
 
-            return $"https://login.eveonline.com/v2/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={pString}&state=authst";
+            return $"https://login.eveonline.com/v2/oauth/authorize/?response_type=code&redirect_uri={callbackurl}&client_id={clientID}&scope={HttpUtility.UrlEncode(pString)}&state=authst";
         }
 
         public static string GetAuthNotifyURL()
@@ -191,8 +191,8 @@ namespace ThunderED.Classes
             }
 
             list.Add("esi-universe.read_structures.v1");
-            var pString = string.Join('+', list);
-            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}&state=cauth{HttpUtility.UrlEncode(groupName)}";
+            var pString = string.Join(' ', list);
+            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={HttpUtility.UrlEncode(pString)}&state=cauth{HttpUtility.UrlEncode(groupName)}";
         }
 
         public static string GetIndustryJobsAuthURL(bool readChar, bool readCorp, string groupName)
@@ -211,8 +211,8 @@ namespace ThunderED.Classes
             }
 
             list.Add("esi-universe.read_structures.v1");
-            var pString = string.Join('+', list);
-            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}&state=ijobsauth{HttpUtility.UrlEncode(groupName)}";
+            var pString = string.Join(' ', list);
+            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={HttpUtility.UrlEncode(pString)}&state=ijobsauth{HttpUtility.UrlEncode(groupName)}";
         }
 
         public static string GetCustomAuthUrl(string ip, List<string> permissions, string group = null, long mainCharacterId = 0, bool nox = false)
@@ -223,8 +223,8 @@ namespace ThunderED.Classes
             var grp = string.IsNullOrEmpty(group) ? null : $"&state={(nox?null:"x")}{HttpUtility.UrlEncode(group)}";
             var mc = mainCharacterId == 0 ? null : $"|{mainCharacterId}";
 
-            var pString = string.Join('+', permissions);
-            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}{grp}{mc}";//
+            var pString = string.Join(" ", permissions);
+            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={HttpUtility.UrlEncode(callbackurl)}&client_id={HttpUtility.UrlEncode(clientId)}&scope={HttpUtility.UrlEncode(pString)}{grp}{HttpUtility.UrlEncode(mc)}";
         }
 
         public static string GetAuthUrl(string ip, string groupName = null, long mainCharacterId = 0, bool nox = false)
@@ -246,8 +246,8 @@ namespace ThunderED.Classes
                 "esi-universe.read_structures.v1",
                 "esi-industry.read_corporation_mining.v1"
             };
-            var pString = string.Join('+', list);
-            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}&state=ms";
+            var pString = string.Join(' ', list);
+            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={HttpUtility.UrlEncode(pString)}&state=ms";
         }
 
 
@@ -260,8 +260,8 @@ namespace ThunderED.Classes
                 "esi-corporations.read_structures.v1",
                 "esi-universe.read_structures.v1",
             };
-            var pString = string.Join('+', list);
-            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={pString}&state=sm";
+            var pString = string.Join(' ', list);
+            return $"https://login.eveonline.com/v2/oauth/authorize?response_type=code&redirect_uri={callbackurl}&client_id={clientId}&scope={HttpUtility.UrlEncode(pString)}&state=sm";
 
         }
         #endregion
