@@ -446,14 +446,25 @@ namespace ThunderED
 
         #region Cache
 
+        private static string GetListItemTypeName(Type type)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition()
+                == typeof(List<>))
+            {
+                return type.GetGenericArguments()[0].Name; // use this...
+            }
+
+            return type.Name;
+        }
+
         public static async Task<T> GetCache<T>(string cacheId, int minutes)
         {
             await using var db = new ThunderedDbContext();
             var now = DateTime.Now;
-            var content = db.Cache.AsNoTracking().Where(a => a.Id == cacheId).ToList()
+            var typeName = GetListItemTypeName(typeof(T));
+
+            var content = db.Cache.AsNoTracking().Where(a => a.Id == cacheId && a.Type == typeName).ToList()
                 .FirstOrDefault(a => (now - a.LastUpdate).Minutes <= minutes)?.Content;
-//            if (content != null && content.GetType() == typeof(string))
-  //              return (T) (object) content;
 
             return string.IsNullOrEmpty(content) ? (T) (object) null : JsonConvert.DeserializeObject<T>(content);
         }
@@ -467,12 +478,13 @@ namespace ThunderED
             try
             {
                 await using var db = new ThunderedDbContext();
-                var typeName = typeof(T).Name;
+                var typeName = GetListItemTypeName(typeof(T));
+
                 var entry = await db.Cache.FirstOrDefaultAsync(a =>
-                    EF.Functions.Like(a.Id, cacheId) && EF.Functions.Like(a.Type, typeName));
+                    a.Id == cacheId && a.Type == typeName);
                 if (entry == null)
                     await db.Cache.AddAsync(new ThdCacheEntry
-                        {Id = cacheId, Content = JsonConvert.SerializeObject(content), Days = days, Type = typeName});
+                        {Id = cacheId, Content = JsonConvert.SerializeObject(content), Days = days, Type = typeName, LastAccess = DateTime.Now, LastUpdate = DateTime.Now});
                 else
                 {
                     entry.Type = typeName;
@@ -494,10 +506,11 @@ namespace ThunderED
             }
         }
 
-        public static async Task SetCacheLastAccess(string id, string type)
+        public static async Task SetCacheLastAccess(string id, Type type)
         {
             await using var db = new ThunderedDbContext();
-            var entry = await db.Cache.FirstOrDefaultAsync(a => EF.Functions.Like(a.Id, id) && EF.Functions.Like(a.Type, type));
+            var typeName = GetListItemTypeName(type);
+            var entry = await db.Cache.FirstOrDefaultAsync(a => a.Id == id && a.Type == typeName);
 
             if (entry != null)
             {
@@ -509,7 +522,8 @@ namespace ThunderED
         public static async Task DeleteCache(string id, string type)
         {
             await using var db = new ThunderedDbContext();
-            var old = await db.Cache.FirstOrDefaultAsync(a => EF.Functions.Like(a.Id, id) && EF.Functions.Like(a.Type, type));
+
+            var old = await db.Cache.FirstOrDefaultAsync(a => a.Id == id && a.Type == type);
             if (old != null)
             {
                 db.Cache.Remove(old);
@@ -526,7 +540,7 @@ namespace ThunderED
                 return;
             }
 
-            var old = await db.Cache.Where(a => EF.Functions.Like(a.Type, type)).ToListAsync();
+            var old = await db.Cache.Where(a => a.Type == type).ToListAsync();
             if (old.Any())
             {
                 db.Cache.RemoveRange(old);
