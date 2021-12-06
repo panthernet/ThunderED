@@ -1,6 +1,6 @@
 ﻿@using ThunderED.Modules
-@using ThunderED.Json.Internal
 @using ThunderED.Helpers
+@using ThunderED.Thd
 
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_TIMERS)]
 @inject ProtectedSessionStorage Store
@@ -13,7 +13,7 @@
     }
     else
     {
-        <RadzenTemplateForm Data="@WtData" Submit="@(async (WebTimerData args) => await Submit(args))">
+        <RadzenTemplateForm Data="@WtData" Submit="@(async (ThdTimer args) => await Submit(args))">
             @if (IsErrorVisible)
             {
                 <div class="row">
@@ -90,11 +90,11 @@
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-    [Parameter] public TimerItem Entry { get; set; }
+    [Parameter] public ThdTimer Entry { get; set; }
     [Parameter] public string Header { get; set; }
 
 
-    private WebTimerData WtData { get; set; } = new WebTimerData();
+    private ThdTimer WtData { get; set; } = new ThdTimer();
     private string ErrorText { get; set; }
     private bool IsErrorVisible => !string.IsNullOrEmpty(ErrorText);
 
@@ -122,20 +122,23 @@
         WtData.Id = 0;
 
         if (Entry != null)
-            WtData.FromItem(Entry);
+            WtData = Entry.Clone();
 
 
         base.OnInitialized();
     }
 
-    private async Task Submit(WebTimerData args)
+    private async Task Submit(ThdTimer args)
     {
         try
         {
             var user = await Store.GetAsync<WebAuthUserData>("user");
+            WtData.TimerChar = user.Name;
             ErrorText = await TimersModule.SaveTimer(WtData, user);
             if (!IsErrorVisible)
-                await BlazoredModal.CloseAsync(ModalResult.Ok(args.FromWebTimerData(WtData, user)));
+            {
+                await BlazoredModal.CloseAsync(ModalResult.Ok(WtData));
+            }
             else
             {
                 await InvokeAsync(StateHasChanged);

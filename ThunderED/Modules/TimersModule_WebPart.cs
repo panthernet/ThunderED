@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Classes;
 using ThunderED.Helpers;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules
 {
@@ -59,7 +60,7 @@ namespace ThunderED.Modules
             return false;
         }
 
-        public static async Task<string> SaveTimer(WebTimerData data, WebAuthUserData user)
+        public static async Task<string> SaveTimer(ThdTimer timer, WebAuthUserData user)
         {
             try
             {
@@ -74,16 +75,13 @@ namespace ThunderED.Modules
                 if (!checkResult[0] || !checkResult[1])
                     return LM.Get("webAuthenticationExpired");
 
-                var timer = data.FromWebTimerData(data, user);
-
-                var iDate = timer.GetDateTime();
-                if (iDate == null)
+                if (timer.Date == DateTime.MinValue)
                     return LM.Get("invalidTimeFormat");
 
-                if (iDate < DateTime.UtcNow)
+                if (timer.Date < DateTime.UtcNow)
                     return LM.Get("passedTimeValue");
 
-                await SQLHelper.UpdateTimer(timer);
+                await DbHelper.UpdateTimer(timer);
                 return null;
             }
             catch (Exception ex)
@@ -93,7 +91,7 @@ namespace ThunderED.Modules
             }
         }
 
-        public static async Task<string> SaveTimerRf(WebTimerDataRf data, WebAuthUserData user)
+        public static async Task<string> SaveTimerRf(ThdTimerRf data, WebAuthUserData user)
         {
             data.PushDate();
             return await SaveTimer(data, user);

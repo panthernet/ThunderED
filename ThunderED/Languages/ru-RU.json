@@ -763,5 +763,6 @@
   "wsAuthGenColNameEnableDetailedLogging": "Enable detailed logging",
 
   "NotifyHeader_TowerAlertMsg": "Объект {0}, принадлежащий {1} атакован!",
-  "PosFuelAlert": "В {0} принадлежащем {1} кончается топливо!"
+  "PosFuelAlert": "В {0} принадлежащем {1} кончается топливо!",
+  "webAuthGroupAccordionHeader": "Основные настройки"
 }

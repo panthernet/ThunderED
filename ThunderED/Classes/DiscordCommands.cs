@@ -942,11 +942,11 @@ namespace ThunderED.Classes
                         switch (snd)
                         {
                             case "notifcache":
-                                await SQLHelper.RunCommand("delete from notificationsList");
+                                await DbHelper.PurgeNotifications();
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysFlushedNotifications"), true);
                                 return;
                             case "dbcache":
-                                await SQLHelper.RunCommand("delete from cache");
+                                await DbHelper.PurgeCache();
                                 await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("sysFlushedAllCache"), true);
                                 return;
                         }

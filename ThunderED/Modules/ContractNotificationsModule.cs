@@ -163,15 +163,6 @@ namespace ThunderED.Modules
                 return;
             }
 
-            /*
-            if (lst == null)
-            {
-                var cs = contracts.Where(a => !_completeStatuses.Contains(a.status)).TakeSmart(maxContracts).ToList();
-                //initial cache - only progressing contracts
-                await SQLHelper.SaveContracts(characterID, cs, isCorp);
-                return;
-            }*/
-
             //process cache
             foreach (var contract in lst.ToList())
             {

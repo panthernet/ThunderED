@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ThunderED.Classes;
-using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Json.Internal;
 using ThunderED.Json.ZKill;
 using ThunderED.Thd;
 
@@ -153,9 +151,9 @@ namespace ThunderED
             }
         }
 
-        public static string GetStageName(this TimerItem entry)
+        public static string GetStageName(this ThdTimer entry)
         {
-            switch (entry.timerStage)
+            switch (entry.Stage)
             {
                 case 1:
                     return LM.Get("timerHull");
@@ -170,16 +168,16 @@ namespace ThunderED
             }
         }
 
-        public static string GetRemains(this TimerItem entry, bool addWord = false)
+        public static string GetRemains(this ThdTimer entry, bool addWord = false)
         {
-            if (!entry.Date.HasValue) return null;
-            var dif = (entry.Date.Value - DateTime.UtcNow);
+            if (entry.Date == DateTime.MinValue) return null;
+            var dif = (entry.Date - DateTime.UtcNow);
             return $"{(addWord ? $"{LM.Get("Remains")} " : null)}{LM.Get("timerRemains", dif.Days, dif.Hours, dif.Minutes)}";
         }
 
-        public static string GetModeName(this TimerItem entry)
+        public static string GetModeName(this ThdTimer entry)
         {
-            switch (entry.timerType)
+            switch (entry.Type)
             {
                 case 1:
                     return LM.Get("timerOffensive");
@@ -199,9 +197,9 @@ namespace ThunderED
             user.MiscData.BirthDate = ch.birthday;
             user.MiscData.SecurityStatus = ch.security_status;
         }
-        public static TimerItem FromWebTimerData(this WebTimerData entry, WebTimerData data, WebAuthUserData user)
+        /*public static TimerItem FromWebTimerData(this WebTimerData entry, WebTimerData data, WebAuthUserData user)
         {
-            var ti = new TimerItem
+            var ti = new Thd
             {
                 timerLocation = data.Location,
                 timerType = data.Type,
@@ -215,7 +213,7 @@ namespace ThunderED
 
             ti.Date = ti.GetDateTime();
             return ti;
-        }
+        }*/
 
         public static LogSeverity ToSeverity(this Discord.LogSeverity severity)
         {

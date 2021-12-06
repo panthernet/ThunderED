@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using Newtonsoft.Json;
-using ThunderED.Json.Internal;
 using ThunderED.Thd;
 
 namespace ThunderED
@@ -14,43 +11,14 @@ namespace ThunderED
             user.Data = JsonConvert.SerializeObject(user.DataView);
         }
 
-        public static DateTime? GetDateTime(this TimerItem entry)
+        public static DateTime GetDateTime(this ThdTimerRf entry)
         {
-            if (int.TryParse(entry.timerET, out var iValue))
+            if (entry.IntDay != 0 || entry.IntHour != 0 || entry.IntMinute == 0)
             {
-                var x = DateTimeOffset.FromUnixTimeSeconds(iValue).UtcDateTime;
-                return x;
+                var now = DateTime.UtcNow;
+                return now.AddDays(entry.IntDay).AddHours(entry.IntHour).AddMinutes(entry.IntMinute);
             }
-
-            if (DateTime.TryParse(entry.timerET, out var result)) return result;
-            if (!string.IsNullOrEmpty(SettingsManager.Settings.TimersModule.TimeInputFormat))
-            {
-                var format = SettingsManager.Settings.TimersModule.TimeInputFormat.Replace("D", "d").Replace("Y", "y");
-                if (DateTime.TryParseExact(entry.timerET, format, null, DateTimeStyles.None, out result))
-                    return result;
-            }
-
-            if (entry.timerRfDay == 0 && entry.timerRfHour == 0 && entry.timerRfMin == 0) return null;
-            var now = DateTime.UtcNow;
-            return now.AddDays(entry.timerRfDay).AddHours(entry.timerRfHour).AddMinutes(entry.timerRfMin);
-        }
-
-        public static Dictionary<string, object> GetDictionary(this TimerItem entry)
-        {
-            var dic = new Dictionary<string, object>
-            {
-                {nameof(entry.timerType), entry.timerType},
-                {nameof(entry.timerStage), entry.timerStage},
-                {nameof(entry.timerLocation), entry.timerLocation},
-                {nameof(entry.timerOwner), entry.timerOwner},
-                {nameof(entry.timerET), entry.GetDateTime()},
-                {nameof(entry.timerNotes), entry.timerNotes},
-                {nameof(entry.timerChar), entry.timerChar},
-                {nameof(entry.announce), entry.announce},
-            };
-            if (entry.Id != 0)
-                dic.Add("id", entry.Id);
-            return dic;
+            return DateTime.MinValue;
         }
     }
 }

@@ -42,7 +42,7 @@ namespace ThunderED.API
             if(id == null) return;
             var user = await GetCharacterData("ESIAPI", id);
             if(user == null) return;
-            await RemoveDbCache("CharacterData", id);
+            await RemoveDbCache("CharacterData", id.ToString());
             await RemoveCorporationFromCache(user.corporation_id);
             if (user.alliance_id.HasValue)
                 await RemoveAllianceFromCache(user.alliance_id.Value);
@@ -51,17 +51,17 @@ namespace ThunderED.API
 
         public async Task RemoveCharacterFromCache(object id)
         {
-            await RemoveDbCache("CharacterData", id);
+            await RemoveDbCache("CharacterData", id.ToString());
         }
 
         public async Task RemoveCorporationFromCache(object id)
         {
-            await RemoveDbCache("CorporationData", id);
+            await RemoveDbCache("CorporationData", id.ToString());
         }
 
         public async Task RemoveAllianceFromCache(object id)
         {
-            await RemoveDbCache("AllianceData", id);
+            await RemoveDbCache("AllianceData", id.ToString());
         }
 
         public async Task<JsonClasses.CharacterData> GetCharacterData(string reason, object id, bool forceUpdate = false, bool noCache = false, bool isAggressive = false)
@@ -442,12 +442,12 @@ namespace ThunderED.API
             where T : class
         {
             if (id == null || id.ToString() == "0") return null;
-            var data = await GetFromDbCache<T>(id, days);
+            var data = await GetFromDbCache<T>(id.ToString(), days);
             if(data == null || forceUpdate)
             {
                 data = await APIHelper.RequestWrapper<T>(url, reason, authHeader);
                 if(data != null && !noCache)
-                    await UpdateDbCache(data, id, days);
+                    await UpdateDbCache(data, id.ToString(), days);
             }
             return data;
         }
@@ -457,7 +457,7 @@ namespace ThunderED.API
             where T : class
         {
             if (id == null || id.ToString() == "0") return null;
-            var data = await GetFromDbCache<T>(id, 1);
+            var data = await GetFromDbCache<T>(id.ToString(), 1);
             if (data == null)
             {
                 var result = await APIHelper.AggressiveESIRequestWrapper<T>(url, reason, retries);
@@ -465,7 +465,7 @@ namespace ThunderED.API
                 {
                     data = result.Result;
                     if (data != null)
-                        await UpdateDbCache(data, id, 1);
+                        await UpdateDbCache(data, id.ToString(), 1);
                 }
             }
             return data;
@@ -479,7 +479,7 @@ namespace ThunderED.API
         /// </summary>
         internal override async void PurgeCache()
         {
-            await SQLHelper.PurgeCache();
+            await DbHelper.PurgeCache();
         }
 
         /// <summary>
@@ -488,7 +488,7 @@ namespace ThunderED.API
         /// <param name="type">Cahce type</param>
         internal override async void ResetCache(string type = null)
         {
-            await SQLHelper.DeleteCache(type);
+            await DbHelper.DeleteCache(type);
             await SettingsManager.UpdateSettings();
             await SimplifiedAuth.UpdateInjectedSettings();
         }

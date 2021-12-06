@@ -3,13 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using ThunderED.Classes;
-using ThunderED.Helpers;
-using ThunderED.Json;
-using ThunderED.Json.Internal;
 using ThunderED.Providers;
-using ThunderED.Thd;
 
 namespace ThunderED
 {
@@ -24,7 +19,7 @@ namespace ThunderED
             return await Provider?.Query<T>(table, field, new Dictionary<string, object> {{whereField, whereData}});
         }
 
-        private static async Task<T> Query<T>(string table, string field, Dictionary<string, object> where)
+        /*private static async Task<T> Query<T>(string table, string field, Dictionary<string, object> where)
         {
             return await Provider?.Query<T>(table, field, where);
         }
@@ -32,28 +27,28 @@ namespace ThunderED
         private static async Task<List<T>> QueryList<T>(string table, string field, Dictionary<string, object> where)
         {
             return (await SelectData(table, new[] {field}, where))?.Select(a=> a.FirstOrDefault()).Cast<T>().ToList();
-        }
+        }*/
 
-        private static async Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where = null)
+        /*private static async Task<List<object[]>> SelectData(string table, string[] fields, Dictionary<string, object> where = null)
         {
             return await Provider?.SelectData(table, fields, where);
-        }
+        }*/
 
         private static async Task<List<object[]>> SelectData(string query)
         {
             return await Provider?.SelectData(query);
         }
 
-        private static async Task<bool> IsEntryExists(string table, Dictionary<string, object> where)
+        /*private static async Task<bool> IsEntryExists(string table, Dictionary<string, object> where)
         {
             return await Provider?.IsEntryExists(table, where);
-        }
+        }*/
 
         #endregion
         
         #region Update
 
-        private static async Task Update(string table, string setField, object setData, string whereField, object whereData)
+        /*private static async Task Update(string table, string setField, object setData, string whereField, object whereData)
         {
             await Provider?.Update(table, setField, setData, new Dictionary<string, object> {{whereField, whereData}});
         }
@@ -62,17 +57,17 @@ namespace ThunderED
         {
             await Provider?.Update(table, setField, setData, where);
 
-        }
+        }*/
 
         private static async Task InsertOrUpdate(string table, Dictionary<string, object> values)
         {
             await Provider?.InsertOrUpdate(table, values);
         }
 
-        private static async Task Insert(string table, Dictionary<string, object> values)
+        /*private static async Task Insert(string table, Dictionary<string, object> values)
         {
             await Provider?.Insert(table, values);
-        }
+        }*/
         #endregion
 
         #region Delete
@@ -83,16 +78,16 @@ namespace ThunderED
             return await Provider?.Delete(table, new Dictionary<string, object> {{whereField, whereData}});
         }
 
-        private static async Task Delete(string table, Dictionary<string, object> where)
+        /*private static async Task Delete(string table, Dictionary<string, object> where)
         {
             await Provider?.Delete(table, where);
-        }
+        }*/
         
-        public static async Task DeleteWhereIn(string table, string field, List<long> list, bool not)
+        /*public static async Task DeleteWhereIn(string table, string field, List<long> list, bool not)
         {
             await Provider?.DeleteWhereIn(table, field, list, not);
 
-        }
+        }*/
         #endregion
 
         #region System
@@ -162,7 +157,7 @@ namespace ThunderED
         #region Cache
 
         
-        public static async Task DeleteCache(object type, object value)
+        /*public static async Task DeleteCache(object type, object value)
         {
             await Delete("cache", new Dictionary<string, object>
             {
@@ -176,24 +171,24 @@ namespace ThunderED
             if (string.IsNullOrEmpty(type))
                 await Delete("cache");
             else await Delete("cache", "type", type);
-        }
+        }*/
 
 
-        public static async Task SetCacheDataNextNotificationCheck(int interval)
+        /*public static async Task SetCacheDataNextNotificationCheck(int interval)
         {
             await Update("cache_data", "data", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture), "name", "nextNotificationCheck");
-        }
+        }*/
 
-        public static async Task SetCacheLastAccess(object id, string type)
+        /*public static async Task SetCacheLastAccess(object id, string type)
         {
             await Update("cache", "lastAccess", DateTime.Now, new Dictionary<string, object>
             {
                 {"id", id},
                 {"type", type}
             });
-        }
+        }*/
 
-        public static async Task<T> SelectCache<T>(object whereValue, int maxDays)
+        /*public static async Task<T> SelectCache<T>(object whereValue, int maxDays)
             where T: class
         {
             return await Provider?.SelectCache<T>(whereValue, maxDays);
@@ -203,17 +198,17 @@ namespace ThunderED
             where T : class
         {
             await Provider?.UpdateCache(data, id, days);
-        }
+        }*/
 
-        public static async Task PurgeCache()
+        /*public static async Task PurgeCache()
         {
             await Provider?.PurgeCache();
-        }
+        }*/
 
         #endregion
 
         #region Timers
-        public static async Task DeleteTimer(long id)
+        /*public static async Task DeleteTimer(long id)
         {
             await Delete("timers", "id", id);
         }
@@ -245,13 +240,13 @@ namespace ThunderED
         public static async Task UpdateTimer(TimerItem entry)
         {
             await InsertOrUpdate("timers", entry.GetDictionary());
-        }
+        }*/
 
         #endregion
 
         #region Notifications
         
-        public static async Task<long> GetLastNotification(string group, string filter)
+        /*public static async Task<long> GetLastNotification(string group, string filter)
         {
             return await Query<long>("notifications_list", "id", new Dictionary<string, object>
             {
@@ -281,7 +276,7 @@ namespace ThunderED
         public static async Task CleanupNotificationsList()
         {
             await Provider?.CleanupNotificationsList();
-        }
+        }*/
 
         #endregion
 

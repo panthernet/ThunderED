@@ -770,6 +770,6 @@
   "wsAuthGenColNameEnableDetailedLogging": "Enable detailed logging",
 
   "NotifyHeader_TowerAlertMsg": "{0} belonging to {1} is under attack!",
-  "PosFuelAlert": "{0} belonging to {1} is low on fuel!"
-
+  "PosFuelAlert": "{0} belonging to {1} is low on fuel!",
+  "webAuthGroupAccordionHeader":  "General settings" 
 }

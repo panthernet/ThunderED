@@ -31,9 +31,10 @@ namespace ThunderED
         public DbSet<ThdStarSystem> StarSystems { get; set; }
         public DbSet<ThdStarRegion> StarRegions{ get; set; }
         public DbSet<ThdStarConstellation> StarConstellations { get; set; }
-        
         public DbSet<ThdType> Types { get; set; }
         public DbSet<ThdGroup> Groups { get; set; }
+
+        public DbSet<ThdTimer> Timers { get; set; }
 
         public ThunderedDbContext()
         {
@@ -72,6 +73,22 @@ namespace ThunderED
             modelBuilder.Entity<ThdStandsAuth>().Property(a => a.PersonalStands).HasColumnName("personalStands").HasConversion(v=> JsonConvert.SerializeObject(v), v=> JsonConvert.DeserializeObject<List<JsonClasses.Contact>>(v));
             modelBuilder.Entity<ThdStandsAuth>().Property(a => a.CorpStands).HasColumnName("corpStands").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contact>>(v));
             modelBuilder.Entity<ThdStandsAuth>().Property(a => a.AllianceStands).HasColumnName("allianceStands").HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<JsonClasses.Contact>>(v));
+
+            #endregion
+
+            #region ThdTimer
+            modelBuilder.Entity<ThdTimer>().HasKey(a=> a.Id);
+            modelBuilder.Entity<ThdTimer>().ToTable("timers");
+
+            modelBuilder.Entity<ThdTimer>().Property(a => a.Id).HasColumnName("id");
+            modelBuilder.Entity<ThdTimer>().Property(a => a.Type).HasColumnName("timerType");
+            modelBuilder.Entity<ThdTimer>().Property(a => a.Stage).HasColumnName("timerStage");
+            modelBuilder.Entity<ThdTimer>().Property(a => a.Location).HasColumnName("timerLocation");
+            modelBuilder.Entity<ThdTimer>().Property(a => a.Owner).HasColumnName("timerOwner");
+            modelBuilder.Entity<ThdTimer>().Property(a => a.Date).HasColumnName("timerET");
+            modelBuilder.Entity<ThdTimer>().Property(a => a.Notes).HasColumnName("timerNotes");
+            modelBuilder.Entity<ThdTimer>().Property(a => a.TimerChar).HasColumnName("timerChar");
+            modelBuilder.Entity<ThdTimer>().Property(a => a.Announce).HasColumnName("announce");
 
             #endregion
 
@@ -201,6 +218,7 @@ namespace ThunderED
             #endregion
 
             #region ThdNotificationListEntry
+            modelBuilder.Entity<ThdNotificationListEntry>().HasKey("GroupName", "FilterName", "Id");
             modelBuilder.Entity<ThdNotificationListEntry>().HasIndex(u => u.GroupName);
             modelBuilder.Entity<ThdNotificationListEntry>().ToTable("notifications_list");
 

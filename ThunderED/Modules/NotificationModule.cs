@@ -1,19 +1,15 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-
 using Dasync.Collections;
-
 using Discord;
-
 using ThunderED.Classes;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Json.Internal;
 using ThunderED.Thd;
 
 namespace ThunderED.Modules
@@ -303,7 +299,7 @@ namespace ThunderED.Modules
                     await LogHelper.LogModule("Running Notifications module check...", Category);
                     //update timers
                     var interval = Settings.NotificationFeedModule.CheckIntervalInMinutes;
-                    await SQLHelper.SetCacheDataNextNotificationCheck(interval);
+                    await DbHelper.UpdateCacheDataEntry("nextNotificationCheck", DateTime.Now.AddMinutes(interval).ToString(CultureInfo.InvariantCulture));
                     _nextNotificationCheck = DateTime.Now.AddMinutes(interval);
 
 
@@ -400,7 +396,7 @@ namespace ThunderED.Modules
                             foreach (var filterPair in group.Filters)
                             {
                                 var filter = filterPair.Value;
-                                _lastNotification = await SQLHelper.GetLastNotification(groupName, filterPair.Key);
+                                _lastNotification = await DbHelper.GetLastNotification(groupName, filterPair.Key);
 
                                 var fNotifications = new List<JsonClasses.Notification>();
                                 if (_lastNotification == 0)
@@ -821,14 +817,14 @@ namespace ThunderED.Modules
 
                         if (Settings.Config.ModuleTimers && Settings.TimersModule.AutoAddTimerForReinforceNotifications)
                         {
-                            await SQLHelper.UpdateTimer(new TimerItem
+                            await DbHelper.UpdateTimer(new ThdTimer
                             {
-                                timerChar = "Auto",
-                                timerET = (timestamp + TimeSpan.FromTicks(Convert.ToInt64(strTime))).ToString(),
-                                timerLocation = $"{systemName} - {structureType.Name} - {structure?.name}",
-                                timerStage = notification.type == "StructureLostShields" ? 2 : 1,
-                                timerType = 2,
-                                timerOwner = "Alliance"
+                                TimerChar = "Auto",
+                                Date = (timestamp + TimeSpan.FromTicks(Convert.ToInt64(strTime))),
+                                Location = $"{systemName} - {structureType.Name} - {structure?.name}",
+                                Stage = notification.type == "StructureLostShields" ? 2 : 1,
+                                Type = 2,
+                                Owner = "Alliance"
                             });
                         }
 
@@ -1733,7 +1729,7 @@ namespace ThunderED.Modules
             if ((DateTime.Now - _lastCleanupCheck).TotalHours > 8)
             {
                 _lastCleanupCheck = DateTime.Now;
-                await SQLHelper.CleanupNotificationsList();
+                await DbHelper.CleanupNotificationsList();
                 await LogHelper.LogInfo("Notifications cleanup complete", Category, LogToConsole, false);
             }
         }
@@ -1755,10 +1751,7 @@ namespace ThunderED.Modules
 
         private async Task UpdateNotificationList(string groupName, string filterName, bool isNew)
         {
-            if (isNew)
-                await SQLHelper.SetLastNotification(groupName, filterName, _lastNotification, true);
-            else
-                await SQLHelper.SetLastNotification(groupName, filterName, _lastNotification);
+            await DbHelper.SetLastNotification(groupName, filterName, _lastNotification);
         }
 
         private async Task SetLastNotificationId(long id, string groupName = null, string filterName = null)

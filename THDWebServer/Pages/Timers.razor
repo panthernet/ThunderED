@@ -2,10 +2,9 @@
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_TIMERS)]
 
 @using ThunderED.Helpers
-@using ThunderED.Json.Internal
 @using ThunderED.Modules
 @using THDWebServer.Pages.Modals
-@using SQLHelper = ThunderED.SQLHelper
+@using ThunderED.Thd
 @inject AuthenticationStateProvider Auth
 @inject ProtectedSessionStorage Store
 @inject IModalService Modal
@@ -27,34 +26,34 @@
 
     <div>
         <RadzenGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowPaging="true" PageSize="30"
-                    AllowSorting="true" Data="@_timers" TItem="TimerItem" ColumnWidth="200px" @ref="_ordersGrid" AllowColumnResize="true"
+                    AllowSorting="true" Data="@_timers" TItem="ThdTimer" ColumnWidth="200px" @ref="_ordersGrid" AllowColumnResize="true"
                     >
             <Columns>
-                <RadzenGridColumn TItem="TimerItem" Property="DisplayType" Title="@LM.Get("timersType")" Width="100px">
+                <RadzenGridColumn TItem="ThdTimer" Property="DisplayType" Title="@LM.Get("timersType")" Width="100px">
                     <Template Context="timer">
                         <RadzenLabel Text="@timer.GetModeName()"></RadzenLabel>
                     </Template>
                 </RadzenGridColumn>
-                <RadzenGridColumn TItem="TimerItem" Property="DisplayStage" Title="@LM.Get("timersStage")" Width="100px">
+                <RadzenGridColumn TItem="ThdTimer" Property="DisplayStage" Title="@LM.Get("timersStage")" Width="100px">
                     <Template Context="timer">
                         <RadzenLabel Text="@timer.GetStageName()"></RadzenLabel>
                     </Template>
                 </RadzenGridColumn>
-                <RadzenGridColumn TItem="TimerItem" Property="timerLocation" Title="@LM.Get("timersLocation")" />
-                <RadzenGridColumn TItem="TimerItem" Property="timerOwner" Title="@LM.Get("timersOwner")" />
-                <RadzenGridColumn TItem="TimerItem" Property="timerET" Title="@LM.Get("timersET")" Width="150px" SortProperty="Date">
+                <RadzenGridColumn TItem="ThdTimer" Property="Location" Title="@LM.Get("timersLocation")" />
+                <RadzenGridColumn TItem="ThdTimer" Property="Owner" Title="@LM.Get("timersOwner")" />
+                <RadzenGridColumn TItem="ThdTimer" Property="Date" Title="@LM.Get("timersET")" Width="150px" SortProperty="Date">
                     <Template Context="timer">
-                        @timer.GetDateTime()?.ToString(SettingsManager.Settings.Config.ShortTimeFormat)
+                        @timer.Date.ToString(SettingsManager.Settings.Config.ShortTimeFormat)
                     </Template>
                 </RadzenGridColumn>
-                <RadzenGridColumn TItem="TimerItem" Property="timerET" Title="@LM.Get("timersRemaining")" Width="110px" SortProperty="Date">
+                <RadzenGridColumn TItem="ThdTimer" Property="Date" Title="@LM.Get("timersRemaining")" Width="110px" SortProperty="Date">
                     <Template Context="timer">
                         @timer.GetRemains()
                     </Template>
                 </RadzenGridColumn>
-                <RadzenGridColumn TItem="TimerItem" Property="timerNotes" Title="@LM.Get("timersNotes")" />
-                <RadzenGridColumn TItem="TimerItem" Property="timerChar" Title="@LM.Get("timersUser")" />
-                <RadzenGridColumn TItem="TimerItem" Context="timer" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
+                <RadzenGridColumn TItem="ThdTimer" Property="Notes" Title="@LM.Get("timersNotes")" />
+                <RadzenGridColumn TItem="ThdTimer" Property="TimerChar" Title="@LM.Get("timersUser")" />
+                <RadzenGridColumn TItem="ThdTimer" Context="timer" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
                     <Template Context="order">
                         <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(order))">
                         </RadzenButton>
@@ -64,7 +63,7 @@
                         </RadzenButton>
                     </EditTemplate>
                 </RadzenGridColumn>
-                <RadzenGridColumn TItem="TimerItem" Context="timer" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
+                <RadzenGridColumn TItem="ThdTimer" Context="timer" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
                     <Template Context="order">
                         <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(order))">
                         </RadzenButton>
@@ -80,12 +79,12 @@
 </div>
 
 @functions {
-    RadzenGrid<TimerItem> _ordersGrid;
+    RadzenGrid<ThdTimer> _ordersGrid;
 
     private bool _isEditor = false;
-    private TimerItem _editingRow;
+    private ThdTimer _editingRow;
 
-    private List<TimerItem> _timers;
+    private List<ThdTimer> _timers;
 
     private async Task ShowAddTimer()
     {
@@ -97,7 +96,7 @@
 
         if (!result.Cancelled)
         {
-            _timers.Add(result.Data as TimerItem);
+            _timers.Add(result.Data as ThdTimer);
             await _ordersGrid.Reload();
         }
     }
@@ -112,7 +111,7 @@
 
         if (!result.Cancelled)
         {
-            _timers.Add(result.Data as TimerItem);
+            _timers.Add(result.Data as ThdTimer);
             await _ordersGrid.Reload();
         }
     }
@@ -128,7 +127,7 @@
 
         _isEditor = await TimersModule.HasWebEditorAccess(user);
 
-        _timers = await SQLHelper.SelectTimers();
+        _timers = await DbHelper.SelectTimers();
 
         await base.OnInitializedAsync();
     }
@@ -138,7 +137,7 @@
         if (firstRender) _ordersGrid.OrderBy("Date");
     }
 
-    async void DeleteRow(TimerItem timer)
+    async void DeleteRow(ThdTimer timer)
     {
         try
         {
@@ -147,7 +146,7 @@
 
             _timers.Remove(timer);
             await _ordersGrid.Reload();
-            await SQLHelper.DeleteTimer(timer.Id);
+            await DbHelper.DeleteTimer(timer.Id);
         }
         catch (Exception ex)
         {
@@ -155,7 +154,7 @@
         }
     }
 
-    private async void EditRow(TimerItem timer)
+    private async void EditRow(ThdTimer timer)
     {
         _editingRow = timer.Clone();
 
@@ -170,7 +169,7 @@
 
         if (!result.Cancelled)
         {
-            var ti = result.Data as TimerItem;
+            var ti = result.Data as ThdTimer;
             await _ordersGrid.UpdateRow(ti);
             _timers.ReplaceItem(ti);
             _editingRow = null;
@@ -183,7 +182,7 @@
         //await _ordersGrid.Reload();
     }
 
-    private void CancelEditRow(TimerItem order)
+    private void CancelEditRow(ThdTimer order)
     {
         _ordersGrid.CancelEditRow(order);
         _timers.ReplaceItem(_editingRow);

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+
+using Newtonsoft.Json;
+
 using ThunderED.Helpers;
 
 namespace ThunderED.API
@@ -74,24 +77,24 @@ namespace ThunderED.API
 
         #region Database cache
 
-        protected async Task<T> GetFromDbCache<T>(object id, int days)
+        protected async Task<T> GetFromDbCache<T>(string id, int days)
             where T: class
         {
-            var data = await SQLHelper.SelectCache<T>(id, days);
+            var data = await DbHelper.GetCache<T>(id, days);
             if (data == null) return null;
-            await SQLHelper.SetCacheLastAccess(id, typeof(T).Name);
+            await DbHelper.SetCacheLastAccess(id, typeof(T).Name);
             return data;
         }
 
-        protected async Task UpdateDbCache<T>(T data, object id, int days) 
+        protected async Task UpdateDbCache<T>(T data, string id, int days) 
             where T : class
         {
-            await SQLHelper.UpdateCache(data, id, days);
+            await DbHelper.UpdateCache(id, data, days);
         }
 
-        protected async Task RemoveDbCache(object id, object value) 
+        protected async Task RemoveDbCache(string id, string value) 
         {
-            await SQLHelper.DeleteCache(id, value);
+            await DbHelper.DeleteCache(id, value);
         }
 
         #endregion

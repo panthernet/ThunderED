@@ -169,14 +169,16 @@
     {
         var prms = new ModalParameters();
         prms.Add("AuthGroup", order);
-        var o = new ModalOptions { DisableBackgroundCancel = true, HideHeader = false, ContentScrollable = true, Class = "blazored-modal2" };
-        var result = await Modal.Show<EditAuthGroup>(LM.Get("webSettingsAuthGroupModalHeader", order.Key.TrimLengthOrSpace(30)), prms, o).Result;
+        var o = new ModalOptions { DisableBackgroundCancel = true, HideHeader = false, ContentScrollable = true, Class = "blazored-modal2",  };
+        await Modal.Show<EditAuthGroup>(LM.Get("webSettingsAuthGroupModalHeader", order.Key.TrimLengthOrSpace(30)), prms, o).Result;
+        await SettingsManager.Settings.SaveAsync();
     }
 
     private async Task OpenSettings()
     {
-        var o = new ModalOptions { DisableBackgroundCancel = true, HideHeader = false, ContentScrollable = true, Class = "blazored-modal2", Animation = ModalAnimation.FadeIn(200) };
-        var result = await Modal.Show<EditAuthSettings>(LM.Get("webSettingsGeneralModalHeader"), new ModalParameters(), o).Result;
+        var o = new ModalOptions { DisableBackgroundCancel = true, HideHeader = false, ContentScrollable = true, Class = "blazored-modal2" };
+        await Modal.Show<EditAuthSettings>(LM.Get("webSettingsGeneralModalHeader"), new ModalParameters(), o).Result;
+        await SettingsManager.Settings.SaveAsync();
     }
 
 }

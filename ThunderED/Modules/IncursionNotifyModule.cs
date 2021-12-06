@@ -79,8 +79,7 @@ namespace ThunderED.Modules
                         await ReportIncursion(incursion, null, channel);
                 }
 
-                await SQLHelper.DeleteWhereIn("incursions", "constId",
-                    incursions.Select(a => a.constellation_id).ToList(), not: true);
+                await DbHelper.CleanupIncursions(incursions.Select(a => a.constellation_id).ToList());
 
             }
             catch (Exception ex)

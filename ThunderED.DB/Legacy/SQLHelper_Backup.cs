@@ -30,9 +30,10 @@ namespace ThunderED
                 SettingsManager.Settings.Database.SqliteBackupMaxFiles =
                     SettingsManager.Settings.Database.SqliteBackupMaxFiles < 2 ? 2 : SettingsManager.Settings.Database.SqliteBackupMaxFiles;
 
-                if (!await IsEntryExists("cache_data", new Dictionary<string, object> {{"name", "dbbackup_lasttime"}}))
+                if (!await DbHelper.IsCacheDataExist("dbbackup_lasttime"))
                 {
-                    await Insert("cache_data", new Dictionary<string, object> {{"name", "dbbackup_lasttime"}, {"data", DateTime.Now}});
+                    await DbHelper.UpdateCacheDataEntry("dbbackup_lasttime", DateTime.Now.ToString());
+                    //await Insert("cache_data", new Dictionary<string, object> {{"name", "dbbackup_lasttime"}, {"data", DateTime.Now}});
                     await BackupDatabase(Path.Combine(_backupDirectory, string.Format(_dbBackupFilenameFormat, 1)));
                 }
 
@@ -52,7 +53,8 @@ namespace ThunderED
                 var lastCheck = DateTime.Parse(await Query<string>("cache_data", "data", "name", "dbbackup_lasttime"));
                 if (lastCheck.AddHours(SettingsManager.Settings.Database.SqliteBackupFrequencyInHours) < DateTime.Now)
                 {
-                    await Update("cache_data", "data", DateTime.Now.ToString(), "name", "dbbackup_lasttime");
+                    //await Update("cache_data", "data", DateTime.Now.ToString(), "name", "dbbackup_lasttime");
+                    await DbHelper.UpdateCacheDataEntry("dbbackup_lasttime", DateTime.Now.ToString());
                     var fileNames = Directory.EnumerateFiles(_backupDirectory, string.Format(_dbBackupFilenameFormat, "*")).ToList();
                     if (!fileNames.Any())
                         await BackupDatabase(Path.Combine(_backupDirectory, string.Format(_dbBackupFilenameFormat, 1)));

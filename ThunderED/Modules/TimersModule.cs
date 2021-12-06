@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using ThunderED.Helpers;
 using ThunderED.Json;
-using ThunderED.Json.Internal;
+using ThunderED.Thd;
 
 namespace ThunderED.Modules
 {
@@ -166,16 +166,16 @@ namespace ThunderED.Modules
                 _lastTimersCheck = DateTime.Now;
 
                 await LogHelper.LogModule("Running timers check...", Category);
-                var timers = await SQLHelper.SelectTimers();
+                var timers = await DbHelper.SelectTimers();
                 timers?.ForEach(async timer =>
                 {
                     var channel = Settings.TimersModule.AnnounceChannel;
-                    var dt = timer.GetDateTime();
-                    if (dt != null && (dt.Value - DateTime.UtcNow).TotalMinutes <= 0)
+                    
+                    if (timer.Date != DateTime.MinValue && (timer.Date - DateTime.UtcNow).TotalMinutes <= 0)
                     {
                         if (channel != 0)
                             await SendNotification(timer, channel);
-                        await SQLHelper.DeleteTimer(timer.Id);
+                        await DbHelper.DeleteTimer(timer.Id);
                         return;
                     }
 
@@ -185,31 +185,31 @@ namespace ThunderED.Modules
                     if (announces.Count == 0) return;
 
                     //if we don;t have any lesser announce times
-                    if (timer.announce != 0 && announces.Min() >= timer.announce) return;
+                    if (timer.Announce != 0 && announces.Min() >= timer.Announce) return;
 
-                    if (timer.announce == 0)
+                    if (timer.Announce == 0)
                     {
-                        var left = (timer.GetDateTime().Value - DateTime.UtcNow).TotalMinutes;
+                        var left = (timer.Date - DateTime.UtcNow).TotalMinutes;
                         if (left <= announces.Max())
                         {
                             var value = announces.Where(a => a < left).OrderByDescending(a => a).FirstOrDefault();
                             value = value == 0 ? announces.Min() : value;
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLHelper.SetTimerAnnounce(timer.Id, value);
+                            await DbHelper.SetTimerAnnounce(timer.Id, value);
                         }
                     }
                     else
                     {
-                        var aList = announces.Where(a => a < timer.announce).OrderByDescending(a => a).ToList();
+                        var aList = announces.Where(a => a < timer.Announce).OrderByDescending(a => a).ToList();
                         if (aList.Count == 0) return;
 
                         var an = aList.First();
-                        if ((timer.GetDateTime().Value - DateTime.UtcNow).TotalMinutes <= an)
+                        if ((timer.Date - DateTime.UtcNow).TotalMinutes <= an)
                         {
                             //announce
                             await SendNotification(timer, channel);
-                            await SQLHelper.SetTimerAnnounce(timer.Id, an);
+                            await DbHelper.SetTimerAnnounce(timer.Id, an);
                         }
                     }
                 });
@@ -220,7 +220,7 @@ namespace ThunderED.Modules
             }
         }
 
-        private async Task SendNotification(TimerItem timer, ulong channel)
+        private async Task SendNotification(ThdTimer timer, ulong channel)
         {
             try
             {
@@ -228,12 +228,12 @@ namespace ThunderED.Modules
                 var stage = timer.GetStageName();
                 var mode = timer.GetModeName();
                 var embed = new EmbedBuilder()
-                    .WithTitle(LM.Get("timerNotifyTitle", string.IsNullOrEmpty(timer.timerLocation) ? "-" : timer.timerLocation))
+                    .WithTitle(LM.Get("timerNotifyTitle", string.IsNullOrEmpty(timer.Location) ? "-" : timer.Location))
                     .AddField(LM.Get("timersType"), string.IsNullOrEmpty(mode) ? "-" : mode, true)
                     .AddField(LM.Get("timersStage"), string.IsNullOrEmpty(stage) ? "-" : stage, true)
-                    .AddField(LM.Get("timersOwner"), string.IsNullOrEmpty(timer.timerOwner) ? "-" : timer.timerOwner, true)
+                    .AddField(LM.Get("timersOwner"), string.IsNullOrEmpty(timer.Owner) ? "-" : timer.Owner, true)
                     .AddField(LM.Get("timersRemaining"), string.IsNullOrEmpty(remains) ? "-" : remains, true)
-                    .AddField(LM.Get("timersNotes"), string.IsNullOrEmpty(timer.timerNotes) ? "-" : timer.timerNotes);
+                    .AddField(LM.Get("timersNotes"), string.IsNullOrEmpty(timer.Notes) ? "-" : timer.Notes);
                 if (!string.IsNullOrEmpty(Settings.Resources.ImgTimerAlert))
                     embed.WithThumbnailUrl(Settings.Resources.ImgTimerAlert);
 
@@ -250,7 +250,7 @@ namespace ThunderED.Modules
 
         public static async Task<string> GetUpcomingTimersString(int count = 5)
         {
-            var timers = await SQLHelper.SelectTimers();
+            var timers = await DbHelper.SelectTimers();
             var sb = new StringBuilder();
             if (timers.Count > 0)
             {
@@ -258,7 +258,7 @@ namespace ThunderED.Modules
                 {
                     var timer = timers[i];
                     sb.Append(
-                        $"[{timer.GetModeName()}][{timer.GetStageName()}] {timer.timerLocation} - {timer.GetRemains(true)} ({timer.GetDateTime().Value.ToString(SettingsManager.Settings.Config.ShortTimeFormat)} ET)\n");
+                        $"[{timer.GetModeName()}][{timer.GetStageName()}] {timer.Location} - {timer.GetRemains(true)} ({timer.Date.ToString(SettingsManager.Settings.Config.ShortTimeFormat)} ET)\n");
                 }
             }
             else

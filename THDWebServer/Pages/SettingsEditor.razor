@@ -1,7 +1,5 @@
 ﻿@page "/settings"
 @using ThunderED.Modules
-@using ThunderED.Classes.Entities
-@using ThunderED.Json.Internal
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_WEB_SETTINGS)]
 @inject AuthenticationStateProvider Auth
 @inject ProtectedSessionStorage Store

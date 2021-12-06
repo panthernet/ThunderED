@@ -458,19 +458,28 @@ namespace ThunderED
             return string.IsNullOrEmpty(content) ? (T) (object) null : JsonConvert.DeserializeObject<T>(content);
         }
 
-        public static async Task UpdateCache(string cacheId, string content)
+        private static volatile bool _isCacheUpdating = false;
+        public static async Task UpdateCache<T>(string cacheId, T content, int days = 1)
         {
+            while (_isCacheUpdating)
+                await Task.Delay(5);
+            _isCacheUpdating = true;
             try
             {
                 await using var db = new ThunderedDbContext();
-                var entry = await db.Cache.FirstOrDefaultAsync(a => a.Id == cacheId);
+                var typeName = typeof(T).Name;
+                var entry = await db.Cache.FirstOrDefaultAsync(a =>
+                    EF.Functions.Like(a.Id, cacheId) && EF.Functions.Like(a.Type, typeName));
                 if (entry == null)
-                    await db.Cache.AddAsync(new ThdCacheEntry {Id = cacheId, Content = content});
+                    await db.Cache.AddAsync(new ThdCacheEntry
+                        {Id = cacheId, Content = JsonConvert.SerializeObject(content), Days = days, Type = typeName});
                 else
                 {
-                    entry.Content = content;
+                    entry.Type = typeName;
+                    entry.Content = JsonConvert.SerializeObject(content);
                     entry.LastUpdate = DateTime.Now;
                     entry.LastAccess = DateTime.Now;
+                    entry.Days = days;
                 }
 
                 await db.SaveChangesAsync();
@@ -479,6 +488,59 @@ namespace ThunderED
             {
                 await LogHelper.LogEx(ex, LogCat.Database);
             }
+            finally
+            {
+                _isCacheUpdating = false;
+            }
+        }
+
+        public static async Task SetCacheLastAccess(string id, string type)
+        {
+            await using var db = new ThunderedDbContext();
+            var entry = await db.Cache.FirstOrDefaultAsync(a => EF.Functions.Like(a.Id, id) && EF.Functions.Like(a.Type, type));
+
+            if (entry != null)
+            {
+                entry.LastAccess = DateTime.Now;
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public static async Task DeleteCache(string id, string type)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.Cache.FirstOrDefaultAsync(a => EF.Functions.Like(a.Id, id) && EF.Functions.Like(a.Type, type));
+            if (old != null)
+            {
+                db.Cache.Remove(old);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public static async Task DeleteCache(string type = null)
+        {
+            await using var db = new ThunderedDbContext();
+            if (type == null)
+            {
+                await PurgeCache();
+                return;
+            }
+
+            var old = await db.Cache.Where(a => EF.Functions.Like(a.Type, type)).ToListAsync();
+            if (old.Any())
+            {
+                db.Cache.RemoveRange(old);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public static async Task PurgeCache()
+        {
+            await using var db = new ThunderedDbContext();
+            var list = await db.Cache.Where(a=> EF.Functions.DateDiffDay(a.LastUpdate, DateTime.Now) > a.Days).ToListAsync();
+            db.Cache.RemoveRange(list);
+
+            await db.SaveChangesAsync();
         }
 
         #endregion
@@ -544,6 +606,12 @@ namespace ThunderED
             await db.CacheData.AddAsync(new ThdCacheDataEntry {Name = name, Data = data});
 
             await db.SaveChangesAsync();
+        }
+
+        public static async Task<bool> IsCacheDataExist(string name)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.CacheData.FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name)) !=null;
         }
 
         #endregion
@@ -660,6 +728,18 @@ namespace ThunderED
         #endregion
 
         #region Incursions
+
+
+        public static async Task CleanupIncursions(List<long> list)
+        {
+            await using var db = new ThunderedDbContext();
+            var result = await db.Incursions.Where(a => !list.Contains(a.ConstId)).ToListAsync();
+            if (result != null && result.Any())
+            {
+                db.Incursions.RemoveRange(result);
+                await db.SaveChangesAsync();
+            }
+        }
 
         public static async Task<bool> IsIncursionExists(long id)
         {
@@ -1044,6 +1124,108 @@ namespace ThunderED
 
         #endregion
 
+        #region Notifications
 
+        public static async Task PurgeNotifications()
+        {
+            await using var db = new ThunderedDbContext();
+            if (db.NotificationsList.Any())
+            {
+                db.NotificationsList.RemoveRange(db.NotificationsList);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public static async Task<long> GetLastNotification(string group, string filter)
+        {
+            await using var db = new ThunderedDbContext();
+            return (await db.NotificationsList.AsNoTracking().FirstOrDefaultAsync(a =>
+                EF.Functions.Like(a.GroupName, group) && EF.Functions.Like(a.FilterName, filter)))?.Id ?? 0;
+        }
+
+        public static async Task SetLastNotification(string group, string filter, long id)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.NotificationsList.FirstOrDefaultAsync(a =>
+                EF.Functions.Like(a.GroupName, group) && EF.Functions.Like(a.FilterName, filter));
+            if (old != null)
+            {
+                old.Id = id;
+                old.Time = DateTime.Now;
+            }
+            else
+            {
+                await db.NotificationsList.AddAsync(new ThdNotificationListEntry
+                {
+                    GroupName = group,
+                    FilterName = filter,
+                    Id = id,
+                    Time = DateTime.Now
+                });
+            }
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task CleanupNotificationsList()
+        {
+            await using var db = new ThunderedDbContext();
+            var time = DateTime.Now.Subtract(TimeSpan.FromDays(30));
+            var list = await db.NotificationsList.Where(a => a.Time <= time).ToListAsync();
+            if (list.Any())
+            {
+                db.RemoveRange(list);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        #endregion
+
+        #region Timers
+        public static async Task DeleteTimer(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.Timers.FirstOrDefaultAsync(a => a.Id == id);
+            if (old != null)
+            {
+                db.Timers.Remove(old);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public static async Task SetTimerAnnounce(long id, int value)
+        {
+            await using var db = new ThunderedDbContext();
+            var old = await db.Timers.FirstOrDefaultAsync(a => a.Id == id);
+            if (old != null)
+            {
+                old.Announce = value;
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public static async Task<List<ThdTimer>> SelectTimers()
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Timers.AsNoTracking().ToListAsync();
+        }
+
+        public static async Task UpdateTimer(ThdTimer entry)
+        {
+            await using var db = new ThunderedDbContext();
+            var old =  await db.Timers.AsNoTracking().FirstOrDefaultAsync(a => a.Id == entry.Id);
+            if (old != null)
+            {
+                db.Attach(entry);
+                if (db.Entry(entry).State == EntityState.Unchanged)
+                    db.Entry(entry).State = EntityState.Modified;
+            }
+            else
+            {
+                await db.Timers.AddAsync(entry);
+            }
+            await db.SaveChangesAsync();
+        }
+
+        #endregion
     }
 }

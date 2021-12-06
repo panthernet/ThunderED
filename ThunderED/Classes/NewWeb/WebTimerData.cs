@@ -3,11 +3,10 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using ThunderED.Helpers;
-using ThunderED.Json.Internal;
 
 namespace ThunderED.Classes
 {
-    public class WebTimerData: INotifyPropertyChanged
+   /* public class WebTimerData: INotifyPropertyChanged
     {
         private int _type;
         //private int _stage;
@@ -119,5 +118,5 @@ namespace ThunderED.Classes
         {
             Date = DateTime.UtcNow.AddDays(_intDay).AddHours(_intHour).AddMinutes(_intMinute);
         }
-    }
+    }*/
 }

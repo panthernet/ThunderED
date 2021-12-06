@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace ThunderED.Thd
 {
@@ -10,6 +11,11 @@ namespace ThunderED.Thd
         public DateTime LastUpdate { get; set; } = DateTime.Now;
         public string Content { get; set; }
         public int Days { get; set; } = 1;
+
+        public T GetData<T>()
+        {
+            return JsonConvert.DeserializeObject<T>(Content);
+        }
     }
 
     public class ThdCacheDataEntry

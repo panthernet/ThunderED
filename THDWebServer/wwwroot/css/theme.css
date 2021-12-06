@@ -224,19 +224,18 @@ button {
     transform: skew( -30deg, 0deg);
     box-shadow: rgba(0,0,0,.1) -3px 2px 5px, inset rgba(255,255,255,.09) 1px 0;
 }
-/*
-.rz-tabview-nav li:before {
-    background-color: #000;
-    color: #fff;
-    right: -24px;
-    transform: skew( 30deg, 0deg);
-    box-shadow: rgba(0,0,0,.1) 3px 2px 5px, inset rgba(255,255,255,.09) -1px 0;
+
+.rz-accordion-content {
+    background-color: transparent !important;
 }
 
-.rz-tabview-nav li:after {
-    background-color: #000;
-    color: #fff;
-    left: -24px;
-    transform: skew( -30deg, 0deg);
-    box-shadow: rgba(0,0,0,.1) -3px 2px 5px, inset rgba(255,255,255,.09) 1px 0;
-}*/
+.rz-accordion-header {
+    font-size: 18px;
+}
+
+.rz-dropdown, .rz-textbox, .rz-spinner {
+    height: 25px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    vertical-align: middle !important;
+}

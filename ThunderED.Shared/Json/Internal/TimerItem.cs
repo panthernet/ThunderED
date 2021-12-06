@@ -6,7 +6,7 @@ using ThunderED.Classes;
 
 namespace ThunderED.Json.Internal
 {
-    public class TimerItem: IIdentifiable
+    /*public class TimerItem: IIdentifiable
     {
         public long Id { get; set; }
         public int timerType { get; set; }
@@ -22,5 +22,5 @@ namespace ThunderED.Json.Internal
         public int timerRfMin;
 
         public DateTime? Date { get; set; }
-    }
+    }*/
 }
