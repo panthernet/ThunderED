@@ -40,12 +40,17 @@ namespace ThunderED.Modules
             return list;
         }
 
+        public TiData CreateNewTimersData(List<TiData> list)
+        {
+            return new TiData {Id = list.Any() ? (list.Max(a => a.Id) + 1) : 1};
+        }
+
         public List<TiData> WebGetTimersAccessList()
         {
             var counter = 0;
             var list =  SettingsManager.Settings.TimersModule.AccessList.Select(a => new TiData
             {
-                Id = counter++,
+                Id = ++counter,
                 Name = a.Key,
                 Entities = string.Join(",", a.Value.FilterEntities.Select(b => b.ToString())),
                 Roles = string.Join(",", a.Value.FilterDiscordRoles),

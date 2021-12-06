@@ -107,7 +107,7 @@ namespace ThunderED.Modules
                             structures = await APIHelper.ESIAPI.GetCorpStructures(Reason, rChar.corporation_id,
                                 r.Result);
                             if(structures != null)
-                                await DbHelper.UpdateCache(cacheId, JsonConvert.SerializeObject(structures));
+                                await DbHelper.UpdateCache(cacheId, structures);
                         }
                         if (structures == null)
                         {

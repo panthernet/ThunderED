@@ -34,9 +34,9 @@
                                     <RadzenRequiredValidator Text="Value is required" Component="EName" Popup="true" />
                                 </EditTemplate>
                             </RadzenGridColumn>
-                            <RadzenGridColumn TItem="TiData" Property="RolesList" Title="@LM.Get("webSettingsSaColumnRoles")">
+                            <RadzenGridColumn TItem="TiData" Property="RolesList" Title="@LM.Get("webSettingsSaColumnRoles")" FilterProperty="Roles" SortProperty="Roles">
                                 <Template Context="order">
-                                    @string.Join(',', (string[])order.RolesList.ToArray())
+                                    @string.Join(',', order.RolesList)
                                 </Template>
                                 <EditTemplate Context="order">
                                     <RadzenDropDown @bind-Value="order.RolesList" Data="@_authRolesList2" Style="width: 100%" Multiple="true"
@@ -46,7 +46,10 @@
                             </RadzenGridColumn>
                             <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
                                 <Template Context="order">
-                                    <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditTimersRow(order))" />
+                                    @if (!_isEditingTimersGrid)
+                                    {
+                                        <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditTimersRow(order))"/>
+                                    }
                                 </Template>
                                 <EditTemplate Context="order">
                                     <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveTimersRow(order))" />
@@ -91,6 +94,8 @@
 
     //IEnumerable<string> values;// = new List<string>();
 
+    private bool _isEditingTimersGrid;
+
     public class TestClass
     {
         public long Id { get; set; }
@@ -99,7 +104,7 @@
 
     private WCEAccessFilter _access = new WCEAccessFilter { CanEditSimplifiedAuth = false, CanEditTimers = false, CanEditSettings = false};
     private List<SimplifiedAuthEntity> _authList;
-    private List<TiData> _timersList;
+    private IEnumerable<TiData> _timersList;
     private WebSettingsModule _module;
 
     private int _countTimers;
@@ -156,7 +161,7 @@
         if (_access.CanEditTimers)
         {
             _timersList = _module.WebGetTimersAccessList() ?? new List<TiData>();
-            _countTimers = _timersList?.Count ?? 0;
+            _countTimers = _timersList?.Count() ?? 0;
         }
 
         await base.OnInitializedAsync();
@@ -230,11 +235,12 @@
 
     async Task InsertTimersRow()
     {
-        await _timersListGrid.InsertRow(new TiData());
+        await _timersListGrid.InsertRow(_module.CreateNewTimersData(_timersList.ToList()));
     }
 
     async Task EditTimersRow(TiData order)
     {
+        _isEditingTimersGrid = true;
         _editingTimersRow = order.Clone();
         await _timersListGrid.EditRow(order);
     }
@@ -247,11 +253,12 @@
             return;
         }
         await _timersListGrid.UpdateRow(order);
-        Replace(_timersList, order);
-        await _module.WebSaveTimersAccess(_timersList);
-        _countTimers = _timersList?.Count ?? 0;
+        _timersList = Replace(_timersList, order);
+        await _module.WebSaveTimersAccess(_timersList.ToList());
+        _countTimers = _timersList?.Count() ?? 0;
 
         _editingTimersRow = null;
+        _isEditingTimersGrid = false;
     }
 
     void CancelTimersEdit(TiData order)
@@ -260,12 +267,14 @@
         {
             _timersListGrid.CancelEditRow(order);
             _editingTimersRow = null;
+            _isEditingTimersGrid = false;
             return;
         }
         order.UpdateFrom(_editingTimersRow);
         _timersListGrid.CancelEditRow(order);
         Replace(_timersList, _editingTimersRow);
         _editingTimersRow = null;
+        _isEditingTimersGrid = false;
     }
 
     async Task DeleteTimersRow(TiData order)
@@ -275,9 +284,12 @@
 
         if (_timersList.Contains(order))
         {
-            _timersList.Remove(order);
-            await _module.WebSaveTimersAccess(_timersList);
-            _countTimers = _timersList?.Count ?? 0;
+            var tmp = _timersList.ToList();
+            tmp.Remove(order);
+            _timersList = tmp;
+
+            await _module.WebSaveTimersAccess(_timersList.ToList());
+            _countTimers = _timersList?.Count() ?? 0;
         }
         else
         {
@@ -285,9 +297,10 @@
         }
     }
 
-    private void Replace<T>(List<T> list, T value)
+    private IEnumerable<T> Replace<T>(IEnumerable<T> input, T value)
         where T : IIdentifiable
     {
+        var list = input.ToList();
         var old = list.FirstOrDefault(a => a.Id == value.Id);
         if (old != null)
         {
@@ -296,6 +309,8 @@
             list.Insert(index, value);
         }
         else list.Add(value);
+
+        return list;
     }
     #endregion
 

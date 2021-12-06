@@ -172,17 +172,32 @@ app {
     .hrm-inspect {
         width: 700px;
     }
+    .settings-auth-general {
+        width: 750px;
+    }
+    .settings-auth-group {
+        width: 750px;
+    }
 }
 
 @media (min-width: 1024px) {
     .hrm-inspect {
         width: 900px;
     }
+    .settings-auth-general {
+        width: 800px;
+    }
 }
 
 @media (min-width: 1280px) {
     .hrm-inspect {
         width: 1200px;
+    }
+    .settings-auth-general {
+        width: 800px;
+    }
+    .settings-auth-group {
+        width: 800px;
     }
 }
 
@@ -193,6 +208,13 @@ app {
     .hrm-table {
         height: 390px;
     }
+    .settings-auth-general {
+        width: 760px;
+    }
+    .settings-auth-group {
+        width: 760px;
+    }
+
 }
 
 @media (min-height: 1024px) {
@@ -202,6 +224,13 @@ app {
     .hrm-table {
         height: 550px;
     }
+    .settings-auth-general {
+        width: 800px;
+    }
+    .settings-auth-group {
+        width: 800px;
+    }
+
 }
 
 

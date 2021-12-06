@@ -196,7 +196,8 @@ namespace ThunderED
             #endregion
 
             #region Cache
-            modelBuilder.Entity<ThdCacheEntry>().HasIndex(u => u.Id);
+            modelBuilder.Entity<ThdCacheEntry>().HasKey("Id","Type");
+            modelBuilder.Entity<ThdCacheEntry>().HasIndex("Id", "Type");
 
             modelBuilder.Entity<ThdCacheEntry>().ToTable("cache");
 

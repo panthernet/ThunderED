@@ -48,7 +48,7 @@ namespace ThunderED.Modules
                             else group.FilterEntities.Add(item);
                         }
 
-                        group.FilterDiscordRoles = data.Roles.Split(",", StringSplitOptions.RemoveEmptyEntries)
+                        group.FilterDiscordRoles = data.Roles == null ? new List<string>() : data.Roles.Split(",", StringSplitOptions.RemoveEmptyEntries)
                             .Select(a => a.Trim()).ToList();
                         groups.Add(data.Name, group);
                     }
@@ -167,7 +167,7 @@ namespace ThunderED.Modules
 
         public bool Validate()
         {
-            return !string.IsNullOrEmpty(Name) && (!string.IsNullOrEmpty(Entities) || Roles.Any());
+            return !string.IsNullOrEmpty(Name) && (!string.IsNullOrEmpty(Entities) || RolesList.Any());
         }
 
         public TiData Clone()

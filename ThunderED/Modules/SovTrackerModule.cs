@@ -66,7 +66,7 @@ namespace ThunderED.Modules
                     var trackerData = await DbHelper.GetSovIndexTrackerData(groupName);
                     var holderIds = GetParsedAlliances(groupName, _userStorage) ?? new List<long>();
 
-                    if (!trackerData.Any())
+                    if (trackerData == null || !trackerData.Any())
                     {
                         var list = GetUpdatedList(data, group, groupName, holderIds);
                         if (!list.Any())

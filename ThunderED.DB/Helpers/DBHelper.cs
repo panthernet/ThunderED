@@ -452,8 +452,8 @@ namespace ThunderED
             var now = DateTime.Now;
             var content = db.Cache.AsNoTracking().Where(a => a.Id == cacheId).ToList()
                 .FirstOrDefault(a => (now - a.LastUpdate).Minutes <= minutes)?.Content;
-            if (content != null && content.GetType() == typeof(T))
-                return (T) (object) content;
+//            if (content != null && content.GetType() == typeof(string))
+  //              return (T) (object) content;
 
             return string.IsNullOrEmpty(content) ? (T) (object) null : JsonConvert.DeserializeObject<T>(content);
         }
@@ -536,11 +536,17 @@ namespace ThunderED
 
         public static async Task PurgeCache()
         {
-            await using var db = new ThunderedDbContext();
-            var list = await db.Cache.Where(a=> EF.Functions.DateDiffDay(a.LastUpdate, DateTime.Now) > a.Days).ToListAsync();
-            db.Cache.RemoveRange(list);
+            var dt1 = DateTime.Now.Subtract(TimeSpan.FromDays(1));
+            var dt30 = DateTime.Now.Subtract(TimeSpan.FromDays(30));
+            var dt180 = DateTime.Now.Subtract(TimeSpan.FromDays(180));
 
-            await db.SaveChangesAsync();
+            await using var db = new ThunderedDbContext();
+            var list = await db.Cache.Where(a => (a.Days == 1 && a.LastUpdate < dt1) || (a.Days == 30 && a.LastUpdate < dt30) || (a.Days == 180 && a.LastUpdate < dt180)).ToListAsync();
+            if (list.Any())
+            {
+                db.Cache.RemoveRange(list);
+                await db.SaveChangesAsync();
+            }
         }
 
         #endregion
@@ -691,7 +697,8 @@ namespace ThunderED
                 {
                     GroupKey = groupName,
                     CampaignId = id,
-                    Time = startTime
+                    Time = startTime,
+                    Data = data,
                 });
             }
 

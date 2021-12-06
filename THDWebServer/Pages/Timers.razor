@@ -53,7 +53,7 @@
                 </RadzenGridColumn>
                 <RadzenGridColumn TItem="ThdTimer" Property="Notes" Title="@LM.Get("timersNotes")" />
                 <RadzenGridColumn TItem="ThdTimer" Property="TimerChar" Title="@LM.Get("timersUser")" />
-                <RadzenGridColumn TItem="ThdTimer" Context="timer" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
+                <RadzenGridColumn TItem="ThdTimer" Context="timer" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="75px">
                     <Template Context="order">
                         <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(order))">
                         </RadzenButton>
@@ -63,7 +63,7 @@
                         </RadzenButton>
                     </EditTemplate>
                 </RadzenGridColumn>
-                <RadzenGridColumn TItem="ThdTimer" Context="timer" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
+                <RadzenGridColumn TItem="ThdTimer" Context="timer" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="75px">
                     <Template Context="order">
                         <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(order))">
                         </RadzenButton>
