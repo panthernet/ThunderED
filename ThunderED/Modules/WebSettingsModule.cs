@@ -26,14 +26,14 @@ namespace ThunderED.Modules
 
         }
 
-        private async Task SaveTimersAuthData(List<TiData> convData)
+        private async Task SaveTimersAuthData(List<TiData> convData, Dictionary<string, TimersAccessGroup> dic)
         {
             try
             {
                 lock (SettingsManager.UpdateLock)
                 {
                     var groups = new Dictionary<string, TimersAccessGroup>();
-                    Settings.TimersModule.AccessList.Clear();
+                    dic.Clear();
                     foreach (var data in convData)
                     {
                         if (data.RolesList.Any())
@@ -54,7 +54,7 @@ namespace ThunderED.Modules
                     }
 
                     foreach (var @group in groups)
-                        Settings.TimersModule.AccessList.Add(group.Key, group.Value);
+                        dic.Add(group.Key, group.Value);
 
                     Settings.Save();
                 }

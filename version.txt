@@ -8,6 +8,7 @@
 + Added new button to char inspection in HRM to fetch fresh access token into clipboard (if any)
 + Added WebAuth settings to web UI
 + Added new notifications for POS: `TowerAlertMsg` and `TowerResourceAlertMsg`
++ Added no ESI connection indicator on web site
 + Removed SimpleAuth web UI. Simple auth will be deprecated once web UI settings are polished.
 + Fixed logs overwrite error
 + Fixed aux guilds handling when guild is specified but bot isn't there yet

@@ -10,6 +10,7 @@ namespace ThunderED.Modules
     {
         public async Task<WCEAccessFilter> GetAccess(long userId)
         {
+            if (TickManager.IsESIUnreachable || TickManager.IsNoConnection) return new WCEAccessFilter();
             return await CheckAccess(userId, await APIHelper.ESIAPI.GetCharacterData("Web", userId, true));
         }
 
@@ -60,9 +61,30 @@ namespace ThunderED.Modules
             return list;
         }
 
+        public List<TiData> WebGetTimersEditList()
+        {
+            var counter = 0;
+            var list = SettingsManager.Settings.TimersModule.EditList.Select(a => new TiData
+            {
+                Id = ++counter,
+                Name = a.Key,
+                Entities = string.Join(",", a.Value.FilterEntities.Select(b => b.ToString())),
+                Roles = string.Join(",", a.Value.FilterDiscordRoles),
+                RolesList = a.Value.FilterDiscordRoles
+            }).ToList();
+
+            return list;
+        }
+
         public async Task WebSaveTimersAccess(List<TiData> timersList)
         {
-            await SaveTimersAuthData(timersList);
+            await SaveTimersAuthData(timersList, Settings.TimersModule.AccessList);
         }
+
+        public async Task WebSaveTimersEdit(List<TiData> timersList)
+        {
+            await SaveTimersAuthData(timersList, Settings.TimersModule.EditList);
+        }
+
     }
 }

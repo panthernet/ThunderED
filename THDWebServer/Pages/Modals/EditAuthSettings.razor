@@ -1,6 +1,4 @@
 ﻿@using ThunderED.Modules
-@using ThunderED.Helpers
-@using System.Collections
 
 @inject AuthenticationStateProvider Auth
 @inject ProtectedSessionStorage Store
@@ -175,7 +173,7 @@
 
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     private WebSettingsModule _module;
-    private IEnumerable<SettingsEditor.TestClass> _discordRolesList;
+    private IEnumerable<TestClass> _discordRolesList;
     private string _comAuthChannels;
 
     protected override async Task OnInitializedAsync()
@@ -186,7 +184,7 @@
             return;
         }
 
-        _discordRolesList = _module.WebGetAuthRolesList().ConvertAll(a => new SettingsEditor.TestClass { Name = a, Id = a.GetHashCode() }).ToList();
+        _discordRolesList = _module.WebGetAuthRolesList().ConvertAll(a => new TestClass { Name = a, Id = a.GetHashCode() }).ToList();
 
         _comAuthChannels = string.Join(',', SettingsManager.Settings.WebAuthModule.ComAuthChannels);
 

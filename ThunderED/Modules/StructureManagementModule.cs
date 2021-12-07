@@ -371,7 +371,7 @@ namespace ThunderED.Modules
         /// </summary>
         public static async Task<bool> HasViewAccess(WebAuthUserData data)
         {
-            if (data == null) return false;
+            if (data == null || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
             if (!SettingsManager.Settings.Config.ModuleStructureManagement) return false;
             var module = TickManager.GetModule<StructureManagementModule>();
             if (HasAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedViewAccessMembersLists))
@@ -393,14 +393,14 @@ namespace ThunderED.Modules
 
         private static bool HasAccess(long id, long corpId, long allianceId, Dictionary<string, List<long>> dic)
         {
-            if (!SettingsManager.Settings.Config.ModuleStructureManagement || !dic.Any()) return false;
+            if (!SettingsManager.Settings.Config.ModuleStructureManagement || !dic.Any() || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
             return dic["character"].Contains(id) || dic["corporation"].Contains(corpId) || (allianceId > 0 && dic["alliance"].Contains(corpId));
         }
 
         private static bool HasAccess(long id, long corpId, long allianceId, Dictionary<string, Dictionary<string, List<long>>> dic, out string groupName)
         {
             groupName = null;
-            if (!SettingsManager.Settings.Config.ModuleStructureManagement) return false;
+            if (!SettingsManager.Settings.Config.ModuleStructureManagement || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
 
             groupName = dic.FirstOrDefault(a => a.Value.FirstOrDefault(b => b.Key == "character" && b.Value.Contains(id)).Key != null).Key;
             if (!string.IsNullOrEmpty(groupName))
@@ -434,7 +434,7 @@ namespace ThunderED.Modules
         public static bool HasManageAccess(WebAuthUserData data, out string groupName)
         {
             groupName = null;
-            if (data == null) return false;
+            if (data == null || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
             if (!SettingsManager.Settings.Config.ModuleStructureManagement) return false;
             var module = TickManager.GetModule<StructureManagementModule>();
             if (HasAccess(data.Id, data.CorpId, data.AllianceId, module.ParsedManageAccessMembersLists, out groupName))
@@ -472,6 +472,7 @@ namespace ThunderED.Modules
 
         public async Task<Tuple<List<string>, List<ThdStructureInfo>>> GetStructures(StructureAccessGroup accessGroup, WebAuthUserData user)
         {
+            if (TickManager.IsNoConnection || TickManager.IsESIUnreachable) return null;
             var tokens = await DbHelper.GetTokens(TokenEnum.Structures);
             var result = new List<ThdStructureInfo>();
             var corps = new List<string>();

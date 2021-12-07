@@ -1,0 +1,334 @@
+﻿@using ThunderED.Modules
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_WEB_SETTINGS)]
+@inject AuthenticationStateProvider Auth
+@inject ProtectedSessionStorage Store
+@inject IModalService Modal
+@inject NavigationManager Nav
+
+<div>
+    <RadzenTabs>
+        <Tabs>
+            <RadzenTabsItem Text="@LM.Get("webSettingsTimersAccessTabName")">
+                <button class='navButton2' @onclick="InsertAccessTimersRow" style="width: 150px; margin-bottom: 10px; margin-left: 10px;">
+                    <RadzenIcon Icon="add_circle_outline" Style="font-size: 15px; vertical-align: text-top;"/>
+                    @LM.Get("webSettingsAddEntryButton")
+                </button>
+
+                <RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="20" AllowSorting="true" Data="@_accessTimersList" TItem="TiData"
+                            Count="@_accessTimersList.Count()" @ref="_timersAccessListGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                    <Columns>
+                        <RadzenGridColumn TItem="TiData" Property="Name" Title="@LM.Get("webSettingsSaColumnName")">
+                            <EditTemplate Context="order">
+                                <RadzenTextBox @bind-Value="order.Name" Style="width:100%; display: block" Name="EntryName" />
+                                <RadzenRequiredValidator Text="Value is required" Component="EntryName" Popup="true" />
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="TiData" Property="Entities" Title="@LM.Get("webSettingsTiColumnEntities")">
+                            <EditTemplate Context="order">
+                                <RadzenTextBox @bind-Value="order.Entities" Style="width:100%; display: block" Name="EName" />
+                                <RadzenRequiredValidator Text="Value is required" Component="EName" Popup="true" />
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="TiData" Property="RolesList" Title="@LM.Get("webSettingsSaColumnRoles")" FilterProperty="Roles" SortProperty="Roles">
+                            <Template Context="order">
+                                @string.Join(',', order.RolesList)
+                            </Template>
+                            <EditTemplate Context="order">
+                                <RadzenDropDown @bind-Value="order.RolesList" Data="@_authRolesList2" Style="width: 100%" Multiple="true"
+                                                AllowClear="true" Name="RolesName" TextProperty="Name" ValueProperty="Name" Placeholder="Select...">
+                                </RadzenDropDown>
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+                            <Template Context="order">
+                                @if (!_isEditingAccessTimersGrid)
+                                {
+                                    <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditAccessTimersRow(order))"/>
+                                }
+                            </Template>
+                            <EditTemplate Context="order">
+                                <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveAccessTimersRow(order))" />
+                                <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelAccessTimersEdit(order))" />
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+                            <Template Context="order">
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteAccessTimersRow(order))" />
+                            </Template>
+                            <EditTemplate Context="order">
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteAccessTimersRow(order))" />
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="@LM.Get("webSettingsTimersEditTabName")">
+                <button class='navButton2' @onclick="InsertEditTimersRow" style="width: 150px; margin-bottom: 10px; margin-left: 10px;"><RadzenIcon Icon="add_circle_outline" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webSettingsAddEntryButton")</button>
+
+                <RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="20" AllowSorting="true" Data="@_editTimersList" TItem="TiData"
+                            Count="@_editTimersList.Count()" @ref="_timersEditListGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                    <Columns>
+                        <RadzenGridColumn TItem="TiData" Property="Name" Title="@LM.Get("webSettingsSaColumnName")">
+                            <EditTemplate Context="order">
+                                <RadzenTextBox @bind-Value="order.Name" Style="width:100%; display: block" Name="EntryName" />
+                                <RadzenRequiredValidator Text="Value is required" Component="EntryName" Popup="true" />
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="TiData" Property="Entities" Title="@LM.Get("webSettingsTiColumnEntities")">
+                            <EditTemplate Context="order">
+                                <RadzenTextBox @bind-Value="order.Entities" Style="width:100%; display: block" Name="EName" />
+                                <RadzenRequiredValidator Text="Value is required" Component="EName" Popup="true" />
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="TiData" Property="RolesList" Title="@LM.Get("webSettingsSaColumnRoles")" FilterProperty="Roles" SortProperty="Roles">
+                            <Template Context="order">
+                                @string.Join(',', order.RolesList)
+                            </Template>
+                            <EditTemplate Context="order">
+                                <RadzenDropDown @bind-Value="order.RolesList" Data="@_authRolesList2" Style="width: 100%" Multiple="true"
+                                                AllowClear="true" Name="RolesName" TextProperty="Name" ValueProperty="Name" Placeholder="Select...">
+                                </RadzenDropDown>
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+                            <Template Context="order">
+                                @if (!_isEditingEditTimersGrid)
+                                {
+                                    <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditEditTimersRow(order))"/>
+                                }
+                            </Template>
+                            <EditTemplate Context="order">
+                                <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveEditTimersRow(order))" />
+                                <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEditTimersEdit(order))" />
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+                            <Template Context="order">
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteEditTimersRow(order))" />
+                            </Template>
+                            <EditTemplate Context="order">
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteEditTimersRow(order))" />
+                            </EditTemplate>
+                        </RadzenGridColumn>
+                    </Columns>
+                </RadzenGrid>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</div>
+
+@code {
+    RadzenGrid<TiData> _timersAccessListGrid;
+    RadzenGrid<TiData> _timersEditListGrid;
+    IEnumerable<TestClass> _authRolesList2;
+    private WebSettingsModule _module;
+    private WCEAccessFilter _access = new WCEAccessFilter { CanEditTimers = false, CanEditSettings = false};
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        if (!WebSettingsModule.HasWebAccess(user.Id))
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _module = TickManager.GetModule<WebSettingsModule>();
+        if (_module == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+
+        _access = await _module.GetAccess(user.Id);
+        if (_access == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        if (_access.CanEditTimers)
+        {
+            var counter = 0;
+            _authRolesList2 = _module.WebGetAuthRolesList()?.Select(a => new TestClass { Id = counter++, Name = a }).OrderBy(a=> a.Name).ToList();
+            if (_authRolesList2 == null)
+                _authRolesList2 = new List<TestClass> { new() { Id = 0, Name = "Unknown" } };
+        }
+        if (_access.CanEditTimers)
+        {
+            _accessTimersList = _module.WebGetTimersAccessList() ?? new List<TiData>();
+            _editTimersList = _module.WebGetTimersEditList() ?? new List<TiData>();
+            //_countTimers = _accessTimersList?.Count() ?? 0;
+        }
+
+        await base.OnInitializedAsync();
+
+    }
+    
+#region AccessTimers
+    private IEnumerable<TiData> _accessTimersList;
+    //private int _countTimers;
+    private TiData _editingTimersRow;
+    private bool _isEditingAccessTimersGrid;
+
+    async Task InsertAccessTimersRow()
+    {
+        await _timersAccessListGrid.InsertRow(_module.CreateNewTimersData(_accessTimersList.ToList()));
+    }
+
+    async Task EditAccessTimersRow(TiData order)
+    {
+        _isEditingAccessTimersGrid = true;
+        _editingTimersRow = order.Clone();
+        await _timersAccessListGrid.EditRow(order);
+    }
+
+    async Task SaveAccessTimersRow(TiData order)
+    {
+        if (!order.Validate())
+        {
+            _timersAccessListGrid.CancelEditRow(order);
+            return;
+        }
+        await _timersAccessListGrid.UpdateRow(order);
+        _accessTimersList = Replace(_accessTimersList, order);
+        await _module.WebSaveTimersAccess(_accessTimersList.ToList());
+        //_countTimers = _accessTimersList?.Count() ?? 0;
+
+        _editingTimersRow = null;
+        _isEditingAccessTimersGrid = false;
+    }
+
+    void CancelAccessTimersEdit(TiData order)
+    {
+        if (order.Id == 0)
+        {
+            _timersAccessListGrid.CancelEditRow(order);
+            _editingTimersRow = null;
+            _isEditingAccessTimersGrid = false;
+            return;
+        }
+        order.UpdateFrom(_editingTimersRow);
+        _timersAccessListGrid.CancelEditRow(order);
+        _accessTimersList = Replace(_accessTimersList, _editingTimersRow);
+        _editingTimersRow = null;
+        _isEditingAccessTimersGrid = false;
+    }
+
+    async Task DeleteAccessTimersRow(TiData order)
+    {
+        if(!await Modal.ShowConfirm(null, LM.Get("webGenericQuestionMessage")))
+            return;
+
+        if (_accessTimersList.Contains(order))
+        {
+            var tmp = _accessTimersList.ToList();
+            tmp.Remove(order);
+            _accessTimersList = tmp;
+
+            await _module.WebSaveTimersAccess(_accessTimersList.ToList());
+            //_countTimers = _accessTimersList?.Count() ?? 0;
+        }
+        else
+        {
+            _timersAccessListGrid.CancelEditRow(order);
+        }
+    }
+
+#endregion
+
+#region EditTimers
+    private IEnumerable<TiData> _editTimersList;
+    //private int _countTimers;
+    private TiData _editingEditTimersRow;
+    private bool _isEditingEditTimersGrid;
+
+    async Task InsertEditTimersRow()
+    {
+        await _timersEditListGrid.InsertRow(_module.CreateNewTimersData(_editTimersList.ToList()));
+    }
+
+    async Task EditEditTimersRow(TiData order)
+    {
+        _isEditingEditTimersGrid = true;
+        _editingEditTimersRow = order.Clone();
+        await _timersEditListGrid.EditRow(order);
+    }
+
+    async Task SaveEditTimersRow(TiData order)
+    {
+        if (!order.Validate())
+        {
+            _timersEditListGrid.CancelEditRow(order);
+            return;
+        }
+        await _timersEditListGrid.UpdateRow(order);
+        _editTimersList = Replace(_editTimersList, order);
+        await _module.WebSaveTimersEdit(_editTimersList.ToList());
+        //_countTimers = _accessTimersList?.Count() ?? 0;
+
+        _editingEditTimersRow = null;
+        _isEditingEditTimersGrid = false;
+    }
+
+    void CancelEditTimersEdit(TiData order)
+    {
+        if (order.Id == 0)
+        {
+            _timersEditListGrid.CancelEditRow(order);
+            _editingEditTimersRow = null;
+            _isEditingEditTimersGrid = false;
+            return;
+        }
+        order.UpdateFrom(_editingEditTimersRow);
+        _timersEditListGrid.CancelEditRow(order);
+        _editTimersList = Replace(_editTimersList, _editingEditTimersRow);
+        _editingEditTimersRow = null;
+        _isEditingEditTimersGrid = false;
+    }
+
+    async Task DeleteEditTimersRow(TiData order)
+    {
+        if(!await Modal.ShowConfirm(null, LM.Get("webGenericQuestionMessage")))
+            return;
+
+        if (_editTimersList.Contains(order))
+        {
+            var tmp = _editTimersList.ToList();
+            tmp.Remove(order);
+            _editTimersList = tmp;
+
+            await _module.WebSaveTimersEdit(_editTimersList.ToList());
+            //_countTimers = _accessTimersList?.Count() ?? 0;
+        }
+        else
+        {
+            _timersEditListGrid.CancelEditRow(order);
+        }
+    }
+
+#endregion
+
+    private IEnumerable<T> Replace<T>(IEnumerable<T> input, T value)
+        where T : IIdentifiable
+    {
+        var list = input.ToList();
+        var old = list.FirstOrDefault(a => a.Id == value.Id);
+        if (old != null)
+        {
+            var index = list.IndexOf(old);
+            list.Remove(old);
+            list.Insert(index, value);
+        }
+        else list.Add(value);
+
+        return list;
+    }
+}

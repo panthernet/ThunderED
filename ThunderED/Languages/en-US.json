@@ -771,5 +771,8 @@
 
   "NotifyHeader_TowerAlertMsg": "{0} belonging to {1} is under attack!",
   "PosFuelAlert": "{0} belonging to {1} is low on fuel!",
-  "webAuthGroupAccordionHeader":  "General settings" 
+  "webAuthGroupAccordionHeader": "General settings",
+  "webSettingsTimersAccessTabName": "Access Timers",
+  "webSettingsTimersEditTabName": "Edit Timers",
+  "msgConnectionFailureScroll":  "Warning! ESI connection is unstable. Some features might be unavailable." 
 }

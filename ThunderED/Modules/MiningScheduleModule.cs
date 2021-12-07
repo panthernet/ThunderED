@@ -600,19 +600,33 @@ namespace ThunderED.Modules
 
         public static async Task<bool> HasAuthAccess(JsonClasses.CharacterData data)
         {
-            if (data == null) return false;
-            return await HasAuthAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0);
+            try
+            {
+                if (data == null || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
+                return await HasAuthAccess(data.character_id, data.corporation_id, data.alliance_id ?? 0);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public static async Task<bool> HasAuthAccess(WebAuthUserData data)
         {
-            if (data == null) return false;
-            return await HasAuthAccess(data.Id, data.CorpId, data.AllianceId);
+            try
+            {
+                if (data == null || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
+                return await HasAuthAccess(data.Id, data.CorpId, data.AllianceId);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private static async Task<bool> HasAuthAccess(long id, long corpId, long allianceId)
         {
-            if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
+            if (!SettingsManager.Settings.Config.ModuleMiningSchedule || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
             var module = TickManager.GetModule<MiningScheduleModule>();
 
             if (module.GetAccessAllCharacterIds(module.ParsedAuthAccessMembersLists).Contains(id) ||
@@ -645,7 +659,7 @@ namespace ThunderED.Modules
         /// </summary>
         public static async Task<bool> HasViewAccess(WebAuthUserData data)
         {
-            if (data == null) return false;
+            if (data == null || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
             if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
             if (await HasObserverExtrViewAccess(data) || await HasObserverLedgerViewAccess(data) ||
                 HasExtrEditAccess(data, out _) || HasLedgerEditAccess(data, out _))
@@ -660,14 +674,14 @@ namespace ThunderED.Modules
 
         private static bool HasViewAccess(long id, long corpId, long allianceId, Dictionary<string, List<long>> dic)
         {
-            if (!SettingsManager.Settings.Config.ModuleMiningSchedule || !dic.Any()) return false;
+            if (!SettingsManager.Settings.Config.ModuleMiningSchedule || !dic.Any() || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
             return dic["character"].Contains(id) || dic["corporation"].Contains(corpId) || (allianceId > 0 && dic["alliance"].Contains(corpId));
         }
 
         private static bool HasViewAccess(long id, long corpId, long allianceId, Dictionary<string, Dictionary<string, List<long>>> dic, out string groupName)
         {
             groupName = null;
-            if (!SettingsManager.Settings.Config.ModuleMiningSchedule) return false;
+            if (!SettingsManager.Settings.Config.ModuleMiningSchedule || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
             //var module = TickManager.GetModule<MiningScheduleModule>();
 
             groupName = dic.FirstOrDefault(a => a.Value.FirstOrDefault(b=> b.Key == "character" && b.Value.Contains(id)).Key != null).Key;

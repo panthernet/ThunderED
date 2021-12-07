@@ -238,9 +238,9 @@
     [Parameter]public KeyValuePair<string, WebAuthGroup> AuthGroup { get; set; }
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     private WebSettingsModule _module;
-    private IEnumerable<SettingsEditor.TestClass> _discordRolesList;
-    private IEnumerable<SettingsEditor.TestClass> _esiRolesList;
-    private IEnumerable<SettingsEditor.TestClass> _groupNamesList;
+    private IEnumerable<TestClass> _discordRolesList;
+    private IEnumerable<TestClass> _esiRolesList;
+    private IEnumerable<TestClass> _groupNamesList;
     RadzenGrid<KeyValuePair<string, AuthRoleEntity>> _allowedGrid;
 
     protected override async Task OnInitializedAsync()
@@ -252,9 +252,9 @@
         }
 
 
-        _discordRolesList = _module.WebGetAuthRolesList().ConvertAll(a => new SettingsEditor.TestClass { Name = a, Id = a.GetHashCode() });
-        _esiRolesList = SettingsManager.ESIScopes.ConvertAll(a => new SettingsEditor.TestClass { Name = a, Id = a.GetHashCode() });
-        _groupNamesList = _module.WebGetAuthGroupsList().ConvertAll(a=> new SettingsEditor.TestClass {Name=a, Id=a.GetHashCode()});
+        _discordRolesList = _module.WebGetAuthRolesList().ConvertAll(a => new TestClass { Name = a, Id = a.GetHashCode() });
+        _esiRolesList = SettingsManager.ESIScopes.ConvertAll(a => new TestClass { Name = a, Id = a.GetHashCode() });
+        _groupNamesList = _module.WebGetAuthGroupsList().ConvertAll(a=> new TestClass {Name=a, Id=a.GetHashCode()});
 
         await base.OnInitializedAsync();
     }

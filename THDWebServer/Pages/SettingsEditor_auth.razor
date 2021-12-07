@@ -16,7 +16,7 @@
     <Columns>
         <RadzenGridColumn TItem="KeyValuePair<string, ThunderED.WebAuthGroup>" Property="Key" Title="@LM.Get("webSettingsAuthNameColumnName")" >
             <EditTemplate Context="order">
-                <RadzenTextBox @bind-Value=@EditName Style="width:100%; display: block" Name="EntryName" />
+                <RadzenTextBox @bind-Value=@_editName Style="width:100%; display: block" Name="EntryName" />
                 <RadzenRequiredValidator Text="Value is required" Component="EntryName" Popup="true" />
             </EditTemplate>
         </RadzenGridColumn>
@@ -62,10 +62,10 @@
 @code {
     RadzenGrid<KeyValuePair<string, ThunderED.WebAuthGroup>> _authGrid;
 
-    private WCEAccessFilter _access = new WCEAccessFilter { CanEditSimplifiedAuth = false, CanEditTimers = false, CanEditSettings = false};
+    private WCEAccessFilter _access = new WCEAccessFilter { CanEditTimers = false, CanEditSettings = false};
     private WebSettingsModule _module;
     private Dictionary<string, WebAuthGroup> _groupsList;
-    private List<SettingsEditor.TestClass> _rolesList;
+    private List<TestClass> _rolesList;
 
     protected override async Task OnInitializedAsync()
     {
@@ -89,14 +89,14 @@
         _groupsList = _module.Settings.WebAuthModule.AuthGroups;
 
         var counter = 0;
-        _rolesList = _module.WebGetAuthRolesList()?.Select(a => new SettingsEditor.TestClass { Id = counter++, Name = a }).OrderBy(a => a.Name).ToList() ?? new List<SettingsEditor.TestClass> { new SettingsEditor.TestClass { Id = 0, Name = "Unknown" } };
+        _rolesList = _module.WebGetAuthRolesList()?.Select(a => new TestClass { Id = counter++, Name = a }).OrderBy(a => a.Name).ToList() ?? new List<TestClass> { new TestClass { Id = 0, Name = "Unknown" } };
 
         await base.OnInitializedAsync();
     }
 
     #region Auth
     private KeyValuePair<string, WebAuthGroup>? _editingAuthRow;
-    private string EditName;
+    private string _editName;
     private bool _isEditingWebRegGrid;
 
     async Task InsertRow()
@@ -108,7 +108,7 @@
     async Task EditRow(KeyValuePair<string, WebAuthGroup> order)
     {
         _editingAuthRow = order.Clone();
-        EditName = order.Key;
+        _editName = order.Key;
         _isEditingWebRegGrid = true;
         await _authGrid.EditRow(order);
     }
@@ -122,12 +122,12 @@
         }*/
         await _authGrid.UpdateRow(order);
         SettingsManager.Settings.WebAuthModule.AuthGroups.Remove(order.Key);
-        SettingsManager.Settings.WebAuthModule.AuthGroups.Add(EditName, order.Value);
+        SettingsManager.Settings.WebAuthModule.AuthGroups.Add(_editName, order.Value);
         await _authGrid.Reload();
 
         await SettingsManager.Settings.SaveAsync();
         _editingAuthRow = null;
-        EditName = null;
+        _editName = null;
         _isEditingWebRegGrid = false;
     }
 
@@ -142,7 +142,7 @@
         await _authGrid.Reload();
 
         _editingAuthRow = null;
-        EditName = null;
+        _editName = null;
         _isEditingWebRegGrid = false;
     }
 
@@ -160,7 +160,7 @@
         else
         {
             _authGrid.CancelEditRow(order);
-            EditName = null;
+            _editName = null;
         }
     }
     #endregion

@@ -764,5 +764,9 @@
 
   "NotifyHeader_TowerAlertMsg": "Объект {0}, принадлежащий {1} атакован!",
   "PosFuelAlert": "В {0} принадлежащем {1} кончается топливо!",
-  "webAuthGroupAccordionHeader": "Основные настройки"
+  "webAuthGroupAccordionHeader": "Основные настройки",
+  "webSettingsTimersAccessTabName": "Доступ",
+  "webSettingsTimersEditTabName": "Редактирование",
+  "msgConnectionFailureScroll": "Внимание! Соединение с ESI нестабильно. Некоторый возможности могут быть недоступны."
+
 }

@@ -5,6 +5,12 @@
 <div class="main" style="background-image: url('@WebUiHelper.GetAsset("auth_bg2.jpg")'); height: 100vh;">
 
     <div class="main" style="overflow: auto; background-image: linear-gradient(black, transparent);">
+        @if (TickManager.IsESIUnreachable || TickManager.IsNoConnection)
+        {
+            <div id="scroll-container" style="background: red; height: 25px;">
+                <div id="scroll-text" class="frontcolor fontEternalShadow align-middle">@LM.Get("msgConnectionFailureScroll")</div>
+            </div>
+        }
         <div class="navbar-brand frontcolor" style="vertical-align: middle;">
             @if (WebUiHelper.GetAsset("nav_logo.png") != null)
             {

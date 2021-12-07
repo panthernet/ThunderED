@@ -273,9 +273,8 @@ namespace ThunderED
         public List<object> AllowedEntities { get; set; } = new List<object>();
         public List<string> AllowedDiscordRoles { get; set; } = new List<string>();
 #endif
-        public bool CanEditSimplifiedAuth { get; set; } = true;
-        public bool CanEditTimers { get; set; } = true;
-        public bool CanEditSettings { get; set; } = true;
+        public bool CanEditTimers { get; set; } = false;
+        public bool CanEditSettings { get; set; } = false;
 
         [Comment("Is config element enabled at runtime")]
         public bool IsEnabled { get; set; } = true;

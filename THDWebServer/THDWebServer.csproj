@@ -72,6 +72,7 @@
     <Watch Remove="Pages\MoonTable.razor" />
     <Watch Remove="Pages\SettingsEditor.razor" />
     <Watch Remove="Pages\SettingsEditor_auth.razor" />
+    <Watch Remove="Pages\SettingsEditor_timers.razor" />
     <Watch Remove="Pages\StructureManagement.razor" />
     <Watch Remove="Pages\Success\FeedSuccess.razor" />
     <Watch Remove="Pages\Timers.razor" />
