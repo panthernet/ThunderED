@@ -876,17 +876,12 @@ namespace ThunderED
             var old = await db.MoonTable.FirstOrDefaultAsync(
                 a => a.SystemId == entry.SystemId && entry.MoonId == a.MoonId && entry.OreId == a.OreId);
             if (old != null)
-                entry.Id = old.Id;
+            {
+                db.MoonTable.Remove(old);
+            await db.SaveChangesAsync();
+            }
 
-            if (entry.Id == 0)
-            {
-                await db.MoonTable.AddAsync(entry);
-            }
-            else
-            {
-                db.Attach(entry);
-                db.Entry(entry).State = EntityState.Modified;
-            }
+            await db.MoonTable.AddAsync(entry);
 
             await db.SaveChangesAsync();
         }
@@ -900,19 +895,11 @@ namespace ThunderED
                     a => a.SystemId == entry.SystemId && entry.MoonId == a.MoonId && entry.OreId == a.OreId);
                 if (old != null)
                 {
-                    entry.Id = old.Id;
-                    db.Entry(old).State = EntityState.Detached;
+                    db.MoonTable.Remove(old);
+                    await db.SaveChangesAsync();
                 }
 
-                if (entry.Id == 0)
-                {
-                    await db.MoonTable.AddAsync(entry);
-                }
-                else
-                {
-                    db.Attach(entry);
-                    db.Entry(entry).State = EntityState.Modified;
-                }
+                await db.MoonTable.AddAsync(entry);
             }
 
             await db.SaveChangesAsync();
@@ -1171,19 +1158,17 @@ namespace ThunderED
                 EF.Functions.Like(a.GroupName, group) && EF.Functions.Like(a.FilterName, filter));
             if (old != null)
             {
-                old.Id = id;
-                old.Time = DateTime.Now;
+                //no key modif allowed so delete first
+                db.NotificationsList.Remove(old);
+                await db.SaveChangesAsync();
             }
-            else
+            await db.NotificationsList.AddAsync(new ThdNotificationListEntry
             {
-                await db.NotificationsList.AddAsync(new ThdNotificationListEntry
-                {
-                    GroupName = group,
-                    FilterName = filter,
-                    Id = id,
-                    Time = DateTime.Now
-                });
-            }
+                GroupName = group,
+                FilterName = filter,
+                Id = id,
+                Time = DateTime.Now
+            });
             await db.SaveChangesAsync();
         }
 

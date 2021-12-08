@@ -17,6 +17,7 @@
 + Improved caching logic and handling
 + Improved security
 + Improved several notifications info with additional data
++ Improved moons module
 + Migrated all module DB interactions to EF
 + Updated project to .NET6 + VS2022
 + Updated ORM to EFCore 6

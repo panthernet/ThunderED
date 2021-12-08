@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace ThunderED.Thd
 {
@@ -13,14 +15,11 @@ namespace ThunderED.Thd
         public long RegionId { get; set; }
         public string OreName { get; set; }
         public string MoonName { get; set; }
-
-        [NotMapped]
         public string SystemName { get; set; }
-        [NotMapped]
-        public string PlanetName { get; set; }
-        [NotMapped]
-        public string RealMoonName { get; set; }
-        [NotMapped]
         public string RegionName { get; set; }
+        public string PlanetName { get; set; }
+        public string Notes { get; set; }
+
+
     }
 }

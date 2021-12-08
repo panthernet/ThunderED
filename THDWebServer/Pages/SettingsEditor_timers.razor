@@ -1,4 +1,5 @@
 ﻿@using ThunderED.Modules
+@using ThunderED.Helpers
 @attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_WEB_SETTINGS)]
 @inject AuthenticationStateProvider Auth
 @inject ProtectedSessionStorage Store
@@ -15,7 +16,7 @@
                 </button>
 
                 <RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="20" AllowSorting="true" Data="@_accessTimersList" TItem="TiData"
-                            Count="@_accessTimersList.Count()" @ref="_timersAccessListGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                            Count="@(_accessTimersList?.Count() ?? 0)" @ref="_timersAccessListGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
                     <Columns>
                         <RadzenGridColumn TItem="TiData" Property="Name" Title="@LM.Get("webSettingsSaColumnName")">
                             <EditTemplate Context="order">
@@ -26,7 +27,6 @@
                         <RadzenGridColumn TItem="TiData" Property="Entities" Title="@LM.Get("webSettingsTiColumnEntities")">
                             <EditTemplate Context="order">
                                 <RadzenTextBox @bind-Value="order.Entities" Style="width:100%; display: block" Name="EName" />
-                                <RadzenRequiredValidator Text="Value is required" Component="EName" Popup="true" />
                             </EditTemplate>
                         </RadzenGridColumn>
                         <RadzenGridColumn TItem="TiData" Property="RolesList" Title="@LM.Get("webSettingsSaColumnRoles")" FilterProperty="Roles" SortProperty="Roles">
@@ -66,7 +66,7 @@
                 <button class='navButton2' @onclick="InsertEditTimersRow" style="width: 150px; margin-bottom: 10px; margin-left: 10px;"><RadzenIcon Icon="add_circle_outline" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webSettingsAddEntryButton")</button>
 
                 <RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="20" AllowSorting="true" Data="@_editTimersList" TItem="TiData"
-                            Count="@_editTimersList.Count()" @ref="_timersEditListGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                            Count="@(_editTimersList?.Count() ?? 0)" @ref="_timersEditListGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
                     <Columns>
                         <RadzenGridColumn TItem="TiData" Property="Name" Title="@LM.Get("webSettingsSaColumnName")">
                             <EditTemplate Context="order">
@@ -77,7 +77,6 @@
                         <RadzenGridColumn TItem="TiData" Property="Entities" Title="@LM.Get("webSettingsTiColumnEntities")">
                             <EditTemplate Context="order">
                                 <RadzenTextBox @bind-Value="order.Entities" Style="width:100%; display: block" Name="EName" />
-                                <RadzenRequiredValidator Text="Value is required" Component="EName" Popup="true" />
                             </EditTemplate>
                         </RadzenGridColumn>
                         <RadzenGridColumn TItem="TiData" Property="RolesList" Title="@LM.Get("webSettingsSaColumnRoles")" FilterProperty="Roles" SortProperty="Roles">
@@ -90,7 +89,7 @@
                                 </RadzenDropDown>
                             </EditTemplate>
                         </RadzenGridColumn>
-                        <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+                        <RadzenGridColumn TItem="TiData" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
                             <Template Context="order">
                                 @if (!_isEditingEditTimersGrid)
                                 {

@@ -170,6 +170,7 @@
 
     <div class="row">
         <div class="col d-flex">
+            <RadzenIcon Icon="help" Style="font-size: 25px; vertical-align: text-top;" title="@LM.Get("webSettingsAuthGroupHelp1")" />
             <RadzenLabel Text="@LM.Get("wsAuthColNameAllowedMembers")" />
             <button class='navButton2' @onclick="InsertRow" style="width: 150px; height: 30px; margin-bottom: 10px; margin-left: 10px;"><RadzenIcon Icon="add_circle_outline" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webSettingsAddEntryButton")</button>
         </div>
@@ -208,7 +209,7 @@
                         </EditTemplate>
                     </RadzenGridColumn>
 
-                    <RadzenGridColumn TItem="KeyValuePair<string, AuthRoleEntity>" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="25px">
+                    <RadzenGridColumn TItem="KeyValuePair<string, AuthRoleEntity>" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
                         <Template Context="order">
                             @if (!_isEditingMembersGrid)
                             {
@@ -304,7 +305,8 @@
 
     async Task CancelEdit(KeyValuePair<string, AuthRoleEntity> order)
     {
-        //order.UpdateFrom(_editingAuthRow); TODO
+        if(_editingAuthRow != null)
+            order.Value.UpdateFrom(_editingAuthRow.Value.Value);
         _allowedGrid.CancelEditRow(order);
 
         AuthGroup.Value.AllowedMembers.Remove(order.Key);

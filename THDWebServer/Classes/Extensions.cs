@@ -34,12 +34,12 @@ namespace THDWebServer.Classes
             return query.ToList();
         }
 
-        public static List<T> ApplyAjaxFilters<T>(this IQueryable<T> list, LoadDataArgs args, out int count)
+        public static List<T> ApplyAjaxFilters<T>(this IQueryable<T> query, LoadDataArgs args, out int count)
         {
-            var query = list.AsQueryable();
+            count = query.Count();
+
             if (!string.IsNullOrEmpty(args.Filter))
                 query = query.Where(args.Filter);
-            count = query.Count();
 
             if (!string.IsNullOrEmpty(args.OrderBy))
                 query = query.OrderBy(args.OrderBy);

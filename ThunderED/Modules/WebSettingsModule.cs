@@ -182,12 +182,12 @@ namespace ThunderED.Modules
             };
         }
 
-        public void UpdateFrom(TiData value)
+        /*public void UpdateFrom(TiData value)
         {
             Roles = value.Roles;
             RolesList = value.RolesList;
             Name = value.Name;
             Entities = value.Entities;
-        }
+        }*/
     }
 }

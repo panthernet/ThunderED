@@ -32,7 +32,33 @@ namespace ThunderED.Helpers
             }
         }
 
+        public static void UpdateFrom<T>(this T original, T input)
+        {
+            if (input == null) return;
+            var inputType = input.GetType();
+            var myType = original.GetType();
+            if (myType != inputType)
+                throw new Exception($"Can't update {myType.Name} to {inputType.Name}");
+            var myProps = myType.GetProperties().Where(a => a.CanWrite);
+            var inProps = inputType.GetProperties().Where(a => a.CanWrite).ToList();
 
+            var count = 0;
+            foreach (var myProp in myProps)
+            {
+                myProp.SetValue(original, inProps[count].GetValue(input));
+                count++;
+            }
+
+            var myF = myType.GetFields().Where(a => a.IsPublic);
+            var inF = inputType.GetFields().Where(a => a.IsPublic).ToList();
+
+            count = 0;
+            foreach (var myProp in myF)
+            {
+                myProp.SetValue(original, inF[count].GetValue(input));
+                count++;
+            }
+        }
 
         public static void AddOrUpdate<T, T2>(this ConcurrentDictionary<T, T2> dic, T id, T2 data)
         {

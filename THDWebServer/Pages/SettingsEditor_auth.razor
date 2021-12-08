@@ -133,7 +133,8 @@
 
     async Task CancelEdit(KeyValuePair<string, WebAuthGroup> order)
     {
-        //order.UpdateFrom(_editingAuthRow); TODO
+        if(_editingAuthRow!= null)
+            order.Value.UpdateFrom(_editingAuthRow.Value.Value);
         _authGrid.CancelEditRow(order);
 
         SettingsManager.Settings.WebAuthModule.AuthGroups.Remove(order.Key);

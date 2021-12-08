@@ -774,5 +774,8 @@
   "webAuthGroupAccordionHeader": "General settings",
   "webSettingsTimersAccessTabName": "Access Timers",
   "webSettingsTimersEditTabName": "Edit Timers",
-  "msgConnectionFailureScroll":  "Warning! ESI connection is unstable. Some features might be unavailable." 
+  "msgConnectionFailureScroll": "Warning! ESI connection is unstable. Some features might be unavailable.",
+  "webButtonUploadScan": "Upload Scan",
+  "mtColumnNotes": "Notes",
+  "webSettingsAuthGroupHelp1": "Corporation and Alliance entity names in the table should start with c: and a: prefixes."
 }

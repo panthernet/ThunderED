@@ -31,22 +31,30 @@ namespace ThunderED.Modules
 
         }
 
-        public async Task UpdateMoonTable(ThdMoonTableEntry entry)
+        /*public async Task UpdateMoonTable(ThdMoonTableEntry entry)
         {
             if (entry.RegionId == 0)
                 entry.RegionId = (await APIHelper.ESIAPI.GetSystemData("MoonInfo", entry.SystemId))?.RegionId ?? 0;
             if (string.IsNullOrEmpty(entry.OreName))
                 entry.OreName = (await APIHelper.ESIAPI.GetTypeId("MoonInfo", entry.OreId))?.Name;
             await DbHelper.UpdateMoonTable(entry);
-        }
+        }*/
 
         public async Task<List<ThdMoonTableEntry>> UpdateMoonTable(List<ThdMoonTableEntry> list)
         {
             foreach (var entry in list)
             {
                 if (entry.RegionId == 0)
-                    entry.RegionId = (await APIHelper.ESIAPI.GetSystemData("MoonInfo", entry.SystemId))?.RegionId ??
-                                     0;
+                {
+                    var system = await APIHelper.ESIAPI.GetSystemData("MoonInfo", entry.SystemId);
+                    if (system != null)
+                    {
+                        entry.RegionId = system.RegionId;
+                        var region = await APIHelper.ESIAPI.GetRegionData("MoonInfo", system.RegionId);
+                        entry.RegionName = region?.RegionName ?? null;
+                    }
+                }
+
                 if (string.IsNullOrEmpty(entry.OreName))
                     entry.OreName = (await APIHelper.ESIAPI.GetTypeId("MoonInfo", entry.OreId))?.Name;
             }
@@ -168,8 +176,14 @@ namespace ThunderED.Modules
                         OreId = Convert.ToInt64(data[2]),
                         OreQuantity = double.Parse(data[1], NumberStyles.Any, ci),
                         OreName = data[0].RemoveLocalizedTag(),
-                        MoonName = currentMoonName
                     };
+
+                    var breakIndex = currentMoonName.LastIndexOf('-');
+                    var fPart = currentMoonName.Substring(0, breakIndex).Trim().Split(' ');
+                    entry.PlanetName = fPart[1];
+                    entry.SystemName = fPart[0];
+                    entry.MoonName = currentMoonName.Substring(breakIndex + 1, currentMoonName.Length - (breakIndex + 1)).Trim();
+
                     r.List.Add(entry);
                 }
 
@@ -182,6 +196,11 @@ namespace ThunderED.Modules
             }
 
             return r;
+        }
+
+        public async Task SaveMoonTableEntry(ThdMoonTableEntry entry)
+        {
+            await DbHelper.UpdateMoonTable(entry);
         }
     }
 

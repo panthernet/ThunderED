@@ -5,9 +5,12 @@
 @using ThunderED.Thd
 @using THDWebServer.Pages.Modals
 @using Microsoft.EntityFrameworkCore
+@using System.Linq.Dynamic.Core
 @inject ProtectedSessionStorage Store
 @inject IModalService Modal
 @inject NavigationManager Nav
+
+@inject ThunderedDbContext dbContext
 
 <div class="text-center pageHeader">
     @LM.Get("hrmMoonsPage")
@@ -20,47 +23,82 @@
             {
                 <RadzenTabsItem Text="@LM.Get("mtMoonsHeader")" Style="padding: 0;">
                     <div class="row">
-                        <div>
-                            <RadzenDropDown TValue="WebStellarRegionEntry" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                            Data="@_regions" Style="width: 400px;" @bind-Value="_selectedRegion" TextProperty="Name"
-                                            Change="@OnRegion1FilterChange" AllowFiltering="true" AllowClear="true" />
-                        </div>
                         <div style="margin-left: 10px;">
-                            <RadzenButton ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Icon="system_update_alt" Click="ImportMoonDataClick" />
+                            <button class='navButton2' @onclick="ImportMoonDataClick" style="width: 150px; margin-left: 10px;"><RadzenIcon Icon="system_update_alt" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webButtonUploadScan")</button>
                         </div>
                     </div>
-                    <RadzenGrid PageSize="30" Count="@_countMoons" Data="@_filteredMoonList" TItem="ThdMoonTableEntry"
-                                LoadData="@LoadMoonsGrid" @ref="_moonsGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" AllowColumnResize="false"
-                                Style="height: 640px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                CellRender="@MoonCellRender">
+                    <RadzenDataGrid TItem="ThdMoonTableEntry" FilterMode="FilterMode.Simple"
+                                    Count="@_countMoons"
+                                    LoadData="@LoadMoonsGrid" @ref="_moonsGrid" Data="@_filteredMoonList"
+                                    AllowFiltering="true" AllowSorting="true" AllowColumnResize="false" AllowGrouping="true"
+                                    Style="height: 640px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    LogicalFilterOperator="LogicalFilterOperator.And"
+                                    PageSize="100" AllowPaging="true"
+                                    CellRender="MoonCellRender" Render="@OnMoonsRender">
+                        <GroupHeaderTemplate>
+                            @(context.Data.Key ?? ""), @(context.Data.Items.Cast<ThdMoonTableEntry>().FirstOrDefault()?.PlanetName) - @(context.Data.Items.Cast<ThdMoonTableEntry>().FirstOrDefault()?.SystemName)
+                        </GroupHeaderTemplate>
                         <Columns>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="RegionName" Filterable="false" Sortable="true" FilterProperty="RegionName" SortProperty="RegionName"
-                                              Title="@LM.Get("mtColumnRegionName")">
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="RegionName" Filterable="true" Sortable="true" FilterProperty="RegionName" SortProperty="RegionName"
+                                                  Title="@LM.Get("mtColumnRegionName")">
                                 <Template Context="order">
-                                    <RadzenLabel Text="@order.RegionName" />
+                                    <RadzenLabel Text="@order.RegionName"/>
                                 </Template>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="MoonName" Filterable="true" Sortable="true" FilterProperty="MoonName" SortProperty="MoonName"
-                                              Title="@LM.Get("mtColumnMoonName")">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="SystemName" Filterable="true" Sortable="true" FilterProperty="SystemName" SortProperty="SystemName"
+                                                  Title="@LM.Get("mtColumnSystemName")">
                                 <Template Context="order">
-                                    <RadzenLabel Text="@order.MoonName"/>
+                                    <RadzenLabel Text="@order.SystemName"/>
                                 </Template>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="OreName" Filterable="true" Sortable="true" FilterProperty="OreName" SortProperty="OreName"
-                                              Title="@LM.Get("mtColumnOreName")">
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="MoonName" Filterable="true" Sortable="true" FilterProperty="MoonName" SortProperty="MoonName"
+                                                  Title="@LM.Get("mtColumnMoonName")" Width="120px">
+                                <Template Context="order">
+                                    <RadzenLabel Text="@($"{order.PlanetName} - {order.MoonName}")"/>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="OreName" Filterable="true" Sortable="true"  SortProperty="OreName"
+                                                  FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or"
+                                                  Type="typeof(IEnumerable<string>)"
+                                                  Title="@LM.Get("mtColumnOreName")" Width="180px" FilterValue="@_selectedOreNamesList">
+                                <FilterTemplate>
+                                    <RadzenDropDown @bind-Value=@_selectedOreNamesList Style="width:100%; margin: 8px 4px;"
+                                                    Change=@OnOrenameFilterChange Data="@(_oreNamesList)" AllowClear="true" Multiple="true" />
+                                </FilterTemplate>
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.OreName"/>
                                 </Template>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="OreQuantity" Filterable="false" Sortable="true" FilterProperty="OreQuantity" SortProperty="OreQuantity"
-                                              Title="@LM.Get("mtColumnOreQuantity")">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="OreQuantity" Filterable="true" Sortable="true" FilterProperty="OreQuantity" SortProperty="OreQuantity"
+                                                  Title="@LM.Get("mtColumnOreQuantity")" Groupable="false" Width="80px">
                                 <Template Context="order">
                                     <RadzenLabel Text="@($"{order.OreQuantity:N2}")"/>
                                 </Template>
-                            </RadzenGridColumn>
-
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="Notes" Filterable="true" Sortable="true" FilterProperty="Notes" SortProperty="Notes"
+                                                  Title="@LM.Get("mtColumnNotes")" Groupable="false">
+                                <Template Context="order">
+                                    <RadzenLabel Text="@($"{order.Notes}")"/>
+                                </Template>
+                                <EditTemplate Context="order">
+                                    <RadzenTextBox @bind-Value="order.Notes" />
+                                </EditTemplate>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="80px">
+                                <Template Context="order">
+                                    @if (!_isEditingMoonGrid)
+                                    {
+                                        <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(order))" />
+                                    }
+                                </Template>
+                                <EditTemplate Context="order">
+                                    <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveRow(order))" />
+                                    <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(order))" />
+                                </EditTemplate>
+                            </RadzenDataGridColumn>
                         </Columns>
-                    </RadzenGrid>
+                    </RadzenDataGrid>
                     @if (_isLoading)
                     {
                         <RadzenLabel Text="@LM.Get("webLoading")" Class="generalLoadingTabText" />
@@ -71,45 +109,43 @@
             {
                 <RadzenTabsItem Text="@LM.Get("mtAvailabilityHeader")" Style="padding: 0;">
                     <div class="row">
-                        <div>
-                            <RadzenDropDown TValue="WebStellarRegionEntry" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                            Data="@_regions" Style="width: 400px;" @bind-Value="_selectedRegion2" TextProperty="Name"
-                                            Change="@OnRegion2FilterChange" AllowFiltering="true" AllowClear="true"/>
-                        </div>
                         <div style="margin-left: 10px;">
-                            <RadzenButton ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Icon="system_update_alt" Click="ImportMoonDataClick" />
+                            <button class='navButton2' @onclick="ImportMoonDataClick" style="width: 150px; margin-left: 10px;"><RadzenIcon Icon="system_update_alt" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webButtonUploadScan")</button>
                         </div>
                     </div>
-                    <RadzenGrid PageSize="30" Count="@_countReports" Data="@_filteredReportList" TItem="ThdMoonTableEntry"
-                                LoadData="@LoadReportGrid" @ref="_reportGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" AllowColumnResize="false"
-                                Style="height: 640px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                    <RadzenDataGrid TItem="ThdMoonTableEntry" FilterMode="FilterMode.Simple"
+                                    Count="@_countReports"
+                                    LoadData="@LoadReportGrid" @ref="_reportGrid" Data="@_filteredReportList"
+                                    AllowFiltering="true" AllowSorting="true" AllowColumnResize="false" AllowGrouping="true"
+                                    Style="height: 640px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    LogicalFilterOperator="LogicalFilterOperator.And"
+                                    PageSize="100" AllowPaging="true"
+                                    Render="@OnReportsRender">
+                        <GroupHeaderTemplate>
+                            @(context.Data.Key ?? ""), @(context.Data.Items.Cast<ThdMoonTableEntry>().FirstOrDefault()?.PlanetName) - @(context.Data.Items.Cast<ThdMoonTableEntry>().FirstOrDefault()?.SystemName)
+                        </GroupHeaderTemplate>
                         <Columns>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="RegionName" Filterable="false" Sortable="true" FilterProperty="RegionName" SortProperty="RegionName"
-                                              Title="@LM.Get("mtColumnRegionName")">
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="RegionName" Filterable="true" Sortable="true" FilterProperty="RegionName" SortProperty="RegionName"
+                                                  Title="@LM.Get("mtColumnRegionName")" Width="150px">
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.RegionName"/>
                                 </Template>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="SystemName" Filterable="true" Sortable="true" FilterProperty="SystemName" SortProperty="SystemName"
-                                              Title="@LM.Get("mtColumnSystemName")">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="SystemName" Filterable="true" Sortable="true" FilterProperty="SystemName" SortProperty="SystemName"
+                                                  Title="@LM.Get("mtColumnSystemName")" Width="150px">
                                 <Template Context="order">
                                     <RadzenLabel Text="@order.SystemName"/>
                                 </Template>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="PlanetName" Filterable="true" Sortable="true" FilterProperty="PlanetName" SortProperty="PlanetName"
-                                              Title="@LM.Get("mtColumnPlanetName")">
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="MoonName" Filterable="true" Sortable="true" FilterProperty="MoonName" SortProperty="MoonName"
+                                                  Title="@LM.Get("mtColumnMoonName")">
                                 <Template Context="order">
-                                    <RadzenLabel Text="@order.PlanetName"/>
+                                    <RadzenLabel Text="@($"{order.PlanetName} - {order.MoonName}")"/>
                                 </Template>
-                            </RadzenGridColumn>
-                            <RadzenGridColumn TItem="ThdMoonTableEntry" Property="RealMoonName" Filterable="true" Sortable="true" FilterProperty="RealMoonName" SortProperty="RealMoonName"
-                                              Title="@LM.Get("mtColumnMoonName")">
-                                <Template Context="order">
-                                    <RadzenLabel Text="@order.RealMoonName"/>
-                                </Template>
-                            </RadzenGridColumn>
+                            </RadzenDataGridColumn>
                         </Columns>
-                    </RadzenGrid>
+                    </RadzenDataGrid>
                     @if (_isLoadingReport)
                     {
                         <RadzenLabel Text="@LM.Get("webLoading")" Class="generalLoadingTabText"/>
@@ -121,8 +157,8 @@
 </div>
 
 @code {
-    private RadzenGrid<ThdMoonTableEntry> _moonsGrid;
-    private RadzenGrid<ThdMoonTableEntry> _reportGrid;
+    private RadzenDataGrid<ThdMoonTableEntry> _moonsGrid;
+    private RadzenDataGrid<ThdMoonTableEntry> _reportGrid;
     private MoonInfoModule _module;
     private bool _hasViewAccess;
     private bool _hasLimitedAccess;
@@ -130,17 +166,27 @@
     private bool _isLoading = true;
     private bool _isLoadingReport = true;
 
-    //private List<ThdMoonTableEntry> _moonCacheList;
-    //private List<ThdMoonTableEntry> _reportCacheList;
-    private List<ThdMoonTableEntry> _filteredMoonList;
-    private List<ThdMoonTableEntry> _filteredReportList;
-    private List<WebStellarRegionEntry> _regions;
 
-    private WebStellarRegionEntry _selectedRegion;
-    private WebStellarRegionEntry _selectedRegion2;
+    private IEnumerable<ThdMoonTableEntry> _filteredMoonList;
+    private IEnumerable<ThdMoonTableEntry> _filteredReportList;
+    private List<WebStellarRegionEntry> _regions;
 
     private int _countMoons;
     private int _countReports;
+
+    //filters
+#region OreFilter
+    private IEnumerable<string> _selectedOreNamesList;
+    private IEnumerable<string> _oreNamesList;
+    
+    private void OnOrenameFilterChange(object obj)
+    {
+        if (_selectedOreNamesList != null && !_selectedOreNamesList.Any())
+        {
+            _selectedOreNamesList = null;  
+        }
+    }
+#endregion
 
     protected override async Task OnInitializedAsync()
     {
@@ -166,16 +212,7 @@
         {
             try
             {
-                var ids = await DbHelper.GetMoonTableRegions();
-                _regions = new List<WebStellarRegionEntry>();
-                foreach (var id in ids)
-                {
-                    var name = (await APIHelper.ESIAPI.GetRegionData("MoonInfo", id))?.RegionName;
-                    _regions.Add(new WebStellarRegionEntry { Id = id, Name = name });
-                }
-                _selectedRegion = _regions.FirstOrDefault();
-                _selectedRegion2 = _regions.FirstOrDefault();
-
+                _oreNamesList = (await dbContext.MoonTable.Select(a => a.OreName).Distinct().ToListAsync()).OrderBy(a=> a);
                 _isInitialized = true;
             }
             catch (Exception ex)
@@ -184,95 +221,145 @@
             }
 
         });
-
+        
 
         await base.OnInitializedAsync();
     }
+    
+#region Moons
 
-    private async Task OnRegion1FilterChange()
+    private bool _isEditingMoonGrid = false;
+    private ThdMoonTableEntry _editingMoonRow;
+
+    async Task EditRow(ThdMoonTableEntry order)
     {
-        await _moonsGrid.Reload();
+        if (_isEditingMoonGrid) return;
+        _editingMoonRow = order.Clone();
+        _isEditingMoonGrid = true;
+        await _moonsGrid.EditRow(order);
     }
 
-    private async Task OnRegion2FilterChange()
+    async Task SaveRow(ThdMoonTableEntry order)
     {
-        await _reportGrid.Reload();
+        await _moonsGrid.UpdateRow(order);
+        await _module.SaveMoonTableEntry(order);
+
+        _editingMoonRow = null;
+        _isEditingMoonGrid = false;
     }
 
+    async Task CancelEdit(ThdMoonTableEntry order)
+    {
+         order.UpdateFrom(_editingMoonRow);
+        _moonsGrid.CancelEditRow(order);
+
+        _editingMoonRow = null;
+        _isEditingMoonGrid = false;
+        await Task.Delay(1);
+    }
+
+    
     private async Task LoadMoonsGrid(LoadDataArgs arg)
     {
         try
         {
             while (!_isInitialized)
                 await Task.Delay(100);
-
-            _filteredMoonList?.Clear();
             _isLoading = true;
             await InvokeAsync(StateHasChanged);
 
-            await using var db = new ThunderedDbContext();
-            var mid = db.MoonTable.AsNoTracking();
-            if (_selectedRegion != null)
-                mid = mid.Where(a => a.RegionId == _selectedRegion.Id);
-            _filteredMoonList = mid.OrderByDescending(a => a.MoonName).ApplyAjaxFilters(arg, out _countMoons);
-            foreach (var entry in _filteredMoonList)
-            {
-                entry.RegionName = _regions.FirstOrDefault(a => a.Id == entry.RegionId)?.Name;
-            }
-            _isLoading = false;
-            await InvokeAsync(StateHasChanged);
+            var query = dbContext.MoonTable.AsQueryable();
+
+            if (!string.IsNullOrEmpty(arg.Filter))
+                query = query.Where(arg.Filter);
+            query = !string.IsNullOrEmpty(arg.OrderBy) ? query.OrderBy(arg.OrderBy) : query.OrderByDescending(a => a.MoonName);
+            _countMoons = query.Count();
+            _filteredMoonList = query.Skip(arg.Skip.Value).Take(arg.Top.Value).ToList();
         }
         catch (Exception ex)
         {
             await LogHelper.LogEx(ex, LogCat.MoonInfo);
             await Modal.ShowError();
+        }
+        finally
+        {
             _isLoading = false;
             await InvokeAsync(StateHasChanged);
         }
     }
 
-    private async Task LoadReportGrid(LoadDataArgs arg)
+    private void MoonCellRender(DataGridCellRenderEventArgs<ThdMoonTableEntry> args)
+    {
+        if (MiningScheduleModule.R64List.Contains(args.Data.OreId))
+        {
+            args.Attributes.Add("style", $"background-color: #ff9980;");
+            args.Attributes.Add("class", "frontcolor");
+        }
+        else
+        {
+            if (MiningScheduleModule.R32List.Contains(args.Data.OreId))
+            {
+                args.Attributes.Add("style", $"background-color: lightskyblue;");
+            }
+        }
+    }
+
+
+    private void OnMoonsRender(DataGridRenderEventArgs<ThdMoonTableEntry> args)
+    {
+        if(args.FirstRender)
+        {
+            args.Grid.Groups.Add(new GroupDescriptor(){ Property = "RegionName", Title = LM.Get("mtColumnRegionName")});
+            args.Grid.Groups.Add(new GroupDescriptor(){ Property = "SystemName", Title = LM.Get("mtColumnSystemName") });
+            args.Grid.Groups.Add(new GroupDescriptor(){ Property = "MoonName", Title = LM.Get("mtColumnMoonName") });
+            StateHasChanged();
+        }
+    }
+    #endregion
+    
+    
+#region Reports    
+
+private async Task LoadReportGrid(LoadDataArgs arg)
     {
         try
         {
             while (!_isInitialized)
                 await Task.Delay(100);
-
-            _filteredReportList?.Clear();
             _isLoadingReport = true;
             await InvokeAsync(StateHasChanged);
 
-            await using var db = new ThunderedDbContext();
-            var mid = db.MoonTable.AsNoTracking();
-            if (_selectedRegion2 != null)
-                mid = mid.Where(a => a.RegionId == _selectedRegion2.Id);
-            _filteredReportList = mid.OrderByDescending(a => a.MoonName).ToList().GroupBy(a=> a.MoonId).Select(a=> a.FirstOrDefault()).ToList();
+            var query = dbContext.MoonTable.AsNoTracking().AsQueryable();
 
-            foreach (var report in _filteredReportList)
-            {
-                var m0 = report.MoonName.Split('-', StringSplitOptions.RemoveEmptyEntries);
-                var m = m0[0].Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-                var last = m.Last();
-                report.PlanetName = last;
-                m.Remove(last);
-                report.SystemName = string.Join(' ', m);
-                report.RealMoonName = m0[1];
-
-                report.RegionName = _regions.FirstOrDefault(a => a.Id == report.RegionId)?.Name;
-            }
-            _filteredReportList = _filteredReportList.ApplyAjaxFilters(arg, out _countReports);
-
-            _isLoadingReport = false;
-            await InvokeAsync(StateHasChanged);
+            if (!string.IsNullOrEmpty(arg.Filter))
+                query = query.Where(arg.Filter);
+            query = !string.IsNullOrEmpty(arg.OrderBy) ? query.OrderBy(arg.OrderBy) : query.OrderByDescending(a => a.MoonName);
+            _countReports = query.Count();
+            _filteredReportList = query.Skip(arg.Skip.Value).Take(arg.Top.Value).ToList().GroupBy(a=> a.MoonId).Select(a=> a.FirstOrDefault());
         }
         catch (Exception ex)
         {
             await LogHelper.LogEx(ex, LogCat.MoonInfo);
             await Modal.ShowError();
+        }
+        finally
+        {
             _isLoadingReport = false;
             await InvokeAsync(StateHasChanged);
         }
     }
+
+    private void OnReportsRender(DataGridRenderEventArgs<ThdMoonTableEntry> args)
+    {
+        if(args.FirstRender)
+        {
+            args.Grid.Groups.Add(new GroupDescriptor(){ Property = "RegionName", Title = LM.Get("mtColumnRegionName")});
+            args.Grid.Groups.Add(new GroupDescriptor(){ Property = "SystemName", Title = LM.Get("mtColumnSystemName") });
+            StateHasChanged();
+        }
+    }
+#endregion
+    
 
 
     private async Task ImportMoonDataClick()
@@ -297,7 +384,8 @@
     {
         try
         {
-            var regions = list.Select(a => a.RegionId).Distinct().ToList();
+            var regions = list.Select(a => a.RegionId).Distinct().ToList(
+            );
             var newRegions = regions.Except(_regions.Select(a => a.Id));
             if (newRegions.Any())
             {
@@ -308,14 +396,6 @@
 
                 }
             }
-
-            /*foreach (var entry in list)
-            {
-                var old = _moonCacheList.FirstOrDefault(a => a.Id == entry.Id);
-                if (old != null)
-                    _moonCacheList.Remove(old);
-                _moonCacheList.Add(entry);
-            }*/
 
             if(_moonsGrid != null)
                 await _moonsGrid.Reload();
@@ -329,19 +409,6 @@
         }
     }
 
-    private void MoonCellRender(CellRenderEventArgs<ThdMoonTableEntry> args)
-    {
-        if (MiningScheduleModule.R64List.Contains(args.Data.OreId))
-        {
-            args.Attributes.Add("style", $"background-color: tomato;color: white;");
-        }
-        else
-        {
-            if (MiningScheduleModule.R32List.Contains(args.Data.OreId))
-            {
-                args.Attributes.Add("style", $"background-color: lightskyblue;");
-            }
-        }
-    }
+
 
 }

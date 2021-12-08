@@ -244,6 +244,10 @@ namespace ThunderED
             modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.RegionId).HasColumnName("region_id");
             modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.OreName).HasColumnName("ore_name");
             modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.MoonName).HasColumnName("moon_name");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.SystemName).HasColumnName("system_name");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.PlanetName).HasColumnName("planet_name");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.RegionName).HasColumnName("region_name");
+            modelBuilder.Entity<ThdMoonTableEntry>().Property(a => a.Notes).HasColumnName("notes");
             #endregion
 
             #region ThdStorageConsoleEntry
