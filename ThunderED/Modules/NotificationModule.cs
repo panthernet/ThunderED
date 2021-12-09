@@ -562,7 +562,9 @@ namespace ThunderED.Modules
             var system = string.IsNullOrEmpty(systemId) ? null : await APIHelper.ESIAPI.GetSystemData(Reason, systemId);
             var systemName = system == null ? LM.Get("Unknown") : (system.SolarSystemName == system.SolarSystemId.ToString() ? "Abyss" : system.SolarSystemName);
             var structureId = GetData("structureID", data);
+            var strunctureNumId = string.IsNullOrEmpty(structureId) ? 0 : long.Parse(structureId);
             var structure = string.IsNullOrEmpty(structureId) ? null : await APIHelper.ESIAPI.GetUniverseStructureData(Reason, structureId, token);
+            //structure = structure != null ? structure : (await APIHelper.ESIAPI.GetCorpStructures(Reason, structureId, token))?.FirstOrDefault(a=> a.structure_id == strunctureNumId);
             var structureNameDirect = GetData("structureName", data);
             //parse structure name from link
             var sname2 = GetData("structureLink", data);

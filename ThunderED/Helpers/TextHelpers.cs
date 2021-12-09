@@ -18,7 +18,7 @@ namespace ThunderED
             if (index1 == -1) return value;
             var index2 = value.IndexOf('<', index1);
             if (index2 == -1) return value;
-            return value.Substring(index1+1, index2 - index1 - 1);
+            return value.Substring(index1+1, index2 - index1 - 1).TrimEnd('*');
         }
     }
 }

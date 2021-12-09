@@ -13,7 +13,7 @@ namespace ThunderED
         //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19","1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", 
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5", "2.0.6", "2.0.7","2.0.9","2.0.10", "2.0.15", "2.0.16", "2.0.18", "2.0.19", "2.0.20", "2.1.0"
+            "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5", "2.0.6", "2.0.7","2.0.9","2.0.10", "2.0.15", "2.0.16", "2.0.18", "2.0.19", "2.0.20", "2.1.0", "2.1.1"
         };
 
         public static async Task<bool> Upgrade()
@@ -790,7 +790,18 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                         }
                             break;
+                        case "2.1.1":
+                            {
+                                await BackupDatabase();
 
+                                await using var db = new ThunderedDbContext();
+                                foreach (var item in db.MoonTable)
+                                    item.MoonName = item.MoonName.TrimEnd('*');
+                                await db.SaveChangesAsync();
+
+                                await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            }
+                            break;
                         #endregion
 
                         default:

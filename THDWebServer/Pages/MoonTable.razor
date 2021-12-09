@@ -28,7 +28,7 @@
                         </div>
                     </div>
                     <RadzenDataGrid TItem="ThdMoonTableEntry" FilterMode="FilterMode.Simple"
-                                    Count="@_countMoons"
+                                    Count="@_countMoons" class="fontEternal"
                                     LoadData="@LoadMoonsGrid" @ref="_moonsGrid" Data="@_filteredMoonList"
                                     AllowFiltering="true" AllowSorting="true" AllowColumnResize="false" AllowGrouping="true"
                                     Style="height: 640px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -36,7 +36,7 @@
                                     PageSize="100" AllowPaging="true"
                                     CellRender="MoonCellRender" Render="@OnMoonsRender">
                         <GroupHeaderTemplate>
-                            @(context.Data.Key ?? ""), @(context.Data.Items.Cast<ThdMoonTableEntry>().FirstOrDefault()?.PlanetName) - @(context.Data.Items.Cast<ThdMoonTableEntry>().FirstOrDefault()?.SystemName)
+                            @(context.Data.Key ?? "") @(context.Level == 2 ? string.Join(',', context.Data.Items.ToDynamicList().Select(a=> a.Notes)) : "")
                         </GroupHeaderTemplate>
                         <Columns>
                             <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="RegionName" Filterable="true" Sortable="true" FilterProperty="RegionName" SortProperty="RegionName"
@@ -114,7 +114,7 @@
                         </div>
                     </div>
                     <RadzenDataGrid TItem="ThdMoonTableEntry" FilterMode="FilterMode.Simple"
-                                    Count="@_countReports"
+                                    Count="@_countReports" class="fontEternal"
                                     LoadData="@LoadReportGrid" @ref="_reportGrid" Data="@_filteredReportList"
                                     AllowFiltering="true" AllowSorting="true" AllowColumnResize="false" AllowGrouping="true"
                                     Style="height: 640px;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -122,7 +122,7 @@
                                     PageSize="100" AllowPaging="true"
                                     Render="@OnReportsRender">
                         <GroupHeaderTemplate>
-                            @(context.Data.Key ?? ""), @(context.Data.Items.Cast<ThdMoonTableEntry>().FirstOrDefault()?.PlanetName) - @(context.Data.Items.Cast<ThdMoonTableEntry>().FirstOrDefault()?.SystemName)
+                            @(context.Data.Key ?? "")
                         </GroupHeaderTemplate>
                         <Columns>
                             <RadzenDataGridColumn TItem="ThdMoonTableEntry" Property="RegionName" Filterable="true" Sortable="true" FilterProperty="RegionName" SortProperty="RegionName"
