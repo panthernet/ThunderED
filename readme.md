@@ -77,9 +77,9 @@ With this bot you will have tools to:
 * Moon module - centralized database for moon ore compositions based on the data uploaded from probe scan window
 
 ## Build Requirements
-* Visual Studio 2019 Community Edition (Windows)
+* Visual Studio 2022 Community Edition (Windows)
 * Docker (Linux, Windows)
-* .NET Core 3.1
+* .NET 6.0
 
 ## Pics
 [The bottom of the 1st post, under the cut](https://forums.eveonline.com/t/thundered-eve-online-discord-bot/74213)
