@@ -118,7 +118,12 @@ namespace ThunderED.Helpers
         public static Dictionary<string, string> ParseNotificationText(string text)
         {
             var dic = new Dictionary<string, string>();
-            text.Split('\n', StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(a =>
+            var mid = text.Split('\n', StringSplitOptions.RemoveEmptyEntries).ToList();
+            if (mid.Count == 1)
+                mid = text.Split("\\n", StringSplitOptions.RemoveEmptyEntries).ToList();
+
+
+            mid.ForEach(a =>
             {
                 var res = a.Split(':');
                 if (res.Length == 1)
@@ -127,6 +132,13 @@ namespace ThunderED.Helpers
                         dic.Add(res[0], null);
                 }
                 else{
+                    if(res[0].StartsWith("structureLink", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var k = res[0]?.Trim();
+                        if (!dic.ContainsKey(k))
+                            dic.Add(k, res[2] == "null" ? null : res[2]);
+                        return;
+                    }
                     var value = res[1].Trim();
                     value = value.StartsWith("&id") ? value.Split(' ')[1] : value;
                     value = value?.Trim();

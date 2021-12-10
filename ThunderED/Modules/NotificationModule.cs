@@ -369,26 +369,15 @@ namespace ThunderED.Modules
 
                             var notifications = result.Result;
 
-                              /* notifications.Add(new JsonClasses.Notification
-                               {
-                                   text = @"firedBy: 1723125545
-   firedByLink: 
-   moonID: 40208153
-   oreVolumeByType:
-     45496: 4789716.712817478
-     45498: 3050697.396077991
-     45512: 6573391.23187997
-   solarSystemID: 30003280
-   structureID: 1030932825175
-   structureLink: 
-   structureName: 6-CZ49 - VIP Floor
-   structureTypeID: 35835",
+                             notifications.Add(new JsonClasses.Notification
+                             {
+                                 text = @"daysUntilAbandon: 2\nisCorpOwned: false\nsolarsystemID: 30004587\nstructureID: &id001 1035894524206\nstructureLink: <a href=\""showinfo:35832//1035894524206\"">7X-02R - Villa Kebab</a>\nstructureShowInfoData:\n- showinfo\n- 35832\n- *id001\nstructureTypeID: 35832\n",
 
 
-                                   notification_id = 1386092327,
-                                   type = "MoonminingLaserFired",
-                                   timestamp = "2021-02-25T11:20:00Z"
-                               });*/
+                                 notification_id = 1525221813,
+                                 type = "StructureImpendingAbandonmentAssetsAtRisk",
+                                 timestamp = "2021-02-25T11:20:00Z"
+                             });
 
 
 
