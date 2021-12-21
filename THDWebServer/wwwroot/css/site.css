@@ -178,6 +178,9 @@ app {
     .settings-auth-group {
         width: 750px;
     }
+    .mining-payment {
+        width: 650px;
+    }
 }
 
 @media (min-width: 1024px) {
@@ -186,6 +189,9 @@ app {
     }
     .settings-auth-general {
         width: 800px;
+    }
+    .mining-payment {
+        width: 650px;
     }
 }
 
@@ -199,6 +205,9 @@ app {
     .settings-auth-group {
         width: 800px;
     }
+    .mining-payment {
+        width: 650px;
+    }
 }
 
 @media (min-height: 768px) {
@@ -209,10 +218,13 @@ app {
         height: 390px;
     }
     .settings-auth-general {
-        width: 760px;
+        height: 760px;
     }
     .settings-auth-group {
-        width: 760px;
+        height: 760px;
+    }
+    .mining-payment {
+        height: 500px;
     }
 
 }
@@ -225,10 +237,13 @@ app {
         height: 550px;
     }
     .settings-auth-general {
-        width: 800px;
+        height: 800px;
     }
     .settings-auth-group {
-        width: 800px;
+        height: 800px;
+    }
+    .mining-payment {
+        height: 500px;
     }
 
 }

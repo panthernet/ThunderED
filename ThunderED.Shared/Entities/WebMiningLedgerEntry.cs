@@ -13,6 +13,7 @@ namespace ThunderED
         public long OreId { get; set; }
         public int Quantity { get; set; }
         public double Price { get; set; }
+        public double OriginalPrice { get; set; }
 
         public List<WebMiningLedgerEntry> Alts { get; set; } = new List<WebMiningLedgerEntry>();
         public string AltData { get; set; }
@@ -20,6 +21,7 @@ namespace ThunderED
         public void Recalculate()
         {
             Price = Price + Alts.Where(a => a.OreId == OreId).Sum(a => a.Price);
+            OriginalPrice = OriginalPrice + Alts.Where(a => a.OreId == OreId).Sum(a => a.OriginalPrice);
             Quantity = Quantity + Alts.Where(a => a.OreId == OreId).Sum(a => a.Quantity);
 
             if (Alts.Any())

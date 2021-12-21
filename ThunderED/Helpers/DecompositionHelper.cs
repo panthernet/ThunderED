@@ -28,7 +28,7 @@ namespace ThunderED.Helpers
                     foreach (var item in items)
                     {
                         var price = compPrices.FirstOrDefault(a => a.Id == item.ItemId);
-                        resultValue += price == null
+                        resultValue += (price == null || percent == 0)
                             ? 0d
                             : price.Sell * (item.Quantity * (percent / 100d));
                     }

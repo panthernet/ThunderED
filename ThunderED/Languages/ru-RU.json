@@ -770,6 +770,17 @@
   "msgConnectionFailureScroll": "Внимание! Соединение с ESI нестабильно. Некоторый возможности могут быть недоступны.",
   "webButtonUploadScan": "Загрузить",
   "mtColumnNotes": "Заметки",
-  "webSettingsAuthGroupHelp1": "Названия корпораций и альянсов в таблице должны начинаться с префиксов (англ.) c: и a: соответственно."
+  "webSettingsAuthGroupHelp1": "Названия корпораций и альянсов в таблице должны начинаться с префиксов (англ.) c: и a: соответственно.",
+  "webMiningIspectionHeader": "Список учета {0}",
+  "webMiningPaymentsButton": "Выплаты",
+  "webMiningPaymentHeader": "Расчет выплат за {0}",
+  "webMiningPaymentManualSum": "Ввести сумму вручную",
+  "wsMiningPaymentFieldManualSum": "Сумма ISK",
+  "wsMiningPaymentFieldRefinePerc": "Переработка %",
+  "wsWebStepsNext": "Далее",
+  "wsWebStepsPrev": "Назад",
+  "wsMiningPaymentFieldTaxPerc": "Налог %",
+  "wsMiningPaymentFieldReproTaxPerc": "Эфф. переработки %"
+
 
 }

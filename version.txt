@@ -1,4 +1,9 @@
-### V2.1.1
+### V2.1.2
++ Improved web UI for several modules (new mining ledger is still WIP and buggy)
++ Fixed citadel name resolve from links in notifications
++ Fixed several moon module inconsistencies
++ Fixed auto timer creation from tracker
++ Fixed DB upgrade from older versions
 
 ### V2.1.0
 + Migration to v2 auth

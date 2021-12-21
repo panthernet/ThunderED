@@ -4,6 +4,7 @@ using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Blazored.Modal;
 using Blazored.Modal.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.ProtectedBrowserStorage;
 using Radzen;
 using THDWebServer.Pages.Modals;
@@ -80,11 +81,23 @@ namespace THDWebServer.Classes
 
         public static async Task ShowError(this IModalService modal, string header = null, string message = null)
         {
-            var options = new ModalOptions() { HideCloseButton = true, HideHeader = true};
+            var options = new ModalOptions() { HideCloseButton = true, Class= "blazored-modal2" };
             var parameters = new ModalParameters();
-            parameters.Add("Header", header ?? LM.Get("webErrorHeader"));
             parameters.Add("Message", message ?? LM.Get("webGenericErrorMessage"));
             await modal.Show<ErrorDialog>(header ?? LM.Get("webConfirmation"), parameters, options).Result;
+        }
+
+        public static async Task ShowModal<T>(this IModalService modal, object entry, string header = null, string paramName = null, Dictionary<string, object> prms = null)
+            where T: IComponent
+        {
+            var options = new ModalOptions() { HideCloseButton = false, DisableBackgroundCancel = true, Class = "blazored-modal2", ContentScrollable = true };
+            var parameters = new ModalParameters();
+            parameters.Add(paramName ?? "Entry", entry);      
+            if(prms != null)
+                foreach(var (key,value) in prms)
+                    parameters.Add(key, value);
+
+            await modal.Show<T>(header ?? LM.Get("webConfirmation"), parameters, options).Result;
         }
     }
 }

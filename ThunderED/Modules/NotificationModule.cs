@@ -162,6 +162,7 @@ namespace ThunderED.Modules
                                         ? await APIHelper.ESIAPI.GetAllianceData(Reason, feederChar?.alliance_id)
                                         : null;
                                     var skip = false;
+                                    if (feederChar == null || feederCorp == null) return;
 
                                     //filter all chars that doesn't fit input 
                                     if (Settings.NotificationFeedModule.Tracker.GlobalFilterIn.Any())
@@ -259,7 +260,7 @@ namespace ThunderED.Modules
                                             var outResult = await OutPutNotification(notification,
                                                 value.DiscordChannels,
                                                 track.Key,
-                                                token.CharacterId, null, null, filters);
+                                                token.CharacterId, null, null, filters, true);
                                             if (outResult &&
                                                 !_trackerNotifications.Contains(notification.notification_id))
                                                 _trackerNotifications.Add(notification.notification_id);
@@ -516,7 +517,7 @@ namespace ThunderED.Modules
 
         private async Task<bool> OutPutNotification(JsonClasses.Notification notification, List<ulong> discordChannels,
             string token, long charId, string mention = null, Dictionary<string, string> data = null,
-            List<string> valueFilterOut=null)
+            List<string> valueFilterOut=null, bool fromTracker = false)
         {
             Embed embed;
             EmbedBuilder builder;
@@ -806,7 +807,7 @@ namespace ThunderED.Modules
                             .WithTimestamp(timestamp);
                         embed = builder.Build();
 
-                        if (Settings.Config.ModuleTimers && Settings.TimersModule.AutoAddTimerForReinforceNotifications)
+                        if (Settings.Config.ModuleTimers && Settings.TimersModule.AutoAddTimerForReinforceNotifications && !fromTracker)
                         {
                             await DbHelper.UpdateTimer(new ThdTimer
                             {

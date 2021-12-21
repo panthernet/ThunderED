@@ -193,8 +193,13 @@ namespace ThunderED
             modelBuilder.Entity<ThdMiningLedger>().Property(a => a.Date).HasColumnName("date");
             modelBuilder.Entity<ThdMiningLedger>().Property(a => a.OreJson).HasColumnName("ore_json");
             modelBuilder.Entity<ThdMiningLedger>().Property(a => a.Stats).HasColumnName("stats");
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.RefineEff).HasColumnName("refine_eff");
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.PaymentSettings).HasColumnName("payment_settings").HasConversion(a => JsonConvert.SerializeObject(a), a => JsonConvert.DeserializeObject<LedgerPaymentSettings>(a));
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.PaymentData).HasColumnName("payment_data").HasConversion(a => JsonConvert.SerializeObject(a), a => JsonConvert.DeserializeObject<LedgerPaymentData>(a));
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.LedgerData).HasColumnName("ledger_data").HasConversion(a => JsonConvert.SerializeObject(a), a => JsonConvert.DeserializeObject<List<WebMiningLedgerEntry>>(a));
+            modelBuilder.Entity<ThdMiningLedger>().Property(a => a.Closed).HasColumnName("closed").HasConversion<bool>();
             #endregion
-
+            
             #region Cache
             modelBuilder.Entity<ThdCacheEntry>().HasKey("Id","Type");
             modelBuilder.Entity<ThdCacheEntry>().HasIndex("Id", "Type");

@@ -13,7 +13,7 @@ namespace ThunderED
         //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19","1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", 
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5", "2.0.6", "2.0.7","2.0.9","2.0.10", "2.0.15", "2.0.16", "2.0.18", "2.0.19", "2.0.20", "2.1.0", "2.1.1"
+            "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5", "2.0.6", "2.0.7","2.0.9","2.0.10", "2.0.15", "2.0.16", "2.0.18", "2.0.19", "2.0.20", "2.1.0", "2.1.1", "2.1.2"
         };
 
         public static async Task<bool> Upgrade()
@@ -404,7 +404,8 @@ namespace ThunderED
                                 .ToDictionary(a => Convert.ToInt64(a[0]), a => (string) a[1]);
                             foreach (var (key, value) in tokens)
                             {
-                                await DbHelper.UpdateToken(value, key, TokenEnum.Notification);
+                                //await DbHelper.UpdateToken(value, key, TokenEnum.Notification);
+                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.Notification}, {key});");
                             }
                             //contracts
                             tokens.Clear();
@@ -413,7 +414,8 @@ namespace ThunderED
                                 .ToDictionary(a => Convert.ToInt64(a[0]), a => (string)a[1]);
                             foreach (var (key, value) in tokens)
                             {
-                                await DbHelper.UpdateToken(value, key, TokenEnum.Contract);
+                                //await DbHelper.UpdateToken(value, key, TokenEnum.Contract);
+                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.Contract}, {key});");
                             }
                             //mail
                             tokens.Clear();
@@ -422,7 +424,8 @@ namespace ThunderED
                                 .ToDictionary(a => Convert.ToInt64(a[0]), a => (string)a[1]);
                             foreach (var (key, value) in tokens)
                             {
-                                await DbHelper.UpdateToken(value, key, TokenEnum.Mail);
+                                //await DbHelper.UpdateToken(value, key, TokenEnum.Mail);
+                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.Mail}, {key});");
                             }
                             //industry
                             tokens.Clear();
@@ -431,7 +434,8 @@ namespace ThunderED
                                 .ToDictionary(a => Convert.ToInt64(a[0]), a => (string)a[1]);
                             foreach (var (key, value) in tokens)
                             {
-                                await DbHelper.UpdateToken(value, key, TokenEnum.Industry);
+                                //await DbHelper.UpdateToken(value, key, TokenEnum.Industry);
+                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.Industry}, {key});");
                             }
                             //general
                             tokens.Clear();
@@ -441,7 +445,8 @@ namespace ThunderED
                             {
                                 var key = Convert.ToInt64(d[0]);
                                 var value = (string) d[1];
-                                await DbHelper.UpdateToken(value, key, TokenEnum.General);
+                                //await DbHelper.UpdateToken(value, key, TokenEnum.General);
+                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.General}, {key});");
                             }
                             await LogHelper.LogWarning("Step 2 finished...");
                             await RunCommand(@"drop table refresh_tokens;");
@@ -799,6 +804,16 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                                     item.MoonName = item.MoonName.TrimEnd('*');
                                 await db.SaveChangesAsync();
 
+                                await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                            }
+                            break;
+                        case "2.1.2":
+                            {
+                                await RunCommand("alter table mining_ledger add refine_eff int default 0 not null;");
+                                await RunCommand("alter table mining_ledger add payment_settings text;");
+                                await RunCommand("alter table mining_ledger add payment_data text;");
+                                await RunCommand("alter table mining_ledger add ledger_data text;");
+                                await RunCommand("alter table mining_ledger add closed int default 0 not null;");
                                 await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             }
                             break;

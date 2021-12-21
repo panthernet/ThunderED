@@ -777,5 +777,15 @@
   "msgConnectionFailureScroll": "Warning! ESI connection is unstable. Some features might be unavailable.",
   "webButtonUploadScan": "Upload Scan",
   "mtColumnNotes": "Notes",
-  "webSettingsAuthGroupHelp1": "Corporation and Alliance entity names in the table should start with c: and a: prefixes."
+  "webSettingsAuthGroupHelp1": "Corporation and Alliance entity names in the table should start with c: and a: prefixes.",
+  "webMiningIspectionHeader": "Ledger from {0}",
+  "webMiningPaymentsButton": "Payments",
+  "webMiningPaymentHeader": "Payments for {0}",
+  "webMiningPaymentManualSum": "Specify manual sum",
+  "wsMiningPaymentFieldManualSum": "Sum ISK",
+  "wsMiningPaymentFieldRefinePerc": "Refine %",
+  "wsWebStepsNext": "Next",
+  "wsWebStepsPrev": "Back",
+  "wsMiningPaymentFieldTaxPerc": "Tax %",
+  "wsMiningPaymentFieldReproTaxPerc": "Reprocessing Eff %"
 }

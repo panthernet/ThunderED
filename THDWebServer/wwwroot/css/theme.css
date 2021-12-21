@@ -239,3 +239,11 @@ button {
     padding-bottom: 0px !important;
     vertical-align: middle !important;
 }
+
+.rz-steps .rz-menuitem-link {
+    color: white !important;
+}
+
+.rz-steps .rz-state-disabled .rz-menuitem-link {
+    color: rgba(255,255,255, 0.5) !important;
+}

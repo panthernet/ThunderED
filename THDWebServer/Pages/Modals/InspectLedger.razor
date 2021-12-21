@@ -8,27 +8,34 @@
 @inject NavigationManager Nav
 @inject IModalService Modal
 
-<div class="modal-content hrm-inspect">
-    <div class="modal-header">
-        <h5 class="modal-title">@LM.Get("msInspectingLedgerHeader", Ledger?.StructureName)</h5>
-        <RadzenButton ButtonType="ButtonType.Button" Icon="close" ButtonStyle="ButtonStyle.Secondary"
-                      Click="Close" />
-    </div>
+<div class="hrm-inspect frontcolor fontEternal">    
     <div class="modal-body">
-        <div class="row" style="margin-left: 20px; margin-bottom: 5px;">
-            <RadzenCheckBox @bind-Value=@_isMergeAltsOption TValue="bool" Change="async (args)=> await MergeAltsChanged(args)" /> @LM.Get("msMergeAltsCheck")
-        </div>
-        <RadzenGrid AllowFiltering="true" AllowPaging="false" Count="@_countLedger" AllowSorting="true" Data="@_ledgerList" TItem="WebMiningLedgerEntry"
-                    LoadData="@LoadLedgerData" Style="height: 97%;" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                    AllowColumnResize="true" @ref="@_ledgerGrid">
+        <RadzenCheckBox @bind-Value=@_isMergeAltsOption TValue="bool" Change="async (args)=> await MergeAltsChanged(args)" Style="align-self:normal; margin-bottom: 5px;" />&nbsp;@LM.Get("msMergeAltsCheck")
+        <div class="row" style="margin-bottom:5px;">
+            <div class="col-md-2 align-items-center d-flex">
+                <RadzenLabel Text="@LM.Get("wsMiningPaymentFieldReproTaxPerc")" />
+            </div>
+            <div class="col">
+                <RadzenNumeric @bind-Value=@_tax TValue="int" Min="0" Max="100" ShowUpDown="false" Change="@OnTaxChange" />
+            </div>
+        </div>  
+        <button class='navButton2' @onclick="OpenPayments" style="width: 150px; margin-bottom: 5px; margin-left: 10px;" disabled='@(_isLedgerLoading)' >@LM.Get("webMiningPaymentsButton")</button>
+
+        <RadzenDataGrid Count="@_countLedger" LoadData="@LoadLedgerData" Data="@_ledgerList" TItem="WebMiningLedgerEntry"                     
+                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterMode="FilterMode.Simple"
+                    IsLoading="@(_isLedgerLoading)" AllowGrouping= "false" Render="@OnRender"
+                    Style="min-height: 500px;"
+                    AllowColumnResize="true" @ref="@_ledgerGrid" AllowPaging="false" AllowSorting="true" >
+            <GroupHeaderTemplate>
+                @(context.Data.Items.ToDynamicList<WebMiningLedgerEntry>().FirstOrDefault()?.CharacterName ?? "")
+            </GroupHeaderTemplate>
             <Columns>
-                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="false" Sortable="false" Width="90px">
+                <RadzenDataGridColumn TItem="WebMiningLedgerEntry" Filterable="false" Sortable="false" Width="90px">
                     <Template Context="order">
                         <RadzenImage Path="@ServerPaths.GetCharacterImageUrl(order.CharacterId)" Style="width: 64px; height: 64px; display: block" />
                     </Template>
-                </RadzenGridColumn>
-                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" FilterProperty="NameFilter" SortProperty="NameFilter"
-                                  Title="@LM.Get("msLedgerColumnCharacter")">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="WebMiningLedgerEntry" Property="NameFilter" Filterable="true" Sortable="true" Title="@LM.Get("msLedgerColumnCharacter")">
                     <Template Context="order">
                         @($"{order.CharacterName} [{order.CorporationTicker}]")
                         @if (_isMergeAltsOption && order.Alts.Any())
@@ -36,37 +43,32 @@
                             <img src="@WebUiHelper.GetAsset("alt_ser_small.png")" class="text-center" title="@order.AltData" style="width: 16px; height: 16px;"/>
                         }
                     </Template>
-                </RadzenGridColumn>
-                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="150px" FilterProperty="OreName" SortProperty="OreName"
-                                  Title="@LM.Get("msLedgerColumnOre")">
-                    <Template Context="order">
-                        <RadzenLabel Text="@order.OreName"/>
-                    </Template>
-                </RadzenGridColumn>
-                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="200px" FilterProperty="Quantity" SortProperty="Quantity"
-                                  Title="@LM.Get("msLedgerColumnQuantity")">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="WebMiningLedgerEntry" Property="OreName" Filterable="true" Sortable="true" Width="150px" Title="@LM.Get("msLedgerColumnOre")"/>
+                <RadzenDataGridColumn TItem="WebMiningLedgerEntry" Property="Quantity" Filterable="true" Sortable="true" Groupable="false" Width="200px" Title="@LM.Get("msLedgerColumnQuantity")">
                     <Template Context="order">
                         <RadzenLabel Text="@(order.Quantity.ToString())"/>
                     </Template>
                     <FooterTemplate>
                         @LM.Get("msTotalVolume"): <b>@($"{(_ledgerList?.Sum(o => o.Quantity) * 10):N0} m3")</b>
                     </FooterTemplate>
-                </RadzenGridColumn>
-                <RadzenGridColumn TItem="WebMiningLedgerEntry" Filterable="true" Sortable="true" Width="200px" FilterProperty="Price" SortProperty="Price"
-                                  Title="@LM.Get("msLedgerColumnPrice")">
+                    <GroupFooterTemplate>
+                        @LM.Get("msTotalVolume"): <b>@($"{context.Data.Items.Cast<WebMiningLedgerEntry>().Sum(a=> a.Quantity):N0} m3")</b>
+                    </GroupFooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="WebMiningLedgerEntry" Property="Price" Filterable="true" Sortable="true" Groupable="false" Width="220px" Title="@LM.Get("msLedgerColumnPrice")">
                     <Template Context="order">
                         <RadzenLabel Text="@($"{order.Price:N0} ISK")"/>
                     </Template>
                     <FooterTemplate>
                         @LM.Get("msTotalIsk"): <b>@($"{_ledgerList?.Sum(o => o.Price):N0} ISK")</b>
                     </FooterTemplate>
-                </RadzenGridColumn>
+                    <GroupFooterTemplate>
+                        @LM.Get("msTotalIsk"): <b>@($"{context.Data.Items.Cast<WebMiningLedgerEntry>().Sum(a=> a.Price):N0} ISK")</b>
+                    </GroupFooterTemplate>
+                </RadzenDataGridColumn>
             </Columns>
-        </RadzenGrid>
-        @if (_isLedgerLoading)
-        {
-            <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
-        }
+        </RadzenDataGrid>
     </div>
 </div>
 
@@ -76,11 +78,12 @@
     [Parameter] public WebMiningLedger Ledger { get; set; }
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     private ThdAuthUser _inspector;
-    private RadzenGrid<WebMiningLedgerEntry> _ledgerGrid;
+    private RadzenDataGrid<WebMiningLedgerEntry> _ledgerGrid;
 
     private bool _isMergeAltsOption = true;
     private bool _isLedgerLoading = true;
     private int _countLedger;
+    private int _tax;
     private List<WebMiningLedgerEntry> _ledgerEntriesCache;
     private List<WebMiningLedgerEntry> _ledgerEntriesMergedCache;
     private List<WebMiningLedgerEntry> _ledgerList;
@@ -117,7 +120,7 @@
 
         await Task.Factory.StartNew(async () =>
         {
-            _ledgerEntriesCache = await _module.GetLedgerEntries(Ledger.StructureId, Ledger.FeederId);
+            _ledgerEntriesCache = await _module.GetLedgerEntries(Ledger.StructureId, Ledger.FeederId, _tax);
             _ledgerEntriesMergedCache = await _module.MergeLedgerEntries(_ledgerEntriesCache);
             _isLedgerLoading = false;
         });
@@ -134,10 +137,6 @@
 
         if (!string.IsNullOrEmpty(args.OrderBy))
             query = query.OrderBy(args.OrderBy);
-        //if (args.Skip.HasValue)
-        //   query = query.Skip(args.Skip.Value);
-        // if (args.Top.HasValue)
-        //    query = query.Take(args.Top.Value);
         return query.ToList();
     }
 
@@ -157,4 +156,31 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    private async void OnRender(DataGridRenderEventArgs<WebMiningLedgerEntry> args)
+    {
+        if(args.FirstRender)
+        {
+            args.Grid.Groups.Add(new GroupDescriptor(){ Property = "NameFilter", Title = LM.Get("msLedgerColumnCharacter")});
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnTaxChange(int value)
+    {
+        _isLedgerLoading = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Factory.StartNew(async () =>
+        {
+            _ledgerEntriesCache = await _module.GetLedgerEntries(Ledger.StructureId, Ledger.FeederId, _tax);
+            _ledgerEntriesMergedCache = await _module.MergeLedgerEntries(_ledgerEntriesCache);
+            _isLedgerLoading = false;
+            await _ledgerGrid.Reload();
+            await InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private async Task OpenPayments()
+    {
+        await Modal.ShowModal<LedgerPayments>(Ledger, LM.Get("webMiningPaymentHeader", Ledger.StructureName), "Ledger", new Dictionary<string, object> { { "Entries", (_isMergeAltsOption ? _ledgerEntriesMergedCache : _ledgerEntriesCache).ToList() }, { "MergeAlts", _isMergeAltsOption }, {"ReprocessEff",_tax } });
+    }
 }

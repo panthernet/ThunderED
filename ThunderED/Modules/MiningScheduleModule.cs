@@ -715,7 +715,7 @@ namespace ThunderED.Modules
         }
         #endregion
 
-        public async Task<List<WebMiningLedgerEntry>> GetLedgerEntries(long ledgerStructureId, long charId)
+        public async Task<List<WebMiningLedgerEntry>> GetLedgerEntries(long ledgerStructureId, long charId, int tax)
         {
             try
             {
@@ -775,7 +775,9 @@ namespace ThunderED.Modules
 
                 var oreIds = entries.Select(a => a.type_id).Distinct().ToList();
                 var prices = await APIHelper.ESIAPI.GetFuzzPrice(Reason, oreIds) ?? new List<JsonFuzz.FuzzPrice>();
-                var componentPrices = await DecompositionHelper.GetPrices(70d, oreIds);
+                tax = tax == 0 ? 100 : (tax == 100 ? 0 : tax);
+                var componentPrices = await DecompositionHelper.GetPrices((double)tax, oreIds);
+                var originalPrices = await DecompositionHelper.GetPrices(100d, oreIds);
 
                 foreach (var entry in entries)
                 {
@@ -785,6 +787,9 @@ namespace ThunderED.Modules
                     var price = componentPrices.ContainsKey(entry.type_id)
                         ? (componentPrices.FirstOrDefault(a => a.Key == entry.type_id).Value * Math.Round(entry.quantity / 100d, MidpointRounding.ToZero))
                         : (prices?.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0);
+                    var oprice = originalPrices.ContainsKey(entry.type_id)
+    ? (originalPrices.FirstOrDefault(a => a.Key == entry.type_id).Value * Math.Round(entry.quantity / 100d, MidpointRounding.ToZero))
+    : (prices?.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0);
                     //var price = prices.FirstOrDefault(a => a.Id == entry.type_id)?.Sell ?? 0;
 
                     list.Add(new WebMiningLedgerEntry
@@ -795,7 +800,8 @@ namespace ThunderED.Modules
                         OreName = ore?.Name ?? LM.Get("Unknown"),
                         OreId = entry.type_id,
                         Quantity = entry.quantity,
-                        Price = price ,
+                        Price = price,
+                        OriginalPrice = oprice
                     });
                 }
 
@@ -848,7 +854,7 @@ namespace ThunderED.Modules
             }
         }
 
-        public async Task<List<WebMiningLedger>> WebUpdateLedgerStats(List<WebMiningLedger> ledgers)
+        public async Task<List<WebMiningLedger>> WebUpdateLedgerStats(List<WebMiningLedger> ledgers, int tax)
         {
             try
             {
@@ -864,7 +870,7 @@ namespace ThunderED.Modules
 
                     if (completeLedger != null && !string.IsNullOrEmpty(completeLedger.OreJson))
                     {
-                        var entries = await GetLedgerEntries(ledger.StructureId, ledger.FeederId);
+                        var entries = await GetLedgerEntries(ledger.StructureId, ledger.FeederId, tax);
                         var list = entries.GroupBy(a => a.OreId)
                             .ToDictionary(a => a.Key, a => a.Sum(b => b.Quantity * 10));
                         var totalMinedVolume = list.Values.Sum(a => a);
@@ -926,5 +932,17 @@ namespace ThunderED.Modules
 
         public static readonly List<long> R64List = new List<long> { 45510, 45513, 45511, 45512, 46312, 46313, 46314, 46315, 46316, 46317, 46318, 46319 };
         public static readonly List<long> R32List = new List<long> { 45502, 45503, 45504, 45506, 46304, 46305, 46306, 46307, 46308, 46309, 46310, 46311 };
+
+        public class PaymentEntry
+        {
+            public long CharacterId { get; set; }
+            public string CharacterName { get; set; }
+            public string CorporationTicker { get; set; }
+            public double OriginalSum { get; set; }
+            public double CalculatedSum { get; set; }
+            public int Tax { get; set; }
+        }
+
+        
     }
 }

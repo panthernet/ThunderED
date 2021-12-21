@@ -12,6 +12,11 @@ namespace ThunderED.Thd
         public DateTime? Date { get; set; }
         public string OreJson;
         public string Stats;
+        public int RefineEff;
+        public LedgerPaymentSettings PaymentSettings;
+        public LedgerPaymentData PaymentData;
+        public List<WebMiningLedgerEntry> LedgerData;
+        public bool Closed;
 
 
         public void Unpack()
@@ -29,4 +34,15 @@ namespace ThunderED.Thd
         [NotMapped]
         public Dictionary<long, int> RawOre { get; set; }
     }
+
+    public class LedgerPaymentSettings
+    {
+
+    }
+
+    public class LedgerPaymentData
+    {
+
+    }
+
 }

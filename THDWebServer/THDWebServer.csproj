@@ -66,6 +66,7 @@
     <Watch Remove="Pages\Modals\ErrorDialog.razor" />
     <Watch Remove="Pages\Modals\InspectChar.razor" />
     <Watch Remove="Pages\Modals\InspectLedger.razor" />
+    <Watch Remove="Pages\Modals\LedgerPayments.razor" />
     <Watch Remove="Pages\Modals\MailSearch.razor" />
     <Watch Remove="Pages\Modals\MailViewer.razor" />
     <Watch Remove="Pages\Modals\PasteDIalog.razor" />

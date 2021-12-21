@@ -1,0 +1,252 @@
+﻿@using ThunderED.Modules
+@using System.Linq.Dynamic.Core
+@using ThunderED.Thd
+
+@inject AuthenticationStateProvider Auth
+@inject ProtectedSessionStorage Store
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_MINING_SCHEDULE)]
+@inject NavigationManager Nav
+@inject IModalService Modal
+
+<div class="mining-payment modal-body frontcolor fontEternal">    
+    <RadzenSteps Change=@OnStepChange NextText="@LM.Get("wsWebStepsNext")" PreviousText="@LM.Get("wsWebStepsPrev")" >
+        <Steps>
+            <RadzenStepsItem Text="Settings">
+                <div class="col" style="min-height: 42vh;">
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenCheckBox Value="@MergeAlts" TValue="bool" Disabled="true" Style="align-self:normal; margin-bottom: 5px;" />&nbsp;@LM.Get("msMergeAltsCheck")
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="@LM.Get("webMiningPaymentManualSum")" />
+                        </div>
+                        <div class="col">
+                            <RadzenSwitch @bind-Value=@_isManualSum Change="@OnManualSumSwitchChange" Style="vertical-align: middle;" />
+                        </div>
+                    </div>  
+                    @if(_isManualSum)
+                    {
+                       <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="@LM.Get("wsMiningPaymentFieldManualSum")" />
+                            </div>
+                            <div class="col">
+                                <RadzenNumeric @bind-Value=@_manualSum TValue="double" Min="0" Max="100" ShowUpDown="false" />
+                            </div>
+                        </div>                        
+                    }else{
+                       <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="@LM.Get("wsMiningPaymentFieldRefinePerc")" />
+                            </div>
+                            <div class="col">
+                                <RadzenNumeric @bind-Value=@_refinePercent TValue="int" Min="0" ShowUpDown="false" />
+                            </div>
+                        </div>
+                    }      
+                </div>
+            </RadzenStepsItem>
+            <RadzenStepsItem Text="Calculation" Disabled="@(!ValidateStep1())">
+                <div style="min-height: 42vh;">
+                    <div class="row" style="margin-bottom: 5px">
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="@LM.Get("wsMiningPaymentFieldTaxPerc")" />
+                            </div>
+                            <div class="col">
+                                <RadzenNumeric @bind-Value=@_generalTaxPercent TValue="int" Min="0" Max="100" ShowUpDown="false" Change="@OnGeneralTaxChanged" />
+                            </div>
+                        </div>
+                        @if(_isManualSum)
+                        {
+                            <div class="row">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="@LM.Get("msTotalIsk")" />
+                                </div>
+                                <div class="col">
+                                    <RadzenLabel Text="@($"{_manualSum:N0}")" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        <RadzenDataGrid Data="@Payments" TItem="MiningScheduleModule.PaymentEntry"                     
+                                    AllowFiltering="false" AllowGrouping= "false" AllowPaging="false" AllowSorting="true"
+                                    AllowColumnResize="true" Style="height: 97%" >
+                            <Columns>
+                                <RadzenDataGridColumn TItem="MiningScheduleModule.PaymentEntry" Filterable="false" Sortable="false" Width="60px">
+                                    <Template Context="order">
+                                        <RadzenImage Path="@ServerPaths.GetCharacterImageUrl(order.CharacterId)" Style="width: 32px; height: 32px; display: block" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="MiningScheduleModule.PaymentEntry" Property="CharacterName" Filterable="false" Sortable="true" Title="@LM.Get("msLedgerColumnCharacter")">
+                                    <Template Context="order">
+                                        @($"{order.CharacterName} [{order.CorporationTicker}]")
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="MiningScheduleModule.PaymentEntry" Property="OriginalSum" Filterable="false" Sortable="true" Groupable="false" Width="220px" Title="@LM.Get("msLedgerColumnPrice")">
+                                    <Template Context="order">
+                                        <RadzenLabel Text="@($"{order.OriginalSum:N0} ISK")"/>
+                                    </Template>
+                                    <FooterTemplate>
+                                        @LM.Get("msTotalIsk"): <b>@($"{(_isManualSum ? _manualSum : Payments?.Sum(o => o.OriginalSum)):N0} ISK")</b>
+                                    </FooterTemplate>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="MiningScheduleModule.PaymentEntry" Property="CalculatedSum" Filterable="false" Sortable="true" Groupable="false" Width="220px" Title="@LM.Get("msLedgerColumnPrice")">
+                                    <Template Context="order">
+                                        <RadzenLabel Text="@($"{order.CalculatedSum:N0} ISK")"/>
+                                    </Template>
+                                    <FooterTemplate>
+                                        @LM.Get("msTotalIsk"): <b>@($"{Payments?.Sum(o => o.CalculatedSum):N0} ISK")</b>
+                                    </FooterTemplate>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                     </div>
+                 </div>
+            </RadzenStepsItem>
+            <RadzenStepsItem Text="Finish"  Disabled="@(!ValidateStep1() || !ValidateStep2())">
+                <div style="min-height: 42vh;">
+
+                </div>
+            </RadzenStepsItem>
+        </Steps>
+    </RadzenSteps>
+
+</div>
+
+@functions {
+
+    private MiningScheduleModule _module;
+    [Parameter] public WebMiningLedger Ledger { get; set; }
+    [Parameter] public bool MergeAlts { get; set; }
+    [Parameter] public List<WebMiningLedgerEntry> Entries { get; set; }
+    [Parameter] public int ReprocessEff {  get;  set; }
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    private ThdAuthUser _inspector;
+
+    private bool _isManualSum = false;
+    private bool _isLedgerLoading = true;
+    private double _manualSum;
+    private int _refinePercent;
+    private int _generalTaxPercent;
+    private bool _hasCalculated;
+
+    private List<MiningScheduleModule.PaymentEntry> Payments;
+
+    async Task Close() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        if (!await MiningScheduleModule.HasViewAccess(user))
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+        _module = TickManager.GetModule<MiningScheduleModule>();
+        if (_module == null || !SettingsManager.Settings.Config.ModuleMiningSchedule)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _inspector = await DbHelper.GetAuthUser(user.Id, true);
+        if (_inspector == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _refinePercent = ReprocessEff;
+
+        await base.OnInitializedAsync();
+    }
+
+    async Task OnManualSumSwitchChange(bool value)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    void OnStepChange(int index)
+    {
+        if (index == 1) //Before calc
+            CalculateData(false);
+    }
+
+    void CalculateData(bool force)
+    {
+        if (Payments == null || force)
+        {
+            Payments = Entries.GroupBy(a => a.CharacterId).Select(a =>
+            {
+                var list = a.ToList();
+                var first = list.First();
+                var sum = list.Sum(b => b.OriginalPrice);
+
+                var result = new MiningScheduleModule.PaymentEntry
+                    {
+                        CharacterId = a.Key,
+                        CharacterName = first.CharacterName,
+                        CorporationTicker = first.CorporationTicker,
+                        CalculatedSum = CalculatePersonalSum(sum, _generalTaxPercent),
+                        OriginalSum = _isManualSum ? 0 : sum,
+                        Tax = _generalTaxPercent
+                    };
+                return result;
+
+            }).OrderByDescending(a=> a.OriginalSum).ToList();
+            StateHasChanged();
+        }
+    }
+
+    double CalculatePersonalSum(double input, int tax)
+    {
+        if(_isManualSum) //TODO
+        {
+            var percFromTotal = PercBetween(input, _manualSum);
+            return _manualSum - PercFromValue(_manualSum, tax);
+        }
+
+        input = PercFromValue(input, _refinePercent);
+        return input - PercFromValue(input, tax);
+    }
+
+    private double PercFromValue(double input, int perc)
+    {
+        return (input/100d) * perc;
+    }
+
+    private double PercBetween(double input, double input2)
+    {
+        if (input == 0 || input2 == 0) return 0;
+        return 100d / (input2/input);
+    }
+
+    void OnGeneralTaxChanged(int value)
+    {
+         CalculateData(true);        
+    }
+
+    bool ValidateStep1()
+    {
+        if (_isManualSum && _manualSum == 0) return false;
+        if (!_isManualSum && _refinePercent == 0) return false;
+        return true;
+    }
+
+    bool ValidateStep2()
+    {
+        if (!_hasCalculated) return false;
+        return true;
+    }
+}
