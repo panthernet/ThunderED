@@ -1,3 +1,6 @@
+### V2.1.3
++ Default database fix
+
 ### V2.1.2
 + Improved web UI for several modules (new mining ledger is still WIP and buggy)
 + Fixed citadel name resolve from links in notifications

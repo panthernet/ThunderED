@@ -767,7 +767,7 @@
   "webAuthGroupAccordionHeader": "Основные настройки",
   "webSettingsTimersAccessTabName": "Доступ",
   "webSettingsTimersEditTabName": "Редактирование",
-  "msgConnectionFailureScroll": "Внимание! Соединение с ESI нестабильно. Некоторый возможности могут быть недоступны.",
+  "msgConnectionFailureScroll": "Внимание! Соединение с ESI нестабильно. Некоторые возможности могут быть недоступны.",
   "webButtonUploadScan": "Загрузить",
   "mtColumnNotes": "Заметки",
   "webSettingsAuthGroupHelp1": "Названия корпораций и альянсов в таблице должны начинаться с префиксов (англ.) c: и a: соответственно.",

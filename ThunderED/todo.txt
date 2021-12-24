@@ -19,3 +19,6 @@ USER SERVICES
 1. Skill queue is finishing soon
 
 
+ююююююю
+1. Удаление пилотов из списка выплат
+2. расчет выплат

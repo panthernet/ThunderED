@@ -5,6 +5,6 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <_PublishTargetUrl>D:\Projects\EVE\ThunderED\THD\THDWebServer\bin\Release\publish\linux</_PublishTargetUrl>
-    <History>True|2021-12-08T21:11:26.3638662Z;True|2021-12-06T12:25:01.2831686+03:00;True|2021-11-25T19:09:21.2316111+03:00;True|2021-11-20T22:58:53.3914504+03:00;True|2021-11-02T19:49:35.4482348+03:00;False|2021-11-02T19:46:39.9555456+03:00;False|2021-11-02T19:44:26.1467931+03:00;</History>
+    <History>True|2021-12-21T15:39:09.9339238Z;True|2021-12-08T23:11:26.3638662+02:00;True|2021-12-06T11:25:01.2831686+02:00;True|2021-11-25T18:09:21.2316111+02:00;True|2021-11-20T21:58:53.3914504+02:00;True|2021-11-02T18:49:35.4482348+02:00;False|2021-11-02T18:46:39.9555456+02:00;False|2021-11-02T18:44:26.1467931+02:00;</History>
   </PropertyGroup>
 </Project>
