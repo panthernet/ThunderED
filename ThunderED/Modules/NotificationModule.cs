@@ -421,8 +421,8 @@ namespace ThunderED.Modules
                                         try
                                         {
                                             //log new notifications to get essential data
-                                            if (Settings.Config.LogNewNotifications)
-                                                await LogHelper.LogNotification($"{notification.type} [{notification.notification_id}]", notification.text);
+                                            //if (Settings.Config.LogNewNotifications)
+                                             //   await LogHelper.LogNotification($"{notification.type} [{notification.notification_id}]", notification.text);
 
                                             var discordChannel = APIHelper.DiscordAPI.GetChannel(filter.ChannelID != 0 ? filter.ChannelID : group.DefaultDiscordChannelID);
                                             //var atCorpName = GetData("corpName", data) ?? LM.Get("Unknown");
@@ -530,6 +530,9 @@ namespace ThunderED.Modules
             var feederAlliance = feederChar?.alliance_id > 0 ? await APIHelper.ESIAPI.GetAllianceData(Reason, feederChar?.alliance_id) : null;
 
             mention ??= $"From {feederChar?.name} ";
+
+            if (Settings.Config.LogNewNotifications)
+                await LogHelper.LogNotification($"{notification.type} [{notification.notification_id}]", notification.text);
 
             //check word filters
             if (valueFilterOut != null)
@@ -1707,6 +1710,14 @@ namespace ThunderED.Modules
                     }
                     break;
                 default:
+                    if (notification != null)
+                    {
+                        foreach (var channel in discordChannels)
+                            await APIHelper.DiscordAPI.SendMessageAsync(channel,
+                                    $"Unknown notification type '{notification.type}'\n```\n{notification.text}\n```\n")
+                                .ConfigureAwait(false);
+                    }
+
                     return false;
             }
 
