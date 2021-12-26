@@ -370,7 +370,7 @@ namespace ThunderED.Modules
 
                             var notifications = result.Result;
 
-                             notifications.Add(new JsonClasses.Notification
+                             /*notifications.Add(new JsonClasses.Notification
                              {
                                  text = @"daysUntilAbandon: 2\nisCorpOwned: false\nsolarsystemID: 30004587\nstructureID: &id001 1035894524206\nstructureLink: <a href=\""showinfo:35832//1035894524206\"">7X-02R - Villa Kebab</a>\nstructureShowInfoData:\n- showinfo\n- 35832\n- *id001\nstructureTypeID: 35832\n",
 
@@ -378,7 +378,7 @@ namespace ThunderED.Modules
                                  notification_id = 1525221813,
                                  type = "StructureImpendingAbandonmentAssetsAtRisk",
                                  timestamp = "2021-02-25T11:20:00Z"
-                             });
+                             });*/
 
 
 

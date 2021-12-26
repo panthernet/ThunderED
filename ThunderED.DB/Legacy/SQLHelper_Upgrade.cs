@@ -2,23 +2,29 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using ThunderED.Helpers;
+using ThunderED.Thd;
 
 namespace ThunderED
 {
     public static partial class SQLHelper
     {
+        #region OLD
         //"1.0.0","1.0.1","1.0.7", "1.0.8", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.8", "1.2.2","1.2.6", "1.2.7", "1.2.8", "1.2.10", "1.2.14", "1.2.15", "1.2.16","1.2.19","1.3.1", "1.3.2", "1.3.4", "1.3.10", "1.3.16", "1.4.2", 
         private static readonly string[] MajorVersionUpdates = new[]
         {
-            "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5", "2.0.6", "2.0.7","2.0.9","2.0.10", "2.0.15", "2.0.16", "2.0.18", "2.0.19", "2.0.20", "2.1.0", "2.1.1", "2.1.2"
+            "1.4.5", "1.5.4", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.0.5", "2.0.6", "2.0.7", "2.0.9", "2.0.10",
+            "2.0.15", "2.0.16", "2.0.18", "2.0.19", "2.0.20", "2.1.0", "2.1.1", "2.1.2"
         };
 
         public static async Task<bool> Upgrade()
         {
-            var version = await Query<string>("cache_data", "data", "name", "version") ?? await Query<string>("cacheData", "data", "name", "version");
+            var version = await Query<string>("cache_data", "data", "name", "version") ??
+                          await Query<string>("cacheData", "data", "name", "version");
             var isNew = string.IsNullOrEmpty(version) || SettingsManager.IsNew;
 
             var vDbVersion = isNew ? new Version(Program.VERSION) : new Version(version);
@@ -30,7 +36,8 @@ namespace ThunderED
                     StringComparison.OrdinalIgnoreCase);
                 if (vDbVersion < firstUpdate)
                 {
-                    await LogHelper.LogError("Your database version is below the required minimum for an upgrade. You have to do clean install without the ability to migrate your data. Consult GitHub WIKI or reach @panthernet#1659 on Discord group for assistance.");
+                    await LogHelper.LogError(
+                        "Your database version is below the required minimum for an upgrade. You have to do clean install without the ability to migrate your data. Consult GitHub WIKI or reach @panthernet#1659 on Discord group for assistance.");
                     return false;
                 }
 
@@ -42,6 +49,7 @@ namespace ThunderED
                     switch (update)
                     {
                         #region OLD
+
                         /* case "1.0.1":
                              await RunCommand("DELETE FROM cacheData where name='version'");
                              await RunCommand("CREATE UNIQUE INDEX cacheData_name_uindex ON cacheData (name)");
@@ -365,9 +373,11 @@ namespace ThunderED
                              await RunCommand("ALTER TABLE `auth_users` ADD COLUMN `last_check` timestamp NULL;");
                              await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                              break;*/
+
                         #endregion
 
                         #region Actual Upgrades
+
                         case "1.4.5":
                             await RunCommand("ALTER TABLE `auth_users` ADD COLUMN `ip` text NULL;");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
@@ -379,7 +389,7 @@ namespace ThunderED
                         case "2.0.1":
                             await BackupDatabase();
                             if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
-                                StringComparison.OrdinalIgnoreCase))
+                                    StringComparison.OrdinalIgnoreCase))
                             {
                                 await RunCommand(
                                     @"create table tokens (id integer not null constraint tokens_pk primary key autoincrement,	token text not null,	type int not null,	character_id integer not null);");
@@ -390,9 +400,11 @@ namespace ThunderED
                             }
                             else
                             {
-                                await RunCommand(@"create table tokens(id int key auto_increment,	token text not null, type int not null,	character_id int not null);");
+                                await RunCommand(
+                                    @"create table tokens(id int key auto_increment,	token text not null, type int not null,	character_id int not null);");
                                 await RunCommand(@"create index tokens_character_id_index on tokens (character_id);");
-                                await RunCommand(@"create unique index tokens_character_id_type_uindex on tokens (character_id, type);");
+                                await RunCommand(
+                                    @"create unique index tokens_character_id_type_uindex on tokens (character_id, type);");
                                 await RunCommand(@"create unique index tokens_id_uindex on tokens (id);");
                             }
 
@@ -405,38 +417,46 @@ namespace ThunderED
                             foreach (var (key, value) in tokens)
                             {
                                 //await DbHelper.UpdateToken(value, key, TokenEnum.Notification);
-                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.Notification}, {key});");
+                                await RunCommand(
+                                    @$"insert into tokens(token, type, character_id) values('{value}', {(int) TokenEnum.Notification}, {key});");
                             }
+
                             //contracts
                             tokens.Clear();
                             tokens = (await SelectData("select id,ctoken from refresh_tokens"))
-                                .Where(a => !string.IsNullOrEmpty((string)a[1]))
-                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string)a[1]);
+                                .Where(a => !string.IsNullOrEmpty((string) a[1]))
+                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string) a[1]);
                             foreach (var (key, value) in tokens)
                             {
                                 //await DbHelper.UpdateToken(value, key, TokenEnum.Contract);
-                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.Contract}, {key});");
+                                await RunCommand(
+                                    @$"insert into tokens(token, type, character_id) values('{value}', {(int) TokenEnum.Contract}, {key});");
                             }
+
                             //mail
                             tokens.Clear();
                             tokens = (await SelectData("select id,mail from refresh_tokens"))
-                                .Where(a => !string.IsNullOrEmpty((string)a[1]))
-                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string)a[1]);
+                                .Where(a => !string.IsNullOrEmpty((string) a[1]))
+                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string) a[1]);
                             foreach (var (key, value) in tokens)
                             {
                                 //await DbHelper.UpdateToken(value, key, TokenEnum.Mail);
-                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.Mail}, {key});");
+                                await RunCommand(
+                                    @$"insert into tokens(token, type, character_id) values('{value}', {(int) TokenEnum.Mail}, {key});");
                             }
+
                             //industry
                             tokens.Clear();
                             tokens = (await SelectData("select id,indtoken from refresh_tokens"))
-                                .Where(a => !string.IsNullOrEmpty((string)a[1]))
-                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string)a[1]);
+                                .Where(a => !string.IsNullOrEmpty((string) a[1]))
+                                .ToDictionary(a => Convert.ToInt64(a[0]), a => (string) a[1]);
                             foreach (var (key, value) in tokens)
                             {
                                 //await DbHelper.UpdateToken(value, key, TokenEnum.Industry);
-                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.Industry}, {key});");
+                                await RunCommand(
+                                    @$"insert into tokens(token, type, character_id) values('{value}', {(int) TokenEnum.Industry}, {key});");
                             }
+
                             //general
                             tokens.Clear();
                             var data = (await SelectData("select characterID,refreshToken from auth_users"))
@@ -446,8 +466,10 @@ namespace ThunderED
                                 var key = Convert.ToInt64(d[0]);
                                 var value = (string) d[1];
                                 //await DbHelper.UpdateToken(value, key, TokenEnum.General);
-                                await RunCommand(@$"insert into tokens(token, type, character_id) values('{value}', {(int)TokenEnum.General}, {key});");
+                                await RunCommand(
+                                    @$"insert into tokens(token, type, character_id) values('{value}', {(int) TokenEnum.General}, {key});");
                             }
+
                             await LogHelper.LogWarning("Step 2 finished...");
                             await RunCommand(@"drop table refresh_tokens;");
                             await LogHelper.LogWarning("Step 3 finished...");
@@ -458,25 +480,28 @@ namespace ThunderED
                         case "2.0.2":
                             await BackupDatabase();
                             if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
-                                StringComparison.OrdinalIgnoreCase))
+                                    StringComparison.OrdinalIgnoreCase))
                             {
                                 await RunCommand(
                                     @"create table mining_notifications(citadel_id int not null constraint mining_notifications_pk primary key, ore_composition text not null, operator text not null,date timestamp not null);");
-                                await RunCommand("create unique index mining_notifications_citadel_id_uindex on mining_notifications(citadel_id);");
+                                await RunCommand(
+                                    "create unique index mining_notifications_citadel_id_uindex on mining_notifications(citadel_id);");
                             }
                             else
                             {
                                 await RunCommand(
                                     @"create table mining_notifications(citadel_id int key, ore_composition text not null, operator text not null,date timestamp not null);");
-                                await RunCommand("create unique index mining_notifications_citadel_id_uindex on mining_notifications(citadel_id);");
+                                await RunCommand(
+                                    "create unique index mining_notifications_citadel_id_uindex on mining_notifications(citadel_id);");
 
                             }
+
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         case "2.0.3":
                             await BackupDatabase();
                             if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
-                                StringComparison.OrdinalIgnoreCase))
+                                    StringComparison.OrdinalIgnoreCase))
                             {
                                 await RunCommand(
                                     "create table mining_ledger(id integer not null constraint mining_ledger_pk primary key autoincrement, citadel_id integer not null, date timestamp,ore_json text);");
@@ -496,14 +521,17 @@ namespace ThunderED
                         case "2.0.4":
                             await BackupDatabase();
                             if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
-                                StringComparison.OrdinalIgnoreCase))
+                                    StringComparison.OrdinalIgnoreCase))
                             {
-                                await RunCommand("create table moon_table(id integer not null constraint moon_table_pk primary key autoincrement, ore_id integer not null,ore_quantity real not null,system_id integer not null,planet_id integer not null,moon_id integer not null,region_id integer not null, ore_name text not null, moon_name text not null);");
+                                await RunCommand(
+                                    "create table moon_table(id integer not null constraint moon_table_pk primary key autoincrement, ore_id integer not null,ore_quantity real not null,system_id integer not null,planet_id integer not null,moon_id integer not null,region_id integer not null, ore_name text not null, moon_name text not null);");
                             }
                             else
                             {
-                                await RunCommand("create table moon_table(id bigint not null key auto_increment,ore_id bigint not null,ore_quantity double not null,system_id bigint not null,planet_id bigint not null,moon_id bigint not null,region_id bigint not null, ore_name text not null, moon_name text not null);");
+                                await RunCommand(
+                                    "create table moon_table(id bigint not null key auto_increment,ore_id bigint not null,ore_quantity double not null,system_id bigint not null,planet_id bigint not null,moon_id bigint not null,region_id bigint not null, ore_name text not null, moon_name text not null);");
                             }
+
                             await RunCommand("create unique index moon_table_id_uindex on moon_table(id);");
                             await RunCommand("create index moon_table_ore_id_index on moon_table(ore_id);");
                             await RunCommand("create index moon_table_system_id_index on moon_table(system_id);");
@@ -514,17 +542,23 @@ namespace ThunderED
                             await BackupDatabase();
 
                             if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
-                                StringComparison.OrdinalIgnoreCase))
+                                    StringComparison.OrdinalIgnoreCase))
                             {
-                                await RunCommand("create table storage_console(id integer not null constraint storage_console_pk primary key autoincrement, name text not null,value numeric not null);");
-                                await RunCommand("create unique index storage_console_id_uindex on storage_console(id);");
-                                await RunCommand("create unique index storage_console_name_uindex on storage_console(name);");
+                                await RunCommand(
+                                    "create table storage_console(id integer not null constraint storage_console_pk primary key autoincrement, name text not null,value numeric not null);");
+                                await RunCommand(
+                                    "create unique index storage_console_id_uindex on storage_console(id);");
+                                await RunCommand(
+                                    "create unique index storage_console_name_uindex on storage_console(name);");
                             }
                             else
                             {
-                                await RunCommand("create table storage_console(id bigint not null key auto_increment, name text not null,value numeric not null);");
-                                await RunCommand("create unique index storage_console_id_uindex on storage_console(id);");
-                                await RunCommand("create unique index storage_console_name_uindex on storage_console(name(255) ASC);");
+                                await RunCommand(
+                                    "create table storage_console(id bigint not null key auto_increment, name text not null,value numeric not null);");
+                                await RunCommand(
+                                    "create unique index storage_console_id_uindex on storage_console(id);");
+                                await RunCommand(
+                                    "create unique index storage_console_name_uindex on storage_console(name(255) ASC);");
                             }
 
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
@@ -533,17 +567,23 @@ namespace ThunderED
                         case "2.0.6":
                             await BackupDatabase();
                             if (SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
-                                StringComparison.OrdinalIgnoreCase))
+                                    StringComparison.OrdinalIgnoreCase))
                             {
-                                await RunCommand("create table inv_custom_scheme(id integer not null, item_id integer not null,quantity int default 0 not null);");
-                                await RunCommand("create unique index inv_custom_scheme_id_item_id_uindex on inv_custom_scheme(id, item_id);");
-                                await RunCommand("create index inv_custom_scheme_item_id_index on inv_custom_scheme(item_id);");
+                                await RunCommand(
+                                    "create table inv_custom_scheme(id integer not null, item_id integer not null,quantity int default 0 not null);");
+                                await RunCommand(
+                                    "create unique index inv_custom_scheme_id_item_id_uindex on inv_custom_scheme(id, item_id);");
+                                await RunCommand(
+                                    "create index inv_custom_scheme_item_id_index on inv_custom_scheme(item_id);");
                             }
                             else
                             {
-                                await RunCommand("create table inv_custom_scheme(id bigint not null, item_id bigint not null,quantity int default 0 not null);");
-                                await RunCommand("create unique index inv_custom_scheme_id_item_id_uindex on inv_custom_scheme(id, item_id);");
-                                await RunCommand("create index inv_custom_scheme_item_id_index on inv_custom_scheme(item_id);");
+                                await RunCommand(
+                                    "create table inv_custom_scheme(id bigint not null, item_id bigint not null,quantity int default 0 not null);");
+                                await RunCommand(
+                                    "create unique index inv_custom_scheme_id_item_id_uindex on inv_custom_scheme(id, item_id);");
+                                await RunCommand(
+                                    "create index inv_custom_scheme_item_id_index on inv_custom_scheme(item_id);");
                             }
 
                             await RunCommand(@"
@@ -661,17 +701,44 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                             break;
                         case "2.0.7":
                             if (!SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
-                                StringComparison.OrdinalIgnoreCase))
+                                    StringComparison.OrdinalIgnoreCase))
                                 await RunCommand("alter table `tokens` modify `id` BIGINT AUTO_INCREMENT;");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         case "2.0.8":
                         case "2.0.9":
                             await BackupDatabase();
-                            try { await RunCommand("drop table `timers_auth`;"); }catch {}
-                            try { await RunCommand("drop table `web_editor_auth`;"); } catch { }
-                            try { await RunCommand("drop table `hrm_auth`;"); } catch { }
-                            try { await RunCommand("drop table `fleetup`;"); } catch { }
+                            try
+                            {
+                                await RunCommand("drop table `timers_auth`;");
+                            }
+                            catch
+                            {
+                            }
+
+                            try
+                            {
+                                await RunCommand("drop table `web_editor_auth`;");
+                            }
+                            catch
+                            {
+                            }
+
+                            try
+                            {
+                                await RunCommand("drop table `hrm_auth`;");
+                            }
+                            catch
+                            {
+                            }
+
+                            try
+                            {
+                                await RunCommand("drop table `fleetup`;");
+                            }
+                            catch
+                            {
+                            }
 
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
@@ -682,7 +749,8 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                             break;
                         case "2.0.15":
                             await BackupDatabase();
-                            await RunCommand($"alter table tokens add roles {(SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite", StringComparison.OrdinalIgnoreCase) ? "integer":"BIGINT")}; ");
+                            await RunCommand(
+                                $"alter table tokens add roles {(SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite", StringComparison.OrdinalIgnoreCase) ? "integer" : "BIGINT")}; ");
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
                             break;
                         case "2.0.16":
@@ -710,7 +778,8 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                             }
                             else
                             {
-                                await RunCommand("alter table cache add constraint cache_pk primary key(type(256), id(256)); ");
+                                await RunCommand(
+                                    "alter table cache add constraint cache_pk primary key(type(256), id(256)); ");
                                 await RunCommand("alter table cache_data drop key cacheData_name_uindex;");
                                 await RunCommand(
                                     "alter table cache_data add constraint cacheData_name_uindex primary key(name(256)); ");
@@ -744,7 +813,8 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                             }
                             else
                             {
-                                await RunCommand("alter table null_campaigns add constraint null_campaigns_pk primary key(groupKey(256), campaignId); ");
+                                await RunCommand(
+                                    "alter table null_campaigns add constraint null_campaigns_pk primary key(groupKey(256), campaignId); ");
                             }
 
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
@@ -764,9 +834,11 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                             }
                             else
                             {
-                                await RunCommand("alter table notifications_list add constraint notifications_list_pk primary key(groupName(256), filterName(256)); ");
+                                await RunCommand(
+                                    "alter table notifications_list add constraint notifications_list_pk primary key(groupName(256), filterName(256)); ");
 
                             }
+
                             await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
 
                             break;
@@ -788,7 +860,8 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                                 var fPart = moon.MoonName.Substring(0, breakIndex).Trim().Split(' ');
                                 moon.PlanetName = fPart[1];
                                 moon.SystemName = fPart[0];
-                                moon.MoonName = moon.MoonName.Substring(breakIndex + 1, moon.MoonName.Length - (breakIndex + 1)).Trim();
+                                moon.MoonName = moon.MoonName
+                                    .Substring(breakIndex + 1, moon.MoonName.Length - (breakIndex + 1)).Trim();
                             }
 
                             await db.SaveChangesAsync();
@@ -796,27 +869,29 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                         }
                             break;
                         case "2.1.1":
-                            {
-                                await BackupDatabase();
+                        {
+                            await BackupDatabase();
 
-                                await using var db = new ThunderedDbContext();
-                                foreach (var item in db.MoonTable)
-                                    item.MoonName = item.MoonName.TrimEnd('*');
-                                await db.SaveChangesAsync();
+                            await using var db = new ThunderedDbContext();
+                            foreach (var item in db.MoonTable)
+                                item.MoonName = item.MoonName.TrimEnd('*');
+                            await db.SaveChangesAsync();
 
-                                await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
-                            }
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                        }
                             break;
                         case "2.1.2":
-                            {
-                                await RunCommand("alter table mining_ledger add refine_eff int default 0 not null;");
-                                await RunCommand("alter table mining_ledger add payment_settings text;");
-                                await RunCommand("alter table mining_ledger add payment_data text;");
-                                await RunCommand("alter table mining_ledger add ledger_data text;");
-                                await RunCommand("alter table mining_ledger add closed int default 0 not null;");
-                                await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
-                            }
+                        {
+                            await RunCommand("alter table mining_ledger add refine_eff int default 0 not null;");
+                            await RunCommand("alter table mining_ledger add payment_settings text;");
+                            await RunCommand("alter table mining_ledger add payment_data text;");
+                            await RunCommand("alter table mining_ledger add ledger_data text;");
+                            await RunCommand("alter table mining_ledger add closed int default 0 not null;");
+                            await UpdateDatabaseVersion(update);
+                            await LogHelper.LogWarning($"Upgrade to DB version {update} is complete!");
+                        }
                             break;
+
                         #endregion
 
                         default:
@@ -825,11 +900,11 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                 }
 
                 //update version in DB
-                InsertOrUpdate("cache_data", new Dictionary<string, object>
+                /*InsertOrUpdate("cache_data", new Dictionary<string, object>
                 {
                     { "name", "version"},
                     { "data", Program.VERSION}
-                }).GetAwaiter().GetResult();
+                }).GetAwaiter().GetResult();*/
 
 
                 return true;
@@ -844,10 +919,74 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                 SettingsManager.IsNew = false;
             }
         }
+        #endregion
+
+        #region Upgrade logic
+        private const string MIN_SUPPORTED_UPG_VERSION = "1.5.4";
+
+        public static async Task<bool> UpgradeV2()
+        {
+            await using var db = new ThunderedDbContext();
+
+            var version = await DbHelper.GetCacheDataEntry("version");
+            var isNew = version == null || SettingsManager.IsNew;
+            var vDbVersion = isNew ? new Version(Program.VERSION) : new Version(version.Data);
+
+            //database is up to date
+            if (!isNew && new Version(Program.VERSION) == new Version(version.Data))
+                return true;
+
+            try
+            {
+                var firstUpdate = new Version(MIN_SUPPORTED_UPG_VERSION);
+                var isSqlite = SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
+                    StringComparison.OrdinalIgnoreCase);
+                if (vDbVersion < firstUpdate)
+                {
+                    await LogHelper.LogError(
+                        "Your database version is below the required minimum for an upgrade. You have to do clean install without the ability to migrate your data. Consult GitHub WIKI or reach @panthernet#1659 on Discord group for assistance.");
+                    return false;
+                }
+
+                var upgradeList = new List<Tuple<Version, MethodInfo, string>>();
+                foreach (var methodInfo in typeof(SQLHelper).GetMethods(BindingFlags.Static|BindingFlags.NonPublic))
+                {
+                    var attr = (DBUpgradeAttribute) methodInfo.GetCustomAttribute(typeof(DBUpgradeAttribute));
+                    if (attr == null) continue;
+                    if (attr.VersionNumber > vDbVersion)
+                        upgradeList.Add(new Tuple<Version, MethodInfo, string>(attr.VersionNumber, methodInfo, attr.Version));
+                }
+
+                upgradeList = upgradeList.OrderBy(a => a.Item1).ToList();
+                foreach (var item in upgradeList)
+                {
+                    var result = await (Task<bool>) item.Item2.Invoke(null, new object[] {isSqlite, item.Item3});
+                    if (!result)
+                    {
+                        await LogHelper.LogWarning("Database upgrade has been stopped due to error!",  LogCat.Database);
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx("UpgradeV2", ex, LogCat.Database);
+                return false;
+            }
+            finally
+            {
+                SettingsManager.IsNew = false;
+            }
+        }
+        #endregion
+
+        #region TOOLS
 
         private static async Task BackupDatabase(string bkFile = null)
         {
-            if(SettingsManager.Settings.Database.DatabaseProvider != "sqlite") return;
+            if (SettingsManager.Settings.Database.DatabaseProvider != "sqlite") return;
             try
             {
                 bkFile ??= $"{SettingsManager.DatabaseFilePath}.bk";
@@ -868,59 +1007,64 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
             }
         }
 
-        private static async Task RestoreDatabase()
+        private static async Task UpdateDatabaseVersion(string version, ThunderedDbContext db = null)
         {
-            if(SettingsManager.Settings.Database.DatabaseProvider != "sqlite") return;
-            try
-            {
-                var bkFile = $"{SettingsManager.DatabaseFilePath}.bk";
-                if (!File.Exists(bkFile))
-                    return;
-                File.Copy(bkFile, SettingsManager.DatabaseFilePath, true);
-            }
-            catch (Exception ex)
-            {
-                await LogHelper.LogEx("DbRestore", ex, LogCat.Database);
-            }
+            await DbHelper.UpdateCacheDataEntry("version", version, db);
         }
 
-        private static async Task<bool> CopyTableDataFromDefault(params string[] tables)
+        private static async Task<bool> UpgradeWrapper(string version, Func<ThunderedDbContext, Task> method)
         {
+            if (method == null)
+                throw new Exception($"Upgrade method not found!");
+
+            //await BackupDatabase();
+            await using var db = new ThunderedDbContext();
+            var t = await db.Database.BeginTransactionAsync();
             try
             {
-                if (SettingsManager.Settings.Database.DatabaseProvider == "sqlite")
-                {
-                    using (var source = new SqliteConnection($"Data Source = {SettingsManager.DatabaseFilePath};"))
-                    {
-                        await source.OpenAsync();
-
-                        using (var attach = new SqliteCommand("ATTACH DATABASE 'edb.def.db' AS Y;", source))
-                        {
-                            attach.ExecuteNonQuery();
-                        }
-
-                        foreach (var table in tables)
-                        {
-                            using (var command = new SqliteCommand($"DELETE FROM '{table}';", source))
-                                command.ExecuteNonQuery();
-
-                            using (var command = new SqliteCommand($"INSERT INTO '{table}' SELECT * FROM Y.'{table}';", source))
-                                command.ExecuteNonQuery();
-                        }
-
-                        using (var attach = new SqliteCommand("DETACH DATABASE Y;", source))
-                        {
-                            attach.ExecuteNonQuery();
-                        }
-                    }
-                }
+                await method.Invoke(db);
+                await db.SaveChangesAsync();
+                await UpdateDatabaseVersion(version, db);
+                await t.CommitAsync();
+                await LogHelper.LogWarning($"Upgrade to DB version {version} is complete!");
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
-                await LogHelper.LogEx("Upgrade CopyTableDataFromDefault", ex, LogCat.Database);
+                await t.RollbackAsync();
+                await LogHelper.LogError($"Upgrade to DB version {version} FAILED!");
                 return false;
             }
+        }
+        #endregion
+
+        [DBUpgrade("2.1.4")]
+        private static async Task<bool> UpgradeV214(bool isSQLite, string version)
+        {
+            return await UpgradeWrapper(version, async db =>
+            {
+                if (isSQLite)
+                {
+                    await db.Database.ExecuteSqlRawAsync(
+                        "create table cache_data_dg_tmp(name TEXT not null constraint cache_data_pk primary key, data TEXT);");
+                    await db.Database.ExecuteSqlRawAsync(
+                        "insert into cache_data_dg_tmp(name, data) select name, data from cache_data;");
+                    await db.Database.ExecuteSqlRawAsync("drop table cache_data;");
+                    await db.Database.ExecuteSqlRawAsync(
+                        "alter table cache_data_dg_tmp rename to cache_data;");
+                    await db.Database.ExecuteSqlRawAsync(
+                        "create unique index cache_data_name_uindex on cache_data(name);");
+                }
+                else
+                {
+                    var list = await db.CacheData.Where(a => a.Equals("version")).ToListAsync();
+                    foreach (var item in list)
+                        db.CacheData.Remove(item);
+                    await db.SaveChangesAsync();
+                    await db.Database.ExecuteSqlRawAsync(
+                        "create unique index cache_data_name_uindex on cache_data(name(256));");
+                }
+            });
         }
     }
 }

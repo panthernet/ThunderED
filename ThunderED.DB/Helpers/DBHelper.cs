@@ -617,15 +617,24 @@ namespace ThunderED
             return await db.CacheData.FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
         }
 
-        public static async Task UpdateCacheDataEntry(string name, string data)
+        public static async Task UpdateCacheDataEntry(string name, string data, ThunderedDbContext dbx = null)
         {
-            await using var db = new ThunderedDbContext();
-            var old = await db.CacheData.AsNoTracking().FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
-            if (old != null)
-                db.CacheData.Remove(old);
-            await db.CacheData.AddAsync(new ThdCacheDataEntry {Name = name, Data = data});
+            ThunderedDbContext db = null;
+            try
+            {
+                db = dbx ?? new ThunderedDbContext();
+                var old = await db.CacheData.AsNoTracking().FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
+                if (old != null)
+                    db.CacheData.Remove(old);
+                await db.CacheData.AddAsync(new ThdCacheDataEntry {Name = name, Data = data});
 
-            await db.SaveChangesAsync();
+                await db.SaveChangesAsync();
+            }
+            finally
+            {
+                if (dbx == null && db != null)
+                    await db.DisposeAsync();
+            }
         }
 
         public static async Task<bool> IsCacheDataExist(string name)

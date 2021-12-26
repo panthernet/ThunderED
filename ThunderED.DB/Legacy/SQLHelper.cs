@@ -144,6 +144,10 @@ namespace ThunderED
                     return "[CRITICAL] Failed to upgrade DB to latest version!";
                 }
 
+                if(!await UpgradeV2())
+                    return "[CRITICAL] Failed to upgradeV2 DB to latest version!";
+
+
                 return null;
             }
             catch (Exception ex)
