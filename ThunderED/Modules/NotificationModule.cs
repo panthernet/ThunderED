@@ -203,7 +203,7 @@ namespace ThunderED.Modules
                                         await LogHelper.LogInfo($"Key update...", LogCat.UpdateTracker, logConsole,
                                             logFile);
 
-                                        var key = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddNotifications().Merge()))?.Result;
+                                        var key = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddNotifications().AddUniverseStructure().Merge()))?.Result;
                                         await LogHelper.LogInfo($"Key: {key != null}", LogCat.UpdateTracker, logConsole,
                                             logFile);
                                         if (key == null) return;
@@ -561,6 +561,7 @@ namespace ThunderED.Modules
             var structureNameDirect = GetData("structureName", data);
             //parse structure name from link
             var sname2 = GetData("structureLink", data);
+
             if (!string.IsNullOrEmpty(sname2) && string.IsNullOrEmpty(structureNameDirect))
             {
                 try

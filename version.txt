@@ -2,6 +2,7 @@
 + Improved database upgrade to use EF and transactions for safier updates
 + Improved notifications logging, added raw notification text to feed if unknown type has been specified in settings
 + Fixed MySQL cache_data table not having unique index
++ Fixed citadels name resolution in notifications
 + Removed debug notification from prod
 
 ### V2.1.3
