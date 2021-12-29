@@ -131,7 +131,7 @@ namespace ThunderED.Modules
                                 logConsole,
                                 logFile);
 
-                            var tokens = await DbHelper.GetTokensByScope(SettingsManager.GetNotificationsESIScope());
+                            var tokens = await DbHelper.GetTokens(TokenEnum.Notification);
                             await LogHelper.LogInfo($"Fetched {tokens.Count} tokens", LogCat.UpdateTracker, logConsole,
                                 logFile);
 
