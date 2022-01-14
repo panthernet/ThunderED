@@ -186,6 +186,11 @@ namespace ThunderED.Modules
                                                 {
                                                     var value = announces.Where(a => a <= left).OrderByDescending(a => a)
                                                         .FirstOrDefault();
+                                                    if (value != left)
+                                                    {
+                                                        var index = announces.IndexOf(value) +1;
+                                                        value = announces.Count <= index ? value : announces[index];
+                                                    }
                                                     value = value == 0 ? announces.Min() : value;
                                                     result.Add(new NotifyItem
                                                     {
