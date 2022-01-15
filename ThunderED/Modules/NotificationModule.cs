@@ -334,7 +334,7 @@ namespace ThunderED.Modules
                                 continue;
                             }
 
-                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rToken, new ESIScope().AddNotifications().Merge(), $"From {Category} | Char ID: {charId}");
+                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rToken, new ESIScope().AddNotifications().AddUniverseStructure().Merge(), $"From {Category} | Char ID: {charId}");
                             var token = tq.Result;
                             if (tq.Data.IsNoConnection) return;
                             if (string.IsNullOrEmpty(token))
