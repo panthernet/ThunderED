@@ -581,13 +581,16 @@ namespace ThunderED
                 EF.Functions.Like(a.GroupName, group) && a.Id == id));
         }
 
-        public static async Task UpdateNotificationListEntry(string group, long id, string filter = "-")
+        public static async Task UpdateNotificationListEntry(string group, long id, string filter = null)
         {
             try
             {
+                var fentry = filter == null ? id.ToString() : $"{filter}{id}";
+
                 await using var db = new ThunderedDbContext();
-                var item = await db.NotificationsList.FirstOrDefaultAsync(a =>
-                    EF.Functions.Like(a.GroupName, group) && a.Id == id);
+                var item = filter == null ? await db.NotificationsList.FirstOrDefaultAsync(a =>
+                    EF.Functions.Like(a.GroupName, group) && a.Id == id) : await db.NotificationsList.FirstOrDefaultAsync(a =>
+                    EF.Functions.Like(a.GroupName, group) && EF.Functions.Like(a.FilterName, fentry) && a.Id == id);
                 if (item != null)
                 {
                     item.Time = DateTime.Now;
@@ -596,7 +599,7 @@ namespace ThunderED
                 else
                 {
                     await db.NotificationsList.AddAsync(new ThdNotificationListEntry
-                        {Id = id, GroupName = group, Time = DateTime.Now, FilterName = filter});
+                        {Id = id, GroupName = group, Time = DateTime.Now, FilterName = fentry});
                 }
 
                 await db.SaveChangesAsync();

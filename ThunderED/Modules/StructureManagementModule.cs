@@ -144,8 +144,6 @@ namespace ThunderED.Modules
                                         group.CustomNotifications.UnanchoringDiscordChannelIds.Any() &&
                                         unanchoring.Any())
                                     {
-
-
                                         var announces = group.CustomNotifications.UnanchoringHours
                                             .OrderByDescending(a => a).ToList();
                                         if (announces.Count == 0) continue;
@@ -155,7 +153,7 @@ namespace ThunderED.Modules
                                             var lastNotify =
                                                 await DbHelper.GetNotificationListEntry("structures",
                                                     s.structure_id);
-                                            if(lastNotify != null && lastNotify.FilterName == "check")
+                                            if(lastNotify != null && lastNotify.FilterName.StartsWith("check"))
                                                 continue;
                                             await DbHelper.UpdateNotificationListEntry("structures", s.structure_id,
                                                 "check");
