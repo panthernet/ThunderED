@@ -587,7 +587,7 @@
                             await InvokeAsync(StateHasChanged);
                         });
                     }
-                    localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharAssets().Merge()))?.Result;
+                    localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharAssets().AddUniverseStructure().Merge()))?.Result;
                     if (SettingsManager.HasCharAssetsScope(_character.DataView.PermissionsList) && !string.IsNullOrEmpty(localAccess))
                     {
                         await Task.Factory.StartNew(async () =>
@@ -679,7 +679,7 @@
 
     private async Task LoadMailData(LoadDataArgs args)
     {
-        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharReadMail().Merge()))?.Result;
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharReadMail().AddUniverseStructure().Merge()))?.Result;
         if (!string.IsNullOrEmpty(localAccess))
         {
             _mailListCache ??= await _module.WebGetMailHeaders(_character.CharacterId, localAccess);
@@ -699,7 +699,7 @@
 
     private async Task LoadContractsData(LoadDataArgs args)
     {
-        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharContracts().Merge()))?.Result;
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharContracts().AddUniverseStructure().Merge()))?.Result;
         if (!string.IsNullOrEmpty(localAccess))
         {
             _contractsListCache ??= await _module.WebGetCharContracts(_character.CharacterId, localAccess);

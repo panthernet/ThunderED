@@ -59,7 +59,7 @@ namespace ThunderED.Modules
                         }
                         if (rtoken.Scopes == null) continue;
 
-                        var scope = new ESIScope();
+                        var scope = new ESIScope().AddUniverseStructure();
                         if (SettingsManager.HasCharIndustryJobs(rtoken.Scopes.Split(',').ToList()))
                             scope.AddCharIndustry();
                         if (SettingsManager.HasCorpIndustryJobs(rtoken.Scopes.Split(',').ToList()))
