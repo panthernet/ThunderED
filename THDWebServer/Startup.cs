@@ -12,6 +12,8 @@ using THDWebServer.Authentication;
 using THDWebServer.Classes;
 using ThunderED;
 using ThunderED.Classes;
+using ThunderED.Helpers;
+using ThunderED.Modules.OnDemand;
 
 namespace THDWebServer
 {
@@ -75,8 +77,19 @@ namespace THDWebServer
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
                 endpoints.MapControllers();
+                endpoints.Map("/chatrelay", async context =>
+                {
+                    await LogHelper.Log($"QUERY: {context.Request.Path}", LogSeverity.Info, LogCat.Default);
+
+                    if (SettingsManager.Settings.Config.ModuleChatRelay)
+                    {
+                        await TickManager.GetModule<ChatRelayModule>().ProcessRaw(context);
+                        return;
+                    }
+                });
             });
 
+            //TODO
             if (WebConfig.Instance.Api.IsEnabled)
             {
                 app.UseWebSockets();

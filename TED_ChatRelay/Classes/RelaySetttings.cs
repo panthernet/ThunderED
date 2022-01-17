@@ -5,7 +5,7 @@ using ThunderED.Classes;
 
 namespace TED_ChatRelay.Classes
 {
-    public class RelaySetttings: SettingsBase<RelaySetttings>
+    public class RelaySettings: SettingsBase<RelaySettings>
     {
         public string EveLogsFolder { get; set; }
         public List<RelayChannel> RelayChannels { get; set; } = new List<RelayChannel>();

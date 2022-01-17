@@ -65,6 +65,7 @@ namespace THDWebServer.Classes
                 {
                     var data = await store.GetAsync<WebAuthUserData>("user");
 
+                    await LogHelper.Log($"Callback: {request}|{cType}|{ip}|{data}");
                     result = await ExternalAccess.ProcessCallback(request, cType, ip, data);
                 }
 

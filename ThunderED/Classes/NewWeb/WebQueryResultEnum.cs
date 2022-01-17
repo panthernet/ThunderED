@@ -10,6 +10,9 @@
         BadRequest,
         RedirectUrl,
         GeneralAuthFailure,
-        GeneralAuthSuccess
+        GeneralAuthSuccess,
+        ChatRelayDupe,
+        ChatRelayOK,
+        ChatRelayError
     }
 }

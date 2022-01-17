@@ -7,17 +7,20 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Web;
 using TED_ChatRelay.Classes;
 using ThunderED.Classes;
 
+using Timer = System.Timers.Timer;
+
 namespace ThunderED
 {
     internal partial class Program
     {
-        private static RelaySetttings _settings;
+        private static RelaySettings _settings;
         private static Timer _timer;
         private static Timer _sendTimer;
 
@@ -33,7 +36,7 @@ namespace ThunderED
                 Console.WriteLine($"TED Chat Relay v{VERSION} for EVE Online is starting...");
                 try
                 {
-                    _settings = RelaySetttings.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "relaysettings.json"));
+                    _settings = RelaySettings.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "relaysettings.json"));
                 }
                 catch (Exception ex)
                 {
@@ -227,10 +230,12 @@ namespace ThunderED
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "TED_ChatRelay");
                 httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
 
+                var token = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
                 using (var responseMessage =
-                    await httpClient.PostAsync($"{relay.Endpoint}?msg={EncodeParam(message)}&code={EncodeCode(relay.Code)}&ch={EncodeParam(relay.EveChannelName)}", null))
+                    await httpClient.PostAsync($"{relay.Endpoint}?msg={EncodeParam(message)}&code={EncodeCode(relay.Code)}&ch={EncodeParam(relay.EveChannelName)}", null, token.Token))
                 {
-                    var r = await responseMessage.Content.ReadAsStringAsync();
+                    var r = await responseMessage.Content.ReadAsStringAsync(token.Token);
                     if (!responseMessage.IsSuccessStatusCode)
                     {
                         //if(responceMessage.StatusCode == )

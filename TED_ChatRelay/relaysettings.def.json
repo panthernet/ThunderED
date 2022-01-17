@@ -1,5 +1,5 @@
 ﻿{
-  "eveLogsFolder": "C:\\\\Users\\\\XXX\\\\Documents\\\\EVE\\\\logs\\\\Chatlogs",
+  "eveLogsFolder": "C:/Users/XXX/Documents/EVE/logs/Chatlogs",
   "SendInterval": 5000,
   "RelayChannels": [
     {

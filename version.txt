@@ -4,6 +4,7 @@
 + Fixed MySQL cache_data table not having unique index
 + Fixed citadels name resolution in notifications
 + Fixed unanchoring notifications
++ Fixed ChatRelay module
 + Removed debug notification from prod
 
 ### V2.1.3

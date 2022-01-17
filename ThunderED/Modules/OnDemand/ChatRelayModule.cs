@@ -5,7 +5,14 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+
+using ThunderED.Classes;
+using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
+using ThunderED.Modules.Sub;
 
 namespace ThunderED.Modules.OnDemand
 {
@@ -18,94 +25,99 @@ namespace ThunderED.Modules.OnDemand
         public override async Task Initialize()
         {
             await LogHelper.LogModule("Initializing ChatRelay module...", Category);
+            /*if (WebServerModule.WebModuleConnectors.ContainsKey(Reason))
+                WebServerModule.WebModuleConnectors.Remove(Reason);
+            WebServerModule.WebModuleConnectors.Add(Reason, ProcessRequest);*/
         }
 
-        //TODO
-        private async Task<bool> OnRequestReceived(HttpListenerRequestEventArgs context)
+        private string UnwrapCode(string code)
         {
-            if (!Settings.Config.ModuleChatRelay) return false;
+            var dep = code.Replace("-", "+").Replace("_", "/");
+            var debase = Convert.FromBase64String(dep);
+            return Encoding.UTF8.GetString(debase);
+        }
 
-            var request = context.Request;
-            var response = context.Response;
+        private async Task<WebQueryResult> ProcessRequest(Dictionary<string, StringValues> query, CallbackTypeEnum type, string ip, WebAuthUserData data)
+        {
+            if (!Settings.Config.ModuleChatRelay) return WebQueryResult.False;
+            //await LogHelper.LogWarning($"{query}", Category);
 
             try
             {
                 RunningRequestCount++;
 
-                var extPort = Settings.WebServerModule.WebExternalPort;
-                var port = Settings.WebServerModule.WebExternalPort;
+                var message = query["msg"].ToString();
+                var code = UnwrapCode(query["code"].ToString());
+                var relays = Settings.ChatRelayModule.RelayChannels.Where(a => a.Code == code);
+                var iChannel = query["ch"].ToString();
 
-                if (request.HttpMethod == HttpMethod.Post.ToString())
+                foreach (var relay in relays)
                 {
-                    if (request.Url.LocalPath == "/chatrelay" || request.Url.LocalPath == $"{extPort}/chatrelay" ||
-                        request.Url.LocalPath == $"{port}/chatrelay")
+                    if (relay.DiscordChannelId == 0)
                     {
-                        var prms = request.Url.Query.TrimStart('?').Split('&');
-                        if (prms.Length != 3)
-                        {
-                            await response.WriteContentAsync("ERROR: Bad request");
-                            return true;
-                        }
-
-                        var message = HttpUtility.UrlDecode(prms[0].Split('=')[1]);
-                        var code = Encoding.UTF8.GetString(Convert.FromBase64String(
-                            $"{HttpUtility.UrlDecode(prms[1].Split('=')[1])?.Replace("-", "+").Replace("_", "/")}"));
-                        var relays = Settings.ChatRelayModule.RelayChannels.Where(a => a.Code == code);
-                        var iChannel = HttpUtility.UrlDecode(prms[2].Split('=')[1]);
-
-                        foreach (var relay in relays)
-                        {
-                            if (relay.DiscordChannelId == 0)
-                            {
-                                await LogHelper.LogError($"Relay with code {code} has no discord channel specified!",
-                                    Category);
-                                await response.WriteContentAsync("ERROR: Bad server config");
-                                return true;
-                            }
-
-                            if (relay.EVEChannelName != iChannel)
-                            {
-                                await LogHelper.LogError(
-                                    $"Relay with code {code} has got message with channel mismatch!", Category);
-                                await response.WriteContentAsync("ERROR: Invalid channel name");
-                                return true;
-
-                            }
-
-                            if (!_pool.ContainsKey(code))
-                                _pool.Add(code, new List<string>());
-                            var list = _pool[code];
-                            if (list.Contains(message))
-                            {
-                                await response.WriteContentAsync("DUPE");
-                                return true;
-                            }
-
-                            await APIHelper.DiscordAPI.SendMessageAsync(relay.DiscordChannelId, message);
-
-
-                            list.Add(message);
-                            if (list.Count > 20)
-                                list.RemoveAt(0);
-                        }
-
-                        await response.WriteContentAsync("OK");
-
-                        return true;
+                        await LogHelper.LogError($"Relay with code {code} has no discord channel specified!",
+                            Category);
+                        return new WebQueryResult(WebQueryResultEnum.ChatRelayError);
                     }
+
+                    if (relay.EVEChannelName != iChannel)
+                    {
+                        await LogHelper.LogError(
+                            $"Relay with code {code} has got message with channel mismatch!", Category);
+                        return new WebQueryResult(WebQueryResultEnum.ChatRelayError);
+                    }
+
+                    if (!_pool.ContainsKey(code))
+                        _pool.Add(code, new List<string>());
+                    var list = _pool[code];
+                    if (list.Contains(message))
+                    {
+                        return new WebQueryResult(WebQueryResultEnum.ChatRelayDupe);
+                    }
+
+                    await APIHelper.DiscordAPI.SendMessageAsync(relay.DiscordChannelId, message);
+
+
+                    list.Add(message);
+                    if (list.Count > 20)
+                        list.RemoveAt(0);
                 }
+
+                return new WebQueryResult(WebQueryResultEnum.ChatRelayOK);
+
             }
             catch (Exception ex)
             {
-                await response.WriteContentAsync("ERROR: Server error");
                 await LogHelper.LogEx(ex.Message, ex, Category);
+                return new WebQueryResult(WebQueryResultEnum.ChatRelayError);
             }
             finally
             {
                 RunningRequestCount--;
             }
 
-            return false;
+            return WebQueryResult.False;
+        }
+
+        public async Task ProcessRaw(HttpContext context)
+        {
+
+            if (context.Request.Method != "POST" || context.Request.Query.Keys.Count != 3 || !context.Request.Path.Value.Contains("/chatrelay"))
+            {
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync("ERROR: General error");
+            }
+
+            var result = await ProcessRequest(context.Request.Query.ToDictionary(a=>a.Key, a=>a.Value), CallbackTypeEnum.Callback, null, null);
+            if (result.Result == WebQueryResultEnum.ChatRelayOK)
+                await context.Response.WriteAsync("OK");
+            else if (result.Result == WebQueryResultEnum.ChatRelayDupe)
+                await context.Response.WriteAsync("DUPE");
+            else if (result.Result == WebQueryResultEnum.ChatRelayError)
+            {
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync("ERROR: General error");
+            }
         }
     }
 }

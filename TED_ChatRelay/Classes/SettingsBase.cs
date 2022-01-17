@@ -165,7 +165,9 @@ namespace ThunderED.Classes
                 {
                     if (File.Exists(filePath))
                     {
-                        using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        var settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(filePath));
+
+                        /*using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                         {
                             if (fileStream.Length > 0)
                             {
@@ -193,7 +195,12 @@ namespace ThunderED.Classes
 
                                 return settings;
                             }
+                        }*/
+                        if (settings == null)
+                        {
+                            throw new Exception(typeName + " object is null.");
                         }
+                        return settings;
                     }
                 }
                 catch (Exception e)
