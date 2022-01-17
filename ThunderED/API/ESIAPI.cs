@@ -583,7 +583,15 @@ namespace ThunderED.API
         {
             try
             {
-                var res = await GetServerStatus(reason);
+                ESIQueryResult<JsonClasses.ServerStatus> res = null;
+                var count = 0;
+                while (res == null || res.Data.ErrorCode == 504)
+                {
+                    res = await GetServerStatus(reason);
+                    count++;
+                    if(count == 5) break;
+                }
+
                 if (res.Data.IsFailed || res.Data.IsNotValid || res.Data.IsNoConnection)
                 {
                     if (DateTime.UtcNow.Hour == 11 && DateTime.UtcNow.Minute <= 30)

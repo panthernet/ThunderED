@@ -1,6 +1,7 @@
 ### V2.1.4
 + Improved database upgrade to use EF and transactions for safier updates
 + Improved notifications logging, added raw notification text to feed if unknown type has been specified in settings
++ Improved server connection detection to trigger less frequently
 + Fixed MySQL cache_data table not having unique index
 + Fixed citadels name resolution in notifications
 + Fixed unanchoring notifications
