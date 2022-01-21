@@ -631,6 +631,7 @@ namespace ThunderED.Classes
         }
 
         [Command("auth", RunMode = RunMode.Async), Summary("Displays web auth URL address")]
+        [Command("подтверждение", RunMode = RunMode.Async)]
         public async Task Auth3(string command, string data)
         {
             if (SettingsManager.Settings.Config.ModuleAuthWeb)
@@ -727,6 +728,7 @@ namespace ThunderED.Classes
                             return;
                         }
                         case "confirm":
+                        case "авторизации":
 
                             if (string.IsNullOrEmpty(authUser.RegCode) || authUser.DiscordId > 0)
                             {

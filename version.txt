@@ -1,3 +1,6 @@
+### V2.1.5
++ Improved Discord auth to accept cyrillic translation of auth command to avoid confusion for russsian users
+
 ### V2.1.4
 + Improved database upgrade to use EF and transactions for safier updates
 + Improved notifications logging, added raw notification text to feed if unknown type has been specified in settings
