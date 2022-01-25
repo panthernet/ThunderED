@@ -158,7 +158,7 @@ namespace ThunderED.Modules
 
                 foreach (var token in tokens)
                 {
-                    var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpMining().AddCorpStructure().AddUniverseStructure().Merge());
+                    var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpMining().AddCorpStructure().AddUniverseStructure());
                     if (r == null || r.Data.IsFailed)
                     {
                         await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}");
@@ -299,7 +299,7 @@ namespace ThunderED.Modules
 
                 foreach (var token in tokens)
                 {
-                    var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpMining().AddCorpStructure().AddUniverseStructure().Merge());
+                    var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpMining().AddCorpStructure().AddUniverseStructure());
                     if (r == null || r.Data.IsFailed)
                     {
                         await LogHelper.LogWarning($"Failed to refresh mining token from {token.CharacterId}",
@@ -675,7 +675,7 @@ namespace ThunderED.Modules
         private static bool HasViewAccess(long id, long corpId, long allianceId, Dictionary<string, List<long>> dic)
         {
             if (!SettingsManager.Settings.Config.ModuleMiningSchedule || !dic.Any() || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
-            return dic["character"].Contains(id) || dic["corporation"].Contains(corpId) || (allianceId > 0 && dic["alliance"].Contains(corpId));
+            return dic["character"].Contains(id) || dic["corporation"].Contains(corpId) || (allianceId > 0 && dic["alliance"].Contains(allianceId));
         }
 
         private static bool HasViewAccess(long id, long corpId, long allianceId, Dictionary<string, Dictionary<string, List<long>>> dic, out string groupName)
@@ -721,7 +721,7 @@ namespace ThunderED.Modules
             {
                 var token = await DbHelper.GetToken(charId, TokenEnum.MiningSchedule);
 
-                var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpMining().AddCorpStructure().AddUniverseStructure().Merge());
+                var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpMining().AddCorpStructure().AddUniverseStructure());
                 if (r == null || r.Data.IsFailed)
                 {
                     await LogHelper.LogWarning($"Failed to refresh mining token from {charId}", Category);

@@ -249,5 +249,30 @@ namespace ThunderED.Helpers
             var t = value.ToEveTime();
             return $"{t.ToShortDateString()} {t.ToShortTimeString()}";
         }
+
+        public static void Add<TKey, TValue>(this List<KeyValuePair<TKey, TValue>> list, TKey key, TValue value)
+        {
+            list.Add(new KeyValuePair<TKey, TValue>(key, value));
+        }
+
+        public static void Remove<TKey, TValue>(this List<KeyValuePair<TKey, TValue>> list, TKey key)
+        {
+            list.RemoveAll(a => a.Key.Equals(key));
+        }
+
+        public static bool ContainsKey<TKey, TValue>(this List<KeyValuePair<TKey, TValue>> list, TKey key)
+        {
+            return list.FirstOrDefault(a => a.Key.Equals(key)).Value != null;
+        }
+
+        public static void Insert<TKey, TValue>(this List<KeyValuePair<TKey, TValue>> list,int index, TKey key, TValue value)
+        {
+            list.Insert(index, new KeyValuePair<TKey, TValue>(key, value));
+        }
+
+        public static List<TKey> GetKeys<TKey, TValue>(this List<KeyValuePair<TKey, TValue>> list)
+        {
+            return list.Select(a => a.Key).ToList();
+        }
     }
 }

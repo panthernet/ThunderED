@@ -17,9 +17,9 @@ namespace ThunderED.Classes
         public WebAuthUserData(ThdAuthUser user, string code)
         {
             Id = user.CharacterId;
-            Name = user.DataView.CharacterName;
-            CorpId = user.DataView.CorporationId;
-            AllianceId = user.DataView.AllianceId;
+            Name = user.CharacterName;
+            CorpId = user.CorporationId;
+            AllianceId = user.AllianceId ?? 0;
             Code = code;
         }
 

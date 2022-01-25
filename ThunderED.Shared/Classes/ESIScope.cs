@@ -8,12 +8,17 @@ namespace ThunderED.Classes
 {
     public class ESIScope
     {
-        public readonly List<string> Scopes = new List<string>();
+        public readonly List<string> Scopes = new();
 
-        public string Merge()
+        protected string Merge()
         {
             if (!Scopes.Any()) return null;
             return string.Join(' ', Scopes);
+        }
+
+        public override string ToString()
+        {
+            return Merge();
         }
     }
 

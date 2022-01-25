@@ -1026,17 +1026,20 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                 await db.SaveChangesAsync();
                 await UpdateDatabaseVersion(version, db);
                 await t.CommitAsync();
-                await LogHelper.LogWarning($"Upgrade to DB version {version} is complete!");
+                await LogHelper.LogWarning($"Upgrade to DB version {version} is complete!", LogCat.Database);
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
                 await t.RollbackAsync();
-                await LogHelper.LogError($"Upgrade to DB version {version} FAILED!");
+                await LogHelper.LogError($"Upgrade to DB version {version} FAILED!", LogCat.Database);
+                await LogHelper.LogEx(ex, LogCat.Database);
                 return false;
             }
         }
         #endregion
+
+        #region UPGRADES
 
         [DBUpgrade("2.1.4")]
         private static async Task<bool> UpgradeV214(bool isSQLite, string version)
@@ -1066,5 +1069,51 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
                 }
             });
         }
+
+        [DBUpgrade("2.1.5")]
+        private static async Task<bool> UpgradeV215(bool isSQLite, string version)
+        {
+            return await UpgradeWrapper(version, async db =>
+            {
+                if (isSQLite)
+                {
+                    await db.Database.ExecuteSqlRawAsync(
+                        "create table fits ( id integer not null constraint fits_pk primary key  autoincrement, `name` text not null, ship_name text not null, group_name text   not null, fit_text   text   not null, skill_data text   not null );");
+                }
+                else
+                {
+                    await db.Database.ExecuteSqlRawAsync(
+                        "create table fits ( id integer auto_increment, constraint fits_pk primary key (id), `name` text not null, ship_name text not null, group_name text   not null, fit_text   text   not null, skill_data text   not null );");
+                }
+
+                await db.Database.ExecuteSqlRawAsync("create unique index fits_id_uindex     on fits (id);");
+            });
+        }
+
+        [DBUpgrade("2.1.6")]
+        private static async Task<bool> UpgradeV216(bool isSQLite, string version)
+        {
+            return await UpgradeWrapper(version, async db =>
+            {
+                await db.Database.ExecuteSqlRawAsync("alter table auth_users add alliance_id bigint;");
+                await db.Database.ExecuteSqlRawAsync(
+                    "alter table auth_users add corporation_id bigint default 0 not null;");
+                await db.Database.ExecuteSqlRawAsync("alter table auth_users add character_name text;");
+
+                foreach (var user in db.Users)
+                {
+                    user.UnpackData();
+                    if (user.DataView != null)
+                    {
+                        user.CorporationId = user.DataView.CorporationId;
+                        user.AllianceId = user.DataView.AllianceId;
+                        user.CharacterName = user.DataView.CharacterName;
+                    }
+                }
+            });
+        }
+
+        //      await db.Database.ExecuteSqlRawAsync("");
+        #endregion
     }
 }

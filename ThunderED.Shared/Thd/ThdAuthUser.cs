@@ -20,12 +20,15 @@ namespace ThunderED.Thd
         public long? MainCharacterId;
         public DateTime? LastCheck;
         public string Ip;
+        public long CorporationId;
+        public long? AllianceId;
+        public string CharacterName;
+
         //[Obsolete]
         //public string RefreshToken { get; set; }
 
         [NotMapped] public AuthUserData DataView = new AuthUserData();
         [NotMapped] public MiscUserData MiscData = new MiscUserData();
-        [NotMapped] public string CharacterName => DataView?.CharacterName;
 
         [NotMapped] public bool HasToken => Tokens?.FirstOrDefault(a => a.Type == TokenEnum.General) != null;
 

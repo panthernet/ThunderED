@@ -62,7 +62,7 @@ namespace ThunderED.Modules
                             continue;
                         }
 
-                        var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rToken, new ESIScope().AddCharReadMail().Merge(), $"From {Category} | Char ID: {charId}");
+                        var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rToken, new ESIScope().AddCharReadMail().ToString(), $"From {Category} | Char ID: {charId}");
                         var token = tq.Result;
                         if (string.IsNullOrEmpty(token))
                         {
@@ -426,8 +426,8 @@ namespace ThunderED.Modules
             //processing
             foreach (var user in users)
             {
-                var corp = user.DataView.CorporationId;
-                var ally= user.DataView.AllianceId;
+                var corp = user.CorporationId;
+                var ally= user.AllianceId ?? 0;
                 var filter = SettingsManager.Settings.HRMModule.SpyFilters.FirstOrDefault(a => a.Value.CorpIds.ContainsValue(corp)).Value;
                 if (filter != null)
                     feedChannel = filter.MailFeedChannelId;
@@ -449,8 +449,8 @@ namespace ThunderED.Modules
                     if (!SettingsManager.HasReadMailScope(user.DataView.PermissionsList))
                         continue;
 
-                    var token = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(user.GetGeneralToken(), new ESIScope().AddCharReadMail().Merge(),
-                        $"From Mail | Char ID: {user.CharacterId} | Char name: {user.DataView.CharacterName}"))?.Result;
+                    var token = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(user.GetGeneralToken(), new ESIScope().AddCharReadMail().ToString(),
+                        $"From Mail | Char ID: {user.CharacterId} | Char name: {user.CharacterName}"))?.Result;
 
                     if (string.IsNullOrEmpty(token))
                         continue;
@@ -469,7 +469,7 @@ namespace ThunderED.Modules
                             var mail = await APIHelper.ESIAPI.GetMail(reason, user.CharacterId, token, mailHeader.mail_id);
                             var sender = await APIHelper.ESIAPI.GetCharacterData(reason, mail.from);
                             mailHeader.ToName = await GetRecepientNames(reason, mailHeader.recipients, user.CharacterId, token);
-                            var from = $"{user.DataView.CharacterName}[{user.DataView.AllianceTicker ?? user.DataView.CorporationTicker}]";
+                            var from = $"{user.CharacterName}[{user.DataView.AllianceTicker ?? user.DataView.CorporationTicker}]";
                             await SendMailNotification(feedChannel, mail, $"**{LM.Get("hrmSpyFeedFrom")} {from}**\n__{LM.Get("hrmSpyMsgFrom",sender?.name, mailHeader.ToName)}__", " ", displaySummary);
                         }
                     }

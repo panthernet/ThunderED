@@ -73,7 +73,8 @@
                     </div>
                     <div class="row">
                         <RadzenDataGrid Data="@Payments" TItem="MiningScheduleModule.PaymentEntry"                     
-                                    AllowFiltering="false" AllowGrouping= "false" AllowPaging="false" AllowSorting="true"
+                                        AllowFiltering="false" AllowGrouping= "false" AllowPaging="false" AllowSorting="true"
+                                        @ref="_allowedGrid"
                                     AllowColumnResize="true" Style="height: 97%" >
                             <Columns>
                                 <RadzenDataGridColumn TItem="MiningScheduleModule.PaymentEntry" Filterable="false" Sortable="false" Width="60px">
@@ -102,6 +103,13 @@
                                         @LM.Get("msTotalIsk"): <b>@($"{Payments?.Sum(o => o.CalculatedSum):N0} ISK")</b>
                                     </FooterTemplate>
                                 </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="MiningScheduleModule.PaymentEntry" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="25px">
+                                    <Template Context="order">
+                                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(order))" />
+                                    </Template>
+                                    <EditTemplate Context="order">
+                                    </EditTemplate>
+                                </RadzenDataGridColumn>
                             </Columns>
                         </RadzenDataGrid>
                      </div>
@@ -119,6 +127,7 @@
 
 @functions {
 
+    RadzenDataGrid<MiningScheduleModule.PaymentEntry> _allowedGrid;
     private MiningScheduleModule _module;
     [Parameter] public WebMiningLedger Ledger { get; set; }
     [Parameter] public bool MergeAlts { get; set; }
@@ -170,6 +179,18 @@
         _refinePercent = ReprocessEff;
 
         await base.OnInitializedAsync();
+    }
+
+    async Task DeleteRow(MiningScheduleModule.PaymentEntry order)
+    {
+        if(!await Modal.ShowConfirm(null, LM.Get("webGenericQuestionMessage")))
+            return;
+
+        if (Payments.Contains(order))
+        {
+            Payments.Remove(order);
+            await _allowedGrid.Reload();
+        }
     }
 
     async Task OnManualSumSwitchChange(bool value)

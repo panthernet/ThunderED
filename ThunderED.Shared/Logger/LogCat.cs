@@ -52,6 +52,7 @@
         Remind,
         UpdateTracker,
         TokenUpdate,
-        AccessToken
+        AccessToken,
+        FitCheck
     }
 }

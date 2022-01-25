@@ -73,7 +73,7 @@ namespace ThunderED.Modules
                             if (SettingsManager.HasCorpContractsScope(rtoken.Scopes.Split(',').ToList()))
                                 s.AddCorpContracts();
 
-                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rtoken, s.Merge(),$"From {Category} | Char ID: {characterID}");
+                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rtoken, s,$"From {Category} | Char ID: {characterID}");
                             var token = tq.Result;
                             if (string.IsNullOrEmpty(token))
                             {

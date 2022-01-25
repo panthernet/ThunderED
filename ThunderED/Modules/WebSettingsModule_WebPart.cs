@@ -31,7 +31,7 @@ namespace ThunderED.Modules
 
         public List<string> WebGetAuthGroupsList()
         {
-            return Settings.WebAuthModule.AuthGroups.Keys.ToList();
+            return Settings.WebAuthModule.AuthGroups.GetKeys();
         }
 
         public List<string> WebGetAuthRolesList()

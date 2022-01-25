@@ -138,11 +138,11 @@
         content: var(--beforeValue);
     }
 
-.navButton2 {
-    box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.16) inset, 0px 0px 10px 0px #669999;
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#669999), to(rgba(222, 135, 61, 0.24))), url("https://static7.depositphotos.com/1222912/788/i/600/depositphotos_7887354-stock-photo-stars-background-01.jpg");
-    background-image: linear-gradient(to bottom, #669999, rgba(222, 135, 61, 0.24)), url("https://static7.depositphotos.com/1222912/788/i/600/depositphotos_7887354-stock-photo-stars-background-01.jpg");
-}
+    .navButton2 {
+        box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.16) inset, 0px 0px 10px 0px #669999;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#669999), to(rgba(222, 135, 61, 0.24))), url("https://static7.depositphotos.com/1222912/788/i/600/depositphotos_7887354-stock-photo-stars-background-01.jpg");
+        background-image: linear-gradient(to bottom, #669999, rgba(222, 135, 61, 0.24)), url("https://static7.depositphotos.com/1222912/788/i/600/depositphotos_7887354-stock-photo-stars-background-01.jpg");
+    }
 
     .navButton2:hover {
         box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.16) inset, 0px 0px 20px 0px #669999;
@@ -151,6 +151,17 @@
     .navButton2:before {
         color: white;
         content: var(--beforeValue);
+    }
+
+    .navButton2:disabled, .navButton2[readonly] {
+        background-color: #669999;
+        opacity: .7;
+        background-image: none;
+        box-shadow: none;
+    }
+
+    .navButton2:hover:disabled {
+        box-shadow: none;
     }
 
 .rotate3D {

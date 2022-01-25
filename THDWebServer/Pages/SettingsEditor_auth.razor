@@ -9,27 +9,31 @@
 @inject NavigationManager Nav
 
 <button class='navButton2' @onclick="InsertRow" style="width: 150px; margin-bottom: 10px; margin-left: 10px;"><RadzenIcon Icon="add_circle_outline" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webSettingsAddEntryButton")</button>
+<button class='navButton2' @onclick="MoveRowToBottom" style="width: 150px; margin-bottom: 10px; margin-left: 10px;" disabled="@(!_selectedAuthGroups.Any())"><RadzenIcon Icon="keyboard_double_arrow_down" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webSettingsMoveRowBottom")</button>
+<button class='navButton2' @onclick="MoveRowToTop" style="width: 150px; margin-bottom: 10px; margin-left: 10px;" disabled="@(!_selectedAuthGroups.Any())"><RadzenIcon Icon="keyboard_double_arrow_up" Style="font-size: 15px; vertical-align: text-top; " />@LM.Get("webSettingsMoveRowTop")</button>
+
 <button class='navButton2 float-right' @onclick="OpenSettings" style="width: 150px; margin-bottom: 10px; margin-left: 10px;">@LM.Get("webSettingsSettingsButton")</button>
-<RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="20" AllowSorting="true" Data="@(SettingsManager.Settings.WebAuthModule.AuthGroups)" TItem="KeyValuePair<string, ThunderED.WebAuthGroup>"
+<RadzenDataGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="20" AllowSorting="true" Data="@(SettingsManager.Settings.WebAuthModule.AuthGroups)" TItem="KeyValuePair<string, ThunderED.WebAuthGroup>"
             Count="@(SettingsManager.Settings.WebAuthModule.AuthGroups.Count)" @ref="_authGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+            SelectionMode="DataGridSelectionMode.Single" @bind-Value=@_selectedAuthGroups
             >
     <Columns>
-        <RadzenGridColumn TItem="KeyValuePair<string, ThunderED.WebAuthGroup>" Property="Key" Title="@LM.Get("webSettingsAuthNameColumnName")" >
+        <RadzenDataGridColumn TItem="KeyValuePair<string, WebAuthGroup>" Property="Key" Title="@LM.Get("webSettingsAuthNameColumnName")" >
             <EditTemplate Context="order">
                 <RadzenTextBox @bind-Value=@_editName Style="width:100%; display: block" Name="EntryName" />
                 <RadzenRequiredValidator Text="Value is required" Component="EntryName" Popup="true" />
             </EditTemplate>
-        </RadzenGridColumn>
-        <RadzenGridColumn TItem="KeyValuePair<string, ThunderED.WebAuthGroup>" Property="Value" Title="@LM.Get("webSettingsAuthEnabledColumnName")" FilterProperty="Value.IsEnabled" SortProperty="Value.IsEnabled" >
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="KeyValuePair<string, WebAuthGroup>" Property="Value" Title="@LM.Get("webSettingsAuthEnabledColumnName")" FilterProperty="Value.IsEnabled" SortProperty="Value.IsEnabled" >
             <Template Context="order">
                 <RadzenCheckBox @bind-Value="order.Value.IsEnabled" Style="width: 15px; height: 15px;" Name="IsEnabled" TValue="bool" Disabled="true"/>
             </Template>
             <EditTemplate Context="order">
                 <RadzenCheckBox @bind-Value="order.Value.IsEnabled" Style="width: 15px; height: 15px;" Name="IsEnabled" TValue="bool"/>
             </EditTemplate>
-        </RadzenGridColumn>
+        </RadzenDataGridColumn>
 
-        <RadzenGridColumn TItem="KeyValuePair<string, ThunderED.WebAuthGroup>" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+        <RadzenDataGridColumn TItem="KeyValuePair<string, ThunderED.WebAuthGroup>" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
             <Template Context="order">
                 @if (!_isEditingWebRegGrid)
                 {
@@ -40,32 +44,33 @@
                 <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveRow(order))"/>
                 <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(order))"/>
             </EditTemplate>
-        </RadzenGridColumn>
+        </RadzenDataGridColumn>
 
-        <RadzenGridColumn TItem="KeyValuePair<string, ThunderED.WebAuthGroup>" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+        <RadzenDataGridColumn TItem="KeyValuePair<string, ThunderED.WebAuthGroup>" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
             <Template Context="order">
                 <RadzenButton Icon="account_circle" Size="ButtonSize.Small" Click="@(args => OpenDetails(order))"/>
             </Template>
             <EditTemplate Context="order">
             </EditTemplate>
-        </RadzenGridColumn>
-        <RadzenGridColumn TItem="KeyValuePair<string, ThunderED.WebAuthGroup>" Bubble="false" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="KeyValuePair<string, ThunderED.WebAuthGroup>" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
             <Template Context="order">
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(order))"/>
             </Template>
             <EditTemplate Context="order">
             </EditTemplate>
-        </RadzenGridColumn>
+        </RadzenDataGridColumn>
     </Columns>
-</RadzenGrid>
+</RadzenDataGrid>
 
 @code {
-    RadzenGrid<KeyValuePair<string, ThunderED.WebAuthGroup>> _authGrid;
+    RadzenDataGrid<KeyValuePair<string, WebAuthGroup>> _authGrid;
 
-    private WCEAccessFilter _access = new WCEAccessFilter { CanEditTimers = false, CanEditSettings = false};
+    private WCEAccessFilter _access = new() { CanEditTimers = false, CanEditSettings = false};
     private WebSettingsModule _module;
-    private Dictionary<string, WebAuthGroup> _groupsList;
+    private List<KeyValuePair<string, WebAuthGroup>> _groupsList;
     private List<TestClass> _rolesList;
+    private IList<KeyValuePair<string, WebAuthGroup>> _selectedAuthGroups = new List<KeyValuePair<string, WebAuthGroup>>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,8 +106,17 @@
 
     async Task InsertRow()
     {
-        await _authGrid.InsertRow(new KeyValuePair<string, WebAuthGroup>("New Group", new WebAuthGroup { IsEnabled = false}));
-        _isEditingWebRegGrid = true;
+        var value = new KeyValuePair<string, WebAuthGroup>("New Group", new WebAuthGroup {IsEnabled = false});
+        if (SettingsManager.Settings.WebAuthModule.AuthGroups.Any())
+        {
+            await _authGrid.InsertRow(value);
+            _isEditingWebRegGrid = true;
+        }
+        else
+        {
+            SettingsManager.Settings.WebAuthModule.AuthGroups.Add(value.Key, value.Value);
+            await _authGrid.Reload();
+        }
     }
 
     async Task EditRow(KeyValuePair<string, WebAuthGroup> order)
@@ -147,7 +161,7 @@
         _isEditingWebRegGrid = false;
     }
 
-    async Task DeleteRow(KeyValuePair<string, ThunderED.WebAuthGroup> order)
+    async Task DeleteRow(KeyValuePair<string, WebAuthGroup> order)
     {
         if(!await Modal.ShowConfirm(null, LM.Get("webGenericQuestionMessage")))
             return;
@@ -180,6 +194,26 @@
         var o = new ModalOptions { DisableBackgroundCancel = true, HideHeader = false, ContentScrollable = true, Class = "blazored-modal2" };
         await Modal.Show<EditAuthSettings>(LM.Get("webSettingsGeneralModalHeader"), new ModalParameters(), o).Result;
         await SettingsManager.Settings.SaveAsync();
+    }
+
+    private async Task MoveRowToBottom()
+    {
+        if (!_selectedAuthGroups.Any()) return;
+        var group = _selectedAuthGroups.FirstOrDefault();
+        SettingsManager.Settings.WebAuthModule.AuthGroups.Remove(group.Key);
+        SettingsManager.Settings.WebAuthModule.AuthGroups.Add(group.Key, group.Value);
+        await _authGrid.Reload();
+        //await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task MoveRowToTop()
+    {
+        if (!_selectedAuthGroups.Any()) return;
+        var group = _selectedAuthGroups.FirstOrDefault();
+        SettingsManager.Settings.WebAuthModule.AuthGroups.Remove(group.Key);
+        SettingsManager.Settings.WebAuthModule.AuthGroups.Insert(0, group.Key, group.Value);
+        await _authGrid.Reload();
+        //await InvokeAsync(StateHasChanged);
     }
 
 }

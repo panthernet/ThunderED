@@ -105,7 +105,7 @@ namespace ThunderED.Modules
                             var dbToken = await DbHelper.GetToken(numericCharId, TokenEnum.AuthStandings);
                             if(dbToken == null) return;
 
-                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(dbToken, new ESIScope().AddCharContacts().AddCorpContacts().AddAllyContacts().Merge(),$"From {Category} | Char ID: {st.CharacterId}");
+                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(dbToken, new ESIScope().AddCharContacts().AddCorpContacts().AddAllyContacts(),$"From {Category} | Char ID: {st.CharacterId}");
                             var token = tq.Result;
 
                             if (!tq.Data.IsFailed)
@@ -168,7 +168,7 @@ namespace ThunderED.Modules
                     if (Settings.Config.ModuleHRM && Settings.HRMModule.UseDumpForMembers)
                     {
                         user.SetStateDumpster();
-                        await LogHelper.LogInfo($"Moving outdated applicant {user.DataView.CharacterName} to dumpster...");
+                        await LogHelper.LogInfo($"Moving outdated applicant {user.CharacterName} to dumpster...");
                         await DbHelper.SaveAuthUser(user);
                     }
                     else await DbHelper.DeleteAuthUser(user.CharacterId);
@@ -488,14 +488,14 @@ namespace ThunderED.Modules
                 var group = GetGroupByName(user.GroupName);
                 if (group.Value == null)
                 {
-                    await LogHelper.LogWarning($"Group {user.GroupName} not found for character {user.DataView.CharacterName} awaiting auth...");
+                    await LogHelper.LogWarning($"Group {user.GroupName} not found for character {user.CharacterName} awaiting auth...");
                     return;
                 }
 
                 var rChar = await APIHelper.ESIAPI.GetCharacterData(Reason, user.CharacterId, true);
                 if (rChar == null) return;
 
-                if (user.DataView.CorporationId != rChar.corporation_id || user.DataView.AllianceId != rChar.alliance_id)
+                if (user.CorporationId != rChar.corporation_id || user.AllianceId != rChar.alliance_id)
                 {
                     await user.UpdateData(rChar);
                     await DbHelper.SaveAuthUser(user);
@@ -507,11 +507,11 @@ namespace ThunderED.Modules
                 {
                     if (group.Value == null)
                     {
-                        await LogHelper.LogWarning($"Unable to auth {user.DataView.CharacterName}({user.CharacterId}) as its auth group {user.GroupName} do not exist in the settings file!",
+                        await LogHelper.LogWarning($"Unable to auth {user.CharacterName}({user.CharacterId}) as its auth group {user.GroupName} do not exist in the settings file!",
                             Category);
                         if (Settings.WebAuthModule.AuthReportChannel != 0)
                             await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,
-                                $"{group.Value.DefaultMention} {LM.Get("authUnableToProcessUserGroup", user.DataView.CharacterName, user.CharacterId, user.GroupName)}");
+                                $"{group.Value.DefaultMention} {LM.Get("authUnableToProcessUserGroup", user.CharacterName, user.CharacterId, user.GroupName)}");
                     }
 
                     //auth
@@ -520,7 +520,7 @@ namespace ThunderED.Modules
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx($"Auth check for {user?.DataView.CharacterName}", ex, Category);
+                await LogHelper.LogEx($"Auth check for {user?.CharacterName}", ex, Category);
             }
         }
 
@@ -620,7 +620,7 @@ namespace ThunderED.Modules
         private static async Task AuthInfoLog(ThdAuthUser ch, string message, bool isOptional = false)
         {
             if(!isOptional || SettingsManager.Settings.WebAuthModule.EnableDetailedLogging)
-                await LogHelper.LogInfo($"[{ch.CharacterId}|{ch.DataView.CharacterName}]: {message}", LogCat.AuthCheck);
+                await LogHelper.LogInfo($"[{ch.CharacterId}|{ch.CharacterName}]: {message}", LogCat.AuthCheck);
         }
 
         private static async Task AuthWarningLog(object charId, string message, bool isOptional = false)
@@ -637,7 +637,7 @@ namespace ThunderED.Modules
         private static async Task AuthWarningLog(ThdAuthUser ch, string message, bool isOptional = false)
         {
             if(!isOptional || SettingsManager.Settings.WebAuthModule.EnableDetailedLogging)
-                await LogHelper.LogWarning($"[{ch.CharacterId}|{ch.DataView.CharacterName}]: {message}", LogCat.AuthCheck);
+                await LogHelper.LogWarning($"[{ch.CharacterId}|{ch.CharacterName}]: {message}", LogCat.AuthCheck);
         }
 
         internal static async Task AuthUser(ICommandContext context, string remainder, ulong discordId, ulong guildId)
@@ -669,7 +669,7 @@ namespace ThunderED.Modules
                     var token = string.IsNullOrEmpty(authUser.GetGeneralTokenString())
                         ? null
                         : (await APIHelper.ESIAPI.GetAccessToken(authUser.GetGeneralToken(),
-                            $"From WebAuth | Char ID: {authUser.CharacterId} | Char name: {authUser.DataView.CharacterName}"));
+                            $"From WebAuth | Char ID: {authUser.CharacterId} | Char name: {authUser.CharacterName}"));
                     //delete char if token is invalid
                     if (string.IsNullOrEmpty(token?.Result) && token!= null && token.Data.IsFailed && !token.Data.IsNoConnection)
                     {

@@ -39,7 +39,8 @@ namespace ThunderED
         public static bool HasCharSkillsScope(List<string> permissions)
         {
             if (permissions == null) return false;
-            return permissions.Any(a => a.Equals("esi-skills.read_skills.v1", StringComparison.OrdinalIgnoreCase));
+            var value = GetCharSkillsScope();
+            return permissions.Any(a => a.Equals(value, StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool HasCharStandingsScope(List<string> permissions)
@@ -57,6 +58,11 @@ namespace ThunderED
         public static string GetCharLocationESIScope()
         {
             return "esi-location.read_location.v1";
+        }
+
+        public static string GetCharSkillsScope()
+        {
+            return "esi-skills.read_skills.v1";
         }
 
         public static bool HasCharShipTypeScope(List<string> permissions)

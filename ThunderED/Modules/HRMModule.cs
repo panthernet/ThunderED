@@ -62,7 +62,7 @@ namespace ThunderED.Modules
                         {
                             if (user.DumpDate.HasValue && (DateTime.Now - user.DumpDate.Value).TotalHours >= Settings.HRMModule.DumpInvalidationInHours)
                             {
-                                await LogHelper.LogInfo($"Disposing dumped member {user.DataView.CharacterName}({user.CharacterId})...");
+                                await LogHelper.LogInfo($"Disposing dumped member {user.CharacterName}({user.CharacterId})...");
                                 await DbHelper.DeleteAuthUser(user.CharacterId, true);
                             }
                         }
@@ -79,7 +79,7 @@ namespace ThunderED.Modules
                         if (r == false)
                         {
                             await LogHelper.LogWarning(
-                                $"Mail token for {entity.DataView.CharacterName} is invalid and will be deleted", Category);
+                                $"Mail token for {entity.CharacterName} is invalid and will be deleted", Category);
                             await DbHelper.DeleteToken(entity.CharacterId, TokenEnum.Mail);
                             spies.Remove(entity);
                         }else if (r == null)
@@ -116,7 +116,7 @@ namespace ThunderED.Modules
             var token = await DbHelper.GetToken(entity.CharacterId, TokenEnum.Mail);
             if (token == null)
                 return null;
-            var result = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCharReadMail().Merge());
+            var result = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCharReadMail());
             if (result.Data.IsNotValid && !result.Data.IsNoConnection)
                 return false;
             return !string.IsNullOrEmpty(result.Result);

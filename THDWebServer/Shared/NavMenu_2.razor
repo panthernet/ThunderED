@@ -72,6 +72,11 @@
                 <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("settings.svg")')" @onclick="NavButtonSettingsClick">@LM.Get("nmWebSettings")</button>
             </li>
         </AuthorizeView>
+        <AuthorizeView Roles="@CustomAuthenticationStateProvider.ROLE_FIT_CHECK">
+            <li class="nav-item px-2">
+                <button class='navButton1' style="--beforeValue: url('@WebUiHelper.GetSvg("fits.svg")')" @onclick="NavButtonFitsClick">@LM.Get("nmFitChecker")</button>
+            </li>
+        </AuthorizeView>
     </ul>
 </div>
 
@@ -130,6 +135,11 @@
     private async Task NavButtonZkbClick()
     {
         await JSRuntime.InvokeAsync<object>("open", SettingsManager.Settings.WebServerModule.ZkbUrl, "_blank");
+    }
+
+    private void NavButtonFitsClick()
+    {
+        Nav.NavigateTo(ServerPaths.GetFitCheckerPageUrl());
     }
 
 }

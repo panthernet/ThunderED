@@ -787,5 +787,23 @@
   "wsWebStepsNext": "Next",
   "wsWebStepsPrev": "Back",
   "wsMiningPaymentFieldTaxPerc": "Tax %",
-  "wsMiningPaymentFieldReproTaxPerc": "Reprocessing Eff %"
+  "wsMiningPaymentFieldReproTaxPerc": "Reprocessing Eff %",
+
+  "headerFitCheckPage": "Fit Checker",
+  "fitCheckAddFitHeader": "Add fit",
+  "fitCheckColSelectedFit": "Selected Fit",
+  "fitCheckColTargetGroup": "Target Group",
+  "fitCheckRun": "Check",
+  "fitCheckAddFitDescription": "Paste fit in selected format and press Confirm button",
+  "fitCheckConfirmButton": "Confirm",
+  "fitCheckerInvalidFitFormat": "Fit has invalid format and can't be imported",
+  "fitCheckResultWaitText": "Searching... Please wait",
+  "fitCheckReportHeader": "Fit Report",
+  "fitCheckReportPilots": "{0} of {1} pilots can use this fit",
+  "fitCheckReportFitDetails": "Fit Details",
+  "fitCheckReportFitSkills": "Fit Skills",
+  "fitCheckReportPilotNames": "Pilot Names",
+  "nmFitChecker": "Fit Checker",
+  "webSettingsMoveRowBottom": "Move down",
+  "webSettingsMoveRowTop": "Move Up"
 }

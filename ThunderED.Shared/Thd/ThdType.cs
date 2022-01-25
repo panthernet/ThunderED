@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 using ThunderED.Json;
 
 namespace ThunderED.Thd
@@ -23,6 +26,10 @@ namespace ThunderED.Thd
         public long? SoundId { get; set; }
         public long? GraphicId { get; set; }
 
+        [JsonIgnore]
+        [NotMapped]
+        public List<JsonClasses.Dogma_Attributes> Attributes { get; set; } = new List<JsonClasses.Dogma_Attributes>();
+
         //public List<ThdInvCustomScheme> Schemes { get; set; }
         public static ThdType FromJson(JsonClasses.Type_id input)
         {
@@ -39,6 +46,7 @@ namespace ThunderED.Thd
                 GroupId = input.group_id,
                 Mass = input.mass,
                 Volume = input.volume,
+                Attributes = input.dogma_attributes == null ? new List<JsonClasses.Dogma_Attributes>() : input.dogma_attributes.ToList()
             };
         }
     }

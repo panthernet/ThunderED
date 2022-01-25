@@ -293,14 +293,14 @@ namespace ThunderED.Modules.OnDemand
                 foreach (var user in users)
                 {
                     if (!SettingsManager.HasCharStandingsScope(user.DataView.PermissionsList)) continue;
-                    var token = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(user.GetGeneralToken(), new ESIScope().AddCharStandings().Merge(),
-                            $"From FWStats | Char ID: {user.CharacterId} | Char name: {user.DataView.CharacterName}"))
+                    var token = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(user.GetGeneralToken(), new ESIScope().AddCharStandings(),
+                            $"From FWStats | Char ID: {user.CharacterId} | Char name: {user.CharacterName}"))
                         ?.Result;
                     if (string.IsNullOrEmpty(token)) continue;
                     var st = await APIHelper.ESIAPI.GetcharacterStandings("FWStats", user.CharacterId, token);
                     var exStand = st.FirstOrDefault(a => a.from_type == from_t && a.from_id == lookupId);
                     if (exStand == null) continue;
-                    list.Add(new StandsEntity {Name = user.DataView.CharacterName, CharId = user.CharacterId, Stand = exStand.standing, Tickers = ""});
+                    list.Add(new StandsEntity {Name = user.CharacterName, CharId = user.CharacterId, Stand = exStand.standing, Tickers = ""});
                 }
 
                 if (!list.Any() || list.All(a => a.Stand >= 0))

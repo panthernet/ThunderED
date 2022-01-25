@@ -75,6 +75,8 @@ namespace ThunderED
             }
 
             APIHelper.Prepare();
+
+
             await LogHelper.LogInfo($"ThunderED v{VERSION} is running!").ConfigureAwait(false);
             //load database provider
             var rs = await SQLHelper.LoadProvider();
@@ -180,7 +182,7 @@ namespace ThunderED
         {
             //check integrity
             var users = await DbHelper.GetAuthUsers();
-            var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.ToList();
+            var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.GetKeys();
             var problem = string.Join(',', users.Where(a => !groups.Contains(a.GroupName)).Select(a => a.GroupName ?? "null").Distinct());
             if (!string.IsNullOrEmpty(problem))
             {
@@ -338,6 +340,10 @@ namespace ThunderED
             }
 
             APIHelper.Prepare();
+
+            //var xxx = await APIHelper.ESIAPI.SearchMemberEntity("ddd", "Space Traffic Control", true);
+
+
             await LogHelper.LogInfo($"ThunderED v{Program.VERSION} is running!").ConfigureAwait(false);
             //load database provider
             var rs = await SQLHelper.LoadProvider();
@@ -478,7 +484,7 @@ namespace ThunderED
         {
             //check integrity
             var users = await DbHelper.GetAuthUsers();
-            var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.Keys.ToList();
+            var groups = SettingsManager.Settings.WebAuthModule.AuthGroups.GetKeys();
             var problem = string.Join(',', users.Where(a => !groups.Contains(a.GroupName)).Select(a => a.GroupName ?? "null").Distinct());
             if (!string.IsNullOrEmpty(problem))
             {

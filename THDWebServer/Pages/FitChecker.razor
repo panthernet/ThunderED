@@ -1,0 +1,161 @@
+﻿@page "/fitcheck"
+@attribute [Authorize(Roles = CustomAuthenticationStateProvider.ROLE_FIT_CHECK)]
+
+@using ThunderED.Thd
+@using THDWebServer.Pages.Modals
+@using ThunderED.Modules.OnDemand
+
+@inject ProtectedSessionStorage Store
+@inject IModalService Modal
+@inject NavigationManager Nav
+@inject ThunderedDbContext dbContext
+
+<div class="text-center pageHeader">
+    @LM.Get("headerFitCheckPage")
+</div>
+
+<div class="container fontEternal">
+    <div class="row">
+        <div class="col-4">
+            <div class="row">
+                <div class="col">
+                    <RadzenLabel Text=" "/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <RadzenLabel Text=" "/>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 5px; margin-top: 7px;">
+                <button class='navButton2' @onclick="ShowAddFit" style="width: 150px;">@LM.Get("fitCheckAddFitHeader")</button>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Medium" Click="DeleteSelectedFit" Disabled="@(SelectedFit == null)"/>
+
+            </div>
+
+            <RadzenListBox @bind-value=@SelectedFit Data=@Fits Style="height: 300px; color: black; width: 100%;" @ref="_listBox"
+                           TextProperty="WebName" TValue="ThdFit" Change=@(args => OnChange(args))/>
+        </div>
+        <div class="col frontcolor">
+            <div class="row">
+                <div class="col-md-2 align-items-center d-flex">
+                    <RadzenLabel Text="@LM.Get("fitCheckColSelectedFit")" />
+                </div>
+                <div class="col-md-4">
+                    <RadzenTextBox Value="@SelectedFit?.WebName" Style="width: 100%" ReadOnly="true" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2 align-items-center d-flex">
+                    <RadzenLabel Text="@LM.Get("fitCheckColTargetGroup")" />
+                </div>
+                <div class="col-md-4">
+                    <RadzenDropDown @bind-Value="@SelectedTargetGroup" Data="@TargetGroupsList" Style="width: 100%" 
+                                    TextProperty="Name" AllowFiltering="true" AllowClear="true" AllowVirtualization="true"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Change="OnFitSelected"  />
+                </div>
+            </div>
+            <div class="row" style="margin-bottom: 5px;">
+                <button class='navButton2' @onclick="ExecuteSearch" style="width: 150px; margin-top: 3px; " disabled="@(_isSearchRunning || !IsSearchAvailable)">@LM.Get("fitCheckRun")</button>
+            </div>
+            <div class="row">
+                <RadzenTextArea @bind-Value="@_resultText" Style="width: 100%; height: 300px;" ReadOnly="true" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private FitCheckModule _module;
+    private List<ThdFit> Fits { get; set; }
+    private ThdFit SelectedFit { get; set; }
+    private IEnumerable<FitTargetGroupEntry> TargetGroupsList { get; set; }
+    private FitTargetGroupEntry SelectedTargetGroup { get; set; }
+    private RadzenListBox<ThdFit> _listBox;
+    private string _fitsGroup;
+    private string _resultText;
+    private bool IsSearchAvailable => SelectedFit != null && SelectedTargetGroup != null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            Nav.NavigateTo("/", true);
+            return;
+        }
+
+        _module = TickManager.GetModule<FitCheckModule>();
+        _fitsGroup = await _module.GetUserGroup(user);
+
+        await UpdateFits();
+
+        TargetGroupsList = await _module.GetTargetGroups();
+        SelectedTargetGroup = TargetGroupsList.FirstOrDefault();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task UpdateFits()
+    {
+        Fits = await DbHelper.GetFits(_fitsGroup);
+    }
+
+    private async Task ShowAddFit()
+    {
+        var o = new ModalOptions { DisableBackgroundCancel = true, HideHeader = true, ContentScrollable = false };
+        var r = await Modal.Show<AddFitModal>("Inspection", o).Result;
+        if (!r.Cancelled)
+            await UpdateFits();
+    }
+
+    private volatile bool _isSearchRunning;
+
+    private async Task ExecuteSearch()
+    {
+        if(_isSearchRunning) return;
+        _isSearchRunning = true;
+        _resultText = LM.Get("fitCheckResultWaitText");
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Factory.StartNew(async () =>
+        {
+            try
+            {
+                var result = await _module.ExecuteSearch(SelectedFit, SelectedTargetGroup);
+                _resultText = result;
+            }
+            finally
+            {
+                _isSearchRunning = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+    }
+
+    private async Task OnFitSelected()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    private void OnChange(object args)
+    {
+        StateHasChanged();
+    }
+
+
+
+    private async Task DeleteSelectedFit()
+    {
+        if (await Modal.ShowConfirm())
+        {
+            await DbHelper.DeleteFit(SelectedFit.Id);
+            Fits.Remove(SelectedFit);
+            SelectedFit = null;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+}

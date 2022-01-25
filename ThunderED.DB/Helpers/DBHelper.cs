@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Radzen;
+using ThunderED.Classes;
 using ThunderED.Classes.Enums;
 using ThunderED.Helpers;
 using ThunderED.Json;
@@ -380,6 +381,107 @@ namespace ThunderED
             await db.SaveChangesAsync();
         }
 
+        public static async Task<List<ThdAuthUser>> GetRegisteredUsersWithSkills()
+        {
+            await using var db = new ThunderedDbContext();
+            var ids = await db.Tokens.Where(a => EF.Functions.Like(a.Scopes, $"%{SettingsManager.GetCharSkillsScope()}%"))
+                .Select(a => a.CharacterId).ToListAsync();
+
+            return await db.Users.Where(a => ids.Contains(a.CharacterId)).ToListAsync();
+        }
+
+        public static async Task<List<FitTargetGroupEntry>> GetRegisteredUserCorpsAndAlliancesWithSkills()
+        {
+            await using var db = new ThunderedDbContext();
+            var ids = await db.Tokens.AsNoTracking().Where(a => EF.Functions.Like(a.Scopes, $"%{SettingsManager.GetCharSkillsScope()}%"))
+                .Select(a => a.CharacterId).ToListAsync();
+
+            var users = await db.Users.AsNoTracking().Where(a => ids.Contains(a.CharacterId)).ToListAsync();
+            var result = new List<FitTargetGroupEntry>();
+            var tmpList = new List<string>();
+            users.ForEach(a =>
+            {
+                a.UnpackData();
+
+                if (!string.IsNullOrEmpty(a.DataView.AllianceName) && !tmpList.Contains(a.DataView.AllianceName) && a.AllianceId != 0)
+                {
+                    result.Add(new FitTargetGroupEntry { Id = a.AllianceId ?? 0, Name = a.DataView.AllianceName, IsAlliance = true });
+                    tmpList.Add(a.DataView.AllianceName);
+                }
+
+                if (!tmpList.Contains(a.DataView.CorporationName) && a.CorporationId != 0)
+                {
+                    result.Add(new FitTargetGroupEntry { Id = a.CorporationId, Name = a.DataView.CorporationName, IsAlliance = false });
+                    tmpList.Add(a.DataView.CorporationName);
+                }
+
+            });
+            return result;
+        }
+
+        public static async Task<List<TestClass>> GetUserInfoByTargetGroup(FitTargetGroupEntry group)
+        {
+            await using var db = new ThunderedDbContext();
+            List<TestClass> list;
+
+            if (group.IsAlliance)
+                list = (await db.Users.AsNoTracking().Where(a => a.AllianceId != null && a.AllianceId == group.Id)
+                        .Select(a => new {a.CharacterId, a.CharacterName}).ToListAsync())
+                    .Select(a => new TestClass {Id = a.CharacterId, Name = a.CharacterName}).ToList();
+            else 
+                list =  (await db.Users.AsNoTracking().Where(a => a.CorporationId == group.Id)
+                    .Select(a => new {a.CharacterId, a.CharacterName}).ToListAsync())
+                .Select(a => new TestClass {Id = a.CharacterId, Name = a.CharacterName}).ToList();
+
+            if (list.FirstOrDefault(a => a.Id == 341748641) != null) //todo remove
+                await LogHelper.LogWarning("FOUND CPT!", LogCat.Database);
+
+            var tokenIds = await db.Tokens.AsNoTracking().Where(a => a.Type == TokenEnum.General && EF.Functions.Like(a.Scopes, $"%{SettingsManager.GetCharSkillsScope()}%"))
+                .Select(a => a.CharacterId).Distinct().ToListAsync();
+            if (tokenIds.Contains(341748641)) //todo remove
+                await LogHelper.LogWarning("FOUND CPT 2!", LogCat.Database);
+            list.RemoveAll(a => !tokenIds.Contains(a.Id));
+
+            return list;
+        }
+
+        #endregion
+
+        #region Fits
+
+        public static async Task SaveOrUpdateFit(ThdFit fit)
+        {
+            await using var db = new ThunderedDbContext();
+            if (fit.Id == 0)
+            {
+                await db.Fits.AddAsync(fit);
+            }
+            else
+            {
+                db.Attach(fit);
+                if (db.Entry(fit).State == EntityState.Unchanged)
+                    db.Entry(fit).State = EntityState.Modified;
+            }
+
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task<List<ThdFit>> GetFits(string groupName)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.Fits.AsNoTracking().Where(a => EF.Functions.Like(a.GroupName, groupName)).ToListAsync();
+        }
+
+        public static async Task DeleteFit(long id)
+        {
+            await using var db = new ThunderedDbContext();
+            var fit = await db.Fits.FirstOrDefaultAsync(a => a.Id == id);
+            if(fit == null)
+                return;
+            db.Fits.Remove(fit);
+            await db.SaveChangesAsync();
+        }
+
         #endregion
 
         #region Mining
@@ -626,7 +728,7 @@ namespace ThunderED
             try
             {
                 db = dbx ?? new ThunderedDbContext();
-                var old = await db.CacheData.AsNoTracking().FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
+                var old = await db.CacheData.FirstOrDefaultAsync(a => EF.Functions.Like(a.Name, name));
                 if (old != null)
                     db.CacheData.Remove(old);
                 await db.CacheData.AddAsync(new ThdCacheDataEntry {Name = name, Data = data});
@@ -1245,5 +1347,7 @@ namespace ThunderED
         }
 
         #endregion
+
+        
     }
 }

@@ -180,7 +180,7 @@
         <div class="col d-flex align-items-center">
 
             <RadzenGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" Data="@(AuthGroup.Value.AllowedMembers)" TItem="KeyValuePair<string, AuthRoleEntity>"
-                        Count="@(AuthGroup.Value.AllowedMembers.Count)" @ref="_allowedGrid" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+                        Count="@(AuthGroup.Value.AllowedMembers.Count)" @ref="_groupsGridModal" AllowColumnResize="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
                 <Columns>
                     <RadzenGridColumn TItem="KeyValuePair<string, AuthRoleEntity>" Property="Key" Width="100px" Title="@LM.Get("webSettingsAuthNameColumnName")">
                         <EditTemplate Context="order">
@@ -241,7 +241,7 @@
     private IEnumerable<TestClass> _discordRolesList;
     private IEnumerable<TestClass> _esiRolesList;
     private IEnumerable<TestClass> _groupNamesList;
-    RadzenGrid<KeyValuePair<string, AuthRoleEntity>> _allowedGrid;
+    RadzenGrid<KeyValuePair<string, AuthRoleEntity>> _groupsGridModal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -269,8 +269,16 @@
     async Task InsertRow()
     {
         var value = new KeyValuePair<string, AuthRoleEntity>("New Entity", new AuthRoleEntity());
-        await _allowedGrid.InsertRow(value);
-        _isEditingMembersGrid = true;
+        if (AuthGroup.Value.AllowedMembers.Any())
+        {
+            await _groupsGridModal.InsertRow(value);
+            _isEditingMembersGrid = true;
+        }
+        else
+        {
+            AuthGroup.Value.AllowedMembers.Add(value.Key, value.Value);
+            await _groupsGridModal.Reload();
+        }
     }
 
     async Task EditRow(KeyValuePair<string, AuthRoleEntity> order)
@@ -280,7 +288,7 @@
         _editMembersName = order.Key;
         _editMembersEntities = order.Value.EntitiesFilterString;
         _isEditingMembersGrid = true;
-        await _allowedGrid.EditRow(order);
+        await _groupsGridModal.EditRow(order);
     }
 
     async Task SaveRow(KeyValuePair<string, AuthRoleEntity> order)
@@ -290,11 +298,11 @@
                 _authGrid.CancelEditRow(order);
                 return;
             }*/
-        await _allowedGrid.UpdateRow(order);
+        await _groupsGridModal.UpdateRow(order);
         AuthGroup.Value.AllowedMembers.Remove(order.Key);
         order.Value.Entities = string.IsNullOrEmpty(_editMembersEntities) ? new List<object>() : _editMembersEntities.Split(",").Select(a => (object) a).ToList();
         AuthGroup.Value.AllowedMembers.Add(_editMembersName, order.Value);
-        await _allowedGrid.Reload();
+        await _groupsGridModal.Reload();
 
         _editingAuthRow = null;
         _editMembersName = null;
@@ -306,12 +314,12 @@
     {
         if(_editingAuthRow != null)
             order.Value.UpdateFrom(_editingAuthRow.Value.Value);
-        _allowedGrid.CancelEditRow(order);
+        _groupsGridModal.CancelEditRow(order);
 
         AuthGroup.Value.AllowedMembers.Remove(order.Key);
         if(_editingAuthRow != null)
             AuthGroup.Value.AllowedMembers.Add(_editingAuthRow.Value.Key, _editingAuthRow.Value.Value);
-        await _allowedGrid.Reload();
+        await _groupsGridModal.Reload();
 
         _editingAuthRow = null;
         _editMembersName = null;
@@ -327,11 +335,11 @@
         if (AuthGroup.Value.AllowedMembers.ContainsKey(order.Key))
         {
             AuthGroup.Value.AllowedMembers.Remove(order.Key);
-            await _allowedGrid.Reload();
+            await _groupsGridModal.Reload();
         }
         else
         {
-            _allowedGrid.CancelEditRow(order);
+            _groupsGridModal.CancelEditRow(order);
             _editMembersName = null;
             _editMembersEntities = null;
         }

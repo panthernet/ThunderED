@@ -1,0 +1,95 @@
+﻿@using ThunderED.Modules
+@using ThunderED.Modules.OnDemand
+@inject ProtectedSessionStorage Store
+
+<div class="modal-content" style="width: 510px;">
+    <div class="modal-header fontEternalShadow">
+        <h5 class="modal-title">@LM.Get("fitCheckAddFitHeader")</h5>
+        <RadzenButton ButtonType="ButtonType.Button" Icon="close" ButtonStyle="ButtonStyle.Secondary"
+                      Click="Cancel" />
+    </div>
+    <div class="modal-body fontEternal">
+        <div class="col">
+            <div class="row">@LM.Get("fitCheckAddFitDescription")</div>
+            @if (_isError)
+            {
+                <div class="row">
+                    <p style="color: white; background-color: red; font-weight: bold; font-size: 1em; text-align: center; width: 98%;">@_errorText</p>
+                </div>
+            }
+            <div class="row">
+                <RadzenDropDown Data="@ImportTypes" TValue="string" @bind-Value="SelectedType" TValue="string" Style="margin-bottom: 3px;"/>
+            </div>
+            <div class="row">
+                <RadzenTextArea Style="height: 150px; width: 100%;" @bind-Value="@_inputText" />
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center" style="margin: 10px;">
+        <div>
+            <button class='navButton2' @onclick="UploadClick" style="width: 150px; margin-left: 10px;" disabled="@(!_isButtonEnabled)"><RadzenIcon Icon="save" Style="font-size: 15px; vertical-align: text-top;"/>@LM.Get("fitCheckConfirmButton")</button>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    private List<string> ImportTypes { get; set; } = new List<string> {"EFT/EVE"};
+    private string SelectedType { get; set; }
+
+    async Task Close(bool result) => await BlazoredModal.CloseAsync(ModalResult.Ok(result));
+    async Task Cancel() => await BlazoredModal.CancelAsync();
+    private bool _isError;
+    private string _inputText;
+
+    private bool _isButtonEnabled = true;
+    private string _errorText;
+
+    private string _groupName;
+    private FitCheckModule _module;
+
+    protected override async Task OnInitializedAsync()
+    {
+        SelectedType = ImportTypes.FirstOrDefault();
+
+        var user = await Store.GetAsync<WebAuthUserData>("user");
+        if (user == null)
+        {
+            await Close(false);
+            return;
+        }        
+        
+        _module = TickManager.GetModule<FitCheckModule>();
+
+        _groupName = await _module.GetUserGroup(user);
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task UploadClick()
+    {
+        if (string.IsNullOrEmpty(_inputText)) return;
+
+        _isError = false;
+        _isButtonEnabled = false;
+        await InvokeAsync(StateHasChanged);
+
+        var result = await _module.ImportFit(_inputText, _groupName);
+        if (result == null)
+        {
+            _isError = true;
+            _errorText = LM.Get("fitCheckerInvalidFitFormat");
+        }
+        else
+        {
+            await Close(true);
+            return;
+        }
+
+        _isButtonEnabled = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

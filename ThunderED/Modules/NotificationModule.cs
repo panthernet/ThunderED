@@ -203,7 +203,7 @@ namespace ThunderED.Modules
                                         await LogHelper.LogInfo($"Key update...", LogCat.UpdateTracker, logConsole,
                                             logFile);
 
-                                        var key = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddNotifications().AddUniverseStructure().Merge()))?.Result;
+                                        var key = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddNotifications().AddUniverseStructure()))?.Result;
                                         await LogHelper.LogInfo($"Key: {key != null}", LogCat.UpdateTracker, logConsole,
                                             logFile);
                                         if (key == null) return;
@@ -334,7 +334,7 @@ namespace ThunderED.Modules
                                 continue;
                             }
 
-                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rToken, new ESIScope().AddNotifications().AddUniverseStructure().Merge(), $"From {Category} | Char ID: {charId}");
+                            var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rToken, new ESIScope().AddNotifications().AddUniverseStructure(), $"From {Category} | Char ID: {charId}");
                             var token = tq.Result;
                             if (tq.Data.IsNoConnection) return;
                             if (string.IsNullOrEmpty(token))

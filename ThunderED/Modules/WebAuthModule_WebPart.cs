@@ -117,7 +117,7 @@ namespace ThunderED.Modules
                     }
                     var data = new ThdStandsAuth { CharacterId = numericCharId };
 
-                    var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(refreshToken, new ESIScope().AddCharContacts().AddCorpContacts().AddAllyContacts().Merge(), $"From {Category} | Char ID: {characterId}");
+                    var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(refreshToken, new ESIScope().AddCharContacts().AddCorpContacts().AddAllyContacts(), $"From {Category} | Char ID: {characterId}");
                     var token = tq.Result;
 
                     if (!tq.Data.IsFailed)
@@ -227,11 +227,11 @@ namespace ThunderED.Modules
 
                             if (Settings.WebAuthModule.AuthReportChannel > 0)
                                 await APIHelper.DiscordAPI.SendMessageAsync(Settings.WebAuthModule.AuthReportChannel,
-                                    LM.Get("authReportCreateAlt", altUser.DataView.CharacterName, user.DataView.CharacterName));
+                                    LM.Get("authReportCreateAlt", altUser.CharacterName, user.CharacterName));
 
                             var success = WebQueryResult.GeneralAuthSuccess;
                             success.Message1 = LM.Get("authAltRegTemplateHeader");
-                            success.Message2 = LM.Get("authAltRegAccepted", rChar.name, user.DataView.CharacterName);
+                            success.Message2 = LM.Get("authAltRegAccepted", rChar.name, user.CharacterName);
                             return success;
                         }
 

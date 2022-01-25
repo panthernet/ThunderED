@@ -124,6 +124,9 @@ namespace ThunderED.Classes
             if (SettingsManager.Settings.Config.ModuleSystemLogFeeder)
                 OnDemandModules.Add(new SystemLogFeeder());
 
+            if (SettingsManager.Settings.Config.ModuleFitChecker)
+                OnDemandModules.Add(new FitCheckModule());
+
             //IMPORTANT - web auth is the last module - to be the last for 404 handling
             //it is always loaded but won't run if property is false
             //if (SettingsManager.Settings.Config.ModuleAuthWeb)

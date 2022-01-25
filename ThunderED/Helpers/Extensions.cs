@@ -15,14 +15,14 @@ namespace ThunderED
         public static async Task UpdateData(this ThdAuthUser user, JsonClasses.CharacterData characterData, JsonClasses.CorporationData rCorp = null, JsonClasses.AllianceData rAlliance = null, string permissions = null, bool forceUpdate = false)
         {
             rCorp ??= await APIHelper.ESIAPI.GetCorporationData(LogCat.AuthCheck.ToString(), characterData.corporation_id, forceUpdate);
-            user.DataView.CharacterName = characterData.name;
-            user.DataView.CorporationId = characterData.corporation_id;
+            user.CharacterName = characterData.name;
+            user.CorporationId = characterData.corporation_id;
             user.DataView.CorporationName = rCorp?.name;
             user.DataView.CorporationTicker = rCorp?.ticker;
-            user.DataView.AllianceId = characterData.alliance_id ?? 0;
+            user.AllianceId = characterData.alliance_id;
             user.DataView.AllianceName = null;
             user.DataView.AllianceTicker = null;
-            if (user.DataView.AllianceId > 0)
+            if (user.AllianceId > 0)
             {
                 rAlliance ??= await APIHelper.ESIAPI.GetAllianceData(LogCat.AuthCheck.ToString(), characterData.alliance_id, forceUpdate);
                 user.DataView.AllianceName = rAlliance?.name;

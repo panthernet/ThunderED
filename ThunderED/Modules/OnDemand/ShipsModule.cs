@@ -182,11 +182,11 @@ namespace ThunderED.Modules.OnDemand
                 await usersToCheck.ParallelForEachAsync(async userEntity =>
                 {
                     var token = (await APIHelper.ESIAPI.GetAccessToken(userEntity.GetGeneralToken(),
-                            $"From {Category} | Char ID: {userEntity.CharacterId} | Char name: {userEntity.DataView.CharacterName}"))
+                            $"From {Category} | Char ID: {userEntity.CharacterId} | Char name: {userEntity.CharacterName}"))
                         ?.Result;
                     if (string.IsNullOrEmpty(token))
                     {
-                        await LogHelper.LogWarning($"Character {userEntity.DataView.CharacterName}({userEntity.CharacterId}) has invalid token!");
+                        await LogHelper.LogWarning($"Character {userEntity.CharacterName}({userEntity.CharacterId}) has invalid token!");
                         return;
                     }
                     var skills = await APIHelper.ESIAPI.GetCharSkills(Reason, userEntity.CharacterId, token);
@@ -266,7 +266,7 @@ namespace ThunderED.Modules.OnDemand
                                 userCounted = true;
                             }
 
-                            var tmplt = group.FormatTemplate.Replace("{NAME}", user.User.DataView.CharacterName)
+                            var tmplt = group.FormatTemplate.Replace("{NAME}", user.User.CharacterName)
                                 .Replace("{ST1}", st1)
                                 .Replace("{ST2}", st2);
                             for (int i = 1; i < 99; i++)

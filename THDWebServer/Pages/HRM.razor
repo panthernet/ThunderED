@@ -551,7 +551,7 @@ var user = new WebAuthUserData(new AuthUserEntity { CharacterId = 1731524545 }, 
                         {
                             ch.CorporationName = db.DataView.CorporationName = corp.name;
                             ch.CorporationTicker = db.DataView.CorporationTicker = corp.ticker;
-                            db.DataView.CorporationId = item.corporation_id;
+                            db.CorporationId = item.corporation_id;
                         }
                         if (ch != null)
                         {
@@ -559,13 +559,13 @@ var user = new WebAuthUserData(new AuthUserEntity { CharacterId = 1731524545 }, 
                             {
                                 ch.AllianceName = db.DataView.AllianceName = ally.name;
                                 ch.AllianceTicker = db.DataView.AllianceTicker = ally.ticker;
-                                db.DataView.AllianceId = item.alliance_id;
+                                db.AllianceId = item.alliance_id;
                             }
                             else
                             {
                                 ch.AllianceName = db.DataView.AllianceName = null;
                                 ch.AllianceTicker = db.DataView.AllianceTicker = null;
-                                db.DataView.AllianceId = 0;
+                                db.AllianceId = 0;
                             }
                         }
                         await DbHelper.SaveAuthUser(db);

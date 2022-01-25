@@ -11,6 +11,7 @@ using ThunderED.Classes;
 using ThunderED.Classes.Entities;
 using ThunderED.Helpers;
 using ThunderED.Modules;
+using ThunderED.Modules.OnDemand;
 using ThunderED.Thd;
 
 namespace THDWebServer.Authentication
@@ -24,6 +25,7 @@ namespace THDWebServer.Authentication
         public const string ROLE_MINING_SCHEDULE = "ms";
         public const string ROLE_STRUCTURES = "struct";
         public const string ROLE_MOON_TABLE = "moon_table";
+        public const string ROLE_FIT_CHECK = "fit_check";
 
         public ProtectedSessionStorage ProtectedSessionStore { get; set; }
 
@@ -101,6 +103,11 @@ namespace THDWebServer.Authentication
                 || await MiningScheduleModule.HasAuthAccess(usr))
             {
                 claims.Add(new Claim(ClaimTypes.Role, ROLE_FEED_AUTH));
+            }
+
+            if (await FitCheckModule.HasAccess(usr))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, ROLE_FIT_CHECK));
             }
 
 

@@ -18,5 +18,35 @@
             public Dogma_Attributes[] dogma_attributes { get; set; }
             public Dogma_Effects[] dogma_effects { get; set; }
         }
+
+        public class UniverseIdTypes
+        {
+            public SimpleInventoryType[] inventory_types;
+        }
+        public class UniverseIdEntities
+        {
+            public SimpleInventoryType[] characters;
+            public SimpleInventoryType[] alliances;
+            public SimpleInventoryType[] corporations;
+            public SimpleInventoryType[] factions;
+        }
+
+        public class UniverseIdMap
+        {
+            public SimpleInventoryType[] constellations;
+            public SimpleInventoryType[] regions;
+            public SimpleInventoryType[] systems;
+        }
+
+        public class UniverseIdStations
+        {
+            public SimpleInventoryType[] stations;
+        }
+
+        public class SimpleInventoryType
+        {
+            public long id;
+            public string name;
+        }
     }
 }

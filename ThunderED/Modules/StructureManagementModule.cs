@@ -66,7 +66,7 @@ namespace ThunderED.Modules
                     var processedCorps = new List<long>();
                     foreach (var token in await DbHelper.GetTokens(TokenEnum.Structures))
                     {
-                        var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpStructure().AddUniverseStructure().Merge());
+                        var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpStructure().AddUniverseStructure());
                         if (r == null || r.Data.IsFailed)
                         {
                             await LogHelper.LogWarning($"Failed to refresh structure token from {token.CharacterId}",
@@ -397,7 +397,7 @@ namespace ThunderED.Modules
         private static bool HasAccess(long id, long corpId, long allianceId, Dictionary<string, List<long>> dic)
         {
             if (!SettingsManager.Settings.Config.ModuleStructureManagement || !dic.Any() || TickManager.IsNoConnection || TickManager.IsESIUnreachable) return false;
-            return dic["character"].Contains(id) || dic["corporation"].Contains(corpId) || (allianceId > 0 && dic["alliance"].Contains(corpId));
+            return dic["character"].Contains(id) || dic["corporation"].Contains(corpId) || (allianceId > 0 && dic["alliance"].Contains(allianceId));
         }
 
         private static bool HasAccess(long id, long corpId, long allianceId, Dictionary<string, Dictionary<string, List<long>>> dic, out string groupName)
@@ -483,7 +483,7 @@ namespace ThunderED.Modules
 
             foreach (var token in tokens)
             {
-                var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpStructure().AddUniverseStructure().Merge());
+                var r = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCorpStructure().AddUniverseStructure());
                 if (r == null || r.Data.IsFailed)
                 {
                     await LogHelper.LogWarning($"Failed to refresh structure token from {token.CharacterId}",

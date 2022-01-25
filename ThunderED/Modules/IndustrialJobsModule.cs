@@ -66,7 +66,7 @@ namespace ThunderED.Modules
                             scope.AddCorpIndustry();
 
 
-                        var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rtoken, scope.Merge(), $"From {Category} | Char ID: {characterID}");
+                        var tq = await APIHelper.ESIAPI.GetAccessTokenWithScopes(rtoken, scope, $"From {Category} | Char ID: {characterID}");
                         var token = tq.Result;
                         if (string.IsNullOrEmpty(token))
                         {

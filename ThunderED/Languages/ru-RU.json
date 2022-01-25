@@ -780,7 +780,23 @@
   "wsWebStepsNext": "Далее",
   "wsWebStepsPrev": "Назад",
   "wsMiningPaymentFieldTaxPerc": "Налог %",
-  "wsMiningPaymentFieldReproTaxPerc": "Эфф. переработки %"
+  "wsMiningPaymentFieldReproTaxPerc": "Эфф. переработки %",
 
-
+  "headerFitCheckPage": "Проверка фитов",
+  "fitCheckAddFitHeader": "Добавить",
+  "fitCheckColSelectedFit": "Выбранный фит",
+  "fitCheckColTargetGroup": "Целевая группа",
+  "fitCheckRun": "Проверить",
+  "fitCheckAddFitDescription": "Встоавьте фит в выбранном формате и нажмите Подтвердить",
+  "fitCheckConfirmButton": "Подтвердить",
+  "fitCheckerInvalidFitFormat": "Фит имеет неверный формат или произошла ошибка",
+  "fitCheckResultWaitText": "Ищем... Пожалуйста, подождите",
+  "fitCheckReportHeader": "Отчет по фиту",
+  "fitCheckReportPilots": "{0} из {1} пилотов могут использовать фит",
+  "fitCheckReportFitDetails": "Данные о фите",
+  "fitCheckReportFitSkills": "Скилы для фита",
+  "fitCheckReportPilotNames": "Имена пилотов",
+  "nmFitChecker": "Фиты",
+  "webSettingsMoveRowBottom": "Строку вниз",
+  "webSettingsMoveRowTop": "Строку вверх"
 }

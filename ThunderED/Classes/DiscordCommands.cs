@@ -682,7 +682,7 @@ namespace ThunderED.Classes
                             //check if user confirmed application
                             if (authUser.AuthState < 2)
                             {
-                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authUserNotConfirmed", authUser.DataView.CharacterName));
+                                await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authUserNotConfirmed", authUser.CharacterName));
                                 return;
                             }
 
@@ -723,7 +723,7 @@ namespace ThunderED.Classes
                             }
 
                             await DbHelper.DeleteAuthUser(characterId);
-                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserDeclined", authUser.DataView.CharacterName));
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserDeclined", authUser.CharacterName));
 
                             return;
                         }
@@ -740,7 +740,7 @@ namespace ThunderED.Classes
                             authUser.SetStateAwaiting();
                             await DbHelper.SaveAuthUser(authUser);
                             await TickManager.GetModule<WebAuthModule>().ProcessPreliminaryApplicant(authUser, Context);
-                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserConfirmed", authUser.DataView.CharacterName));
+                            await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("authDiscordUserConfirmed", authUser.CharacterName));
                             return;
                         default:
                             await APIHelper.DiscordAPI.ReplyMessageAsync(Context, LM.Get("invalidCommandSyntax"));

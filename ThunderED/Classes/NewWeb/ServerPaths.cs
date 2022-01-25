@@ -271,5 +271,10 @@ namespace ThunderED.Classes
         {
             return $"{GetWebSiteUrl()}/remauth";
         }
+
+        public static string GetFitCheckerPageUrl()
+        {
+            return $"{GetWebSiteUrl()}/fitcheck";
+        }
     }
 }

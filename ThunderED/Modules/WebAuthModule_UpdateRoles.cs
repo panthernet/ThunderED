@@ -158,7 +158,7 @@ namespace ThunderED.Modules
                     {
                         await DbHelper.DeleteAuthDataByDiscordId(discordUserId);
                         await LogHelper.LogInfo(
-                            $"User {authUser.DataView.CharacterName}[{discordUserId}] has been removed from DB (no token, no auth, not present in discord)");
+                            $"User {authUser.CharacterName}[{discordUserId}] has been removed from DB (no token, no auth, not present in discord)");
                         return null;
                     }
 
@@ -178,7 +178,7 @@ namespace ThunderED.Modules
                         return null;
                     }
 
-                    if (authUser.DataView.CorporationId != characterData.corporation_id || authUser.DataView.AllianceId != (characterData.alliance_id ?? 0))
+                    if (authUser.CorporationId != characterData.corporation_id || authUser.AllianceId != characterData.alliance_id)
                     {
                         await authUser.UpdateData(characterData);
                         await DbHelper.SaveAuthUser(authUser);
@@ -197,7 +197,7 @@ namespace ThunderED.Modules
                     if (result.TokenMustBeDeleted)
                     {
                         await LogHelper.LogWarning(
-                            $"Invalid token detected for {authUser.DataView.CharacterName}. It will be removed.");
+                            $"Invalid token detected for {authUser.CharacterName}. It will be removed.");
                         await DbHelper.DeleteToken(authUser.CharacterId, TokenEnum.General);
                     }
                     await AuthInfoLog(characterData, $"[RUPD] GRPFETCH GROUP: {result.GroupName} ROLES: {(result.UpdatedRoles == null || !result.UpdatedRoles.Any() ? "null" : string.Join(',', result.UpdatedRoles.Where(a=> !a.Name.StartsWith("@")).Select(a=> a.Name)))} MANUAL: {(result.ValidManualAssignmentRoles == null || !result.ValidManualAssignmentRoles.Any() ? "null" : string.Join(',', result.ValidManualAssignmentRoles))}", true);
@@ -236,7 +236,7 @@ namespace ThunderED.Modules
                         }
                         else
                         {
-                            await AuthInfoLog(characterData, $"[RUPD] {authUser.DataView.CharacterName}({authUser.CharacterId}) is no longer validated for `{authUser.GroupName}` group and will be deleted!");
+                            await AuthInfoLog(characterData, $"[RUPD] {authUser.CharacterName}({authUser.CharacterId}) is no longer validated for `{authUser.GroupName}` group and will be deleted!");
                             await DbHelper.DeleteAuthUser(authUser.CharacterId);
                         }
                     }

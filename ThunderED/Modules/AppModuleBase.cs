@@ -219,9 +219,9 @@ namespace ThunderED.Modules
                             if (res.character.Any() && enumMod == MemberSearchModeEnum.Character)
                                 result["character"].Add(res.character.First());
                             else if (res.corporation.Any() && enumMod == MemberSearchModeEnum.Corporation)
-                                result["corporation"].Add(res.corporation.First());
+                                result["corporation"].Add(GetValidEntity(res.corporation));
                             else if (res.alliance.Any() && enumMod == MemberSearchModeEnum.Alliance)
-                                result["alliance"].Add(res.alliance.First());
+                                result["alliance"].Add(GetValidEntity(res.alliance));
                             else failedList.Add(searchString);
                         }else failedList.Add(searchString);
                     }
@@ -239,6 +239,12 @@ namespace ThunderED.Modules
             }
 
             return result;
+        }
+
+        private long GetValidEntity(List<long> list)
+        {
+            if (list.Count == 1) return list.First();
+            return list.Max();
         }
 
         protected async Task<Dictionary<string, List<long>>> ParseLocationDataArray(List<object> list)

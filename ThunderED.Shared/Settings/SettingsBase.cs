@@ -33,6 +33,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using ThunderED.Helpers;
+using ThunderED.Json.Converters;
 
 namespace ThunderED
 {
@@ -108,6 +109,7 @@ namespace ThunderED
                             jsonWriter.Formatting = Formatting.Indented;
                             var serializer = new JsonSerializer {ContractResolver = new WritablePropertiesOnlyResolver()};
                             serializer.Converters.Add(new StringEnumConverter());
+                            serializer.Converters.Add(new KVConverter<string, WebAuthGroup>());
                             serializer.Serialize(jsonWriter, obj);
                             jsonWriter.Flush();
                         }
@@ -170,6 +172,7 @@ namespace ThunderED
                             {
                                 var serializer = new JsonSerializer();
                                 serializer.Converters.Add(new StringEnumConverter());
+                                serializer.Converters.Add(new KVConverter<string, WebAuthGroup>());
                                 serializer.ObjectCreationHandling = ObjectCreationHandling.Replace;
                                 serializer.Error += (sender, e) =>
                                 {                                        

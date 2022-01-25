@@ -179,7 +179,14 @@
 
     async Task InsertAccessTimersRow()
     {
-        await _timersAccessListGrid.InsertRow(_module.CreateNewTimersData(_accessTimersList.ToList()));
+        var value = _module.CreateNewTimersData(_accessTimersList.ToList());
+        if(_accessTimersList.Any())
+            await _timersAccessListGrid.InsertRow(value);
+        else
+        {
+            ((List<TiData>)_accessTimersList).Add(value);
+            await _timersAccessListGrid.Reload();
+        }
     }
 
     async Task EditAccessTimersRow(TiData order)
@@ -251,7 +258,14 @@
 
     async Task InsertEditTimersRow()
     {
-        await _timersEditListGrid.InsertRow(_module.CreateNewTimersData(_editTimersList.ToList()));
+        var value = _module.CreateNewTimersData(_editTimersList.ToList());
+        if(_editTimersList.Any())
+            await _timersEditListGrid.InsertRow(value);
+        else
+        {
+            ((List<TiData>) _editTimersList).Add(value);
+            await _timersEditListGrid.Reload();
+        }
     }
 
     async Task EditEditTimersRow(TiData order)

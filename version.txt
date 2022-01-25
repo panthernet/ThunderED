@@ -1,5 +1,10 @@
-### V2.1.5
-+ Improved Discord auth to accept cyrillic translation of auth command to avoid confusion for russsian users
+### V2.1.7
++ Added new fit checker module
++ Improved Discord auth to accept cyrillic translation of auth command to avoid confusion for russian users
++ Improved web settings for auth groups to allow group order shuffling which is important for some setups
++ Fixed several module auth checks
++ Fixed corp and alliance resolve tech pointing to deleted entities
++ Fixed web UI not allowing to add new entry into empty tables
 
 ### V2.1.4
 + Improved database upgrade to use EF and transactions for safier updates

@@ -35,6 +35,7 @@ namespace ThunderED
         public DbSet<ThdGroup> Groups { get; set; }
 
         public DbSet<ThdTimer> Timers { get; set; }
+        public DbSet<ThdFit> Fits { get; set; }
 
         public ThunderedDbContext()
         {
@@ -61,6 +62,21 @@ namespace ThunderED
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.MainCharacterId).HasColumnName("main_character_id");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.LastCheck).HasColumnName("last_check");
             modelBuilder.Entity<ThdAuthUser>().Property(a => a.Ip).HasColumnName("ip");
+            modelBuilder.Entity<ThdAuthUser>().Property(a => a.AllianceId).HasColumnName("alliance_id");
+            modelBuilder.Entity<ThdAuthUser>().Property(a => a.CorporationId).HasColumnName("corporation_id");
+            modelBuilder.Entity<ThdAuthUser>().Property(a => a.CharacterName).HasColumnName("character_name");
+
+            #endregion
+
+            #region ThdFit
+            modelBuilder.Entity<ThdFit>().HasKey(u => u.Id);
+            modelBuilder.Entity<ThdFit>().ToTable("fits");
+            modelBuilder.Entity<ThdFit>().Property(a => a.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            modelBuilder.Entity<ThdFit>().Property(a => a.Name).HasColumnName("name");
+            modelBuilder.Entity<ThdFit>().Property(a => a.ShipName).HasColumnName("ship_name");
+            modelBuilder.Entity<ThdFit>().Property(a => a.GroupName).HasColumnName("group_name");
+            modelBuilder.Entity<ThdFit>().Property(a => a.FitText).HasColumnName("fit_text");
+            modelBuilder.Entity<ThdFit>().Property(a => a.Skills).HasColumnName("skill_data").HasConversion(v=> JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<List<FitSkillEntry>>(v));
 
             #endregion
 

@@ -27,7 +27,7 @@ namespace ThunderED.Modules
                 result.Add(new WebUserItem
                 {
                     Id = a.CharacterId,
-                    CharacterName = a.DataView.CharacterName,
+                    CharacterName = a.CharacterName,
                     CorporationName = a.DataView.CorporationName,
                     AllianceName = a.DataView.AllianceName,
                     CorporationTicker = a.DataView.CorporationTicker,
@@ -58,13 +58,13 @@ namespace ThunderED.Modules
                 {
                     sUser.SetStateDumpster();
                     await LogHelper.LogInfo(
-                        $"HR moving character {sUser.DataView.CharacterName} to dumpster...");
+                        $"HR moving character {sUser.CharacterName} to dumpster...");
                     await DbHelper.SaveAuthUser(sUser);
                 }
                 else
                 {
                     await LogHelper.LogInfo(
-                        $"HR deleting character {sUser.DataView.CharacterName} auth...");
+                        $"HR deleting character {sUser.CharacterName} auth...");
                     await DbHelper.DeleteAuthUser(order.Id, true);
                 }
 
@@ -215,8 +215,8 @@ namespace ThunderED.Modules
                     var hrUserInfo = await DbHelper.GetAuthUser(hrId, true);
                     if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.DataView.PermissionsList))
                     {
-                        var hrToken = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(hrUserInfo.GetGeneralToken(), new ESIScope().AddCharContacts().Merge(),
-                                $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.DataView.CharacterName}"))
+                        var hrToken = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(hrUserInfo.GetGeneralToken(), new ESIScope().AddCharContacts(),
+                                $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.CharacterName}"))
                             ?.Result;
                         if (!string.IsNullOrEmpty(hrToken))
                         {

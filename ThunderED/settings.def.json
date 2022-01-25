@@ -42,6 +42,7 @@
     "ModuleStructureManagement": false,
     "ModuleMoonTable": false,
     "ModuleStorageConsole": false,
+    "ModuleFitChecker": false,
 
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
@@ -63,7 +64,17 @@
     "EnableLegacyRestartLogic": false,
     "EnableSwatch": false,
 
-    "WebSessionTimeout":  60 
+    "WebSessionTimeout": 60
+  },
+
+  "FitCheckerModule": {
+    "AccessGroups": {
+      "group1": {
+        "IsEnabled": true,
+        "AccessDiscordRoles": [],
+        "AccessEntities":  [] 
+      } 
+    } 
   },
 
   "webServerModule": {

@@ -122,7 +122,7 @@ namespace ThunderED.API
         {
             
             var data = await DbHelper.GetTypeId(Convert.ToInt64(id));
-            if (data != null)
+            if (data != null && !forceUpdate)
                 return data;
 
             var result =  await GetEntry<JsonClasses.Type_id>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/types/{id}/?datasource=tranquility&language={_language}", reason, id, 30,
@@ -130,10 +130,19 @@ namespace ThunderED.API
             if (result != null)
             {
                 var item = ThdType.FromJson(result);
-                await DbHelper.SaveType(item);
+                if(!forceUpdate)
+                    await DbHelper.SaveType(item);
                 return item;
             }
             return null;
+        }
+
+        public async Task<JsonClasses.UniverseIdTypes> GetUniverseIdsFromNames(string reason, List<string> names)
+        {
+            var result =
+                await APIHelper.PostWrapperWithResult<JsonClasses.UniverseIdTypes>($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/ids/?datasource=tranquility&language={_language}",
+                    JsonConvert.SerializeObject(names), reason, null);
+            return result;
         }
 
         public async Task<JsonClasses.SystemIDSearch> GetRadiusSystems(string reason, object id)
@@ -311,11 +320,11 @@ namespace ThunderED.API
             return r;
         }
 
-        public async Task<ESIQueryResult<string>> GetAccessTokenWithScopes(ThdToken token, string scope, string notes = null, bool logDetails = true, [CallerMemberName] string methodname = null)
+        public async Task<ESIQueryResult<string>> GetAccessTokenWithScopes(ThdToken token, object scope, string notes = null, bool logDetails = true, [CallerMemberName] string methodname = null)
         {
             var r = await APIHelper.ESIAPI.RefreshToken(token,
                 SettingsManager.Settings.WebServerModule.CcpAppClientId,
-                SettingsManager.Settings.WebServerModule.CcpAppSecret, nameof(GetAccessToken), scope);
+                SettingsManager.Settings.WebServerModule.CcpAppSecret, nameof(GetAccessToken), scope.ToString());
             if (r?.Data == null || r.Data.IsFailed || r.Data.IsNoConnection)
             {
                 if (logDetails)

@@ -96,6 +96,9 @@ namespace ThunderED
         [ConfigEntryName("ModuleStructureManagement")]
         public StructureManagementModuleSettings StructureManagementModule { get; set; } = new StructureManagementModuleSettings();
 
+        [ConfigEntryName("ModuleFitChecker")]
+        public FitCheckerModuleSettings FitCheckerModule { get; set; } = new FitCheckerModuleSettings();
+
 
 #if EDITOR
         public string Validate(List<string> usedModules)
@@ -132,6 +135,33 @@ namespace ThunderED
                 value.OnEditorSave();
             }
         }
+#endif
+    }
+
+    public class FitCheckerModuleSettings
+    {
+#if EDITOR
+        public ObservableDictionary<string, FitCheckerModuleGroup> AccessGroups { get; set; } = new ObservableDictionary<string, FitCheckerModuleGroup>();
+#else
+        public Dictionary<string, FitCheckerModuleGroup> AccessGroups { get; set; } =
+            new Dictionary<string, FitCheckerModuleGroup>();
+#endif
+        public List<KeyValuePair<string,FitCheckerModuleGroup>> GetEnabledGroups()
+        {
+            return AccessGroups.Where(a => a.Value.IsEnabled).ToList();
+        }
+    }
+
+    public class FitCheckerModuleGroup
+    {
+        public bool IsEnabled { get; set; } = true;
+
+#if EDITOR
+        public ObservableCollection<string> AccessDiscordRoles { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<object> AccessEntities { get; set; } = new ObservableCollection<object>();
+#else
+        public List<string> AccessDiscordRoles { get; set; } = new List<string>();
+        public List<object> AccessEntities { get; set; } = new List<object>();
 #endif
     }
 
@@ -1831,6 +1861,7 @@ namespace ThunderED
         public bool ModuleMoonTable { get; set; } = false;
         public bool ModuleStorageConsole { get; set; } = false;
         public bool ModuleRemind { get; set; } = false;
+        public bool ModuleFitChecker { get; set; } = false;
 
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";
@@ -2179,7 +2210,7 @@ namespace ThunderED
         public List<string> AuthCheckIgnoreRoles { get; set; } = new List<string>();
         public List<ulong> ComAuthChannels { get; set; } = new List<ulong>();
         public List<ulong> AuxiliaryDiscordGuildIds { get; set; } = new List<ulong>();
-        public Dictionary<string, WebAuthGroup> AuthGroups { get; set; } = new Dictionary<string, WebAuthGroup>();
+        public List<KeyValuePair<string, WebAuthGroup>> AuthGroups { get; set; } = new ();
 #endif
 
         /// <summary>
