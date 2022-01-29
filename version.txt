@@ -5,6 +5,7 @@
 + Fixed several module auth checks
 + Fixed corp and alliance resolve tech pointing to deleted entities
 + Fixed web UI not allowing to add new entry into empty tables
++ Updated Discord lib and fixed DM messages
 
 ### V2.1.4
 + Improved database upgrade to use EF and transactions for safier updates

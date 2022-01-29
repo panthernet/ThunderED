@@ -55,7 +55,7 @@ namespace ThunderED.Modules.Static
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("seeDM"));
 
-                    var channel = await context.Message.Author.GetOrCreateDMChannelAsync();
+                    var channel = await context.Message.Author.CreateDMChannelAsync();
 
                     var tmp = JsonConvert.SerializeObject(itemIdResults.inventory_type);
                     var httpContent = new StringContent(tmp);

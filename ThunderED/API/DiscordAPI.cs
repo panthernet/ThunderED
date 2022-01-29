@@ -41,7 +41,9 @@ namespace ThunderED.API
                 //ignore
             }
 
-            Client = new DiscordSocketClient();
+            var config = new DiscordSocketConfig() {GatewayIntents = GatewayIntents.All};
+
+            Client = new DiscordSocketClient(config);
             Commands = new CommandService();
             Commands.AddModuleAsync(typeof(DiscordCommands), null).GetAwaiter().GetResult();
             Client.Log += async message =>
@@ -63,6 +65,11 @@ namespace ThunderED.API
                     : SettingsManager.Settings.Config.BotDiscordName;
                 foreach (var g in _cacheGuilds.Where(g => g.CurrentUser.Nickname != name))
                     await g.CurrentUser.ModifyAsync(x => x.Nickname = name);
+
+                foreach (var guild in _cacheGuilds)
+                {
+                    await guild.DownloadUsersAsync();
+                }
             };
             Client.Connected += async () =>
             {
@@ -239,7 +246,7 @@ namespace ThunderED.API
             }
             catch (HttpException ex)
             {
-                if (ex.DiscordCode == 50013)
+                if (ex.DiscordCode == DiscordErrorCode.InsufficientPermissions)
                     await LogHelper.LogError($"The bot don't have rights to send message to {context.Message.Channel.Id} ({context.Message.Channel.Name}) channel!");
             }
             catch (Exception ex)
@@ -264,7 +271,7 @@ namespace ThunderED.API
             }
             catch (HttpException ex)
             {
-                if (ex.DiscordCode == 50013)
+                if (ex.DiscordCode == DiscordErrorCode.InsufficientPermissions)
                     await LogHelper.LogError($"The bot don't have rights to send message to {context.Message.Channel.Id} ({context.Message.Channel.Name}) channel!");
             }
             catch (Exception ex)
@@ -315,7 +322,7 @@ namespace ThunderED.API
             }
             catch (HttpException ex)
             {
-                if (ex.DiscordCode == 50013)
+                if (ex.DiscordCode == DiscordErrorCode.InsufficientPermissions)
                     await LogHelper.LogError($"The bot don't have rights to send message to {channel.Id} ({channel.Name}) channel!");
                 else await LogHelper.LogEx(nameof(SendMessageAsync), ex, LogCat.Discord);
                 return null;
@@ -545,6 +552,7 @@ namespace ThunderED.API
                     var guild = (await context.Client.GetGuildsAsync()).FirstOrDefault();
                     if (guild == null) return "Error getting guild!";
                     var roles = new List<IRole>(guild.Roles);
+                    //var xxx = await guild.GetUsersAsync();
                     var userRoleIDs = (await guild.GetUserAsync(context.User.Id)).RoleIds;
                     var roleMatch = SettingsManager.Settings.Config.DiscordAdminRoles;
                     if ((from role in roleMatch
