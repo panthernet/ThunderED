@@ -1,5 +1,6 @@
 ### V2.1.7
 + Added new fit checker module
++ Added map to CustomAssetsMap static folder for web custom assets
 + Improved Discord auth to accept cyrillic translation of auth command to avoid confusion for russian users
 + Improved web settings for auth groups to allow group order shuffling which is important for some setups
 + Fixed several module auth checks
