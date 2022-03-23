@@ -1,4 +1,4 @@
-# ThunderED - EVE Online Discord Bot
+# ThunderED - EVE Online Community Management System
 [Reach us on Discord](https://discord.gg/UsnY6UR)
 
 [Check the FAQ about installation and settings!](https://github.com/panthernet/ThunderED/wiki)
