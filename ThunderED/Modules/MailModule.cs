@@ -86,7 +86,7 @@ namespace ThunderED.Modules
                         var labelsData = await APIHelper.ESIAPI.GetMailLabels(Reason, charId.ToString(), token);
                         var searchLabels = labelsData?.labels.Where(a => a.name?.ToLower() != "sent" && a.name?.ToLower() != "received").ToList() ??
                                            new List<JsonClasses.MailLabel>();
-                        var mailLists = await APIHelper.ESIAPI.GetMailLists(Reason, charId, token);
+                        var mailLists = (await APIHelper.ESIAPI.GetMailLists(Reason, charId, token))?.Result;
 
                         var etag = _tags.GetOrNull(charId);
                         var result = await APIHelper.ESIAPI.GetMailHeaders(Reason, charId.ToString(), token, 0, etag);
@@ -446,7 +446,7 @@ namespace ThunderED.Modules
 
                 try
                 {
-                    if (!SettingsManager.HasReadMailScope(user.DataView.PermissionsList))
+                    if (!SettingsManager.HasReadMailScope(user.GetGeneralToken()?.GetSplitScopes()))
                         continue;
 
                     var token = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(user.GetGeneralToken(), new ESIScope().AddCharReadMail().ToString(),
@@ -507,7 +507,7 @@ namespace ThunderED.Modules
                         rcp.Append(",");
                         break;
                     case "mailing_list":
-                        var mls = await APIHelper.ESIAPI.GetMailLists(reason, inspectCharId, token);
+                        var mls = (await APIHelper.ESIAPI.GetMailLists(reason, inspectCharId, token))?.Result;
                         var ml = mls?.FirstOrDefault(a => a.mailing_list_id == r.recipient_id);
                         rcp.Append(ml == null ? LM.Get("mailUnkList") : ml.name);
                         rcp.Append(",");

@@ -53,6 +53,7 @@
         UpdateTracker,
         TokenUpdate,
         AccessToken,
-        FitCheck
+        FitCheck,
+        Aggregator
     }
 }

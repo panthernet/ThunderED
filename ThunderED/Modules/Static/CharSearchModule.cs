@@ -17,7 +17,8 @@ namespace ThunderED.Modules.Static
         {
             var channel = context.Channel;
 
-            var charSearch = await APIHelper.ESIAPI.SearchCharacterId(LogCat.CharSearch.ToString(), name);
+            var token = await APIHelper.ESIAPI.GetSearchTokenString();
+            var charSearch = await APIHelper.ESIAPI.SearchCharacterId(LogCat.CharSearch.ToString(), name, token);
             if (charSearch == null)
             {
                 await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("charNotFound"), true);

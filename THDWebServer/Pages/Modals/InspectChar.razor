@@ -74,25 +74,25 @@
                     <div class="row-fluid">
                         @LM.Get("hrmInspectBirth"):&nbsp; @_character?.MiscData.BirthDate.ToString(_module.Settings.Config.ShortTimeFormat)
                     </div>
-                    @if (SettingsManager.HasCharSkillsScope(_character?.DataView.PermissionsList) && _hasToken)
+                    @if (SettingsManager.HasCharSkillsScope(_characterGeneralScopes) && _hasToken)
                     {
                         <div class="row-fluid">
                             SP:&nbsp; @_totalSp
                         </div>
                     }
-                    @if (SettingsManager.HasCharWalletScope(_character?.DataView.PermissionsList) && _hasToken)
+                    @if (SettingsManager.HasCharWalletScope(_characterGeneralScopes) && _hasToken)
                     {
                         <div class="row-fluid">
                             ISK:&nbsp; @_totalIskBalance
                         </div>
                     }
-                    @if (SettingsManager.HasCharLocationScope(_character?.DataView.PermissionsList) && _hasToken)
+                    @if (SettingsManager.HasCharLocationScope(_characterGeneralScopes) && _hasToken)
                     {
                         <div class="row-fluid">
                             @LM.Get("hrmInspectLocation"):&nbsp; @_locationData
                         </div>
                     }
-                    @if (SettingsManager.HasCharShipTypeScope(_character?.DataView.PermissionsList) && _hasToken)
+                    @if (SettingsManager.HasCharShipTypeScope(_characterGeneralScopes) && _hasToken)
                     {
                         <div class="row-fluid">
                             @LM.Get("hrmInspectShip"):&nbsp; @_shipData
@@ -140,7 +140,7 @@
                                 <RadzenLabel Text="@LM.Get("webLoading")" Class="hrmLoadingTabText" />
                             }
                         </RadzenTabsItem>
-                        @if (SettingsManager.HasReadMailScope(_character?.DataView.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasReadMailScope(_characterGeneralScopes) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabMail")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="20" Count="@_countMail" AllowSorting="true" Data="@_mailList" TItem="WebMailHeader"
@@ -182,7 +182,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharContractsScope(_character?.DataView.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharContractsScope(_characterGeneralScopes) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabContracts")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countContracts" AllowSorting="true" Data="@_contractsList" TItem="WebContract"
@@ -239,7 +239,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharContactsScope(_character?.DataView.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharContactsScope(_characterGeneralScopes) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabContacts")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countContacts" AllowSorting="true" Data="@_contactsList" TItem="WebContact"
@@ -279,7 +279,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharWalletScope(_character?.DataView.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharWalletScope(_characterGeneralScopes) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabJournal")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countWalletJournal" AllowSorting="true" Data="@_walletJournalList" TItem="WebWalletJournal"
@@ -314,7 +314,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharWalletScope(_character?.DataView.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharWalletScope(_characterGeneralScopes) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabTransfers")">
                                 <RadzenGrid AllowFiltering="true" AllowPaging="true" PageSize="30" Count="@_countWalletTrans" AllowSorting="true" Data="@_walletTransList" TItem="WebWalletTrans"
@@ -354,7 +354,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (SettingsManager.HasCharSkillsScope(_character?.DataView.PermissionsList) && _hasToken)
+                        @if (SettingsManager.HasCharSkillsScope(_characterGeneralScopes) && _hasToken)
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabSkills")">
                                 <RadzenGrid LoadData="@LoadSkillzData" TItem="WebSkillItem" Count="@_countSkillsList" PageSize="30" AllowFiltering="true" AllowPaging="true" Class="hrm-table"
@@ -389,7 +389,7 @@
                                 }
                             </RadzenTabsItem>
                         }
-                        @if (false) //SettingsManager.HasCharAssetsScope(_character?.Data.PermissionsList) && _hasToken
+                        @if (false) //SettingsManager.HasCharAssetsScope(_characterGeneralScopes) && _hasToken
                         {
                             <RadzenTabsItem Text="@LM.Get("hrmTabCharAssets")">
 
@@ -480,6 +480,7 @@
     private List<WebWalletJournal> _walletJournalListCache;
     private List<WebSkillItem> _skillsListCache;
     private string _walletAccessToken;
+    private List<string> _characterGeneralScopes;
 
     #endregion
 
@@ -532,6 +533,7 @@
                 Nav.NavigateTo("/", true);
                 return;
             }
+            _characterGeneralScopes = _character.GetGeneralToken()?.GetSplitScopes();
             await _character.UpdateData();
             await DbHelper.SaveAuthUser(_character);
 
@@ -543,57 +545,72 @@
             _hasToken = _character.HasToken;
             if (_hasToken)
             {
-                var tq = await APIHelper.ESIAPI.GetAccessToken(_character.GetGeneralToken(), $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.CharacterName}");
+                var token = _character.GetGeneralToken();
+                var tq = await APIHelper.ESIAPI.GetAccessToken(token, $"From {_reason} | Char ID: {_character.CharacterId} | Char name: {_character.CharacterName}");
                 _inspectToken = tq.Result;
                 if (!string.IsNullOrEmpty(_inspectToken))
                 {
+                    var tokenScopes = token.Scopes.Split(',').ToList();
 
-                    var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddLocation().AddUniverseStructure()))?.Result;
-                    if (SettingsManager.HasCharLocationScope(_character.DataView.PermissionsList) && !string.IsNullOrEmpty(localAccess))
+
+                    if (SettingsManager.HasCharLocationScope(tokenScopes))
                     {
-                        var locationData =
-                            await APIHelper.ESIAPI.GetCharacterLocation(_reason, _character.CharacterId, localAccess);
-                        var system =
-                            await APIHelper.ESIAPI.GetSystemData(_reason, locationData?.solar_system_id ?? 0);
-                        var station = locationData != null && locationData.station_id > 0 ? await APIHelper.ESIAPI.GetStationData(_reason, locationData.station_id, localAccess)
-                            : null;
-                        var citadel = locationData != null && locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetUniverseStructureData(_reason, locationData.structure_id, localAccess)
-                            : null;
-                        var loc = station != null ? station.name : citadel?.name;
+                        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddLocation().AddUniverseStructure()))?.Result;
+                        if (!string.IsNullOrEmpty(localAccess))
+                        {
+                            var locationData =
+                                await APIHelper.ESIAPI.GetCharacterLocation(_reason, _character.CharacterId, localAccess);
+                            var system =
+                                await APIHelper.ESIAPI.GetSystemData(_reason, locationData?.solar_system_id ?? 0);
+                            var station = locationData != null && locationData.station_id > 0 ? await APIHelper.ESIAPI.GetStationData(_reason, locationData.station_id, localAccess)
+                                : null;
+                            var citadel = locationData != null && locationData.structure_id > 0 ? await APIHelper.ESIAPI.GetUniverseStructureData(_reason, locationData.structure_id, localAccess)
+                                : null;
+                            var loc = station != null ? station.name : citadel?.name;
 
-                        _locationData = $"{system.SolarSystemName} {loc}";
+                            _locationData = $"{system.SolarSystemName} {loc}";
+                        }
                     }
                     
-                    localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddShip()))?.Result;
-                    if (SettingsManager.HasCharShipTypeScope(_character.DataView.PermissionsList) && !string.IsNullOrEmpty(localAccess))
+                    if (SettingsManager.HasCharShipTypeScope(tokenScopes))
                     {
-                        var stData =
-                            await APIHelper.ESIAPI.GetCharacterShipType(_reason, _character.CharacterId, localAccess);
-                        var tType = await APIHelper.ESIAPI.GetTypeId(_reason, stData.ship_type_id);
-                        _shipData = tType?.Name;
-                    }
-                    localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddSkills()))?.Result;
-                    if (SettingsManager.HasCharSkillsScope(_character.DataView.PermissionsList) && !string.IsNullOrEmpty(localAccess))
-                    {
-                        await Task.Factory.StartNew(async () =>
+                        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddShip()))?.Result;
+                        if (!string.IsNullOrEmpty(localAccess))
                         {
-                            var values = await _module.WebGetSkills(_character.CharacterId, localAccess);
-                            if (values != null)
+                            var stData =
+                                await APIHelper.ESIAPI.GetCharacterShipType(_reason, _character.CharacterId, localAccess);
+                            var tType = await APIHelper.ESIAPI.GetTypeId(_reason, stData.ship_type_id);
+                            _shipData = tType?.Name;
+                        }
+                    }
+                    if (SettingsManager.HasCharSkillsScope(tokenScopes))
+                    {
+                        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddSkills()))?.Result;
+                        if (!string.IsNullOrEmpty(localAccess))
+                        {
+                            await Task.Factory.StartNew(async () =>
                             {
-                                _skillsListCache = values[1] as List<WebSkillItem>;
-                                _totalSp = ((int)values[0]).ToString("N0");
-                            }
+                                var values = await _module.WebGetSkills(_character.CharacterId, localAccess);
+                                if (values != null)
+                                {
+                                    _skillsListCache = values[1] as List<WebSkillItem>;
+                                    _totalSp = ((int) values[0]).ToString("N0");
+                                }
 
-                            await InvokeAsync(StateHasChanged);
-                        });
+                                await InvokeAsync(StateHasChanged);
+                            });
+                        }
                     }
-                    localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharAssets().AddUniverseStructure()))?.Result;
-                    if (SettingsManager.HasCharAssetsScope(_character.DataView.PermissionsList) && !string.IsNullOrEmpty(localAccess))
+                    if (SettingsManager.HasCharAssetsScope(tokenScopes))
                     {
-                        await Task.Factory.StartNew(async () =>
+                        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCharAssets().AddUniverseStructure()))?.Result;
+                        if (!string.IsNullOrEmpty(localAccess))
                         {
-                            await LoadCharAssetsData(localAccess);
-                        });
+                            await Task.Factory.StartNew(async () =>
+                            {
+                                await LoadCharAssetsData(localAccess);
+                            });
+                        }
                     }
                     await LoadWalletData();
                     await InvokeAsync(StateHasChanged);
@@ -613,6 +630,7 @@
 
     private async Task LoadSkillzData(LoadDataArgs args)
     {
+        if(_character == null) return;
         if (_skillsListCache == null)
         {
             var count = 0;
@@ -637,18 +655,24 @@
 
     private async Task LoadWalletData()
     {
-        _walletAccessToken = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharWallet()))?.Result;
+        if(_character == null) return;
+        var token = _character.GetGeneralToken();
 
-        if (!string.IsNullOrEmpty(_walletAccessToken) && SettingsManager.HasCharWalletScope(_character.DataView.PermissionsList))
+        if (SettingsManager.HasCharWalletScope(token.GetSplitScopes()))
         {
-            var value = await APIHelper.ESIAPI.GetCharacterWalletBalance(_reason, _character.CharacterId, _walletAccessToken);
-            _totalIskBalance = value.ToString("N");
-            await InvokeAsync(StateHasChanged);
+            _walletAccessToken = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCharWallet()))?.Result;
+            if (!string.IsNullOrEmpty(_walletAccessToken))
+            {
+                var value = await APIHelper.ESIAPI.GetCharacterWalletBalance(_reason, _character.CharacterId, _walletAccessToken);
+                _totalIskBalance = value.ToString("N");
+                await InvokeAsync(StateHasChanged);
+            }
         }
     }
 
     private async Task LoadWalletJournalData(LoadDataArgs args)
     {
+        if(_character == null || string.IsNullOrEmpty(_walletAccessToken)) return;
         _walletJournalListCache ??= await _module.WebGetWalletJournal(_character.CharacterId, _walletAccessToken);
         if (_walletJournalListCache == null) return;
         _walletJournalList = ApplyAjaxFilters(_walletJournalListCache, args, out _countWalletJournal);
@@ -658,6 +682,7 @@
 
     private async Task LoadWalletTransData(LoadDataArgs args)
     {
+        if(_character == null || string.IsNullOrEmpty(_walletAccessToken)) return;
         _walletTransListCache ??= await _module.WebGetWalletTrans(_character.CharacterId, _walletAccessToken);
         if (_walletTransListCache == null) return;
         _walletTransList = ApplyAjaxFilters(_walletTransListCache, args, out _countWalletTrans);
@@ -667,6 +692,7 @@
 
     private async Task LoadCharAssetsData(string token)
     {
+        if(_character == null) return;
         var data = await _module.WebGetCharAssetsList(_character.CharacterId, token);
         if (data != null)
         {
@@ -679,7 +705,11 @@
 
     private async Task LoadMailData(LoadDataArgs args)
     {
-        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharReadMail().AddUniverseStructure()))?.Result;
+        if(_character == null) return;
+        var token = _character.GetGeneralToken();
+        if(!SettingsManager.HasReadMailScope(token.GetSplitScopes())) return;
+
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCharReadMail().AddUniverseStructure()))?.Result;
         if (!string.IsNullOrEmpty(localAccess))
         {
             _mailListCache ??= await _module.WebGetMailHeaders(_character.CharacterId, localAccess);
@@ -691,6 +721,7 @@
 
     private async Task LoadCorpHistoryData(LoadDataArgs args)
     {
+        if(_character == null) return;
         _corpHistoryList = ApplyAjaxFilters(await _module.WebGenerateCorpHistory(_character.CharacterId), args, out _);
         _isCorpsLoading = false;
         await InvokeAsync(StateHasChanged);
@@ -699,7 +730,11 @@
 
     private async Task LoadContractsData(LoadDataArgs args)
     {
-        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharContracts().AddUniverseStructure()))?.Result;
+        if(_character == null) return;
+        var token = _character.GetGeneralToken();
+        if(!SettingsManager.HasCharContractsScope(token.GetSplitScopes())) return;
+
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCharContracts().AddUniverseStructure()))?.Result;
         if (!string.IsNullOrEmpty(localAccess))
         {
             _contractsListCache ??= await _module.WebGetCharContracts(_character.CharacterId, localAccess);
@@ -711,7 +746,11 @@
 
     private async Task LoadContactsData(LoadDataArgs args)
     {
-        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharContacts()))?.Result;
+        if(_character == null) return;
+        var token = _character.GetGeneralToken();
+        if(!SettingsManager.HasCharContactsScope(token.GetSplitScopes())) return;
+
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCharContacts()))?.Result;
         if (!string.IsNullOrEmpty(localAccess))
         {
             _contactsListCache ??= await _module.WebGetCharContacts(_character.CharacterId, localAccess, _inspector.CharacterId);
@@ -724,7 +763,11 @@
 
     private async Task ExecuteSearchMail()
     {
-        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(_character.GetGeneralToken(), new ESIScope().AddCharReadMail()))?.Result;
+        if(_character == null) return;
+        var token = _character.GetGeneralToken();
+        if(!SettingsManager.HasReadMailScope(token.GetSplitScopes())) return;
+
+        var localAccess = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddCharReadMail()))?.Result;
         if (!string.IsNullOrEmpty(localAccess))
         {
             var prms = new ModalParameters();

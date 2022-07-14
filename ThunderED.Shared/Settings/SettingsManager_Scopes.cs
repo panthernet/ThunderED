@@ -101,6 +101,16 @@ namespace ThunderED
             return "esi-characters.read_notifications.v1";
         }
 
+        public static string GetMailESIScope()
+        {
+            return "esi-mail.read_mail.v1";
+        }
+
+        public static string GetStructureSearchESIScope()
+        {
+            return "esi-search.search_structures.v1";
+        }
+
         public static List<string> ESIScopes = new List<string>
         {
             "esi-calendar.respond_calendar_events.v1",
@@ -173,7 +183,6 @@ namespace ThunderED
             "esi-alliances.read_contacts.v1",
             "esi-corporations.read_fw_stats.v1",
         };
-
 
     }
 }

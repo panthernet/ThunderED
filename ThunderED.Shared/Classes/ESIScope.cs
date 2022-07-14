@@ -153,6 +153,15 @@ namespace ThunderED.Classes
             return item;
         }
 
+        public static ESIScope AddSearch(this ESIScope item)
+        {
+            const string scope = "esi-search.search_structures.v1";
+            if (!item.Scopes.Contains(scope))
+                item.Scopes.Add(scope);
+            return item;
+        }
+        
+
         public static ESIScope AddCharStandings(this ESIScope item)
         {
             const string scope = "esi-characters.read_standings.v1";

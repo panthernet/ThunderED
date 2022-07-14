@@ -529,7 +529,7 @@ namespace ThunderED.Modules
             try
             {
                 await LogHelper.LogModule("Running preliminary auth check...", Category);
-                var list = await DbHelper.GetAuthUsers(UserStatusEnum.Awaiting, false, true);
+                var list = await DbHelper.GetAuthUsers(UserStatusEnum.Awaiting, true, true);
                 foreach (var data in list.Where(a => a.DiscordId != 0))
                 {
                     await ProcessPreliminaryApplicant(data);
@@ -664,7 +664,7 @@ namespace ThunderED.Modules
                     return;
                 }
 
-                if (authUser.DataView.PermissionsList.Any())
+                if (!string.IsNullOrEmpty(authUser.GetGeneralTokenString()))
                 {
                     var token = string.IsNullOrEmpty(authUser.GetGeneralTokenString())
                         ? null

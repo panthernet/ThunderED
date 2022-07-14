@@ -121,7 +121,6 @@ namespace ThunderED.Modules
                     {
                         try
                         {
-
                             var enabledGroups = Settings.NotificationFeedModule.Tracker.GetEnabledGroups()
                                 .Where(a => (a.Value.DiscordChannels?.Any() ?? false) &&
                                             (a.Value.Notifications?.Any() ?? false))
@@ -131,7 +130,8 @@ namespace ThunderED.Modules
                                 logConsole,
                                 logFile);
 
-                            var tokens = await DbHelper.GetTokens(TokenEnum.Notification);
+                            var tokens = await DbHelper.GetTokensByScope(SettingsManager.GetNotificationsESIScope());//await DbHelper.GetTokens(TokenEnum.Notification);
+
                             await LogHelper.LogInfo($"Fetched {tokens.Count} tokens", LogCat.UpdateTracker, logConsole,
                                 logFile);
 
@@ -203,15 +203,30 @@ namespace ThunderED.Modules
                                         await LogHelper.LogInfo($"Key update...", LogCat.UpdateTracker, logConsole,
                                             logFile);
 
-                                        var key = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddNotifications().AddUniverseStructure()))?.Result;
+                                        var data = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddNotifications().AddUniverseStructure());
+                                        var key = data?.Result;
+
+                                        if(data?.Data != null && data.Data.IsInvalidScope)
+                                            data = await APIHelper.ESIAPI.GetAccessTokenWithScopes(token, new ESIScope().AddNotifications());
+
                                         await LogHelper.LogInfo($"Key: {key != null}", LogCat.UpdateTracker, logConsole,
                                             logFile);
-                                        if (key == null) return;
+                                        if (key == null)
+                                        {
+                                            if (data?.Data != null && data.Data.IsNotValid)
+                                            {
+                                                token.Roles = 99;
+                                                await DbHelper.UpdateTokenEx(token);
+                                            }
+
+                                            return;
+                                        }
                                         _trackerKeys.AddOrUpdate(token.CharacterId, new TrackerData(key));
                                     }
 
                                     var track = _trackerKeys[token.CharacterId];
                                     var cacheHeader = $"nmt|{token.CharacterId}";
+                                    var cacheHeaderInfo = $"nmi|{token.CharacterId}";
 
                                     //try fetch last ETAG
                                     if (string.IsNullOrEmpty(track.Etag))
@@ -235,9 +250,16 @@ namespace ThunderED.Modules
                                     //continue if no new data
                                     if (nResult.Data.IsNotModified) return;
 
+                                    var oldInfo = await DbHelper.GetCache<string>(cacheHeaderInfo, 7200);
+                                    var notifyFilterCheckDate = oldInfo == null
+                                        ? lastCheck.Subtract(TimeSpan.FromDays(5))
+                                        : DateTime.Parse(oldInfo);
+
                                     var notifications = nResult.Result.Where(a =>
-                                            a.Date >= lastCheck && allEnabledTypes.ContainsCaseInsensitive(a.type))
+                                            a.Date >= notifyFilterCheckDate && allEnabledTypes.ContainsCaseInsensitive(a.type))
                                         .ToList();
+                                    await DbHelper.UpdateCache(cacheHeaderInfo, DateTime.Now.ToString(), 5);
+
                                     await LogHelper.LogInfo($"Notif filtered: {notifications.Count}",
                                         LogCat.UpdateTracker,
                                         logConsole, logFile);

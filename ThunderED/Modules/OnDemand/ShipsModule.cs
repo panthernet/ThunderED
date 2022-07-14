@@ -147,8 +147,8 @@ namespace ThunderED.Modules.OnDemand
                 {
                     foreach (var userId in APIHelper.DiscordAPI.GetUserIdsFromChannel(context.Guild.Id, context.Channel.Id, isOnlineOnly))
                     {
-                        var item = await DbHelper.GetAuthUserByDiscordId(userId);
-                        if (item != null && !string.IsNullOrEmpty(item.DataView.Permissions) && SettingsManager.HasCharSkillsScope(item.DataView.PermissionsList))
+                        var item = await DbHelper.GetAuthUserByDiscordId(userId, true);
+                        if (item != null && SettingsManager.HasCharSkillsScope(item.GetGeneralToken()?.GetSplitScopes()))
                             usersToCheck.Add(item);
                     }
                 }
@@ -158,12 +158,12 @@ namespace ThunderED.Modules.OnDemand
                     {
                         var dusers = APIHelper.DiscordAPI.GetUserIdsFromChannel(context.Guild.Id, 0, true);
                         usersToCheck = (await DbHelper.GetAuthUsers(UserStatusEnum.Authed, true)).Where(item => dusers.Contains(item.DiscordId ?? 0) &&
-                                !string.IsNullOrEmpty(item.DataView.Permissions) && SettingsManager.HasCharSkillsScope(item.DataView.PermissionsList))
+                                SettingsManager.HasCharSkillsScope(item.GetGeneralToken()?.GetSplitScopes()))
                             .ToList();
                     }
                     else
                         usersToCheck = (await DbHelper.GetAuthUsers(UserStatusEnum.Authed, true)).Where(item =>
-                                !string.IsNullOrEmpty(item.DataView.Permissions) && SettingsManager.HasCharSkillsScope(item.DataView.PermissionsList))
+                                SettingsManager.HasCharSkillsScope(item.GetGeneralToken()?.GetSplitScopes()))
                             .ToList();
                 }
 

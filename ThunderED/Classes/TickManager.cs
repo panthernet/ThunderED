@@ -106,6 +106,9 @@ namespace ThunderED.Classes
                     await APIHelper.ESIAPI.RemoveAllCharacterDataFromCache(id);
             }
 
+            if (SettingsManager.Settings.Config.ModuleAggregator)
+                Modules.Add(new AggregatorModule());
+
             //on demand modules - only could be pinged by other modules or commands
             if (SettingsManager.Settings.Config.ModuleLiveKillFeed)
                 OnDemandModules.Add(new LiveKillFeedModule());

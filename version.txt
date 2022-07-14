@@ -1,3 +1,16 @@
+### 2.1.9
++ Fixed internal search functionality
+
+BREAKING
+Introduced new settings variable: `SearchCharacterId`! It is mandatory now if you use modules that rely on search by names such as WebAuth and ZKB.
+Set your character ID there. Make auth block with `esi-search.search_structures.v1` scopes. Auth your character to fetch token into the DB. Should work.
+
+### 2.1.8
++ Added new Aggregator module to gather and store user data for conseqent access and analysis
+    Currently support: mail, notifications
++ Improved notification tracker to track data from all availabale tokens
++ Fixed tokens fetch for web
+
 ### V2.1.7
 + Added new fit checker module
 + Added map to CustomAssetsMap static folder for web custom assets

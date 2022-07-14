@@ -154,7 +154,7 @@ namespace ThunderED
                 // if(!SettingsManager.Settings.Config.DisableLogIntoFiles)
                 WriteToResource(file,  $"{DateTime.Now,-19} [{LogSeverity.Critical,8}]: {message} {Environment.NewLine}{exception}{exception.InnerException}{Environment.NewLine}");
 
-                var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat,13}]: {message} {methodName}";
+                var msg = $"{DateTime.Now,-19} [{LogSeverity.Critical,8}] [{cat,13}]: {message} UPPER METHOD: {methodName}";
                 var logConsole = !SettingsManager.Settings?.Config.RunAsServiceCompatibility ?? true;
 
                 if (logConsole)

@@ -35,10 +35,17 @@
       "launchBrowser": true,
       "launchUrl": "https://localhost:5001",
       "environmentVariables": {
-        "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000"
       },
       "distributionName": ""
+    },
+    "REMOTE UF": {
+      "commandName": "Executable",
+      "executablePath": "D:\\Projects\\EVE\\ThunderED\\THD\\THDWebServer\\bin\\Debug\\net6.0-windows\\THDWebServer.exe",
+      "remoteDebugEnabled": true,
+      "authenticationMode": "Windows",
+      "remoteDebugMachine": "176.119.158.51:4026"
     }
   }
 }

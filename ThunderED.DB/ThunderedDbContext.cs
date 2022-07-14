@@ -34,6 +34,11 @@ namespace ThunderED
         public DbSet<ThdType> Types { get; set; }
         public DbSet<ThdGroup> Groups { get; set; }
 
+        public DbSet<ThdHistoryNotification> HistoryNotifications { get; set; }
+        public DbSet<ThdHistoryMail> HistoryMail { get; set; }
+        public DbSet<ThdHistoryMailRcp> HistoryMailRcp { get; set; }
+        public DbSet<ThdHistoryMailList> HistoryMailLists { get; set; }
+
         public DbSet<ThdTimer> Timers { get; set; }
         public DbSet<ThdFit> Fits { get; set; }
 
@@ -407,8 +412,87 @@ namespace ThunderED
             modelBuilder.Entity<ThdStarConstellation>().Property(a => a.FactionId).HasColumnName("factionID");
             modelBuilder.Entity<ThdStarConstellation>().Property(a => a.Radius).HasColumnName("radius");
             #endregion
-        }
 
+            #region ThdHistoryMailLists
+
+            modelBuilder.Entity<ThdHistoryMailList>().HasKey(u => u.Id);
+            modelBuilder.Entity<ThdHistoryMailList>().HasIndex(u => u.Id);
+
+            modelBuilder.Entity<ThdHistoryMailList>().ToTable("history_mail_list");
+            modelBuilder.Entity<ThdHistoryMailList>().Property(a => a.Id).HasColumnName("id").ValueGeneratedNever();
+            modelBuilder.Entity<ThdHistoryMailList>().Property(a => a.Name).HasColumnName("name");
+
+            #endregion
+            
+            #region ThdHistoryMailRcp
+
+            modelBuilder.Entity<ThdHistoryMailRcp>().HasKey(u => u.Id);
+            modelBuilder.Entity<ThdHistoryMailRcp>().HasIndex(u => u.Id);
+            modelBuilder.Entity<ThdHistoryMailRcp>().HasIndex(u => u.MailId);
+            modelBuilder.Entity<ThdHistoryMailRcp>().HasIndex(u => u.RecipientId);
+
+            modelBuilder.Entity<ThdHistoryMailRcp>().ToTable("history_mail_rcp");
+            modelBuilder.Entity<ThdHistoryMailRcp>().Property(a => a.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            modelBuilder.Entity<ThdHistoryMailRcp>().Property(a => a.MailId).HasColumnName("mail_id");
+            modelBuilder.Entity<ThdHistoryMailRcp>().Property(a => a.RecipientId).HasColumnName("rcp_id");
+            modelBuilder.Entity<ThdHistoryMailRcp>().Property(a => a.RecipientType).HasColumnName("rcp_type");
+            modelBuilder.Entity<ThdHistoryMailRcp>().Property(a => a.RecipientSnapshot).HasColumnName("rcp_snapshot").HasConversion(a => JsonConvert.SerializeObject(a), a => JsonConvert.DeserializeObject<CharacterSnapshot>(a));
+
+            #endregion
+
+            #region ThdHistoryMail
+
+            modelBuilder.Entity<ThdHistoryMail>().HasKey(u => u.Id);
+            modelBuilder.Entity<ThdHistoryMail>().HasIndex(u => u.Labels);
+            modelBuilder.Entity<ThdHistoryMail>().HasIndex(u => u.SenderId);
+
+            modelBuilder.Entity<ThdHistoryMail>().ToTable("history_mail");
+            modelBuilder.Entity<ThdHistoryMail>().Property(a => a.Id).HasColumnName("id").ValueGeneratedNever();
+            modelBuilder.Entity<ThdHistoryMail>().Property(a => a.SenderId).HasColumnName("sender_id");
+            modelBuilder.Entity<ThdHistoryMail>().Property(a => a.Subject).HasColumnName("subject");
+            modelBuilder.Entity<ThdHistoryMail>().Property(a => a.ReceiveDate).HasColumnName("receive_date");
+            modelBuilder.Entity<ThdHistoryMail>().Property(a => a.Body).HasColumnName("body");
+            modelBuilder.Entity<ThdHistoryMail>().Property(a => a.Labels).HasColumnName("labels");
+            modelBuilder.Entity<ThdHistoryMail>().Property(a => a.SenderSnapshot).HasColumnName("sender_snapshot").HasConversion(a => JsonConvert.SerializeObject(a), a => JsonConvert.DeserializeObject<CharacterSnapshot>(a));
+            modelBuilder.Entity<ThdHistoryMail>().Property(a => a.SenderCorporationId).HasColumnName("sender_corporation_id");
+            modelBuilder.Entity<ThdHistoryMail>().Property(a => a.SenderAllianceId).HasColumnName("sender_alliance_id");
+
+            modelBuilder.Entity<ThdHistoryMail>().HasMany(a => a.Recipients).WithOne(a=> a.Mail)
+                .HasForeignKey(a=> a.RecipientId).HasPrincipalKey(a=> a.Id);
+            modelBuilder.Entity<ThdHistoryMail>().HasOne(a => a.User).WithMany(a=> a.HistoryMail)
+                .HasForeignKey(a=> a.SenderId).HasPrincipalKey(a=> a.CharacterId);
+
+
+            #endregion
+
+            
+            #region ThdHistoryNotification
+
+            modelBuilder.Entity<ThdHistoryNotification>().HasKey(u => u.Id);
+            modelBuilder.Entity<ThdHistoryNotification>().HasIndex(u => u.Id);
+            modelBuilder.Entity<ThdHistoryNotification>().HasIndex(u => u.Type);
+            modelBuilder.Entity<ThdHistoryNotification>().HasIndex(u => u.SenderId);
+            modelBuilder.Entity<ThdHistoryNotification>().HasIndex("Type","ReceiveDate");
+            modelBuilder.Entity<ThdHistoryNotification>().HasIndex("SenderId","ReceiveDate");
+
+            modelBuilder.Entity<ThdHistoryNotification>().ToTable("history_notifications");
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.Id).HasColumnName("id").ValueGeneratedNever();
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.SenderId).HasColumnName("sender_id");
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.SenderType).HasColumnName("sender_type");
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.Type).HasColumnName("type");
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.ReceiveDate).HasColumnName("receive_date");
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.Data).HasColumnName("data");
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.SenderSnapshot).HasColumnName("sender_snapshot").HasConversion(a => JsonConvert.SerializeObject(a), a => JsonConvert.DeserializeObject<CharacterSnapshot>(a));
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.SenderCorporationId).HasColumnName("sender_corporation_id");
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.SenderAllianceId).HasColumnName("sender_alliance_id");
+            modelBuilder.Entity<ThdHistoryNotification>().Property(a => a.FeederId).HasColumnName("feeder_id");
+
+            modelBuilder.Entity<ThdHistoryNotification>().HasOne(a => a.User).WithMany(a=> a.HistoryNotifications)
+                .HasForeignKey(a=> a.SenderId).HasPrincipalKey(a=> a.CharacterId);
+
+            #endregion
+
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

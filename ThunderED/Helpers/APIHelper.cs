@@ -214,7 +214,9 @@ namespace ThunderED.Helpers
                         httpClient.DefaultRequestHeaders.Clear();
                         httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
                         httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                        httpClient.DefaultRequestHeaders.Add("Accept-Language", "en");
                         httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+                        httpClient.DefaultRequestHeaders.Add("accept", "application/json");
                         if (!string.IsNullOrEmpty(auth))
                             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", auth);
                         if (!string.IsNullOrEmpty(etag))

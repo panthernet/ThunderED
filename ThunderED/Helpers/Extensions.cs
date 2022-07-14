@@ -28,8 +28,8 @@ namespace ThunderED
                 user.DataView.AllianceName = rAlliance?.name;
                 user.DataView.AllianceTicker = rAlliance?.ticker;
             }
-            if (permissions != null)
-                user.DataView.Permissions = permissions;
+            //if (permissions != null)
+            //    user.DataView.Permissions = permissions;
 
             user.MiscData.BirthDate = characterData.birthday;
             user.MiscData.SecurityStatus = characterData.security_status;

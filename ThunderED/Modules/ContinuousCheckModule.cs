@@ -332,8 +332,10 @@ namespace ThunderED.Modules
                 return;
             }
 
-            var allyId = grp?.DailyStatsAlliance ?? ((await APIHelper.ESIAPI.SearchAllianceId("Stats", entity))?.alliance?.FirstOrDefault() ?? 0);
-            var corpId = grp?.DailyStatsCorp ?? (await APIHelper.ESIAPI.SearchCorporationId("Stats", entity))?.corporation?.FirstOrDefault() ?? 0;
+            var token = await APIHelper.ESIAPI.GetSearchTokenString();
+
+            var allyId = grp?.DailyStatsAlliance ?? ((await APIHelper.ESIAPI.SearchAllianceId("Stats", entity, token))?.alliance?.FirstOrDefault() ?? 0);
+            var corpId = grp?.DailyStatsCorp ?? (await APIHelper.ESIAPI.SearchCorporationId("Stats", entity, token))?.corporation?.FirstOrDefault() ?? 0;
             if (allyId == 0 && corpId == 0)
             {
                 await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("entryNotFound"), true).ConfigureAwait(false);           

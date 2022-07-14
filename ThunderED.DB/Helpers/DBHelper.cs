@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Radzen;
@@ -16,6 +19,11 @@ namespace ThunderED
 {
     public static class DbHelper
     {
+        public static bool IsSQLite => SettingsManager.Settings.Database.DatabaseProvider.Equals("sqlite",
+            StringComparison.OrdinalIgnoreCase);
+
+
+
         public static async Task<object[]> GetUsersList(UserStatusEnum type, LoadDataArgs args)
         {
             await using var db = new ThunderedDbContext();
@@ -23,19 +31,19 @@ namespace ThunderED
             switch (type)
             {
                 case UserStatusEnum.Awaiting:
-                    q = db.Users.OrderBy(a => a.Data).AsNoTracking().Where(a => a.AuthState < 2);
+                    q = db.Users.OrderBy(a => a.Data).Include(a=> a.Tokens).AsNoTracking().Where(a => a.AuthState < 2);
                     break;
                 case UserStatusEnum.Authed:
-                    q = db.Users.OrderBy(a => a.Data).AsNoTracking().Where(a => a.AuthState == 2);
+                    q = db.Users.OrderBy(a => a.Data).Include(a=> a.Tokens).AsNoTracking().Where(a => a.AuthState == 2);
                     break;
                 case UserStatusEnum.Dumped:
-                    q = db.Users.OrderBy(a => a.Data).AsNoTracking().Where(a => a.AuthState == 3);
+                    q = db.Users.OrderBy(a => a.Data).Include(a=> a.Tokens).AsNoTracking().Where(a => a.AuthState == 3);
                     break;
                 case UserStatusEnum.Spying:
-                    q = db.Users.OrderBy(a => a.Data).AsNoTracking().Where(a => a.AuthState == 4);
+                    q = db.Users.OrderBy(a => a.Data).Include(a=> a.Tokens).AsNoTracking().Where(a => a.AuthState == 4);
                     break;
                 case UserStatusEnum.Alts:
-                    q = db.Users.OrderBy(a => a.Data).AsNoTracking().Where(a => a.MainCharacterId > 0);
+                    q = db.Users.OrderBy(a => a.Data).Include(a=> a.Tokens).AsNoTracking().Where(a => a.MainCharacterId > 0);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, "User type not found");
@@ -110,7 +118,8 @@ namespace ThunderED
         public static async Task<List<ThdToken>> GetTokensByScope(string scope)
         {
             await using var db = new ThunderedDbContext();
-            return await db.Tokens.AsNoTracking().Where(a => EF.Functions.Like(a.Scopes, $"%{scope}%")).ToListAsync();
+            //99 means it is no longer valid
+            return await db.Tokens.AsNoTracking().Where(a => EF.Functions.Like(a.Scopes, $"%{scope}%") && a.Roles != 99).ToListAsync();
         }
 
         public static async Task<List<ThdToken>> GetTokens(TokenEnum type)
@@ -135,6 +144,23 @@ namespace ThunderED
             await db.SaveChangesAsync();
         }
 
+        
+        public static async Task UpdateTokenEx(ThdToken token)
+        {
+            try
+            {
+                await using var db = new ThunderedDbContext();
+                db.Attach(token);
+                db.Entry(token).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                await LogHelper.LogEx(ex);
+                throw;
+            }
+        }
+
         public static async Task<ThdToken> UpdateToken(string token, long characterId, TokenEnum type,
             string scopes = null)
         {
@@ -149,12 +175,15 @@ namespace ThunderED
                         CharacterId = characterId,
                         Token = token,
                         Type = type,
-                        Scopes = scopes
+                        Scopes = scopes,
+                        Roles = null
                     };
                     await db.Tokens.AddAsync(entry);
                 }
                 else
                 {
+                    if (entry.Token != token)
+                        entry.Roles = null;
                     entry.Token = token;
                     entry.Scopes = scopes;
                 }
@@ -197,7 +226,17 @@ namespace ThunderED
             var list = await req.ToListAsync();
             list.ForEach(a => { a?.UnpackData(); });
             if (checkPermissions)
-                list = list.Where(a => a.DataView.PermissionsList.Any()).ToList();
+            {
+                if (includeToken)
+                    list = list.Where(a => !string.IsNullOrEmpty(a.GetGeneralTokenString())).ToList();
+                else
+                {
+                    await LogHelper.LogWarning(
+                        $"Selecting users with permissions without tokens always nets empty result!", LogCat.Database);
+                    return new List<ThdAuthUser>();
+                }
+            }
+
             return list;
         }
 
@@ -220,7 +259,16 @@ namespace ThunderED
             var list = await req.ToListAsync();
             list.ForEach(a => { a?.UnpackData(); });
             if (checkPermissions)
-                list = list.Where(a => a.DataView.PermissionsList.Any()).ToList();
+            {
+                if (includeToken)
+                    list = list.Where(a => !string.IsNullOrEmpty(a.GetGeneralTokenString())).ToList();
+                else
+                {
+                    await LogHelper.LogWarning(
+                        $"Selecting users with permissions without tokens always nets empty result!", LogCat.Database);
+                    return new List<ThdAuthUser>();
+                }
+            }
             return list;
         }
 
@@ -572,7 +620,7 @@ namespace ThunderED
         }
 
         private static volatile bool _isCacheUpdating = false;
-        public static async Task UpdateCache<T>(string cacheId, T content, int days = 1)
+        public static async Task UpdateCache<T>(string cacheId, T content, int days = 1, [CallerMemberName]string caller = null)
         {
             while (_isCacheUpdating)
                 await Task.Delay(5);
@@ -600,7 +648,7 @@ namespace ThunderED
             }
             catch (Exception ex)
             {
-                await LogHelper.LogEx(ex, LogCat.Database);
+                await LogHelper.LogEx(ex, LogCat.Database, caller);
             }
             finally
             {
@@ -1348,6 +1396,60 @@ namespace ThunderED
 
         #endregion
 
+        #region Aggregate
+
+        #region Aggregate notifications
+
+        public static async Task<long> GetLastAggregateNotificationId(long characterId)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.HistoryNotifications.Where(a => a.SenderId == characterId).MaxAsync(a => a.Id as long?) ?? 0;
+        }
+
+        public static async Task AggregateAddNotifications(List<ThdHistoryNotification> list)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.BulkInsertOrUpdateAsync(list);
+            await db.SaveChangesAsync();
+        }
+
+        #endregion
+
+        #region Aggregate mail
         
+        
+        public static async Task AggregateAddMail(List<ThdHistoryMail> list)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.BulkInsertOrUpdateAsync(list, new BulkConfig {PropertiesToIncludeOnCompare = new List<string>{"Id"}});
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task<long> AggregateGetLastMailId(long characterId)
+        {
+            await using var db = new ThunderedDbContext();
+            return await db.HistoryMail.Where(a => a.SenderId == characterId).MaxAsync(a => a.Id as long?) ?? 0;
+        }
+
+        public static async Task AggregateAddMailLists(List<ThdHistoryMailList> list)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.BulkInsertOrUpdateAsync(list);
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task AggregateAddMailRcp(List<ThdHistoryMailRcp> list)
+        {
+            await using var db = new ThunderedDbContext();
+            await db.BulkInsertOrUpdateAsync(list, new BulkConfig {PropertiesToIncludeOnCompare = new List<string>{"MailId","RecipientId"}});
+            await db.SaveChangesAsync();
+        }
+
+        #endregion
+
+        #endregion
+
+
+
     }
 }

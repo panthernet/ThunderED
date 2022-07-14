@@ -10,15 +10,19 @@ namespace ThunderED.Json.Converters
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var list = value as List<KeyValuePair<TKey, TValue>>;
-            writer.WriteStartArray();
+            writer.WriteStartObject();
             foreach (var item in list)
             {
                 writer.WriteStartObject();
                 writer.WritePropertyName(item.Key?.ToString() ?? "");
-                writer.WriteValue(item.Value);
+                if (item.Value.GetType().IsClass)
+                {
+                    writer.WriteRawValue(JsonConvert.SerializeObject(item.Value));
+                }
+                else writer.WriteValue(item.Value);
                 writer.WriteEndObject();
             }
-            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)

@@ -167,7 +167,8 @@ namespace ThunderED.Modules.OnDemand
                     fwData.factionCorpId = 1000182;
                     break;
                 default:
-                    var res = (await APIHelper.ESIAPI.SearchCorporationId("LP", command))?.corporation?.FirstOrDefault();
+                    var token = await APIHelper.ESIAPI.GetSearchTokenString();
+                    var res = (await APIHelper.ESIAPI.SearchCorporationId("LP", command, token))?.corporation?.FirstOrDefault();
                     if (res.HasValue)
                     {
                         var npcCorps = await APIHelper.ESIAPI.GetNpcCorps("LP");
@@ -292,7 +293,7 @@ namespace ThunderED.Modules.OnDemand
                 var lookupId = isFaction ? data.factionId : data.factionCorpId;
                 foreach (var user in users)
                 {
-                    if (!SettingsManager.HasCharStandingsScope(user.DataView.PermissionsList)) continue;
+                    if (!SettingsManager.HasCharStandingsScope(user.GetGeneralToken()?.GetSplitScopes())) continue;
                     var token = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(user.GetGeneralToken(), new ESIScope().AddCharStandings(),
                             $"From FWStats | Char ID: {user.CharacterId} | Char name: {user.CharacterName}"))
                         ?.Result;

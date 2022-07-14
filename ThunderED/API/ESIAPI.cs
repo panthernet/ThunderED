@@ -145,10 +145,11 @@ namespace ThunderED.API
             return result;
         }
 
-        public async Task<JsonClasses.SystemIDSearch> GetRadiusSystems(string reason, object id)
+        public async Task<JsonClasses.SystemIDSearch> GetRadiusSystems(string reason, object id, string token)
         {
             if (id == null || id.ToString() == "0") return null;
-            return await APIHelper.RequestWrapper<JsonClasses.SystemIDSearch>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=solar_system&datasource=tranquility&search={id}&strict=true", reason);
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<JsonClasses.SystemIDSearch>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{SettingsManager.Settings.Config.SearchCharacterId}/search/?categories=solar_system&datasource=tranquility&search={id}&strict=true", reason, authHeader);
         }
 
         public async Task<string> GetRawRoute(string reason, object firstId, object secondId)
@@ -221,11 +222,12 @@ namespace ThunderED.API
         }
 
 
-        public async Task<JsonClasses.CharacterID> SearchCharacterId(string reason, string name)
+        public async Task<JsonClasses.CharacterID> SearchCharacterId(string reason, string name, string token)
         {
             name = HttpUtility.UrlEncode(name);
+            var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.CharacterID>(
-                $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=character&datasource=tranquility&search={name}&strict=true", reason);
+                $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{SettingsManager.Settings.Config.SearchCharacterId}/search/?categories=character&datasource=tranquility&search={name}&strict=true", reason, authHeader);
         }
 
         public async Task<bool> OpenContractIngame(string reason, long contractId, string token)
@@ -240,18 +242,20 @@ namespace ThunderED.API
             return await APIHelper.PostWrapper($"{SettingsManager.Settings.Config.ESIAddress}latest/ui/openwindow/contract/?contract_id={contractId}&datasource=tranquility", content, reason, authHeader);
         }
 
-        public async Task<JsonClasses.CorpIDLookup> SearchCorporationId(string reason, string name)
+        public async Task<JsonClasses.CorpIDLookup> SearchCorporationId(string reason, string name, string token)
         {
             name = HttpUtility.UrlEncode(name);
+            var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.CorpIDLookup>(
-                $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=corporation&datasource=tranquility&search={name}&strict=true", reason);
+                $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{SettingsManager.Settings.Config.SearchCharacterId}/search/?categories=corporation&datasource=tranquility&search={name}&strict=true", reason, authHeader);
         }
 
-        public async Task<JsonClasses.AllianceIDLookup> SearchAllianceId(string reason, string name)
+        public async Task<JsonClasses.AllianceIDLookup> SearchAllianceId(string reason, string name, string token)
         {
             name = HttpUtility.UrlEncode(name);
+            var authHeader = $"Bearer {token}";
             return await APIHelper.RequestWrapper<JsonClasses.AllianceIDLookup>(
-                $"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance&datasource=tranquility&search={name}&strict=true", reason);
+                $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{SettingsManager.Settings.Config.SearchCharacterId}/search/?categories=alliance&datasource=tranquility&search={name}&strict=true", reason, authHeader);
         }
 
         public async Task<ESIQueryResult<List<JsonClasses.FWSystemStat>>> GetFWSystemStats(string reason, string etag)
@@ -378,24 +382,15 @@ namespace ThunderED.API
                                 }
 
                                 await LogHelper.LogWarning(
-                                    $"Access token request for {refreshToken.CharacterId} failed with code {(int)responseMessage.StatusCode}!\nScope: {scope}\nNotes: {notes}\nMessage: {msg}\nSSO: {code}]nMsg: {raw}\n", LogCat.AccessToken);
+                                    $"Access token request for {refreshToken.CharacterId} failed with code {(int)responseMessage.StatusCode}!\nScope: {scope}\nNotes: {notes}\nMessage: {msg}\nSSO: {code}\nMsg: {raw}\n", LogCat.AccessToken);
                             }
                             catch
                             {
                                 // ignore
                             }
 
-                            if (raw.StartsWith("{\"error\""))
-                            {
-                                await LogHelper.LogWarning($"[TOKEN] Request failure: {raw}\n{notes}", LogCat.AccessToken);
-                                result.Data.ErrorCode = -99;
-                                result.Data.Message = $"Valid ESI request error";
-                            }
-                            else
-                            {
-                                result.Data.ErrorCode = (int)responseMessage.StatusCode;
-                                result.Data.Message = responseMessage.StatusCode.ToString();
-                            }
+                            await UpdateQueryResult(result.Data, raw, responseMessage, scope);
+
                             return result;
                         }
 
@@ -412,6 +407,31 @@ namespace ThunderED.API
                 result.Data.ErrorCode = 400;
                 result.Data.Message = "Unexpected exception";
                 return result;
+            }
+        }
+
+        private static async Task UpdateQueryResult(QueryData data, string raw, HttpResponseMessage responseMessage, string scope = null)
+        {
+            
+            if (raw.StartsWith("{\"error\""))
+            {
+                var msg = JObject.Parse(raw)["error"]?.ToString();
+                if (msg == "invalid_scope")
+                {
+                    data.ErrorCode = -98;
+                    data.Message = $"Valid ESI request error: invalid scope {scope}";
+                }else if (msg == "invalid_grant")
+                {
+                    data.ErrorCode = -99;
+                    data.Message = $"Valid ESI request error: invalid token";
+                } else data.ErrorCode = -100;
+
+                await LogHelper.LogWarning($"[TOKEN] Request failure: {raw}\n", LogCat.AccessToken);
+            }
+            else
+            {
+                data.ErrorCode = (int)responseMessage.StatusCode;
+                data.Message = responseMessage.StatusCode.ToString();
             }
         }
 
@@ -515,15 +535,15 @@ namespace ThunderED.API
             return data;
         }
 
-        public async Task<List<JsonClasses.MailList>> GetMailLists(string reason, long id, string token)
+        public async Task<ESIQueryResult<List<JsonClasses.MailList>>> GetMailLists(string reason, long id, string token, string etag = null)
         {
-            if (id == 0) return new List<JsonClasses.MailList>();
+            if (id == 0) return null;
             var authHeader = $"Bearer {token}";
 
-            var data = await APIHelper.RequestWrapper<List<JsonClasses.MailList>>(
-                $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/mail/lists/?datasource=tranquility&language={_language}", reason, authHeader);
+            var data = await APIHelper.ESIRequestWrapper<List<JsonClasses.MailList>>(
+                $"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{id}/mail/lists/?datasource=tranquility&language={_language}", reason, authHeader, etag);
 
-            return data ?? new List<JsonClasses.MailList>();
+            return data;
         }
 
         public async Task<decimal> GetCharacterWalletBalance(string reason, object id, string token)
@@ -739,25 +759,28 @@ namespace ThunderED.API
 
         }
 
-        public async Task<JsonClasses.SearchResult> SearchLocationEntity(string reason, string value)
+        public async Task<JsonClasses.SearchResult> SearchLocationEntity(string reason, string value, string token)
         {
             var searchValue = HttpUtility.UrlEncode(value);
-            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=constellation,region,solar_system&datasource=tranquility&search={searchValue}&strict=true", reason);
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{SettingsManager.Settings.Config.SearchCharacterId}/search/?categories=constellation,region,solar_system&datasource=tranquility&search={searchValue}&strict=true", reason, authHeader);
         }
 
-        public async Task<JsonClasses.SearchResult> SearchTypeEntity(string reason, string value)
+        public async Task<JsonClasses.SearchResult> SearchTypeEntity(string reason, string value, string token)
         {
             var searchValue = HttpUtility.UrlEncode(value);
-            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=inventory_type&datasource=tranquility&language={_language}&search={searchValue}&strict=true", reason);
+            var authHeader = $"Bearer {token}";
+            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{SettingsManager.Settings.Config.SearchCharacterId}/search/?categories=inventory_type&datasource=tranquility&language={_language}&search={searchValue}&strict=true", reason, authHeader);
         }
 
 
-        public async Task<JsonClasses.SearchResult> SearchMemberEntity(string reason, string value, bool isAggressive = false)
+        public async Task<JsonClasses.SearchResult> SearchMemberEntity(string reason, string value, string token, bool isAggressive = false)
         {
             var searchValue = HttpUtility.UrlEncode(value);
+            var authHeader = $"Bearer {token}";
             if(isAggressive)
-                return (await APIHelper.AggressiveESIRequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance,character,corporation&datasource=tranquility&search={searchValue}&strict=true", reason,10))?.Result;
-            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=alliance,character,corporation&datasource=tranquility&search={searchValue}&strict=true", reason);
+                return (await APIHelper.AggressiveESIRequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{SettingsManager.Settings.Config.SearchCharacterId}/search/?categories=alliance,character,corporation&datasource=tranquility&search={searchValue}&strict=true", reason,10, authHeader))?.Result;
+            return await APIHelper.RequestWrapper<JsonClasses.SearchResult>($"{SettingsManager.Settings.Config.ESIAddress}latest/characters/{SettingsManager.Settings.Config.SearchCharacterId}/search/?categories=alliance,character,corporation&datasource=tranquility&search={searchValue}&strict=true", reason, authHeader);
         }
 
         public async Task<JsonClasses.MoonData> GetMoon(string reason, object id)
@@ -948,5 +971,23 @@ namespace ThunderED.API
 
         //public async Task<ESIQueryResult<List<>>>
 
+        public async Task<string> GetSearchTokenString()
+        {
+            if (SettingsManager.Settings.Config.SearchCharacterId == 0) 
+                return null;
+            var token = await DbHelper.GetToken(SettingsManager.Settings.Config.SearchCharacterId, TokenEnum.General);
+            if (token != null)
+            {
+                var name = "SearchToken";
+                var dbToken=  await DbHelper.GetCache<string>(name, 10);
+                if (!string.IsNullOrEmpty(dbToken))
+                    return dbToken;
+                var result = await GetAccessTokenWithScopes(token, new ESIScope().AddSearch());
+                await DbHelper.UpdateCache(name, result?.Result);
+                return result?.Result;
+            }
+
+            return null;
+        }
     }
 }

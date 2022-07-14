@@ -1114,6 +1114,71 @@ insert into inv_custom_scheme (id, item_id, quantity) values (46311, 16646, 50);
         }
 
         //      await db.Database.ExecuteSqlRawAsync("");
+
+
+        
+        [DBUpgrade("2.1.8")]
+        private static async Task<bool> UpgradeV218(bool isSQLite, string version)
+        {
+            return await UpgradeWrapper(version, async db =>
+            {
+                if (isSQLite)
+                {
+                    await db.Database.ExecuteSqlRawAsync("create table history_notifications(id bigint  not null constraint history_notifications_pk primary key,type      text     not null,sender_id bigint  not null,sender_type  text      not null,receive_date timestamp not null, data      text     not null);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_notifications_sender_id_date_index   on history_notifications (sender_id, receive_date);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_notifications_sender_id_index    on history_notifications (sender_id);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_notifications_type_date_index    on history_notifications (type, receive_date);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_notifications_type_index    on history_notifications (type);");
+
+                    await db.Database.ExecuteSqlRawAsync("create table history_mail(    id           bigint    not null        constraint history_mail_pk            primary key,    sender_id    bigint    not null,    subject      text,    receive_date timestamp not null,    body         text,    labels       text);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_mail_labels_index    on history_mail (labels);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_mail_sender_id_index    on history_mail (sender_id);");
+                    
+                    await db.Database.ExecuteSqlRawAsync("create table history_mail_rcp(    id       INTEGER not null        constraint history_mail_rcp_pk            primary key autoincrement,    mail_id  bigint  not null,    rcp_id   bigint  not null,    rcp_type text    not null);");
+                    await db.Database.ExecuteSqlRawAsync("create unique index history_mail_rcp_id_uindex    on history_mail_rcp (id);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_mail_rcp_mail_id_index    on history_mail_rcp (mail_id);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_mail_rcp_rcp_id_index    on history_mail_rcp (rcp_id);");
+                    
+                    await db.Database.ExecuteSqlRawAsync("create table history_mail_list(    id   bigint not null        constraint history_mail_list_pk            primary key,    name text   not null);");
+                    await db.Database.ExecuteSqlRawAsync("create unique index history_mail_list_id_uindex    on history_mail_list (id);");
+
+                }
+                else
+                {
+                    await db.Database.ExecuteSqlRawAsync("create table history_notifications(    id        bigint  not null primary key,    type      text     not null,    sender_id bigint  not null,sender_type  text      not null,receive_date timestamp not null,    data      text     not null);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_notifications_sender_id_date_index    on history_notifications (sender_id, receive_date);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_notifications_sender_id_index    on history_notifications (sender_id);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_notifications_type_date_index    on history_notifications (type(255), receive_date);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_notifications_type_index    on history_notifications (type(255));");
+
+                    await db.Database.ExecuteSqlRawAsync("create table history_mail(    id           bigint    not null            primary key,    sender_id    bigint    not null,    subject      text,    receive_date timestamp not null,    body         text,    labels       text);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_mail_labels_index    on history_mail (labels(512));");
+                    await db.Database.ExecuteSqlRawAsync("create index history_mail_sender_id_index    on history_mail (sender_id);");
+                    
+                    await db.Database.ExecuteSqlRawAsync("create table history_mail_rcp(id  bigint not null  primary key auto_increment,    mail_id  bigint  not null,    rcp_id   bigint  not null,    rcp_type text    not null);");
+                    await db.Database.ExecuteSqlRawAsync("create unique index history_mail_rcp_id_uindex    on history_mail_rcp (id);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_mail_rcp_mail_id_index    on history_mail_rcp (mail_id);");
+                    await db.Database.ExecuteSqlRawAsync("create index history_mail_rcp_rcp_id_index    on history_mail_rcp (rcp_id);");
+                    
+                    await db.Database.ExecuteSqlRawAsync("create table history_mail_list(id   bigint not null primary key,    name text   not null);");
+                    await db.Database.ExecuteSqlRawAsync("create unique index history_mail_list_id_uindex    on history_mail_list (id);");
+
+                }
+
+                await db.Database.ExecuteSqlRawAsync("create unique index history_mail_rcp_mail_id_rcp_id_uindex on history_mail_rcp (mail_id, rcp_id);");
+
+                await db.Database.ExecuteSqlRawAsync("alter table history_notifications add sender_snapshot text not null;");
+                await db.Database.ExecuteSqlRawAsync("alter table history_notifications add sender_corporation_id bigint not null;");
+                await db.Database.ExecuteSqlRawAsync("alter table history_notifications add sender_alliance_id bigint;");
+                await db.Database.ExecuteSqlRawAsync("alter table history_mail_rcp add rcp_snapshot text;");
+
+                await db.Database.ExecuteSqlRawAsync("alter table history_mail add sender_snapshot text;");
+                await db.Database.ExecuteSqlRawAsync("alter table history_mail add sender_corporation_id bigint;");
+                await db.Database.ExecuteSqlRawAsync("alter table history_mail add sender_alliance_id bigint;");
+
+                await db.Database.ExecuteSqlRawAsync("alter table history_notifications add feeder_id bigint not null;");
+            });
+        }
         #endregion
     }
 }

@@ -13,8 +13,9 @@ namespace ThunderED.Modules.Static
 
         internal static async Task CorpSearch(ICommandContext context, string name)
         {
+            var token = await APIHelper.ESIAPI.GetSearchTokenString();
             var reason = LogCat.CorpSearch.ToString();
-            var corpIDLookup = await APIHelper.ESIAPI.SearchCorporationId(reason, name);
+            var corpIDLookup = await APIHelper.ESIAPI.SearchCorporationId(reason, name, token);
             if (corpIDLookup == null || corpIDLookup.corporation == null)
             {
                 await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("corpNotFound"));

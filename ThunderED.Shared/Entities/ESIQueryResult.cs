@@ -19,6 +19,7 @@
         public bool IsNoConnection => ErrorCode == 400 || ErrorCode == 420 || ErrorCode >= 500;
         public bool IsNotDeserialized => ErrorCode == -100;
         public bool IsNotValid => ErrorCode == -99;
+        public bool IsInvalidScope => ErrorCode == -98;
 
         public bool IsFailed => ErrorCode != 0;
     }

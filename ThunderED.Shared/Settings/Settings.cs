@@ -99,6 +99,9 @@ namespace ThunderED
         [ConfigEntryName("ModuleFitChecker")]
         public FitCheckerModuleSettings FitCheckerModule { get; set; } = new FitCheckerModuleSettings();
 
+        [ConfigEntryName("ModuleAggregator")]
+        public AggregatorModuleSettings AggregatorModule { get; set; } = new AggregatorModuleSettings();
+
 
 #if EDITOR
         public string Validate(List<string> usedModules)
@@ -136,6 +139,12 @@ namespace ThunderED
             }
         }
 #endif
+    }
+
+    public class AggregatorModuleSettings
+    {
+        public bool EnableMail { get; set; } = true;
+        public bool EnableNotifications { get; set; } = true;
     }
 
     public class FitCheckerModuleSettings
@@ -1803,6 +1812,10 @@ namespace ThunderED
         [Required]
         public ulong DiscordGuildId { get; set; }
 
+        [Required]
+        [Comment("ID of the character who will be registered with search rights for global search function")]
+        public long SearchCharacterId { get; set; }
+
         public bool DiscordAllowGeneralCommandsOnSecondaryGuilds { get; set; } = true;
         public bool DiscordAllowSystemCommandsOnSecondaryGuilds { get; set; } = false;
 #if EDITOR
@@ -1862,6 +1875,7 @@ namespace ThunderED
         public bool ModuleStorageConsole { get; set; } = false;
         public bool ModuleRemind { get; set; } = false;
         public bool ModuleFitChecker { get; set; } = false;
+        public bool ModuleAggregator { get; set; } = false;
 
         public string TimeFormat { get; set; } = "dd.MM.yyyy HH:mm:ss";
         public string ShortTimeFormat { get; set; } = "dd.MM.yyyy HH:mm";

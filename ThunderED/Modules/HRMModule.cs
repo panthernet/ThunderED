@@ -19,18 +19,19 @@ namespace ThunderED.Modules
         {
             await LogHelper.LogModule("Initializing HRM module...", Category);
 
+            var token = await APIHelper.ESIAPI.GetSearchTokenString();
             foreach (var pair in Settings.HRMModule.SpyFilters)
             {
                 var filter = pair.Value;
                 filter.CorporationNames.ForEach(async name =>
                 {
-                    var corp = await APIHelper.ESIAPI.SearchCorporationId(Reason, name);
+                    var corp = await APIHelper.ESIAPI.SearchCorporationId(Reason, name, token);
                     if (corp?.corporation != null && corp.corporation.Any())
                         filter.CorpIds.Add(name, corp.corporation.First());
                 });
                 filter.AllianceNames.ForEach(async name =>
                 {
-                    var alliance = await APIHelper.ESIAPI.SearchAllianceId(Reason, name);
+                    var alliance = await APIHelper.ESIAPI.SearchAllianceId(Reason, name, token);
                     if (alliance?.alliance != null && alliance.alliance.Any())
                         filter.AllianceIds.Add(name, alliance.alliance.First());
                 });

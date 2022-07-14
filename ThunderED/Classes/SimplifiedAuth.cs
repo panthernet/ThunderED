@@ -83,6 +83,9 @@ namespace ThunderED.Classes
             await LogHelper.LogInfo("Injecting Simplified Auth information...", LogCat.SimplAuth);
 
             var lines = await GetData(path);
+
+            var token = await APIHelper.ESIAPI.GetSearchTokenString();
+
             //each line is a new entry
             foreach (var entry in lines)
             {
@@ -102,7 +105,7 @@ namespace ThunderED.Classes
                     }
 
 
-                    var r = await APIHelper.ESIAPI.SearchMemberEntity("SimplAuth", entry.Name, true);
+                    var r = await APIHelper.ESIAPI.SearchMemberEntity("SimplAuth", entry.Name, token, true);
                     if (r.alliance.Any() || r.character.Any() || r.corporation.Any())
                     {
                         var prefix = r.alliance.Any() ? "a:" : (r.corporation.Any() ? "c:" : null);

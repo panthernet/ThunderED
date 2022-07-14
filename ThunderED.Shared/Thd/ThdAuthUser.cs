@@ -38,7 +38,9 @@ namespace ThunderED.Thd
             DataView = JsonConvert.DeserializeObject<AuthUserData>(Data);
         }
 
-        public List<ThdToken> Tokens { get; set; }
+        public virtual List<ThdToken> Tokens { get; set; }
+        public virtual List<ThdHistoryNotification> HistoryNotifications { get; set; }
+        public virtual List<ThdHistoryMail> HistoryMail { get; set; }
 
 
         public string GetGeneralTokenString()

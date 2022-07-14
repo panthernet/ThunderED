@@ -175,6 +175,8 @@ namespace ThunderED.Modules
             var result = new Dictionary<string, List<long>> {{"character", new List<long>()}, {"corporation", new List<long>()}, {"alliance", new List<long>()}};
             if (!list.Any()) return result;
             var failedList = new List<object>();
+            var token = await APIHelper.ESIAPI.GetSearchTokenString();
+
             foreach (var entity in list)
             {
                 try
@@ -213,7 +215,7 @@ namespace ThunderED.Modules
                         var enumMod = mod == "a:" ? MemberSearchModeEnum.Alliance : (mod == "c:" ? MemberSearchModeEnum.Corporation : MemberSearchModeEnum.Character);
                         var searchString = str.StartsWith("c:") || str.StartsWith("a:") ? str.Remove(0, 2) : str;
 
-                        var res = await APIHelper.ESIAPI.SearchMemberEntity(Reason, searchString, true);
+                        var res = await APIHelper.ESIAPI.SearchMemberEntity(Reason, searchString, token, true);
                         if (res != null)
                         {
                             if (res.character.Any() && enumMod == MemberSearchModeEnum.Character)
@@ -252,6 +254,8 @@ namespace ThunderED.Modules
             var result = new Dictionary<string, List<long>> {{"solar_system", new List<long>()}, {"constellation", new List<long>()}, {"region", new List<long>()}};
             if (!list.Any()) return result;
             var failedList = new List<object>();
+            var token = await APIHelper.ESIAPI.GetSearchTokenString();
+
             foreach (var entity in list)
             {
                 try
@@ -279,7 +283,7 @@ namespace ThunderED.Modules
                     }
                     else
                     {
-                        var res = await APIHelper.ESIAPI.SearchLocationEntity(Reason, entity.ToString());
+                        var res = await APIHelper.ESIAPI.SearchLocationEntity(Reason, entity.ToString(), token);
                         if (res != null)
                         {
                             if (res.solar_system.Any())
@@ -309,6 +313,7 @@ namespace ThunderED.Modules
             var result = new Dictionary<string, List<long>> {{"type", new List<long>()}};
             if (!list.Any()) return result;
             var failedList = new List<object>();
+            var token = await APIHelper.ESIAPI.GetSearchTokenString();
             foreach (var entity in list)
             {
                 try
@@ -324,7 +329,7 @@ namespace ThunderED.Modules
                     }
                     else
                     {
-                        var res = await APIHelper.ESIAPI.SearchTypeEntity(Reason, entity.ToString());
+                        var res = await APIHelper.ESIAPI.SearchTypeEntity(Reason, entity.ToString(), token);
                         if (res != null)
                         {
                             if (res.inventory_type.Any())

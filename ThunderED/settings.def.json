@@ -5,6 +5,9 @@
     "botDiscordGame": "DisplayGameInDiscord",
     "botDiscordCommandPrefix": "!",
     "discordGuildId": 0,
+
+    "SearchCharacterId": 0,
+
     "discordAdminRoles": [ "Admins" ],
     "DiscordAllowGeneralCommandsOnSecondaryGuilds": true,
     "DiscordAllowSystemCommandsOnSecondaryGuilds": false,
@@ -43,6 +46,7 @@
     "ModuleMoonTable": false,
     "ModuleStorageConsole": false,
     "ModuleFitChecker": false,
+    "ModuleAggregator": false,
 
     "timeFormat": "dd.MM.yyyy HH:mm:ss",
     "shortTimeFormat": "dd.MM.yyyy HH:mm",
@@ -1004,5 +1008,9 @@
     "NameFormattingLength": 20,
     "ListAccessRoles": [],
     "EditAccessRoles": []
+  },
+  "AggregatorModule": {
+    "EnableMail": true,
+    "EnableNotifications":  true,
   }
 }

@@ -213,7 +213,7 @@ namespace ThunderED.Modules
                 if (hrId > 0 && hrId != id)
                 {
                     var hrUserInfo = await DbHelper.GetAuthUser(hrId, true);
-                    if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.DataView.PermissionsList))
+                    if (hrUserInfo != null && SettingsManager.HasCharContactsScope(hrUserInfo.GetGeneralToken()?.GetSplitScopes()))
                     {
                         var hrToken = (await APIHelper.ESIAPI.GetAccessTokenWithScopes(hrUserInfo.GetGeneralToken(), new ESIScope().AddCharContacts(),
                                 $"From {Category} | Char ID: {hrUserInfo.CharacterId} | Char name: {hrUserInfo.CharacterName}"))
