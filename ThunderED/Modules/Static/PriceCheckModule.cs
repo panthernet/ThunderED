@@ -29,35 +29,31 @@ namespace ThunderED.Modules.Static
                 using var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
 
-                HttpResponseMessage itemId;
-                if (command.ToLower().StartsWith("search"))
-                    itemId = await httpClient.GetAsync($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=inventory_type&datasource=tranquility&language=en-us&search=" +
-                                                       $"{command.TrimStart(new char[] {'s', 'e', 'a', 'r', 'c', 'h'})}&strict=false");
-                else
-                    itemId = await httpClient.GetAsync($"{SettingsManager.Settings.Config.ESIAddress}latest/search/?categories=inventory_type&datasource=tranquility&language=en-us&search=" +
-                                                       $"{command.ToLower()}&strict=true");
 
-                if (!itemId.IsSuccessStatusCode)
+                var value = command.ToLower().StartsWith("search")
+                    ? command.TrimStart(new char[] {'s', 'e', 'a', 'r', 'c', 'h'})
+                    : command;
+
+                var token = await APIHelper.ESIAPI.GetSearchTokenString();
+                var result =  await APIHelper.ESIAPI.SearchTypeEntity("PriceCheck", value, token);
+
+                if (result == null)
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("ESIFailure"));
                     await Task.CompletedTask;
-                    itemId.Dispose();
                     return;
                 }
 
-                var itemIdResult = await itemId.Content.ReadAsStringAsync();
-                var itemIdResults = JsonConvert.DeserializeObject<JsonClasses.SearchInventoryType>(itemIdResult);
-                itemId?.Dispose();
 
-                if (string.IsNullOrWhiteSpace(itemIdResults.inventory_type?.ToString()))
+                if (string.IsNullOrWhiteSpace(result.inventory_type?.ToString()))
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("itemNotExist",command));
-                else if (itemIdResults.inventory_type.Count() > 1)
+                else if (result.inventory_type.Count() > 1)
                 {
                     await APIHelper.DiscordAPI.ReplyMessageAsync(context, LM.Get("seeDM"));
 
                     var channel = await context.Message.Author.CreateDMChannelAsync();
 
-                    var tmp = JsonConvert.SerializeObject(itemIdResults.inventory_type);
+                    var tmp = JsonConvert.SerializeObject(result.inventory_type);
                     var httpContent = new StringContent(tmp);
 
                     var itemName = await httpClient.PostAsync($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/names/?datasource=tranquility", httpContent);
@@ -84,7 +80,7 @@ namespace ThunderED.Modules.Static
                         })
                         .WithDescription(LM.Get("searchExample"));
                     var count = 0;
-                    foreach (var inventoryType in itemIdResults.inventory_type)
+                    foreach (var inventoryType in result.inventory_type)
                     {
                         if (count < 25)
                         {
@@ -110,7 +106,7 @@ namespace ThunderED.Modules.Static
                 {
                     try
                     {
-                        var httpContent = new StringContent($"[{itemIdResults.inventory_type[0]}]", Encoding.UTF8, "application/json");
+                        var httpContent = new StringContent($"[{result.inventory_type[0]}]", Encoding.UTF8, "application/json");
                         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                         var itemName = await httpClient.PostAsync($"{SettingsManager.Settings.Config.ESIAddress}latest/universe/names/?datasource=tranquility", httpContent);
 
@@ -126,7 +122,7 @@ namespace ThunderED.Modules.Static
                         var itemNameResults = JsonConvert.DeserializeObject<List<JsonClasses.SearchName>>(itemNameResult)[0];
                         itemName?.Dispose();
 
-                        await GoFuzz(httpClient, context, system, itemIdResults, itemNameResults);
+                        await GoFuzz(httpClient, context, system, result.inventory_type, itemNameResults);
 
                     }
                     catch (Exception ex)
@@ -143,7 +139,7 @@ namespace ThunderED.Modules.Static
         }
 
         private static async Task GoFuzz(HttpClient httpClient, ICommandContext context, string system,
-            JsonClasses.SearchInventoryType itemIDResults, JsonClasses.SearchName itemNameResults)
+            List<long> idList, JsonClasses.SearchName itemNameResults)
         {
             var url = "https://market.fuzzwork.co.uk/aggregates/";
 
@@ -167,7 +163,7 @@ namespace ThunderED.Modules.Static
 
             httpClient.DefaultRequestHeaders.Clear();
             httpClient.DefaultRequestHeaders.Add("User-Agent", SettingsManager.DefaultUserAgent);
-            var webReply = await httpClient.GetStringAsync($"{url}{systemAddon}&types={itemIDResults.inventory_type[0]}");
+            var webReply = await httpClient.GetStringAsync($"{url}{systemAddon}&types={idList[0]}");
             var market = JsonConvert.DeserializeObject<Dictionary<string,JsonFuzz.FuzzItems>>(webReply);
 
             await LogHelper.LogInfo($"Sending {context.Message.Author}'s Price check", LogCat.PriceCheck);

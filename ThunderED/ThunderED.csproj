@@ -55,7 +55,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
     <PackageReference Include="System.Linq.Async" Version="5.1.0" />
     <PackageReference Include="System.Net.WebSockets.Client" Version="4.3.2" />
-    <PackageReference Include="Telegram.Bot" Version="14.12.0" />
+    <PackageReference Include="Telegram.Bot" Version="16.0.0" />
   </ItemGroup>
 
   <ItemGroup>
