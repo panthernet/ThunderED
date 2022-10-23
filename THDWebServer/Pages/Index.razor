@@ -43,6 +43,7 @@
         base.OnInitialized();
 
         CustomHtml = WebUiHelper.GetCustomHtmlContent("index.html");
+        if(CustomHtml != null)
         CustomHtml = CustomHtml.Replace("@AuthButtonText", LM.Get("butGeneralAuthPage"))
             .Replace("@AuthPagePath", ServerPaths.GetGeneralAuthPageUrl())
             .Replace("@LogoPath", WebUiHelper.GetAsset("logo.png"));
