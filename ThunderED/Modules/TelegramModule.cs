@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Pipes;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -50,6 +52,7 @@ namespace ThunderED.Modules
                     return;
                 }
 
+                HttpClient cli = null;
                 IWebProxy proxy = null;
                 if (!string.IsNullOrEmpty(Settings.TelegramModule.ProxyAddress) && Settings.TelegramModule.ProxyPort != 0)
                 {
@@ -60,9 +63,10 @@ namespace ThunderED.Modules
                         cr = new NetworkCredential(Settings.TelegramModule.ProxyUsername, Settings.TelegramModule.ProxyPassword);
                     }
                     proxy = new WebProxy(new Uri(url), true, null, cr);
+                    cli = new HttpClient(new SocketsHttpHandler {Proxy = proxy});
                 }
 
-                _client = new TelegramBotClient(Settings.TelegramModule.Token, proxy);
+                _client = new TelegramBotClient(Settings.TelegramModule.Token, cli);
                 _client.OnMessage += BotClient_OnMessage;
                 if (!await _client.TestApiAsync())
                 {
