@@ -24,7 +24,7 @@ namespace ThunderED.Zkb {
         /// <returns>The HttpWebRequest</returns>
         public static HttpWebRequest CreateRequest(Uri uri) {
             var request = WebRequest.CreateHttp(uri);
-            request.UserAgent = "Opux";
+            request.UserAgent = "ThunderED";
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.GZip;
             request.ContentType = ContentType;
             return request;
