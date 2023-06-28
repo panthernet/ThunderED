@@ -744,7 +744,7 @@ namespace ThunderED
                 if (item != null)
                 {
                     item.Time = DateTime.Now;
-                    item.FilterName = filter;
+                        //item.FilterName = filter;
                 }
                 else
                 {
